@@ -1093,8 +1093,27 @@ async function scrapeSingleListing(url) {
 // ============ PARDAVEJO/DILERIO INFORMACIJOS PAIESKA ============
 // Imones pavadinimas ir vieai prieinama registro/atsiliepimu informacija (pvz. rekvizitai.vz.lt)
 // yra viesi verslo duomenys - naudinga patikrinti dilerio patikimuma pries perkant.
-async function searchSellerInfo(pardavejas) {
-  const prompt = `Atlik web paieska apie si automobiliu pardavimo diler/imone Lietuvoje: "${pardavejas}"
+async function searchSellerInfo(pardavejas, listingUrl) {
+  const isInternational = listingUrl && (
+    listingUrl.includes('autoscout24') || listingUrl.includes('otomoto.pl') ||
+    listingUrl.includes('mobile.de') || listingUrl.includes('olx.pl')
+  );
+  const prompt = isInternational
+    ? `Search the web for information about this car dealer/company: "${pardavejas}"
+
+Search Google, TrustPilot, AutoScout24 dealer reviews, and any country-specific business registry.
+Look for: company address and location, how long they have been in business, customer reviews and reputation, any complaints or disputes.
+
+Return ONLY JSON (no markdown):
+{
+  "rasta": true/false,
+  "imones_pavadinimas": "full official company name if found, or null",
+  "veiklos_trukme": "since when they operate, or null",
+  "atsiliepimu_santrauka": "summary of reviews/reputation (include rating if found), or null",
+  "ispejimai": "if negative reviews/complaints/disputes found - briefly, or null",
+  "nuoroda": "URL to review page or registry if found, or null"
+}`
+    : `Atlik web paieska apie si automobiliu pardavimo diler/imone Lietuvoje: "${pardavejas}"
 
 Ieskok viesai prieinamos informacijos: imones registro duomenu (pvz. rekvizitai.vz.lt,
 rekvizitai.lt), veiklos trukmes, atsiliepimu/reputacijos, ar buvo teistu gincu ar
@@ -1374,7 +1393,7 @@ app.post('/api/vin-lookup', async (req, res) => {
 
 app.post('/api/seller-lookup', async (req, res) => {
   try {
-    const { pardavejas, force } = req.body;
+    const { pardavejas, force, listingUrl } = req.body;
     if (!pardavejas) return res.status(400).json({ error: 'Trūksta pardavėjo pavadinimo' });
 
     if (!force) {
@@ -1385,7 +1404,7 @@ app.post('/api/seller-lookup', async (req, res) => {
       }
     }
 
-    const result = await searchSellerInfo(pardavejas);
+    const result = await searchSellerInfo(pardavejas, listingUrl);
     cache.setCached('seller', pardavejas, result);
     res.json({ ...result, cached: false });
   } catch (err) {
