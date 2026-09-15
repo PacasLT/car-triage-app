@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '../frontend')));
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-const MODEL = 'claude-sonnet-5';
+const MODEL = 'claude-sonnet-4-5';
 
 // ============ SCRAPING (ta pati logika kaip triage.js) ============
 
