@@ -33,6 +33,10 @@
   .card-comment { font-size: 13px; color: #d0d0d8; margin-top: 6px; line-height: 1.4; }
   .card-link { display: inline-block; margin-top: 8px; color: #6c5ce7; font-size: 13px; text-decoration: none; }
   .source-tag { font-size: 11px; padding: 1px 6px; border-radius: 4px; background: #2c303a; color: #9a9aa5; margin-left: 6px; }
+  #search-progress-wrap { display: none; margin: -8px 0 14px; }
+  #search-progress-track-main { height: 4px; background: #1a1d24; border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
+  #search-progress-fill-main { height: 100%; background: linear-gradient(90deg, #6c5ce7, #a78bfa); border-radius: 4px; transition: width 0.5s ease; width: 0%; }
+  #search-progress-label { font-size: 12px; color: #6c5ce7; font-weight: 600; }
   #log-container { margin-bottom: 16px; display: none; }
   #log-header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #1a1d24; border: 1px solid #2c303a; border-radius: 10px; cursor: pointer; font-size: 13px; color: #b8b8c0; user-select: none; }
   #log-header:hover { background: #20232b; }
@@ -71,6 +75,72 @@
   .card-photo-nav.next { right: 4px; }
   .card-photo-count { position: absolute; bottom: 4px; right: 6px; background: rgba(15,17,21,0.7); color: #cfcbf5; font-size: 10px; padding: 1px 6px; border-radius: 10px; }
 
+  /* ============ PALYGINIMAS ============ */
+  .compare-toggle {
+    background: #1a1d24; color: #9a9aa5; border: 1px solid #2c303a;
+    padding: 5px 10px; border-radius: 6px; font-size: 11px; cursor: pointer;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .compare-toggle.active { background: #2d4a63; color: #74c0fc; border-color: #4a90d9; }
+  #compare-bar {
+    display: none; position: fixed; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(135deg, #1a1d24, #20232b);
+    border-top: 1px solid #2c303a;
+    padding: 12px 20px; z-index: 900;
+    display: none; align-items: center; justify-content: space-between; gap: 12px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+  }
+  #compare-bar.visible { display: flex; }
+  #compare-bar-items { display: flex; gap: 8px; flex: 1; overflow: hidden; }
+  .compare-bar-chip {
+    background: #2c303a; border-radius: 8px; padding: 6px 10px;
+    font-size: 12px; color: #e8e8ea; display: flex; align-items: center; gap: 6px;
+    max-width: 160px; overflow: hidden;
+  }
+  .compare-bar-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .compare-bar-chip button { background: none; border: none; color: #9a9aa5; cursor: pointer; font-size: 14px; padding: 0; flex-shrink: 0; }
+  #compare-btn {
+    background: linear-gradient(135deg, #6c5ce7, #a78bfa); color: #fff;
+    border: none; padding: 10px 20px; border-radius: 10px; font-size: 14px;
+    font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(108,92,231,0.4);
+  }
+  #compare-modal {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88);
+    z-index: 1500; overflow-y: auto; padding: 20px;
+  }
+  #compare-modal.active { display: block; }
+  #compare-modal-inner {
+    max-width: 960px; margin: 0 auto; background: #14161c;
+    border-radius: 16px; padding: 20px; position: relative;
+  }
+  .compare-grid { display: grid; gap: 14px; }
+  .compare-col {
+    background: #1a1d24; border-radius: 12px; padding: 14px; overflow: hidden;
+  }
+  .compare-col img { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; background: #2c303a; }
+  .compare-col-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .compare-col-price { color: #a78bfa; font-size: 18px; font-weight: 800; margin-bottom: 10px; }
+  .compare-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #22252c; font-size: 12px; }
+  .compare-row:last-child { border-bottom: none; }
+  .compare-row-label { color: #9a9aa5; }
+  .compare-row-val { color: #e8e8ea; font-weight: 500; text-align: right; max-width: 60%; }
+  .compare-row-val.better { color: #7fd88f; }
+  .compare-row-val.worse { color: #ff9d9d; }
+  #compare-close {
+    position: absolute; top: 16px; right: 16px;
+    background: rgba(255,255,255,0.08); color: #fff; border: none;
+    width: 36px; height: 36px; border-radius: 50%; font-size: 16px; cursor: pointer;
+  }
+  @media (max-width: 640px) {
+    #compare-bar { padding: 10px 12px; }
+    .compare-bar-chip { max-width: 100px; font-size: 11px; }
+    #compare-btn { font-size: 13px; padding: 8px 14px; }
+    #compare-modal { padding: 10px; }
+    #compare-modal-inner { padding: 14px; }
+    .compare-col img { height: 110px; }
+    .compare-bar-items { gap: 4px; }
+  }
   /* ============ MOBILUS ISDESTYMAS ============ */
   @media (max-width: 640px) {
     body { padding: 12px; }
@@ -133,7 +203,8 @@
     cursor: grab; user-select: none; touch-action: none;
     display: flex; flex-direction: column;
   }
-  .tinder-photo-wrap { position: relative; flex-shrink: 0; height: 52%; overflow: hidden; }
+  .tinder-photo-wrap { position: relative; flex-shrink: 0; height: 52%; overflow: hidden; transition: height 0.3s ease; }
+  .tinder-photo-wrap.shrunk { height: 22%; }
   .tinder-photo-wrap img { width: 100%; height: 100%; object-fit: cover; background: #2c303a; display: block; }
   .tinder-photo-gradient {
     position: absolute; bottom: 0; left: 0; right: 0; height: 60%;
@@ -203,7 +274,7 @@
 </head>
 <body>
 <div class="container">
-  <h1>🚗 Car Triage</h1>
+  <h1>🚗 Car Triage <span id="app-version" style="font-size:11px; color:#3a3f4c; font-weight:400; margin-left:6px; letter-spacing:0.5px;"></span></h1>
   <div class="subtitle">Suveskite filtrus – sistema nuskaitys automobilių portalus, palygins kainas ir įvertins riziką.</div>
 
   <div id="favorites-wrap" style="display:none; margin-bottom:18px;">
@@ -306,6 +377,10 @@
   </div>
 
   <div id="status"></div>
+  <div id="search-progress-wrap">
+    <div id="search-progress-track-main"><div id="search-progress-fill-main"></div></div>
+    <span id="search-progress-label">0%</span>
+  </div>
   <div id="log-container">
     <div id="log-header" onclick="toggleLog()">
       <span class="spinner" id="log-header-icon"></span>
@@ -359,7 +434,23 @@
   </div>
 </div>
 
+<!-- Palyginimo juosta apačioje -->
+<div id="compare-bar">
+  <div id="compare-bar-items"></div>
+  <button id="compare-btn" onclick="openCompareModal()">⚖️ Palyginti</button>
+</div>
+
+<!-- Palyginimo modalas -->
+<div id="compare-modal" onclick="if(event.target.id==='compare-modal') closeCompareModal()">
+  <div id="compare-modal-inner">
+    <button id="compare-close" onclick="closeCompareModal()">✕</button>
+    <h2 style="margin:0 0 16px; font-size:18px;">⚖️ Automobilių palyginimas</h2>
+    <div id="compare-grid-wrap"></div>
+  </div>
+</div>
+
 <script>
+const APP_VERSION = 'v1.5.0';
 const BRAND_MODELS = {
   'BMW': ['1', '2', '3', '4', '5', '6', '7', '8', 'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'Z4', 'M'],
   'Audi': ['A1', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q2', 'Q3', 'Q5', 'Q7', 'Q8'],
@@ -384,6 +475,30 @@ const BRAND_MODELS = {
 
 // ============ PAIESKOS ISTORIJA (localStorage, tik siame narsyklyje) ============
 const SEARCH_HISTORY_KEY = 'carTriageSearchHistory';
+const ANALYSIS_CACHE_KEY = 'carTriageAnalysisCache';
+const ANALYSIS_CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 dienų
+
+function getAnalysisCache(url) {
+  try {
+    const store = JSON.parse(localStorage.getItem(ANALYSIS_CACHE_KEY) || '{}');
+    const entry = store[url];
+    if (!entry) return null;
+    if (Date.now() - entry.savedAt > ANALYSIS_CACHE_TTL) return null;
+    return entry.data;
+  } catch { return null; }
+}
+function setAnalysisCache(url, data) {
+  try {
+    const store = JSON.parse(localStorage.getItem(ANALYSIS_CACHE_KEY) || '{}');
+    store[url] = { data, savedAt: Date.now() };
+    // Laikome tik 100 naujausių
+    const keys = Object.keys(store);
+    if (keys.length > 100) {
+      keys.sort((a, b) => store[a].savedAt - store[b].savedAt).slice(0, keys.length - 100).forEach(k => delete store[k]);
+    }
+    localStorage.setItem(ANALYSIS_CACHE_KEY, JSON.stringify(store));
+  } catch {}
+}
 const MAX_HISTORY = 8;
 
 function loadSearchHistory() {
@@ -665,6 +780,7 @@ function updateGenerationHint() {
 updateGenerationHint();
 renderSearchHistory();
 renderFavorites();
+document.getElementById('app-version').textContent = APP_VERSION;
 
 let logExpanded = false;
 
@@ -696,11 +812,25 @@ function renderLogSteps(log, logBox, jobStatus) {
 
   const headerIcon = document.getElementById('log-header-icon');
   const headerText = document.getElementById('log-header-text');
-  // Antrasteje rodome PASKUTINE dar vykstancia (pending) eilute, jei tokiu yra - kitaip
-  // paskutine bendra zinute. Su lygiagreciu vykdymu paskutine masyvo eilute ne visada
-  // yra ta, kuri realiai dar vyksta.
   const pendingLines = log.filter((l) => lineIsPending(l, jobStatus));
   const lastLine = pendingLines.length > 0 ? pendingLines[pendingLines.length - 1] : (log[log.length - 1] || 'Paleidžiama...');
+
+  // Progresas
+  const progressFill = document.getElementById('search-progress-fill-main');
+  const progressLabel = document.getElementById('search-progress-label');
+  if (progressFill && progressLabel) {
+    const doneSteps = log.filter((l) => !lineIsPending(l, jobStatus)).length;
+    let pct;
+    if (jobStatus === 'done') {
+      pct = 100;
+    } else {
+      const estimated = Math.max(log.length + 2, window.__estimatedSearchSteps || 45);
+      pct = Math.min(94, Math.round((doneSteps / estimated) * 100));
+    }
+    progressFill.style.width = pct + '%';
+    progressLabel.textContent = pct + '%  (' + log.length + ' žingsniai)';
+  }
+
   if (jobStatus === 'running') {
     headerIcon.outerHTML = '<span class="spinner" id="log-header-icon"></span>';
     headerText.textContent = lastLine;
@@ -771,6 +901,9 @@ async function runSearch() {
   results.innerHTML = '';
   logBox.innerHTML = '';
   logExpanded = false;
+  compareList = [];
+  renderCompareBar();
+  document.body.style.paddingBottom = '';
   logBox.style.display = 'none';
   document.getElementById('log-header').classList.remove('expanded');
   logContainer.style.display = 'block';
@@ -802,6 +935,14 @@ async function runSearch() {
   btn.disabled = true;
   btn.textContent = '⏳ Vyksta paieška...';
   status.textContent = 'Paleidžiama...';
+  // Apskaičiuojame apytikslį žingsnių kiekį pagal filtrus
+  window.__estimatedSearchSteps = Math.max(30, filters.portals.length * parseInt(filters.maxPages || '3') * 4 + 20);
+  const progressWrap = document.getElementById('search-progress-wrap');
+  const progressFill = document.getElementById('search-progress-fill-main');
+  const progressLabel = document.getElementById('search-progress-label');
+  progressWrap.style.display = 'block';
+  progressFill.style.width = '0%';
+  progressLabel.textContent = '0%';
 
   try {
     const startResp = await fetch('/api/search-start', {
@@ -837,6 +978,7 @@ async function runSearch() {
   } finally {
     btn.disabled = false;
     btn.textContent = '🔍 Ieškoti ir analizuoti';
+    document.getElementById('search-progress-wrap').style.display = 'none';
   }
 }
 
@@ -875,43 +1017,37 @@ function renderTinderCard() {
     document.getElementById('tinder-actions').style.display = 'none';
     document.getElementById('tinder-counter').textContent = '';
     const allListings = (currentData && currentData.allListings) || [];
-    const topUrls = new Set(tinderQueue.map(c => c.url));
-    const restListings = allListings.filter(l => !topUrls.has(l.url));
-    const skippedHtml = tinderSkipped.length > 0
-      ? `<div style="margin-top:16px; text-align:left;">
-          <div style="font-size:13px; color:#9a9aa5; margin-bottom:8px;">❌ Praleisti TOP skelbimai (${tinderSkipped.length}):</div>
-          ${tinderSkipped.map((c) => `<div style="background:#1a1d24; border-radius:8px; padding:10px 12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-            <div>
-              <div style="font-size:13px; font-weight:600;">${c.modelis}</div>
-              <div style="font-size:12px; color:#a78bfa;">${formatEUR(c.kaina)} · ${c.metai||'?'} · ${c.source}</div>
-            </div>
-            <div style="display:flex; gap:6px;">
-              <a href="${c.url}" target="_blank" style="background:#2c303a; color:#cfcbf5; border:none; padding:6px 10px; border-radius:6px; font-size:11px; cursor:pointer; text-decoration:none;">🔗 Žiūrėti</a>
-              <button onclick="tinderGetAnalysis('${c.url.replace(/'/g,"\'")}', this)" style="background:#6c5ce7; color:#fff; border:none; padding:6px 10px; border-radius:6px; font-size:11px; cursor:pointer;">🔍 Analizė</button>
-            </div>
-          </div>`).join('')}
-        </div>` : '';
-    const restHtml = restListings.length > 0
-      ? `<div style="margin-top:16px; text-align:left;">
-          <div style="font-size:13px; color:#9a9aa5; margin-bottom:8px;">📋 Kiti rasti skelbimai (${restListings.length}):</div>
-          ${restListings.map((l) => `<div style="background:#1a1d24; border-radius:8px; padding:10px 12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-            <div>
-              <div style="font-size:13px; font-weight:600;">${l.modelis||'?'}</div>
-              <div style="font-size:12px; color:#a78bfa;">${formatEUR(l.kaina)} · ${l.metai||'?'} · ${l.rida ? (l.rida.toLocaleString('lt-LT').replace(/,/g,' ') + ' km') : '?'}</div>
-            </div>
-            <div style="display:flex; gap:6px;">
-              <a href="${l.url}" target="_blank" style="background:#2c303a; color:#cfcbf5; border:none; padding:6px 10px; border-radius:6px; font-size:11px; cursor:pointer; text-decoration:none;">🔗 Žiūrėti</a>
-              <button onclick="tinderGetAnalysis('${l.url.replace(/'/g,"\'")}', this)" style="background:#6c5ce7; color:#fff; border:none; padding:6px 10px; border-radius:6px; font-size:11px; cursor:pointer;">🔍 Analizė</button>
-            </div>
-          </div>`).join('')}
-        </div>` : '';
-    stack.innerHTML = `<div id="tinder-summary-box" style="overflow-y:auto; max-height:calc(100vh - 120px); padding:16px; width:100%; max-width:420px; box-sizing:border-box;">
-      <div style="font-size:18px; font-weight:700; margin-bottom:4px;">${tinderLiked.length > 0 ? '🎉 Patiko ' + tinderLiked.length + ' pasiūlymai!' : '🤷 Nė vienas nepatiko'}</div>
-      ${tinderLiked.length > 0 ? tinderLiked.map((c) => `<a href="${c.url}" target="_blank" style="display:block; color:#7fd88f; margin:4px 0; text-decoration:none; font-size:13px;">✅ ${c.modelis} – ${formatEUR(c.kaina)} (${c.source})</a>`).join('') : ''}
-      ${skippedHtml}
-      ${restHtml}
-      <button onclick="exitTinder()" style="margin-top:16px; width:100%; padding:10px; background:#2c303a; color:#e8e8ea; border:none; border-radius:8px; cursor:pointer;">Uždaryti</button>
-    </div>`;
+    const topUrls = new Set((tinderPhase === 'top' ? tinderQueue : (window.__tinderTopQueue || tinderQueue)).map(c => c.url));
+    const restListings = tinderPhase === 'top' ? allListings.filter(l => !topUrls.has(l.url)) : [];
+
+    if (tinderPhase === 'top') {
+      window.__tinderTopQueue = [...tinderQueue];
+      const likedHtml = tinderLiked.length > 0
+        ? tinderLiked.map((c) => `<a href="${c.url}" target="_blank" style="display:block; color:#7fd88f; margin:4px 0; text-decoration:none; font-size:13px;">✅ ${c.modelis} – ${formatEUR(c.kaina)} (${c.source})</a>`).join('')
+        : '<div style="color:#9a9aa5; font-size:13px;">Nė vienas nepatiko</div>';
+      stack.innerHTML = `<div style="overflow-y:auto; max-height:calc(100vh - 80px); padding:20px; width:100%; max-width:420px; box-sizing:border-box; text-align:center;">
+        <div style="font-size:36px; margin-bottom:8px;">${tinderLiked.length > 0 ? '🎉' : '🤷'}</div>
+        <div style="font-size:18px; font-weight:700; margin-bottom:12px;">TOP skelbimai peržiūrėti!</div>
+        <div style="text-align:left; background:#1a1d24; border-radius:10px; padding:12px; margin-bottom:16px;">
+          <div style="font-size:12px; color:#9a9aa5; margin-bottom:6px;">Patiko (${tinderLiked.length}):</div>
+          ${likedHtml}
+        </div>
+        ${restListings.length > 0 ? `<button onclick="startTinderRest()" style="width:100%; padding:14px; background:linear-gradient(135deg,#6c5ce7,#a78bfa); color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:600; cursor:pointer; margin-bottom:10px; box-shadow:0 4px 14px rgba(108,92,231,0.4);">🔥 Naršyti likusius ${restListings.length} skelbimus</button>` : ''}
+        <button onclick="exitTinder()" style="width:100%; padding:12px; background:#2c303a; color:#e8e8ea; border:none; border-radius:12px; font-size:14px; cursor:pointer;">Uždaryti</button>
+      </div>`;
+      window.__tinderRestListings = restListings;
+    } else {
+      const allLiked = tinderLiked;
+      stack.innerHTML = `<div style="overflow-y:auto; max-height:calc(100vh - 80px); padding:20px; width:100%; max-width:420px; box-sizing:border-box; text-align:center;">
+        <div style="font-size:36px; margin-bottom:8px;">🏁</div>
+        <div style="font-size:18px; font-weight:700; margin-bottom:12px;">Visi skelbimai peržiūrėti!</div>
+        ${allLiked.length > 0 ? `<div style="text-align:left; background:#1a1d24; border-radius:10px; padding:12px; margin-bottom:16px;">
+          <div style="font-size:12px; color:#9a9aa5; margin-bottom:6px;">Patiko (${allLiked.length}):</div>
+          ${allLiked.map(lc => `<a href="${lc.url}" target="_blank" style="display:block; color:#7fd88f; margin:4px 0; text-decoration:none; font-size:13px;">✅ ${lc.modelis} – ${formatEUR(lc.kaina)} (${lc.source})</a>`).join('')}
+        </div>` : '<div style="color:#9a9aa5; margin-bottom:16px;">Nė vienas nepatiko</div>'}
+        <button onclick="exitTinder()" style="width:100%; padding:12px; background:#2c303a; color:#e8e8ea; border:none; border-radius:12px; font-size:14px; cursor:pointer;">Uždaryti</button>
+      </div>`;
+    }
     return;
   }
 
@@ -933,7 +1069,7 @@ function renderTinderCard() {
     <div class="tinder-card" id="tinder-card-current">
       <div class="tinder-badge like" id="tinder-badge-like">PATINKA</div>
       <div class="tinder-badge skip" id="tinder-badge-skip">PRALEISTI</div>
-      <div class="tinder-photo-wrap">
+      <div class="tinder-photo-wrap" onclick="this.classList.toggle('shrunk')" title="Paspausti – padidinti/sumažinti nuotrauką">
         <img src="${c.photo || ''}" onerror="this.style.background='#2c303a'">
         <div class="tinder-photo-gradient"></div>
         <div class="tinder-photo-info">
@@ -972,6 +1108,13 @@ async function toggleTinderDetail() {
     extra.dataset.loaded = 'true';
     return;
   }
+  // Tikrinti localStorage cache
+  const cached = getAnalysisCache(c.url);
+  if (cached) {
+    extra.innerHTML = buildDetailPanelHTML(cached, c.url, 'tinder-detail-extra');
+    extra.dataset.loaded = 'true';
+    return;
+  }
 
   extra.innerHTML = '<span style="color:#9a9aa5;font-size:12px;">🔬 Kraunama detali apžvalga...</span>';
   try {
@@ -985,6 +1128,7 @@ async function toggleTinderDetail() {
       extra.innerHTML = `<span style="color:#e88;font-size:12px;">Klaida: ${data.error}</span>`;
       return;
     }
+    setAnalysisCache(c.url, data);
     extra.innerHTML = buildDetailPanelHTML(data, c.url, 'tinder-detail-extra');
     extra.dataset.loaded = 'true';
   } catch (err) {
@@ -1055,20 +1199,35 @@ async function tinderGetAnalysis(url, btn) {
   resultDiv.style = 'margin-top:8px; font-size:12px; color:#d0d0d8; background:#0f111a; border-radius:6px; padding:10px;';
   resultDiv.textContent = 'Kraunama...';
   container.after(resultDiv);
+  const cachedGet = getAnalysisCache(url);
+  if (cachedGet) {
+    resultDiv.innerHTML = buildDetailPanelHTML(cachedGet, url, 'tinder-summary-result-' + Date.now());
+    btn.disabled = false; btn.textContent = '🔍 Analizė'; return;
+  }
   try {
     const resp = await fetch('/api/analyze-single', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ url }) });
     const data = await resp.json();
     if (data.error) { resultDiv.innerHTML = `<span style="color:#e88;">Klaida: ${data.error}</span>`; return; }
-    const a = data.analysis || {};
-    resultDiv.innerHTML = `
-      <div style="font-weight:600; color:#a78bfa; margin-bottom:4px;">${data.title || ''}</div>
-      ${a.vertinimas !== undefined ? `<div>Įvertinimas: <b>${a.vertinimas}/10</b></div>` : ''}
-      ${a.santrauka ? `<div style="margin-top:4px;">${a.santrauka}</div>` : ''}
-      ${a.rizikos && a.rizikos.length ? `<div style="color:#ff8080; margin-top:4px;">⚠️ ${a.rizikos.join(', ')}</div>` : ''}
-      ${a.privalumai && a.privalumai.length ? `<div style="color:#7fd88f; margin-top:4px;">✅ ${a.privalumai.join(', ')}</div>` : ''}
-    `;
+    setAnalysisCache(url, data);
+    resultDiv.innerHTML = buildDetailPanelHTML(data, url, 'tinder-summary-result-' + Date.now());
   } catch(err) { resultDiv.innerHTML = `<span style="color:#e88;">Klaida: ${err.message}</span>`; }
   finally { btn.disabled = false; btn.textContent = '🔍 Analizė'; }
+}
+
+function startTinderRest() {
+  const rest = window.__tinderRestListings || [];
+  if (rest.length === 0) return;
+  tinderPhase = 'rest';
+  tinderQueue = rest.map(l => ({
+    ...l,
+    source: l.source || (l.url && l.url.includes('autoscout24') ? 'autoscout24.com' : l.url && l.url.includes('otomoto') ? 'otomoto.pl' : l.url && l.url.includes('autogidas') ? 'autogidas.lt' : 'autoplius.lt'),
+    comment: l.comment || '',
+    diffPct: l.diffPct || 0,
+  }));
+  tinderIndex = 0;
+  document.getElementById('tinder-actions').style.display = 'flex';
+  document.getElementById('tinder-hint').style.display = 'block';
+  renderTinderCard();
 }
 
 function tinderSwipe(direction) {
@@ -1267,6 +1426,7 @@ function renderCandidateCards(candidates, results) {
         <div class="card-actions">
           <a class="card-link" href="${c.url}" target="_blank">Žiūrėti skelbimą →</a>
           <button class="detail-btn${hasPreloadedDeep ? ' ready' : ''}" id="${cardId}-btn" data-closed-label="${detailBtnLabel}" onclick="loadDetail('${c.url}', '${cardId}', this, false, {kaina:${c.kaina||'null'}, marketMedian:${c.marketMedian||'null'}, marketCount:${c.marketCount||'null'}, diffPct:${c.diffPct!=null?c.diffPct:'null'}, modelis:'${escJs(c.modelis)}', pardavejas:${c.pardavejas ? `'${escJs(c.pardavejas)}'` : 'null'}, galia:${c.galia||'null'}, variklioTuris:${c.variklioTuris||'null'}})">${detailBtnLabel}</button>
+          <button class="compare-toggle" id="cmp-${cardId}" onclick="toggleCompare('${c.url}', '${escJs(c.modelis)}', ${c.kaina||'null'}, '${escJs(c.photo||'')}', ${c.metai||'null'}, ${c.rida||'null'}, '${escJs(c.kuras||'')}', ${c.galia||'null'}, ${c.variklioTuris||'null'}, '${escJs(c.pavarai||'')}', ${c.diffPct!=null?c.diffPct:'null'}, ${c.marketMedian||'null'}, '${escJs(c.source||'')}', 'cmp-${cardId}')">⚖️ Palyginti</button>
         </div>
         <div class="detail-panel" id="${cardId}" data-loaded="${hasPreloadedDeep}" style="display:none">${preloadedPanelHTML}</div>
       </div>
@@ -1497,7 +1657,6 @@ function buildDetailPanelHTML(data, url, panelId) {
     : '';
   return `
     ${cacheNote}
-    ${galleryBlock}
     <div class="verdict">${a.verdiktas || ''}</div>
     ${vinBlock}
     ${sellerBlock}
@@ -1510,6 +1669,7 @@ function buildDetailPanelHTML(data, url, panelId) {
     <h4>🔍 Ką patikrinti gyvai</h4>${listFmt(a.ka_patikrinti_gyvai)}
     <h4>❓ Klausimai pardavėjui</h4>${listFmt(a.klausimai_pardavejui)}
     <h4>💬 Derybų patarimas</h4><div>${a.derybu_patarimas || '–'}</div>
+    ${galleryBlock}
   `;
 }
 
@@ -1570,6 +1730,113 @@ async function loadDetail(url, panelId, btn, force, marketContext) {
     btn.disabled = false;
     if (btn.textContent.includes('%') || btn.textContent.includes('⏳')) btn.textContent = '🔬 Detali apžvalga';
   }
+}
+
+// ============ PALYGINIMAS ============
+let compareList = []; // max 3
+
+function toggleCompare(url, modelis, kaina, photo, metai, rida, kuras, galia, variklioTuris, pavarai, diffPct, marketMedian, source, btnId) {
+  const existIdx = compareList.findIndex(c => c.url === url);
+  if (existIdx >= 0) {
+    compareList.splice(existIdx, 1);
+  } else {
+    if (compareList.length >= 3) {
+      alert('Galima palyginti tik iki 3 automobilių. Pašalinkite vieną ir bandykite dar kartą.');
+      return;
+    }
+    compareList.push({ url, modelis, kaina, photo, metai, rida, kuras, galia, variklioTuris, pavarai, diffPct, marketMedian, source });
+  }
+  // Atnaujiname mygtuko būseną
+  const btn = document.getElementById(btnId);
+  if (btn) btn.classList.toggle('active', compareList.some(c => c.url === url));
+  renderCompareBar();
+}
+
+function renderCompareBar() {
+  const bar = document.getElementById('compare-bar');
+  const itemsEl = document.getElementById('compare-bar-items');
+  if (compareList.length === 0) {
+    bar.classList.remove('visible');
+    return;
+  }
+  bar.classList.add('visible');
+  itemsEl.innerHTML = compareList.map((c, i) =>
+    `<div class="compare-bar-chip">
+      <span>${c.modelis} – ${formatEUR(c.kaina)}</span>
+      <button onclick="removeFromCompare(${i})">✕</button>
+    </div>`
+  ).join('');
+  document.getElementById('compare-btn').textContent = `⚖️ Palyginti (${compareList.length})`;
+  // Tarpas kad juosta neuždengtų kortelių
+  document.body.style.paddingBottom = compareList.length > 0 ? '70px' : '';
+}
+
+function removeFromCompare(idx) {
+  const removed = compareList.splice(idx, 1)[0];
+  // Išjungiame visus mygtukus su tuo url
+  document.querySelectorAll('.compare-toggle').forEach(btn => {
+    if (btn.id && compareList.some(c => btn.id.includes(c.url.length.toString()))) return;
+    // simple: reset all, then re-mark active ones
+  });
+  document.querySelectorAll('.compare-toggle.active').forEach(btn => {
+    const url = btn.getAttribute('data-url');
+    if (!compareList.some(c => c.url === removed.url)) btn.classList.remove('active');
+  });
+  renderCompareBar();
+}
+
+function openCompareModal() {
+  if (compareList.length < 2) { alert('Pasirinkite bent 2 automobilius palyginimui.'); return; }
+  const modal = document.getElementById('compare-modal');
+  const wrap = document.getElementById('compare-grid-wrap');
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+
+  const cols = compareList.length;
+  const grid = document.getElementById('compare-grid-wrap');
+  grid.style.display = 'grid';
+  grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  grid.style.gap = '12px';
+
+  // Apskaičiuojame geriausias/blogiausias reikšmes
+  const allKainos = compareList.map(c => c.kaina).filter(Boolean);
+  const allRidos = compareList.map(c => c.rida).filter(Boolean);
+  const allDiff = compareList.map(c => c.diffPct).filter(v => v != null);
+  const minKaina = Math.min(...allKainos);
+  const maxKaina = Math.max(...allKainos);
+  const minRida = Math.min(...allRidos);
+  const maxRida = Math.max(...allRidos);
+  const maxDiff = Math.max(...allDiff);
+
+  wrap.innerHTML = compareList.map((c) => {
+    const kainaClass = cols > 1 && c.kaina === minKaina ? 'better' : c.kaina === maxKaina ? 'worse' : '';
+    const ridaClass = cols > 1 && c.rida === minRida ? 'better' : c.rida === maxRida ? 'worse' : '';
+    const diffClass = cols > 1 && c.diffPct === maxDiff ? 'better' : '';
+    const rows = [
+      { label: 'Kaina', val: formatEUR(c.kaina), cls: kainaClass },
+      { label: 'Nuolaida', val: c.diffPct != null ? `-${c.diffPct}%` : '–', cls: diffClass },
+      { label: 'Rinkos vidurkis', val: c.marketMedian ? formatEUR(c.marketMedian) : '–', cls: '' },
+      { label: 'Metai', val: c.metai || '–', cls: '' },
+      { label: 'Rida', val: c.rida ? c.rida.toLocaleString('lt-LT').replace(/,/g,' ') + ' km' : '–', cls: ridaClass },
+      { label: 'Kuras', val: c.kuras || '–', cls: '' },
+      { label: 'Galia', val: c.galia ? `${c.galia} kW` : '–', cls: '' },
+      { label: 'Variklio tūris', val: c.variklioTuris ? `${c.variklioTuris} L` : '–', cls: '' },
+      { label: 'Pavarų dėžė', val: c.pavarai || '–', cls: '' },
+      { label: 'Šaltinis', val: c.source || '–', cls: '' },
+    ];
+    return `<div class="compare-col">
+      <img src="${c.photo || ''}" onerror="this.style.display='none'">
+      <div class="compare-col-title">${c.modelis}</div>
+      <div class="compare-col-price">${formatEUR(c.kaina)}</div>
+      ${rows.map(r => `<div class="compare-row"><span class="compare-row-label">${r.label}</span><span class="compare-row-val ${r.cls}">${r.val}</span></div>`).join('')}
+      <a href="${c.url}" target="_blank" style="display:block; margin-top:10px; color:#6c5ce7; font-size:12px; text-decoration:none;">Žiūrėti skelbimą →</a>
+    </div>`;
+  }).join('');
+}
+
+function closeCompareModal() {
+  document.getElementById('compare-modal').classList.remove('active');
+  document.body.style.overflow = '';
 }
 </script>
 </body>
