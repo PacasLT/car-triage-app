@@ -772,12 +772,14 @@ async function runSearch() {
 // ============ TINDER STILIAUS NARSYMAS ============
 let tinderQueue = [];
 let tinderLiked = [];
+let tinderSkipped = [];
 let tinderIndex = 0;
 
 function startTinder() {
   if (!currentData || !currentData.candidates || currentData.candidates.length === 0) return;
   tinderQueue = [...currentData.candidates];
   tinderLiked = [];
+  tinderSkipped = [];
   tinderIndex = 0;
   document.getElementById('tinder-view').classList.add('active');
   document.body.style.overflow = 'hidden';
@@ -797,16 +799,44 @@ function renderTinderCard() {
   if (tinderIndex >= tinderQueue.length) {
     fill.style.width = '100%';
     hint.style.display = 'none';
-    stack.innerHTML = tinderLiked.length > 0
-      ? `<div id="tinder-summary-box">
-          <div style="font-size:18px; font-weight:700; margin-bottom:10px;">🎉 Jums patiko ${tinderLiked.length} pasiūlymai!</div>
-          ${tinderLiked.map((c) => `<a href="${c.url}" target="_blank">✅ ${c.modelis} – ${formatEUR(c.kaina)} (${c.source})</a>`).join('')}
-          <button onclick="exitTinder()" style="margin-top:16px; padding:10px 20px; background:#6c5ce7; color:#fff; border:none; border-radius:8px; cursor:pointer;">Uždaryti</button>
-        </div>`
-      : `<div id="tinder-summary-box">
-          <div style="font-size:18px; margin-bottom:10px;">🤷 Nė vienas šį kartą nepatiko</div>
-          <button onclick="exitTinder()" style="margin-top:8px; padding:10px 20px; background:#6c5ce7; color:#fff; border:none; border-radius:8px; cursor:pointer;">Uždaryti</button>
-        </div>`;
+    const allListings = (currentData && currentData.allListings) || [];
+    const topUrls = new Set(tinderQueue.map(c => c.url));
+    const restListings = allListings.filter(l => !topUrls.has(l.url));
+    const skippedHtml = tinderSkipped.length > 0
+      ? `<div style="margin-top:16px; text-align:left;">
+          <div style="font-size:13px; color:#9a9aa5; margin-bottom:8px;">❌ Praleisti TOP skelbimai (${tinderSkipped.length}):</div>
+          ${tinderSkipped.map((c) => `<div style="background:#1a1d24; border-radius:8px; padding:10px 12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:13px; font-weight:600;">${c.modelis}</div>
+              <div style="font-size:12px; color:#a78bfa;">${formatEUR(c.kaina)} · ${c.metai||'?'} · ${c.source}</div>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <a href="${c.url}" target="_blank" style="background:#2c303a; color:#cfcbf5; border:none; padding:6px 10px; border-radius:6px; font-size:11px; cursor:pointer; text-decoration:none;">🔗 Žiūrėti</a>
+              <button onclick="tinderGetAnalysis('${c.url.replace(/'/g,"\'")}', this)" style="background:#6c5ce7; color:#fff; border:none; padding:6px 10px; border-radius:6px; font-size:11px; cursor:pointer;">🔍 Analizė</button>
+            </div>
+          </div>`).join('')}
+        </div>` : '';
+    const restHtml = restListings.length > 0
+      ? `<div style="margin-top:16px; text-align:left;">
+          <div style="font-size:13px; color:#9a9aa5; margin-bottom:8px;">📋 Kiti rasti skelbimai (${restListings.length}):</div>
+          ${restListings.map((l) => `<div style="background:#1a1d24; border-radius:8px; padding:10px 12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:13px; font-weight:600;">${l.modelis||'?'}</div>
+              <div style="font-size:12px; color:#a78bfa;">${formatEUR(l.kaina)} · ${l.metai||'?'} · ${l.rida ? (l.rida.toLocaleString('lt-LT').replace(/,/g,' ') + ' km') : '?'}</div>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <a href="${l.url}" target="_blank" style="background:#2c303a; color:#cfcbf5; border:none; padding:6px 10px; border-radius:6px; font-size:11px; cursor:pointer; text-decoration:none;">🔗 Žiūrėti</a>
+              <button onclick="tinderGetAnalysis('${l.url.replace(/'/g,"\'")}', this)" style="background:#6c5ce7; color:#fff; border:none; padding:6px 10px; border-radius:6px; font-size:11px; cursor:pointer;">🔍 Analizė</button>
+            </div>
+          </div>`).join('')}
+        </div>` : '';
+    stack.innerHTML = `<div id="tinder-summary-box" style="overflow-y:auto; max-height:calc(100vh - 120px); padding:16px; width:100%; max-width:420px; box-sizing:border-box;">
+      <div style="font-size:18px; font-weight:700; margin-bottom:4px;">${tinderLiked.length > 0 ? '🎉 Patiko ' + tinderLiked.length + ' pasiūlymai!' : '🤷 Nė vienas nepatiko'}</div>
+      ${tinderLiked.length > 0 ? tinderLiked.map((c) => `<a href="${c.url}" target="_blank" style="display:block; color:#7fd88f; margin:4px 0; text-decoration:none; font-size:13px;">✅ ${c.modelis} – ${formatEUR(c.kaina)} (${c.source})</a>`).join('') : ''}
+      ${skippedHtml}
+      ${restHtml}
+      <button onclick="exitTinder()" style="margin-top:16px; width:100%; padding:10px; background:#2c303a; color:#e8e8ea; border:none; border-radius:8px; cursor:pointer;">Uždaryti</button>
+    </div>`;
     return;
   }
 
@@ -935,6 +965,33 @@ function attachSwipeHandlers(el) {
   });
 }
 
+async function tinderGetAnalysis(url, btn) {
+  const container = btn.parentElement.parentElement;
+  const existingResult = container.querySelector('.tinder-analysis-result');
+  if (existingResult) { existingResult.style.display = existingResult.style.display === 'none' ? 'block' : 'none'; return; }
+  btn.disabled = true;
+  btn.textContent = '⏳';
+  const resultDiv = document.createElement('div');
+  resultDiv.className = 'tinder-analysis-result';
+  resultDiv.style = 'margin-top:8px; font-size:12px; color:#d0d0d8; background:#0f111a; border-radius:6px; padding:10px;';
+  resultDiv.textContent = 'Kraunama...';
+  container.after(resultDiv);
+  try {
+    const resp = await fetch('/api/analyze-single', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ url }) });
+    const data = await resp.json();
+    if (data.error) { resultDiv.innerHTML = `<span style="color:#e88;">Klaida: ${data.error}</span>`; return; }
+    const a = data.analysis || {};
+    resultDiv.innerHTML = `
+      <div style="font-weight:600; color:#a78bfa; margin-bottom:4px;">${data.title || ''}</div>
+      ${a.vertinimas !== undefined ? `<div>Įvertinimas: <b>${a.vertinimas}/10</b></div>` : ''}
+      ${a.santrauka ? `<div style="margin-top:4px;">${a.santrauka}</div>` : ''}
+      ${a.rizikos && a.rizikos.length ? `<div style="color:#ff8080; margin-top:4px;">⚠️ ${a.rizikos.join(', ')}</div>` : ''}
+      ${a.privalumai && a.privalumai.length ? `<div style="color:#7fd88f; margin-top:4px;">✅ ${a.privalumai.join(', ')}</div>` : ''}
+    `;
+  } catch(err) { resultDiv.innerHTML = `<span style="color:#e88;">Klaida: ${err.message}</span>`; }
+  finally { btn.disabled = false; btn.textContent = '🔍 Analizė'; }
+}
+
 function tinderSwipe(direction) {
   const el = document.getElementById('tinder-card-current');
   const c = tinderQueue[tinderIndex];
@@ -943,6 +1000,7 @@ function tinderSwipe(direction) {
     el.style.transform = `translate(${direction === 'right' ? 700 : -700}px, -40px) rotate(${direction === 'right' ? 25 : -25}deg)`;
   }
   if (direction === 'right' && c) tinderLiked.push(c);
+  else if (direction === 'left' && c) tinderSkipped.push(c);
   setTimeout(() => {
     tinderIndex++;
     renderTinderCard();
