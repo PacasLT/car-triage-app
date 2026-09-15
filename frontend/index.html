@@ -1259,7 +1259,7 @@ async function lookupVin(vin, resultId, btn) {
   }
 }
 
-async function lookupSeller(pardavejas, resultId, btn) {
+async function lookupSeller(pardavejas, resultId, btn, listingUrl) {
   const resultEl = document.getElementById(resultId);
   btn.disabled = true;
   btn.textContent = '⏳ Ieškoma...';
@@ -1275,7 +1275,7 @@ async function lookupSeller(pardavejas, resultId, btn) {
     const resp = await fetch('/api/seller-lookup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pardavejas }),
+      body: JSON.stringify({ pardavejas, listingUrl }),
     });
     const data = await resp.json();
     stopRotating();
@@ -1342,7 +1342,7 @@ function buildDetailPanelHTML(data, url, panelId) {
   const sellerBlock = data.pardavejas
     ? `<div style="font-size:12px; color:#9a9aa5; margin:6px 0;">
         🏢 Pardavėjas: <b style="color:#e8e8ea;">${data.pardavejas}</b>
-        <button onclick="lookupSeller('${data.pardavejas.replace(/'/g, "\\'")}', '${sellerResultId}', this)" style="margin-left:8px; font-size:11px; padding:3px 8px; background:#2c303a; color:#e8e8ea; border:none; border-radius:5px; cursor:pointer;">🔎 Ieškoti informacijos apie pardavėją</button>
+        <button onclick="lookupSeller('${data.pardavejas.replace(/'/g, "\\'")}', '${sellerResultId}', this, '${escJs(url)}')" style="margin-left:8px; font-size:11px; padding:3px 8px; background:#2c303a; color:#e8e8ea; border:none; border-radius:5px; cursor:pointer;">🔎 Ieškoti informacijos apie pardavėją</button>
         <div id="${sellerResultId}" style="margin-top:6px;"></div>
       </div>`
     : '';
