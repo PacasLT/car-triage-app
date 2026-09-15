@@ -138,7 +138,7 @@
 <body>
 <div class="container">
   <h1>🚗 Car Triage</h1>
-  <div class="subtitle">Suveskite filtrus – sistema nuskaitys autoplius.lt ir autogidas.lt, palygins kainas ir įvertins riziką.</div>
+  <div class="subtitle">Suveskite filtrus – sistema nuskaitys automobilių portalus, palygins kainas ir įvertins riziką.</div>
 
   <div id="favorites-wrap" style="display:none; margin-bottom:18px;">
     <button onclick="toggleFavoritesPanel()" id="favorites-toggle-btn" style="background:#1a1d24; color:#f0c674; border:1px solid #2c303a; padding:10px 16px; border-radius:8px; cursor:pointer; width:100%; text-align:left; font-size:13px;">
@@ -225,6 +225,9 @@
         </label>
         <label style="display:flex; align-items:center; gap:6px; font-size:13px; color:#e8e8ea; font-weight:normal;">
           <input type="checkbox" id="portal-autoscout24" style="width:auto;"> autoscout24.com (užsienio rinka)
+        </label>
+        <label style="display:flex; align-items:center; gap:6px; font-size:13px; color:#e8e8ea; font-weight:normal;">
+          <input type="checkbox" id="portal-otomoto" style="width:auto;"> otomoto.pl <span style="font-size:11px; color:#a0a0b0;">(Lenkija, PLN→EUR)</span>
         </label>
       </div>
     </div>
@@ -365,6 +368,7 @@ function applyHistoryFilters(idx) {
   document.getElementById('portal-autoplius').checked = !f.portals || f.portals.includes('autoplius');
   document.getElementById('portal-autogidas').checked = !f.portals || f.portals.includes('autogidas');
   document.getElementById('portal-autoscout24').checked = !!(f.portals && f.portals.includes('autoscout24'));
+  document.getElementById('portal-otomoto').checked = !!(f.portals && f.portals.includes('otomoto'));
   updateGenerationHint();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -675,6 +679,9 @@ async function runQuickCount() {
     if (document.getElementById('portal-autoscout24').checked) {
       parts.push(`autoscout24.com: ${fmt(data.autoscout24)}`);
     }
+    if (document.getElementById('portal-otomoto').checked) {
+      parts.push(`otomoto.pl: ${fmt(data.otomoto)}`);
+    }
     resultEl.textContent = parts.join(' · ') + ' skelbimų atitinka';
   } catch (err) {
     resultEl.textContent = `Klaida: ${err.message}`;
@@ -711,12 +718,13 @@ async function runSearch() {
       document.getElementById('portal-autoplius').checked ? 'autoplius' : null,
       document.getElementById('portal-autogidas').checked ? 'autogidas' : null,
       document.getElementById('portal-autoscout24').checked ? 'autoscout24' : null,
+      document.getElementById('portal-otomoto').checked ? 'otomoto' : null,
     ].filter(Boolean),
   };
   saveSearchToHistory(filters);
 
   if (filters.portals.length === 0) {
-    status.textContent = 'Pasirinkite bent vieną portalą (autoplius.lt arba autogidas.lt).';
+    status.textContent = 'Pasirinkite bent vieną portalą.';
     return;
   }
 
