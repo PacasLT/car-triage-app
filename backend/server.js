@@ -628,18 +628,24 @@ function extractOtomotoListings(html) {
       const model = getParam('model') || '';
       const modelis = `${make} ${model}`.trim() || (item.title || '').trim();
       const url = item.url ? (item.url.startsWith('http') ? item.url : `https://www.otomoto.pl${item.url}`) : null;
-      const photo = (item.thumbnail && (item.thumbnail.x2 || item.thumbnail.x1)) || null;
+      const photosArr = [];
+      if (item.photos && Array.isArray(item.photos)) {
+        item.photos.forEach((p) => { const src = (p && (p.x2 || p.x1 || p.url)) || null; if (src) photosArr.push(src); });
+      }
+      if (photosArr.length === 0 && item.thumbnail) { const t = item.thumbnail.x2 || item.thumbnail.x1 || null; if (t) photosArr.push(t); }
+      const photo = photosArr[0] || null;
 
       return {
         kaina, kainaBaze: null, pvmPastaba: null, kainaBePvm: null, turiLizingoOpcija: false,
         rida, metai, modelis, galimiDefektai: [],
         kuras, pavarai, turiVin: false, galimasJavImportas: false,
         turiIstorijosAtaskaita: false, turiGarantija: false, garantijosTipas: null,
-        yraVerslas: false, pardavejas: null,
+        yraVerslas: !!(item.seller && item.seller.__typename === 'BusinessSeller'),
+        pardavejas: (item.seller && item.seller.name) || null,
         galia, variklioTuris,
         reitingas: null, atsiliepimuSkaicius: null,
         rawText: `${modelis} ${kaina}€ (${kainaPlN} PLN) ${metai || ''} ${rida || ''} km`.trim().slice(0, 200),
-        url, photo, photos: photo ? [photo] : [],
+        url, photo, photos: photosArr.slice(0, 12),
       };
     }).filter((l) => l && l.url && l.kaina);
   } catch (err) {
@@ -974,13 +980,14 @@ async function runSearchJob(jobId, filters) {
           ]);
           try {
             const { title, fullText, photo: detailPhoto, photos: detailPhotos, vin, pardavejas } = await scrapeSingleListing(c.url);
+            const photosForAI = (detailPhotos && detailPhotos.length > 0) ? detailPhotos : (c.photos || []);
             const marketContext = { kaina: c.kaina, marketMedian: c.marketMedian, marketCount: c.marketCount, diffPct: c.diffPct, modelis: c.modelis, galia: c.galia, variklioTuris: c.variklioTuris };
-            const analysis = await generateDeepAnalysis(title, fullText, detailPhotos, marketContext);
+            const analysis = await generateDeepAnalysis(title, fullText, photosForAI, marketContext);
             c.deepAnalysis = analysis;
             c.vin = vin;
             c.pardavejas = pardavejas || c.pardavejas;
-            c.photos = detailPhotos;
-            cache.setCached('analysis', c.url, { title, photo: detailPhoto, photos: detailPhotos, analysis, vin, pardavejas });
+            c.photos = photosForAI;
+            cache.setCached('analysis', c.url, { title, photo: photosForAI[0] || detailPhoto, photos: photosForAI, analysis, vin, pardavejas });
           } finally {
             stopFake();
           }
@@ -1056,8 +1063,9 @@ async function scrapeSingleListing(url) {
   const SELLER_INFO_SELECTOR = '[class*="seller" i], [class*="dealer" i], [class*="partner" i], [class*="advertiser" i], [class*="agent" i], [class*="contact" i], [class*="profile" i]';
   const photoMatches = $('img').filter(function () {
     const el = $(this);
-    const src = (el.attr('src') || '').toLowerCase();
-    const isFromCarCdn = src.includes('img.autogidas.lt') || src.includes('autoplius-img') || src.includes('pictures.autoscout24.net');
+    const src = (el.attr('src') || el.attr('data-src') || '').toLowerCase();
+    const CAR_CDN_LIST = ['img.autogidas.lt', 'autoplius-img', 'pictures.autoscout24.net', 'apollo.olxcdn.com', 'ireland.apollo.olxcdn.com', 'img.otomoto.pl'];
+    const isFromCarCdn = CAR_CDN_LIST.some((cdn) => src.includes(cdn));
     const looksLikeJunk = NON_CAR_IMAGE_KEYWORDS.some((kw) => src.includes(kw));
     const isNearSellerInfo = el.closest(SELLER_INFO_SELECTOR).length > 0;
     const w = parseInt(el.attr('width'), 10);
