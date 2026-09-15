@@ -981,7 +981,7 @@ async function runSearchJob(jobId, filters) {
           try {
             const { title, fullText, photo: detailPhoto, photos: detailPhotos, vin, pardavejas } = await scrapeSingleListing(c.url);
             const photosForAI = (detailPhotos && detailPhotos.length > 0) ? detailPhotos : (c.photos || []);
-            const marketContext = { kaina: c.kaina, marketMedian: c.marketMedian, marketCount: c.marketCount, diffPct: c.diffPct, modelis: c.modelis, galia: c.galia, variklioTuris: c.variklioTuris };
+            const marketContext = { kaina: c.kaina, marketMedian: c.marketMedian, marketCount: c.marketCount, diffPct: c.diffPct, modelis: c.modelis, galia: c.galia, variklioTuris: c.variklioTuris, url: c.url };
             const analysis = await generateDeepAnalysis(title, fullText, photosForAI, marketContext);
             c.deepAnalysis = analysis;
             c.vin = vin;
@@ -1201,7 +1201,8 @@ async function downloadImageAsBase64(url) {
 async function generateDeepAnalysis(title, fullText, photos, marketContext) {
   // Vizualia zalos patikra atliekame TIK jei tekste jau yra pozymiu, kad automobilis
   // galimai dauztas/su defektais - taupome kastus, nesiunciant nuotrauku kiekvienam skelbimui.
-  const suspectsDamage = /dau[žz]t|po avarijos|defekt|avarij[ųu]|remontuot/i.test(fullText.slice(0, 4000));
+  const isInternationalListing = !!(marketContext && marketContext.url && /autoscout24|otomoto\.pl|mobile\.de|olx\.pl/i.test(marketContext.url));
+  const suspectsDamage = isInternationalListing || /dau[žz]t|po avarijos|defekt|avarij[ųu]|remontuot|accident|damage|crashed|repaired|Unfall|Schaden/i.test(fullText.slice(0, 4000));
   let imageBlocks = [];
   if (suspectsDamage && photos && photos.length > 0) {
     const downloaded = await Promise.all(photos.slice(0, 4).map(downloadImageAsBase64));
