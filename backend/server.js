@@ -361,7 +361,8 @@ async function fetchAllPages(baseUrl, maxPages, onProgress) {
   const seenUrls = new Set();
   const isAutogidas = baseUrl.includes('autogidas.lt');
   const isAutoscout = baseUrl.includes('autoscout24.com');
-  const pageParam = (isAutogidas || isAutoscout) ? 'page' : 'page_nr';
+  const isOtomoto = baseUrl.includes('otomoto.pl');
+  const pageParam = (isAutogidas || isAutoscout || isOtomoto) ? 'page' : 'page_nr';
   for (let page = 1; page <= maxPages; page++) {
     const resolveStep = onProgress ? onProgress(page) : null;
     const pageUrl = page === 1 ? baseUrl : `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}${pageParam}=${page}`;
@@ -374,6 +375,7 @@ async function fetchAllPages(baseUrl, maxPages, onProgress) {
     }
     const newItems = isAutogidas ? extractAutogidasListings(html, pageUrl)
       : isAutoscout ? extractAutoscout24Listings(html)
+      : isOtomoto ? extractOtomotoListings(html)
       : extractListingBlocksAutoplius(html);
     const filtered = newItems.filter((b) => !seenUrls.has(b.url));
     if (resolveStep) resolveStep();
@@ -381,7 +383,7 @@ async function fetchAllPages(baseUrl, maxPages, onProgress) {
     filtered.forEach((b) => seenUrls.add(b.url));
     allListings.push(...filtered);
   }
-  const format = (isAutogidas || isAutoscout) ? 'parsed' : 'raw';
+  const format = (isAutogidas || isAutoscout || isOtomoto) ? 'parsed' : 'raw';
   return { listings: allListings, format };
 }
 
@@ -552,6 +554,120 @@ function buildAutoscout24Url(filters) {
   return `${url}?${params.join('&')}`;
 }
 
+// ============ OTOMOTO.PL (Lenkija) ============
+// Lenkijos populiariausias automobiliu portalas. Kainos PLN, automatiskai konvertuojamos i EUR.
+// Duomenys saugomi __NEXT_DATA__ JSON bloke (Next.js SSR), viduje urqlState raktu kaip JSON eilute.
+const PLN_EUR_RATE = 4.25; // apytiksis kursas, atnaujinkite jei reikia
+
+function buildOtomotoUrl(filters) {
+  const marke = (filters.marke || '').toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  const modelis = (filters.modelis || '').toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  let url = `https://www.otomoto.pl/osobowe`;
+  if (marke) url += `/${marke}`;
+  if (marke && modelis) url += `/${modelis}`;
+  const params = ['search[order]=filter_float_price:asc'];
+  // Kaina EUR -> PLN konversija
+  if (filters.kainaNuo) params.push(`search[filter_float_price:from]=${Math.floor(parseInt(filters.kainaNuo, 10) * PLN_EUR_RATE)}`);
+  if (filters.kainaIki) params.push(`search[filter_float_price:to]=${Math.ceil(parseInt(filters.kainaIki, 10) * PLN_EUR_RATE)}`);
+  if (filters.metaiNuo) params.push(`search[filter_float_year:from]=${filters.metaiNuo}`);
+  if (filters.metaiIki) params.push(`search[filter_float_year:to]=${filters.metaiIki}`);
+  if (filters.ridaIki) params.push(`search[filter_float_mileage:to]=${filters.ridaIki}`);
+  if (filters.pavaru_deze) {
+    const g = filters.pavaru_deze === 'Automatinė' ? 'automatic' : filters.pavaru_deze === 'Mechaninė' ? 'manual' : null;
+    if (g) params.push(`search[filter_enum_gearbox][0]=${g}`);
+  }
+  return `${url}?${params.join('&')}`;
+}
+
+function extractOtomotoListings(html) {
+  try {
+    const $ = cheerio.load(html);
+    const scriptContent = $('#__NEXT_DATA__').html();
+    if (!scriptContent) return [];
+    const data = JSON.parse(scriptContent);
+    const urqlState = (data.props && data.props.pageProps && data.props.pageProps.urqlState) || {};
+    // Ieskome rakto, kurio duomenyse yra advertSearch
+    let edges = [];
+    for (const key of Object.keys(urqlState)) {
+      const entry = urqlState[key];
+      if (!entry || !entry.data) continue;
+      let parsed;
+      try { parsed = typeof entry.data === 'string' ? JSON.parse(entry.data) : entry.data; } catch { continue; }
+      if (parsed && parsed.advertSearch && parsed.advertSearch.edges) {
+        edges = parsed.advertSearch.edges;
+        break;
+      }
+    }
+    const FUEL_MAP = { petrol: 'Benzinas', diesel: 'Dyzelinas', electric: 'Elektra', hybrid: 'Hibridas', lpg: 'Dujos', cng: 'Dujos' };
+    const GEAR_MAP = { automatic: 'Automatinė', manual: 'Mechaninė', 'semi-automatic': 'Automatinė' };
+
+    return edges.map(({ node: item }) => {
+      if (!item) return null;
+      const priceRaw = item.price && item.price.amount && item.price.amount.units;
+      const kainaPlN = priceRaw ? parseInt(priceRaw, 10) : null;
+      const kaina = kainaPlN ? Math.round(kainaPlN / PLN_EUR_RATE) : null;
+
+      const params = item.parameters || [];
+      const getParam = (id) => { const p = params.find((x) => x.key === id); return p ? p.value : null; };
+
+      const metai = getParam('year') ? parseInt(getParam('year'), 10) : null;
+      const ridaStr = getParam('mileage');
+      const rida = ridaStr ? parseInt(ridaStr.replace(/\D/g, ''), 10) : null;
+      const fuelRaw = getParam('fuel_type');
+      const kuras = FUEL_MAP[fuelRaw] || fuelRaw || null;
+      const gearRaw = getParam('gearbox');
+      const pavarai = GEAR_MAP[gearRaw] || null;
+      const ccStr = getParam('engine_capacity');
+      const variklioTuris = ccStr ? Math.round(parseInt(ccStr.replace(/\D/g, ''), 10) / 100) / 10 : null;
+      const powerStr = getParam('engine_power');
+      const powerMatch = powerStr && powerStr.match(/(\d+)\s*KM/i);
+      // Lenkijoje galia KM (arklio jegos) -> kW (1 KM ≈ 0.7355 kW)
+      const galia = powerMatch ? Math.round(parseInt(powerMatch[1], 10) * 0.7355) : null;
+
+      const make = getParam('make') || '';
+      const model = getParam('model') || '';
+      const modelis = `${make} ${model}`.trim() || (item.title || '').trim();
+      const url = item.url ? (item.url.startsWith('http') ? item.url : `https://www.otomoto.pl${item.url}`) : null;
+      const photo = (item.thumbnail && (item.thumbnail.x2 || item.thumbnail.x1)) || null;
+
+      return {
+        kaina, kainaBaze: null, pvmPastaba: null, kainaBePvm: null, turiLizingoOpcija: false,
+        rida, metai, modelis, galimiDefektai: [],
+        kuras, pavarai, turiVin: false, galimasJavImportas: false,
+        turiIstorijosAtaskaita: false, turiGarantija: false, garantijosTipas: null,
+        yraVerslas: false, pardavejas: null,
+        galia, variklioTuris,
+        reitingas: null, atsiliepimuSkaicius: null,
+        rawText: `${modelis} ${kaina}€ (${kainaPlN} PLN) ${metai || ''} ${rida || ''} km`.trim().slice(0, 200),
+        url, photo, photos: photo ? [photo] : [],
+      };
+    }).filter((l) => l && l.url && l.kaina);
+  } catch (err) {
+    console.error('extractOtomotoListings klaida:', err.message);
+    return [];
+  }
+}
+
+function extractOtomotoTotalCount(html) {
+  try {
+    const $ = cheerio.load(html);
+    const scriptContent = $('#__NEXT_DATA__').html();
+    if (!scriptContent) return null;
+    const data = JSON.parse(scriptContent);
+    const urqlState = (data.props && data.props.pageProps && data.props.pageProps.urqlState) || {};
+    for (const key of Object.keys(urqlState)) {
+      const entry = urqlState[key];
+      if (!entry || !entry.data) continue;
+      let parsed;
+      try { parsed = typeof entry.data === 'string' ? JSON.parse(entry.data) : entry.data; } catch { continue; }
+      if (parsed && parsed.advertSearch && typeof parsed.advertSearch.totalCount === 'number') {
+        return { count: parsed.advertSearch.totalCount, exact: true };
+      }
+    }
+    return null;
+  } catch { return null; }
+}
+
 // ============ GREITAS KIEKIO PATIKRINIMAS (be AI, be pilnos analizes) ============
 // Nuskaito TIK 1 puslapi is kiekvieno portalo (naudoja ta pati 30 min talpykla),
 // ir isskiria bendra rastu skelbimu skaiciu, kuri patys portalai rodo. Jokio AI
@@ -584,15 +700,18 @@ app.post('/api/quick-count', async (req, res) => {
     const autopliusUrl = buildAutopliusUrl(filters);
     const autogidasUrl = buildAutogidasUrl(filters);
     const autoscoutUrl = buildAutoscout24Url(filters);
-    const [autopliusHtml, autogidasHtml, autoscoutHtml] = await Promise.all([
+    const otomotoUrl = buildOtomotoUrl(filters);
+    const [autopliusHtml, autogidasHtml, autoscoutHtml, otomotoHtml] = await Promise.all([
       fetchSearchPage(autopliusUrl).catch(() => null),
       fetchSearchPage(autogidasUrl).catch(() => null),
       fetchSearchPage(autoscoutUrl).catch(() => null),
+      fetchSearchPage(otomotoUrl).catch(() => null),
     ]);
     res.json({
       autoplius: autopliusHtml ? extractTotalCount(autopliusHtml, false) : null,
       autogidas: autogidasHtml ? extractTotalCount(autogidasHtml, true) : null,
       autoscout24: autoscoutHtml ? extractAutoscout24TotalCount(autoscoutHtml) : null,
+      otomoto: otomotoHtml ? extractOtomotoTotalCount(otomotoHtml) : null,
     });
   } catch (err) {
     console.error(err);
@@ -687,6 +806,7 @@ async function runSearchJob(jobId, filters) {
       { key: 'autoplius', url: buildAutopliusUrl(filters), site: 'autoplius.lt' },
       { key: 'autogidas', url: buildAutogidasUrl(filters), site: 'autogidas.lt' },
       { key: 'autoscout24', url: buildAutoscout24Url(filters), site: 'autoscout24.com' },
+      { key: 'otomoto', url: buildOtomotoUrl(filters), site: 'otomoto.pl' },
     ];
     const urls = allUrls.filter((u) => selectedPortals.includes(u.key));
 
