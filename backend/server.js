@@ -23,7 +23,8 @@ const MODEL = 'claude-sonnet-5';
 
 async function fetchWithPuppeteer(url) {
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: 'new',
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
     args: ['--no-sandbox', '--disable-blink-features=AutomationControlled'],
   });
   const page = await browser.newPage();
@@ -44,23 +45,45 @@ async function fetchSearchPage(url) {
     return cached;
   }
 
-  const origin = new URL(url).origin;
+  const SCRAPER_KEY = process.env.SCRAPER_API_KEY;
   let html;
-  try {
-    const response = await axios.get(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-        'Accept-Language': 'lt-LT,lt;q=0.9,en-US;q=0.8,en;q=0.7',
-        'Referer': `${origin}/`,
-      },
-      timeout: 30000,
-      validateStatus: (s) => s < 500,
-    });
-    if (response.status === 200) html = response.data;
-  } catch (err) {
-    // tesiame prie Puppeteer
+
+  // 1. ScraperAPI (jei raktas nurodytas)
+  if (SCRAPER_KEY) {
+    try {
+      const scraperUrl = `http://api.scraperapi.com?api_key=${SCRAPER_KEY}&url=${encodeURIComponent(url)}&render=false`;
+      console.log(`  ScraperAPI: ${url.slice(0, 60)}...`);
+      const response = await axios.get(scraperUrl, { timeout: 60000 });
+      if (response.status === 200 && response.data && response.data.length > 500) {
+        html = response.data;
+        console.log(`  ScraperAPI OK (${html.length} simboliu)`);
+      }
+    } catch (err) {
+      console.log(`  ScraperAPI klaida: ${err.message}`);
+    }
   }
+
+  // 2. Tiesioginis axios (atsarginis)
+  if (!html) {
+    const origin = new URL(url).origin;
+    try {
+      const response = await axios.get(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+          'Accept-Language': 'lt-LT,lt;q=0.9,en-US;q=0.8,en;q=0.7',
+          'Referer': `${origin}/`,
+        },
+        timeout: 30000,
+        validateStatus: (s) => s < 500,
+      });
+      if (response.status === 200) html = response.data;
+    } catch (err) {
+      // tesiame prie Puppeteer
+    }
+  }
+
+  // 3. Puppeteer (paskutinis variantas)
   if (!html) html = await fetchWithPuppeteer(url);
 
   cache.setCached('pages', url, html);
