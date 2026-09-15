@@ -3,448 +3,511 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-<title>Car Triage - Automobilių paieškos įrankis</title>
+<title>CarTriige — Automobilių paieška</title>
 <style>
-  * { box-sizing: border-box; }
-  body { font-family: -apple-system, Segoe UI, Arial, sans-serif; background: #0f1115; color: #e8e8ea; margin: 0; padding: 24px; }
-  .container { max-width: 900px; margin: 0 auto; }
-  h1 { font-size: 22px; margin-bottom: 4px; }
-  .subtitle { color: #9a9aa5; margin-bottom: 24px; font-size: 14px; }
-  .filters { background: #1a1d24; border-radius: 12px; padding: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
-  .filters label { display: block; font-size: 12px; color: #9a9aa5; margin-bottom: 4px; }
-  .filters input, .filters select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #2c303a; background: #0f1115; color: #e8e8ea; font-size: 14px; }
-  .full-row { grid-column: 1 / -1; }
-  button#search-btn { grid-column: 1 / -1; padding: 12px; background: #6c5ce7; color: white; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; margin-top: 8px; }
-  button#search-btn:hover { background: #5b4bd1; }
-  button#search-btn:disabled { background: #444; cursor: not-allowed; }
-  #status { color: #9a9aa5; font-size: 14px; margin-bottom: 16px; min-height: 20px; }
-  .card { background: #1a1d24; border-radius: 12px; padding: 16px; margin-bottom: 14px; display: flex; gap: 16px; border-left: 4px solid #6c5ce7; position: relative; }
-  .fav-star { position: absolute; top: 10px; right: 10px; background: rgba(15,17,21,0.7); border: none; color: #666; font-size: 20px; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; z-index: 2; }
-  .fav-star.active { color: #f0c674; }
-  .card img { width: 140px; height: 100px; object-fit: cover; border-radius: 8px; background: #2c303a; flex-shrink: 0; }
-  .card-body { flex: 1; min-width: 0; }
-  .card-title { font-weight: 600; font-size: 16px; }
-  .card-price { color: #6c5ce7; font-weight: 700; font-size: 17px; }
-  .card-meta { color: #9a9aa5; font-size: 13px; margin: 4px 0; }
-  .card-diff { display: inline-block; background: #2c303a; padding: 2px 8px; border-radius: 6px; font-size: 12px; margin-left: 8px; }
-  .card-diff.high-risk { background: #4a1f1f; color: #ff8080; }
-  .risk-banner { background: #3a1f1f; border: 1px solid #7a3030; color: #ff9d9d; padding: 8px 10px; border-radius: 6px; font-size: 12px; margin: 6px 0; }
-  .card-signals { font-size: 12px; color: #7fd88f; margin: 6px 0; }
-  .card-comment { font-size: 13px; color: #d0d0d8; margin-top: 6px; line-height: 1.4; }
-  .card-link { display: inline-block; margin-top: 8px; color: #6c5ce7; font-size: 13px; text-decoration: none; }
-  .source-tag { font-size: 11px; padding: 1px 6px; border-radius: 4px; background: #2c303a; color: #9a9aa5; margin-left: 6px; }
-  #search-progress-wrap { display: none; margin: -8px 0 14px; }
-  #search-progress-track-main { height: 4px; background: #1a1d24; border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
-  #search-progress-fill-main { height: 100%; background: linear-gradient(90deg, #6c5ce7, #a78bfa); border-radius: 4px; transition: width 0.5s ease; width: 0%; }
-  #search-progress-label { font-size: 12px; color: #6c5ce7; font-weight: 600; }
-  #log-container { margin-bottom: 16px; display: none; }
-  #log-header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #1a1d24; border: 1px solid #2c303a; border-radius: 10px; cursor: pointer; font-size: 13px; color: #b8b8c0; user-select: none; }
-  #log-header:hover { background: #20232b; }
-  #log-header .chevron { margin-left: auto; transition: transform 0.2s; color: #666; }
-  #log-header.expanded .chevron { transform: rotate(180deg); }
-  #log-box { background: #14161c; border: 1px solid #2c303a; border-top: none; border-radius: 0 0 10px 10px; padding: 4px; max-height: 260px; overflow-y: auto; display: none; }
-  .log-step { display: flex; align-items: center; gap: 10px; padding: 8px 12px; font-size: 13px; color: #b8b8c0; border-bottom: 1px solid #22252c; }
-  .log-step:last-child { border-bottom: none; }
-  .log-step .spinner { width: 14px; height: 14px; border: 2px solid #3a3f4c; border-top-color: #6c5ce7; border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
-  .log-step .done-check { color: #7fd88f; flex-shrink: 0; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .log-step.current { color: #e8e8ea; font-weight: 500; }
-  .card-actions { margin-top: 10px; display: flex; gap: 10px; align-items: center; }
-  .detail-btn { background: #2c303a; color: #e8e8ea; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
-  .detail-btn.ready { background: linear-gradient(135deg, #6c5ce7, #a78bfa); color: #fff; font-weight: 600; box-shadow: 0 0 14px rgba(108,92,231,0.45); animation: pulse-glow 2.5s ease-in-out infinite; }
-  @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 8px rgba(108,92,231,0.35); } 50% { box-shadow: 0 0 18px rgba(167,139,250,0.6); } }
-  .detail-btn:hover { background: #3a3f4c; }
-  .detail-panel { margin-top: 12px; padding: 12px; background: #12151b; border-radius: 8px; border-left: 3px solid #7fd88f; font-size: 13px; display: none; }
-  .detail-panel h4 { margin: 8px 0 4px; font-size: 12px; color: #9a9aa5; text-transform: uppercase; }
-  .detail-panel ul { margin: 4px 0; padding-left: 18px; }
-  .detail-panel .verdict { color: #7fd88f; font-weight: 600; }
-  .photo-gallery { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
-  .photo-gallery img { width: 76px; height: 58px; object-fit: cover; border-radius: 6px; flex-shrink: 0; background: #2c303a; cursor: pointer; }
-  #lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 2000; align-items: center; justify-content: center; flex-direction: column; }
-  #lightbox.active { display: flex; }
-  #lightbox img { max-width: 92vw; max-height: 76vh; object-fit: contain; border-radius: 6px; }
-  #lightbox-counter { color: #9a9aa5; font-size: 13px; margin-top: 10px; }
-  #lightbox-close { position: absolute; top: 16px; right: 20px; background: rgba(255,255,255,0.1); color: #fff; border: none; width: 38px; height: 38px; border-radius: 50%; font-size: 18px; cursor: pointer; }
-  .lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.1); color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 20px; cursor: pointer; }
-  #lightbox-prev { left: 12px; }
-  #lightbox-next { right: 12px; }
-  .card-photo-wrap { position: relative; flex-shrink: 0; line-height: 0; }
-  .card-photo-wrap img { display: block; }
-  .card-photo-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(15,17,21,0.65); color: #fff; border: none; width: 26px; height: 26px; border-radius: 50%; font-size: 15px; cursor: pointer; line-height: 1; padding: 0; }
-  .card-photo-nav.prev { left: 4px; }
-  .card-photo-nav.next { right: 4px; }
-  .card-photo-count { position: absolute; bottom: 4px; right: 6px; background: rgba(15,17,21,0.7); color: #cfcbf5; font-size: 10px; padding: 1px 6px; border-radius: 10px; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, 'Segoe UI', Arial, sans-serif; background: #0a0c12; color: #e2e4f0; min-height: 100vh; }
 
-  /* ============ PALYGINIMAS ============ */
-  .compare-toggle {
-    background: #1a1d24; color: #9a9aa5; border: 1px solid #2c303a;
-    padding: 5px 10px; border-radius: 6px; font-size: 11px; cursor: pointer;
-    transition: all 0.15s; white-space: nowrap;
-  }
-  .compare-toggle.active { background: #2d4a63; color: #74c0fc; border-color: #4a90d9; }
-  #compare-bar {
-    display: none; position: fixed; bottom: 0; left: 0; right: 0;
-    background: linear-gradient(135deg, #1a1d24, #20232b);
-    border-top: 1px solid #2c303a;
-    padding: 12px 20px; z-index: 900;
-    display: none; align-items: center; justify-content: space-between; gap: 12px;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
-  }
-  #compare-bar.visible { display: flex; }
-  #compare-bar-items { display: flex; gap: 8px; flex: 1; overflow: hidden; }
-  .compare-bar-chip {
-    background: #2c303a; border-radius: 8px; padding: 6px 10px;
-    font-size: 12px; color: #e8e8ea; display: flex; align-items: center; gap: 6px;
-    max-width: 160px; overflow: hidden;
-  }
-  .compare-bar-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .compare-bar-chip button { background: none; border: none; color: #9a9aa5; cursor: pointer; font-size: 14px; padding: 0; flex-shrink: 0; }
-  #compare-btn {
-    background: linear-gradient(135deg, #6c5ce7, #a78bfa); color: #fff;
-    border: none; padding: 10px 20px; border-radius: 10px; font-size: 14px;
-    font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0;
-    box-shadow: 0 4px 14px rgba(108,92,231,0.4);
-  }
-  #compare-modal {
-    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88);
-    z-index: 1500; overflow-y: auto; padding: 20px;
-  }
-  #compare-modal.active { display: block; }
-  #compare-modal-inner {
-    max-width: 960px; margin: 0 auto; background: #14161c;
-    border-radius: 16px; padding: 20px; position: relative;
-  }
-  .compare-grid { display: grid; gap: 14px; }
-  .compare-col {
-    background: #1a1d24; border-radius: 12px; padding: 14px; overflow: hidden;
-  }
-  .compare-col img { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; background: #2c303a; }
-  .compare-col-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-  .compare-col-price { color: #a78bfa; font-size: 18px; font-weight: 800; margin-bottom: 10px; }
-  .compare-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #22252c; font-size: 12px; }
-  .compare-row:last-child { border-bottom: none; }
-  .compare-row-label { color: #9a9aa5; }
-  .compare-row-val { color: #e8e8ea; font-weight: 500; text-align: right; max-width: 60%; }
-  .compare-row-val.better { color: #7fd88f; }
-  .compare-row-val.worse { color: #ff9d9d; }
-  #compare-close {
-    position: absolute; top: 16px; right: 16px;
-    background: rgba(255,255,255,0.08); color: #fff; border: none;
-    width: 36px; height: 36px; border-radius: 50%; font-size: 16px; cursor: pointer;
-  }
-  @media (max-width: 640px) {
-    #compare-bar { padding: 10px 12px; }
-    .compare-bar-chip { max-width: 100px; font-size: 11px; }
-    #compare-btn { font-size: 13px; padding: 8px 14px; }
-    #compare-modal { padding: 10px; }
-    #compare-modal-inner { padding: 14px; }
-    .compare-col img { height: 110px; }
-    .compare-bar-items { gap: 4px; }
-  }
-  /* ============ MOBILUS ISDESTYMAS ============ */
-  @media (max-width: 640px) {
-    body { padding: 12px; }
-    h1 { font-size: 19px; }
-    .subtitle { font-size: 13px; margin-bottom: 16px; }
-    .filters { grid-template-columns: 1fr; padding: 14px; gap: 10px; }
-    .filters input, .filters select { padding: 11px; font-size: 16px; } /* 16px - apsaugo nuo iOS auto-zoom paspaudus lauka */
-    button#search-btn { padding: 14px; font-size: 15px; }
-    .card { flex-direction: column; padding: 12px; gap: 10px; }
-    .card img { width: 100%; height: 180px; }
-    .card-title { font-size: 15px; }
-    .card-price { font-size: 16px; }
-    .card-actions { flex-direction: column; align-items: stretch; gap: 8px; }
-    .card-actions .card-link { padding: 10px; text-align: center; background: #2c303a; border-radius: 6px; }
-    .detail-btn { padding: 11px 12px; font-size: 13px; width: 100%; }
-    #log-header { font-size: 12px; padding: 12px; }
-    #sort-bar select { width: 100%; margin-top: 6px; }
-    #sort-bar label { display: block; margin-bottom: 2px; }
-    .risk-banner { font-size: 11px; }
-    #all-listings-wrap button { font-size: 13px; padding: 12px; }
-    #all-listings > div > div:not(.detail-panel) { flex-direction: column !important; align-items: stretch !important; }
-    #all-listings img { width: 100% !important; height: 140px !important; }
-    #all-listings .detail-btn { width: 100%; margin-top: 6px; }
-  }
+/* ====== NAV ====== */
+.nav-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(10,12,18,0.95); backdrop-filter: blur(12px);
+  border-bottom: 1px solid #1e2130;
+  padding: 0 24px; display: flex; align-items: center; gap: 0; height: 54px;
+}
+.nav-logo { font-size: 17px; font-weight: 800; color: #fff; letter-spacing: -0.5px; margin-right: 28px; white-space: nowrap; }
+.nav-logo span { color: #7c6ff0; }
+.nav-version { font-size: 10px; color: #3a3f55; font-weight: 400; margin-left: 6px; }
+.nav-tabs { display: flex; gap: 2px; flex: 1; }
+.nav-tab { background: none; border: none; color: #7a7f9a; font-size: 13px; font-weight: 500; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+.nav-tab:hover { color: #e2e4f0; background: #13172a; }
+.nav-tab.active { color: #fff; background: #1e2340; }
 
-  /* ============ TINDER STILIAUS NARSYMAS - TIK MOBILE ============ */
-  #tinder-launch-btn { display: none; }
-  #tinder-view {
-    display: none;
-    position: fixed; inset: 0;
-    background: #0a0b0e;
-    z-index: 1000;
-    flex-direction: column; align-items: center;
-  }
-  #tinder-view.active { display: flex; }
-  #tinder-topbar {
-    width: 100%; max-width: 480px;
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 14px 16px 10px;
-    flex-shrink: 0;
-  }
-  #tinder-counter { font-size: 12px; color: #9a9aa5; }
-  #tinder-close {
-    background: rgba(44,48,58,0.8); color: #e8e8ea; border: none;
-    width: 36px; height: 36px; border-radius: 50%; font-size: 16px; cursor: pointer;
-  }
-  #tinder-progress-track { flex: 1; margin: 0 12px; height: 3px; background: #2c303a; border-radius: 4px; overflow: hidden; }
-  #tinder-progress-fill { height: 100%; background: linear-gradient(90deg, #6c5ce7, #a78bfa); border-radius: 4px; transition: width 0.3s; }
-  #tinder-stack {
-    position: relative; width: 100%; max-width: 480px;
-    flex: 1; padding: 0 12px 8px;
-    display: flex; align-items: stretch; justify-content: center; overflow: hidden;
-  }
-  .tinder-card {
-    position: absolute; width: calc(100% - 24px); max-width: 456px;
-    top: 0; bottom: 0;
-    background: #1a1d24;
-    border-radius: 20px; overflow: hidden;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
-    cursor: grab; user-select: none; touch-action: none;
-    display: flex; flex-direction: column;
-  }
-  .tinder-photo-wrap { position: relative; flex-shrink: 0; height: 52%; overflow: hidden; transition: height 0.3s ease; }
-  .tinder-photo-wrap.shrunk { height: 22%; }
-  .tinder-photo-wrap img { width: 100%; height: 100%; object-fit: cover; background: #2c303a; display: block; }
-  .tinder-photo-gradient {
-    position: absolute; bottom: 0; left: 0; right: 0; height: 60%;
-    background: linear-gradient(to top, rgba(10,11,14,0.95) 0%, rgba(10,11,14,0.5) 50%, transparent 100%);
-    pointer-events: none;
-  }
-  .tinder-photo-info {
-    position: absolute; bottom: 0; left: 0; right: 0; padding: 14px 16px 12px;
-    pointer-events: none;
-  }
-  .tinder-card-title { font-size: 20px; font-weight: 700; color: #fff; line-height: 1.2; }
-  .tinder-card-price {
-    display: flex; align-items: center; gap: 8px; margin-top: 3px;
-  }
-  .tinder-price-val { color: #a78bfa; font-size: 22px; font-weight: 800; }
-  .tinder-price-diff {
-    background: rgba(108,92,231,0.25); border: 1px solid rgba(108,92,231,0.5);
-    color: #a78bfa; font-size: 12px; font-weight: 700;
-    padding: 2px 8px; border-radius: 20px;
-  }
-  .tinder-card-body { padding: 12px 16px 10px; overflow-y: auto; flex: 1; min-height: 0; }
-  .tinder-card-meta { color: #9a9aa5; font-size: 13px; margin-bottom: 6px; line-height: 1.5; }
-  .tinder-card-comment { font-size: 13px; color: #d0d0d8; line-height: 1.45; margin-bottom: 8px; }
-  .tinder-card-signals { font-size: 12px; color: #7fd88f; margin-bottom: 8px; }
-  .tinder-detail-btn {
-    background: rgba(44,48,58,0.8); color: #cfcbf5; border: 1px solid #3a3f4c;
-    padding: 8px 16px; border-radius: 20px; font-size: 12px; cursor: pointer;
-    display: inline-flex; align-items: center; gap: 5px;
-  }
-  .tinder-badge {
-    position: absolute; top: 20px; font-size: 22px; font-weight: 800;
-    padding: 5px 14px; border-radius: 8px; border: 3px solid;
-    opacity: 0; pointer-events: none; z-index: 5; letter-spacing: 1px;
-  }
-  .tinder-badge.like { right: 16px; color: #7fd88f; border-color: #7fd88f; transform: rotate(-12deg); }
-  .tinder-badge.skip { left: 16px; color: #ff8080; border-color: #ff8080; transform: rotate(12deg); }
-  #tinder-actions {
-    width: 100%; max-width: 480px; padding: 12px 16px 20px;
-    display: flex; justify-content: center; gap: 24px; align-items: center; flex-shrink: 0;
-  }
-  .tinder-btn-skip {
-    width: 62px; height: 62px; border-radius: 50%; border: 2px solid #ff8080;
-    background: rgba(255,128,128,0.1); color: #ff8080;
-    font-size: 26px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s; -webkit-tap-highlight-color: transparent;
-  }
-  .tinder-btn-skip:active { background: rgba(255,128,128,0.25); transform: scale(0.92); }
-  .tinder-btn-like {
-    width: 72px; height: 72px; border-radius: 50%; border: 2px solid #7fd88f;
-    background: rgba(127,216,143,0.1); color: #7fd88f;
-    font-size: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s; -webkit-tap-highlight-color: transparent;
-  }
-  .tinder-btn-like:active { background: rgba(127,216,143,0.25); transform: scale(0.92); }
-  .tinder-btn-info {
-    width: 48px; height: 48px; border-radius: 50%; border: 2px solid #6c5ce7;
-    background: rgba(108,92,231,0.1); color: #a78bfa;
-    font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s; -webkit-tap-highlight-color: transparent;
-  }
-  .tinder-btn-info:active { background: rgba(108,92,231,0.25); transform: scale(0.92); }
-  #tinder-hint { color: #555; font-size: 11px; padding: 0 16px 6px; text-align: center; flex-shrink: 0; }
-  @media (max-width: 640px) {
-    #tinder-launch-btn { display: inline-block; }
-  }
+/* ====== LAYOUT ====== */
+.page-content { max-width: 960px; margin: 0 auto; padding: 24px 20px 80px; }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* ====== SEARCH PANEL ====== */
+.search-panel {
+  background: #10131a; border: 1px solid #1e2130; border-radius: 16px;
+  padding: 22px 22px 18px; margin-bottom: 20px;
+}
+.search-panel-title { font-size: 13px; font-weight: 600; color: #7c6ff0; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 16px; }
+.filter-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.filter-group label { display: block; font-size: 11px; color: #6a6f88; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+.filter-grid input, .filter-grid select {
+  width: 100%; padding: 9px 11px; border-radius: 8px;
+  border: 1px solid #1e2130; background: #0d1018; color: #e2e4f0;
+  font-size: 14px; transition: border-color 0.15s;
+}
+.filter-grid input:focus, .filter-grid select:focus { outline: none; border-color: #7c6ff0; }
+.filter-full { grid-column: 1/-1; }
+.portal-row { display: flex; flex-wrap: wrap; gap: 8px 20px; padding-top: 2px; }
+.portal-label { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #e2e4f0; cursor: pointer; }
+.portal-label input[type=checkbox] { width: auto; accent-color: #7c6ff0; }
+.btn-search {
+  grid-column: 1/-1; padding: 12px; background: linear-gradient(135deg, #7c6ff0, #a78bfa);
+  color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600;
+  cursor: pointer; margin-top: 6px; transition: opacity 0.15s;
+  box-shadow: 0 4px 18px rgba(124,111,240,0.35);
+}
+.btn-search:hover { opacity: 0.88; }
+.btn-search:disabled { background: #2a2d3a; color: #555; cursor: not-allowed; box-shadow: none; }
+.btn-quickcount {
+  padding: 8px 14px; background: #1a1d2a; color: #a78bfa; border: 1px solid #2c2f45;
+  border-radius: 8px; font-size: 12px; cursor: pointer;
+}
+.generation-hint { font-size: 12px; color: #a78bfa; background: #13162a; padding: 8px 10px; border-radius: 8px; display: none; }
+
+/* ====== PROGRESS / LOG ====== */
+#status { color: #7a7f9a; font-size: 14px; margin-bottom: 12px; min-height: 20px; }
+#search-progress-wrap { display: none; margin: -4px 0 12px; }
+#search-progress-track-main { height: 3px; background: #1a1d2a; border-radius: 4px; overflow: hidden; margin-bottom: 4px; }
+#search-progress-fill-main { height: 100%; background: linear-gradient(90deg, #7c6ff0, #a78bfa); border-radius: 4px; transition: width 0.5s ease; width: 0%; }
+#search-progress-label { font-size: 11px; color: #7c6ff0; font-weight: 600; }
+#log-container { margin-bottom: 14px; display: none; }
+#log-header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #10131a; border: 1px solid #1e2130; border-radius: 10px; cursor: pointer; font-size: 13px; color: #9a9db8; user-select: none; }
+#log-header:hover { background: #13172a; }
+#log-header .chevron { margin-left: auto; transition: transform 0.2s; color: #555; }
+#log-header.expanded .chevron { transform: rotate(180deg); }
+#log-box { background: #0d1018; border: 1px solid #1e2130; border-top: none; border-radius: 0 0 10px 10px; padding: 4px; max-height: 240px; overflow-y: auto; display: none; }
+.log-step { display: flex; align-items: center; gap: 10px; padding: 7px 12px; font-size: 12px; color: #9a9db8; border-bottom: 1px solid #181b28; }
+.log-step:last-child { border-bottom: none; }
+.log-step .spinner { width: 13px; height: 13px; border: 2px solid #2c2f45; border-top-color: #7c6ff0; border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+.log-step .done-check { color: #34d399; flex-shrink: 0; font-size: 11px; }
+.log-step.current { color: #e2e4f0; font-weight: 500; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ====== SORT BAR ====== */
+#sort-bar { display: none; margin-bottom: 16px; align-items: center; gap: 12px; flex-wrap: wrap; }
+#sort-bar label { font-size: 12px; color: #6a6f88; }
+#sort-select { padding: 7px 10px; border-radius: 8px; border: 1px solid #1e2130; background: #10131a; color: #e2e4f0; font-size: 13px; }
+#tinder-launch-btn { display: none; }
+
+/* ====== CARD (premium horizontal) ====== */
+.card {
+  background: #10131a; border: 1px solid #1e2130; border-radius: 14px;
+  margin-bottom: 12px; display: flex; overflow: hidden; position: relative;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.card:hover { border-color: #2c2f55; box-shadow: 0 4px 24px rgba(0,0,0,0.4); }
+
+/* Photo section */
+.card-photo-section { width: 200px; flex-shrink: 0; position: relative; background: #0d1018; }
+.card-photo-section img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.card-photo-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(10,12,18,0.7); color: #fff; border: none; width: 26px; height: 26px; border-radius: 50%; font-size: 14px; cursor: pointer; line-height: 1; padding: 0; z-index: 2; }
+.card-photo-nav.prev { left: 4px; }
+.card-photo-nav.next { right: 4px; }
+.card-photo-count { position: absolute; bottom: 4px; right: 6px; background: rgba(10,12,18,0.75); color: #c0c4e0; font-size: 10px; padding: 1px 6px; border-radius: 10px; }
+
+/* Info section */
+.card-info { flex: 1; padding: 14px 14px 12px; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.card-top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.card-rank { font-size: 11px; color: #4a4f6a; font-weight: 600; }
+.card-title { font-size: 15px; font-weight: 700; color: #fff; }
+.source-tag { font-size: 10px; padding: 1px 6px; border-radius: 4px; background: #1a1d2a; color: #6a6f88; margin-left: 5px; vertical-align: middle; }
+.fav-btn { background: rgba(10,12,18,0.6); border: none; color: #4a4f6a; font-size: 18px; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; flex-shrink: 0; transition: color 0.15s; }
+.fav-btn.active { color: #f0c674; }
+.card-price-row { display: flex; align-items: baseline; gap: 8px; }
+.card-price { font-size: 20px; font-weight: 800; color: #fff; }
+.card-discount { font-size: 13px; font-weight: 700; background: rgba(52,211,153,0.15); color: #34d399; padding: 2px 8px; border-radius: 20px; }
+.card-discount.danger { background: rgba(248,113,113,0.12); color: #f87171; }
+.pvm-note { color: #f0c674; font-size: 12px; }
+.risk-banner { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.25); color: #f87171; padding: 7px 10px; border-radius: 8px; font-size: 12px; }
+.card-meta { font-size: 12px; color: #6a6f88; line-height: 1.5; }
+.rida-note-good { color: #34d399; font-size: 12px; }
+.rida-note-bad { color: #f87171; font-size: 12px; }
+.cross-list-note { color: #6a6f88; font-size: 12px; }
+.card-comment { font-size: 13px; color: #c0c4d8; line-height: 1.45; }
+
+/* Insight badges */
+.insight-badges { display: flex; flex-wrap: wrap; gap: 5px; }
+.insight-badge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; }
+.insight-badge.good { background: rgba(52,211,153,0.12); color: #34d399; border: 1px solid rgba(52,211,153,0.2); }
+.insight-badge.ok { background: rgba(124,111,240,0.12); color: #a78bfa; border: 1px solid rgba(124,111,240,0.2); }
+.insight-badge.warn { background: rgba(251,146,60,0.12); color: #fb923c; border: 1px solid rgba(251,146,60,0.2); }
+
+/* Card actions */
+.card-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 2px; }
+.btn-link { color: #7c6ff0; font-size: 12px; text-decoration: none; padding: 5px 10px; background: rgba(124,111,240,0.1); border-radius: 7px; white-space: nowrap; }
+.btn-link:hover { background: rgba(124,111,240,0.2); }
+.btn-detail { background: #1a1d2a; color: #e2e4f0; border: 1px solid #2c2f45; padding: 5px 12px; border-radius: 7px; font-size: 12px; cursor: pointer; white-space: nowrap; }
+.btn-detail:hover { background: #23263a; }
+.btn-detail.ready { background: linear-gradient(135deg, #7c6ff0, #a78bfa); color: #fff; font-weight: 600; border-color: transparent; box-shadow: 0 0 14px rgba(124,111,240,0.4); animation: pulse-glow 2.5s ease-in-out infinite; }
+@keyframes pulse-glow { 0%,100%{ box-shadow:0 0 8px rgba(124,111,240,0.35); } 50%{ box-shadow:0 0 18px rgba(167,139,250,0.6); } }
+.btn-compare { background: #1a1d2a; color: #6a6f88; border: 1px solid #2c2f45; padding: 5px 10px; border-radius: 7px; font-size: 11px; cursor: pointer; white-space: nowrap; }
+.btn-compare.active { background: rgba(74,144,217,0.15); color: #74c0fc; border-color: #4a90d9; }
+
+/* Score section (right column) */
+.card-score-divider { width: 1px; background: #1e2130; flex-shrink: 0; margin: 14px 0; }
+.card-score-section { width: 120px; flex-shrink: 0; padding: 14px 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.score-ring-wrap { position: relative; display: flex; align-items: center; justify-content: center; }
+.score-center { position: absolute; text-align: center; line-height: 1; }
+.score-value { font-size: 17px; font-weight: 800; color: #fff; display: block; }
+.score-label { font-size: 9px; color: #6a6f88; display: block; }
+.sub-scores { width: 100%; display: flex; flex-direction: column; gap: 4px; }
+.sub-score-row { display: flex; align-items: center; gap: 5px; }
+.sub-score-name { font-size: 9px; color: #6a6f88; width: 38px; flex-shrink: 0; }
+.sub-score-bar { flex: 1; height: 4px; background: #1a1d2a; border-radius: 4px; overflow: hidden; }
+.sub-score-fill { height: 100%; border-radius: 4px; }
+.score-fill-good { background: #34d399; }
+.score-fill-ok { background: #fb923c; }
+.score-fill-bad { background: #f87171; }
+
+/* ====== DETAIL PANEL (tabbed) ====== */
+.detail-panel { display: none; background: #0d1018; border-top: 1px solid #1e2130; padding: 0; }
+.detail-tabs { display: flex; gap: 0; border-bottom: 1px solid #1e2130; padding: 0 16px; overflow-x: auto; }
+.detail-tab { background: none; border: none; border-bottom: 2px solid transparent; color: #6a6f88; font-size: 12px; font-weight: 500; padding: 10px 14px; cursor: pointer; white-space: nowrap; margin-bottom: -1px; transition: color 0.15s; }
+.detail-tab:hover { color: #e2e4f0; }
+.detail-tab.active { color: #7c6ff0; border-bottom-color: #7c6ff0; }
+.detail-tab-content { padding: 16px; }
+.detail-tab-pane { display: none; }
+.detail-tab-pane.active { display: block; }
+.detail-section-label { font-size: 11px; color: #6a6f88; text-transform: uppercase; letter-spacing: 0.6px; margin: 12px 0 6px; font-weight: 600; }
+.detail-section-label:first-child { margin-top: 0; }
+.detail-verdict { font-size: 14px; font-weight: 600; color: #34d399; margin-bottom: 10px; }
+.detail-list { margin: 0; padding-left: 18px; color: #c0c4d8; font-size: 13px; line-height: 1.6; }
+.detail-text { font-size: 13px; color: #c0c4d8; line-height: 1.55; }
+.detail-tip { background: rgba(124,111,240,0.08); border: 1px solid rgba(124,111,240,0.15); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: #c0c4d8; line-height: 1.5; }
+.equipment-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.equipment-chip { font-size: 12px; background: #1a1d2a; border: 1px solid #2c2f45; border-radius: 20px; padding: 4px 10px; color: #c0c4d8; }
+.detail-spec-box { background: #10131a; border-radius: 8px; padding: 10px 12px; font-size: 13px; color: #c0c4d8; line-height: 1.6; }
+.detail-stat-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #1a1d2a; font-size: 12px; }
+.detail-stat-row:last-child { border-bottom: none; }
+.detail-stat-label { color: #6a6f88; }
+.detail-stat-val { color: #e2e4f0; font-weight: 500; }
+.perikupas-box { background: #13172a; border: 1px solid #2c2f45; border-radius: 10px; padding: 12px; }
+.perikupas-title { font-weight: 700; margin-bottom: 6px; font-size: 14px; }
+.photo-gallery { display: flex; flex-wrap: wrap; gap: 6px; }
+.photo-gallery img { width: 80px; height: 60px; object-fit: cover; border-radius: 6px; cursor: pointer; background: #1a1d2a; }
+.cache-note { color: #555; font-size: 11px; margin-bottom: 8px; }
+.photo-damage-box { background: rgba(248,113,113,0.06); border: 1px solid rgba(248,113,113,0.2); border-radius: 8px; padding: 10px 12px; margin: 8px 0; }
+.photo-damage-title { color: #f87171; font-weight: 600; margin-bottom: 6px; font-size: 13px; }
+.vin-box, .seller-box { background: #10131a; border-radius: 8px; padding: 10px 12px; font-size: 13px; margin-bottom: 8px; }
+.vin-code { font-family: monospace; color: #e2e4f0; font-size: 14px; }
+.btn-lookup { font-size: 11px; padding: 4px 10px; background: #1a1d2a; color: #e2e4f0; border: 1px solid #2c2f45; border-radius: 6px; cursor: pointer; margin-left: 8px; }
+.lookup-result { margin-top: 8px; }
+.vin-found { background: #1a1215; border: 1px solid rgba(248,113,113,0.3); border-radius: 6px; padding: 8px 10px; font-size: 12px; }
+.seller-found { background: #0f1a15; border: 1px solid rgba(52,211,153,0.2); border-radius: 6px; padding: 8px 10px; font-size: 12px; }
+.cross-list-box { font-size: 13px; color: #c0c4d8; }
+
+/* ====== ALL LISTINGS (bottom section) ====== */
+#all-listings-wrap { margin-top: 24px; }
+.all-listings-toggle { background: #10131a; color: #6a6f88; border: 1px solid #1e2130; padding: 10px 16px; border-radius: 10px; cursor: pointer; width: 100%; text-align: left; font-size: 13px; }
+#all-listings { margin-top: 8px; }
+#all-listings > div { padding: 8px; border-bottom: 1px solid #1a1d2a; }
+
+/* ====== LIGHTBOX ====== */
+#lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.93); z-index: 2000; align-items: center; justify-content: center; flex-direction: column; }
+#lightbox.active { display: flex; }
+#lightbox img { max-width: 92vw; max-height: 76vh; object-fit: contain; border-radius: 6px; }
+#lightbox-counter { color: #6a6f88; font-size: 13px; margin-top: 10px; }
+#lightbox-close { position: absolute; top: 16px; right: 20px; background: rgba(255,255,255,0.1); color: #fff; border: none; width: 38px; height: 38px; border-radius: 50%; font-size: 18px; cursor: pointer; }
+.lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.1); color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 20px; cursor: pointer; }
+#lightbox-prev { left: 12px; }
+#lightbox-next { right: 12px; }
+
+/* ====== COMPARE BAR / MODAL ====== */
+#compare-bar { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: linear-gradient(135deg, #10131a, #14172a); border-top: 1px solid #1e2130; padding: 12px 20px; z-index: 900; align-items: center; justify-content: space-between; gap: 12px; box-shadow: 0 -4px 20px rgba(0,0,0,0.5); }
+#compare-bar.visible { display: flex; }
+#compare-bar-items { display: flex; gap: 8px; flex: 1; overflow: hidden; }
+.compare-bar-chip { background: #1a1d2a; border-radius: 8px; padding: 6px 10px; font-size: 12px; color: #e2e4f0; display: flex; align-items: center; gap: 6px; max-width: 160px; overflow: hidden; }
+.compare-bar-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.compare-bar-chip button { background: none; border: none; color: #6a6f88; cursor: pointer; font-size: 14px; padding: 0; flex-shrink: 0; }
+#compare-btn { background: linear-gradient(135deg, #7c6ff0, #a78bfa); color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+#compare-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 1500; overflow-y: auto; padding: 20px; }
+#compare-modal.active { display: block; }
+#compare-modal-inner { max-width: 960px; margin: 0 auto; background: #10131a; border-radius: 16px; padding: 20px; position: relative; }
+.compare-grid { display: grid; gap: 14px; }
+.compare-col { background: #14172a; border-radius: 12px; padding: 14px; overflow: hidden; }
+.compare-col img { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; background: #1a1d2a; }
+.compare-col-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.compare-col-price { color: #a78bfa; font-size: 18px; font-weight: 800; margin-bottom: 10px; }
+.compare-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #1e2130; font-size: 12px; }
+.compare-row:last-child { border-bottom: none; }
+.compare-row-label { color: #6a6f88; }
+.compare-row-val { color: #e2e4f0; font-weight: 500; text-align: right; max-width: 60%; }
+.compare-row-val.better { color: #34d399; }
+.compare-row-val.worse { color: #f87171; }
+#compare-close { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.08); color: #fff; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 16px; cursor: pointer; }
+
+/* ====== FAVORITES ====== */
+.favs-panel { background: #10131a; border: 1px solid #1e2130; border-radius: 12px; padding: 14px; }
+.fav-row { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid #1a1d2a; align-items: center; }
+.fav-row:last-child { border-bottom: none; }
+.fav-row img { width: 60px; height: 44px; object-fit: cover; border-radius: 6px; background: #1a1d2a; flex-shrink: 0; }
+
+/* ====== HISTORY CHIPS ====== */
+.history-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.history-chip { background: #10131a; color: #a78bfa; border: 1px solid #2c2f45; padding: 6px 12px; border-radius: 16px; font-size: 12px; cursor: pointer; }
+.history-chip:hover { background: #14172a; }
+
+/* ====== TINDER ====== */
+#tinder-view { display: none; position: fixed; inset: 0; background: #0a0b0e; z-index: 1000; flex-direction: column; align-items: center; }
+#tinder-view.active { display: flex; }
+#tinder-topbar { width: 100%; max-width: 480px; display: flex; justify-content: space-between; align-items: center; padding: 14px 16px 10px; flex-shrink: 0; }
+#tinder-counter { font-size: 12px; color: #6a6f88; }
+#tinder-close { background: rgba(44,47,69,0.8); color: #e2e4f0; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 16px; cursor: pointer; }
+#tinder-progress-track { flex: 1; margin: 0 12px; height: 3px; background: #1a1d2a; border-radius: 4px; overflow: hidden; }
+#tinder-progress-fill { height: 100%; background: linear-gradient(90deg, #7c6ff0, #a78bfa); border-radius: 4px; transition: width 0.3s; }
+#tinder-stack { position: relative; width: 100%; max-width: 480px; flex: 1; padding: 0 12px 8px; display: flex; align-items: stretch; justify-content: center; overflow: hidden; }
+.tinder-card { position: absolute; width: calc(100% - 24px); max-width: 456px; top: 0; bottom: 0; background: #10131a; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.6); cursor: grab; user-select: none; touch-action: none; display: flex; flex-direction: column; }
+.tinder-photo-wrap { position: relative; flex-shrink: 0; height: 52%; overflow: hidden; transition: height 0.3s ease; }
+.tinder-photo-wrap.shrunk { height: 22%; }
+.tinder-photo-wrap img { width: 100%; height: 100%; object-fit: cover; background: #1a1d2a; display: block; }
+.tinder-photo-gradient { position: absolute; bottom: 0; left: 0; right: 0; height: 60%; background: linear-gradient(to top, rgba(10,11,14,0.95) 0%, rgba(10,11,14,0.5) 50%, transparent 100%); pointer-events: none; }
+.tinder-photo-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 14px 16px 12px; pointer-events: none; }
+.tinder-card-title { font-size: 20px; font-weight: 700; color: #fff; line-height: 1.2; }
+.tinder-card-price { display: flex; align-items: center; gap: 8px; margin-top: 3px; }
+.tinder-price-val { color: #a78bfa; font-size: 22px; font-weight: 800; }
+.tinder-price-diff { background: rgba(124,111,240,0.25); border: 1px solid rgba(124,111,240,0.5); color: #a78bfa; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+.tinder-card-body { padding: 12px 16px 10px; overflow-y: auto; flex: 1; min-height: 0; }
+.tinder-card-meta { color: #6a6f88; font-size: 13px; margin-bottom: 6px; line-height: 1.5; }
+.tinder-card-comment { font-size: 13px; color: #c0c4d8; line-height: 1.45; margin-bottom: 8px; }
+.tinder-card-signals { font-size: 12px; color: #34d399; margin-bottom: 8px; }
+.tinder-badge { position: absolute; top: 20px; font-size: 22px; font-weight: 800; padding: 5px 14px; border-radius: 8px; border: 3px solid; opacity: 0; pointer-events: none; z-index: 5; letter-spacing: 1px; }
+.tinder-badge.like { right: 16px; color: #34d399; border-color: #34d399; transform: rotate(-12deg); }
+.tinder-badge.skip { left: 16px; color: #f87171; border-color: #f87171; transform: rotate(12deg); }
+#tinder-actions { width: 100%; max-width: 480px; padding: 12px 16px 20px; display: flex; justify-content: center; gap: 24px; align-items: center; flex-shrink: 0; }
+.tinder-btn-skip { width: 62px; height: 62px; border-radius: 50%; border: 2px solid #f87171; background: rgba(248,113,113,0.1); color: #f87171; font-size: 26px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; -webkit-tap-highlight-color: transparent; }
+.tinder-btn-skip:active { background: rgba(248,113,113,0.25); transform: scale(0.92); }
+.tinder-btn-like { width: 72px; height: 72px; border-radius: 50%; border: 2px solid #34d399; background: rgba(52,211,153,0.1); color: #34d399; font-size: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; -webkit-tap-highlight-color: transparent; }
+.tinder-btn-like:active { background: rgba(52,211,153,0.25); transform: scale(0.92); }
+.tinder-btn-info { width: 48px; height: 48px; border-radius: 50%; border: 2px solid #7c6ff0; background: rgba(124,111,240,0.1); color: #a78bfa; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; -webkit-tap-highlight-color: transparent; }
+.tinder-btn-info:active { background: rgba(124,111,240,0.25); transform: scale(0.92); }
+#tinder-hint { color: #444; font-size: 11px; padding: 0 16px 6px; text-align: center; flex-shrink: 0; }
+
+/* ====== MOBILE ====== */
+@media (max-width: 640px) {
+  .nav-header { padding: 0 14px; }
+  .nav-tab { padding: 6px 10px; font-size: 12px; }
+  .page-content { padding: 14px 12px 80px; }
+  .filter-grid { grid-template-columns: 1fr; }
+  .filter-grid input, .filter-grid select { font-size: 16px; padding: 11px; }
+  .card { flex-direction: column; }
+  .card-photo-section { width: 100%; height: 180px; }
+  .card-score-divider { width: auto; height: 1px; margin: 0 14px; }
+  .card-score-section { width: auto; flex-direction: row; padding: 10px 14px; justify-content: flex-start; gap: 14px; }
+  .sub-scores { flex: 1; }
+  #tinder-launch-btn { display: inline-block !important; }
+  #compare-bar { padding: 10px 12px; }
+  .compare-bar-chip { max-width: 100px; font-size: 11px; }
+  #compare-modal { padding: 10px; }
+  #compare-modal-inner { padding: 14px; }
+}
 </style>
 </head>
 <body>
-<div class="container">
-  <h1>🚗 Car Triage <span id="app-version" style="font-size:11px; color:#3a3f4c; font-weight:400; margin-left:6px; letter-spacing:0.5px;"></span></h1>
-  <div class="subtitle">Suveskite filtrus – sistema nuskaitys automobilių portalus, palygins kainas ir įvertins riziką.</div>
 
-  <div id="favorites-wrap" style="display:none; margin-bottom:18px;">
-    <button onclick="toggleFavoritesPanel()" id="favorites-toggle-btn" style="background:#1a1d24; color:#f0c674; border:1px solid #2c303a; padding:10px 16px; border-radius:8px; cursor:pointer; width:100%; text-align:left; font-size:13px;">
-      ⭐ Favoritai (<span id="favorites-count">0</span>) ▾
-    </button>
-    <div id="favorites-panel" style="display:none; margin-top:10px; background:#1a1d24; border-radius:8px; padding:10px;">
-      <button onclick="checkAllFavorites()" style="margin-bottom:8px; padding:8px 12px; background:#2c303a; color:#e8e8ea; border:none; border-radius:6px; font-size:12px; cursor:pointer;">🔄 Patikrinti visus pakeitimus</button>
-      <div id="favorites-list"></div>
-    </div>
-  </div>
+<!-- NAV -->
+<header class="nav-header">
+  <div class="nav-logo">Car<span>Triige</span><span class="nav-version" id="app-version"></span></div>
+  <nav class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('search')">🔍 Paieška</button>
+    <button class="nav-tab" onclick="switchTab('favorites')">⭐ Favoritai</button>
+    <button class="nav-tab" onclick="switchTab('history')">🕘 Istorija</button>
+  </nav>
+</header>
 
-  <div id="search-history-wrap" style="display:none; margin-bottom:16px;">
-    <div style="font-size:12px; color:#9a9aa5; margin-bottom:6px;">🕘 Ankstesnės paieškos (paspauskite, kad užpildytumėte filtrus):</div>
-    <div id="search-history-chips" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
-  </div>
+<div class="page-content">
 
-  <div class="filters">
-    <div><label>Markė</label>
-      <select id="marke" onchange="updateModels(); updateGenerationHint();">
-        <option value="BMW">BMW</option>
-        <option value="Audi">Audi</option>
-        <option value="Volkswagen">Volkswagen</option>
-        <option value="Mercedes-Benz">Mercedes-Benz</option>
-        <option value="Opel">Opel</option>
-        <option value="Ford">Ford</option>
-        <option value="Volvo">Volvo</option>
-        <option value="Toyota">Toyota</option>
-        <option value="Skoda">Skoda</option>
-        <option value="Peugeot">Peugeot</option>
-        <option value="Nissan">Nissan</option>
-        <option value="Hyundai">Hyundai</option>
-        <option value="Kia">Kia</option>
-        <option value="Renault">Renault</option>
-        <option value="Mazda">Mazda</option>
-        <option value="Honda">Honda</option>
-        <option value="Porsche">Porsche</option>
-        <option value="Land Rover">Land Rover</option>
-        <option value="Lexus">Lexus</option>
-      </select>
+  <!-- SEARCH TAB -->
+  <div class="tab-pane active" id="tab-search">
+
+    <div id="history-chips-wrap" style="display:none;">
+      <div class="history-chips" id="search-history-chips"></div>
     </div>
-    <div><label>Modelis</label>
-      <select id="modelis" onchange="updateGenerationHint()">
-        <option value="">Visi modeliai</option>
-      </select>
-    </div>
-    <div><label>Pavarų dėžė</label>
-      <select id="pavaru_deze">
-        <option value="">Bet kokia</option>
-        <option value="Automatinė">Automatinė</option>
-        <option value="Mechaninė">Mechaninė</option>
-      </select>
-    </div>
-    <div><label>Metai nuo</label><input id="metaiNuo" type="number" placeholder="Nenurodyta" oninput="updateGenerationHint()"></div>
-    <div><label>Metai iki</label><input id="metaiIki" type="number" placeholder="Nenurodyta"></div>
-    <div class="full-row" id="generation-hint" style="display:none; font-size:12px; color:#a78bfa; background:#1a1d24; padding:8px 10px; border-radius:6px;"></div>
-    <div><label>Rida iki</label>
-      <select id="ridaIki">
-        <option value="">Bet kokia</option>
-        <option value="30000">iki 30 000 km</option>
-        <option value="50000">iki 50 000 km</option>
-        <option value="100000">iki 100 000 km</option>
-        <option value="150000">iki 150 000 km</option>
-        <option value="200000">iki 200 000 km</option>
-        <option value="300000">iki 300 000 km</option>
-      </select>
-    </div>
-    <div><label>Kaina nuo (€)</label><input id="kainaNuo" type="number" placeholder="Nenurodyta"></div>
-    <div><label>Kaina iki (€)</label><input id="kainaIki" type="number" placeholder="Nenurodyta"></div>
-    <div><label>Puslapių skenuoti (per portalą)</label>
-      <select id="maxPages">
-        <option value="3" selected>3 (numatyta, greičiau)</option>
-        <option value="5">5</option>
-        <option value="8">8 (daugiau duomenų, ilgiau truks)</option>
-        <option value="10">10 (maksimaliai)</option>
-      </select>
-    </div>
-    <div class="full-row"><label>Portalai</label>
-      <div style="display:flex; flex-wrap:wrap; gap:10px 20px; padding-top:4px;">
-        <label style="display:flex; align-items:center; gap:6px; font-size:13px; color:#e8e8ea; font-weight:normal;">
-          <input type="checkbox" id="portal-autoplius" checked style="width:auto;"> autoplius.lt
-        </label>
-        <label style="display:flex; align-items:center; gap:6px; font-size:13px; color:#e8e8ea; font-weight:normal;">
-          <input type="checkbox" id="portal-autogidas" checked style="width:auto;"> autogidas.lt
-        </label>
-        <label style="display:flex; align-items:center; gap:6px; font-size:13px; color:#e8e8ea; font-weight:normal;">
-          <input type="checkbox" id="portal-autoscout24" style="width:auto;"> autoscout24.com (užsienio rinka)
-        </label>
-        <label style="display:flex; align-items:center; gap:6px; font-size:13px; color:#e8e8ea; font-weight:normal;">
-          <input type="checkbox" id="portal-otomoto" style="width:auto;"> otomoto.pl <span style="font-size:11px; color:#a0a0b0;">(Lenkija, PLN→EUR)</span>
-        </label>
+
+    <div class="search-panel">
+      <div class="search-panel-title">Paieškos filtrai</div>
+      <div class="filter-grid">
+        <div class="filter-group">
+          <label>Markė</label>
+          <select id="marke" onchange="updateModels(); updateGenerationHint();">
+            <option value="BMW">BMW</option>
+            <option value="Audi">Audi</option>
+            <option value="Volkswagen">Volkswagen</option>
+            <option value="Mercedes-Benz">Mercedes-Benz</option>
+            <option value="Opel">Opel</option>
+            <option value="Ford">Ford</option>
+            <option value="Volvo">Volvo</option>
+            <option value="Toyota">Toyota</option>
+            <option value="Skoda">Skoda</option>
+            <option value="Peugeot">Peugeot</option>
+            <option value="Nissan">Nissan</option>
+            <option value="Hyundai">Hyundai</option>
+            <option value="Kia">Kia</option>
+            <option value="Renault">Renault</option>
+            <option value="Mazda">Mazda</option>
+            <option value="Honda">Honda</option>
+            <option value="Porsche">Porsche</option>
+            <option value="Land Rover">Land Rover</option>
+            <option value="Lexus">Lexus</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Modelis</label>
+          <select id="modelis" onchange="updateGenerationHint()">
+            <option value="">Visi modeliai</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Pavarų dėžė</label>
+          <select id="pavaru_deze">
+            <option value="">Bet kokia</option>
+            <option value="Automatinė">Automatinė</option>
+            <option value="Mechaninė">Mechaninė</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Metai nuo</label>
+          <input id="metaiNuo" type="number" placeholder="Nenurodyta" oninput="updateGenerationHint()">
+        </div>
+        <div class="filter-group">
+          <label>Metai iki</label>
+          <input id="metaiIki" type="number" placeholder="Nenurodyta">
+        </div>
+        <div class="filter-group">
+          <div id="generation-hint" class="generation-hint"></div>
+        </div>
+        <div class="filter-group">
+          <label>Rida iki</label>
+          <select id="ridaIki">
+            <option value="">Bet kokia</option>
+            <option value="30000">iki 30 000 km</option>
+            <option value="50000">iki 50 000 km</option>
+            <option value="100000">iki 100 000 km</option>
+            <option value="150000">iki 150 000 km</option>
+            <option value="200000">iki 200 000 km</option>
+            <option value="300000">iki 300 000 km</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Kaina nuo (€)</label>
+          <input id="kainaNuo" type="number" placeholder="Nenurodyta">
+        </div>
+        <div class="filter-group">
+          <label>Kaina iki (€)</label>
+          <input id="kainaIki" type="number" placeholder="Nenurodyta">
+        </div>
+        <div class="filter-group">
+          <label>Puslapių (per portalą)</label>
+          <select id="maxPages">
+            <option value="3" selected>3 (numatyta)</option>
+            <option value="5">5</option>
+            <option value="8">8 (daugiau duomenų)</option>
+            <option value="10">10 (maksimaliai)</option>
+          </select>
+        </div>
+        <div class="filter-group filter-full">
+          <label>Portalai</label>
+          <div class="portal-row">
+            <label class="portal-label"><input type="checkbox" id="portal-autoplius" checked> autoplius.lt</label>
+            <label class="portal-label"><input type="checkbox" id="portal-autogidas" checked> autogidas.lt</label>
+            <label class="portal-label"><input type="checkbox" id="portal-autoscout24"> autoscout24.com <span style="font-size:11px;color:#4a4f6a;">(užsienio)</span></label>
+            <label class="portal-label"><input type="checkbox" id="portal-otomoto"> otomoto.pl <span style="font-size:11px;color:#4a4f6a;">(Lenkija)</span></label>
+          </div>
+        </div>
+        <button class="btn-search" id="search-btn" onclick="runSearch()">🔍 Ieškoti ir analizuoti</button>
+        <div class="filter-full" style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+          <button class="btn-quickcount" id="quick-count-btn" onclick="runQuickCount()">🔢 Patikrinti kiekį</button>
+          <span id="quick-count-result" style="font-size:12px;color:#6a6f88;"></span>
+        </div>
       </div>
     </div>
-    <div></div>
-    <button id="search-btn" onclick="runSearch()">🔍 Ieškoti ir analizuoti</button>
-    <div class="full-row" style="display:flex; align-items:center; gap:10px;">
-      <button id="quick-count-btn" onclick="runQuickCount()" style="padding:8px 14px; background:#2c303a; color:#cfcbf5; border:none; border-radius:6px; font-size:12px; cursor:pointer;">🔢 Patikrinti kiekį (be analizės)</button>
-      <span id="quick-count-result" style="font-size:12px; color:#9a9aa5;"></span>
-    </div>
-  </div>
 
-  <div id="status"></div>
-  <div id="search-progress-wrap">
-    <div id="search-progress-track-main"><div id="search-progress-fill-main"></div></div>
-    <span id="search-progress-label">0%</span>
-  </div>
-  <div id="log-container">
-    <div id="log-header" onclick="toggleLog()">
-      <span class="spinner" id="log-header-icon"></span>
-      <span id="log-header-text">Paleidžiama...</span>
-      <span class="chevron">▾</span>
+    <!-- STATUS + LOG -->
+    <div id="status"></div>
+    <div id="search-progress-wrap">
+      <div id="search-progress-track-main"><div id="search-progress-fill-main"></div></div>
+      <span id="search-progress-label">0%</span>
     </div>
-    <div id="log-box"></div>
-  </div>
-  <div id="sort-bar" style="display:none; margin-bottom:14px; flex-wrap:wrap; gap:10px; align-items:center;">
-    <div>
-      <label style="font-size:12px; color:#9a9aa5; margin-right:8px;">Rūšiuoti:</label>
-      <select id="sort-select" onchange="applySorting()" style="padding:6px; border-radius:6px; border:1px solid #2c303a; background:#1a1d24; color:#e8e8ea;">
-        <option value="quality">Kaina/kokybės santykis (numatyta)</option>
+    <div id="log-container">
+      <div id="log-header" onclick="toggleLog()">
+        <span class="spinner" id="log-header-icon"></span>
+        <span id="log-header-text">Paleidžiama...</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div id="log-box"></div>
+    </div>
+
+    <!-- SORT BAR -->
+    <div id="sort-bar" style="display:none;">
+      <label>Rūšiuoti:</label>
+      <select id="sort-select" onchange="applySorting()">
+        <option value="quality">Kaina/kokybės santykis</option>
         <option value="cheapest">Pigiausi pirmiausia</option>
         <option value="priciest">Brangiausi pirmiausia</option>
         <option value="biggest-discount">Didžiausia nuolaida %</option>
       </select>
+      <button id="tinder-launch-btn" onclick="startTinder()" style="padding:9px 18px;background:linear-gradient(135deg,#7c6ff0,#a78bfa);color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;">🔥 Tinder naršymas</button>
     </div>
-    <button id="tinder-launch-btn" onclick="startTinder()" style="padding:10px 18px; background:linear-gradient(135deg,#6c5ce7,#a78bfa); color:#fff; border:none; border-radius:20px; font-size:13px; font-weight:600; cursor:pointer; box-shadow:0 4px 14px rgba(108,92,231,0.4);">🔥 Tinder naršymas</button>
-  </div>
-  <div id="results"></div>
 
-  <div id="all-listings-wrap" style="display:none; margin-top:30px;">
-    <button onclick="toggleAllListings()" id="toggle-all-btn" style="background:#1a1d24; color:#9a9aa5; border:1px solid #2c303a; padding:10px 16px; border-radius:8px; cursor:pointer; width:100%; text-align:left;">
-      📋 Rodyti visus nuskaitytus skelbimus (naršykite patys) ▾
-    </button>
-    <div id="all-listings" style="display:none; margin-top:10px;"></div>
-  </div>
+    <!-- RESULTS -->
+    <div id="results"></div>
 
-  <div id="tinder-view">
-    <div id="tinder-topbar">
-      <button id="tinder-close" onclick="exitTinder()">✕</button>
-      <div id="tinder-progress-track"><div id="tinder-progress-fill" style="width:0%"></div></div>
-      <div id="tinder-counter" style="min-width:36px; text-align:right;"></div>
-    </div>
-    <div id="tinder-stack"></div>
-    <div id="tinder-hint">braukite kairėn / dešinėn arba naudokite mygtukus</div>
-    <div id="tinder-actions" style="display:none;">
-      <button class="tinder-btn-skip" onclick="tinderSwipe('left')" title="Praleisti">✕</button>
-      <button class="tinder-btn-info" onclick="toggleTinderDetail()" title="Detali apžvalga">🔍</button>
-      <button class="tinder-btn-like" onclick="tinderSwipe('right')" title="Patinka">♥</button>
+    <!-- ALL LISTINGS -->
+    <div id="all-listings-wrap" style="display:none;margin-top:24px;">
+      <button class="all-listings-toggle" onclick="toggleAllListings()" id="toggle-all-btn">
+        📋 Rodyti visus nuskaitytus skelbimus ▾
+      </button>
+      <div id="all-listings" style="display:none;margin-top:8px;background:#10131a;border:1px solid #1e2130;border-radius:12px;overflow:hidden;"></div>
     </div>
   </div>
 
-  <div id="lightbox" onclick="if(event.target.id==='lightbox') closeLightbox();">
-    <button id="lightbox-close" onclick="closeLightbox()">✕</button>
-    <button class="lightbox-nav" id="lightbox-prev" onclick="lightboxNav(-1)">‹</button>
-    <img id="lightbox-img" src="">
-    <button class="lightbox-nav" id="lightbox-next" onclick="lightboxNav(1)">›</button>
-    <div id="lightbox-counter"></div>
+  <!-- FAVORITES TAB -->
+  <div class="tab-pane" id="tab-favorites">
+    <div id="favorites-main-content">
+      <div style="color:#6a6f88;font-size:14px;padding:24px 0;">Dar nėra išsaugotų favoritų.</div>
+    </div>
+  </div>
+
+  <!-- HISTORY TAB -->
+  <div class="tab-pane" id="tab-history">
+    <div id="history-main-content">
+      <div style="color:#6a6f88;font-size:14px;padding:24px 0;">Paieškos istorija tuščia.</div>
+    </div>
+  </div>
+
+</div><!-- /page-content -->
+
+<!-- TINDER VIEW -->
+<div id="tinder-view">
+  <div id="tinder-topbar">
+    <button id="tinder-close" onclick="exitTinder()">✕</button>
+    <div id="tinder-progress-track"><div id="tinder-progress-fill" style="width:0%"></div></div>
+    <div id="tinder-counter" style="min-width:36px;text-align:right;"></div>
+  </div>
+  <div id="tinder-stack"></div>
+  <div id="tinder-hint">braukite kairėn / dešinėn arba naudokite mygtukus</div>
+  <div id="tinder-actions" style="display:none;">
+    <button class="tinder-btn-skip" onclick="tinderSwipe('left')" title="Praleisti">✕</button>
+    <button class="tinder-btn-info" onclick="toggleTinderDetail()" title="Detali apžvalga">🔍</button>
+    <button class="tinder-btn-like" onclick="tinderSwipe('right')" title="Patinka">♥</button>
   </div>
 </div>
 
-<!-- Palyginimo juosta apačioje -->
+<!-- LIGHTBOX -->
+<div id="lightbox" onclick="if(event.target.id==='lightbox') closeLightbox();">
+  <button id="lightbox-close" onclick="closeLightbox()">✕</button>
+  <button class="lightbox-nav" id="lightbox-prev" onclick="lightboxNav(-1)">‹</button>
+  <img id="lightbox-img" src="">
+  <button class="lightbox-nav" id="lightbox-next" onclick="lightboxNav(1)">›</button>
+  <div id="lightbox-counter"></div>
+</div>
+
+<!-- COMPARE BAR -->
 <div id="compare-bar">
   <div id="compare-bar-items"></div>
   <button id="compare-btn" onclick="openCompareModal()">⚖️ Palyginti</button>
 </div>
 
-<!-- Palyginimo modalas -->
+<!-- COMPARE MODAL -->
 <div id="compare-modal" onclick="if(event.target.id==='compare-modal') closeCompareModal()">
   <div id="compare-modal-inner">
     <button id="compare-close" onclick="closeCompareModal()">✕</button>
-    <h2 style="margin:0 0 16px; font-size:18px;">⚖️ Automobilių palyginimas</h2>
+    <h2 style="margin:0 0 16px;font-size:18px;">⚖️ Automobilių palyginimas</h2>
     <div id="compare-grid-wrap"></div>
   </div>
 </div>
@@ -473,11 +536,13 @@ const BRAND_MODELS = {
   'Lexus': ['IS', 'ES', 'RX', 'NX', 'CT'],
 };
 
-// ============ PAIESKOS ISTORIJA (localStorage, tik siame narsyklyje) ============
 const SEARCH_HISTORY_KEY = 'carTriageSearchHistory';
 const ANALYSIS_CACHE_KEY = 'carTriageAnalysisCache';
-const ANALYSIS_CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 dienų
+const ANALYSIS_CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
+const FAVORITES_KEY = 'carTriageFavorites';
+const MAX_HISTORY = 8;
 
+// ===== CACHE =====
 function getAnalysisCache(url) {
   try {
     const store = JSON.parse(localStorage.getItem(ANALYSIS_CACHE_KEY) || '{}');
@@ -491,52 +556,52 @@ function setAnalysisCache(url, data) {
   try {
     const store = JSON.parse(localStorage.getItem(ANALYSIS_CACHE_KEY) || '{}');
     store[url] = { data, savedAt: Date.now() };
-    // Laikome tik 100 naujausių
     const keys = Object.keys(store);
-    if (keys.length > 100) {
-      keys.sort((a, b) => store[a].savedAt - store[b].savedAt).slice(0, keys.length - 100).forEach(k => delete store[k]);
-    }
+    if (keys.length > 100) keys.sort((a,b) => store[a].savedAt - store[b].savedAt).slice(0, keys.length-100).forEach(k => delete store[k]);
     localStorage.setItem(ANALYSIS_CACHE_KEY, JSON.stringify(store));
   } catch {}
 }
-const MAX_HISTORY = 8;
 
+// ===== HISTORY =====
 function loadSearchHistory() {
-  try {
-    return JSON.parse(localStorage.getItem(SEARCH_HISTORY_KEY)) || [];
-  } catch {
-    return [];
-  }
+  try { return JSON.parse(localStorage.getItem(SEARCH_HISTORY_KEY)) || []; } catch { return []; }
 }
-
 function saveSearchToHistory(filters) {
   let history = loadSearchHistory();
   const key = JSON.stringify(filters);
-  history = history.filter((h) => JSON.stringify(h.filters) !== key);
+  history = history.filter(h => JSON.stringify(h.filters) !== key);
   history.unshift({ filters, savedAt: Date.now() });
   history = history.slice(0, MAX_HISTORY);
   localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history));
-  renderSearchHistory();
+  renderSearchHistoryChips();
 }
-
 function historyLabel(f) {
   const parts = [f.marke, f.modelis].filter(Boolean).join(' ');
   const years = [f.metaiNuo, f.metaiIki].filter(Boolean).join('–');
   const price = f.kainaIki ? `≤${Number(f.kainaIki).toLocaleString('lt-LT')}€` : '';
   return [parts, years, price].filter(Boolean).join(' · ') || 'Paieška';
 }
-
-function renderSearchHistory() {
+function renderSearchHistoryChips() {
   const history = loadSearchHistory();
-  const wrap = document.getElementById('search-history-wrap');
+  const wrap = document.getElementById('history-chips-wrap');
   const chips = document.getElementById('search-history-chips');
   if (history.length === 0) { wrap.style.display = 'none'; return; }
   wrap.style.display = 'block';
-  chips.innerHTML = history.map((h, i) => `
-    <button onclick="applyHistoryFilters(${i})" style="background:#1a1d24; color:#cfcbf5; border:1px solid #2c303a; padding:6px 10px; border-radius:16px; font-size:12px; cursor:pointer;">${historyLabel(h.filters)}</button>
-  `).join('');
+  chips.innerHTML = history.map((h,i) =>
+    `<button class="history-chip" onclick="applyHistoryFilters(${i})">${historyLabel(h.filters)}</button>`
+  ).join('');
 }
-
+function renderSearchHistoryPanel() {
+  const history = loadSearchHistory();
+  const el = document.getElementById('history-main-content');
+  if (history.length === 0) { el.innerHTML = '<div style="color:#6a6f88;font-size:14px;padding:24px 0;">Paieškos istorija tuščia.</div>'; return; }
+  el.innerHTML = `<div style="margin-bottom:12px;font-size:13px;color:#6a6f88;">Spustelėkite, kad užpildytumėte filtrus:</div>` +
+    history.map((h,i) => `
+      <div style="background:#10131a;border:1px solid #1e2130;border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;" onclick="applyHistoryFilters(${i}); switchTab('search')">
+        <div style="font-weight:600;color:#e2e4f0;margin-bottom:4px;">${historyLabel(h.filters)}</div>
+        <div style="font-size:11px;color:#4a4f6a;">${new Date(h.savedAt).toLocaleString('lt-LT')}</div>
+      </div>`).join('');
+}
 function applyHistoryFilters(idx) {
   const history = loadSearchHistory();
   const f = history[idx] && history[idx].filters;
@@ -559,206 +624,112 @@ function applyHistoryFilters(idx) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ============ FAVORITAI (localStorage) - issaugoti skelbimai su busenos sekimu ============
-const FAVORITES_KEY = 'carTriageFavorites';
-
+// ===== FAVORITES =====
 function loadFavorites() {
-  try {
-    return JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
-  } catch {
-    return [];
-  }
+  try { return JSON.parse(localStorage.getItem(FAVORITES_KEY)) || []; } catch { return []; }
 }
-
-function saveFavorites(list) {
-  localStorage.setItem(FAVORITES_KEY, JSON.stringify(list));
-}
-
-function isFavorited(url) {
-  return loadFavorites().some((f) => f.url === url);
-}
-
+function saveFavorites(list) { localStorage.setItem(FAVORITES_KEY, JSON.stringify(list)); }
+function isFavorited(url) { return loadFavorites().some(f => f.url === url); }
 function toggleFavorite(url, snapshot, btn) {
   let favs = loadFavorites();
-  const idx = favs.findIndex((f) => f.url === url);
+  const idx = favs.findIndex(f => f.url === url);
   if (idx >= 0) {
     favs.splice(idx, 1);
     if (btn) { btn.textContent = '☆'; btn.classList.remove('active'); }
   } else {
-    favs.unshift({
-      url, modelis: snapshot.modelis, kaina: snapshot.kaina, metai: snapshot.metai,
-      rida: snapshot.rida, photo: snapshot.photo, source: snapshot.source,
-      savedAt: Date.now(), lastKnownPrice: snapshot.kaina, lastCheckedAt: null, status: 'active',
-    });
+    favs.unshift({ url, modelis: snapshot.modelis, kaina: snapshot.kaina, metai: snapshot.metai, rida: snapshot.rida, photo: snapshot.photo, source: snapshot.source, savedAt: Date.now(), lastKnownPrice: snapshot.kaina, lastCheckedAt: null, status: 'active' });
     if (btn) { btn.textContent = '★'; btn.classList.add('active'); }
   }
   saveFavorites(favs);
-  renderFavorites();
+  renderFavoritesMain();
 }
-
-function toggleFavoritesPanel() {
-  const panel = document.getElementById('favorites-panel');
-  const isHidden = panel.style.display === 'none';
-  panel.style.display = isHidden ? 'block' : 'none';
-  document.getElementById('favorites-toggle-btn').innerHTML =
-    `⭐ Favoritai (<span id="favorites-count">${loadFavorites().length}</span>) ${isHidden ? '▴' : '▾'}`;
-}
-
-function renderFavorites() {
+function renderFavoritesMain() {
   const favs = loadFavorites();
-  const wrap = document.getElementById('favorites-wrap');
-  const countEl = document.getElementById('favorites-count');
-  const list = document.getElementById('favorites-list');
-  if (countEl) countEl.textContent = favs.length;
-  wrap.style.display = favs.length > 0 ? 'block' : 'none';
-  if (favs.length === 0) return;
-
-  list.innerHTML = favs.map((f, i) => {
-    let statusLine = '';
-    if (f.status === 'removed') {
-      statusLine = `<div style="color:#ff9d9d; font-size:12px;">❌ Skelbimas pašalintas (galimai parduotas)</div>`;
-    } else if (f.status === 'reserved') {
-      statusLine = `<div style="color:#f0c674; font-size:12px;">🔒 Rezervuotas</div>`;
-    } else if (f.lastKnownPrice && f.currentPrice && f.currentPrice !== f.lastKnownPrice) {
-      const dropped = f.currentPrice < f.lastKnownPrice;
-      statusLine = `<div style="color:${dropped ? '#7fd88f' : '#ff9d9d'}; font-size:12px;">${dropped ? '📉' : '📈'} Kaina ${dropped ? 'sumažėjo' : 'padidėjo'}: ${formatEUR(f.lastKnownPrice)} → ${formatEUR(f.currentPrice)}</div>`;
-    }
-    const checkedNote = f.lastCheckedAt
-      ? `<span style="color:#666; font-size:11px;">Tikrinta: ${new Date(f.lastCheckedAt).toLocaleString('lt-LT')}</span>`
-      : `<span style="color:#666; font-size:11px;">Dar netikrinta</span>`;
-    return `
-      <div style="display:flex; gap:8px; padding:8px 0; border-bottom:1px solid #2c303a; align-items:center;" id="fav-row-${i}">
-        <img src="${f.photo || ''}" onerror="this.style.display='none'" style="width:56px;height:42px;object-fit:cover;border-radius:4px;background:#2c303a;flex-shrink:0;">
-        <div style="flex:1; font-size:12px;">
-          <a href="${f.url}" target="_blank" style="color:#e8e8ea; text-decoration:none; font-weight:600;">${f.modelis}</a>
-          <span class="source-tag">${f.source}</span>
-          <div style="color:#9a9aa5;">${formatEUR(f.currentPrice || f.kaina)} · ${f.metai || '?'} · ${checkedNote}</div>
-          ${statusLine}
-        </div>
-        <button onclick="checkSingleFavorite(${i})" style="background:#2c303a; color:#e8e8ea; border:none; padding:6px 8px; border-radius:6px; font-size:11px; cursor:pointer; flex-shrink:0;">🔄</button>
-        <button onclick="removeFavorite(${i})" style="background:#2c303a; color:#ff9d9d; border:none; padding:6px 8px; border-radius:6px; font-size:11px; cursor:pointer; flex-shrink:0;">✕</button>
-      </div>
-    `;
-  }).join('');
+  const el = document.getElementById('favorites-main-content');
+  // Update nav tab count
+  const tab = document.querySelector('.nav-tab:nth-child(2)');
+  if (tab) tab.textContent = `⭐ Favoritai${favs.length > 0 ? ' (' + favs.length + ')' : ''}`;
+  if (favs.length === 0) { el.innerHTML = '<div style="color:#6a6f88;font-size:14px;padding:24px 0;">Dar nėra išsaugotų favoritų.</div>'; return; }
+  el.innerHTML = `
+    <div style="margin-bottom:12px;">
+      <button onclick="checkAllFavorites()" style="padding:9px 14px;background:#10131a;color:#e2e4f0;border:1px solid #1e2130;border-radius:8px;font-size:12px;cursor:pointer;">🔄 Patikrinti visų kainas</button>
+    </div>
+    <div class="favs-panel">
+      ${favs.map((f,i) => {
+        let statusLine = '';
+        if (f.status==='removed') statusLine = `<div style="color:#f87171;font-size:12px;">❌ Skelbimas pašalintas</div>`;
+        else if (f.status==='reserved') statusLine = `<div style="color:#f0c674;font-size:12px;">🔒 Rezervuotas</div>`;
+        else if (f.lastKnownPrice && f.currentPrice && f.currentPrice !== f.lastKnownPrice) {
+          const dropped = f.currentPrice < f.lastKnownPrice;
+          statusLine = `<div style="color:${dropped?'#34d399':'#f87171'};font-size:12px;">${dropped?'📉':'📈'} ${formatEUR(f.lastKnownPrice)} → ${formatEUR(f.currentPrice)}</div>`;
+        }
+        return `<div class="fav-row">
+          <img src="${f.photo||''}" onerror="this.style.display='none'">
+          <div style="flex:1;font-size:13px;">
+            <a href="${f.url}" target="_blank" style="color:#e2e4f0;text-decoration:none;font-weight:600;">${f.modelis}</a>
+            <span class="source-tag">${f.source}</span>
+            <div style="color:#6a6f88;font-size:12px;">${formatEUR(f.currentPrice||f.kaina)} · ${f.metai||'?'}</div>
+            ${statusLine}
+          </div>
+          <button onclick="checkSingleFavorite(${i})" style="background:#1a1d2a;color:#e2e4f0;border:none;padding:6px 8px;border-radius:6px;font-size:11px;cursor:pointer;">🔄</button>
+          <button onclick="removeFav(${i})" style="background:#1a1d2a;color:#f87171;border:none;padding:6px 8px;border-radius:6px;font-size:11px;cursor:pointer;">✕</button>
+        </div>`;
+      }).join('')}
+    </div>`;
 }
-
-function removeFavorite(idx) {
-  const favs = loadFavorites();
-  favs.splice(idx, 1);
-  saveFavorites(favs);
-  renderFavorites();
-}
-
+function removeFav(idx) { const favs = loadFavorites(); favs.splice(idx,1); saveFavorites(favs); renderFavoritesMain(); }
 async function checkSingleFavorite(idx) {
   const favs = loadFavorites();
   const f = favs[idx];
   if (!f) return;
   try {
-    const resp = await fetch('/api/check-favorite', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: f.url }),
-    });
+    const resp = await fetch('/api/check-favorite', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({url:f.url}) });
     const data = await resp.json();
-    // Fresh nuskaitymas TIESIAI PRIES rasyma - saugu lygiagreciam vykdymui
-    // (checkAllFavorites), kad nepasidubliuotu/nepersirasytu kitu irasu pakeitimai.
     const freshFavs = loadFavorites();
-    const target = freshFavs.find((x) => x.url === f.url);
-    if (target) {
-      target.status = data.status;
-      if (data.currentPrice) target.currentPrice = data.currentPrice;
-      target.lastCheckedAt = Date.now();
-      saveFavorites(freshFavs);
-      renderFavorites();
-    }
-  } catch (err) {
-    console.error(err);
-  }
+    const target = freshFavs.find(x => x.url === f.url);
+    if (target) { target.status=data.status; if(data.currentPrice) target.currentPrice=data.currentPrice; target.lastCheckedAt=Date.now(); saveFavorites(freshFavs); renderFavoritesMain(); }
+  } catch(err) { console.error(err); }
 }
-
 async function checkAllFavorites() {
   const favs = loadFavorites();
-  await Promise.all(favs.map((_, i) => checkSingleFavorite(i)));
+  await Promise.all(favs.map((_,i) => checkSingleFavorite(i)));
 }
 
+// ===== MODELS / GENERATION =====
 function updateModels() {
   const marke = document.getElementById('marke').value;
   const modelSelect = document.getElementById('modelis');
   const models = BRAND_MODELS[marke] || [];
-  modelSelect.innerHTML = '<option value="">Visi modeliai</option>' +
-    models.map((m) => `<option value="${m}">${m}</option>`).join('');
+  modelSelect.innerHTML = '<option value="">Visi modeliai</option>' + models.map(m => `<option value="${m}">${m}</option>`).join('');
 }
 updateModels();
 
-// ============ KARTOS/KEBULO INDIKACIJA (statiniai duomenys, be API kvietimu) ============
 const GENERATION_INFO = {
-  'BMW X5': [
-    { gen: 'G05', years: [2018, 2023], body: 'Visureigis (SUV)' },
-    { gen: 'F15', years: [2013, 2018], body: 'Visureigis (SUV)' },
-    { gen: 'E70', years: [2006, 2013], body: 'Visureigis (SUV)' },
-  ],
-  'BMW X3': [
-    { gen: 'G01', years: [2017, 2024], body: 'Visureigis (SUV)' },
-    { gen: 'F25', years: [2010, 2017], body: 'Visureigis (SUV)' },
-  ],
-  'BMW X4': [
-    { gen: 'G02', years: [2018, 2024], body: 'Visureigis-kupė (SUV Coupe)' },
-    { gen: 'F26', years: [2014, 2018], body: 'Visureigis-kupė (SUV Coupe)' },
-  ],
-  'BMW X1': [
-    { gen: 'U11', years: [2022, 2024], body: 'Kompaktinis visureigis' },
-    { gen: 'F48', years: [2015, 2022], body: 'Kompaktinis visureigis' },
-  ],
-  'BMW X6': [
-    { gen: 'G06', years: [2019, 2024], body: 'Visureigis-kupė' },
-    { gen: 'F16', years: [2014, 2019], body: 'Visureigis-kupė' },
-  ],
-  'BMW X7': [{ gen: 'G07', years: [2018, 2024], body: 'Pilno dydžio visureigis' }],
-  'BMW 3': [
-    { gen: 'G20', years: [2018, 2024], body: 'Sedanas/Universalas' },
-    { gen: 'F30', years: [2011, 2018], body: 'Sedanas/Universalas' },
-  ],
-  'BMW 5': [
-    { gen: 'G30', years: [2016, 2023], body: 'Sedanas/Universalas' },
-    { gen: 'F10', years: [2009, 2016], body: 'Sedanas/Universalas' },
-  ],
-  'Audi A4': [
-    { gen: 'B9', years: [2015, 2024], body: 'Sedanas/Universalas' },
-    { gen: 'B8', years: [2007, 2015], body: 'Sedanas/Universalas' },
-  ],
-  'Audi A6': [
-    { gen: 'C8', years: [2018, 2024], body: 'Sedanas/Universalas' },
-    { gen: 'C7', years: [2011, 2018], body: 'Sedanas/Universalas' },
-  ],
-  'Audi Q5': [
-    { gen: 'FY', years: [2016, 2024], body: 'Visureigis (SUV)' },
-    { gen: '8R', years: [2008, 2016], body: 'Visureigis (SUV)' },
-  ],
-  'Audi Q7': [{ gen: '4M', years: [2015, 2024], body: 'Pilno dydžio visureigis' }],
-  'Volkswagen Golf': [
-    { gen: 'Mk8', years: [2019, 2024], body: 'Hečbekas' },
-    { gen: 'Mk7', years: [2012, 2019], body: 'Hečbekas' },
-  ],
-  'Volkswagen Passat': [{ gen: 'B8', years: [2014, 2024], body: 'Sedanas/Universalas' }],
-  'Volkswagen Tiguan': [{ gen: 'Mk2', years: [2016, 2024], body: 'Visureigis (SUV)' }],
-  'Mercedes-Benz C Klasė': [
-    { gen: 'W206', years: [2021, 2024], body: 'Sedanas/Universalas' },
-    { gen: 'W205', years: [2014, 2021], body: 'Sedanas/Universalas' },
-  ],
-  'Mercedes-Benz E Klasė': [
-    { gen: 'W213', years: [2016, 2024], body: 'Sedanas/Universalas' },
-  ],
-  'Mercedes-Benz GLC': [
-    { gen: 'X254', years: [2022, 2024], body: 'Visureigis (SUV)' },
-    { gen: 'X253', years: [2015, 2022], body: 'Visureigis (SUV)' },
-  ],
-  'Mercedes-Benz GLE': [{ gen: 'W167', years: [2019, 2024], body: 'Pilno dydžio visureigis' }],
-  'Volvo XC60': [{ gen: '2 karta', years: [2017, 2024], body: 'Visureigis (SUV)' }],
-  'Volvo XC90': [{ gen: '2 karta', years: [2015, 2024], body: 'Pilno dydžio visureigis' }],
-  'Toyota RAV4': [{ gen: '5 karta (XA50)', years: [2018, 2024], body: 'Visureigis (SUV)' }],
-  'Skoda Octavia': [{ gen: 'Mk4', years: [2019, 2024], body: 'Sedanas/Universalas' }],
-  'Skoda Superb': [{ gen: 'Mk3', years: [2015, 2024], body: 'Sedanas/Universalas' }],
-  'Skoda Kodiaq': [{ gen: 'Mk1', years: [2016, 2024], body: 'Visureigis (SUV)' }],
+  'BMW X5': [{gen:'G05',years:[2018,2023],body:'Visureigis (SUV)'},{gen:'F15',years:[2013,2018],body:'Visureigis (SUV)'},{gen:'E70',years:[2006,2013],body:'Visureigis (SUV)'}],
+  'BMW X3': [{gen:'G01',years:[2017,2024],body:'Visureigis (SUV)'},{gen:'F25',years:[2010,2017],body:'Visureigis (SUV)'}],
+  'BMW X4': [{gen:'G02',years:[2018,2024],body:'Visureigis-kupė'},{gen:'F26',years:[2014,2018],body:'Visureigis-kupė'}],
+  'BMW X1': [{gen:'U11',years:[2022,2024],body:'Kompaktinis visureigis'},{gen:'F48',years:[2015,2022],body:'Kompaktinis visureigis'}],
+  'BMW X6': [{gen:'G06',years:[2019,2024],body:'Visureigis-kupė'},{gen:'F16',years:[2014,2019],body:'Visureigis-kupė'}],
+  'BMW X7': [{gen:'G07',years:[2018,2024],body:'Pilno dydžio visureigis'}],
+  'BMW 3': [{gen:'G20',years:[2018,2024],body:'Sedanas/Universalas'},{gen:'F30',years:[2011,2018],body:'Sedanas/Universalas'}],
+  'BMW 5': [{gen:'G30',years:[2016,2023],body:'Sedanas/Universalas'},{gen:'F10',years:[2009,2016],body:'Sedanas/Universalas'}],
+  'Audi A4': [{gen:'B9',years:[2015,2024],body:'Sedanas/Universalas'},{gen:'B8',years:[2007,2015],body:'Sedanas/Universalas'}],
+  'Audi A6': [{gen:'C8',years:[2018,2024],body:'Sedanas/Universalas'},{gen:'C7',years:[2011,2018],body:'Sedanas/Universalas'}],
+  'Audi Q5': [{gen:'FY',years:[2016,2024],body:'Visureigis'},{gen:'8R',years:[2008,2016],body:'Visureigis'}],
+  'Audi Q7': [{gen:'4M',years:[2015,2024],body:'Pilno dydžio visureigis'}],
+  'Volkswagen Golf': [{gen:'Mk8',years:[2019,2024],body:'Hečbekas'},{gen:'Mk7',years:[2012,2019],body:'Hečbekas'}],
+  'Volkswagen Passat': [{gen:'B8',years:[2014,2024],body:'Sedanas/Universalas'}],
+  'Volkswagen Tiguan': [{gen:'Mk2',years:[2016,2024],body:'Visureigis'}],
+  'Mercedes-Benz C Klasė': [{gen:'W206',years:[2021,2024],body:'Sedanas/Universalas'},{gen:'W205',years:[2014,2021],body:'Sedanas/Universalas'}],
+  'Mercedes-Benz E Klasė': [{gen:'W213',years:[2016,2024],body:'Sedanas/Universalas'}],
+  'Mercedes-Benz GLC': [{gen:'X254',years:[2022,2024],body:'Visureigis'},{gen:'X253',years:[2015,2022],body:'Visureigis'}],
+  'Mercedes-Benz GLE': [{gen:'W167',years:[2019,2024],body:'Pilno dydžio visureigis'}],
+  'Volvo XC60': [{gen:'2 karta',years:[2017,2024],body:'Visureigis'}],
+  'Volvo XC90': [{gen:'2 karta',years:[2015,2024],body:'Pilno dydžio visureigis'}],
+  'Toyota RAV4': [{gen:'5 karta (XA50)',years:[2018,2024],body:'Visureigis'}],
+  'Skoda Octavia': [{gen:'Mk4',years:[2019,2024],body:'Sedanas/Universalas'}],
+  'Skoda Superb': [{gen:'Mk3',years:[2015,2024],body:'Sedanas/Universalas'}],
+  'Skoda Kodiaq': [{gen:'Mk1',years:[2016,2024],body:'Visureigis'}],
 };
 
 function updateGenerationHint() {
@@ -768,1076 +739,617 @@ function updateGenerationHint() {
   const hintEl = document.getElementById('generation-hint');
   const key = `${marke} ${modelis}`;
   const entries = GENERATION_INFO[key];
-  if (!entries || !modelis) {
-    hintEl.style.display = 'none';
-    return;
-  }
-  let match = entries.find((e) => metaiNuo && metaiNuo >= e.years[0] && metaiNuo <= e.years[1]);
+  if (!entries || !modelis) { hintEl.style.display='none'; return; }
+  let match = entries.find(e => metaiNuo && metaiNuo >= e.years[0] && metaiNuo <= e.years[1]);
   if (!match) match = entries[0];
   hintEl.style.display = 'block';
-  hintEl.innerHTML = `📖 ${marke} ${modelis}${metaiNuo ? ` (${metaiNuo})` : ''} → <b>${match.gen}</b> karta (${match.years[0]}–${match.years[1]}), ${match.body}. <span style="color:#666">(orientacinė informacija)</span>`;
+  hintEl.innerHTML = `📖 <b>${match.gen}</b> karta (${match.years[0]}–${match.years[1]}), ${match.body}`;
 }
 updateGenerationHint();
-renderSearchHistory();
-renderFavorites();
-document.getElementById('app-version').textContent = APP_VERSION;
 
-let logExpanded = false;
-
-function toggleLog() {
-  logExpanded = !logExpanded;
-  const box = document.getElementById('log-box');
-  const header = document.getElementById('log-header');
-  box.style.display = logExpanded ? 'block' : 'none';
-  header.classList.toggle('expanded', logExpanded);
+// ===== TAB SWITCHING =====
+function switchTab(tab) {
+  document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach((el, i) => {
+    el.classList.toggle('active', ['search','favorites','history'][i] === tab);
+  });
+  if (tab === 'history') renderSearchHistoryPanel();
+  if (tab === 'favorites') renderFavoritesMain();
 }
 
-const PENDING_MARKERS = ['🔎', '📄', '🔍', '🔧', '🌐', '🔑', '⚖️', '⏳', '🤖'];
-const DONE_MARKERS = ['✅', '⚠', '🎉', '❌'];
-
+// ===== LOG =====
+let logExpanded = false;
+function toggleLog() {
+  logExpanded = !logExpanded;
+  document.getElementById('log-box').style.display = logExpanded ? 'block' : 'none';
+  document.getElementById('log-header').classList.toggle('expanded', logExpanded);
+}
+const PENDING_MARKERS = ['🔎','📄','🔍','🔧','🌐','🔑','⚖️','⏳','🤖'];
+const DONE_MARKERS = ['✅','⚠','🎉','❌'];
 function lineIsPending(line, jobStatus) {
   if (jobStatus !== 'running') return false;
   const trimmed = line.trim();
-  if (DONE_MARKERS.some((m) => trimmed.startsWith(m))) return false;
-  return PENDING_MARKERS.some((m) => trimmed.startsWith(m));
+  if (DONE_MARKERS.some(m => trimmed.startsWith(m))) return false;
+  return PENDING_MARKERS.some(m => trimmed.startsWith(m));
 }
-
 function renderLogSteps(log, logBox, jobStatus) {
-  logBox.innerHTML = log.map((line) => {
+  logBox.innerHTML = log.map(line => {
     const isRunning = lineIsPending(line, jobStatus);
     const icon = isRunning ? '<span class="spinner"></span>' : '<span class="done-check">✓</span>';
-    return `<div class="log-step${isRunning ? ' current' : ''}">${icon}<span>${line}</span></div>`;
+    return `<div class="log-step${isRunning?' current':''}">${icon}<span>${line}</span></div>`;
   }).join('');
   if (logExpanded) logBox.scrollTop = logBox.scrollHeight;
-
   const headerIcon = document.getElementById('log-header-icon');
   const headerText = document.getElementById('log-header-text');
-  const pendingLines = log.filter((l) => lineIsPending(l, jobStatus));
-  const lastLine = pendingLines.length > 0 ? pendingLines[pendingLines.length - 1] : (log[log.length - 1] || 'Paleidžiama...');
-
-  // Progresas
+  const pendingLines = log.filter(l => lineIsPending(l, jobStatus));
+  const lastLine = pendingLines.length > 0 ? pendingLines[pendingLines.length-1] : (log[log.length-1] || 'Paleidžiama...');
   const progressFill = document.getElementById('search-progress-fill-main');
   const progressLabel = document.getElementById('search-progress-label');
   if (progressFill && progressLabel) {
-    const doneSteps = log.filter((l) => !lineIsPending(l, jobStatus)).length;
+    const doneSteps = log.filter(l => !lineIsPending(l, jobStatus)).length;
     let pct;
-    if (jobStatus === 'done') {
-      pct = 100;
-    } else {
-      const estimated = Math.max(log.length + 2, window.__estimatedSearchSteps || 45);
-      pct = Math.min(94, Math.round((doneSteps / estimated) * 100));
-    }
+    if (jobStatus === 'done') { pct = 100; }
+    else { const estimated = Math.max(log.length+2, window.__estimatedSearchSteps||45); pct = Math.min(94, Math.round((doneSteps/estimated)*100)); }
     progressFill.style.width = pct + '%';
     progressLabel.textContent = pct + '%  (' + log.length + ' žingsniai)';
   }
-
-  if (jobStatus === 'running') {
-    headerIcon.outerHTML = '<span class="spinner" id="log-header-icon"></span>';
-    headerText.textContent = lastLine;
-  } else if (jobStatus === 'done') {
-    headerIcon.outerHTML = '<span class="done-check" id="log-header-icon">✓</span>';
-    headerText.textContent = `Baigta! (${log.length} žingsnių)`;
-  } else {
-    headerIcon.outerHTML = '<span id="log-header-icon">⚠️</span>';
-    headerText.textContent = 'Klaida';
-  }
+  if (jobStatus === 'running') { headerIcon.outerHTML='<span class="spinner" id="log-header-icon"></span>'; headerText.textContent=lastLine; }
+  else if (jobStatus === 'done') { headerIcon.outerHTML='<span class="done-check" id="log-header-icon">✓</span>'; headerText.textContent=`Baigta! (${log.length} žingsnių)`; }
+  else { headerIcon.outerHTML='<span id="log-header-icon">⚠️</span>'; headerText.textContent='Klaida'; }
 }
 
+// ===== QUICK COUNT =====
 async function runQuickCount() {
   const btn = document.getElementById('quick-count-btn');
   const resultEl = document.getElementById('quick-count-result');
-  const filters = {
-    marke: document.getElementById('marke').value,
-    modelis: document.getElementById('modelis').value,
-    pavaru_deze: document.getElementById('pavaru_deze').value,
-    metaiNuo: document.getElementById('metaiNuo').value,
-    metaiIki: document.getElementById('metaiIki').value,
-    ridaIki: document.getElementById('ridaIki').value,
-    kainaNuo: document.getElementById('kainaNuo').value,
-    kainaIki: document.getElementById('kainaIki').value,
-  };
-  btn.disabled = true;
-  btn.textContent = '⏳ Tikrinama...';
-  resultEl.textContent = '';
+  const filters = { marke:document.getElementById('marke').value, modelis:document.getElementById('modelis').value, pavaru_deze:document.getElementById('pavaru_deze').value, metaiNuo:document.getElementById('metaiNuo').value, metaiIki:document.getElementById('metaiIki').value, ridaIki:document.getElementById('ridaIki').value, kainaNuo:document.getElementById('kainaNuo').value, kainaIki:document.getElementById('kainaIki').value };
+  btn.disabled=true; btn.textContent='⏳ Tikrinama...'; resultEl.textContent='';
   try {
-    const resp = await fetch('/api/quick-count', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(filters),
-    });
+    const resp = await fetch('/api/quick-count', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(filters) });
     const data = await resp.json();
-    if (data.error) {
-      resultEl.textContent = `Klaida: ${data.error}`;
-      return;
-    }
-    const parts = [];
-    const fmt = (r) => {
-      if (!r) return 'nepavyko nustatyti';
-      return r.exact ? `${r.count}` : `bent ${r.count} (1 psl.)`;
-    };
-    parts.push(`autoplius.lt: ${fmt(data.autoplius)}`);
-    parts.push(`autogidas.lt: ${fmt(data.autogidas)}`);
-    if (document.getElementById('portal-autoscout24').checked) {
-      parts.push(`autoscout24.com: ${fmt(data.autoscout24)}`);
-    }
-    if (document.getElementById('portal-otomoto').checked) {
-      parts.push(`otomoto.pl: ${fmt(data.otomoto)}`);
-    }
-    resultEl.textContent = parts.join(' · ') + ' skelbimų atitinka';
-  } catch (err) {
-    resultEl.textContent = `Klaida: ${err.message}`;
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '🔢 Patikrinti kiekį (be analizės)';
-  }
+    if (data.error) { resultEl.textContent=`Klaida: ${data.error}`; return; }
+    const fmt = r => r ? (r.exact ? `${r.count}` : `bent ${r.count}`) : '?';
+    const parts = [`autoplius.lt: ${fmt(data.autoplius)}`, `autogidas.lt: ${fmt(data.autogidas)}`];
+    if (document.getElementById('portal-autoscout24').checked) parts.push(`autoscout24: ${fmt(data.autoscout24)}`);
+    if (document.getElementById('portal-otomoto').checked) parts.push(`otomoto.pl: ${fmt(data.otomoto)}`);
+    resultEl.textContent = parts.join(' · ') + ' skelbimų';
+  } catch(err) { resultEl.textContent=`Klaida: ${err.message}`; }
+  finally { btn.disabled=false; btn.textContent='🔢 Patikrinti kiekį'; }
 }
 
+// ===== SEARCH =====
 async function runSearch() {
   const btn = document.getElementById('search-btn');
   const status = document.getElementById('status');
   const logContainer = document.getElementById('log-container');
   const logBox = document.getElementById('log-box');
   const results = document.getElementById('results');
-  results.innerHTML = '';
-  logBox.innerHTML = '';
-  logExpanded = false;
-  compareList = [];
-  renderCompareBar();
-  document.body.style.paddingBottom = '';
-  logBox.style.display = 'none';
-  document.getElementById('log-header').classList.remove('expanded');
-  logContainer.style.display = 'block';
-
+  results.innerHTML=''; logBox.innerHTML=''; logExpanded=false;
+  compareList=[]; renderCompareBar(); document.body.style.paddingBottom='';
+  logBox.style.display='none'; document.getElementById('log-header').classList.remove('expanded');
+  logContainer.style.display='block';
   const filters = {
-    marke: document.getElementById('marke').value,
-    modelis: document.getElementById('modelis').value,
-    pavaru_deze: document.getElementById('pavaru_deze').value,
-    metaiNuo: document.getElementById('metaiNuo').value,
-    metaiIki: document.getElementById('metaiIki').value,
-    ridaIki: document.getElementById('ridaIki').value,
-    kainaNuo: document.getElementById('kainaNuo').value,
-    kainaIki: document.getElementById('kainaIki').value,
-    maxPages: document.getElementById('maxPages').value,
-    portals: [
-      document.getElementById('portal-autoplius').checked ? 'autoplius' : null,
-      document.getElementById('portal-autogidas').checked ? 'autogidas' : null,
-      document.getElementById('portal-autoscout24').checked ? 'autoscout24' : null,
-      document.getElementById('portal-otomoto').checked ? 'otomoto' : null,
-    ].filter(Boolean),
+    marke:document.getElementById('marke').value, modelis:document.getElementById('modelis').value,
+    pavaru_deze:document.getElementById('pavaru_deze').value, metaiNuo:document.getElementById('metaiNuo').value,
+    metaiIki:document.getElementById('metaiIki').value, ridaIki:document.getElementById('ridaIki').value,
+    kainaNuo:document.getElementById('kainaNuo').value, kainaIki:document.getElementById('kainaIki').value,
+    maxPages:document.getElementById('maxPages').value,
+    portals:[ document.getElementById('portal-autoplius').checked?'autoplius':null, document.getElementById('portal-autogidas').checked?'autogidas':null, document.getElementById('portal-autoscout24').checked?'autoscout24':null, document.getElementById('portal-otomoto').checked?'otomoto':null ].filter(Boolean),
   };
   saveSearchToHistory(filters);
-
-  if (filters.portals.length === 0) {
-    status.textContent = 'Pasirinkite bent vieną portalą.';
-    return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = '⏳ Vyksta paieška...';
-  status.textContent = 'Paleidžiama...';
-  // Apskaičiuojame apytikslį žingsnių kiekį pagal filtrus
-  window.__estimatedSearchSteps = Math.max(30, filters.portals.length * parseInt(filters.maxPages || '3') * 4 + 20);
+  if (filters.portals.length===0) { status.textContent='Pasirinkite bent vieną portalą.'; return; }
+  btn.disabled=true; btn.textContent='⏳ Vyksta paieška...'; status.textContent='Paleidžiama...';
+  window.__estimatedSearchSteps = Math.max(30, filters.portals.length * parseInt(filters.maxPages||'3') * 4 + 20);
   const progressWrap = document.getElementById('search-progress-wrap');
   const progressFill = document.getElementById('search-progress-fill-main');
   const progressLabel = document.getElementById('search-progress-label');
-  progressWrap.style.display = 'block';
-  progressFill.style.width = '0%';
-  progressLabel.textContent = '0%';
-
+  progressWrap.style.display='block'; progressFill.style.width='0%'; progressLabel.textContent='0%';
   try {
-    const startResp = await fetch('/api/search-start', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(filters),
-    });
+    const startResp = await fetch('/api/search-start', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(filters) });
     const { jobId } = await startResp.json();
-
     let lastLogSnapshot = '';
     while (true) {
-      await new Promise((r) => setTimeout(r, 1200));
+      await new Promise(r => setTimeout(r, 1200));
       const statusResp = await fetch(`/api/search-status/${jobId}`);
       const job = await statusResp.json();
-
       const currentSnapshot = JSON.stringify(job.log);
-      if (currentSnapshot !== lastLogSnapshot) {
-        renderLogSteps(job.log, logBox, job.status);
-        lastLogSnapshot = currentSnapshot;
-      }
-
-      if (job.status === 'error') {
-        status.textContent = 'Klaida: ' + job.error;
-        break;
-      }
-      if (job.status === 'done') {
-        renderResults(job.result, status, results);
-        break;
-      }
+      if (currentSnapshot !== lastLogSnapshot) { renderLogSteps(job.log, logBox, job.status); lastLogSnapshot=currentSnapshot; }
+      if (job.status==='error') { status.textContent='Klaida: '+job.error; break; }
+      if (job.status==='done') { renderResults(job.result, status, results); break; }
     }
-  } catch (err) {
-    status.textContent = 'Klaida: ' + err.message;
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '🔍 Ieškoti ir analizuoti';
-    document.getElementById('search-progress-wrap').style.display = 'none';
-  }
+  } catch(err) { status.textContent='Klaida: '+err.message; }
+  finally { btn.disabled=false; btn.textContent='🔍 Ieškoti ir analizuoti'; document.getElementById('search-progress-wrap').style.display='none'; }
 }
 
-// ============ TINDER STILIAUS NARSYMAS ============
-let tinderQueue = [];
-let tinderLiked = [];
-let tinderSkipped = [];
-let tinderIndex = 0;
+// ===== SCORE CALC =====
+function calcCarScore(c) {
+  let kainaScore;
+  if (c.diffPct != null) {
+    if (c.diffPct>=30) kainaScore=9.5; else if (c.diffPct>=20) kainaScore=8.5; else if (c.diffPct>=10) kainaScore=7.5; else if (c.diffPct>=5) kainaScore=6.5; else kainaScore=5.0;
+  } else { kainaScore=5.5; }
+  let ridaScore;
+  if (c.ridaDiffPct != null) {
+    if (c.ridaDiffPct<=-30) ridaScore=9.5; else if (c.ridaDiffPct<=-20) ridaScore=8.5; else if (c.ridaDiffPct<=-10) ridaScore=7.5; else if (c.ridaDiffPct<=10) ridaScore=6.5; else if (c.ridaDiffPct<=25) ridaScore=5.5; else ridaScore=4.0;
+  } else { ridaScore=6.5; }
+  let irangaScore=6.0;
+  if (c.turiIstorijosAtaskaita) irangaScore+=1.0;
+  if (c.turiVin) irangaScore+=0.5;
+  if (c.garantijosTipas) irangaScore+=1.5;
+  irangaScore=Math.min(10,irangaScore);
+  let istorijaScore=6.0;
+  if (c.turiIstorijosAtaskaita) istorijaScore+=2.0;
+  if (c.turiVin) istorijaScore+=1.0;
+  istorijaScore=Math.min(10,istorijaScore);
+  const potencialaScore = c.qualityScore ? Math.min(10,Math.max(1,c.qualityScore)) : 6.0;
+  const overall = kainaScore*0.30 + ridaScore*0.20 + irangaScore*0.20 + istorijaScore*0.15 + potencialaScore*0.15;
+  return { overall:Math.round(overall*10)/10, kaina:Math.round(kainaScore*10)/10, rida:Math.round(ridaScore*10)/10, iranga:Math.round(irangaScore*10)/10, istorija:Math.round(istorijaScore*10)/10, potencialas:Math.round(potencialaScore*10)/10 };
+}
+function buildInsights(c) {
+  const badges = [];
+  if (c.diffPct>=20) badges.push({type:'good',text:`−${c.diffPct}% nuo rinkos`});
+  else if (c.diffPct>=8) badges.push({type:'ok',text:`−${c.diffPct}% nuo rinkos`});
+  if (c.ridaDiffPct!=null&&c.ridaDiffPct<=-20) badges.push({type:'good',text:`Maža rida −${Math.abs(c.ridaDiffPct)}%`});
+  else if (c.ridaDiffPct!=null&&c.ridaDiffPct>=25) badges.push({type:'warn',text:`Didelė rida +${c.ridaDiffPct}%`});
+  if (c.turiIstorijosAtaskaita) badges.push({type:'good',text:'Patikrinta istorija'});
+  if (c.garantijosTipas) badges.push({type:'good',text:'Garantija'});
+  if (c.turiVin) badges.push({type:'ok',text:'VIN nurodytas'});
+  if (c.diffPct>=40) badges.push({type:'warn',text:'⚠ Labai didelė nuolaida'});
+  return badges.slice(0,4);
+}
+function scoreColor(score) {
+  if (score>=7.5) return '#34d399'; if (score>=5.5) return '#fb923c'; return '#f87171';
+}
+function subScoreFillClass(score) {
+  if (score>=7.5) return 'score-fill-good'; if (score>=5.5) return 'score-fill-ok'; return 'score-fill-bad';
+}
+function scoreRingSVG(score, color) {
+  const r=34, circ=2*Math.PI*r, offset=circ-(score/10)*circ;
+  return `<svg viewBox="0 0 80 80" width="80" height="80"><circle cx="40" cy="40" r="${r}" fill="none" stroke="#1a1d2a" stroke-width="7"/><circle cx="40" cy="40" r="${r}" fill="none" stroke="${color}" stroke-width="7" stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}" stroke-linecap="round" transform="rotate(-90 40 40)"/></svg>`;
+}
 
+// ===== TINDER =====
+let tinderQueue=[], tinderLiked=[], tinderSkipped=[], tinderIndex=0, tinderPhase='top';
 function startTinder() {
-  if (!currentData || !currentData.candidates || currentData.candidates.length === 0) return;
-  tinderQueue = [...currentData.candidates];
-  tinderLiked = [];
-  tinderSkipped = [];
-  tinderIndex = 0;
+  if (!currentData||!currentData.candidates||currentData.candidates.length===0) return;
+  tinderPhase='top'; tinderQueue=[...currentData.candidates]; tinderLiked=[]; tinderSkipped=[]; tinderIndex=0;
   document.getElementById('tinder-view').classList.add('active');
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow='hidden';
   renderTinderCard();
 }
-
 function exitTinder() {
   document.getElementById('tinder-view').classList.remove('active');
-  document.getElementById('tinder-actions').style.display = 'none';
-  document.getElementById('tinder-counter').textContent = '';
-  document.body.style.overflow = '';
+  document.getElementById('tinder-actions').style.display='none';
+  document.getElementById('tinder-counter').textContent='';
+  document.body.style.overflow='';
 }
-
 function renderTinderCard() {
-  const stack = document.getElementById('tinder-stack');
-  const fill = document.getElementById('tinder-progress-fill');
-  const hint = document.getElementById('tinder-hint');
-
-  if (tinderIndex >= tinderQueue.length) {
-    fill.style.width = '100%';
-    hint.style.display = 'none';
-    document.getElementById('tinder-actions').style.display = 'none';
-    document.getElementById('tinder-counter').textContent = '';
-    const allListings = (currentData && currentData.allListings) || [];
-    const topUrls = new Set((tinderPhase === 'top' ? tinderQueue : (window.__tinderTopQueue || tinderQueue)).map(c => c.url));
-    const restListings = tinderPhase === 'top' ? allListings.filter(l => !topUrls.has(l.url)) : [];
-
-    if (tinderPhase === 'top') {
-      window.__tinderTopQueue = [...tinderQueue];
-      const likedHtml = tinderLiked.length > 0
-        ? tinderLiked.map((c) => `<a href="${c.url}" target="_blank" style="display:block; color:#7fd88f; margin:4px 0; text-decoration:none; font-size:13px;">✅ ${c.modelis} – ${formatEUR(c.kaina)} (${c.source})</a>`).join('')
-        : '<div style="color:#9a9aa5; font-size:13px;">Nė vienas nepatiko</div>';
-      stack.innerHTML = `<div style="overflow-y:auto; max-height:calc(100vh - 80px); padding:20px; width:100%; max-width:420px; box-sizing:border-box; text-align:center;">
-        <div style="font-size:36px; margin-bottom:8px;">${tinderLiked.length > 0 ? '🎉' : '🤷'}</div>
-        <div style="font-size:18px; font-weight:700; margin-bottom:12px;">TOP skelbimai peržiūrėti!</div>
-        <div style="text-align:left; background:#1a1d24; border-radius:10px; padding:12px; margin-bottom:16px;">
-          <div style="font-size:12px; color:#9a9aa5; margin-bottom:6px;">Patiko (${tinderLiked.length}):</div>
-          ${likedHtml}
-        </div>
-        ${restListings.length > 0 ? `<button onclick="startTinderRest()" style="width:100%; padding:14px; background:linear-gradient(135deg,#6c5ce7,#a78bfa); color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:600; cursor:pointer; margin-bottom:10px; box-shadow:0 4px 14px rgba(108,92,231,0.4);">🔥 Naršyti likusius ${restListings.length} skelbimus</button>` : ''}
-        <button onclick="exitTinder()" style="width:100%; padding:12px; background:#2c303a; color:#e8e8ea; border:none; border-radius:12px; font-size:14px; cursor:pointer;">Uždaryti</button>
-      </div>`;
-      window.__tinderRestListings = restListings;
+  const stack=document.getElementById('tinder-stack');
+  const fill=document.getElementById('tinder-progress-fill');
+  const hint=document.getElementById('tinder-hint');
+  if (tinderIndex>=tinderQueue.length) {
+    fill.style.width='100%'; hint.style.display='none';
+    document.getElementById('tinder-actions').style.display='none';
+    document.getElementById('tinder-counter').textContent='';
+    const allListings=(currentData&&currentData.allListings)||[];
+    const topUrls=new Set((tinderPhase==='top'?tinderQueue:(window.__tinderTopQueue||tinderQueue)).map(c=>c.url));
+    const restListings=tinderPhase==='top'?allListings.filter(l=>!topUrls.has(l.url)):[];
+    if (tinderPhase==='top') {
+      window.__tinderTopQueue=[...tinderQueue];
+      const likedHtml=tinderLiked.length>0?tinderLiked.map(c=>`<a href="${c.url}" target="_blank" style="display:block;color:#34d399;margin:4px 0;text-decoration:none;font-size:13px;">✅ ${c.modelis} – ${formatEUR(c.kaina)}</a>`).join(''):'<div style="color:#6a6f88;font-size:13px;">Nė vienas nepatiko</div>';
+      stack.innerHTML=`<div style="overflow-y:auto;max-height:calc(100vh - 80px);padding:20px;width:100%;max-width:420px;box-sizing:border-box;text-align:center;"><div style="font-size:36px;margin-bottom:8px;">${tinderLiked.length>0?'🎉':'🤷'}</div><div style="font-size:18px;font-weight:700;margin-bottom:12px;">TOP skelbimai peržiūrėti!</div><div style="text-align:left;background:#10131a;border-radius:10px;padding:12px;margin-bottom:16px;"><div style="font-size:12px;color:#6a6f88;margin-bottom:6px;">Patiko (${tinderLiked.length}):</div>${likedHtml}</div>${restListings.length>0?`<button onclick="startTinderRest()" style="width:100%;padding:14px;background:linear-gradient(135deg,#7c6ff0,#a78bfa);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:10px;">🔥 Naršyti likusius ${restListings.length}</button>`:''}<button onclick="exitTinder()" style="width:100%;padding:12px;background:#1a1d2a;color:#e2e4f0;border:none;border-radius:12px;font-size:14px;cursor:pointer;">Uždaryti</button></div>`;
+      window.__tinderRestListings=restListings;
     } else {
-      const allLiked = tinderLiked;
-      stack.innerHTML = `<div style="overflow-y:auto; max-height:calc(100vh - 80px); padding:20px; width:100%; max-width:420px; box-sizing:border-box; text-align:center;">
-        <div style="font-size:36px; margin-bottom:8px;">🏁</div>
-        <div style="font-size:18px; font-weight:700; margin-bottom:12px;">Visi skelbimai peržiūrėti!</div>
-        ${allLiked.length > 0 ? `<div style="text-align:left; background:#1a1d24; border-radius:10px; padding:12px; margin-bottom:16px;">
-          <div style="font-size:12px; color:#9a9aa5; margin-bottom:6px;">Patiko (${allLiked.length}):</div>
-          ${allLiked.map(lc => `<a href="${lc.url}" target="_blank" style="display:block; color:#7fd88f; margin:4px 0; text-decoration:none; font-size:13px;">✅ ${lc.modelis} – ${formatEUR(lc.kaina)} (${lc.source})</a>`).join('')}
-        </div>` : '<div style="color:#9a9aa5; margin-bottom:16px;">Nė vienas nepatiko</div>'}
-        <button onclick="exitTinder()" style="width:100%; padding:12px; background:#2c303a; color:#e8e8ea; border:none; border-radius:12px; font-size:14px; cursor:pointer;">Uždaryti</button>
-      </div>`;
+      const allLiked=tinderLiked;
+      stack.innerHTML=`<div style="overflow-y:auto;max-height:calc(100vh - 80px);padding:20px;width:100%;max-width:420px;box-sizing:border-box;text-align:center;"><div style="font-size:36px;margin-bottom:8px;">🏁</div><div style="font-size:18px;font-weight:700;margin-bottom:12px;">Visi skelbimai peržiūrėti!</div>${allLiked.length>0?`<div style="text-align:left;background:#10131a;border-radius:10px;padding:12px;margin-bottom:16px;"><div style="font-size:12px;color:#6a6f88;margin-bottom:6px;">Patiko (${allLiked.length}):</div>${allLiked.map(lc=>`<a href="${lc.url}" target="_blank" style="display:block;color:#34d399;margin:4px 0;text-decoration:none;font-size:13px;">✅ ${lc.modelis} – ${formatEUR(lc.kaina)}</a>`).join('')}</div>`:'<div style="color:#6a6f88;margin-bottom:16px;">Nė vienas nepatiko</div>'}<button onclick="exitTinder()" style="width:100%;padding:12px;background:#1a1d2a;color:#e2e4f0;border:none;border-radius:12px;font-size:14px;cursor:pointer;">Uždaryti</button></div>`;
     }
     return;
   }
-
-  hint.style.display = 'block';
-  const c = tinderQueue[tinderIndex];
-  fill.style.width = `${Math.round((tinderIndex / tinderQueue.length) * 100)}%`;
-
-  const signals = [];
-  if (c.yraVerslas) signals.push('verslas/dealeris');
+  hint.style.display='block';
+  const c=tinderQueue[tinderIndex];
+  fill.style.width=`${Math.round((tinderIndex/tinderQueue.length)*100)}%`;
+  const signals=[];
+  if (c.yraVerslas) signals.push('verslas');
   if (c.turiIstorijosAtaskaita) signals.push('patikrinta istorija');
   if (c.garantijosTipas) signals.push('garantija');
-  const signalsText = signals.length ? signals.join(', ') : 'nėra papildomų signalų';
-  const specsLine = [c.kuras, c.pavarai, (c.variklioTuris ? `${c.variklioTuris}L` : null), (c.galia ? `${c.galia}kW` : null)].filter(Boolean).join(' · ');
-
-  const riskBanner = c.diffPct >= 50 ? `<div style="background:rgba(122,48,48,0.5);border:1px solid #7a3030;color:#ff9d9d;padding:7px 10px;border-radius:8px;font-size:12px;margin-bottom:8px;">⚠️ ${c.diffPct}% nuolaida – didelė rizika (gali būti avarija ar paslėpti defektai)</div>` : '';
-  document.getElementById('tinder-counter').textContent = `${tinderIndex + 1}/${tinderQueue.length}`;
-  document.getElementById('tinder-actions').style.display = 'flex';
-  stack.innerHTML = `
-    <div class="tinder-card" id="tinder-card-current">
-      <div class="tinder-badge like" id="tinder-badge-like">PATINKA</div>
-      <div class="tinder-badge skip" id="tinder-badge-skip">PRALEISTI</div>
-      <div class="tinder-photo-wrap" onclick="this.classList.toggle('shrunk')" title="Paspausti – padidinti/sumažinti nuotrauką">
-        <img src="${c.photo || ''}" onerror="this.style.background='#2c303a'">
-        <div class="tinder-photo-gradient"></div>
-        <div class="tinder-photo-info">
-          <div class="tinder-card-title">${c.modelis} <span class="source-tag" style="font-size:10px;">${c.source}</span></div>
-          <div class="tinder-card-price">
-            <span class="tinder-price-val">${formatEUR(c.kaina)}</span>
-            <span class="tinder-price-diff">-${c.diffPct}%</span>
-          </div>
-        </div>
-      </div>
-      <div class="tinder-card-body">
-        ${riskBanner}
-        <div class="tinder-card-meta">📅 ${c.metai || '?'} &nbsp;·&nbsp; 🛣️ ${c.rida ? c.rida.toLocaleString('lt-LT').replace(/,/g,' ') + ' km' : '? km'}${specsLine ? '<br>⚙️ ' + specsLine : ''}</div>
-        ${signals.length ? `<div class="tinder-card-signals">🛡️ ${signalsText}</div>` : ''}
-        <div class="tinder-card-comment">${c.comment || ''}</div>
-        <div id="tinder-detail-extra" style="margin-top:8px; display:none;"></div>
-      </div>
-    </div>
-  `;
+  const specsLine=[c.kuras,c.pavarai,c.variklioTuris?`${c.variklioTuris}L`:null,c.galia?`${c.galia}kW`:null].filter(Boolean).join(' · ');
+  const riskBanner=c.diffPct>=50?`<div style="background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25);color:#f87171;padding:7px 10px;border-radius:8px;font-size:12px;margin-bottom:8px;">⚠️ ${c.diffPct}% nuolaida – didelė rizika</div>`:'';
+  document.getElementById('tinder-counter').textContent=`${tinderIndex+1}/${tinderQueue.length}`;
+  document.getElementById('tinder-actions').style.display='flex';
+  stack.innerHTML=`<div class="tinder-card" id="tinder-card-current"><div class="tinder-badge like" id="tinder-badge-like">PATINKA</div><div class="tinder-badge skip" id="tinder-badge-skip">PRALEISTI</div><div class="tinder-photo-wrap" onclick="this.classList.toggle('shrunk')" title="Paspausti – padidinti/sumažinti"><img src="${c.photo||''}" onerror="this.style.background='#1a1d2a'"><div class="tinder-photo-gradient"></div><div class="tinder-photo-info"><div class="tinder-card-title">${c.modelis} <span class="source-tag" style="font-size:10px;">${c.source}</span></div><div class="tinder-card-price"><span class="tinder-price-val">${formatEUR(c.kaina)}</span><span class="tinder-price-diff">-${c.diffPct}%</span></div></div></div><div class="tinder-card-body">${riskBanner}<div class="tinder-card-meta">📅 ${c.metai||'?'} &nbsp;·&nbsp; 🛣️ ${c.rida?c.rida.toLocaleString('lt-LT').replace(/,/g,' ')+' km':'? km'}${specsLine?'<br>⚙️ '+specsLine:''}</div>${signals.length?`<div class="tinder-card-signals">🛡️ ${signals.join(', ')}</div>`:''}<div class="tinder-card-comment">${c.comment||''}</div><div id="tinder-detail-extra" style="margin-top:8px;display:none;"></div></div></div>`;
   attachSwipeHandlers(document.getElementById('tinder-card-current'));
 }
-
 async function toggleTinderDetail() {
-  const extra = document.getElementById('tinder-detail-extra');
-  const btn = document.getElementById('tinder-detail-btn');
-  const c = tinderQueue[tinderIndex];
-
-  if (extra.dataset.loaded === 'true') {
-    extra.style.display = extra.style.display === 'none' ? 'block' : 'none';
-    return;
-  }
-
-  extra.style.display = 'block';
-  if (c.deepAnalysis) {
-    extra.innerHTML = buildDetailPanelHTML({ analysis: c.deepAnalysis, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, 'tinder-detail-extra');
-    extra.dataset.loaded = 'true';
-    return;
-  }
-  // Tikrinti localStorage cache
-  const cached = getAnalysisCache(c.url);
-  if (cached) {
-    extra.innerHTML = buildDetailPanelHTML(cached, c.url, 'tinder-detail-extra');
-    extra.dataset.loaded = 'true';
-    return;
-  }
-
-  extra.innerHTML = '<span style="color:#9a9aa5;font-size:12px;">🔬 Kraunama detali apžvalga...</span>';
+  const extra=document.getElementById('tinder-detail-extra');
+  const c=tinderQueue[tinderIndex];
+  if (extra.dataset.loaded==='true') { extra.style.display=extra.style.display==='none'?'block':'none'; return; }
+  extra.style.display='block';
+  if (c.deepAnalysis) { extra.innerHTML=buildDetailPanelHTML({analysis:c.deepAnalysis,vin:c.vin,pardavejas:c.pardavejas,photos:c.photos,cached:false},c.url,'tinder-detail-extra'); extra.dataset.loaded='true'; return; }
+  const cached=getAnalysisCache(c.url);
+  if (cached) { extra.innerHTML=buildDetailPanelHTML(cached,c.url,'tinder-detail-extra'); extra.dataset.loaded='true'; return; }
+  extra.innerHTML='<span style="color:#6a6f88;font-size:12px;">🔬 Kraunama...</span>';
   try {
-    const resp = await fetch('/api/analyze-single', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: c.url }),
-    });
-    const data = await resp.json();
-    if (data.error) {
-      extra.innerHTML = `<span style="color:#e88;font-size:12px;">Klaida: ${data.error}</span>`;
-      return;
-    }
-    setAnalysisCache(c.url, data);
-    extra.innerHTML = buildDetailPanelHTML(data, c.url, 'tinder-detail-extra');
-    extra.dataset.loaded = 'true';
-  } catch (err) {
-    extra.innerHTML = `<span style="color:#e88;font-size:12px;">Klaida: ${err.message}</span>`;
-  }
+    const resp=await fetch('/api/analyze-single',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:c.url})});
+    const data=await resp.json();
+    if (data.error){extra.innerHTML=`<span style="color:#f87171;font-size:12px;">Klaida: ${data.error}</span>`;return;}
+    setAnalysisCache(c.url,data); extra.innerHTML=buildDetailPanelHTML(data,c.url,'tinder-detail-extra'); extra.dataset.loaded='true';
+  } catch(err){extra.innerHTML=`<span style="color:#f87171;font-size:12px;">Klaida: ${err.message}</span>`;}
 }
-
 function attachSwipeHandlers(el) {
-  let startX = 0, startY = 0, dx = 0, dragging = false;
-  const likeBadge = document.getElementById('tinder-badge-like');
-  const skipBadge = document.getElementById('tinder-badge-skip');
-
-  function onMove(clientX, clientY) {
-    dx = clientX - startX;
-    const dy = clientY - startY;
-    el.style.transform = `translate(${dx}px, ${dy * 0.2}px) rotate(${dx / 18}deg)`;
-    const opacity = Math.min(Math.abs(dx) / 100, 1);
-    if (dx > 0) { likeBadge.style.opacity = opacity; skipBadge.style.opacity = 0; }
-    else { skipBadge.style.opacity = opacity; likeBadge.style.opacity = 0; }
-  }
-  function onEnd() {
-    dragging = false;
-    if (dx > 100) tinderSwipe('right');
-    else if (dx < -100) tinderSwipe('left');
-    else {
-      el.style.transition = 'transform 0.25s ease-out';
-      el.style.transform = '';
-      likeBadge.style.opacity = 0;
-      skipBadge.style.opacity = 0;
-    }
-  }
-
-  el.addEventListener('touchstart', (e) => {
-    dragging = true; startX = e.touches[0].clientX; startY = e.touches[0].clientY;
-    el.style.transition = 'none';
-  });
-  el.addEventListener('touchmove', (e) => {
-    if (!dragging) return;
-    onMove(e.touches[0].clientX, e.touches[0].clientY);
-  });
-  el.addEventListener('touchend', onEnd);
-
-  // pelele valdymas (desktop testavimui)
-  el.addEventListener('mousedown', (e) => {
-    dragging = true; startX = e.clientX; startY = e.clientY;
-    el.style.transition = 'none';
-    el.style.cursor = 'grabbing';
-  });
-  window.addEventListener('mousemove', (e) => {
-    if (!dragging) return;
-    onMove(e.clientX, e.clientY);
-  });
-  window.addEventListener('mouseup', () => {
-    if (!dragging) return;
-    el.style.cursor = 'grab';
-    onEnd();
-  });
+  let startX=0,startY=0,dx=0,dragging=false;
+  const likeBadge=document.getElementById('tinder-badge-like');
+  const skipBadge=document.getElementById('tinder-badge-skip');
+  function onMove(clientX,clientY){dx=clientX-startX;const dy=clientY-startY;el.style.transform=`translate(${dx}px,${dy*0.2}px) rotate(${dx/18}deg)`;const opacity=Math.min(Math.abs(dx)/100,1);if(dx>0){likeBadge.style.opacity=opacity;skipBadge.style.opacity=0;}else{skipBadge.style.opacity=opacity;likeBadge.style.opacity=0;}}
+  function onEnd(){dragging=false;if(dx>100)tinderSwipe('right');else if(dx<-100)tinderSwipe('left');else{el.style.transition='transform 0.25s ease-out';el.style.transform='';likeBadge.style.opacity=0;skipBadge.style.opacity=0;}}
+  el.addEventListener('touchstart',e=>{dragging=true;startX=e.touches[0].clientX;startY=e.touches[0].clientY;el.style.transition='none';});
+  el.addEventListener('touchmove',e=>{if(!dragging)return;onMove(e.touches[0].clientX,e.touches[0].clientY);});
+  el.addEventListener('touchend',onEnd);
+  el.addEventListener('mousedown',e=>{dragging=true;startX=e.clientX;startY=e.clientY;el.style.transition='none';el.style.cursor='grabbing';});
+  window.addEventListener('mousemove',e=>{if(!dragging)return;onMove(e.clientX,e.clientY);});
+  window.addEventListener('mouseup',()=>{if(!dragging)return;el.style.cursor='grab';onEnd();});
 }
-
-async function tinderGetAnalysis(url, btn) {
-  const container = btn.parentElement.parentElement;
-  const existingResult = container.querySelector('.tinder-analysis-result');
-  if (existingResult) { existingResult.style.display = existingResult.style.display === 'none' ? 'block' : 'none'; return; }
-  btn.disabled = true;
-  btn.textContent = '⏳';
-  const resultDiv = document.createElement('div');
-  resultDiv.className = 'tinder-analysis-result';
-  resultDiv.style = 'margin-top:8px; font-size:12px; color:#d0d0d8; background:#0f111a; border-radius:6px; padding:10px;';
-  resultDiv.textContent = 'Kraunama...';
-  container.after(resultDiv);
-  const cachedGet = getAnalysisCache(url);
-  if (cachedGet) {
-    resultDiv.innerHTML = buildDetailPanelHTML(cachedGet, url, 'tinder-summary-result-' + Date.now());
-    btn.disabled = false; btn.textContent = '🔍 Analizė'; return;
-  }
-  try {
-    const resp = await fetch('/api/analyze-single', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ url }) });
-    const data = await resp.json();
-    if (data.error) { resultDiv.innerHTML = `<span style="color:#e88;">Klaida: ${data.error}</span>`; return; }
-    setAnalysisCache(url, data);
-    resultDiv.innerHTML = buildDetailPanelHTML(data, url, 'tinder-summary-result-' + Date.now());
-  } catch(err) { resultDiv.innerHTML = `<span style="color:#e88;">Klaida: ${err.message}</span>`; }
-  finally { btn.disabled = false; btn.textContent = '🔍 Analizė'; }
+function tinderSwipe(direction) {
+  const el=document.getElementById('tinder-card-current');
+  const c=tinderQueue[tinderIndex];
+  if (el){el.style.transition='transform 0.35s ease-out';el.style.transform=`translate(${direction==='right'?700:-700}px,-40px) rotate(${direction==='right'?25:-25}deg)`;}
+  if (direction==='right'&&c) tinderLiked.push(c); else if (direction==='left'&&c) tinderSkipped.push(c);
+  setTimeout(()=>{tinderIndex++;renderTinderCard();},220);
 }
-
 function startTinderRest() {
-  const rest = window.__tinderRestListings || [];
-  if (rest.length === 0) return;
-  tinderPhase = 'rest';
-  tinderQueue = rest.map(l => ({
-    ...l,
-    source: l.source || (l.url && l.url.includes('autoscout24') ? 'autoscout24.com' : l.url && l.url.includes('otomoto') ? 'otomoto.pl' : l.url && l.url.includes('autogidas') ? 'autogidas.lt' : 'autoplius.lt'),
-    comment: l.comment || '',
-    diffPct: l.diffPct || 0,
-  }));
-  tinderIndex = 0;
-  document.getElementById('tinder-actions').style.display = 'flex';
-  document.getElementById('tinder-hint').style.display = 'block';
+  const rest=window.__tinderRestListings||[];
+  if (rest.length===0) return;
+  tinderPhase='rest';
+  tinderQueue=rest.map(l=>({...l,source:l.source||(l.url&&l.url.includes('autoscout24')?'autoscout24.com':l.url&&l.url.includes('otomoto')?'otomoto.pl':l.url&&l.url.includes('autogidas')?'autogidas.lt':'autoplius.lt'),comment:l.comment||'',diffPct:l.diffPct||0}));
+  tinderIndex=0;
+  document.getElementById('tinder-actions').style.display='flex';
+  document.getElementById('tinder-hint').style.display='block';
   renderTinderCard();
 }
-
-function tinderSwipe(direction) {
-  const el = document.getElementById('tinder-card-current');
-  const c = tinderQueue[tinderIndex];
-  if (el) {
-    el.style.transition = 'transform 0.35s ease-out';
-    el.style.transform = `translate(${direction === 'right' ? 700 : -700}px, -40px) rotate(${direction === 'right' ? 25 : -25}deg)`;
-  }
-  if (direction === 'right' && c) tinderLiked.push(c);
-  else if (direction === 'left' && c) tinderSkipped.push(c);
-  setTimeout(() => {
-    tinderIndex++;
-    renderTinderCard();
-  }, 220);
-}
-
-document.addEventListener('keydown', (e) => {
+document.addEventListener('keydown',e=>{
   if (!document.getElementById('tinder-view').classList.contains('active')) return;
-  if (e.key === 'ArrowLeft') tinderSwipe('left');
-  if (e.key === 'ArrowRight') tinderSwipe('right');
-  if (e.key === 'Escape') exitTinder();
+  if (e.key==='ArrowLeft') tinderSwipe('left');
+  if (e.key==='ArrowRight') tinderSwipe('right');
+  if (e.key==='Escape') exitTinder();
 });
 
-// ============ NUOTRAUKU LIGHTBOX (padidinimas + narsymas tarp visu nuotrauku) ============
-let lightboxPhotos = [];
-let lightboxIndex = 0;
-
-function openLightbox(photos, startIndex) {
-  lightboxPhotos = photos;
-  lightboxIndex = startIndex;
-  document.getElementById('lightbox').classList.add('active');
-  document.body.style.overflow = 'hidden';
-  renderLightbox();
-}
-
-function closeLightbox() {
-  document.getElementById('lightbox').classList.remove('active');
-  document.body.style.overflow = '';
-}
-
-function lightboxNav(dir) {
-  lightboxIndex = (lightboxIndex + dir + lightboxPhotos.length) % lightboxPhotos.length;
-  renderLightbox();
-}
-
-function renderLightbox() {
-  document.getElementById('lightbox-img').src = lightboxPhotos[lightboxIndex];
-  document.getElementById('lightbox-counter').textContent = `${lightboxIndex + 1} / ${lightboxPhotos.length}`;
-  const multi = lightboxPhotos.length > 1;
-  document.getElementById('lightbox-prev').style.display = multi ? 'block' : 'none';
-  document.getElementById('lightbox-next').style.display = multi ? 'block' : 'none';
-}
-
-document.addEventListener('keydown', (e) => {
+// ===== LIGHTBOX =====
+let lightboxPhotos=[], lightboxIndex=0;
+function openLightbox(photos, startIndex) { lightboxPhotos=photos; lightboxIndex=startIndex; document.getElementById('lightbox').classList.add('active'); document.body.style.overflow='hidden'; renderLightbox(); }
+function closeLightbox() { document.getElementById('lightbox').classList.remove('active'); document.body.style.overflow=''; }
+function lightboxNav(dir) { lightboxIndex=(lightboxIndex+dir+lightboxPhotos.length)%lightboxPhotos.length; renderLightbox(); }
+function renderLightbox() { document.getElementById('lightbox-img').src=lightboxPhotos[lightboxIndex]; document.getElementById('lightbox-counter').textContent=`${lightboxIndex+1} / ${lightboxPhotos.length}`; const multi=lightboxPhotos.length>1; document.getElementById('lightbox-prev').style.display=multi?'block':'none'; document.getElementById('lightbox-next').style.display=multi?'block':'none'; }
+document.addEventListener('keydown',e=>{
   if (!document.getElementById('lightbox').classList.contains('active')) return;
-  if (e.key === 'ArrowLeft') lightboxNav(-1);
-  if (e.key === 'ArrowRight') lightboxNav(1);
-  if (e.key === 'Escape') closeLightbox();
+  if (e.key==='ArrowLeft') lightboxNav(-1);
+  if (e.key==='ArrowRight') lightboxNav(1);
+  if (e.key==='Escape') closeLightbox();
 });
-
-function cyclePhoto(cardId, dir) {
-  window.__galleryStore = window.__galleryStore || {};
-  window.__cardPhotoIndex = window.__cardPhotoIndex || {};
-  const photos = window.__galleryStore[cardId + '-strip'];
-  if (!photos || photos.length < 2) return;
-  let idx = window.__cardPhotoIndex[cardId] || 0;
-  idx = (idx + dir + photos.length) % photos.length;
-  window.__cardPhotoIndex[cardId] = idx;
-  const img = document.getElementById(cardId + '-img');
-  if (img) img.src = photos[idx];
-  const counter = document.getElementById(cardId + '-photocount');
-  if (counter) counter.textContent = `${idx + 1}/${photos.length}`;
+function cyclePhoto(cardId,dir) {
+  window.__galleryStore=window.__galleryStore||{}; window.__cardPhotoIndex=window.__cardPhotoIndex||{};
+  const photos=window.__galleryStore[cardId+'-strip'];
+  if (!photos||photos.length<2) return;
+  let idx=window.__cardPhotoIndex[cardId]||0;
+  idx=(idx+dir+photos.length)%photos.length;
+  window.__cardPhotoIndex[cardId]=idx;
+  const img=document.getElementById(cardId+'-img');
+  if (img) img.src=photos[idx];
+  const counter=document.getElementById(cardId+'-photocount');
+  if (counter) counter.textContent=`${idx+1}/${photos.length}`;
 }
 
-function escJs(s) {
-  return String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, ' ');
-}
+// ===== UTILS =====
+function escJs(s) { return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,' '); }
+function formatEUR(n) { if (n===null||n===undefined) return '?'; return n.toLocaleString('lt-LT').replace(/,/g,' ')+' €'; }
+function formatRidaDiff(pct) { return pct>=100?`${(pct/100+1).toFixed(1)} karto`:`${pct}%`; }
 
-function formatEUR(n) {
-  if (n === null || n === undefined) return '?';
-  return n.toLocaleString('lt-LT').replace(/,/g, ' ') + ' €';
-}
-
-function formatRidaDiff(pct) {
-  return pct >= 100 ? `${(pct / 100 + 1).toFixed(1)} karto` : `${pct}%`;
-}
-
-let currentData = null;
-
+// ===== RESULTS =====
+let currentData=null;
 function renderResults(data, status, results) {
-  currentData = data;
-  const rawNote = data.rawFoundCount && data.rawFoundCount !== data.totalScanned
-    ? ` (iš ${data.rawFoundCount} pagal markę/modelį, ${data.totalScanned} atitiko jūsų kainos/ridos/metų filtrus)`
-    : '';
-  status.textContent = `Rasta ${data.candidates.length} verti dėmesio${rawNote}:`;
-  document.getElementById('sort-bar').style.display = data.candidates.length > 0 ? 'flex' : 'none';
-  document.getElementById('sort-select').value = 'quality';
-
+  currentData=data;
+  const rawNote=data.rawFoundCount&&data.rawFoundCount!==data.totalScanned?` (iš ${data.rawFoundCount} pagal markę/modelį, ${data.totalScanned} atitiko filtrus)`:'';
+  status.textContent=`Rasta ${data.candidates.length} verti dėmesio${rawNote}:`;
+  document.getElementById('sort-bar').style.display=data.candidates.length>0?'flex':'none';
+  document.getElementById('sort-select').value='quality';
   renderCandidateCards(data.candidates, results);
-  renderAllListings(data.allListings || []);
+  renderAllListings(data.allListings||[]);
 }
-
 function applySorting() {
   if (!currentData) return;
-  const mode = document.getElementById('sort-select').value;
-  const sorted = [...currentData.candidates];
-  if (mode === 'cheapest') sorted.sort((a, b) => a.kaina - b.kaina);
-  else if (mode === 'priciest') sorted.sort((a, b) => b.kaina - a.kaina);
-  else if (mode === 'biggest-discount') sorted.sort((a, b) => b.diffPct - a.diffPct);
-  else sorted.sort((a, b) => b.qualityScore - a.qualityScore);
+  const mode=document.getElementById('sort-select').value;
+  const sorted=[...currentData.candidates];
+  if (mode==='cheapest') sorted.sort((a,b)=>a.kaina-b.kaina);
+  else if (mode==='priciest') sorted.sort((a,b)=>b.kaina-a.kaina);
+  else if (mode==='biggest-discount') sorted.sort((a,b)=>b.diffPct-a.diffPct);
+  else sorted.sort((a,b)=>b.qualityScore-a.qualityScore);
   renderCandidateCards(sorted, document.getElementById('results'));
 }
 
 function renderCandidateCards(candidates, results) {
-  results.innerHTML = '';
-  if (candidates.length === 0) {
-    results.innerHTML = '<div style="color:#9a9aa5">Nieko nerasta pagal šiuos kriterijus, arba visos kainos atitinka rinkos vidurkį.</div>';
-    return;
-  }
-
+  results.innerHTML='';
+  if (candidates.length===0) { results.innerHTML='<div style="color:#6a6f88;padding:24px 0;">Nieko nerasta pagal šiuos kriterijus.</div>'; return; }
   candidates.forEach((c, idx) => {
-    const signals = [];
-    if (c.yraVerslas) signals.push('verslas/dealeris');
-    if (c.turiIstorijosAtaskaita) signals.push('patikrinta istorija');
-    if (c.garantijosTipas) signals.push('garantija');
-    if (c.turiVin) signals.push('VIN nurodytas');
-    const signalsText = signals.length ? signals.join(', ') : 'nėra papildomų signalų';
-    const cardId = `detail-${idx}-${c.url.length}`;
-    const pvmNote = c.pvmPastaba
-      ? `<div style="color:#f0c674;font-size:12px;margin:4px 0">💶 ${c.pvmPastaba}</div>`
-      : c.kainaBePvm
-      ? `<div style="color:#666;font-size:11px;margin:4px 0">(skelbime taip pat nurodyta ${formatEUR(c.kainaBePvm)} be PVM/Eksportui kaina)</div>`
-      : '';
-    const riskBanner = c.diffPct >= 39
-      ? `<div class="risk-banner">⚠️ ${c.diffPct}% nuolaida yra labai didelė – statistiškai tokie skelbimai dažnai turi paslėptų defektų (daužtas, po avarijos ar pan.). Būtina kruopšti apžiūra prieš perkant.</div>`
-      : '';
-    const diffClass = c.diffPct >= 39 ? 'card-diff high-risk' : 'card-diff';
-    const ridaNote = c.ridaDiffPct !== null
-      ? c.ridaDiffPct >= 20
-        ? `<div style="color:#ff9d9d;font-size:12px;margin:2px 0">🔧 Rida ${formatRidaDiff(c.ridaDiffPct)} aukštesnė nei imties vidurkis (${c.ridaMedian.toLocaleString('lt-LT').replace(/,/g,' ')} km) – daugiau nusidėvėjimo</div>`
-        : c.ridaDiffPct <= -20
-        ? `<div style="color:#7fd88f;font-size:12px;margin:2px 0">✓ Rida ${Math.abs(c.ridaDiffPct)}% žemesnė nei imties vidurkis (${c.ridaMedian.toLocaleString('lt-LT').replace(/,/g,' ')} km)</div>`
-        : ''
-      : '';
-    const crossListNote = c.kryzminiaiSkelbimai && c.kryzminiaiSkelbimai.length > 0
-      ? `<div style="color:#9a9aa5;font-size:12px;margin:2px 0">🔗 Tas pats automobilis taip pat: ${c.kryzminiaiSkelbimai.map((k) => `${k.source} už ${formatEUR(k.kaina)}`).join(', ')}</div>`
-      : '';
-    const specsLine = [c.kuras, c.pavarai, (c.variklioTuris ? `${c.variklioTuris}L` : null), (c.galia ? `${c.galia}kW` : null)].filter(Boolean).join(' · ');
-
-    // TOP 5 kandidatai jau ateina su pilna analize is backend - rodome is karto,
-    // be poreikio spausti mygtuka. Likusiems - iprastas mygtukas su leftiniu uzkrovimu.
-    const hasPreloadedDeep = !!c.deepAnalysis;
-    const detailBtnLabel = hasPreloadedDeep ? '✨ Rodyti gilią analizę' : '🔬 Detali apžvalga';
-    const preloadedPanelHTML = hasPreloadedDeep
-      ? buildDetailPanelHTML({ analysis: c.deepAnalysis, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, cardId)
-      : '';
-    const fullBadge = hasPreloadedDeep
-      ? `<span style="font-size:10px; background:#2d4a35; color:#7fd88f; padding:2px 6px; border-radius:4px; margin-left:6px;">✨ pilna apžvalga</span>`
-      : '';
-
-    const isFav = isFavorited(c.url);
-    const favSnapshot = `{modelis:'${escJs(c.modelis)}', kaina:${c.kaina || 'null'}, metai:${c.metai || 'null'}, rida:${c.rida || 'null'}, photo:'${escJs(c.photo || '')}', source:'${escJs(c.source)}'}`;
-
-    const hasMultiplePhotos = c.photos && c.photos.length > 1;
+    const cardId=`detail-${idx}-${c.url.length}`;
+    const scores=calcCarScore(c);
+    const sColor=scoreColor(scores.overall);
+    const insights=buildInsights(c);
+    const isFav=isFavorited(c.url);
+    const favSnapshot=`{modelis:'${escJs(c.modelis)}',kaina:${c.kaina||'null'},metai:${c.metai||'null'},rida:${c.rida||'null'},photo:'${escJs(c.photo||'')}',source:'${escJs(c.source)}'}`;
+    const pvmNote=c.pvmPastaba?`<div class="pvm-note">💶 ${c.pvmPastaba}</div>`:c.kainaBePvm?`<div style="color:#4a4f6a;font-size:11px;">(taip pat ${formatEUR(c.kainaBePvm)} be PVM)</div>`:'';
+    const riskBanner=c.diffPct>=39?`<div class="risk-banner">⚠️ ${c.diffPct}% nuolaida labai didelė – tikėtinas defektas ar avarija. Būtina kruopšti apžiūra.</div>`:'';
+    const discountClass=c.diffPct>=39?'card-discount danger':'card-discount';
+    const ridaNote=c.ridaDiffPct!==null?(c.ridaDiffPct>=20?`<div class="rida-note-bad">🔧 Rida ${formatRidaDiff(c.ridaDiffPct)} aukštesnė nei vidurkis (${c.ridaMedian?c.ridaMedian.toLocaleString('lt-LT').replace(/,/g,' '):'-'} km)</div>`:c.ridaDiffPct<=-20?`<div class="rida-note-good">✓ Rida ${Math.abs(c.ridaDiffPct)}% žemesnė nei vidurkis (${c.ridaMedian?c.ridaMedian.toLocaleString('lt-LT').replace(/,/g,' '):'-'} km)</div>`:''):'';
+    const crossListNote=c.kryzminiaiSkelbimai&&c.kryzminiaiSkelbimai.length>0?`<div class="cross-list-note">🔗 Tas pats taip pat: ${c.kryzminiaiSkelbimai.map(k=>`${k.source} ${formatEUR(k.kaina)}`).join(', ')}</div>`:'';
+    const specsLine=[c.kuras,c.pavarai,c.variklioTuris?`${c.variklioTuris}L`:null,c.galia?`${c.galia}kW`:null].filter(Boolean).join(' · ');
+    const hasPreloadedDeep=!!c.deepAnalysis;
+    const detailBtnLabel=hasPreloadedDeep?'✨ Gilią analizę':'🔬 Detali apžvalga';
+    const preloadedPanelHTML=hasPreloadedDeep?buildDetailPanelHTML({analysis:c.deepAnalysis,vin:c.vin,pardavejas:c.pardavejas,photos:c.photos,cached:false},c.url,cardId):'';
+    const hasMultiplePhotos=c.photos&&c.photos.length>1;
     if (hasMultiplePhotos) {
-      window.__galleryStore = window.__galleryStore || {};
-      window.__galleryStore[cardId + '-strip'] = c.photos;
-      window.__cardPhotoIndex = window.__cardPhotoIndex || {};
-      window.__cardPhotoIndex[cardId] = 0;
+      window.__galleryStore=window.__galleryStore||{};
+      window.__galleryStore[cardId+'-strip']=c.photos;
+      window.__cardPhotoIndex=window.__cardPhotoIndex||{};
+      window.__cardPhotoIndex[cardId]=0;
     }
-    const photoNavArrows = hasMultiplePhotos
-      ? `<button class="card-photo-nav prev" onclick="event.stopPropagation(); cyclePhoto('${cardId}', -1)">‹</button>
-         <button class="card-photo-nav next" onclick="event.stopPropagation(); cyclePhoto('${cardId}', 1)">›</button>
-         <div class="card-photo-count" id="${cardId}-photocount">1/${c.photos.length}</div>`
-      : '';
+    const photoNavArrows=hasMultiplePhotos?`<button class="card-photo-nav prev" onclick="event.stopPropagation();cyclePhoto('${cardId}',-1)">‹</button><button class="card-photo-nav next" onclick="event.stopPropagation();cyclePhoto('${cardId}',1)">›</button><div class="card-photo-count" id="${cardId}-photocount">1/${c.photos.length}</div>`:'';
+    const insideBadgeHTML=insights.map(b=>`<span class="insight-badge ${b.type}">${b.text}</span>`).join('');
+    const subScoresHTML=['kaina','rida','iranga','istorija','potencialas'].map(k=>`<div class="sub-score-row"><span class="sub-score-name">${{kaina:'Kaina',rida:'Rida',iranga:'Įranga',istorija:'Istorija',potencialas:'Potenc.'}[k]}</span><div class="sub-score-bar"><div class="sub-score-fill ${subScoreFillClass(scores[k])}" style="width:${scores[k]*10}%"></div></div></div>`).join('');
 
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
-      <button class="fav-star${isFav ? ' active' : ''}" onclick="toggleFavorite('${c.url}', ${favSnapshot}, this)">${isFav ? '★' : '☆'}</button>
-      <div class="card-photo-wrap">
-        <img id="${cardId}-img" src="${c.photo || ''}" onclick="${hasMultiplePhotos ? `openLightbox(window.__galleryStore['${cardId}-strip'], window.__cardPhotoIndex['${cardId}']||0)` : ''}" onerror="this.style.display='none'">
+    const card=document.createElement('div');
+    card.className='card';
+    card.innerHTML=`
+      <div class="card-photo-section">
+        <img id="${cardId}-img" src="${c.photo||''}" onclick="${hasMultiplePhotos?`openLightbox(window.__galleryStore['${cardId}-strip'],window.__cardPhotoIndex['${cardId}']||0)`:''}" onerror="this.style.display='none'" style="cursor:${hasMultiplePhotos?'pointer':'default'}">
         ${photoNavArrows}
       </div>
-      <div class="card-body">
-        <div class="card-title">#${idx + 1} ${c.modelis} <span class="source-tag">${c.source}</span>${fullBadge}</div>
-        <div class="card-price">${formatEUR(c.kaina)} <span class="${diffClass}">-${c.diffPct}%</span></div>
-        ${pvmNote}
-        ${riskBanner}
-        <div class="card-meta">${c.metai || '?'} · ${c.rida ? c.rida.toLocaleString('lt-LT').replace(/,/g,' ') + ' km' : '? km'}${specsLine ? ' · ' + specsLine : ''} · rinkos vidurkis ${formatEUR(c.marketMedian)} (imtis ${c.marketCount})</div>
-        ${ridaNote}
-        ${crossListNote}
-        <div class="card-signals">🛡️ ${signalsText}</div>
-        <div class="card-comment">${c.comment}</div>
-        <div class="card-actions">
-          <a class="card-link" href="${c.url}" target="_blank">Žiūrėti skelbimą →</a>
-          <button class="detail-btn${hasPreloadedDeep ? ' ready' : ''}" id="${cardId}-btn" data-closed-label="${detailBtnLabel}" onclick="loadDetail('${c.url}', '${cardId}', this, false, {kaina:${c.kaina||'null'}, marketMedian:${c.marketMedian||'null'}, marketCount:${c.marketCount||'null'}, diffPct:${c.diffPct!=null?c.diffPct:'null'}, modelis:'${escJs(c.modelis)}', pardavejas:${c.pardavejas ? `'${escJs(c.pardavejas)}'` : 'null'}, galia:${c.galia||'null'}, variklioTuris:${c.variklioTuris||'null'}})">${detailBtnLabel}</button>
-          <button class="compare-toggle" id="cmp-${cardId}" onclick="toggleCompare('${c.url}', '${escJs(c.modelis)}', ${c.kaina||'null'}, '${escJs(c.photo||'')}', ${c.metai||'null'}, ${c.rida||'null'}, '${escJs(c.kuras||'')}', ${c.galia||'null'}, ${c.variklioTuris||'null'}, '${escJs(c.pavarai||'')}', ${c.diffPct!=null?c.diffPct:'null'}, ${c.marketMedian||'null'}, '${escJs(c.source||'')}', 'cmp-${cardId}')">⚖️ Palyginti</button>
+      <div class="card-info">
+        <div class="card-top-row">
+          <div>
+            <div class="card-rank">#${idx+1}</div>
+            <div class="card-title">${c.modelis} <span class="source-tag">${c.source}</span>${hasPreloadedDeep?'<span style="font-size:10px;background:#162a1e;color:#34d399;padding:2px 6px;border-radius:4px;margin-left:5px;">✨ pilna apžvalga</span>':''}</div>
+          </div>
+          <button class="fav-btn${isFav?' active':''}" onclick="toggleFavorite('${c.url}',${favSnapshot},this)">${isFav?'★':'☆'}</button>
         </div>
-        <div class="detail-panel" id="${cardId}" data-loaded="${hasPreloadedDeep}" style="display:none">${preloadedPanelHTML}</div>
+        <div class="card-price-row">
+          <span class="card-price">${formatEUR(c.kaina)}</span>
+          ${c.diffPct!=null?`<span class="${discountClass}">−${c.diffPct}%</span>`:''}
+          ${c.marketMedian?`<span style="font-size:11px;color:#4a4f6a;">· rinkos vid. ${formatEUR(c.marketMedian)}${c.marketCount?' ('+c.marketCount+')'':''}</span>`:''}
+        </div>
+        ${pvmNote}${riskBanner}
+        <div class="card-meta">${c.metai||'?'} · ${c.rida?c.rida.toLocaleString('lt-LT').replace(/,/g,' ')+' km':'? km'}${specsLine?' · '+specsLine:''}</div>
+        ${ridaNote}${crossListNote}
+        <div class="insight-badges">${insideBadgeHTML}</div>
+        <div class="card-comment">${c.comment||''}</div>
+        <div class="card-actions">
+          <a class="btn-link" href="${c.url}" target="_blank">Žiūrėti skelbimą →</a>
+          <button class="btn-detail${hasPreloadedDeep?' ready':''}" id="${cardId}-btn" data-closed-label="${detailBtnLabel}" onclick="loadDetail('${c.url}','${cardId}',this,false,{kaina:${c.kaina||'null'},marketMedian:${c.marketMedian||'null'},marketCount:${c.marketCount||'null'},diffPct:${c.diffPct!=null?c.diffPct:'null'},modelis:'${escJs(c.modelis)}',pardavejas:${c.pardavejas?`'${escJs(c.pardavejas)}'`:'null'},galia:${c.galia||'null'},variklioTuris:${c.variklioTuris||'null'}})">${detailBtnLabel}</button>
+          <button class="btn-compare" id="cmp-${cardId}" onclick="toggleCompare('${c.url}','${escJs(c.modelis)}',${c.kaina||'null'},'${escJs(c.photo||'')}',${c.metai||'null'},${c.rida||'null'},'${escJs(c.kuras||'')}',${c.galia||'null'},${c.variklioTuris||'null'},'${escJs(c.pavarai||'')}',${c.diffPct!=null?c.diffPct:'null'},${c.marketMedian||'null'},'${escJs(c.source||'')}','cmp-${cardId}')">⚖️ Palyginti</button>
+        </div>
+        <div class="detail-panel" id="${cardId}" data-loaded="${hasPreloadedDeep}" style="display:none;margin:-12px -14px 0;border-radius:0 0 14px 14px;">${hasPreloadedDeep?`<div class="detail-tabs" id="${cardId}-tabs"></div><div class="detail-tab-content" id="${cardId}-content">${preloadedPanelHTML}</div>`:''}</div>
+      </div>
+      <div class="card-score-divider"></div>
+      <div class="card-score-section">
+        <div class="score-ring-wrap">
+          ${scoreRingSVG(scores.overall, sColor)}
+          <div class="score-center">
+            <span class="score-value" style="color:${sColor}">${scores.overall}</span>
+            <span class="score-label">/ 10</span>
+          </div>
+        </div>
+        <div class="sub-scores">${subScoresHTML}</div>
       </div>
     `;
     results.appendChild(card);
   });
 }
 
-function renderAllListings(allListings) {
-  const wrap = document.getElementById('all-listings-wrap');
-  const container = document.getElementById('all-listings');
-  if (allListings.length === 0) {
-    wrap.style.display = 'none';
-    return;
-  }
-  wrap.style.display = 'block';
-  container.innerHTML = allListings.map((l, idx) => {
-    const specs = [l.kuras, l.pavarai, (l.variklioTuris ? `${l.variklioTuris}L` : null), (l.galia ? `${l.galia}kW` : null)].filter(Boolean).join(' · ');
-    const panelId = `all-detail-${idx}`;
-    const reasonId = `all-reason-${idx}`;
-    const candidateBadge = l.isCandidate
-      ? '<span style="font-size:10px; background:#2d4a35; color:#7fd88f; padding:2px 6px; border-radius:4px; margin-left:4px;">✓ TOP</span>'
-      : '';
-    const rejectionToggle = (!l.isCandidate && l.rejectionReasons && l.rejectionReasons.length > 0)
-      ? `<div>
-          <a href="#" onclick="event.preventDefault(); toggleReason('${reasonId}', this);" style="color:#9a9aa5; font-size:11px;">❓ Kodėl neatrinktas? ▾</a>
-          <div id="${reasonId}" style="display:none; margin-top:4px;">
-            <ul style="margin:0; padding-left:16px; font-size:11px; color:#9a9aa5;">
-              ${l.rejectionReasons.map((r) => `<li>${r}</li>`).join('')}
-            </ul>
-          </div>
-        </div>`
-      : '';
-    return `
-      <div style="padding:8px; border-bottom:1px solid #2c303a;">
-        <div style="display:flex; gap:10px; align-items:center;">
-          <img src="${l.photo || ''}" onerror="this.style.display='none'" style="width:60px;height:44px;object-fit:cover;border-radius:4px;background:#2c303a;flex-shrink:0;">
-          <div style="flex:1; font-size:13px;">
-            <a href="${l.url}" target="_blank" style="color:#e8e8ea; text-decoration:none; font-weight:600;">${l.modelis}</a>
-            <span class="source-tag">${l.source}</span>${candidateBadge}
-            ${l.turiVin ? '<span style="color:#7fd88f;font-size:11px;margin-left:4px;">VIN</span>' : ''}
-            <div style="color:#9a9aa5; font-size:12px;">${formatEUR(l.kaina)} · ${l.metai || '?'} · ${l.rida ? l.rida.toLocaleString('lt-LT').replace(/,/g,' ') + ' km' : '?'}${specs ? ' · ' + specs : ''}</div>
-            ${rejectionToggle}
-          </div>
-          <button class="detail-btn" id="${panelId}-btn" onclick="loadDetail('${l.url}', '${panelId}', this, false, {kaina:${l.kaina||'null'}, marketMedian:${l.marketMedian||'null'}, marketCount:${l.marketCount||'null'}, diffPct:${l.diffPct!=null?l.diffPct:'null'}, modelis:'${escJs(l.modelis)}', pardavejas:${l.pardavejas ? `'${escJs(l.pardavejas)}'` : 'null'}, galia:${l.galia||'null'}, variklioTuris:${l.variklioTuris||'null'}})" style="flex-shrink:0;">🔬 Detali apžvalga</button>
-        </div>
-        <div class="detail-panel" id="${panelId}"></div>
-      </div>
-    `;
-  }).join('');
-}
-
-function toggleReason(id, link) {
-  const el = document.getElementById(id);
-  const isHidden = el.style.display === 'none';
-  el.style.display = isHidden ? 'block' : 'none';
-  link.textContent = isHidden ? '❓ Kodėl neatrinktas? ▴' : '❓ Kodėl neatrinktas? ▾';
-}
-
-function toggleAllListings() {
-  const el = document.getElementById('all-listings');
-  const btn = document.getElementById('toggle-all-btn');
-  const isHidden = el.style.display === 'none';
-  el.style.display = isHidden ? 'block' : 'none';
-  btn.textContent = isHidden
-    ? `📋 Slėpti visus nuskaitytus skelbimus ▴`
-    : `📋 Rodyti visus nuskaitytus skelbimus (naršykite patys) ▾`;
-}
-
-// Besisukancios, konkrecios busenos zinutes - kad laukimas atrodytu "gyvas" ir aisku,
-// ka realiai sistema tuo metu daro (ne banalus statinis "Ieskoma...").
-function startRotatingStatus(el, messages, intervalMs = 1800) {
-  let i = 0;
-  el.innerHTML = `<span style="color:#9a9aa5; font-size:12px;">${messages[0]}</span>`;
-  const timer = setInterval(() => {
-    i = (i + 1) % messages.length;
-    const span = el.querySelector('span');
-    if (span) span.textContent = messages[i];
-  }, intervalMs);
-  return () => clearInterval(timer);
-}
-
-async function lookupVin(vin, resultId, btn) {
-  const resultEl = document.getElementById(resultId);
-  btn.disabled = true;
-  btn.textContent = '⏳ Ieškoma...';
-  const stopRotating = startRotatingStatus(resultEl, [
-    `🔍 Tikrinu VIN kodą ${vin} viešose duomenų bazėse...`,
-    '🌐 Naršau JAV aukcionų archyvus (Copart, IAAI, Bidmotors)...',
-    '📋 Ieškau, ar šis automobilis buvo parduotas aukcione...',
-    '🧩 Lyginu rastus duomenis su skelbimo informacija...',
-    '📝 Ruošiu santrauką...',
-  ]);
-
-  try {
-    const resp = await fetch('/api/vin-lookup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ vin }),
-    });
-    const data = await resp.json();
-    stopRotating();
-    if (data.error) {
-      resultEl.innerHTML = `<span style="color:#e88; font-size:12px;">Klaida: ${data.error}</span>`;
-      return;
-    }
-    const cacheNote = data.cached ? `<span style="color:#666;"> (talpykla, prieš ${data.cacheAgeMinutes} min.)</span>` : '';
-    if (!data.rasta) {
-      resultEl.innerHTML = `<div style="font-size:12px; color:#666; background:#12151b; padding:8px; border-radius:6px;">Viešai prieinamos informacijos apie šį VIN nerasta.${cacheNote}</div>`;
-    } else {
-      resultEl.innerHTML = `
-        <div style="font-size:12px; background:#12151b; padding:10px; border-radius:6px; border-left:3px solid #ff9d9d;">
-          <div style="color:#ff9d9d; font-weight:600;">⚠️ Rasta informacija${cacheNote}</div>
-          ${data.saltinis ? `<div>📍 Šaltinis: ${data.saltinis}</div>` : ''}
-          ${data.zalos_aprasas ? `<div>🔧 Žala/būklė: ${data.zalos_aprasas}</div>` : ''}
-          ${data.aukciono_kaina ? `<div>💰 Aukciono kaina: ${data.aukciono_kaina}</div>` : ''}
-          ${data.papildoma_info ? `<div>ℹ️ ${data.papildoma_info}</div>` : ''}
-          ${data.nuoroda ? `<div><a href="${data.nuoroda}" target="_blank" style="color:#6c5ce7;">Šaltinio nuoroda →</a></div>` : ''}
-        </div>`;
-    }
-  } catch (err) {
-    stopRotating();
-    resultEl.innerHTML = `<span style="color:#e88; font-size:12px;">Klaida: ${err.message}</span>`;
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '🔎 Ieškoti VIN istorijos internete';
-  }
-}
-
-async function lookupSeller(pardavejas, resultId, btn, listingUrl) {
-  const resultEl = document.getElementById(resultId);
-  btn.disabled = true;
-  btn.textContent = '⏳ Ieškoma...';
-  const stopRotating = startRotatingStatus(resultEl, [
-    `🏢 Ieškau "${pardavejas}" įmonės registro duomenų...`,
-    '⭐ Tikrinu, ar yra viešų atsiliepimų apie šį pardavėją...',
-    '📅 Žiūriu, nuo kada įmonė veikia rinkoje...',
-    '🔎 Ieškau, ar buvo nusiskundimų ar ginčų...',
-    '📝 Ruošiu santrauką...',
-  ]);
-
-  try {
-    const resp = await fetch('/api/seller-lookup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pardavejas, listingUrl }),
-    });
-    const data = await resp.json();
-    stopRotating();
-    if (data.error) {
-      resultEl.innerHTML = `<span style="color:#e88; font-size:12px;">Klaida: ${data.error}</span>`;
-      return;
-    }
-    const cacheNote = data.cached ? `<span style="color:#666;"> (talpykla, prieš ${data.cacheAgeMinutes} min.)</span>` : '';
-    if (!data.rasta) {
-      resultEl.innerHTML = `<div style="font-size:12px; color:#666; background:#12151b; padding:8px; border-radius:6px;">Viešai prieinamos informacijos apie šį pardavėją nerasta.${cacheNote}</div>`;
-    } else {
-      resultEl.innerHTML = `
-        <div style="font-size:12px; background:#12151b; padding:10px; border-radius:6px; border-left:3px solid #7fd88f;">
-          <div style="color:#7fd88f; font-weight:600;">🏢 Rasta informacija${cacheNote}</div>
-          ${data.imones_pavadinimas ? `<div>📛 Pavadinimas: ${data.imones_pavadinimas}</div>` : ''}
-          ${data.veiklos_trukme ? `<div>📅 Veiklos trukmė: ${data.veiklos_trukme}</div>` : ''}
-          ${data.atsiliepimu_santrauka ? `<div>⭐ Atsiliepimai: ${data.atsiliepimu_santrauka}</div>` : ''}
-          ${data.ispejimai ? `<div style="color:#ff9d9d;">⚠️ ${data.ispejimai}</div>` : ''}
-          ${data.nuoroda ? `<div><a href="${data.nuoroda}" target="_blank" style="color:#6c5ce7;">Šaltinio nuoroda →</a></div>` : ''}
-        </div>`;
-    }
-  } catch (err) {
-    stopRotating();
-    resultEl.innerHTML = `<span style="color:#e88; font-size:12px;">Klaida: ${err.message}</span>`;
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '🔎 Ieškoti informacijos apie pardavėją';
-  }
-}
-
+// ===== DETAIL PANEL =====
 function buildDetailPanelHTML(data, url, panelId) {
-  const a = data.analysis;
-  const listFmt = (arr) => (arr && arr.length ? '<ul>' + arr.map((x) => `<li>${x}</li>`).join('') + '</ul>' : '<span style="color:#666">–</span>');
-  const cacheNote = data.cached
-    ? `<div style="color:#666;font-size:11px;margin-bottom:8px">📦 Iš talpyklos (prieš ${data.cacheAgeMinutes} min.) · <a href="#" onclick="event.preventDefault(); loadDetail('${url}', '${panelId}', document.getElementById('${panelId}-btn'), true); return false;" style="color:#6c5ce7">atnaujinti</a></div>`
-    : '';
-  window.__galleryStore = window.__galleryStore || {};
-  window.__galleryStore[panelId] = data.photos || [];
-  const galleryBlock = (data.photos && data.photos.length > 1)
-    ? `<div class="photo-gallery">
-        ${data.photos.map((p, i) => `<img src="${p}" loading="lazy" onclick="openLightbox(window.__galleryStore['${panelId}'], ${i})" onerror="this.style.display='none'">`).join('')}
-      </div>`
-    : '';
-  const pr = a && a.perikupo_radaras;
-  const prColor = pr ? (pr.procentas >= 60 ? '#7fd88f' : pr.procentas >= 30 ? '#f0c674' : '#ff9d9d') : '#9a9aa5';
-  const pelnoLabelMap = { aukstas: 'Aukštas', vidutinis: 'Vidutinis', zemas: 'Žemas', neverta: 'Neverta' };
-  const perikupoBlock = pr
-    ? `<div style="background:#1a1d24; border:1px solid #2c303a; border-radius:8px; padding:10px 12px; margin:10px 0;">
-        <div style="font-weight:600; margin-bottom:4px;">💰 Pelno potencialas: <span style="color:${prColor}">${pelnoLabelMap[pr.pelno_potencialas] || pr.pelno_potencialas} (${pr.procentas}%)</span></div>
-        <div style="font-size:12px; color:#d0d0d8; margin-bottom:4px;">${pr.paaiskinimas || ''}</div>
-        ${pr.numatoma_investicija ? `<div style="font-size:12px; color:#9a9aa5;">🔧 Numatoma investicija: ${pr.numatoma_investicija}</div>` : ''}
-        ${pr.numatomas_pardavimo_diapazonas ? `<div style="font-size:12px; color:#9a9aa5;">🏷️ Galimas pardavimas po sutvarkymo: ${pr.numatomas_pardavimo_diapazonas}</div>` : ''}
-      </div>`
-    : '';
-  const vinResultId = `${panelId}-vin-result`;
-  const vinBlock = data.vin
-    ? `<div style="font-size:12px; color:#9a9aa5; margin:6px 0;">
-        🔑 VIN: <code style="color:#e8e8ea;">${data.vin}</code>
-        <button onclick="lookupVin('${data.vin}', '${vinResultId}', this)" style="margin-left:8px; font-size:11px; padding:3px 8px; background:#2c303a; color:#e8e8ea; border:none; border-radius:5px; cursor:pointer;">🔎 Ieškoti VIN istorijos internete</button>
-        <div id="${vinResultId}" style="margin-top:6px;"></div>
-      </div>`
-    : '';
-  const sellerResultId = `${panelId}-seller-result`;
-  const sellerBlock = data.pardavejas
-    ? `<div style="font-size:12px; color:#9a9aa5; margin:6px 0;">
-        🏢 Pardavėjas: <b style="color:#e8e8ea;">${data.pardavejas}</b>
-        <button onclick="lookupSeller('${data.pardavejas.replace(/'/g, "\\'")}', '${sellerResultId}', this, '${escJs(url)}')" style="margin-left:8px; font-size:11px; padding:3px 8px; background:#2c303a; color:#e8e8ea; border:none; border-radius:5px; cursor:pointer;">🔎 Ieškoti informacijos apie pardavėją</button>
-        <div id="${sellerResultId}" style="margin-top:6px;"></div>
-      </div>`
-    : '';
-  const specBlock = a.technine_specifikacija
-    ? `<div style="font-size:13px; color:#d0d0d8; margin:6px 0;">🔧 <b>Specifikacija:</b> ${a.technine_specifikacija}</div>`
-    : '';
-  const irangaBlock = a.irangos_akcentai && a.irangos_akcentai.length > 0
-    ? `<h4>⭐ Įrangos akcentai</h4>${listFmt(a.irangos_akcentai)}`
-    : '';
-  const photoDamageBlock = a.nuotrauku_pastebejimai && a.nuotrauku_pastebejimai.length > 0
-    ? `<div style="background:#2a1a1a; border:1px solid #5a2a2a; border-radius:8px; padding:10px 12px; margin:10px 0;">
-        <div style="font-weight:600; color:#ff9d9d; margin-bottom:4px;">👁️ AI peržiūrėjo nuotraukas – matomi pažeidimai</div>
-        ${listFmt(a.nuotrauku_pastebejimai)}
-      </div>`
-    : '';
+  const a=data.analysis;
+  if (!a) return '<div style="color:#6a6f88;padding:12px;">Nėra analizės duomenų.</div>';
+  const listFmt=arr=>arr&&arr.length?'<ul class="detail-list">'+arr.map(x=>`<li>${x}</li>`).join('')+'</ul>':'<span style="color:#4a4f6a;">–</span>';
+  const cacheNote=data.cached?`<div class="cache-note">📦 Iš talpyklos (prieš ${data.cacheAgeMinutes} min.) · <a href="#" onclick="event.preventDefault();loadDetail('${url}','${panelId}',document.getElementById('${panelId}-btn'),true);return false;" style="color:#7c6ff0">atnaujinti</a></div>`:'';
+  window.__galleryStore=window.__galleryStore||{};
+  window.__galleryStore[panelId]=data.photos||[];
+  const galleryBlock=data.photos&&data.photos.length>1?`<div class="photo-gallery">${data.photos.map((p,i)=>`<img src="${p}" loading="lazy" onclick="openLightbox(window.__galleryStore['${panelId}'],${i})" onerror="this.style.display='none'">`).join('')}</div>`:'';
+  const pr=a&&a.perikupo_radaras;
+  const prColor=pr?(pr.procentas>=60?'#34d399':pr.procentas>=30?'#f0c674':'#f87171'):'#6a6f88';
+  const pelnoLabelMap={aukstas:'Aukštas',vidutinis:'Vidutinis',zemas:'Žemas',neverta:'Neverta'};
+  const perikupoBlock=pr?`<div class="perikupas-box"><div class="perikupas-title">💰 Pelno potencialas: <span style="color:${prColor}">${pelnoLabelMap[pr.pelno_potencialas]||pr.pelno_potencialas} (${pr.procentas}%)</span></div><div style="font-size:12px;color:#c0c4d8;margin-bottom:4px;">${pr.paaiskinimas||''}</div>${pr.numatoma_investicija?`<div style="font-size:12px;color:#6a6f88;">🔧 Investicija: ${pr.numatoma_investicija}</div>`:''} ${pr.numatomas_pardavimo_diapazonas?`<div style="font-size:12px;color:#6a6f88;">🏷️ Galimas pardavimas: ${pr.numatomas_pardavimo_diapazonas}</div>`:''}</div>`:'';
+  const vinResultId=`${panelId}-vin-result`;
+  const vinBlock=data.vin?`<div class="vin-box"><span style="color:#6a6f88;">VIN:</span> <span class="vin-code">${data.vin}</span> <button class="btn-lookup" onclick="lookupVin('${data.vin}','${vinResultId}',this)">🔎 Ieškoti istorijos</button><div id="${vinResultId}" class="lookup-result"></div></div>`:'';
+  const sellerResultId=`${panelId}-seller-result`;
+  const sellerBlock=data.pardavejas?`<div class="seller-box"><span style="color:#6a6f88;">Pardavėjas:</span> <b style="color:#e2e4f0;">${data.pardavejas}</b> <button class="btn-lookup" onclick="lookupSeller('${data.pardavejas.replace(/'/g,"\\'")}','${sellerResultId}',this,'${escJs(url)}')">🔎 Tikrinti pardavėją</button><div id="${sellerResultId}" class="lookup-result"></div></div>`:'';
+  const irangaChips=a.irangos_akcentai&&a.irangos_akcentai.length>0?`<div class="equipment-chips">${a.irangos_akcentai.map(x=>`<span class="equipment-chip">${x}</span>`).join('')}</div>`:'<span style="color:#4a4f6a;">–</span>';
+  const photoDamageBlock=a.nuotrauku_pastebejimai&&a.nuotrauku_pastebejimai.length>0?`<div class="photo-damage-box"><div class="photo-damage-title">👁️ AI matomi pažeidimai nuotraukose</div>${listFmt(a.nuotrauku_pastebejimai)}</div>`:'';
+  const crossListBlock=data.kryzminiaiSkelbimai&&data.kryzminiaiSkelbimai.length>0?`<div class="cross-list-box">🔗 Tas pats automobilis: ${data.kryzminiaiSkelbimai.map(k=>`${k.source} už ${formatEUR(k.kaina)}`).join(', ')}</div>`:'';
+
+  // Build tabbed HTML
   return `
     ${cacheNote}
-    <div class="verdict">${a.verdiktas || ''}</div>
-    ${vinBlock}
-    ${sellerBlock}
-    ${specBlock}
-    ${perikupoBlock}
-    ${photoDamageBlock}
-    ${irangaBlock}
-    <h4>✅ Privalumai</h4>${listFmt(a.privalumai)}
-    <h4>⚠️ Rizikos</h4>${listFmt(a.rizikos)}
-    <h4>🔍 Ką patikrinti gyvai</h4>${listFmt(a.ka_patikrinti_gyvai)}
-    <h4>❓ Klausimai pardavėjui</h4>${listFmt(a.klausimai_pardavejui)}
-    <h4>💬 Derybų patarimas</h4><div>${a.derybu_patarimas || '–'}</div>
-    ${galleryBlock}
-  `;
+    <div class="detail-tabs">
+      <button class="detail-tab active" onclick="switchDetailTab(this,'${panelId}-pane-ai')">🤖 AI analizė</button>
+      <button class="detail-tab" onclick="switchDetailTab(this,'${panelId}-pane-tech')">🔧 Techninė info</button>
+      <button class="detail-tab" onclick="switchDetailTab(this,'${panelId}-pane-hist')">📋 Istorija</button>
+      <button class="detail-tab" onclick="switchDetailTab(this,'${panelId}-pane-market')">📊 Rinka</button>
+      ${data.photos&&data.photos.length>0?`<button class="detail-tab" onclick="switchDetailTab(this,'${panelId}-pane-photos')">📷 Nuotraukos</button>`:''}
+    </div>
+    <div class="detail-tab-content">
+      <div class="detail-tab-pane active" id="${panelId}-pane-ai">
+        <div class="detail-verdict">${a.verdiktas||''}</div>
+        <div class="detail-section-label">✅ Privalumai</div>${listFmt(a.privalumai)}
+        <div class="detail-section-label">⚠️ Rizikos</div>${listFmt(a.rizikos)}
+        <div class="detail-section-label">🔍 Ką patikrinti gyvai</div>${listFmt(a.ka_patikrinti_gyvai)}
+        <div class="detail-section-label">❓ Klausimai pardavėjui</div>${listFmt(a.klausimai_pardavejui)}
+        <div class="detail-section-label">💬 Derybų patarimas</div>
+        <div class="detail-tip">${a.derybu_patarimas||'–'}</div>
+      </div>
+      <div class="detail-tab-pane" id="${panelId}-pane-tech">
+        ${a.technine_specifikacija?`<div class="detail-section-label">Specifikacija</div><div class="detail-spec-box">${a.technine_specifikacija}</div>`:''}
+        <div class="detail-section-label">⭐ Įrangos akcentai</div>${irangaChips}
+      </div>
+      <div class="detail-tab-pane" id="${panelId}-pane-hist">
+        ${vinBlock}${sellerBlock}${photoDamageBlock}
+        ${!data.vin&&!data.pardavejas&&!photoDamageBlock?'<div style="color:#4a4f6a;font-size:13px;">Nėra papildomos informacijos.</div>':''}
+      </div>
+      <div class="detail-tab-pane" id="${panelId}-pane-market">
+        ${perikupoBlock}${crossListBlock}
+        ${!pr&&!crossListBlock?'<div style="color:#4a4f6a;font-size:13px;">Nėra rinkos duomenų.</div>':''}
+      </div>
+      ${data.photos&&data.photos.length>0?`<div class="detail-tab-pane" id="${panelId}-pane-photos">${galleryBlock}</div>`:''}
+    </div>`;
+}
+
+function switchDetailTab(btn, paneId) {
+  const tabsEl=btn.parentElement;
+  const contentEl=tabsEl.nextElementSibling;
+  tabsEl.querySelectorAll('.detail-tab').forEach(t=>t.classList.remove('active'));
+  contentEl.querySelectorAll('.detail-tab-pane').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  const pane=document.getElementById(paneId);
+  if (pane) pane.classList.add('active');
 }
 
 async function loadDetail(url, panelId, btn, force, marketContext) {
-  const panel = document.getElementById(panelId);
-
-  // Jei jau uzkrauta ir nera priverstinio atnaujinimo - tiesiog perjungiam rodyma/slepima.
-  if (panel.dataset.loaded === 'true' && !force) {
-    const isHidden = panel.style.display === 'none';
-    panel.style.display = isHidden ? 'block' : 'none';
-    btn.textContent = isHidden ? '🔼 Slėpti apžvalgą' : (btn.dataset.closedLabel || '🔬 Detali apžvalga');
+  const panel=document.getElementById(panelId);
+  if (panel.dataset.loaded==='true'&&!force) {
+    const isHidden=panel.style.display==='none';
+    panel.style.display=isHidden?'block':'none';
+    btn.textContent=isHidden?'🔼 Slėpti apžvalgą':(btn.dataset.closedLabel||'🔬 Detali apžvalga');
     return;
   }
-
-  btn.disabled = true;
-  panel.style.display = 'block';
-
-  const detailMessages = [
-    '📖 Skaitau pilną skelbimo aprašymą...',
-    '🔧 Renku techninę specifikaciją (variklis, komplektacija)...',
-    '🔑 Ieškau VIN kodo ir pardavėjo duomenų...',
-    '🌐 Tikrinu, ar šis modelis/metai turi žinomų gedimų...',
-    '⚖️ Lyginu privalumus ir rizikas...',
-    '✍️ Ruošiu derybų patarimą...',
-  ];
-  let pct = 0;
-  let msgIdx = 0;
-  panel.innerHTML = `<span style="color:#9a9aa5">${detailMessages[0]} (0%)</span>`;
-  const ticker = setInterval(() => {
-    pct = Math.min(pct + Math.random() * 8, 92);
-    msgIdx = Math.min(Math.floor((pct / 100) * detailMessages.length), detailMessages.length - 1);
-    btn.textContent = `⏳ ${Math.round(pct)}%`;
-    const span = panel.querySelector('span');
-    if (span) span.textContent = `${detailMessages[msgIdx]} (${Math.round(pct)}%)`;
-  }, 600);
-
+  btn.disabled=true;
+  panel.style.display='block';
+  const detailMessages=['📖 Skaitau aprašymą...','🔧 Renku techninę specifikaciją...','🔑 Ieškau VIN ir pardavėjo...','🌐 Tikrinu žinomus gedimus...','⚖️ Vertinu rizikas...','✍️ Ruošiu derybų patarimą...'];
+  let pct=0, msgIdx=0;
+  panel.innerHTML=`<div class="detail-tab-content"><span style="color:#6a6f88">${detailMessages[0]} (0%)</span></div>`;
+  const ticker=setInterval(()=>{
+    pct=Math.min(pct+Math.random()*8,92);
+    msgIdx=Math.min(Math.floor((pct/100)*detailMessages.length),detailMessages.length-1);
+    btn.textContent=`⏳ ${Math.round(pct)}%`;
+    const span=panel.querySelector('span');
+    if (span) span.textContent=`${detailMessages[msgIdx]} (${Math.round(pct)}%)`;
+  },600);
   try {
-    const resp = await fetch('/api/analyze-single', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url, force: !!force, ...(marketContext || {}) }),
-    });
-    const data = await resp.json();
+    const resp=await fetch('/api/analyze-single',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url,force:!!force,...(marketContext||{})})});
+    const data=await resp.json();
     clearInterval(ticker);
-    if (data.error) {
-      panel.innerHTML = `<span style="color:#e88">Klaida: ${data.error}</span>`;
-      return;
-    }
-    panel.innerHTML = buildDetailPanelHTML(data, url, panelId);
-    panel.dataset.loaded = 'true';
-    btn.textContent = '🔼 Slėpti apžvalgą';
-    btn.disabled = false;
+    if (data.error){panel.innerHTML=`<div class="detail-tab-content"><span style="color:#f87171">Klaida: ${data.error}</span></div>`;return;}
+    panel.innerHTML=buildDetailPanelHTML(data,url,panelId);
+    panel.dataset.loaded='true';
+    btn.textContent='🔼 Slėpti apžvalgą';
+    btn.disabled=false;
     return;
-  } catch (err) {
-    clearInterval(ticker);
-    panel.innerHTML = `<span style="color:#e88">Klaida: ${err.message}</span>`;
-  } finally {
-    btn.disabled = false;
-    if (btn.textContent.includes('%') || btn.textContent.includes('⏳')) btn.textContent = '🔬 Detali apžvalga';
-  }
+  } catch(err){clearInterval(ticker);panel.innerHTML=`<div class="detail-tab-content"><span style="color:#f87171">Klaida: ${err.message}</span></div>`;}
+  finally{btn.disabled=false;if(btn.textContent.includes('%')||btn.textContent.includes('⏳'))btn.textContent='🔬 Detali apžvalga';}
 }
 
-// ============ PALYGINIMAS ============
-let compareList = []; // max 3
-
-function toggleCompare(url, modelis, kaina, photo, metai, rida, kuras, galia, variklioTuris, pavarai, diffPct, marketMedian, source, btnId) {
-  const existIdx = compareList.findIndex(c => c.url === url);
-  if (existIdx >= 0) {
-    compareList.splice(existIdx, 1);
-  } else {
-    if (compareList.length >= 3) {
-      alert('Galima palyginti tik iki 3 automobilių. Pašalinkite vieną ir bandykite dar kartą.');
-      return;
-    }
-    compareList.push({ url, modelis, kaina, photo, metai, rida, kuras, galia, variklioTuris, pavarai, diffPct, marketMedian, source });
-  }
-  // Atnaujiname mygtuko būseną
-  const btn = document.getElementById(btnId);
-  if (btn) btn.classList.toggle('active', compareList.some(c => c.url === url));
-  renderCompareBar();
-}
-
-function renderCompareBar() {
-  const bar = document.getElementById('compare-bar');
-  const itemsEl = document.getElementById('compare-bar-items');
-  if (compareList.length === 0) {
-    bar.classList.remove('visible');
-    return;
-  }
-  bar.classList.add('visible');
-  itemsEl.innerHTML = compareList.map((c, i) =>
-    `<div class="compare-bar-chip">
-      <span>${c.modelis} – ${formatEUR(c.kaina)}</span>
-      <button onclick="removeFromCompare(${i})">✕</button>
-    </div>`
-  ).join('');
-  document.getElementById('compare-btn').textContent = `⚖️ Palyginti (${compareList.length})`;
-  // Tarpas kad juosta neuždengtų kortelių
-  document.body.style.paddingBottom = compareList.length > 0 ? '70px' : '';
-}
-
-function removeFromCompare(idx) {
-  const removed = compareList.splice(idx, 1)[0];
-  // Išjungiame visus mygtukus su tuo url
-  document.querySelectorAll('.compare-toggle').forEach(btn => {
-    if (btn.id && compareList.some(c => btn.id.includes(c.url.length.toString()))) return;
-    // simple: reset all, then re-mark active ones
-  });
-  document.querySelectorAll('.compare-toggle.active').forEach(btn => {
-    const url = btn.getAttribute('data-url');
-    if (!compareList.some(c => c.url === removed.url)) btn.classList.remove('active');
-  });
-  renderCompareBar();
-}
-
-function openCompareModal() {
-  if (compareList.length < 2) { alert('Pasirinkite bent 2 automobilius palyginimui.'); return; }
-  const modal = document.getElementById('compare-modal');
-  const wrap = document.getElementById('compare-grid-wrap');
-  modal.classList.add('active');
-  document.body.style.overflow = 'hidden';
-
-  const cols = compareList.length;
-  const grid = document.getElementById('compare-grid-wrap');
-  grid.style.display = 'grid';
-  grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-  grid.style.gap = '12px';
-
-  // Apskaičiuojame geriausias/blogiausias reikšmes
-  const allKainos = compareList.map(c => c.kaina).filter(Boolean);
-  const allRidos = compareList.map(c => c.rida).filter(Boolean);
-  const allDiff = compareList.map(c => c.diffPct).filter(v => v != null);
-  const minKaina = Math.min(...allKainos);
-  const maxKaina = Math.max(...allKainos);
-  const minRida = Math.min(...allRidos);
-  const maxRida = Math.max(...allRidos);
-  const maxDiff = Math.max(...allDiff);
-
-  wrap.innerHTML = compareList.map((c) => {
-    const kainaClass = cols > 1 && c.kaina === minKaina ? 'better' : c.kaina === maxKaina ? 'worse' : '';
-    const ridaClass = cols > 1 && c.rida === minRida ? 'better' : c.rida === maxRida ? 'worse' : '';
-    const diffClass = cols > 1 && c.diffPct === maxDiff ? 'better' : '';
-    const rows = [
-      { label: 'Kaina', val: formatEUR(c.kaina), cls: kainaClass },
-      { label: 'Nuolaida', val: c.diffPct != null ? `-${c.diffPct}%` : '–', cls: diffClass },
-      { label: 'Rinkos vidurkis', val: c.marketMedian ? formatEUR(c.marketMedian) : '–', cls: '' },
-      { label: 'Metai', val: c.metai || '–', cls: '' },
-      { label: 'Rida', val: c.rida ? c.rida.toLocaleString('lt-LT').replace(/,/g,' ') + ' km' : '–', cls: ridaClass },
-      { label: 'Kuras', val: c.kuras || '–', cls: '' },
-      { label: 'Galia', val: c.galia ? `${c.galia} kW` : '–', cls: '' },
-      { label: 'Variklio tūris', val: c.variklioTuris ? `${c.variklioTuris} L` : '–', cls: '' },
-      { label: 'Pavarų dėžė', val: c.pavarai || '–', cls: '' },
-      { label: 'Šaltinis', val: c.source || '–', cls: '' },
-    ];
-    return `<div class="compare-col">
-      <img src="${c.photo || ''}" onerror="this.style.display='none'">
-      <div class="compare-col-title">${c.modelis}</div>
-      <div class="compare-col-price">${formatEUR(c.kaina)}</div>
-      ${rows.map(r => `<div class="compare-row"><span class="compare-row-label">${r.label}</span><span class="compare-row-val ${r.cls}">${r.val}</span></div>`).join('')}
-      <a href="${c.url}" target="_blank" style="display:block; margin-top:10px; color:#6c5ce7; font-size:12px; text-decoration:none;">Žiūrėti skelbimą →</a>
-    </div>`;
+// ===== ALL LISTINGS =====
+function renderAllListings(allListings) {
+  const wrap=document.getElementById('all-listings-wrap');
+  const container=document.getElementById('all-listings');
+  if (allListings.length===0){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  container.innerHTML=allListings.map((l,idx)=>{
+    const specs=[l.kuras,l.pavarai,l.variklioTuris?`${l.variklioTuris}L`:null,l.galia?`${l.galia}kW`:null].filter(Boolean).join(' · ');
+    const panelId=`all-detail-${idx}`;
+    const reasonId=`all-reason-${idx}`;
+    const candidateBadge=l.isCandidate?'<span style="font-size:10px;background:#162a1e;color:#34d399;padding:2px 6px;border-radius:4px;margin-left:4px;">✓ TOP</span>':'';
+    const rejectionToggle=!l.isCandidate&&l.rejectionReasons&&l.rejectionReasons.length>0?`<div><a href="#" onclick="event.preventDefault();toggleReason('${reasonId}',this);" style="color:#6a6f88;font-size:11px;">❓ Kodėl neatrinktas? ▾</a><div id="${reasonId}" style="display:none;margin-top:4px;"><ul style="margin:0;padding-left:16px;font-size:11px;color:#6a6f88;">${l.rejectionReasons.map(r=>`<li>${r}</li>`).join('')}</ul></div></div>`:'';
+    return `<div style="padding:8px;border-bottom:1px solid #1a1d2a;"><div style="display:flex;gap:10px;align-items:center;"><img src="${l.photo||''}" onerror="this.style.display='none'" style="width:60px;height:44px;object-fit:cover;border-radius:4px;background:#1a1d2a;flex-shrink:0;"><div style="flex:1;font-size:13px;"><a href="${l.url}" target="_blank" style="color:#e2e4f0;text-decoration:none;font-weight:600;">${l.modelis}</a><span class="source-tag">${l.source}</span>${candidateBadge}${l.turiVin?'<span style="color:#34d399;font-size:11px;margin-left:4px;">VIN</span>':''}<div style="color:#6a6f88;font-size:12px;">${formatEUR(l.kaina)} · ${l.metai||'?'} · ${l.rida?l.rida.toLocaleString('lt-LT').replace(/,/g,' ')+' km':'?'}${specs?' · '+specs:''}</div>${rejectionToggle}</div><button class="btn-detail" id="${panelId}-btn" onclick="loadDetail('${l.url}','${panelId}',this,false,{kaina:${l.kaina||'null'},marketMedian:${l.marketMedian||'null'},marketCount:${l.marketCount||'null'},diffPct:${l.diffPct!=null?l.diffPct:'null'},modelis:'${escJs(l.modelis)}',pardavejas:${l.pardavejas?`'${escJs(l.pardavejas)}'`:'null'},galia:${l.galia||'null'},variklioTuris:${l.variklioTuris||'null'}})" style="flex-shrink:0;">🔬 Detali apžvalga</button></div><div class="detail-panel" id="${panelId}" style="margin-top:8px;"></div></div>`;
   }).join('');
 }
+function toggleReason(id,link) { const el=document.getElementById(id); const isHidden=el.style.display==='none'; el.style.display=isHidden?'block':'none'; link.textContent=isHidden?'❓ Kodėl neatrinktas? ▴':'❓ Kodėl neatrinktas? ▾'; }
+function toggleAllListings() { const el=document.getElementById('all-listings'); const btn=document.getElementById('toggle-all-btn'); const isHidden=el.style.display==='none'; el.style.display=isHidden?'block':'none'; btn.textContent=isHidden?'📋 Slėpti visus nuskaitytus skelbimus ▴':'📋 Rodyti visus nuskaitytus skelbimus ▾'; }
 
-function closeCompareModal() {
-  document.getElementById('compare-modal').classList.remove('active');
-  document.body.style.overflow = '';
+// ===== VIN / SELLER LOOKUP =====
+function startRotatingStatus(el,messages,intervalMs=1800) {
+  let i=0; el.innerHTML=`<span style="color:#6a6f88;font-size:12px;">${messages[0]}</span>`;
+  const timer=setInterval(()=>{i=(i+1)%messages.length;const span=el.querySelector('span');if(span)span.textContent=messages[i];},intervalMs);
+  return ()=>clearInterval(timer);
 }
+async function lookupVin(vin,resultId,btn) {
+  const resultEl=document.getElementById(resultId);
+  btn.disabled=true; btn.textContent='⏳ Ieškoma...';
+  const stopRotating=startRotatingStatus(resultEl,['🔍 Tikrinu VIN kodą viešose bazėse...','🌐 Naršau JAV aukcionų archyvus...','📋 Ieškau aukciono istorijos...','📝 Ruošiu santrauką...']);
+  try {
+    const resp=await fetch('/api/vin-lookup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({vin})});
+    const data=await resp.json();
+    stopRotating();
+    if (data.error){resultEl.innerHTML=`<span style="color:#f87171;font-size:12px;">Klaida: ${data.error}</span>`;return;}
+    const cacheNote=data.cached?`<span style="color:#444;"> (talpykla, prieš ${data.cacheAgeMinutes} min.)</span>`:'';
+    if (!data.rasta){resultEl.innerHTML=`<div style="font-size:12px;color:#4a4f6a;background:#0d1018;padding:8px;border-radius:6px;">Viešai prieinamos informacijos nerasta.${cacheNote}</div>`;}
+    else{resultEl.innerHTML=`<div class="vin-found"><div style="color:#f87171;font-weight:600;">⚠️ Rasta informacija${cacheNote}</div>${data.saltinis?`<div>📍 Šaltinis: ${data.saltinis}</div>`:''}${data.zalos_aprasas?`<div>🔧 Žala: ${data.zalos_aprasas}</div>`:''}${data.aukciono_kaina?`<div>💰 Aukciono kaina: ${data.aukciono_kaina}</div>`:''}${data.papildoma_info?`<div>ℹ️ ${data.papildoma_info}</div>`:''}${data.nuoroda?`<div><a href="${data.nuoroda}" target="_blank" style="color:#7c6ff0;">Šaltinio nuoroda →</a></div>`:''}</div>`;}
+  } catch(err){stopRotating();resultEl.innerHTML=`<span style="color:#f87171;font-size:12px;">Klaida: ${err.message}</span>`;}
+  finally{btn.disabled=false;btn.textContent='🔎 Ieškoti VIN istorijos';}
+}
+async function lookupSeller(pardavejas,resultId,btn,listingUrl) {
+  const resultEl=document.getElementById(resultId);
+  btn.disabled=true; btn.textContent='⏳ Ieškoma...';
+  const stopRotating=startRotatingStatus(resultEl,[`🏢 Ieškau "${pardavejas}" duomenų...`,'⭐ Tikrinu atsiliepimus...','📅 Žiūriu veiklos trukmę...','📝 Ruošiu santrauką...']);
+  try {
+    const resp=await fetch('/api/seller-lookup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pardavejas,listingUrl})});
+    const data=await resp.json();
+    stopRotating();
+    if (data.error){resultEl.innerHTML=`<span style="color:#f87171;font-size:12px;">Klaida: ${data.error}</span>`;return;}
+    const cacheNote=data.cached?`<span style="color:#444;"> (talpykla, prieš ${data.cacheAgeMinutes} min.)</span>`:'';
+    if (!data.rasta){resultEl.innerHTML=`<div style="font-size:12px;color:#4a4f6a;background:#0d1018;padding:8px;border-radius:6px;">Viešai prieinamos informacijos nerasta.${cacheNote}</div>`;}
+    else{resultEl.innerHTML=`<div class="seller-found"><div style="color:#34d399;font-weight:600;">🏢 Rasta informacija${cacheNote}</div>${data.imones_pavadinimas?`<div>📛 Pavadinimas: ${data.imones_pavadinimas}</div>`:''}${data.veiklos_trukme?`<div>📅 Veiklos trukmė: ${data.veiklos_trukme}</div>`:''}${data.atsiliepimu_santrauka?`<div>⭐ Atsiliepimai: ${data.atsiliepimu_santrauka}</div>`:''}${data.ispejimai?`<div style="color:#f87171;">⚠️ ${data.ispejimai}</div>`:''}${data.nuoroda?`<div><a href="${data.nuoroda}" target="_blank" style="color:#7c6ff0;">Šaltinio nuoroda →</a></div>`:''}</div>`;}
+  } catch(err){stopRotating();resultEl.innerHTML=`<span style="color:#f87171;font-size:12px;">Klaida: ${err.message}</span>`;}
+  finally{btn.disabled=false;btn.textContent='🔎 Ieškoti pardavėjo info';}
+}
+
+// ===== COMPARE =====
+let compareList=[];
+function toggleCompare(url,modelis,kaina,photo,metai,rida,kuras,galia,variklioTuris,pavarai,diffPct,marketMedian,source,btnId) {
+  const existIdx=compareList.findIndex(c=>c.url===url);
+  if (existIdx>=0){compareList.splice(existIdx,1);}
+  else{if(compareList.length>=3){alert('Galima palyginti tik iki 3 automobilių.');return;}compareList.push({url,modelis,kaina,photo,metai,rida,kuras,galia,variklioTuris,pavarai,diffPct,marketMedian,source});}
+  const btn=document.getElementById(btnId);
+  if (btn) btn.classList.toggle('active',compareList.some(c=>c.url===url));
+  renderCompareBar();
+}
+function renderCompareBar() {
+  const bar=document.getElementById('compare-bar');
+  const itemsEl=document.getElementById('compare-bar-items');
+  if (compareList.length===0){bar.classList.remove('visible');document.body.style.paddingBottom='';return;}
+  bar.classList.add('visible');
+  itemsEl.innerHTML=compareList.map((c,i)=>`<div class="compare-bar-chip"><span>${c.modelis} – ${formatEUR(c.kaina)}</span><button onclick="removeFromCompare(${i})">✕</button></div>`).join('');
+  document.getElementById('compare-btn').textContent=`⚖️ Palyginti (${compareList.length})`;
+  document.body.style.paddingBottom=compareList.length>0?'70px':'';
+}
+function removeFromCompare(idx) {
+  compareList.splice(idx,1);
+  document.querySelectorAll('.btn-compare.active').forEach(btn=>{});
+  renderCompareBar();
+}
+function openCompareModal() {
+  if (compareList.length<2){alert('Pasirinkite bent 2 automobilius.');return;}
+  const modal=document.getElementById('compare-modal');
+  const wrap=document.getElementById('compare-grid-wrap');
+  modal.classList.add('active');
+  document.body.style.overflow='hidden';
+  const cols=compareList.length;
+  wrap.style.display='grid'; wrap.style.gridTemplateColumns=`repeat(${cols},1fr)`; wrap.style.gap='12px';
+  const allKainos=compareList.map(c=>c.kaina).filter(Boolean);
+  const allRidos=compareList.map(c=>c.rida).filter(Boolean);
+  const allDiff=compareList.map(c=>c.diffPct).filter(v=>v!=null);
+  const minKaina=Math.min(...allKainos),maxKaina=Math.max(...allKainos);
+  const minRida=Math.min(...allRidos),maxRida=Math.max(...allRidos);
+  const maxDiff=Math.max(...allDiff);
+  wrap.innerHTML=compareList.map(c=>{
+    const kainaClass=cols>1&&c.kaina===minKaina?'better':c.kaina===maxKaina?'worse':'';
+    const ridaClass=cols>1&&c.rida===minRida?'better':c.rida===maxRida?'worse':'';
+    const diffClass=cols>1&&c.diffPct===maxDiff?'better':'';
+    const rows=[{label:'Kaina',val:formatEUR(c.kaina),cls:kainaClass},{label:'Nuolaida',val:c.diffPct!=null?`-${c.diffPct}%`:'–',cls:diffClass},{label:'Rinkos vidurkis',val:c.marketMedian?formatEUR(c.marketMedian):'–',cls:''},{label:'Metai',val:c.metai||'–',cls:''},{label:'Rida',val:c.rida?c.rida.toLocaleString('lt-LT').replace(/,/g,' ')+' km':'–',cls:ridaClass},{label:'Kuras',val:c.kuras||'–',cls:''},{label:'Galia',val:c.galia?`${c.galia} kW`:'–',cls:''},{label:'Variklio tūris',val:c.variklioTuris?`${c.variklioTuris} L`:'–',cls:''},{label:'Pavarų dėžė',val:c.pavarai||'–',cls:''},{label:'Šaltinis',val:c.source||'–',cls:''}];
+    return `<div class="compare-col"><img src="${c.photo||''}" onerror="this.style.display='none'"><div class="compare-col-title">${c.modelis}</div><div class="compare-col-price">${formatEUR(c.kaina)}</div>${rows.map(r=>`<div class="compare-row"><span class="compare-row-label">${r.label}</span><span class="compare-row-val ${r.cls}">${r.val}</span></div>`).join('')}<a href="${c.url}" target="_blank" style="display:block;margin-top:10px;color:#7c6ff0;font-size:12px;text-decoration:none;">Žiūrėti skelbimą →</a></div>`;
+  }).join('');
+}
+function closeCompareModal() { document.getElementById('compare-modal').classList.remove('active'); document.body.style.overflow=''; }
+
+// ===== INIT =====
+document.getElementById('app-version').textContent = APP_VERSION;
+renderSearchHistoryChips();
+renderFavoritesMain();
 </script>
 </body>
 </html>
