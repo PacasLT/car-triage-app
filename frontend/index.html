@@ -100,36 +100,102 @@
   #tinder-launch-btn { display: none; }
   #tinder-view {
     display: none;
-    position: fixed; inset: 0; background: radial-gradient(circle at 50% 0%, #1a1d24, #0a0b0e);
+    position: fixed; inset: 0;
+    background: #0a0b0e;
     z-index: 1000;
     flex-direction: column; align-items: center;
   }
   #tinder-view.active { display: flex; }
-  #tinder-topbar { width: 100%; max-width: 420px; display: flex; justify-content: space-between; align-items: center; padding: 16px; }
-  #tinder-close { background: #1a1d24; color: #e8e8ea; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 16px; cursor: pointer; }
-  #tinder-progress-track { flex: 1; margin: 0 12px; height: 4px; background: #2c303a; border-radius: 4px; overflow: hidden; }
+  #tinder-topbar {
+    width: 100%; max-width: 480px;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 16px 10px;
+    flex-shrink: 0;
+  }
+  #tinder-counter { font-size: 12px; color: #9a9aa5; }
+  #tinder-close {
+    background: rgba(44,48,58,0.8); color: #e8e8ea; border: none;
+    width: 36px; height: 36px; border-radius: 50%; font-size: 16px; cursor: pointer;
+  }
+  #tinder-progress-track { flex: 1; margin: 0 12px; height: 3px; background: #2c303a; border-radius: 4px; overflow: hidden; }
   #tinder-progress-fill { height: 100%; background: linear-gradient(90deg, #6c5ce7, #a78bfa); border-radius: 4px; transition: width 0.3s; }
-  #tinder-stack { position: relative; width: 100%; max-width: 420px; flex: 1; padding: 8px 16px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  #tinder-stack {
+    position: relative; width: 100%; max-width: 480px;
+    flex: 1; padding: 0 12px 8px;
+    display: flex; align-items: stretch; justify-content: center; overflow: hidden;
+  }
   .tinder-card {
-    position: absolute; width: calc(100% - 32px); max-width: 400px; height: calc(100% - 16px); background: #1a1d24;
-    border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.55);
+    position: absolute; width: calc(100% - 24px); max-width: 456px;
+    top: 0; bottom: 0;
+    background: #1a1d24;
+    border-radius: 20px; overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
     cursor: grab; user-select: none; touch-action: none;
     display: flex; flex-direction: column;
   }
-  .tinder-card img { width: 100%; height: 46%; object-fit: cover; background: #2c303a; flex-shrink: 0; }
-  .tinder-card-body { padding: 16px; overflow-y: auto; flex: 1; }
-  .tinder-card-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
-  .tinder-card-price { color: #a78bfa; font-size: 21px; font-weight: 700; margin-bottom: 6px; }
-  .tinder-card-meta { color: #9a9aa5; font-size: 13px; margin-bottom: 8px; }
-  .tinder-card-comment { font-size: 13px; color: #d0d0d8; line-height: 1.4; margin-bottom: 10px; }
-  .tinder-card-signals { font-size: 12px; color: #7fd88f; margin-bottom: 10px; }
-  .tinder-detail-btn { background: #2c303a; color: #cfcbf5; border: none; padding: 8px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; }
-  .tinder-badge { position: absolute; top: 24px; font-size: 24px; font-weight: 800; padding: 6px 16px; border-radius: 8px; border: 3px solid; opacity: 0; transform: rotate(-15deg); pointer-events: none; z-index: 5; }
-  .tinder-badge.like { right: 20px; color: #7fd88f; border-color: #7fd88f; }
-  .tinder-badge.skip { left: 20px; color: #ff8080; border-color: #ff8080; transform: rotate(15deg); }
-  #tinder-hint { color: #666; font-size: 12px; padding: 14px; text-align: center; }
-  #tinder-summary-box { text-align: center; padding: 20px; }
-  #tinder-summary-box a { display: block; color: #a78bfa; margin: 8px 0; text-decoration: none; font-size: 14px; }
+  .tinder-photo-wrap { position: relative; flex-shrink: 0; height: 52%; overflow: hidden; }
+  .tinder-photo-wrap img { width: 100%; height: 100%; object-fit: cover; background: #2c303a; display: block; }
+  .tinder-photo-gradient {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 60%;
+    background: linear-gradient(to top, rgba(10,11,14,0.95) 0%, rgba(10,11,14,0.5) 50%, transparent 100%);
+    pointer-events: none;
+  }
+  .tinder-photo-info {
+    position: absolute; bottom: 0; left: 0; right: 0; padding: 14px 16px 12px;
+    pointer-events: none;
+  }
+  .tinder-card-title { font-size: 20px; font-weight: 700; color: #fff; line-height: 1.2; }
+  .tinder-card-price {
+    display: flex; align-items: center; gap: 8px; margin-top: 3px;
+  }
+  .tinder-price-val { color: #a78bfa; font-size: 22px; font-weight: 800; }
+  .tinder-price-diff {
+    background: rgba(108,92,231,0.25); border: 1px solid rgba(108,92,231,0.5);
+    color: #a78bfa; font-size: 12px; font-weight: 700;
+    padding: 2px 8px; border-radius: 20px;
+  }
+  .tinder-card-body { padding: 12px 16px 10px; overflow-y: auto; flex: 1; min-height: 0; }
+  .tinder-card-meta { color: #9a9aa5; font-size: 13px; margin-bottom: 6px; line-height: 1.5; }
+  .tinder-card-comment { font-size: 13px; color: #d0d0d8; line-height: 1.45; margin-bottom: 8px; }
+  .tinder-card-signals { font-size: 12px; color: #7fd88f; margin-bottom: 8px; }
+  .tinder-detail-btn {
+    background: rgba(44,48,58,0.8); color: #cfcbf5; border: 1px solid #3a3f4c;
+    padding: 8px 16px; border-radius: 20px; font-size: 12px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .tinder-badge {
+    position: absolute; top: 20px; font-size: 22px; font-weight: 800;
+    padding: 5px 14px; border-radius: 8px; border: 3px solid;
+    opacity: 0; pointer-events: none; z-index: 5; letter-spacing: 1px;
+  }
+  .tinder-badge.like { right: 16px; color: #7fd88f; border-color: #7fd88f; transform: rotate(-12deg); }
+  .tinder-badge.skip { left: 16px; color: #ff8080; border-color: #ff8080; transform: rotate(12deg); }
+  #tinder-actions {
+    width: 100%; max-width: 480px; padding: 12px 16px 20px;
+    display: flex; justify-content: center; gap: 24px; align-items: center; flex-shrink: 0;
+  }
+  .tinder-btn-skip {
+    width: 62px; height: 62px; border-radius: 50%; border: 2px solid #ff8080;
+    background: rgba(255,128,128,0.1); color: #ff8080;
+    font-size: 26px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s; -webkit-tap-highlight-color: transparent;
+  }
+  .tinder-btn-skip:active { background: rgba(255,128,128,0.25); transform: scale(0.92); }
+  .tinder-btn-like {
+    width: 72px; height: 72px; border-radius: 50%; border: 2px solid #7fd88f;
+    background: rgba(127,216,143,0.1); color: #7fd88f;
+    font-size: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s; -webkit-tap-highlight-color: transparent;
+  }
+  .tinder-btn-like:active { background: rgba(127,216,143,0.25); transform: scale(0.92); }
+  .tinder-btn-info {
+    width: 48px; height: 48px; border-radius: 50%; border: 2px solid #6c5ce7;
+    background: rgba(108,92,231,0.1); color: #a78bfa;
+    font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s; -webkit-tap-highlight-color: transparent;
+  }
+  .tinder-btn-info:active { background: rgba(108,92,231,0.25); transform: scale(0.92); }
+  #tinder-hint { color: #555; font-size: 11px; padding: 0 16px 6px; text-align: center; flex-shrink: 0; }
   @media (max-width: 640px) {
     #tinder-launch-btn { display: inline-block; }
   }
@@ -216,7 +282,7 @@
       </select>
     </div>
     <div class="full-row"><label>Portalai</label>
-      <div style="display:flex; gap:16px; padding-top:4px;">
+      <div style="display:flex; flex-wrap:wrap; gap:10px 20px; padding-top:4px;">
         <label style="display:flex; align-items:center; gap:6px; font-size:13px; color:#e8e8ea; font-weight:normal;">
           <input type="checkbox" id="portal-autoplius" checked style="width:auto;"> autoplius.lt
         </label>
@@ -258,7 +324,7 @@
         <option value="biggest-discount">Didžiausia nuolaida %</option>
       </select>
     </div>
-    <button id="tinder-launch-btn" onclick="startTinder()" style="padding:8px 14px; background:#6c5ce7; color:#fff; border:none; border-radius:6px; font-size:13px; cursor:pointer;">🔥 Naršyti Tinder stiliumi</button>
+    <button id="tinder-launch-btn" onclick="startTinder()" style="padding:10px 18px; background:linear-gradient(135deg,#6c5ce7,#a78bfa); color:#fff; border:none; border-radius:20px; font-size:13px; font-weight:600; cursor:pointer; box-shadow:0 4px 14px rgba(108,92,231,0.4);">🔥 Tinder naršymas</button>
   </div>
   <div id="results"></div>
 
@@ -273,10 +339,15 @@
     <div id="tinder-topbar">
       <button id="tinder-close" onclick="exitTinder()">✕</button>
       <div id="tinder-progress-track"><div id="tinder-progress-fill" style="width:0%"></div></div>
-      <div style="width:36px;"></div>
+      <div id="tinder-counter" style="min-width:36px; text-align:right;"></div>
     </div>
     <div id="tinder-stack"></div>
-    <div id="tinder-hint">← braukite kairėn praleisti · braukite dešinėn patinka →</div>
+    <div id="tinder-hint">braukite kairėn / dešinėn arba naudokite mygtukus</div>
+    <div id="tinder-actions" style="display:none;">
+      <button class="tinder-btn-skip" onclick="tinderSwipe('left')" title="Praleisti">✕</button>
+      <button class="tinder-btn-info" onclick="toggleTinderDetail()" title="Detali apžvalga">🔍</button>
+      <button class="tinder-btn-like" onclick="tinderSwipe('right')" title="Patinka">♥</button>
+    </div>
   </div>
 
   <div id="lightbox" onclick="if(event.target.id==='lightbox') closeLightbox();">
@@ -788,6 +859,8 @@ function startTinder() {
 
 function exitTinder() {
   document.getElementById('tinder-view').classList.remove('active');
+  document.getElementById('tinder-actions').style.display = 'none';
+  document.getElementById('tinder-counter').textContent = '';
   document.body.style.overflow = '';
 }
 
@@ -799,6 +872,8 @@ function renderTinderCard() {
   if (tinderIndex >= tinderQueue.length) {
     fill.style.width = '100%';
     hint.style.display = 'none';
+    document.getElementById('tinder-actions').style.display = 'none';
+    document.getElementById('tinder-counter').textContent = '';
     const allListings = (currentData && currentData.allListings) || [];
     const topUrls = new Set(tinderQueue.map(c => c.url));
     const restListings = allListings.filter(l => !topUrls.has(l.url));
@@ -851,19 +926,30 @@ function renderTinderCard() {
   const signalsText = signals.length ? signals.join(', ') : 'nėra papildomų signalų';
   const specsLine = [c.kuras, c.pavarai, (c.variklioTuris ? `${c.variklioTuris}L` : null), (c.galia ? `${c.galia}kW` : null)].filter(Boolean).join(' · ');
 
+  const riskBanner = c.diffPct >= 50 ? `<div style="background:rgba(122,48,48,0.5);border:1px solid #7a3030;color:#ff9d9d;padding:7px 10px;border-radius:8px;font-size:12px;margin-bottom:8px;">⚠️ ${c.diffPct}% nuolaida – didelė rizika (gali būti avarija ar paslėpti defektai)</div>` : '';
+  document.getElementById('tinder-counter').textContent = `${tinderIndex + 1}/${tinderQueue.length}`;
+  document.getElementById('tinder-actions').style.display = 'flex';
   stack.innerHTML = `
     <div class="tinder-card" id="tinder-card-current">
       <div class="tinder-badge like" id="tinder-badge-like">PATINKA</div>
       <div class="tinder-badge skip" id="tinder-badge-skip">PRALEISTI</div>
-      <img src="${c.photo || ''}" onerror="this.style.display='none'">
+      <div class="tinder-photo-wrap">
+        <img src="${c.photo || ''}" onerror="this.style.background='#2c303a'">
+        <div class="tinder-photo-gradient"></div>
+        <div class="tinder-photo-info">
+          <div class="tinder-card-title">${c.modelis} <span class="source-tag" style="font-size:10px;">${c.source}</span></div>
+          <div class="tinder-card-price">
+            <span class="tinder-price-val">${formatEUR(c.kaina)}</span>
+            <span class="tinder-price-diff">-${c.diffPct}%</span>
+          </div>
+        </div>
+      </div>
       <div class="tinder-card-body">
-        <div class="tinder-card-title">${c.modelis} <span class="source-tag">${c.source}</span></div>
-        <div class="tinder-card-price">${formatEUR(c.kaina)} <span class="card-diff">-${c.diffPct}%</span></div>
-        <div class="tinder-card-meta">${c.metai || '?'} · ${c.rida ? c.rida.toLocaleString('lt-LT').replace(/,/g,' ') + ' km' : '? km'}${specsLine ? ' · ' + specsLine : ''}</div>
-        <div class="tinder-card-signals">🛡️ ${signalsText}</div>
+        ${riskBanner}
+        <div class="tinder-card-meta">📅 ${c.metai || '?'} &nbsp;·&nbsp; 🛣️ ${c.rida ? c.rida.toLocaleString('lt-LT').replace(/,/g,' ') + ' km' : '? km'}${specsLine ? '<br>⚙️ ' + specsLine : ''}</div>
+        ${signals.length ? `<div class="tinder-card-signals">🛡️ ${signalsText}</div>` : ''}
         <div class="tinder-card-comment">${c.comment || ''}</div>
-        <button class="tinder-detail-btn" id="tinder-detail-btn" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); toggleTinderDetail();">🔍 Detali apžvalga</button>
-        <div id="tinder-detail-extra" style="margin-top:10px; display:none;"></div>
+        <div id="tinder-detail-extra" style="margin-top:8px; display:none;"></div>
       </div>
     </div>
   `;
@@ -876,9 +962,7 @@ async function toggleTinderDetail() {
   const c = tinderQueue[tinderIndex];
 
   if (extra.dataset.loaded === 'true') {
-    const isHidden = extra.style.display === 'none';
-    extra.style.display = isHidden ? 'block' : 'none';
-    btn.textContent = isHidden ? '🔼 Slėpti apžvalgą' : '🔍 Detali apžvalga';
+    extra.style.display = extra.style.display === 'none' ? 'block' : 'none';
     return;
   }
 
@@ -886,11 +970,9 @@ async function toggleTinderDetail() {
   if (c.deepAnalysis) {
     extra.innerHTML = buildDetailPanelHTML({ analysis: c.deepAnalysis, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, 'tinder-detail-extra');
     extra.dataset.loaded = 'true';
-    btn.textContent = '🔼 Slėpti apžvalgą';
     return;
   }
 
-  btn.disabled = true;
   extra.innerHTML = '<span style="color:#9a9aa5;font-size:12px;">🔬 Kraunama detali apžvalga...</span>';
   try {
     const resp = await fetch('/api/analyze-single', {
@@ -905,11 +987,8 @@ async function toggleTinderDetail() {
     }
     extra.innerHTML = buildDetailPanelHTML(data, c.url, 'tinder-detail-extra');
     extra.dataset.loaded = 'true';
-    btn.textContent = '🔼 Slėpti apžvalgą';
   } catch (err) {
     extra.innerHTML = `<span style="color:#e88;font-size:12px;">Klaida: ${err.message}</span>`;
-  } finally {
-    btn.disabled = false;
   }
 }
 
