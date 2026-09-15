@@ -1,0 +1,6 @@
+node_modules/
+.env
+backend/.env
+backend/cache.json
+backend/market-history.json
+.DS_Store
