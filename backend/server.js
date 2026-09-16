@@ -934,12 +934,66 @@ async function runSearchJob(jobId, filters) {
     for (const model of modelsInSearch) {
       const hist = cache.getHistoryForModel(model);
       const currentUrls = new Set(parsed.filter((l) => l.modelis === model).map((l) => l.url));
-      const fromHistory = hist.filter((h) => !currentUrls.has(h.url)).map((h) => ({ modelis: model, kaina: h.kaina, rida: h.rida }));
+      const fromHistory = hist.filter((h) => !currentUrls.has(h.url)).map((h) => ({ modelis: model, kaina: h.kaina, rida: h.rida, metai: h.metai || null, kuras: h.kuras || null, galia: h.galia || null }));
       combinedForMedians = combinedForMedians.concat(fromHistory);
       historyAddedCount += fromHistory.length;
     }
     if (historyAddedCount > 0) {
       logJob(jobId, `   +${historyAddedCount} skelbimų iš archyvo (ankstesnės paieškos) – tikslesni vidurkiai`);
+    }
+
+    // Papildomas nuskaitymas: modeliai kur mažai duomenų rinkoje
+    // Jei konkretaus modelio+metų ±1 metų lange < 8 skelbimų, nuskaito 1 papildomą puslapį
+    // iš autoplius.lt tiesiogiai to modelio + tų metų paieška - daugiau duomenų = tikslesni vidurkiai
+    const combinedForMediansLenBefore = combinedForMedians.length;
+    const thinModels = new Map(); // 'modelis::metai' -> {modelis, metai}
+    for (const l of parsed) {
+      if (!l.modelis || !l.metai) continue;
+      const key = `${l.modelis}::${l.metai}`;
+      if (thinModels.has(key)) continue;
+      // Suskaičiuojame kiek turime combinedForMedians šiam modeliui±1 metai
+      const yr = l.metai;
+      const count = combinedForMedians.filter((c) => c.modelis === l.modelis && c.metai && Math.abs(c.metai - yr) <= 1).length;
+      if (count < 8) thinModels.set(key, { modelis: l.modelis, metai: l.metai });
+    }
+    if (thinModels.size > 0) {
+      logJob(jobId, `📡 Papildomai ieškome rinkos duomenų (${thinModels.size} modelių su mažai duomenų)...`);
+      let suppCount = 0;
+      // Nuskaitymai lygiagrečiai (maks 4 vienu metu) kad neužkimšti
+      const thinArr = [...thinModels.values()];
+      const SUPP_BATCH = 4;
+      for (let bi = 0; bi < thinArr.length; bi += SUPP_BATCH) {
+        const batch = thinArr.slice(bi, bi + SUPP_BATCH);
+        const batchResults = await Promise.allSettled(batch.map(async ({ modelis, metai }) => {
+          try {
+            // Sudarome modelio pavadinimą iš pirmų 2 žodžių (pvz "BMW X5" -> "BMW X5")
+            const parts = modelis.trim().split(/\s+/);
+            const marke = parts[0] || '';
+            const modPart = parts.slice(1).join(' ');
+            const suppFilters = { marke, modelis: modPart, metaiNuo: metai - 1, metaiIki: metai + 1 };
+            const suppUrl = buildAutopliusUrl(suppFilters);
+            const { listings: suppRaw } = await fetchAllPages(suppUrl, 1, null);
+            const suppParsed = suppRaw.map((r) => ({ ...parseListingFields(r.text), url: r.url, photo: r.photo, source: 'autoplius.lt' }));
+            // Pridedame tik tuos, kurių dar neturime
+            const existingUrls = new Set(combinedForMedians.map((c) => c.url));
+            const newOnes = suppParsed.filter((s) => s.url && !existingUrls.has(s.url) && s.kaina);
+            return newOnes;
+          } catch (e) {
+            return [];
+          }
+        }));
+        for (const r of batchResults) {
+          if (r.status === 'fulfilled' && r.value.length > 0) {
+            combinedForMedians.push(...r.value);
+            suppCount += r.value.length;
+          }
+        }
+      }
+      if (suppCount > 0) {
+        logJob(jobId, `   +${suppCount} papildomų rinkos skelbimų iš tikslinės paieškos`);
+        // Išsaugome ir šiuos į istoriją (bus panaudoti kitose paieškose)
+        cache.addToHistory(combinedForMedians.slice(combinedForMediansLenBefore));
+      }
     }
 
     logJob(jobId, '🧮 Skaičiuojame rinkos vidurkius...');
