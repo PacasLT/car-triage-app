@@ -4,33 +4,49 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <title>CarTriige — Europos automobilių rinkos analizė</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   /* ===== DESIGN TOKENS ===== */
   :root {
-    --bg-base:       #0a0c10;
-    --bg-surface:    #141720;
-    --bg-elevated:   #1c2030;
-    --bg-card:       #16192a;
-    --border:        #252a38;
-    --border-light:  #2e3448;
-    --accent:        #7c6ff7;
-    --accent-hover:  #6c5ce7;
-    --accent-light:  #a78bfa;
-    --accent-dim:    rgba(124,111,247,0.12);
-    --success:       #7fd88f;
-    --danger:        #ff9d9d;
-    --warning:       #f0c674;
-    --text-primary:  #e8e8ea;
-    --text-secondary:#b0b0c0;
-    --text-muted:    #6e7080;
-    --radius-sm:     6px;
-    --radius-md:     10px;
-    --radius-lg:     14px;
-    --radius-xl:     20px;
-    --font:          -apple-system, 'Segoe UI', Arial, sans-serif;
-    --shadow-card:   0 2px 16px rgba(0,0,0,0.4);
-    --shadow-glow:   0 0 20px rgba(124,111,247,0.25);
+    --bg-base:        #0A0C12;
+    --bg-surface:     #11141C;
+    --bg-elevated:    #171B25;
+    --bg-card:        #11141C;
+    --bg-raised:      #1F2431;
+    --border:         rgba(255,255,255,.075);
+    --border-light:   rgba(255,255,255,.14);
+    --accent:         #7C5CFF;
+    --accent-hover:   #8B6FFF;
+    --accent-light:   #A78BFA;
+    --accent-dim:     rgba(124,92,255,.14);
+    --accent-border:  rgba(124,92,255,.30);
+    --success:        oklch(.75 .15 158);
+    --success-dim:    oklch(.75 .15 158 / .13);
+    --success-border: oklch(.75 .15 158 / .30);
+    --warning:        oklch(.81 .13 78);
+    --warning-dim:    oklch(.81 .13 78 / .13);
+    --warning-border: oklch(.81 .13 78 / .30);
+    --danger:         oklch(.66 .19 25);
+    --danger-dim:     oklch(.66 .19 25 / .13);
+    --danger-border:  oklch(.66 .19 25 / .30);
+    --text-primary:   #E9EBF2;
+    --text-secondary: #C3C9D8;
+    --text-muted:     #8C93A6;
+    --text-dim:       #5E6578;
+    --radius-sm:      6px;
+    --radius-md:      7px;
+    --radius-lg:      11px;
+    --radius-xl:      12px;
+    --font:           'Archivo', -apple-system, 'Segoe UI', Helvetica, sans-serif;
+    --font-mono:      'IBM Plex Mono', ui-monospace, Menlo, monospace;
+    --shadow-card:    0 1px 0 rgba(255,255,255,.03) inset;
+    --shadow-panel:   0 18px 40px -24px rgba(0,0,0,.8);
+    --shadow-glow:    0 8px 22px -12px rgba(124,92,255,.9);
   }
+  .eyebrow { font: 500 9px/1 var(--font-mono); letter-spacing: .12em; color: var(--text-dim); text-transform: uppercase; }
+  .mono    { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
   /* ===== RESET & BASE ===== */
   * { box-sizing: border-box; }
@@ -41,129 +57,148 @@
     margin: 0;
     padding: 0;
   }
-  .container { max-width: 920px; margin: 0 auto; padding: 0 20px 40px; }
+  .container { max-width: 1400px; margin: 0 auto; padding: 0 24px 40px; }
 
   /* ===== APP HEADER ===== */
   .app-header {
-    background: var(--bg-surface);
+    position: sticky; top: 0; z-index: 800;
+    background: rgba(10,12,18,.88);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    z-index: 800;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
   }
   .app-header-inner {
-    max-width: 920px;
-    margin: 0 auto;
-    padding: 0 20px;
-    height: 58px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
+    max-width: 1400px; margin: 0 auto; padding: 0 24px; height: 56px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
   }
-  .app-logo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    flex-shrink: 0;
-  }
+  .app-logo { display: flex; align-items: center; gap: 9px; text-decoration: none; flex-shrink: 0; }
   .app-logo-mark {
-    width: 32px;
-    height: 32px;
-    background: linear-gradient(135deg, var(--accent), var(--accent-light));
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 17px;
-    flex-shrink: 0;
+    width: 20px; height: 20px; background: var(--accent); border-radius: 3px;
+    transform: rotate(45deg); position: relative; font-size: 0;
   }
+  .app-logo-mark::after { content: ""; position: absolute; inset: 6px; background: var(--bg-base); border-radius: 1px; }
   .app-logo-name {
-    font-size: 18px;
-    font-weight: 700;
-    background: linear-gradient(135deg, #fff 40%, var(--accent-light));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: -0.3px;
+    font-size: 15px; font-weight: 700; letter-spacing: .11em; text-transform: uppercase;
+    color: var(--text-primary); background: none; -webkit-text-fill-color: currentColor;
   }
   #app-version {
-    font-size: 10px;
-    color: var(--text-muted);
-    font-weight: 400;
-    margin-left: 2px;
-    letter-spacing: 0.5px;
-    -webkit-text-fill-color: var(--text-muted);
+    font: 500 8.5px/1 var(--font-mono); letter-spacing: .14em; color: var(--text-dim);
+    border: 1px solid var(--border-light); border-radius: 3px; padding: 3px 4px; margin-left: 2px;
+    -webkit-text-fill-color: var(--text-dim);
   }
-  .app-nav {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+  .app-nav { display: flex; align-items: center; gap: 8px; }
   .nav-btn {
-    background: var(--bg-elevated);
-    border: 1px solid var(--border);
-    color: var(--text-secondary);
-    padding: 6px 12px;
-    border-radius: var(--radius-md);
-    font-size: 13px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    transition: all 0.15s;
-    white-space: nowrap;
+    background: transparent; border: 1px solid var(--border); color: var(--text-muted);
+    height: 32px; padding: 0 12px; border-radius: var(--radius-md); font-size: 13px; font-weight: 500;
+    cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background .15s, color .15s; white-space: nowrap;
   }
-  .nav-btn:hover { background: var(--border); color: var(--text-primary); }
-  .nav-btn.has-items { color: var(--warning); border-color: rgba(240,198,116,0.3); }
+  .nav-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
+  .nav-btn.has-items { color: var(--text-primary); border-color: var(--warning-border); }
   .nav-badge {
-    background: var(--accent);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 700;
-    min-width: 18px;
-    height: 18px;
-    border-radius: 9px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 4px;
+    background: var(--accent); color: #fff; font: 600 9px/1 var(--font-mono);
+    min-width: 15px; height: 15px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; padding: 0 3px;
   }
 
   /* ===== SEARCH HERO ===== */
-  .search-hero {
-    padding: 32px 0 8px;
+  .search-hero { position: relative; padding: 42px 0 8px; }
+  .search-hero::before {
+    content: ""; position: absolute; top: -8px; right: -24px; bottom: 90px; width: 46%;
+    background-color: #0C0F17;
+    background-image: repeating-linear-gradient(115deg, rgba(255,255,255,.055) 0 1px, transparent 1px 9px);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 55%);
+            mask-image: linear-gradient(90deg, transparent 0%, #000 55%);
+    pointer-events: none; z-index: 0;
   }
+  .search-hero > * { position: relative; z-index: 1; }
+  .hero-kicker { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .hero-kicker .eyebrow-chip {
+    font: 600 9.5px/1 var(--font-mono); letter-spacing: .16em; color: var(--accent);
+    background: var(--accent-dim); border: 1px solid var(--accent-border); border-radius: 4px; padding: 5px 7px;
+  }
+  .hero-kicker .eyebrow-meta { font: 500 10.5px/1 var(--font-mono); letter-spacing: .06em; color: var(--text-dim); }
   .hero-title {
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-    margin: 0 0 6px;
-    color: var(--text-primary);
+    font-size: 40px; font-weight: 600; letter-spacing: -.02em; line-height: 1.08;
+    margin: 0; max-width: 620px; color: var(--text-primary); text-wrap: pretty;
   }
   .hero-subtitle {
-    color: var(--text-muted);
-    font-size: 14px;
-    margin: 0 0 24px;
-    line-height: 1.5;
+    color: var(--text-muted); font-size: 14px; line-height: 1.55; margin: 12px 0 0; max-width: 520px; text-wrap: pretty;
   }
 
-  /* ===== LEGACY COMPAT (subtitle class still used nowhere, kept for safety) ===== */
+  /* ===== LEGACY COMPAT ===== */
   .subtitle { color: var(--text-muted); margin-bottom: 24px; font-size: 14px; }
 
   /* ===== FORM FIELDS ===== */
-  .filters { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
-  .filters label { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
-  .filters input, .filters select { width: 100%; padding: 9px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text-primary); font-size: 14px; transition: border-color 0.15s; }
-  .filters input:focus, .filters select:focus { outline: none; border-color: var(--accent); }
+  .filters {
+    margin-top: 26px; margin-bottom: 24px; padding: 0;
+    background: rgba(17,20,28,.86); border: 1px solid var(--border); border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-panel);
+    display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1px;
+    overflow: hidden;
+  }
+  .filters > div { background: var(--bg-surface); padding: 12px 14px; min-width: 0; outline: 1px solid var(--border); }
+  .filters label {
+    display: block; font: 500 9px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 7px;
+  }
+  .filters input, .filters select {
+    width: 100%; height: 30px; padding: 0 9px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text-primary);
+    font-size: 13px; transition: border-color .15s; appearance: none; -webkit-appearance: none;
+  }
+  .filters input[type="number"] { font: 500 12.5px var(--font-mono); font-variant-numeric: tabular-nums; }
+  .filters input::placeholder { color: var(--text-dim); }
+  .filters input:focus, .filters select:focus { outline: none; border-color: var(--border-light); }
+  .filters select {
+    background-image: linear-gradient(45deg, transparent 50%, var(--text-muted) 50%), linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+    background-position: calc(100% - 13px) 12px, calc(100% - 9px) 12px; background-size: 4px 4px; background-repeat: no-repeat; padding-right: 26px;
+  }
   .full-row { grid-column: 1 / -1; }
-  button#search-btn { grid-column: 1 / -1; padding: 13px; background: linear-gradient(135deg, var(--accent), var(--accent-light)); color: white; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 6px; letter-spacing: 0.2px; box-shadow: 0 4px 14px rgba(124,111,247,0.35); transition: opacity 0.15s, transform 0.15s; }
-  button#search-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-  button#search-btn:disabled { background: var(--bg-elevated); color: var(--text-muted); cursor: not-allowed; box-shadow: none; transform: none; }
-  #status { color: var(--text-muted); font-size: 14px; margin-bottom: 16px; min-height: 20px; }
+  .filters .range-pair { display: flex; align-items: center; gap: 6px; }
+  .filters .range-pair span { color: var(--text-dim); font-size: 12px; }
+  #generation-hint {
+    font: 500 11px/1.5 var(--font-mono) !important; color: var(--accent-light) !important;
+    background: var(--accent-dim) !important; border-radius: 0 !important; padding: 9px 14px !important;
+  }
+  .filters .portals-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 22px; padding: 14px; }
+  .portals-row .portals-group { flex: 1; min-width: 280px; }
+  .portals-row .portals-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .portal-chip {
+    display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 8px;
+    background: transparent; border: 1px solid var(--border); border-radius: 14px;
+    color: var(--text-muted); font-size: 12px !important; font-weight: 500 !important; cursor: pointer; user-select: none;
+    text-transform: none !important; letter-spacing: 0 !important; margin: 0 !important;
+    transition: background .15s, border-color .15s, color .15s;
+  }
+  .portal-chip input { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; }
+  .portal-chip .cc { font: 500 9px/1 var(--font-mono); color: var(--text-dim); }
+  .portal-chip .cc::before { content: "○"; margin-right: 5px; }
+  .portal-chip:has(input:checked) { background: var(--bg-raised); border-color: var(--border-light); color: var(--text-primary); }
+  .portal-chip:has(input:checked) .cc::before { content: "●"; color: var(--success); }
+  .portal-chip small { color: var(--text-dim); font-size: 10.5px; }
+  .portals-row .filters-actions { display: flex; gap: 9px; margin-left: auto; align-items: center; }
+  #quick-count-btn {
+    height: 38px !important; padding: 0 16px !important; background: none !important; color: var(--text-primary) !important;
+    border: 1px solid var(--border-light) !important; border-radius: var(--radius-md) !important;
+    font-size: 13px !important; font-weight: 500 !important; cursor: pointer; transition: background .15s;
+  }
+  #quick-count-btn:hover { background: var(--bg-elevated) !important; }
+  #quick-count-result { font: 500 10.5px/1 var(--font-mono) !important; color: var(--text-muted) !important; }
+  button#search-btn {
+    grid-column: auto; margin: 0; height: 38px; padding: 0 22px;
+    background: var(--accent); color: #fff; border: 1px solid var(--accent); border-radius: var(--radius-md);
+    font-size: 13px; font-weight: 600; letter-spacing: 0; cursor: pointer; box-shadow: var(--shadow-glow);
+    transition: filter .15s; white-space: nowrap;
+  }
+  button#search-btn:hover { filter: brightness(1.1); opacity: 1; transform: none; }
+  button#search-btn:disabled { background: var(--bg-elevated); border-color: var(--border); color: var(--text-muted); box-shadow: none; filter: none; cursor: not-allowed; }
+  #status { color: var(--text-muted); font-size: 13px; margin-bottom: 14px; min-height: 20px; }
+  #search-progress-track-main { height: 3px; background: var(--bg-raised); border-radius: 2px; overflow: hidden; margin-bottom: 6px; }
+  #search-progress-fill-main { height: 100%; background: var(--accent); border-radius: 2px; transition: width .5s ease; width: 0%; }
+  #search-progress-label { font: 600 11px/1 var(--font-mono); color: var(--accent-light); }
+  #search-history-chips button {
+    background: transparent !important; color: var(--text-muted) !important; border: 1px solid var(--border) !important;
+    height: 28px; padding: 0 10px !important; border-radius: 14px !important; font-size: 12px !important; font-weight: 500;
+  }
+  #search-history-chips button:hover { background: var(--bg-raised) !important; color: var(--text-primary) !important; }
   .card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 14px; display: flex; gap: 16px; border-left: 4px solid var(--accent); position: relative; box-shadow: var(--shadow-card); }
   .fav-star { position: absolute; top: 10px; right: 10px; background: rgba(10,12,16,0.75); border: none; color: var(--text-muted); font-size: 20px; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; z-index: 2; }
   .fav-star.active { color: var(--warning); }
@@ -180,9 +215,6 @@
   .card-link { display: inline-block; margin-top: 8px; color: var(--accent-light); font-size: 13px; text-decoration: none; }
   .source-tag { font-size: 11px; padding: 1px 7px; border-radius: var(--radius-sm); background: var(--bg-elevated); color: var(--text-muted); margin-left: 6px; border: 1px solid var(--border); }
   #search-progress-wrap { display: none; margin: -8px 0 14px; }
-  #search-progress-track-main { height: 3px; background: var(--bg-surface); border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
-  #search-progress-fill-main { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-light)); border-radius: 4px; transition: width 0.5s ease; width: 0%; }
-  #search-progress-label { font-size: 12px; color: var(--accent-light); font-weight: 600; }
   #log-container { margin-bottom: 16px; display: none; }
   #log-header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); cursor: pointer; font-size: 13px; color: var(--text-secondary); user-select: none; }
   #log-header:hover { background: var(--bg-elevated); }
@@ -287,17 +319,21 @@
     .compare-col img { height: 110px; }
     #compare-bar-items { gap: 4px; }
   }
-  /* ============ MOBILUS ISDESTYMAS ============ */
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 1100px) {
+    .filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .search-hero::before { display: none; }
+  }
   @media (max-width: 640px) {
     .container { padding: 0 12px 40px; }
-    .search-hero { padding: 20px 0 4px; }
-    .hero-title { font-size: 19px; }
-    .hero-subtitle { font-size: 13px; margin-bottom: 16px; }
-    .app-header-inner { height: 50px; }
-    .app-logo-name { font-size: 16px; }
-    .filters { grid-template-columns: 1fr; padding: 14px; gap: 10px; }
-    .filters input, .filters select { padding: 11px; font-size: 16px; } /* 16px - apsaugo nuo iOS auto-zoom */
-    button#search-btn { padding: 14px; font-size: 15px; }
+    .app-header-inner { height: 50px; padding: 0 12px; }
+    .search-hero { padding: 24px 0 4px; }
+    .hero-title { font-size: 26px; }
+    .hero-subtitle { font-size: 13px; }
+    .filters { grid-template-columns: 1fr; }
+    .filters input, .filters select { height: 40px; font-size: 16px; } /* 16px prevents iOS auto-zoom */
+    .portals-row .filters-actions { width: 100%; margin-left: 0; flex-direction: column; align-items: stretch; }
+    button#search-btn, #quick-count-btn { width: 100%; }
     .card { flex-direction: column; padding: 12px; gap: 10px; }
     .card img { width: 100%; height: 180px; }
     .card-title { font-size: 15px; }
@@ -439,7 +475,7 @@
 <header class="app-header">
   <div class="app-header-inner">
     <div class="app-logo">
-      <div class="app-logo-mark">🎯</div>
+      <div class="app-logo-mark"></div>
       <span class="app-logo-name">CarTriige</span>
       <span id="app-version"></span>
     </div>
@@ -468,10 +504,15 @@
 
   <!-- Search hero -->
   <section class="search-hero">
-    <h1 class="hero-title">Europos automobilių rinkos analizė</h1>
+    <div class="hero-kicker">
+      <span class="eyebrow-chip">BETA</span>
+      <span class="eyebrow-meta">Europos automobilių rinkos skaitytuvas</span>
+    </div>
+    <h1 class="hero-title">Raskite geriausią sandorį</h1>
     <p class="hero-subtitle">Suveskite filtrus – sistema nuskaitys portālus, palygins kainas ir įvertins riziką.</p>
 
   <div class="filters">
+    <!-- Row 1: 6 main filters -->
     <div><label>Markė</label>
       <select id="marke" onchange="updateModels(); updateGenerationHint();">
         <option value="BMW">BMW</option>
@@ -509,7 +550,6 @@
     </div>
     <div><label>Metai nuo</label><input id="metaiNuo" type="number" placeholder="Nenurodyta" oninput="updateGenerationHint()"></div>
     <div><label>Metai iki</label><input id="metaiIki" type="number" placeholder="Nenurodyta"></div>
-    <div class="full-row" id="generation-hint" style="display:none; font-size:12px; color:#a78bfa; background:#1a1d24; padding:8px 10px; border-radius:6px;"></div>
     <div><label>Rida iki</label>
       <select id="ridaIki">
         <option value="">Bet kokia</option>
@@ -521,37 +561,47 @@
         <option value="300000">iki 300 000 km</option>
       </select>
     </div>
+    <!-- Generation hint (conditionally visible) -->
+    <div class="full-row" id="generation-hint" style="display:none;"></div>
+    <!-- Row 2: Price + pages -->
     <div><label>Kaina nuo (€)</label><input id="kainaNuo" type="number" placeholder="Nenurodyta"></div>
     <div><label>Kaina iki (€)</label><input id="kainaIki" type="number" placeholder="Nenurodyta"></div>
-    <div><label>Puslapių skenuoti (per portalą)</label>
+    <div><label>Puslapių (per portalą)</label>
       <select id="maxPages">
-        <option value="3" selected>3 (numatyta, greičiau)</option>
+        <option value="3" selected>3 — greičiau</option>
         <option value="5">5</option>
-        <option value="8">8 (daugiau duomenų, ilgiau truks)</option>
-        <option value="10">10 (maksimaliai)</option>
+        <option value="8">8 — daugiau duomenų</option>
+        <option value="10">10 — maksimaliai</option>
       </select>
     </div>
-    <div class="full-row"><label>Portalai</label>
-      <div style="display:flex; flex-wrap:wrap; gap:10px 20px; padding-top:4px;">
-        <label style="display:flex; align-items:center; gap:6px; font-size:13px; color:#e8e8ea; font-weight:normal;">
-          <input type="checkbox" id="portal-autoplius" checked style="width:auto;"> autoplius.lt
-        </label>
-        <label style="display:flex; align-items:center; gap:6px; font-size:13px; color:#e8e8ea; font-weight:normal;">
-          <input type="checkbox" id="portal-autogidas" checked style="width:auto;"> autogidas.lt
-        </label>
-        <label style="display:flex; align-items:center; gap:6px; font-size:13px; color:#e8e8ea; font-weight:normal;">
-          <input type="checkbox" id="portal-autoscout24" style="width:auto;"> autoscout24.com (užsienio rinka)
-        </label>
-        <label style="display:flex; align-items:center; gap:6px; font-size:13px; color:#e8e8ea; font-weight:normal;">
-          <input type="checkbox" id="portal-otomoto" style="width:auto;"> otomoto.pl <span style="font-size:11px; color:#a0a0b0;">(Lenkija, PLN→EUR)</span>
-        </label>
+    <!-- Portals + actions (full-row) -->
+    <div class="full-row portals-row">
+      <div class="portals-group">
+        <label>Portalai</label>
+        <div class="portals-chips">
+          <label class="portal-chip">
+            <input type="checkbox" id="portal-autoplius" checked>
+            <span class="cc"></span>autoplius.lt
+          </label>
+          <label class="portal-chip">
+            <input type="checkbox" id="portal-autogidas" checked>
+            <span class="cc"></span>autogidas.lt
+          </label>
+          <label class="portal-chip">
+            <input type="checkbox" id="portal-autoscout24">
+            <span class="cc"></span>autoscout24.com <small>užsienio</small>
+          </label>
+          <label class="portal-chip">
+            <input type="checkbox" id="portal-otomoto">
+            <span class="cc"></span>otomoto.pl <small>PLN→EUR</small>
+          </label>
+        </div>
       </div>
-    </div>
-    <div></div>
-    <button id="search-btn" onclick="runSearch()">🔍 Ieškoti ir analizuoti</button>
-    <div class="full-row" style="display:flex; align-items:center; gap:10px;">
-      <button id="quick-count-btn" onclick="runQuickCount()" style="padding:8px 14px; background:#2c303a; color:#cfcbf5; border:none; border-radius:6px; font-size:12px; cursor:pointer;">🔢 Patikrinti kiekį (be analizės)</button>
-      <span id="quick-count-result" style="font-size:12px; color:#9a9aa5;"></span>
+      <div class="filters-actions">
+        <span id="quick-count-result"></span>
+        <button id="quick-count-btn" onclick="runQuickCount()">Kiekis</button>
+        <button id="search-btn" onclick="runSearch()">🔍 Ieškoti</button>
+      </div>
     </div>
   </div>
   </section>
