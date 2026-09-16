@@ -2201,15 +2201,27 @@ async function runSearch() {
   progressFill.style.width = '0%';
   progressLabel.textContent = '0%';
 
+  // Auth guard: explicit token check before request
+  const _srchTok = (function(){ try { return localStorage.getItem('ct_token'); } catch(e) { return null; } })();
+  if (!_srchTok) {
+    btn.disabled = false;
+    btn.textContent = '🔍 Pradėti paiešką';
+    status.textContent = '';
+    if (typeof window.showAuthModal === 'function') window.showAuthModal();
+    return;
+  }
+
   try {
     const startResp = await fetch('/api/search-start', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _srchTok },
       body: JSON.stringify(filters),
     });
     if (!startResp.ok) {
       if (startResp.status === 401) {
         status.textContent = '';
+        // Token rejected — clear and re-prompt
+        try { localStorage.removeItem('ct_token'); localStorage.removeItem('ct_email'); } catch(e) {}
         if (typeof window.showAuthModal === 'function') window.showAuthModal();
         return;
       }
@@ -3973,8 +3985,15 @@ function ctNavTab(tab) {
     var d = document.createElement('div');
     d.id = 'ct-user-dropdown';
     d.style.cssText = 'position:fixed;top:56px;right:16px;z-index:9999;background:#1a1d24;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:12px 16px;min-width:200px;box-shadow:0 8px 32px rgba(0,0,0,.5);';
-    d.innerHTML = '<div style="font:600 12px var(--font);color:var(--text-primary);margin-bottom:10px;">'+email+'</div>'
-      + '<button onclick="window.ctLogout()" style="width:100%;padding:8px;background:transparent;border:1px solid rgba(255,255,255,.1);border-radius:6px;color:var(--text-secondary);font:500 12px var(--font);cursor:pointer;">Atsijungti</button>';
+    var initials = email ? email[0].toUpperCase() : '?';
+    d.innerHTML = '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'
+      + '<div style="width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font:700 14px var(--font);color:#fff;flex-shrink:0;">'+initials+'</div>'
+      + '<div><div style="font:600 13px var(--font);color:var(--text-primary);word-break:break-all;">'+email+'</div>'
+      + '<div style="font:400 11px var(--font);color:var(--accent-light);margin-top:2px;">Prisijungęs</div></div></div>'
+      + '<div style="height:1px;background:rgba(255,255,255,.08);margin:0 -4px 10px;"></div>'
+      + '<button onclick="window.ctLogout()" style="width:100%;padding:8px 12px;background:transparent;border:1px solid rgba(255,255,255,.1);border-radius:6px;color:var(--text-secondary);font:500 12px var(--font);cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:all .15s;" onmouseover="this.style.background='rgba(255,255,255,.05)'" onmouseout="this.style.background='transparent'">'
+      + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>'
+      + 'Atsijungti</button>';
     document.body.appendChild(d);
     setTimeout(function(){ document.addEventListener('click', function rm(e){ if(!d.contains(e.target)&&e.target.id!=='ct3-avatar-btn'){d.remove();document.removeEventListener('click',rm);} }); }, 10);
   };
@@ -3982,6 +4001,21 @@ function ctNavTab(tab) {
     var hasToken = !!getToken();
     var logoutBtn = $('ct-logout-btn');
     if (logoutBtn) logoutBtn.style.display = hasToken ? 'flex' : 'none';
+    // Update avatar button to show logged-in state visually
+    var avatarBtn = document.getElementById('ct3-avatar-btn');
+    if (avatarBtn) {
+      if (hasToken) {
+        avatarBtn.style.borderColor = 'var(--accent)';
+        avatarBtn.style.background = 'var(--accent-dim)';
+        avatarBtn.style.color = 'var(--accent-light)';
+        avatarBtn.title = localStorage.getItem('ct_email') || 'Paskyra';
+      } else {
+        avatarBtn.style.borderColor = '';
+        avatarBtn.style.background = '';
+        avatarBtn.style.color = '';
+        avatarBtn.title = 'Prisijungti';
+      }
+    }
   }
   document.addEventListener('DOMContentLoaded', function () {
     ctUpdateHeader();
