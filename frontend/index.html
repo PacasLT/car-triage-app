@@ -1137,6 +1137,43 @@
   .ct3-stats-inner { flex-wrap: wrap; gap: 12px; padding: 12px 16px; }
   .ct3-stat-div { display: none; }
 }
+
+/* ── v1.12 new card design CSS ── */
+.ct-ring-inner{position:relative;text-align:center;line-height:1;}
+.ct-ring-lg{width:58px;height:58px;} .ct-ring-lg b{font-size:16px;}
+.ct-ring-sm{width:40px;height:40px;} .ct-ring-sm b{font-size:12px;}
+.ct-ring-sm::before{inset:4px;}
+.ct-bar-fill{height:100%;border-radius:2px;width:var(--w,50%);transition:width .3s;}
+.chip{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 9px;border-radius:6px;background:var(--bg-elevated);border:1px solid var(--border);font-size:11.5px;color:var(--text-secondary);white-space:nowrap;flex:none;}
+.chip-pos{background:var(--success-dim);border-color:var(--success-border);color:var(--success);}
+.chip-warn{background:var(--warning-dim);border-color:var(--warning-border);color:var(--warning);}
+.chip-ac{background:var(--accent-dim);border-color:var(--accent-border);color:var(--accent-light);}
+.diff-pos{background:var(--success-dim);border:1px solid var(--success-border);color:var(--success);}
+.diff-warn{background:var(--warning-dim);border:1px solid var(--warning-border);color:var(--warning);}
+.diff-neg{background:var(--danger-dim);border:1px solid var(--danger-border);color:var(--danger);}
+.ct-top-card{background:var(--bg-surface);border-radius:16px;overflow:hidden;margin-bottom:12px;transition:box-shadow .2s,border-color .2s;}
+.ct-top-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.45);}
+.ct-std-card{display:flex;align-items:stretch;background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:8px;transition:border-color .15s;}
+.ct-std-card:hover{border-color:var(--border-light);}
+.photo-ph{background:repeating-linear-gradient(115deg,rgba(255,255,255,.035) 0 1px,transparent 1px 8px),#141822;display:flex;align-items:center;justify-content:center;}
+@keyframes ctin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.ctin{animation:ctin .22s ease both;}
+.ctin:nth-child(2){animation-delay:.05s}
+.ctin:nth-child(3){animation-delay:.1s}
+.ctin:nth-child(4){animation-delay:.15s}
+.ctin:nth-child(5){animation-delay:.2s}
+@media(max-width:720px){
+  .top-grid{grid-template-columns:1fr !important;}
+  .top-photo-col{border-right:none !important;border-bottom:1px solid var(--border);padding:12px 12px 0 !important;}
+  .top-info-col{padding:14px 14px 12px !important;}
+  .score-bars{grid-template-columns:repeat(3,minmax(0,1fr)) !important;}
+  .std-photo-col{width:120px !important;}
+  .std-right{flex-direction:column !important;align-items:flex-start !important;gap:8px !important;}
+}
+@media(max-width:480px){
+  .std-photo-col{display:none;}
+  .std-card-inner{border-left:none !important;}
+}
 </style>
 </head>
 <body>
@@ -1487,7 +1524,7 @@
 </div>
 
 <script>
-const APP_VERSION = 'v1.11.0';
+const APP_VERSION = 'v1.12.0';
 const BRAND_MODELS = {
   'BMW': ['1', '2', '3', '4', '5', '6', '7', '8', 'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'Z4', 'M'],
   'Audi': ['A1', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q2', 'Q3', 'Q5', 'Q7', 'Q8'],
@@ -3224,98 +3261,230 @@ function ctNavTab(tab) {
     window.__galleryStore = window.__galleryStore || {};
     window.__cardPhotoIndex = window.__cardPhotoIndex || {};
 
-    candidates.forEach((c, idx) => {
-      const cardId = `detail-${idx}-${c.url.length}`;
-      const btnId = `${cardId}-btn`;
-      const a = c.deepAnalysis || null;
-      const hasDeep = !!a;
-      const photos = c.photos && c.photos.length ? c.photos : (c.photo ? [c.photo] : []);
-      const multi = photos.length > 1;
+    const _srcMap = {
+      'OTOMOTO.PL':   { bg:'rgba(192,57,43,.18)',   fg:'#e07070', bo:'rgba(192,57,43,.35)' },
+      'MOBILE.DE':    { bg:'rgba(25,100,200,.18)',   fg:'#74b2f6', bo:'rgba(25,100,200,.35)' },
+      'AUTOSCOUT24':  { bg:'rgba(240,106,0,.18)',    fg:'#f8a15a', bo:'rgba(240,106,0,.35)' },
+      'AUTO.PL':      { bg:'rgba(139,60,247,.18)',   fg:'#c4a8f8', bo:'rgba(139,60,247,.35)' },
+      'AUTOPLIUS.LT': { bg:'rgba(25,184,106,.18)',   fg:'#5dca80', bo:'rgba(25,184,106,.35)' },
+      'AUTOGIDAS.LT': { bg:'rgba(45,111,202,.18)',   fg:'#74b2f6', bo:'rgba(45,111,202,.35)' },
+    };
+    const _rankSt = [null,
+      {bg:'linear-gradient(135deg,#FFD700,#E8A000)',tc:'#0A0C12',bs:'1px solid rgba(255,215,0,.45)'},
+      {bg:'linear-gradient(135deg,#d8d8d8,#a0a0a0)',tc:'#0A0C12',bs:'1px solid rgba(180,180,180,.45)'},
+      {bg:'linear-gradient(135deg,#CD7F32,#9B5523)',tc:'#fff',   bs:'1px solid rgba(205,127,50,.45)'},
+      {bg:'var(--success-dim)',tc:'var(--success)',bs:'1px solid var(--success-border)'},
+      {bg:'var(--success-dim)',tc:'var(--success)',bs:'1px solid var(--success-border)'},
+    ];
+    const _tone = (v) => v >= 7.5 ? 'var(--success)' : v >= 5.5 ? 'var(--warning)' : 'var(--danger)';
+    const _toneDim = (v) => v >= 7.5 ? 'var(--success-dim)' : v >= 5.5 ? 'var(--warning-dim)' : 'var(--danger-dim)';
+    const _toneBo = (v) => v >= 7.5 ? 'var(--success-border)' : v >= 5.5 ? 'var(--warning-border)' : 'var(--danger-border)';
+    const _verdict = (v) => v >= 7.5 ? 'Didelė galimybė' : v >= 5.5 ? 'Gera galimybė' : 'Verta apsvarstyti';
+    const _diffCls = (d) => (d||0) >= 39 ? 'diff-neg' : (d||0) >= 8 ? 'diff-pos' : 'diff-warn';
+
+    const TOP_N = 5;
+    const topCands = candidates.slice(0, TOP_N);
+    const restCands = candidates.slice(TOP_N);
+
+    // ── TOP header ──
+    const _th = document.createElement('div');
+    _th.innerHTML = '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;"><div style="display:flex;align-items:center;gap:9px;flex:none;"><div style="width:22px;height:22px;border-radius:6px;background:var(--accent);display:grid;place-items:center;flex:none;"><svg width=\'12\' height=\'12\' viewBox=\'0 0 24 24\' fill=\'#fff\'><path d=\'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z\'/></svg></div><span style="font:700 13px/1 var(--font);color:var(--text-primary);">TOP ' + topCands.length + ' Pasiūlymai</span></div><div style="flex:1;height:1px;background:var(--border);"></div><span style="font:500 10px/1 var(--font-mono);letter-spacing:.08em;color:var(--text-dim);flex:none;">AI IŠRYŠKINTOS GERIAUSIOS GALIMYBĖS</span></div>';
+    results.appendChild(_th.firstElementChild);
+
+    // ── TOP cards ──
+    topCands.forEach(function(c, idx) {
+      var rank = idx + 1;
+      var cardId = 'detail-' + idx + '-' + c.url.length;
+      var btnId = cardId + '-btn';
+      var a = c.deepAnalysis || null;
+      var hasDeep = !!a;
+      var photos = (c.photos && c.photos.length) ? c.photos : (c.photo ? [c.photo] : []);
+      var multi = photos.length > 1;
       if (multi) { window.__galleryStore[cardId + '-strip'] = photos; window.__cardPhotoIndex[cardId] = 0; }
 
-      const isFav = isFavorited(c.url);
-      const favSnapshot = `{modelis:'${escJs(c.modelis)}', kaina:${c.kaina || 'null'}, metai:${c.metai || 'null'}, rida:${c.rida || 'null'}, photo:'${escJs(c.photo || '')}', source:'${escJs(c.source)}'}`;
-      const diffTone = c.diffPct >= 39 ? 'neg' : c.diffPct >= 8 ? 'pos' : 'warn';
-      const skirtumas = c.marketMedian && c.kaina ? c.kaina - c.marketMedian : null;
+      var src = _srcMap[c.source] || { bg:'var(--bg-elevated)', fg:'var(--text-muted)', bo:'var(--border)' };
+      var rs = _rankSt[rank] || { bg:'var(--bg-raised)', tc:'var(--text-muted)', bs:'1px solid var(--border)' };
+      var rankLabel = rank === 1 ? '★ #1 GERIAUSIAS' : '#' + rank;
+      var cardBorder = rank === 1 ? 'var(--success-border)' : rank === 2 ? 'rgba(124,92,255,.3)' : rank <= 5 ? 'rgba(255,255,255,.1)' : 'rgba(255,255,255,.075)';
 
-      const thumbs = multi ? `<div class="ct-thumbs">${photos.slice(0, 5).map((p, i) => `<img src="${p}" loading="lazy" onclick="window.__cardPhotoIndex['${cardId}']=${i}; cyclePhoto('${cardId}', 0)" onerror="this.style.display='none'">`).join('')}${photos.length > 5 ? `<button onclick="openLightbox(window.__galleryStore['${cardId}-strip'], 5)">+${photos.length - 5}</button>` : ''}</div>` : '';
+      var s = ctScore(c, a);
+      var scoreColor = _tone(s.total);
+      var scorePct = Math.round(s.total * 10);
+      var isFav = isFavorited(c.url);
+      var favSnap = "{modelis:'" + escJs(c.modelis) + "', kaina:" + (c.kaina||'null') + ", metai:" + (c.metai||'null') + ", rida:" + (c.rida||'null') + ", photo:'" + escJs(c.photo||'') + "', source:'" + escJs(c.source) + "'}";
+      var detailBtnLabel = hasDeep ? 'Pilna apžvalga →' : 'Detali apžvalga';
+      var dArgs = "'" + c.url + "', '" + cardId + "', this, false, {kaina:" + (c.kaina||'null') + ", marketMedian:" + (c.marketMedian||'null') + ", marketCount:" + (c.marketCount||'null') + ", diffPct:" + (c.diffPct!=null?c.diffPct:'null') + ", modelis:'" + escJs(c.modelis) + "', pardavejas:" + (c.pardavejas ? ("'" + escJs(c.pardavejas) + "'") : 'null') + ", galia:" + (c.galia||'null') + ", variklioTuris:" + (c.variklioTuris||'null') + "}";
+      var detailClick = hasDeep ? ("ctOpenDetail('" + escJs(c.url) + "')") : ("loadDetail(" + dArgs + ")");
+      var cmpArgs = "'" + c.url + "', '" + escJs(c.modelis) + "', " + (c.kaina||'null') + ", '" + escJs(c.photo||'') + "', " + (c.metai||'null') + ", " + (c.rida||'null') + ", '" + escJs(c.kuras||'') + "', " + (c.galia||'null') + ", " + (c.variklioTuris||'null') + ", '" + escJs(c.pavarai||'') + "', " + (c.diffPct!=null?c.diffPct:'null') + ", " + (c.marketMedian||'null') + ", '" + escJs(c.source||'') + "', 'cmp-" + cardId + "'";
+      var panelHTML = hasDeep ? buildDetailPanelHTML({ analysis: a, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, cardId) : '';
 
-      const chips = [
-        c.metai ? ['▦', c.metai] : null,
-        ['◔', fmtKm(c.rida)],
-        (c.variklioTuris || c.kuras) ? ['◉', [c.variklioTuris ? c.variklioTuris + ' l' : null, c.kuras ? `(${c.kuras.toLowerCase()})` : null].filter(Boolean).join(' ')] : null,
-        c.galia ? ['⚡', `${c.galia} kW`] : null,
-        c.pavarai ? ['⚙', c.pavarai] : null,
-      ].filter(Boolean).map(([ic, t]) => `<span class="ct-chip"><i>${ic}</i>${esc(t)}</span>`).join('');
+      var diffCls = _diffCls(c.diffPct);
+      var skirt = (c.marketMedian && c.kaina) ? Math.round(c.kaina - c.marketMedian) : null;
+      var savColor = (skirt != null && skirt < 0) ? 'var(--success)' : 'var(--warning)';
 
-      const signals = [];
-      if (c.yraVerslas) signals.push('Verslas / dealeris');
-      if (c.turiIstorijosAtaskaita) signals.push('Patikrinta istorija');
-      if (c.garantijosTipas) signals.push('Garantija');
-      if (c.turiVin) signals.push('VIN nurodytas');
-      if (c.ridaDiffPct != null && c.ridaDiffPct <= -20) signals.push('Maža rida');
-      const uniqueSignals = [...new Set(signals)];
-      const signalChips = uniqueSignals.map((s) => `<span class="ct-chip ct-chip-pos">✓ ${s}</span>`).join('');
+      var thumbsHtml = '';
+      if (multi) {
+        thumbsHtml = photos.slice(0, 5).map(function(p, i) {
+          return '<div style="aspect-ratio:4/3;border-radius:6px;border:1px solid ' + (i===0?'var(--accent-border)':'var(--border)') + ';overflow:hidden;"><img src="' + p + '" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onclick="window.__cardPhotoIndex[\'' + cardId + '\']=' + i + '; cyclePhoto(\'' + cardId + '\', 0)" onerror="this.parentElement.style.display=\'none\'"></div>';
+        }).join('');
+        if (photos.length > 5) {
+          thumbsHtml += '<div style="aspect-ratio:4/3;border-radius:6px;border:1px solid var(--border);background:var(--bg-raised);display:flex;align-items:center;justify-content:center;font:600 9px/1 var(--font-mono);color:var(--text-dim);cursor:pointer;" onclick="openLightbox(window.__galleryStore[\'' + cardId + '-strip\'], 5)">+' + (photos.length - 5) + '</div>';
+        }
+      }
 
-      const notes = [];
-      if (c.pvmPastaba) notes.push(`<div class="ct-note ct-warn">${esc(c.pvmPastaba)}</div>`);
-      else if (c.kainaBePvm) notes.push(`<div class="ct-note">Skelbime taip pat nurodyta ${formatEUR(c.kainaBePvm)} be PVM / eksportui.</div>`);
-      if (c.diffPct >= 39) notes.push(`<div class="ct-note ct-neg">${c.diffPct}% nuolaida yra labai didelė – statistiškai tokie skelbimai dažnai turi paslėptų defektų. Būtina kruopšti apžiūra.</div>`);
-      if (c.ridaDiffPct != null && c.ridaDiffPct >= 20) notes.push(`<div class="ct-note ct-neg">Rida ${formatRidaDiff(c.ridaDiffPct)} aukštesnė nei imties vidurkis (${fmtKm(c.ridaMedian)}).</div>`);
-      if (c.kryzminiaiSkelbimai && c.kryzminiaiSkelbimai.length) notes.push(`<div class="ct-note">Tas pats automobilis taip pat: ${c.kryzminiaiSkelbimai.map((k) => `${esc(k.source)} už ${formatEUR(k.kaina)}`).join(', ')}</div>`);
+      var chipsHtml = [
+        c.metai ? '<span class="chip">📅 ' + c.metai + '</span>' : '',
+        c.rida ? '<span class="chip">🛣 ' + fmtKm(c.rida) + '</span>' : '',
+        c.kuras ? '<span class="chip">⛽ ' + esc(c.kuras) + '</span>' : '',
+        c.pavarai ? '<span class="chip">⚙ ' + esc(c.pavarai) + '</span>' : '',
+        c.turiVin ? '<span class="chip chip-pos">✓ VIN</span>' : '',
+        c.turiIstorijosAtaskaita ? '<span class="chip chip-pos">✓ Istorija</span>' : '',
+        c.garantijosTipas ? '<span class="chip chip-pos">✓ Garantija</span>' : '',
+        c.yraVerslas ? '<span class="chip chip-ac">🏢 Verslas</span>' : '',
+      ].join('');
 
-      const detailBtnLabel = hasDeep ? 'Pilna apžvalga →' : 'Detali apžvalga';
-      const detailArgs = `'${c.url}', '${cardId}', this, false, {kaina:${c.kaina || 'null'}, marketMedian:${c.marketMedian || 'null'}, marketCount:${c.marketCount || 'null'}, diffPct:${c.diffPct != null ? c.diffPct : 'null'}, modelis:'${escJs(c.modelis)}', pardavejas:${c.pardavejas ? `'${escJs(c.pardavejas)}'` : 'null'}, galia:${c.galia || 'null'}, variklioTuris:${c.variklioTuris || 'null'}}`;
-      const detailOnclick = hasDeep ? `ctOpenDetail('${escJs(c.url)}')` : `loadDetail(${detailArgs})`;
-      const preloadedPanelHTML = hasDeep ? buildDetailPanelHTML({ analysis: a, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, cardId) : '';
-      const compareArgs = `'${c.url}', '${escJs(c.modelis)}', ${c.kaina || 'null'}, '${escJs(c.photo || '')}', ${c.metai || 'null'}, ${c.rida || 'null'}, '${escJs(c.kuras || '')}', ${c.galia || 'null'}, ${c.variklioTuris || 'null'}, '${escJs(c.pavarai || '')}', ${c.diffPct != null ? c.diffPct : 'null'}, ${c.marketMedian || 'null'}, '${escJs(c.source || '')}', 'cmp-${cardId}'`;
+      var subBarsHtml = s.parts.map(function(part) {
+        var label = part[0]; var val = part[1];
+        var bc = _tone(val);
+        return '<div style="display:flex;flex-direction:column;gap:5px;"><span style="font:500 9px/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + label + '</span><b style="font:700 12px/1 var(--font-mono);color:' + bc + ';">' + val.toFixed(1) + '</b><div style="height:3px;border-radius:2px;background:var(--bg-raised);overflow:hidden;"><div class="ct-bar-fill" style="--w:' + (val*10) + '%;background:' + bc + ';"></div></div></div>';
+      }).join('');
 
-      // Saugome kortele detail puslapiui
       window.__ctCardData[c.url] = { c: c, analysis: a, photos: photos };
 
-      const card = document.createElement('div');
-      card.className = 'card ct-card' + (idx === 0 ? ' ct-top1' : '');
-      card.innerHTML = `
-        <div class="ct-grid">
-          <div class="ct-photo">
-            <div class="ct-photo-main">
-              <img id="${cardId}-img" src="${photos[0] || ''}" onclick="${multi ? `openLightbox(window.__galleryStore['${cardId}-strip'], window.__cardPhotoIndex['${cardId}']||0)` : ''}" onerror="this.style.visibility='hidden'">
-              <span class="ct-rank ${idx === 0 ? 'ct-rank-top' : ''}">${idx === 0 ? '★ Top pasiūlymas' : '#' + (idx + 1)}</span>
-              ${hasDeep ? `<span class="ct-full" style="cursor:pointer" onclick="event.stopPropagation();ctOpenDetail('${escJs(c.url)}')">✦ Pilna apžvalga</span>` : ''}
-              ${multi ? `<button class="ct-nav ct-nav-l" onclick="event.stopPropagation(); cyclePhoto('${cardId}', -1)">‹</button><button class="ct-nav ct-nav-r" onclick="event.stopPropagation(); cyclePhoto('${cardId}', 1)">›</button><span class="ct-count" id="${cardId}-photocount">1/${photos.length}</span>` : ''}
-            </div>
-            ${thumbs}
-          </div>
+      var card = document.createElement('div');
+      card.className = 'ct-top-card ctin';
+      card.style.border = '1px solid ' + cardBorder;
 
-          <div class="ct-main">
-            <div class="ct-title-row">
-              <h3>${esc(c.modelis)}</h3>
-              <span class="source-tag">${esc(c.source)}</span>
-              <button class="fav-star ct-fav${isFav ? ' active' : ''}" title="Išsaugoti" onclick="toggleFavorite('${c.url}', ${favSnapshot}, this)">${isFav ? '★' : '☆'}</button>
-            </div>
-            <div class="ct-price-row">
-              <span class="ct-price">${formatEUR(c.kaina)}</span>
-              <span class="ct-diff ct-bg-${diffTone}">−${c.diffPct}%</span>
-              <span class="ct-market">Rinkos vidurkis: <b>${formatEUR(c.marketMedian)}</b>${skirtumas != null ? ` · Skirtumas: <b class="ct-${diffTone}">${skirtumas > 0 ? '+' : '−'}${formatEUR(Math.abs(skirtumas))}</b>` : ''} <small>(imtis ${c.marketCount || '?'})</small></span>
-            </div>
-            <div class="ct-chips">${chips}${signalChips}</div>
-            ${notes.join('')}
-            ${c.comment ? `<div class="ct-comment"><span>AI</span><p>${esc(c.comment)}</p></div>` : ''}
-            <div class="ct-actions">
-              <a class="ct-btn" href="${c.url}" target="_blank">Žiūrėti skelbimą ↗</a>
-              <button class="compare-toggle ct-btn" id="cmp-${cardId}" onclick="toggleCompare(${compareArgs})">⇄ Palyginti</button>
-              <button class="detail-btn ct-btn ct-btn-primary${hasDeep ? ' ready' : ''}" id="${btnId}" data-closed-label="${detailBtnLabel}" onclick="${detailOnclick}">${detailBtnLabel}</button>
-            </div>
-            ${scoreBlock(c, a)}
-          </div>
+      var accentLine = rank === 1 ? '<div style="height:2px;background:linear-gradient(90deg,var(--success) 0%,var(--accent) 60%,transparent 100%);"></div>' : '';
+      var bestBadge = rank === 1 ? '<div style="position:absolute;top:10px;right:10px;z-index:2;display:flex;align-items:center;gap:5px;padding:5px 8px;border-radius:6px;background:rgba(10,12,18,.82);border:1px solid rgba(255,255,255,.14);"><svg width="9" height="9" viewBox="0 0 36 36" fill="none"><rect x="18" y="2" width="20" height="20" rx="3" transform="rotate(45 18 2)" fill="#7C5CFF"/><rect x="18" y="9" width="11" height="11" rx="2" transform="rotate(45 18 9)" fill="#0A0C12" opacity="0.7"/></svg><span style="font:700 8px/1 var(--font-mono);letter-spacing:.1em;color:var(--accent-light);">GERIAUSIAS</span></div>' : '';
+      var navHtml = multi ? '<button class="ct-nav ct-nav-l" onclick="event.stopPropagation(); cyclePhoto(\'' + cardId + '\', -1)">‹</button><button class="ct-nav ct-nav-r" onclick="event.stopPropagation(); cyclePhoto(\'' + cardId + '\', 1)">›</button><span class="ct-count" id="' + cardId + '-photocount">1/' + photos.length + '</span>' : '';
+      var imgClick = multi ? 'openLightbox(window.__galleryStore[\'' + cardId + '-strip\'], window.__cardPhotoIndex[\'' + cardId + '\']||0)' : '';
 
-          <div class="ct-sides">${profitBlock(a, cardId, hasDeep, btnId)}${riskBlock(a, c, hasDeep, btnId)}</div>
-        </div>
-        <div class="detail-panel ct-panel" id="${cardId}" data-loaded="${hasDeep}" style="display:none">${preloadedPanelHTML}</div>
-      `;
+      card.innerHTML = accentLine +
+        '<div class="top-grid" style="display:grid;grid-template-columns:280px minmax(0,1fr);gap:0;">' +
+          '<div class="top-photo-col" style="padding:14px 0 0 14px;display:flex;flex-direction:column;gap:8px;border-right:1px solid var(--border);">' +
+            '<div class="photo-ph" style="aspect-ratio:4/3;border-radius:12px;overflow:hidden;position:relative;">' +
+              '<div style="position:absolute;top:10px;left:10px;z-index:2;background:' + rs.bg + ';color:' + rs.tc + ';font:700 10px/1 var(--font-mono);letter-spacing:.08em;padding:6px 9px;border-radius:7px;border:' + rs.bs + ';white-space:nowrap;">' + rankLabel + '</div>' +
+              bestBadge +
+              '<img id="' + cardId + '-img" src="' + (photos[0]||'') + '" style="width:100%;height:100%;object-fit:cover;" onclick="' + imgClick + '" onerror="this.style.visibility=\'hidden\'">' +
+              navHtml +
+            '</div>' +
+            '<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;padding-bottom:14px;">' + thumbsHtml + '</div>' +
+          '</div>' +
+          '<div class="top-info-col" style="padding:16px 18px 14px;display:flex;flex-direction:column;gap:0;min-width:0;">' +
+            '<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;">' +
+              '<div style="flex:1;min-width:0;">' +
+                '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">' +
+                  '<h3 style="font:600 18px/1.2 var(--font);letter-spacing:-.01em;margin:0;">' + esc(c.modelis) + '</h3>' +
+                  '<span style="font:700 9px/1 var(--font-mono);letter-spacing:.07em;padding:4px 7px;border-radius:4px;background:' + src.bg + ';color:' + src.fg + ';border:1px solid ' + src.bo + ';text-transform:uppercase;flex:none;">' + esc(c.source) + '</span>' +
+                '</div>' +
+                '<div style="font:500 11.5px/1 var(--font-mono);color:var(--text-muted);">' + [c.metai, c.rida ? fmtKm(c.rida) : null, c.kuras, c.pavarai].filter(Boolean).join(' · ') + '</div>' +
+              '</div>' +
+              '<button class="fav-star' + (isFav ? ' active' : '') + '" style="flex:none;width:32px;height:32px;border-radius:8px;background:transparent;border:1px solid var(--border-light);color:var(--text-muted);display:grid;place-items:center;font-size:16px;" title="Išsaugoti" onclick="toggleFavorite(\'' + c.url + '\', ' + favSnap + ', this)">' + (isFav ? '★' : '☆') + '</button>' +
+            '</div>' +
+            '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:5px;">' +
+              '<span style="font:600 26px/1 var(--font-mono);letter-spacing:-.02em;color:var(--text-primary);">' + formatEUR(c.kaina) + '</span>' +
+              '<span class="' + diffCls + '" style="font:700 12px/1 var(--font-mono);padding:6px 9px;border-radius:6px;">−' + c.diffPct + '%</span>' +
+              '<span style="font-size:12.5px;color:var(--text-muted);">Rinkos vidurkis: <b style="color:var(--text-primary);font-weight:600;">' + formatEUR(c.marketMedian) + '</b></span>' +
+            '</div>' +
+            '<div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">Skirtumas: <b style="color:' + savColor + ';font-weight:600;">' + (skirt != null ? (skirt < 0 ? '−' : '+') + formatEUR(Math.abs(skirt)) : '–') + '</b><span style="color:var(--text-dim);margin-left:8px;">· ' + (c.marketCount||'?') + ' panašių skelbimų</span></div>' +
+            '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">' + chipsHtml + '</div>' +
+            (c.comment ? '<div style="display:flex;gap:9px;padding:10px 12px;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:9px;margin-bottom:14px;align-items:flex-start;"><span style="flex:none;font:700 9px/1 var(--font-mono);padding:4px 5px;border-radius:4px;background:var(--accent);color:#fff;height:18px;display:grid;place-items:center;margin-top:1px;">AI</span><p style="margin:0;font-size:12.5px;line-height:1.5;color:var(--text-secondary);">' + esc(c.comment) + '</p></div>' : '') +
+            '<div style="padding:12px 0 0;border-top:1px solid var(--border);margin-bottom:12px;">' +
+              '<div style="font:500 9px/1 var(--font-mono);letter-spacing:.13em;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;">CARTRIIGE ĮVERTIS</div>' +
+              '<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">' +
+                '<div class="ct-ring ct-ring-lg" style="--pct:' + scorePct + ';color:' + scoreColor + ';">' +
+                  '<div class="ct-ring-inner"><b style="color:' + scoreColor + ';">' + s.total.toFixed(1) + '</b><small>/10</small></div>' +
+                '</div>' +
+                '<div class="score-bars" style="flex:1;min-width:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;">' + subBarsHtml + '</div>' +
+                '<div style="flex:none;padding:8px 12px;border-radius:8px;background:' + _toneDim(s.total) + ';border:1px solid ' + _toneBo(s.total) + ';display:flex;align-items:center;gap:6px;">' +
+                  '<span style="width:7px;height:7px;border-radius:50%;background:' + scoreColor + ';flex:none;box-shadow:0 0 5px ' + scoreColor + ';"></span>' +
+                  '<span style="font:600 12px/1.3 var(--font);color:' + scoreColor + ';white-space:nowrap;">' + _verdict(s.total) + '</span>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+            '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">' +
+              '<a class="ct-btn" href="' + c.url + '" target="_blank" style="display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--border-light);color:var(--text-secondary);font:500 12.5px var(--font);">Žiūrėti skelbimą <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14L21 3"/></svg></a>' +
+              '<button class="compare-toggle ct-btn" id="cmp-' + cardId + '" style="display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--border-light);background:transparent;color:var(--text-primary);font:500 12.5px var(--font);" onclick="toggleCompare(' + cmpArgs + ')">⇄ Palyginti</button>' +
+              '<button class="detail-btn ct-btn ct-btn-primary' + (hasDeep ? ' ready' : '') + '" id="' + btnId + '" data-closed-label="' + detailBtnLabel + '" style="display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 16px;border-radius:8px;background:var(--accent);border:none;color:#fff;font:600 12.5px var(--font);margin-left:auto;cursor:pointer;" onclick="' + detailClick + '">' + detailBtnLabel + ' <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="detail-panel ct-panel" id="' + cardId + '" data-loaded="' + hasDeep + '" style="display:none">' + panelHTML + '</div>';
+      results.appendChild(card);
+    });
+
+    // ── REST header ──
+    if (restCands.length > 0) {
+      var _rh = document.createElement('div');
+      _rh.innerHTML = '<div style="display:flex;align-items:center;gap:12px;margin:24px 0 14px;"><div style="display:flex;align-items:center;gap:8px;flex:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span style="font:600 13px/1 var(--font);color:var(--text-secondary);">Kiti skelbimai</span><span style="font:500 10px/1 var(--font-mono);color:var(--text-dim);">' + (TOP_N + 1) + ' – ' + candidates.length + '</span></div><div style="flex:1;height:1px;background:var(--border);"></div></div>';
+      results.appendChild(_rh.firstElementChild);
+    }
+
+    // ── Standard cards ──
+    restCands.forEach(function(c, idx) {
+      var rank = TOP_N + idx + 1;
+      var cardId = 'detail-' + (TOP_N + idx) + '-' + c.url.length;
+      var btnId = cardId + '-btn';
+      var a = c.deepAnalysis || null;
+      var hasDeep = !!a;
+      var photos = (c.photos && c.photos.length) ? c.photos : (c.photo ? [c.photo] : []);
+
+      var src = _srcMap[c.source] || { bg:'var(--bg-elevated)', fg:'var(--text-muted)', bo:'var(--border)' };
+      var s = ctScore(c, a);
+      var scoreColor = _tone(s.total);
+      var scorePct = Math.round(s.total * 10);
+      var accentLine = scoreColor;
+      var diffCls = _diffCls(c.diffPct);
+      var detailBtnLabel = hasDeep ? 'Pilna apžvalga →' : 'Detales →';
+      var dArgs = "'" + c.url + "', '" + cardId + "', this, false, {kaina:" + (c.kaina||'null') + ", marketMedian:" + (c.marketMedian||'null') + ", marketCount:" + (c.marketCount||'null') + ", diffPct:" + (c.diffPct!=null?c.diffPct:'null') + ", modelis:'" + escJs(c.modelis) + "', pardavejas:" + (c.pardavejas ? ("'" + escJs(c.pardavejas) + "'") : 'null') + ", galia:" + (c.galia||'null') + ", variklioTuris:" + (c.variklioTuris||'null') + "}";
+      var detailClick = hasDeep ? ("ctOpenDetail('" + escJs(c.url) + "')") : ("loadDetail(" + dArgs + ")");
+      var panelHTML = hasDeep ? buildDetailPanelHTML({ analysis: a, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, cardId) : '';
+
+      var chipsHtml = [
+        c.metai ? '<span class="chip" style="height:22px;font-size:11px;padding:0 7px;">' + c.metai + '</span>' : '',
+        c.rida ? '<span class="chip" style="height:22px;font-size:11px;padding:0 7px;">' + fmtKm(c.rida) + '</span>' : '',
+        c.kuras ? '<span class="chip" style="height:22px;font-size:11px;padding:0 7px;">' + esc(c.kuras) + '</span>' : '',
+        c.turiVin ? '<span class="chip chip-pos" style="height:22px;font-size:11px;padding:0 7px;">✓ VIN</span>' : '',
+      ].join('');
+
+      window.__ctCardData[c.url] = { c: c, analysis: a, photos: photos };
+
+      var card = document.createElement('div');
+      card.className = 'ct-std-card';
+      card.innerHTML =
+        '<div class="std-photo-col photo-ph" style="width:192px;flex:none;border-right:1px solid var(--border);position:relative;min-height:90px;overflow:hidden;">' +
+          '<div style="position:absolute;top:8px;left:8px;z-index:1;font:700 9px/1 var(--font-mono);letter-spacing:.06em;padding:5px 7px;border-radius:5px;background:rgba(10,12,18,.8);border:1px solid var(--border-light);color:var(--text-dim);">#' + rank + '</div>' +
+          (photos[0] ? '<img src="' + photos[0] + '" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\'">' : '<span style="font:600 8px/1 var(--font-mono);letter-spacing:.1em;color:var(--text-dim);">NUOTRAUKA</span>') +
+        '</div>' +
+        '<div class="std-card-inner" style="flex:1;padding:11px 14px;display:flex;align-items:center;gap:14px;min-width:0;border-left:3px solid ' + accentLine + ';">' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:5px;">' +
+              '<span style="font:600 14px/1.2 var(--font);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;">' + esc(c.modelis) + '</span>' +
+              '<span style="font:700 8px/1 var(--font-mono);letter-spacing:.07em;padding:3px 5px;border-radius:4px;background:' + src.bg + ';color:' + src.fg + ';border:1px solid ' + src.bo + ';text-transform:uppercase;flex:none;">' + esc(c.source) + '</span>' +
+            '</div>' +
+            '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;">' + chipsHtml + '</div>' +
+            '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
+              '<span style="font:600 17px/1 var(--font-mono);letter-spacing:-.01em;">' + formatEUR(c.kaina) + '</span>' +
+              '<span class="' + diffCls + '" style="font:700 11px/1 var(--font-mono);padding:4px 7px;border-radius:5px;">−' + c.diffPct + '%</span>' +
+              '<span style="font-size:11px;color:var(--text-dim);">vs ' + formatEUR(c.marketMedian) + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="std-right" style="flex:none;display:flex;align-items:center;gap:10px;">' +
+            '<div class="ct-ring ct-ring-sm" style="--pct:' + scorePct + ';color:' + scoreColor + ';">' +
+              '<div class="ct-ring-inner"><b style="color:' + scoreColor + ';">' + s.total.toFixed(1) + '</b><small>/10</small></div>' +
+            '</div>' +
+            '<div style="padding:6px 10px;border-radius:7px;background:' + _toneDim(s.total) + ';border:1px solid ' + _toneBo(s.total) + ';">' +
+              '<span style="font:600 11px/1.3 var(--font);color:' + scoreColor + ';white-space:nowrap;">' + _verdict(s.total) + '</span>' +
+            '</div>' +
+            '<button class="detail-btn ct-btn' + (hasDeep ? ' ready' : '') + '" id="' + btnId + '" data-closed-label="' + detailBtnLabel + '" style="display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 13px;border-radius:8px;border:1px solid var(--border-light);color:var(--text-primary);font:600 12px var(--font);white-space:nowrap;background:transparent;cursor:pointer;" onclick="' + detailClick + '">Detales <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="detail-panel ct-panel" id="' + cardId + '" data-loaded="' + hasDeep + '" style="display:none">' + panelHTML + '</div>';
       results.appendChild(card);
     });
   };
+
 
   // ---------- DETALĖS PANELĖ SU TABAIS ----------
   window.ctTab = function (panelId, key, btn) {
