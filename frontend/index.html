@@ -754,6 +754,13 @@
 .ct-list li::before { content: ""; position: absolute; left: 0; top: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--text-dim); }
 .ct-list-pos li::before { background: var(--success); } .ct-list-warn li::before { background: var(--warning); } .ct-list-neg li::before { background: var(--danger); }
 .ct-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.ct-highlight-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; }
+.ct-ht { display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 13px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.ct-ht-success { background: rgba(0,200,100,0.12); color: #00c864; border: 1px solid rgba(0,200,100,0.25); }
+.ct-ht-accent { background: rgba(108,92,231,0.12); color: var(--accent-light); border: 1px solid rgba(108,92,231,0.3); }
+.ct-ht-info { background: rgba(0,160,220,0.12); color: #60b8e8; border: 1px solid rgba(0,160,220,0.25); }
+.ct-ht-warn { background: rgba(255,200,0,0.10); color: #f1c40f; border: 1px solid rgba(255,200,0,0.25); }
+.ct-ht-muted { background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border); }
 .ct-tags span { white-space: nowrap; font-size: 12.5px; padding: 6px 10px; border-radius: 7px; background: var(--bg-raised); border: 1px solid var(--border); color: var(--text-secondary); display: inline-flex; align-items: center; line-height: 1; }
 .ct-tags .ct-tag-more { color: var(--accent-light); border-color: var(--accent-border); background: var(--accent-dim); cursor: pointer; }
 .ct-table > div { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
@@ -1017,7 +1024,7 @@
 </div>
 
 <script>
-const APP_VERSION = 'v2.0.4';
+const APP_VERSION = 'v2.0.5';
 const BRAND_MODELS = {
   'BMW': ['1', '2', '3', '4', '5', '6', '7', '8', 'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'Z4', 'M'],
   'Audi': ['A1', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q2', 'Q3', 'Q5', 'Q7', 'Q8'],
@@ -2272,6 +2279,8 @@ async function loadDetail(url, panelId, btn, force, marketContext) {
     const isHidden = panel.style.display === 'none';
     panel.style.display = isHidden ? 'block' : 'none';
     btn.textContent = isHidden ? '🔼 Slėpti apžvalgą' : (btn.dataset.closedLabel || '🔬 Detali apžvalga');
+    const sidesEl = document.getElementById(panelId + '-sides');
+    if (sidesEl) sidesEl.style.display = isHidden ? '' : 'none';
     return;
   }
 
@@ -2313,6 +2322,8 @@ async function loadDetail(url, panelId, btn, force, marketContext) {
     panel.dataset.loaded = 'true';
     btn.textContent = '🔼 Slėpti apžvalgą';
     btn.disabled = false;
+    const sidesEl2 = document.getElementById(panelId + '-sides');
+    if (sidesEl2) sidesEl2.style.display = '';
     return;
   } catch (err) {
     clearInterval(ticker);
@@ -2596,6 +2607,22 @@ function loadSavedSearch() {
   }
 
   // ---------- KORTELĖS ----------
+  window.buildHighlightTags = function(c, a) {
+    const tags = [];
+    if (c.diffPct != null && c.diffPct <= 0) tags.push(['success', '💰 Labai gera kaina']);
+    else if (c.diffPct != null && c.diffPct <= 10) tags.push(['success', '✓ Gera kainos sąlygos']);
+    if (c.ridaDiffPct != null && c.ridaDiffPct <= -20) tags.push(['success', '✓ Maža rida']);
+    else if (c.ridaDiffPct != null && c.ridaDiffPct <= -10) tags.push(['success', '✓ Žemensnė rida']);
+    if (c.turiIstorijosAtaskaita) tags.push(['success', '✓ Patikrinta istorija']);
+    if (c.garantijosTipas) tags.push(['accent', '🛡 Garantija']);
+    if (c.turiVin) tags.push(['info', '✓ VIN nurodytas']);
+    if (a && a.irangos_akcentai && a.irangos_akcentai.length >= 4) tags.push(['accent', '★ Gera komplektacija']);
+    if (c.yraVerslas) tags.push(['muted', 'Verslas / dealeris']);
+    if (c.ridaDiffPct != null && c.ridaDiffPct >= 25) tags.push(['warn', '⚠ Didelė rida']);
+    if (!tags.length) return '';
+    return `<div class="ct-highlight-tags">${tags.map(([cls, t]) => `<span class="ct-ht ct-ht-${cls}">${t}</span>`).join('')}</div>`;
+  };
+
   window.renderCandidateCards = function (candidates, results) {
     results.innerHTML = '';
     if (candidates.length === 0) {
@@ -2675,6 +2702,7 @@ function loadSavedSearch() {
               <span class="ct-market">Rinkos vidurkis: <b>${formatEUR(c.marketMedian)}</b>${skirtumas != null ? ` · Skirtumas: <b class="ct-${diffTone}">${skirtumas > 0 ? '+' : '−'}${formatEUR(Math.abs(skirtumas))}</b>` : ''} <small>(imtis ${c.marketCount || '?'})</small></span>
             </div>
             <div class="ct-chips">${chips}${signalChips}</div>
+            ${buildHighlightTags(c, a)}
             ${notes.join('')}
             ${c.comment ? `<div class="ct-comment"><span>AI</span><p>${esc(c.comment)}</p></div>` : ''}
             <div class="ct-actions">
@@ -2685,7 +2713,7 @@ function loadSavedSearch() {
           </div>
 
           ${scoreBlock(c, a)}
-          <div class="ct-sides">${profitBlock(a, cardId, hasDeep, btnId)}${riskBlock(a, c, hasDeep, btnId)}</div>
+          <div class="ct-sides" id="${cardId}-sides" style="display:none">${profitBlock(a, cardId, hasDeep, btnId)}${riskBlock(a, c, hasDeep, btnId)}</div>
         </div>
         <div class="detail-panel ct-panel" id="${cardId}" data-loaded="${hasDeep}" style="display:none">${preloadedPanelHTML}</div>
       `;
