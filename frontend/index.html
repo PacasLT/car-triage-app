@@ -2029,7 +2029,7 @@ function renderCandidateCards(candidates, results) {
         <div class="card-comment">${c.comment}</div>
         <div class="card-actions">
           <a class="card-link" href="${c.url}" target="_blank">Žiūrėti skelbimą →</a>
-          <button class="detail-btn${hasPreloadedDeep ? ' ready' : ''}" id="${cardId}-btn" data-closed-label="${detailBtnLabel}" onclick="loadDetail('${c.url}', '${cardId}', this, false, {kaina:${c.kaina||'null'}, marketMedian:${c.marketMedian||'null'}, marketCount:${c.marketCount||'null'}, diffPct:${c.diffPct!=null?c.diffPct:'null'}, modelis:'${escJs(c.modelis)}', metai:${c.metai||'null'}, ridaMedian:${c.ridaMedian||'null'}, marketYearRange:${c.marketYearRange!=null?c.marketYearRange:'null'}, pardavejas:${c.pardavejas ? `'${escJs(c.pardavejas)}'` : 'null'}, galia:${c.galia||'null'}, variklioTuris:${c.variklioTuris||'null'}})">${detailBtnLabel}</button>
+          <button class="detail-btn${hasPreloadedDeep ? ' ready' : ''}" id="${cardId}-btn" data-closed-label="${detailBtnLabel}" onclick="loadDetail('${c.url}', '${cardId}', this, false, {kaina:${c.kaina||'null'}, rida:${c.rida||'null'}, kuras:'${escJs(c.kuras||'')}', marketMedian:${c.marketMedian||'null'}, marketCount:${c.marketCount||'null'}, diffPct:${c.diffPct!=null?c.diffPct:'null'}, ridaDiffPct:${c.ridaDiffPct!=null?c.ridaDiffPct:'null'}, modelis:'${escJs(c.modelis)}', metai:${c.metai||'null'}, ridaMedian:${c.ridaMedian||'null'}, marketYearRange:${c.marketYearRange!=null?c.marketYearRange:'null'}, pardavejas:${c.pardavejas ? `'${escJs(c.pardavejas)}'` : 'null'}, galia:${c.galia||'null'}, variklioTuris:${c.variklioTuris||'null'}})">${detailBtnLabel}</button>
           <button class="compare-toggle" id="cmp-${cardId}" onclick="toggleCompare('${c.url}', '${escJs(c.modelis)}', ${c.kaina||'null'}, '${escJs(c.photo||'')}', ${c.metai||'null'}, ${c.rida||'null'}, '${escJs(c.kuras||'')}', ${c.galia||'null'}, ${c.variklioTuris||'null'}, '${escJs(c.pavarai||'')}', ${c.diffPct!=null?c.diffPct:'null'}, ${c.marketMedian||'null'}, '${escJs(c.source||'')}', 'cmp-${cardId}')">⚖️ Palyginti</button>
         </div>
         <div class="detail-panel" id="${cardId}" data-loaded="${hasPreloadedDeep}" style="display:none">${preloadedPanelHTML}</div>
@@ -2075,7 +2075,7 @@ function renderAllListings(allListings) {
             <div style="color:#9a9aa5; font-size:12px;">${formatEUR(l.kaina)} · ${l.metai || '?'} · ${l.rida ? l.rida.toLocaleString('lt-LT').replace(/,/g,' ') + ' km' : '?'}${specs ? ' · ' + specs : ''}</div>
             ${rejectionToggle}
           </div>
-          <button class="detail-btn" id="${panelId}-btn" onclick="loadDetail('${l.url}', '${panelId}', this, false, {kaina:${l.kaina||'null'}, marketMedian:${l.marketMedian||'null'}, marketCount:${l.marketCount||'null'}, diffPct:${l.diffPct!=null?l.diffPct:'null'}, modelis:'${escJs(l.modelis)}', metai:${l.metai||'null'}, ridaMedian:${l.ridaMedian||'null'}, marketYearRange:${l.marketYearRange!=null?l.marketYearRange:'null'}, pardavejas:${l.pardavejas ? `'${escJs(l.pardavejas)}'` : 'null'}, galia:${l.galia||'null'}, variklioTuris:${l.variklioTuris||'null'}})" style="flex-shrink:0;">🔬 Detali apžvalga</button>
+          <button class="detail-btn" id="${panelId}-btn" onclick="loadDetail('${l.url}', '${panelId}', this, false, {kaina:${l.kaina||'null'}, rida:${l.rida||'null'}, kuras:'${escJs(l.kuras||'')}', marketMedian:${l.marketMedian||'null'}, marketCount:${l.marketCount||'null'}, diffPct:${l.diffPct!=null?l.diffPct:'null'}, ridaDiffPct:${l.ridaDiffPct!=null?l.ridaDiffPct:'null'}, modelis:'${escJs(l.modelis)}', metai:${l.metai||'null'}, ridaMedian:${l.ridaMedian||'null'}, marketYearRange:${l.marketYearRange!=null?l.marketYearRange:'null'}, pardavejas:${l.pardavejas ? `'${escJs(l.pardavejas)}'` : 'null'}, galia:${l.galia||'null'}, variklioTuris:${l.variklioTuris||'null'}})" style="flex-shrink:0;">🔬 Detali apžvalga</button>
         </div>
         <div class="detail-panel" id="${panelId}"></div>
       </div>
@@ -2324,7 +2324,7 @@ async function loadDetail(url, panelId, btn, force, marketContext) {
       panel.innerHTML = `<span style="color:#e88">Klaida: ${data.error}</span>`;
       return;
     }
-    panel.innerHTML = buildDetailPanelHTML(data, url, panelId);
+    panel.innerHTML = buildDetailPanelHTML(data, url, panelId, marketContext);
     panel.dataset.loaded = 'true';
     btn.textContent = '🔼 Slėpti apžvalgą';
     btn.disabled = false;
@@ -2683,7 +2683,7 @@ function loadSavedSearch() {
       const detailBtnLabel = hasDeep ? 'Rodyti gilią analizę' : 'Detali apžvalga';
       const preloadedPanelHTML = hasDeep ? buildDetailPanelHTML({ analysis: a, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, cardId) : '';
       const compareArgs = `'${c.url}', '${escJs(c.modelis)}', ${c.kaina || 'null'}, '${escJs(c.photo || '')}', ${c.metai || 'null'}, ${c.rida || 'null'}, '${escJs(c.kuras || '')}', ${c.galia || 'null'}, ${c.variklioTuris || 'null'}, '${escJs(c.pavarai || '')}', ${c.diffPct != null ? c.diffPct : 'null'}, ${c.marketMedian || 'null'}, '${escJs(c.source || '')}', 'cmp-${cardId}'`;
-      const detailArgs = `'${c.url}', '${cardId}', this, false, {kaina:${c.kaina || 'null'}, marketMedian:${c.marketMedian || 'null'}, marketCount:${c.marketCount || 'null'}, diffPct:${c.diffPct != null ? c.diffPct : 'null'}, modelis:'${escJs(c.modelis)}', metai:${c.metai || 'null'}, ridaMedian:${c.ridaMedian || 'null'}, marketYearRange:${c.marketYearRange != null ? c.marketYearRange : 'null'}, pardavejas:${c.pardavejas ? `'${escJs(c.pardavejas)}'` : 'null'}, galia:${c.galia || 'null'}, variklioTuris:${c.variklioTuris || 'null'}}`;
+      const detailArgs = `'${c.url}', '${cardId}', this, false, {kaina:${c.kaina || 'null'}, rida:${c.rida || 'null'}, kuras:'${escJs(c.kuras || '')}', marketMedian:${c.marketMedian || 'null'}, marketCount:${c.marketCount || 'null'}, diffPct:${c.diffPct != null ? c.diffPct : 'null'}, ridaDiffPct:${c.ridaDiffPct != null ? c.ridaDiffPct : 'null'}, modelis:'${escJs(c.modelis)}', metai:${c.metai || 'null'}, ridaMedian:${c.ridaMedian || 'null'}, marketYearRange:${c.marketYearRange != null ? c.marketYearRange : 'null'}, pardavejas:${c.pardavejas ? `'${escJs(c.pardavejas)}'` : 'null'}, galia:${c.galia || 'null'}, variklioTuris:${c.variklioTuris || 'null'}}`;
 
       const card = document.createElement('div');
       card.className = 'card ct-card' + (idx === 0 ? ' ct-top1' : '');
@@ -2738,9 +2738,9 @@ function loadSavedSearch() {
     p.querySelectorAll('.ct-tab').forEach((x) => x.classList.toggle('active', x === btn));
   };
 
-  window.buildDetailPanelHTML = function (data, url, panelId) {
+  window.buildDetailPanelHTML = function (data, url, panelId, marketCtx) {
     const a = data.analysis || {};
-    const c = findCandidate(url) || {};
+    const c = Object.assign({}, findCandidate(url) || {}, marketCtx || {});
     const list = (arr, cls) => (arr && arr.length ? `<ul class="ct-list ${cls || ''}">${arr.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : '<p class="ct-dash">–</p>');
     const cacheNote = data.cached
       ? `<div class="ct-cache">Iš talpyklos (prieš ${data.cacheAgeMinutes} min.) · <a href="#" onclick="event.preventDefault(); loadDetail('${url}', '${panelId}', document.getElementById('${panelId}-btn'), true); return false;">atnaujinti</a></div>`
