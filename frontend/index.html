@@ -5,80 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <title>CarTriige — Europos automobilių rinkos analizė</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  /* ===== DESIGN TOKENS ===== */
+  /* ===== DESIGN TOKENS (v1, overridden below by v2) ===== */
   :root {
-    --bg-base:        #0A0C12;
-    --bg-surface:     #11141C;
-    --bg-elevated:    #171B25;
-    --bg-card:        #11141C;
-    --bg-raised:      #1F2431;
-    --border:         rgba(255,255,255,.075);
-    --border-light:   rgba(255,255,255,.14);
-    --accent:         #7C5CFF;
-    --accent-hover:   #8B6FFF;
-    --accent-light:   #A78BFA;
-    --accent-dim:     rgba(124,92,255,.14);
-    --accent-border:  rgba(124,92,255,.30);
-    --success:        oklch(.75 .15 158);
-    --success-dim:    oklch(.75 .15 158 / .13);
-    --success-border: oklch(.75 .15 158 / .30);
-    --warning:        oklch(.81 .13 78);
-    --warning-dim:    oklch(.81 .13 78 / .13);
-    --warning-border: oklch(.81 .13 78 / .30);
-    --danger:         oklch(.66 .19 25);
-    --danger-dim:     oklch(.66 .19 25 / .13);
-    --danger-border:  oklch(.66 .19 25 / .30);
-    --text-primary:   #E9EBF2;
-    --text-secondary: #C3C9D8;
-    --text-muted:     #8C93A6;
-    --text-dim:       #5E6578;
-    --radius-sm:      6px;
-    --radius-md:      7px;
-    --radius-lg:      11px;
-    --radius-xl:      12px;
-    --font:           'Archivo', -apple-system, 'Segoe UI', Helvetica, sans-serif;
-    --font-mono:      'IBM Plex Mono', ui-monospace, Menlo, monospace;
-    --shadow-card:    0 1px 0 rgba(255,255,255,.03) inset;
-    --shadow-panel:   0 18px 40px -24px rgba(0,0,0,.8);
-    --shadow-glow:    0 8px 22px -12px rgba(124,92,255,.9);
+    --bg-base:       #0a0c10;
+    --bg-surface:    #141720;
+    --bg-elevated:   #1c2030;
+    --bg-card:       #16192a;
+    --border:        #252a38;
+    --border-light:  #2e3448;
+    --accent:        #7c6ff7;
+    --accent-hover:  #6c5ce7;
+    --accent-light:  #a78bfa;
+    --accent-dim:    rgba(124,111,247,0.12);
+    --success:       #7fd88f;
+    --danger:        #ff9d9d;
+    --warning:       #f0c674;
+    --text-primary:  #e8e8ea;
+    --text-secondary:#b0b0c0;
+    --text-muted:    #6e7080;
+    --radius-sm:     6px;
+    --radius-md:     10px;
+    --radius-lg:     14px;
+    --radius-xl:     20px;
+    --font:          -apple-system, 'Segoe UI', Arial, sans-serif;
+    --shadow-card:   0 2px 16px rgba(0,0,0,0.4);
+    --shadow-glow:   0 0 20px rgba(124,111,247,0.25);
   }
-
-  /* ===== ŠVIESI TEMA ===== */
-  :root[data-theme="light"] {
-    --bg-base:        #F0F2F7;
-    --bg-surface:     #FFFFFF;
-    --bg-elevated:    #E8EAF0;
-    --bg-card:        #FFFFFF;
-    --bg-raised:      #DDE0EA;
-    --border:         rgba(0,0,0,.09);
-    --border-light:   rgba(0,0,0,.16);
-    --accent:         #6B4EE6;
-    --accent-hover:   #7B5EF6;
-    --accent-light:   #7C5CFF;
-    --accent-dim:     rgba(107,78,230,.10);
-    --accent-border:  rgba(107,78,230,.25);
-    --text-primary:   #0E1018;
-    --text-secondary: #2E3347;
-    --text-muted:     #5B6278;
-    --text-dim:       #8C93A6;
-    --shadow-card:    0 1px 0 rgba(0,0,0,.04) inset;
-    --shadow-panel:   0 8px 30px -12px rgba(0,0,0,.18);
-    --shadow-glow:    0 8px 22px -12px rgba(107,78,230,.5);
-  }
-  :root[data-theme="light"] .app-header { background: rgba(240,242,247,.92); }
-  :root[data-theme="light"] select option { background: #FFFFFF; color: #0E1018; }
-  :root[data-theme="light"] .hero-photo { background-color: #E0E3EE; background-image: repeating-linear-gradient(115deg, rgba(0,0,0,.04) 0 1px, transparent 1px 9px); }
-  :root[data-theme="light"] #log-container { background: var(--bg-surface); border-color: var(--border); }
-  :root[data-theme="light"] .toast { background: #FFFFFF; }
-  /* Tema mygtuko ikona pagal temą */
-  [data-theme="light"] .theme-icon::before { content: "☀"; }
-  .theme-icon::before { content: "◐"; }
-
-  .eyebrow { font: 500 9px/1 var(--font-mono); letter-spacing: .12em; color: var(--text-dim); text-transform: uppercase; }
-  .mono    { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
   /* ===== RESET & BASE ===== */
   * { box-sizing: border-box; }
@@ -89,112 +43,129 @@
     margin: 0;
     padding: 0;
   }
-  .container { max-width: 1000px; margin: 0 auto; padding: 0 20px 40px; }
-  button, input, select { font-family: var(--font); }
+  .container { max-width: 920px; margin: 0 auto; padding: 0 20px 40px; }
 
   /* ===== APP HEADER ===== */
-  .app-header { position: sticky; top: 0; z-index: 800; background: rgba(10,12,18,.9); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); }
-  .app-header-inner { max-width: 1000px; margin: 0 auto; padding: 0 20px; height: 56px; display: flex; align-items: center; gap: 22px; justify-content: flex-start; }
-  .app-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0; }
-  .app-logo-mark { display: none; }
-  .app-logo-name { font-size: 20px; font-weight: 500; letter-spacing: -.02em; color: var(--text-primary); background: none; -webkit-text-fill-color: currentColor; }
-  .app-logo-name b { font-weight: 700; color: var(--accent-light); }
-  #app-version { font: 500 8.5px/1 var(--font-mono); letter-spacing: .12em; color: var(--text-dim); border: 1px solid var(--border-light); border-radius: 3px; padding: 3px 4px; -webkit-text-fill-color: var(--text-dim); }
-  .app-nav { display: flex; align-items: center; gap: 4px; }
-  .nav-btn { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 13px; border-radius: 8px; background: transparent; border: 1px solid transparent; color: var(--text-muted); font-size: 13.5px; font-weight: 500; text-decoration: none; cursor: pointer; white-space: nowrap; transition: background .15s, color .15s; }
-  .nav-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
-  .nav-btn.active { background: var(--bg-raised); color: var(--text-primary); border-color: var(--border); }
-  .nav-btn.has-items { color: var(--text-primary); }
-  .nav-badge { background: var(--accent); color: #fff; font: 600 9px/1 var(--font-mono); min-width: 15px; height: 15px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; padding: 0 3px; }
-  .app-tools { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-  .icon-btn { position: relative; width: 34px; height: 34px; display: grid; place-items: center; background: transparent; border: none; border-radius: 8px; color: var(--text-muted); font-size: 15px; cursor: pointer; }
-  .icon-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
-  .icon-btn.has-dot::after { content: ""; position: absolute; top: 7px; right: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 13px; font-weight: 600; }
+  .app-header {
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 800;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .app-header-inner {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 0 20px;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .app-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+  .app-logo-mark {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+  .app-logo-name {
+    font-size: 18px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff 40%, var(--accent-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.3px;
+  }
+  #app-version {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-left: 2px;
+    letter-spacing: 0.5px;
+    -webkit-text-fill-color: var(--text-muted);
+  }
+  .app-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .nav-btn {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .nav-btn:hover { background: var(--border); color: var(--text-primary); }
+  .nav-btn.has-items { color: var(--warning); border-color: rgba(240,198,116,0.3); }
+  .nav-badge {
+    background: var(--accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+  }
 
   /* ===== SEARCH HERO ===== */
-  .search-hero { padding: 28px 0 8px; }
-  .hero-top { display: grid; grid-template-columns: minmax(0, 1fr) 420px; grid-template-rows: auto auto; gap: 16px 24px; align-items: stretch; margin-bottom: 18px; }
-  .hero-copy { display: flex; flex-direction: column; justify-content: center; }
-  .hero-eyebrow { font: 600 10.5px/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--accent-light); margin-bottom: 14px; }
-  .hero-title { font-size: 36px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; margin: 0; color: var(--text-primary); }
-  .hero-title em { font-style: normal; color: var(--accent-light); }
-  .hero-subtitle { color: var(--text-muted); font-size: 14.5px; line-height: 1.55; margin: 12px 0 0; max-width: 520px; text-wrap: pretty; }
-  .hero-feats { grid-column: 1; grid-row: 2; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 8px; }
-  .feat { display: flex; align-items: center; gap: 10px; padding: 10px 12px; min-width: 0; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 10px; font-size: 12px; line-height: 1.35; color: var(--text-secondary); }
-  .feat > span:last-child { min-width: 0; overflow-wrap: anywhere; }
-  .feat-ic { flex: none; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; background: var(--accent-dim); color: var(--accent-light); font-size: 14px; }
-  .hero-visual { position: relative; min-height: 240px; grid-row: 1 / 3; grid-column: 2; }
-  .hero-photo { position: absolute; inset: 0; border-radius: 14px; background-color: #0C0F17; background-image: repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 1px, transparent 1px 9px); display: grid; place-items: center; overflow: hidden; }
-  .hero-photo::after { content: ""; position: absolute; inset: 0; background: radial-gradient(70% 70% at 60% 45%, rgba(124,92,255,.12), transparent 70%); pointer-events: none; }
-  .hero-photo span { font: 500 9.5px/1.5 var(--font-mono); letter-spacing: .1em; color: var(--text-dim); text-align: center; padding: 0 40px; }
-  .hero-quote { position: absolute; right: 16px; bottom: 16px; margin: 0; max-width: 160px; font-size: 12px; line-height: 1.45; color: var(--text-secondary); text-align: right; }
-  .hero-quote::after { content: ""; display: block; width: 28px; height: 2px; background: var(--accent); margin: 8px 0 0 auto; }
+  .search-hero {
+    padding: 32px 0 8px;
+  }
+  .hero-title {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin: 0 0 6px;
+    color: var(--text-primary);
+  }
+  .hero-subtitle {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin: 0 0 24px;
+    line-height: 1.5;
+  }
 
-  /* ===== LEGACY COMPAT ===== */
+  /* ===== LEGACY COMPAT (subtitle class still used nowhere, kept for safety) ===== */
   .subtitle { color: var(--text-muted); margin-bottom: 24px; font-size: 14px; }
 
-  /* ===== FILTER PANEL ===== */
-  .filters { display: block; margin: 0 0 22px; padding: 22px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow-panel); }
-  .filters > * + * { margin-top: 18px; }
-  .filters-head { display: flex; align-items: center; gap: 14px; }
-  .filters-head-ic { width: 42px; height: 42px; flex: none; display: grid; place-items: center; border-radius: 10px; background: var(--accent-dim); color: var(--accent-light); }
-  .filters-title { font-size: 17px; font-weight: 600; letter-spacing: -.01em; }
-  .filters-sub { font-size: 12.5px; color: var(--text-muted); margin-top: 3px; }
-  .btn-ghost { height: 36px; padding: 0 14px; background: var(--accent-dim); border: 1px solid var(--accent-border); border-radius: 9px; color: var(--accent-light); font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
-  .btn-ghost:hover { background: rgba(124,92,255,.22); }
-  .filters label { display: block; font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 7px; text-transform: none; letter-spacing: 0; }
-  .filters label small { color: var(--text-dim); font-size: 11px; }
-  .f-grid { display: grid; gap: 14px; }
-  .f-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .f-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-  .f-ctl { position: relative; display: flex; align-items: center; height: 40px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 9px; transition: border-color .15s; }
-  .f-ctl:focus-within { border-color: var(--accent); }
-  .f-ctl.is-soon { opacity: .55; }
-  .f-ic { flex: none; width: 36px; display: grid; place-items: center; color: var(--text-muted); font-size: 13px; border-right: 1px solid var(--border); height: 100%; }
-  .filters .f-ctl input, .filters .f-ctl select { flex: 1; min-width: 0; height: 100%; padding: 0 30px 0 12px; border: none; background: transparent; color: var(--text-primary); font-size: 13.5px; outline: none; appearance: none; -webkit-appearance: none; border-radius: 0; }
-  .filters .f-ctl input[type="number"] { padding-right: 12px; }
-  .filters .f-ctl input::placeholder { color: var(--text-dim); }
-  .filters .f-ctl select { background-image: linear-gradient(45deg, transparent 50%, var(--text-muted) 50%), linear-gradient(135deg, var(--text-muted) 50%, transparent 50%); background-position: calc(100% - 15px) 17px, calc(100% - 10px) 17px; background-size: 5px 5px; background-repeat: no-repeat; }
-  select option { background: #171B25; color: #E9EBF2; }
-  #generation-hint { font: 500 12px/1.5 var(--font-mono) !important; color: var(--accent-light) !important; background: var(--accent-dim) !important; border-radius: 8px !important; padding: 9px 14px !important; }
-  .f-row-3 { display: flex; align-items: flex-end; gap: 20px; flex-wrap: wrap; }
-  .f-row-3 > div:first-child { width: 270px; }
-  .filters .f-toggle { display: inline-flex; align-items: center; gap: 10px; height: 40px; margin: 0; font-size: 13px; color: var(--text-secondary); cursor: default; white-space: nowrap; }
-  .f-toggle small { color: var(--text-dim); font-size: 11px; }
-  .f-toggle input { display: none; }
-  .f-toggle .knob { position: relative; width: 34px; height: 20px; border-radius: 10px; background: var(--accent); flex: none; }
-  .f-toggle .knob::after { content: ""; position: absolute; top: 3px; left: 17px; width: 14px; height: 14px; border-radius: 50%; background: #fff; }
-  .link-more { display: inline-flex; align-items: center; height: 40px; font-size: 13px; font-weight: 500; color: var(--accent-light); text-decoration: none; }
+  /* ===== FORM FIELDS ===== */
+  .filters { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+  .filters label { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .filters input, .filters select { width: 100%; padding: 9px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text-primary); font-size: 14px; transition: border-color 0.15s; }
+  .filters input:focus, .filters select:focus { outline: none; border-color: var(--accent); }
   .full-row { grid-column: 1 / -1; }
-  /* Portals — card checkboxes */
-  .portals { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
-  .filters label.portal { position: relative; display: flex; align-items: center; gap: 12px; height: 54px; padding: 0 12px; margin: 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; user-select: none; color: var(--text-primary); font-size: 13px; font-weight: 500; text-transform: none; letter-spacing: 0; transition: border-color .15s, background .15s; }
-  .filters label.portal:hover { border-color: var(--border-light); }
-  .filters label.portal:has(input:checked) { border-color: var(--accent-border); background: rgba(124,92,255,.07); }
-  .portal input { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; }
-  .portal .chk { flex: none; width: 20px; height: 20px; border-radius: 5px; border: 1.5px solid var(--border-light); display: grid; place-items: center; color: #fff; font-size: 12px; }
-  .filters label.portal:has(input:checked) .chk { background: var(--accent); border-color: var(--accent); }
-  .filters label.portal:has(input:checked) .chk::after { content: "✓"; font-weight: 700; }
-  .portal .logo { flex: none; width: 26px; height: 26px; border-radius: 5px; display: grid; place-items: center; color: #fff; font: 700 10px/1 var(--font); }
-  .portal .p-name { display: flex; flex-direction: column; gap: 2px; min-width: 0; line-height: 1.2; font-size: 12.5px; }
-  .portal .p-name, .portal .p-name small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
-  .portal .p-name small { font-size: 10.5px; color: var(--text-dim); font-weight: 400; margin-top: 2px; }
-  /* Primary CTA */
-  button#search-btn { display: block; width: 100%; height: 48px; margin: 18px 0 0; padding: 0; background: var(--accent); background-image: linear-gradient(90deg, var(--accent), var(--accent-hover)); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; letter-spacing: 0; cursor: pointer; box-shadow: 0 10px 26px -14px rgba(124,92,255,.9); transition: filter .15s; }
-  button#search-btn:hover { filter: brightness(1.08); opacity: 1; transform: none; }
-  button#search-btn:disabled { background: var(--bg-elevated); color: var(--text-muted); box-shadow: none; filter: none; cursor: not-allowed; }
-  .filters-foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  #quick-count-btn { height: 34px !important; padding: 0 12px !important; background: transparent !important; color: var(--text-primary) !important; border: 1px solid var(--border-light) !important; border-radius: 8px !important; font-size: 12.5px !important; font-weight: 600 !important; cursor: pointer; white-space: nowrap; }
-  #quick-count-btn:hover { background: var(--bg-elevated) !important; }
-  .foot-note { font-size: 12px; color: var(--text-muted); }
-  #quick-count-result { margin-left: auto; font: 500 11px/1 var(--font-mono) !important; color: var(--text-muted) !important; }
-  #status { color: var(--text-muted); font-size: 13px; margin-bottom: 14px; min-height: 20px; }
-  #search-progress-track-main { height: 3px; background: var(--bg-raised); border-radius: 2px; overflow: hidden; margin-bottom: 6px; }
-  #search-progress-fill-main { height: 100%; background: var(--accent); border-radius: 2px; transition: width .5s ease; width: 0%; }
-  #search-progress-label { font: 600 11px/1 var(--font-mono); color: var(--accent-light); }
-  #search-history-chips button { display: inline-flex; align-items: center; white-space: nowrap; font-family: var(--font); background: transparent !important; color: var(--text-muted) !important; border: 1px solid var(--border) !important; height: 28px; padding: 0 10px !important; border-radius: 14px !important; font-size: 12px !important; font-weight: 500; }
-  #search-history-chips button:hover { background: var(--bg-raised) !important; color: var(--text-primary) !important; }
+  button#search-btn { grid-column: 1 / -1; padding: 13px; background: linear-gradient(135deg, var(--accent), var(--accent-light)); color: white; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 6px; letter-spacing: 0.2px; box-shadow: 0 4px 14px rgba(124,111,247,0.35); transition: opacity 0.15s, transform 0.15s; }
+  button#search-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  button#search-btn:disabled { background: var(--bg-elevated); color: var(--text-muted); cursor: not-allowed; box-shadow: none; transform: none; }
+  #status { color: var(--text-muted); font-size: 14px; margin-bottom: 16px; min-height: 20px; }
   .card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 14px; display: flex; gap: 16px; border-left: 4px solid var(--accent); position: relative; box-shadow: var(--shadow-card); }
   .fav-star { position: absolute; top: 10px; right: 10px; background: rgba(10,12,16,0.75); border: none; color: var(--text-muted); font-size: 20px; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; z-index: 2; }
   .fav-star.active { color: var(--warning); }
@@ -211,6 +182,9 @@
   .card-link { display: inline-block; margin-top: 8px; color: var(--accent-light); font-size: 13px; text-decoration: none; }
   .source-tag { font-size: 11px; padding: 1px 7px; border-radius: var(--radius-sm); background: var(--bg-elevated); color: var(--text-muted); margin-left: 6px; border: 1px solid var(--border); }
   #search-progress-wrap { display: none; margin: -8px 0 14px; }
+  #search-progress-track-main { height: 3px; background: var(--bg-surface); border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
+  #search-progress-fill-main { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-light)); border-radius: 4px; transition: width 0.5s ease; width: 0%; }
+  #search-progress-label { font-size: 12px; color: var(--accent-light); font-weight: 600; }
   #log-container { margin-bottom: 16px; display: none; }
   #log-header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); cursor: pointer; font-size: 13px; color: var(--text-secondary); user-select: none; }
   #log-header:hover { background: var(--bg-elevated); }
@@ -315,82 +289,27 @@
     .compare-col img { height: 110px; }
     #compare-bar-items { gap: 4px; }
   }
-  /* ============ RESPONSIVE ============ */
-
-  /* --- Tablet (iki 900px) --- */
-  @media (max-width: 900px) {
-    .hero-top { grid-template-columns: 1fr; grid-template-rows: auto auto; }
-    .hero-visual { display: none; }
-    .hero-feats { grid-column: 1; grid-row: 2; grid-template-columns: repeat(2, 1fr); }
-    .f-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .f-5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .portals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .f-row-3 { flex-wrap: wrap; gap: 12px; }
-    .f-row-3 > div:first-child { width: 100%; }
-    .app-nav .nav-btn:nth-child(3),
-    .app-nav .nav-btn:nth-child(4) { display: none; }
-  }
-
-  /* --- Mobile (iki 640px) --- */
+  /* ============ MOBILUS ISDESTYMAS ============ */
   @media (max-width: 640px) {
     .container { padding: 0 12px 40px; }
-
-    /* Header */
-    .app-header-inner { height: 52px; padding: 0 12px; gap: 8px; }
-    .app-logo-name { font-size: 17px; }
-    #app-version { display: none; }
-    .app-nav { gap: 2px; }
-    .app-nav .nav-btn { height: 30px; padding: 0 8px; font-size: 12px; gap: 4px; }
-    .app-nav .nav-btn svg { display: none; }
-    .app-nav .nav-btn:nth-child(3),
-    .app-nav .nav-btn:nth-child(4) { display: none; }
-    .app-tools .icon-btn:first-child { display: none; } /* slėpti tema mygtuką */
-    .avatar { width: 28px; height: 28px; font-size: 11px; }
-
-    /* Hero */
     .search-hero { padding: 20px 0 4px; }
-    .hero-eyebrow { font-size: 9px; margin-bottom: 10px; }
-    .hero-title { font-size: 28px; }
-    .hero-subtitle { font-size: 13px; margin-top: 8px; }
-    .hero-feats { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 12px; }
-    .feat { padding: 8px 10px; font-size: 11px; gap: 8px; }
-    .feat-ic { width: 26px; height: 26px; font-size: 12px; }
-
-    /* Filtrai */
-    .filters { padding: 16px; }
-    .filters-head { gap: 10px; }
-    .filters-head-ic { width: 36px; height: 36px; }
-    .filters-title { font-size: 15px; }
-    .filters-sub { display: none; }
-    .btn-ghost[style*="margin-left:auto"] { display: none; } /* slėpti "Išsaugoti" */
-    .f-4 { grid-template-columns: 1fr 1fr; gap: 10px; }
-    .f-5 { grid-template-columns: 1fr 1fr; gap: 10px; }
-    .filters .f-ctl input, .filters .f-ctl select { font-size: 16px; } /* iOS auto-zoom fix */
-    .f-row-3 { flex-direction: column; align-items: stretch; gap: 10px; }
-    .f-row-3 > div:first-child { width: 100%; }
-    .f-toggle { font-size: 12px; }
-    .link-more { display: none; }
-    .portals { grid-template-columns: 1fr 1fr; gap: 8px; }
-    .filters label.portal { height: 48px; padding: 0 10px; font-size: 12px; gap: 8px; }
-    .portal .p-name { font-size: 11.5px; }
-    .filters-foot { flex-wrap: wrap; gap: 8px; }
-    .foot-note { display: none; }
-    button#search-btn { font-size: 15px; padding: 14px; }
-    #quick-count-btn { width: 100%; }
-
-    /* Kortelės */
+    .hero-title { font-size: 19px; }
+    .hero-subtitle { font-size: 13px; margin-bottom: 16px; }
+    .app-header-inner { height: 50px; }
+    .app-logo-name { font-size: 16px; }
+    .filters { grid-template-columns: 1fr; padding: 14px; gap: 10px; }
+    .filters input, .filters select { padding: 11px; font-size: 16px; } /* 16px - apsaugo nuo iOS auto-zoom */
+    button#search-btn { padding: 14px; font-size: 15px; }
     .card { flex-direction: column; padding: 12px; gap: 10px; }
-    .card img, .card-photo-wrap img { width: 100%; height: 200px; border-radius: var(--radius-md); }
+    .card img { width: 100%; height: 180px; }
     .card-title { font-size: 15px; }
-    .card-price { font-size: 20px; }
+    .card-price { font-size: 16px; }
     .card-actions { flex-direction: column; align-items: stretch; gap: 8px; }
     .card-actions .card-link { padding: 10px; text-align: center; background: var(--bg-elevated); border-radius: var(--radius-sm); }
-    .detail-btn { padding: 12px; font-size: 13px; width: 100%; }
-
-    /* Kita */
+    .detail-btn { padding: 11px 12px; font-size: 13px; width: 100%; }
     #log-header { font-size: 12px; padding: 12px; }
-    #sort-bar { flex-direction: column; align-items: stretch; gap: 8px; }
-    #sort-bar select { width: 100%; }
+    #sort-bar select { width: 100%; margin-top: 6px; }
+    #sort-bar label { display: block; margin-bottom: 2px; }
     .risk-banner { font-size: 11px; }
     #all-listings-wrap button { font-size: 13px; padding: 12px; }
     #all-listings > div > div:not(.detail-panel) { flex-direction: column !important; align-items: stretch !important; }
@@ -515,28 +434,7 @@
   .toast.warning { border-color: rgba(240,198,116,0.4); color: var(--warning); }
   @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 </style>
-
 <style id="cartriige-v2">
-/* v2.0.12: mobile + chip fixes */
-.ct-chips { overflow: visible !important; }
-.ct-chip { max-width: none; }
-@media (max-width: 480px) {
-  .ct-subs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .ct-subs > div span { font-size: 8px; }
-}
-@media (max-width: 640px) {
-  .ct-kv { flex-wrap: wrap; }
-  .ct-kv b { max-width: 100%; text-align: left; }
-  .ct-side-big { font-size: 13px; }
-  .ct-sides { grid-template-columns: 1fr; }
-  .ct-grid { grid-template-columns: 1fr !important; }
-  .ct-photo { padding: 0; grid-row: 1; }
-  .ct-photo-main { border-radius: 16px 16px 0 0; aspect-ratio: 16/9; }
-  .ct-thumbs { padding: 0 12px; }
-  .ct-main { padding: 12px; }
-  .ct-panel.detail-panel { padding: 0 12px 14px; }
-}
-
 /* ============================================================
    CarTriige design tokens — v2 (from CarTriige.dc.html)
    Drop-in replacement for the :root block in frontend/index.html.
@@ -1015,13 +913,10 @@ button#search-btn:disabled { background: var(--bg-elevated); color: var(--text-m
 }
 
 </style>
-
 </head>
 <body>
 
 <!-- ===== APP HEADER ===== -->
-<!-- CarTriige — header + search hero markup (v3, pagal referensą). Visi id / onclick išlaikyti. -->
-
 <header class="app-header">
   <div class="app-header-inner">
     <div class="app-logo">
@@ -1035,7 +930,7 @@ button#search-btn:disabled { background: var(--bg-elevated); color: var(--text-m
       <a class="nav-btn" href="#results"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 13V7M8 13V3M13 13V9"></path></svg>Palyginimai</a>
     </nav>
     <div class="app-tools">
-      <button class="icon-btn" id="theme-btn" title="Tema" type="button" onclick="toggleTheme()"><span class="theme-icon"></span></button>
+      <button class="icon-btn" title="Tema" type="button">◐</button>
       <button class="icon-btn has-dot" title="Pranešimai" type="button">
         <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 11V7a4 4 0 0 1 8 0v4l1 1.5H3z"></path><path d="M6.5 14a1.5 1.5 0 0 0 3 0"></path></svg>
       </button>
@@ -1044,7 +939,23 @@ button#search-btn:disabled { background: var(--bg-elevated); color: var(--text-m
   </div>
 </header>
 
-<section class="search-hero">
+<div class="container">
+  <!-- Favorites panel (collapsible, below header) -->
+  <div id="favorites-wrap" style="display:none; margin-top:16px;">
+    <div id="favorites-panel" style="display:none; background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:14px; margin-top:8px;">
+      <button onclick="checkAllFavorites()" style="margin-bottom:10px; padding:8px 12px; background:var(--bg-elevated); color:var(--text-secondary); border:1px solid var(--border); border-radius:var(--radius-sm); font-size:12px; cursor:pointer;">🔄 Patikrinti visus pakeitimus</button>
+      <div id="favorites-list"></div>
+    </div>
+  </div>
+
+  <!-- Search history chips -->
+  <div id="search-history-wrap" style="display:none; margin-top:12px;">
+    <div style="font-size:11px; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; font-weight:600;">🕘 Ankstesnės paieškos</div>
+    <div id="search-history-chips" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+  </div>
+
+  <!-- Search hero -->
+  <section class="search-hero">
   <div class="hero-top">
     <div class="hero-copy">
       <div class="hero-eyebrow">Automobilių paieška ir analizė</div>
@@ -1067,7 +978,7 @@ button#search-btn:disabled { background: var(--bg-elevated); color: var(--text-m
     <div class="filters-head">
       <div class="filters-head-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="M15.5 15.5 21 21"></path></svg></div>
       <div><div class="filters-title">Paieškos filtrai</div><div class="filters-sub">Pasirinkite kriterijus ir leiskite CarTriige rasti geriausius pasiūlymus už jus.</div></div>
-      <button type="button" class="btn-ghost" id="save-search-btn" style="margin-left:auto" onclick="saveSearch()">▢ Išsaugoti paiešką</button>
+      <button type="button" class="btn-ghost" style="margin-left:auto">▢ Išsaugoti paiešką</button>
     </div>
 
     <div class="f-grid f-4">
@@ -1132,7 +1043,6 @@ button#search-btn:disabled { background: var(--bg-elevated); color: var(--text-m
   </div>
 </section>
 
-
   <div id="status"></div>
   <div id="search-progress-wrap">
     <div id="search-progress-track-main"><div id="search-progress-fill-main"></div></div>
@@ -1158,11 +1068,6 @@ button#search-btn:disabled { background: var(--bg-elevated); color: var(--text-m
     </div>
     <button id="tinder-launch-btn" onclick="startTinder()" style="padding:9px 18px; background:linear-gradient(135deg,var(--accent),var(--accent-light)); color:#fff; border:none; border-radius:20px; font-size:13px; font-weight:600; cursor:pointer; box-shadow:0 4px 14px rgba(124,111,247,0.4);">🔥 Tinder naršymas</button>
   </div>
-  <div id="search-history-wrap" style="display:none; margin: 0 0 12px; padding: 12px 16px; background: var(--bg-surface); border-radius: 10px; border: 1px solid var(--border);">
-    <div style="font-size:11px; color:var(--text-muted); margin-bottom:8px; font-weight:600; letter-spacing:.04em; text-transform:uppercase;">Ankstesnės paieškos</div>
-    <div id="search-history-chips" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
-  </div>
-
   <div id="results"></div>
 
   <div id="all-listings-wrap" style="display:none;">
@@ -1185,21 +1090,6 @@ button#search-btn:disabled { background: var(--bg-elevated); color: var(--text-m
       <button class="tinder-btn-info" onclick="toggleTinderDetail()" title="Detali apžvalga">🔍</button>
       <button class="tinder-btn-like" onclick="tinderSwipe('right')" title="Patinka">♥</button>
     </div>
-  </div>
-
-  <!-- Favoritai panel -->
-  <div id="favorites-panel" style="display:none; position:fixed; top:60px; right:16px; width:360px; max-height:80vh; overflow-y:auto; background:var(--bg-surface); border:1px solid var(--border-light); border-radius:12px; padding:16px; z-index:200; box-shadow:0 8px 32px rgba(0,0,0,.5);">
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
-      <span style="font-weight:700; font-size:14px;">★ Favoritai</span>
-      <button onclick="toggleFavoritesPanel()" style="background:none; border:none; color:var(--text-muted); font-size:18px; cursor:pointer; line-height:1;">×</button>
-    </div>
-    <div id="favorites-wrap" style="display:none;">
-      <div id="favorites-list"></div>
-      <div style="margin-top:8px; padding-top:8px; border-top:1px solid var(--border);">
-        <button onclick="checkAllFavorites()" style="font-size:12px; padding:6px 12px; background:var(--bg-elevated); border:1px solid var(--border-light); border-radius:6px; cursor:pointer; color:var(--text-secondary);">🔄 Atnaujinti visus</button>
-      </div>
-    </div>
-    <p id="favorites-empty-msg" style="color:var(--text-muted); font-size:13px; margin:0; padding:8px 0;">Favoritų sąrašas tuščias. Spausk ★ ant kortelės.</p>
   </div>
 
   <div id="lightbox" onclick="if(event.target.id==='lightbox') closeLightbox();">
@@ -1230,7 +1120,7 @@ button#search-btn:disabled { background: var(--bg-elevated); color: var(--text-m
 </div>
 
 <script>
-const APP_VERSION = 'v2.0.5';
+const APP_VERSION = 'v1.5.0';
 const BRAND_MODELS = {
   'BMW': ['1', '2', '3', '4', '5', '6', '7', '8', 'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'Z4', 'M'],
   'Audi': ['A1', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q2', 'Q3', 'Q5', 'Q7', 'Q8'],
@@ -1310,7 +1200,6 @@ function renderSearchHistory() {
   const history = loadSearchHistory();
   const wrap = document.getElementById('search-history-wrap');
   const chips = document.getElementById('search-history-chips');
-  if (!wrap || !chips) return;
   if (history.length === 0) { wrap.style.display = 'none'; return; }
   wrap.style.display = 'block';
   chips.innerHTML = history.map((h, i) => `
@@ -1379,7 +1268,6 @@ function toggleFavorite(url, snapshot, btn) {
 
 function toggleFavoritesPanel() {
   const panel = document.getElementById('favorites-panel');
-  if (!panel) return;
   const isHidden = panel.style.display === 'none';
   panel.style.display = isHidden ? 'block' : 'none';
 }
@@ -1396,7 +1284,6 @@ function renderFavorites() {
   // Mark header button
   const navBtn = document.getElementById('favorites-toggle-btn');
   if (navBtn) navBtn.classList.toggle('has-items', favs.length > 0);
-  if (!wrap || !list) return;
   wrap.style.display = favs.length > 0 ? 'block' : 'none';
   if (favs.length === 0) return;
 
@@ -2105,11 +1992,6 @@ function cyclePhoto(cardId, dir) {
   if (img) img.src = photos[idx];
   const counter = document.getElementById(cardId + '-photocount');
   if (counter) counter.textContent = `${idx + 1}/${photos.length}`;
-  // Aktyvinamas thumbnail
-  const thumbs = img && img.closest('.ct-photo') && img.closest('.ct-photo').querySelectorAll('.ct-thumbs img');
-  if (thumbs && thumbs.length) {
-    thumbs.forEach((t, i) => t.classList.toggle('ct-thumb-active', i === idx));
-  }
 }
 
 function escJs(s) {
@@ -2234,7 +2116,7 @@ function renderCandidateCards(candidates, results) {
         <div class="card-comment">${c.comment}</div>
         <div class="card-actions">
           <a class="card-link" href="${c.url}" target="_blank">Žiūrėti skelbimą →</a>
-          <button class="detail-btn${hasPreloadedDeep ? ' ready' : ''}" id="${cardId}-btn" data-closed-label="${detailBtnLabel}" onclick="loadDetail('${c.url}', '${cardId}', this, false, {kaina:${c.kaina||'null'}, rida:${c.rida||'null'}, kuras:'${escJs(c.kuras||'')}', marketMedian:${c.marketMedian||'null'}, marketCount:${c.marketCount||'null'}, diffPct:${c.diffPct!=null?c.diffPct:'null'}, ridaDiffPct:${c.ridaDiffPct!=null?c.ridaDiffPct:'null'}, modelis:'${escJs(c.modelis)}', metai:${c.metai||'null'}, ridaMedian:${c.ridaMedian||'null'}, marketYearRange:${c.marketYearRange!=null?c.marketYearRange:'null'}, pardavejas:${c.pardavejas ? `'${escJs(c.pardavejas)}'` : 'null'}, galia:${c.galia||'null'}, variklioTuris:${c.variklioTuris||'null'}})">${detailBtnLabel}</button>
+          <button class="detail-btn${hasPreloadedDeep ? ' ready' : ''}" id="${cardId}-btn" data-closed-label="${detailBtnLabel}" onclick="loadDetail('${c.url}', '${cardId}', this, false, {kaina:${c.kaina||'null'}, marketMedian:${c.marketMedian||'null'}, marketCount:${c.marketCount||'null'}, diffPct:${c.diffPct!=null?c.diffPct:'null'}, modelis:'${escJs(c.modelis)}', pardavejas:${c.pardavejas ? `'${escJs(c.pardavejas)}'` : 'null'}, galia:${c.galia||'null'}, variklioTuris:${c.variklioTuris||'null'}})">${detailBtnLabel}</button>
           <button class="compare-toggle" id="cmp-${cardId}" onclick="toggleCompare('${c.url}', '${escJs(c.modelis)}', ${c.kaina||'null'}, '${escJs(c.photo||'')}', ${c.metai||'null'}, ${c.rida||'null'}, '${escJs(c.kuras||'')}', ${c.galia||'null'}, ${c.variklioTuris||'null'}, '${escJs(c.pavarai||'')}', ${c.diffPct!=null?c.diffPct:'null'}, ${c.marketMedian||'null'}, '${escJs(c.source||'')}', 'cmp-${cardId}')">⚖️ Palyginti</button>
         </div>
         <div class="detail-panel" id="${cardId}" data-loaded="${hasPreloadedDeep}" style="display:none">${preloadedPanelHTML}</div>
@@ -2280,7 +2162,7 @@ function renderAllListings(allListings) {
             <div style="color:#9a9aa5; font-size:12px;">${formatEUR(l.kaina)} · ${l.metai || '?'} · ${l.rida ? l.rida.toLocaleString('lt-LT').replace(/,/g,' ') + ' km' : '?'}${specs ? ' · ' + specs : ''}</div>
             ${rejectionToggle}
           </div>
-          <button class="detail-btn" id="${panelId}-btn" onclick="loadDetail('${l.url}', '${panelId}', this, false, {kaina:${l.kaina||'null'}, rida:${l.rida||'null'}, kuras:'${escJs(l.kuras||'')}', marketMedian:${l.marketMedian||'null'}, marketCount:${l.marketCount||'null'}, diffPct:${l.diffPct!=null?l.diffPct:'null'}, ridaDiffPct:${l.ridaDiffPct!=null?l.ridaDiffPct:'null'}, modelis:'${escJs(l.modelis)}', metai:${l.metai||'null'}, ridaMedian:${l.ridaMedian||'null'}, marketYearRange:${l.marketYearRange!=null?l.marketYearRange:'null'}, pardavejas:${l.pardavejas ? `'${escJs(l.pardavejas)}'` : 'null'}, galia:${l.galia||'null'}, variklioTuris:${l.variklioTuris||'null'}})" style="flex-shrink:0;">🔬 Detali apžvalga</button>
+          <button class="detail-btn" id="${panelId}-btn" onclick="loadDetail('${l.url}', '${panelId}', this, false, {kaina:${l.kaina||'null'}, marketMedian:${l.marketMedian||'null'}, marketCount:${l.marketCount||'null'}, diffPct:${l.diffPct!=null?l.diffPct:'null'}, modelis:'${escJs(l.modelis)}', pardavejas:${l.pardavejas ? `'${escJs(l.pardavejas)}'` : 'null'}, galia:${l.galia||'null'}, variklioTuris:${l.variklioTuris||'null'}})" style="flex-shrink:0;">🔬 Detali apžvalga</button>
         </div>
         <div class="detail-panel" id="${panelId}"></div>
       </div>
@@ -2413,8 +2295,9 @@ async function lookupSeller(pardavejas, resultId, btn, listingUrl) {
 }
 
 function buildDetailPanelHTML(data, url, panelId) {
-  // Delegate to v2 tabbed version if registered
-  if (window.buildDetailPanelHTML_v2) return window.buildDetailPanelHTML_v2(data, url, panelId, arguments[3]);
+  // v2: delegate to tabbed panel renderer (cartriige-cards-v2 script)
+  if (window.buildDetailPanelHTML_v2) return window.buildDetailPanelHTML_v2(data, url, panelId);
+  // fallback to original
   const a = data.analysis;
   const listFmt = (arr) => (arr && arr.length ? '<ul>' + arr.map((x) => `<li>${x}</li>`).join('') + '</ul>' : '<span style="color:#666">–</span>');
   const cacheNote = data.cached
@@ -2492,8 +2375,6 @@ async function loadDetail(url, panelId, btn, force, marketContext) {
     const isHidden = panel.style.display === 'none';
     panel.style.display = isHidden ? 'block' : 'none';
     btn.textContent = isHidden ? '🔼 Slėpti apžvalgą' : (btn.dataset.closedLabel || '🔬 Detali apžvalga');
-    const sidesEl = document.getElementById(panelId + '-sides');
-    if (sidesEl) sidesEl.style.display = isHidden ? '' : 'none';
     return;
   }
 
@@ -2531,12 +2412,10 @@ async function loadDetail(url, panelId, btn, force, marketContext) {
       panel.innerHTML = `<span style="color:#e88">Klaida: ${data.error}</span>`;
       return;
     }
-    panel.innerHTML = buildDetailPanelHTML(data, url, panelId, marketContext);
+    panel.innerHTML = buildDetailPanelHTML(data, url, panelId);
     panel.dataset.loaded = 'true';
     btn.textContent = '🔼 Slėpti apžvalgą';
     btn.disabled = false;
-    const sidesEl2 = document.getElementById(panelId + '-sides');
-    if (sidesEl2) sidesEl2.style.display = '';
     return;
   } catch (err) {
     clearInterval(ticker);
@@ -2653,92 +2532,6 @@ function closeCompareModal() {
   document.getElementById('compare-modal').classList.remove('active');
   document.body.style.overflow = '';
 }
-
-// ===== TEMOS PERJUNGIMAS =====
-function toggleTheme() {
-  const root = document.documentElement;
-  const isLight = root.getAttribute('data-theme') === 'light';
-  const newTheme = isLight ? 'dark' : 'light';
-  root.setAttribute('data-theme', newTheme);
-  try { localStorage.setItem('ct-theme', newTheme); } catch(e) {}
-}
-
-function applyStoredTheme() {
-  try {
-    const saved = localStorage.getItem('ct-theme');
-    if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
-  } catch(e) {}
-}
-applyStoredTheme();
-document.addEventListener('DOMContentLoaded', loadSavedSearch);
-
-// ===== PAIEŠKOS IŠSAUGOJIMAS =====
-const SAVED_SEARCH_KEY = 'ct-saved-search';
-
-function getFilters() {
-  return {
-    marke:       document.getElementById('marke')?.value || '',
-    modelis:     document.getElementById('modelis')?.value || '',
-    pavaru_deze: document.getElementById('pavaru_deze')?.value || '',
-    metaiNuo:    document.getElementById('metaiNuo')?.value || '',
-    metaiIki:    document.getElementById('metaiIki')?.value || '',
-    ridaIki:     document.getElementById('ridaIki')?.value || '',
-    kainaNuo:    document.getElementById('kainaNuo')?.value || '',
-    kainaIki:    document.getElementById('kainaIki')?.value || '',
-    maxPages:    document.getElementById('maxPages')?.value || '3',
-    portals: [
-      document.getElementById('portal-autoplius')?.checked ? 'autoplius' : null,
-      document.getElementById('portal-autogidas')?.checked ? 'autogidas' : null,
-      document.getElementById('portal-autoscout24')?.checked ? 'autoscout24' : null,
-      document.getElementById('portal-otomoto')?.checked ? 'otomoto' : null,
-    ].filter(Boolean),
-  };
-}
-
-function saveSearch() {
-  const filters = getFilters();
-  try {
-    localStorage.setItem(SAVED_SEARCH_KEY, JSON.stringify(filters));
-    const btn = document.getElementById('save-search-btn');
-    if (btn) {
-      const orig = btn.innerHTML;
-      btn.innerHTML = '✓ Išsaugota!';
-      btn.style.color = 'var(--success)';
-      setTimeout(() => { btn.innerHTML = orig; btn.style.color = ''; }, 2000);
-    }
-    showToast('Paieška išsaugota');
-  } catch(e) { showToast('Nepavyko išsaugoti', 'warning'); }
-}
-
-function loadSavedSearch() {
-  try {
-    const raw = localStorage.getItem(SAVED_SEARCH_KEY);
-    if (!raw) return;
-    const f = JSON.parse(raw);
-    if (f.marke) {
-      const markeEl = document.getElementById('marke');
-      if (markeEl) { markeEl.value = f.marke; updateModels(); }
-    }
-    setTimeout(() => {
-      if (f.modelis) { const el = document.getElementById('modelis'); if (el) el.value = f.modelis; }
-    }, 100);
-    if (f.pavaru_deze) { const el = document.getElementById('pavaru_deze'); if (el) el.value = f.pavaru_deze; }
-    if (f.metaiNuo)    { const el = document.getElementById('metaiNuo');    if (el) el.value = f.metaiNuo; }
-    if (f.metaiIki)    { const el = document.getElementById('metaiIki');    if (el) el.value = f.metaiIki; }
-    if (f.ridaIki)     { const el = document.getElementById('ridaIki');     if (el) el.value = f.ridaIki; }
-    if (f.kainaNuo)    { const el = document.getElementById('kainaNuo');    if (el) el.value = f.kainaNuo; }
-    if (f.kainaIki)    { const el = document.getElementById('kainaIki');    if (el) el.value = f.kainaIki; }
-    if (f.maxPages)    { const el = document.getElementById('maxPages');    if (el) el.value = f.maxPages; }
-    if (f.portals) {
-      document.getElementById('portal-autoplius').checked  = f.portals.includes('autoplius');
-      document.getElementById('portal-autogidas').checked  = f.portals.includes('autogidas');
-      document.getElementById('portal-autoscout24').checked = f.portals.includes('autoscout24');
-      document.getElementById('portal-otomoto').checked    = f.portals.includes('otomoto');
-    }
-    updateGenerationHint();
-  } catch(e) {}
-}
-
 </script>
 <script id="cartriige-cards-v2">
 /* ============================================================
@@ -2927,9 +2720,9 @@ function loadSavedSearch() {
     p.querySelectorAll('.ct-tab').forEach((x) => x.classList.toggle('active', x === btn));
   };
 
-  window.buildDetailPanelHTML_v2 = function (data, url, panelId, marketCtx) {
+  window.buildDetailPanelHTML = function (data, url, panelId) {
     const a = data.analysis || {};
-    const c = Object.assign({}, findCandidate(url) || {}, marketCtx || {});
+    const c = findCandidate(url) || {};
     const list = (arr, cls) => (arr && arr.length ? `<ul class="ct-list ${cls || ''}">${arr.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : '<p class="ct-dash">–</p>');
     const cacheNote = data.cached
       ? `<div class="ct-cache">Iš talpyklos (prieš ${data.cacheAgeMinutes} min.) · <a href="#" onclick="event.preventDefault(); loadDetail('${url}', '${panelId}', document.getElementById('${panelId}-btn'), true); return false;">atnaujinti</a></div>`
@@ -3051,8 +2844,8 @@ function loadSavedSearch() {
     var r = document.getElementById('results');
     if (r) window.__ct_renderCards(sorted, r);
   };
+})();
 
 </script>
-
 </body>
 </html>
