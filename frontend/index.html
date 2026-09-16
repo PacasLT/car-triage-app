@@ -670,6 +670,14 @@
 .ct3-stab:hover { color: var(--text-primary); }
 .ct3-stab.active { color: var(--text-primary); border-bottom-color: var(--accent); font-weight: 600; }
 .ct3-portals-row { display: flex; align-items: center; gap: 10px; }
+.ct3-portal-row { display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:8px; cursor:pointer; color:var(--text-secondary); transition:background .12s; }
+.ct3-portal-row:hover { background:rgba(255,255,255,.06); }
+.ct3-portal-row input[type=checkbox] { accent-color:var(--accent); width:14px; height:14px; flex:none; cursor:pointer; }
+.ct3-portal-badge { font:700 10px/1 var(--font-mono); padding:3px 7px; border-radius:4px; border:1px solid; flex:none; }
+.ct3-portal-name { flex:1; font:500 13px var(--font); }
+.ct3-portal-flag { font-size:15px; flex:none; }
+.ct3-hist-chip { background:var(--bg-elevated); color:var(--accent-light); border:1px solid var(--border-light); padding:6px 14px; border-radius:16px; font-size:12px; cursor:pointer; transition:all .15s; }
+.ct3-hist-chip:hover { border-color:var(--accent); color:var(--accent); }
 .ct3-portals-label { font: 500 11px/1 var(--font-mono); letter-spacing: .08em; color: var(--text-dim); }
 .ct3-flags { display: flex; align-items: center; gap: 4px; }
 .ct3-flags span { font-size: 18px; line-height: 1; cursor: default; opacity: .9; }
@@ -1232,9 +1240,8 @@
     <div class="ct3-search-inner">
       <div class="ct3-search-top">
         <div class="ct3-search-tabs">
-          <button class="ct3-stab active">Ieškoti automobilių</button>
-          <button class="ct3-stab">Išsaugotos paieškos</button>
-          <button class="ct3-stab">Paskutinės paieškos</button>
+          <button class="ct3-stab active" onclick="ctSearchTabSwitch('search',this)">Ieškoti automobilių</button>
+          <button class="ct3-stab" onclick="ctSearchTabSwitch('history',this)">Paskutinės paieškos</button>
         </div>
         <div class="ct3-portals-row">
           <span class="ct3-portals-label">Search across Europe</span>
@@ -1325,18 +1332,7 @@
       <!-- Hidden fields required by runSearch() -->
       <input type="hidden" id="ridaIki" value="">
       <input type="hidden" id="maxPages" value="3">
-      <!-- Portal selector (toggled by "Visi portalai" button) -->
-      <div id="portal-selector" style="display:none; padding:10px 12px 12px; background:rgba(255,255,255,.04); border-top:1px solid rgba(255,255,255,.07); flex-wrap:wrap; gap:16px;">
-        <label style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text-secondary);cursor:pointer;"><input type="checkbox" id="portal-autoplius" checked> autoplius.lt</label>
-        <label style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text-secondary);cursor:pointer;"><input type="checkbox" id="portal-autogidas" checked> autogidas.lt</label>
-        <label style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text-secondary);cursor:pointer;"><input type="checkbox" id="portal-autoscout24"> autoscout24.com</label>
-        <label style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text-secondary);cursor:pointer;"><input type="checkbox" id="portal-otomoto"> otomoto.pl</label>
-      </div>
-      <!-- Search history chips (rodomos virsuj filtru) -->
-      <div id="search-history-wrap" style="display:none; padding:8px 12px 0; border-top:1px solid rgba(255,255,255,.06);">
-        <div style="font-size:10px; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; font-weight:600;">🕘 Ankstesnės paieškos</div>
-        <div id="search-history-chips" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
-      </div>
+
       <div class="ct3-search-bottom">
         <div class="ct3-search-bottom-left">
           <button class="ct3-more-btn">
@@ -1344,11 +1340,19 @@
             Daugiau filtrų
             <span class="ct3-badge">3</span>
           </button>
-          <button class="ct3-marketplaces-btn" onclick="(function(){var s=document.getElementById('portal-selector');s.style.display=s.style.display==='flex'?'none':'flex';})()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M2 12h20M12 2c-3 4-3 12 0 16M12 2c3 4 3 12 0 16"/></svg>
-            Visi portalai
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
+          <div style="position:relative;">
+            <button class="ct3-marketplaces-btn" id="portal-toggle-btn" onclick="ctTogglePortals()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M2 12h20M12 2c-3 4-3 12 0 16M12 2c3 4 3 12 0 16"/></svg>
+              <span id="portal-btn-label">Visi portalai</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transition:transform .2s" id="portal-chevron"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div id="portal-selector" style="display:none; position:absolute; z-index:300; bottom:calc(100% + 8px); left:0; min-width:230px; background:#12151e; border:1px solid rgba(255,255,255,.13); border-radius:12px; padding:6px; box-shadow:0 8px 36px rgba(0,0,0,.6);">
+              <label class="ct3-portal-row"><input type="checkbox" id="portal-autoplius" checked onchange="ctUpdatePortalBtn()"><span class="ct3-portal-badge" style="background:#19b86a20;border-color:#19b86a60;color:#19b86a">AP</span><span class="ct3-portal-name">autoplius.lt</span><span class="ct3-portal-flag">🇱🇹</span></label>
+              <label class="ct3-portal-row"><input type="checkbox" id="portal-autogidas" checked onchange="ctUpdatePortalBtn()"><span class="ct3-portal-badge" style="background:#2D6FCA20;border-color:#2D6FCA60;color:#2D6FCA">AG</span><span class="ct3-portal-name">autogidas.lt</span><span class="ct3-portal-flag">🇱🇹</span></label>
+              <label class="ct3-portal-row"><input type="checkbox" id="portal-autoscout24" onchange="ctUpdatePortalBtn()"><span class="ct3-portal-badge" style="background:#E84C0A20;border-color:#E84C0A60;color:#E84C0A">AS</span><span class="ct3-portal-name">autoscout24.com</span><span class="ct3-portal-flag">🇪🇺</span></label>
+              <label class="ct3-portal-row"><input type="checkbox" id="portal-otomoto" onchange="ctUpdatePortalBtn()"><span class="ct3-portal-badge" style="background:#C0392B20;border-color:#C0392B60;color:#C0392B">OT</span><span class="ct3-portal-name">otomoto.pl</span><span class="ct3-portal-flag">🇵🇱</span></label>
+            </div>
+          </div>
         </div>
         <div class="ct3-search-bottom-right">
           <button class="ct3-save-btn">
@@ -1399,6 +1403,11 @@
 
 
 
+  <!-- Paskutinės paieškos section (shown by ctSearchTabSwitch) -->
+  <div id="ct-history-section" style="display:none; max-width:1440px; margin:0 auto; padding:16px 48px 4px; box-sizing:border-box;">
+    <div style="font:700 9px/1 var(--font-mono); letter-spacing:.12em; color:var(--text-dim); text-transform:uppercase; margin-bottom:10px;">🕘 Paskutinės paieškos</div>
+    <div id="search-history-chips" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+  </div>
   <div id="status"></div>
   <div id="search-progress-wrap">
     <div id="search-progress-track-main"><div id="search-progress-fill-main"></div></div>
@@ -1554,12 +1563,11 @@ function historyLabel(f) {
 
 function renderSearchHistory() {
   const history = loadSearchHistory();
-  const wrap = document.getElementById('search-history-wrap');
   const chips = document.getElementById('search-history-chips');
-  if (history.length === 0) { wrap.style.display = 'none'; return; }
-  wrap.style.display = 'block';
+  if (!chips) return;
+  if (history.length === 0) { chips.innerHTML = '<span style="color:var(--text-muted);font-size:12.5px">Paieškų istorija tuščia.</span>'; return; }
   chips.innerHTML = history.map((h, i) => `
-    <button onclick="applyHistoryFilters(${i})" style="background:var(--bg-elevated); color:var(--accent-light); border:1px solid var(--border-light); padding:6px 12px; border-radius:16px; font-size:12px; cursor:pointer; transition:all 0.15s;">${historyLabel(h.filters)}</button>
+    <button class="ct3-hist-chip" onclick="applyHistoryFilters(${i})">${historyLabel(h.filters)}</button>
   `).join('');
 }
 
@@ -2975,6 +2983,47 @@ function openCompareModal() {
   }).join('');
 }
 
+// ── Search tab switcher ──
+function ctSearchTabSwitch(tab, btn) {
+  document.querySelectorAll('.ct3-stab').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  var histSec = document.getElementById('ct-history-section');
+  if (tab === 'history') {
+    if (histSec) { histSec.style.display = ''; renderSearchHistory(); setTimeout(function(){ histSec.scrollIntoView({behavior:'smooth',block:'start'}); }, 50); }
+  } else {
+    if (histSec) histSec.style.display = 'none';
+  }
+}
+
+// ── Portal dropdown toggle ──
+function ctTogglePortals() {
+  var s = document.getElementById('portal-selector');
+  var chev = document.getElementById('portal-chevron');
+  var open = s.style.display !== 'none';
+  s.style.display = open ? 'none' : 'block';
+  if (chev) chev.style.transform = open ? '' : 'rotate(180deg)';
+}
+function ctUpdatePortalBtn() {
+  var names = ['autoplius','autogidas','autoscout24','otomoto'];
+  var labels = {'autoplius':'autoplius.lt','autogidas':'autogidas.lt','autoscout24':'autoscout24.com','otomoto':'otomoto.pl'};
+  var checked = names.filter(function(n){ var el=document.getElementById('portal-'+n); return el && el.checked; });
+  var lbl = document.getElementById('portal-btn-label');
+  if (!lbl) return;
+  if (checked.length === names.length || checked.length === 0) { lbl.textContent = 'Visi portalai'; }
+  else { lbl.textContent = checked.map(function(n){ return labels[n]; }).join(', '); }
+}
+document.addEventListener('click', function(e) {
+  var btn = document.getElementById('portal-toggle-btn');
+  var sel = document.getElementById('portal-selector');
+  if (!sel || !btn) return;
+  if (sel.style.display === 'none') return;
+  if (!btn.contains(e.target) && !sel.contains(e.target)) {
+    sel.style.display = 'none';
+    var chev = document.getElementById('portal-chevron');
+    if (chev) chev.style.transform = '';
+  }
+}, true);
+
 function closeCompareModal() {
   document.getElementById('compare-modal').classList.remove('active');
   document.body.style.overflow = '';
@@ -2995,10 +3044,9 @@ function ctNavTab(tab) {
     return;
   }
   if (tab === 'istorija') {
-    var hw = document.getElementById('search-history-wrap');
+    var hw = document.getElementById('ct-history-section');
     var isOpen = hw && hw.style.display !== 'none';
-    if (hw) hw.style.display = isOpen ? 'none' : 'block';
-    if (!isOpen && hw) hw.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (hw) { hw.style.display = isOpen ? 'none' : ''; if (!isOpen) { renderSearchHistory(); hw.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }
     return;
   }
   if (tab === 'palyginti') {
