@@ -284,30 +284,81 @@
     #compare-bar-items { gap: 4px; }
   }
   /* ============ RESPONSIVE ============ */
-  @media (max-width: 1100px) {
-    .filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .search-hero::before { display: none; }
+
+  /* --- Tablet (iki 900px) --- */
+  @media (max-width: 900px) {
+    .hero-top { grid-template-columns: 1fr; grid-template-rows: auto auto; }
+    .hero-visual { display: none; }
+    .hero-feats { grid-column: 1; grid-row: 2; grid-template-columns: repeat(2, 1fr); }
+    .f-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .f-5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .portals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .f-row-3 { flex-wrap: wrap; gap: 12px; }
+    .f-row-3 > div:first-child { width: 100%; }
+    .app-nav .nav-btn:nth-child(3),
+    .app-nav .nav-btn:nth-child(4) { display: none; }
   }
+
+  /* --- Mobile (iki 640px) --- */
   @media (max-width: 640px) {
     .container { padding: 0 12px 40px; }
-    .app-header-inner { height: 50px; padding: 0 12px; }
-    .search-hero { padding: 24px 0 4px; }
-    .hero-title { font-size: 26px; }
-    .hero-subtitle { font-size: 13px; }
-    .filters { grid-template-columns: 1fr; }
-    .filters input, .filters select { height: 40px; font-size: 16px; } /* 16px prevents iOS auto-zoom */
-    .portals-row .filters-actions { width: 100%; margin-left: 0; flex-direction: column; align-items: stretch; }
-    button#search-btn, #quick-count-btn { width: 100%; }
+
+    /* Header */
+    .app-header-inner { height: 52px; padding: 0 12px; gap: 8px; }
+    .app-logo-name { font-size: 17px; }
+    #app-version { display: none; }
+    .app-nav { gap: 2px; }
+    .app-nav .nav-btn { height: 30px; padding: 0 8px; font-size: 12px; gap: 4px; }
+    .app-nav .nav-btn svg { display: none; }
+    .app-nav .nav-btn:nth-child(3),
+    .app-nav .nav-btn:nth-child(4) { display: none; }
+    .app-tools .icon-btn:first-child { display: none; } /* slėpti tema mygtuką */
+    .avatar { width: 28px; height: 28px; font-size: 11px; }
+
+    /* Hero */
+    .search-hero { padding: 20px 0 4px; }
+    .hero-eyebrow { font-size: 9px; margin-bottom: 10px; }
+    .hero-title { font-size: 28px; }
+    .hero-subtitle { font-size: 13px; margin-top: 8px; }
+    .hero-feats { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 12px; }
+    .feat { padding: 8px 10px; font-size: 11px; gap: 8px; }
+    .feat-ic { width: 26px; height: 26px; font-size: 12px; }
+
+    /* Filtrai */
+    .filters { padding: 16px; }
+    .filters-head { gap: 10px; }
+    .filters-head-ic { width: 36px; height: 36px; }
+    .filters-title { font-size: 15px; }
+    .filters-sub { display: none; }
+    .btn-ghost[style*="margin-left:auto"] { display: none; } /* slėpti "Išsaugoti" */
+    .f-4 { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .f-5 { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .filters .f-ctl input, .filters .f-ctl select { font-size: 16px; } /* iOS auto-zoom fix */
+    .f-row-3 { flex-direction: column; align-items: stretch; gap: 10px; }
+    .f-row-3 > div:first-child { width: 100%; }
+    .f-toggle { font-size: 12px; }
+    .link-more { display: none; }
+    .portals { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .filters label.portal { height: 48px; padding: 0 10px; font-size: 12px; gap: 8px; }
+    .portal .p-name { font-size: 11.5px; }
+    .filters-foot { flex-wrap: wrap; gap: 8px; }
+    .foot-note { display: none; }
+    button#search-btn { font-size: 15px; padding: 14px; }
+    #quick-count-btn { width: 100%; }
+
+    /* Kortelės */
     .card { flex-direction: column; padding: 12px; gap: 10px; }
-    .card img { width: 100%; height: 180px; }
+    .card img, .card-photo-wrap img { width: 100%; height: 200px; border-radius: var(--radius-md); }
     .card-title { font-size: 15px; }
-    .card-price { font-size: 16px; }
+    .card-price { font-size: 20px; }
     .card-actions { flex-direction: column; align-items: stretch; gap: 8px; }
     .card-actions .card-link { padding: 10px; text-align: center; background: var(--bg-elevated); border-radius: var(--radius-sm); }
-    .detail-btn { padding: 11px 12px; font-size: 13px; width: 100%; }
+    .detail-btn { padding: 12px; font-size: 13px; width: 100%; }
+
+    /* Kita */
     #log-header { font-size: 12px; padding: 12px; }
-    #sort-bar select { width: 100%; margin-top: 6px; }
-    #sort-bar label { display: block; margin-bottom: 2px; }
+    #sort-bar { flex-direction: column; align-items: stretch; gap: 8px; }
+    #sort-bar select { width: 100%; }
     .risk-banner { font-size: 11px; }
     #all-listings-wrap button { font-size: 13px; padding: 12px; }
     #all-listings > div > div:not(.detail-panel) { flex-direction: column !important; align-items: stretch !important; }
