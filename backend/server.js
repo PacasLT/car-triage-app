@@ -1152,14 +1152,42 @@ async function scrapeSingleListing(url) {
     } catch {}
   });
 
-  // 3. Inline script'ai - ieskome masyvų su CDN URL (autogidas.lt naudoja JS galeriją)
+  // 3. __NEXT_DATA__ (autoscout24, otomoto - Next.js SSR, cia pilna galerija)
+  const nextDataEl = $('#__NEXT_DATA__');
+  if (nextDataEl.length) {
+    try {
+      const nextData = JSON.parse(nextDataEl.html());
+      // Autoscout24: props.pageProps.listingDetails.images[]
+      const as24imgs = (nextData.props && nextData.props.pageProps && nextData.props.pageProps.listingDetails && nextData.props.pageProps.listingDetails.images) || [];
+      as24imgs.forEach((img) => {
+        const u = (typeof img === 'string' ? img : (img && (img.src || img.url || img.uri || '')));
+        if (u && isCarCdnUrl(u)) photosSet.add(u.split('?')[0]);
+      });
+      // Otomoto: urqlState -> advertDetails -> photos[]
+      const urqlState = (nextData.props && nextData.props.pageProps && nextData.props.pageProps.urqlState) || {};
+      for (const key of Object.keys(urqlState)) {
+        try {
+          const entry = urqlState[key];
+          const d = typeof entry.data === 'string' ? JSON.parse(entry.data) : entry.data;
+          const advert = d && (d.advert || d.advertDetails || (d.advertSearch && d.advertSearch.edges && d.advertSearch.edges[0] && d.advertSearch.edges[0].node));
+          const photosArr = (advert && (advert.photos || advert.images || advert.gallery)) || [];
+          photosArr.forEach((p) => {
+            const u = typeof p === 'string' ? p : (p && (p.url || p.large || p.src || ''));
+            if (u) photosSet.add(u.split('?')[0]);
+          });
+        } catch {}
+      }
+    } catch {}
+  }
+
+  // 4. Inline script'ai - ieskome masyvų su CDN URL (autogidas.lt naudoja JS galeriją)
   if (photosSet.size < 3) {
     $('script:not([src])').each(function () {
       const txt = $(this).html() || '';
-      const matches = txt.match(/["'](https?:\/\/[^"']*(?:img\.autogidas\.lt|autoplius-img|pictures\.autoscout24\.net)[^"']*\.(jpe?g|png|webp)[^"']*)/gi) || [];
+      const matches = txt.match(/["'](https?:\/\/[^"']*(?:img\.autogidas\.lt|autoplius-img|pictures\.autoscout24\.net|ireland\.apollo\.olxcdn|otomoto)[^"']*\.(jpe?g|png|webp)[^"']*)/gi) || [];
       matches.forEach((m) => {
-        const url = m.replace(/^["']|["']$/g, '').split('?')[0];
-        if (!NON_CAR_IMAGE_KEYWORDS.some((kw) => url.toLowerCase().includes(kw))) photosSet.add(url);
+        const u = m.replace(/^["']|["']$/g, '').split('?')[0];
+        if (!NON_CAR_IMAGE_KEYWORDS.some((kw) => u.toLowerCase().includes(kw))) photosSet.add(u);
       });
     });
   }
