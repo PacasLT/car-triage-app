@@ -1077,6 +1077,42 @@
   .ct-price { font-size: 22px; }
 }
 
+
+/* ── FULL-BLEED: break hero+stats out of .container max-width ── */
+.ct3-hero, .ct3-stats-bar {
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc((100% - 100vw) / 2);
+  box-sizing: border-box;
+}
+/* Sticky header */
+.ct3-header {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: rgba(10,12,18,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+/* Hero: no negative margin since header is sticky */
+.ct3-hero {
+  margin-top: 0 !important;
+}
+/* Responsive header */
+@media (max-width: 768px) {
+  .ct3-header-inner { padding: 14px 20px !important; }
+  .ct3-logo-icon { width: 38px !important; height: 38px !important; }
+  .ct3-logo-text > span { font-size: 20px !important; }
+  .ct3-nav { display: none !important; }
+  .ct3-premium-btn { display: none !important; }
+}
+/* Responsive search panel */
+@media (max-width: 768px) {
+  .ct3-search-panel { margin: 0 8px !important; border-radius: 16px !important; }
+  .ct3-stats-bar { border-radius: 0 !important; }
+  .ct3-stats-inner { flex-wrap: wrap; gap: 12px; padding: 12px 16px; }
+  .ct3-stat-div { display: none; }
+}
 </style>
 </head>
 <body>
@@ -1092,19 +1128,19 @@
       </svg>
       <div class="ct3-logo-text">
         <span>Car<b>Triige</b></span>
-        <small>AUTOMOTIVE MARKET INTELLIGENCE</small>
+        <small>AUTOMOTIVE MARKET INTELLIGENCE <span id="app-version"></span></small>
       </div>
     </a>
     <nav class="ct3-nav">
-      <a class="ct3-nav-link active" href="#">Search</a>
-      <a class="ct3-nav-link" href="#">Favorites</a>
-      <a class="ct3-nav-link" href="#">History</a>
-      <a class="ct3-nav-link" href="#">Compare</a>
+      <a class="ct3-nav-link active" href="#">Paieška</a>
+      <a class="ct3-nav-link" href="#">Mėgstamiausi</a>
+      <a class="ct3-nav-link" href="#">Istorija</a>
+      <a class="ct3-nav-link" href="#">Palyginti</a>
     </nav>
     <div class="ct3-header-right">
       <button class="ct3-premium-btn">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V10l6-8 6 8v10"/></svg>
-        Go Premium
+        Tapti Premium
       </button>
       <button class="ct3-avatar">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
@@ -1138,30 +1174,30 @@
 
   <div class="ct3-hero-content">
     <div class="ct3-hero-left">
-      <div class="ct3-hero-eyebrow">THOUSANDS OF LISTINGS. ONE CLEAR ADVANTAGE.</div>
-      <h1 class="ct3-hero-title">Find the cars<br><em>worth your attention.</em></h1>
-      <p class="ct3-hero-sub">We scan thousands of used-car listings across European marketplaces, analyze the market in real time, and highlight the best opportunities — with the risk attached.</p>
+      <div class="ct3-hero-eyebrow">TŪKSTANČIAI SKELBIMŲ. VIENAS AIŠKUS PRANAŠUMAS.</div>
+      <h1 class="ct3-hero-title">Rask automobilius,<br><em>kurie verti dėmesio.</em></h1>
+      <p class="ct3-hero-sub">Skanuojame tūkstančius naudotų automobilių skelbimų Europos rinkose, analizuojame rinką realiuoju laiku ir išryškiname geriausias galimybes — su rizikos įvertinimu.</p>
       <div class="ct3-hero-feats">
         <div class="ct3-feat">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
-          <span>Multi-portal<br>search</span>
+          <span>Kelių portalų<br>paieška</span>
         </div>
         <div class="ct3-feat">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3h18M3 9h12M3 15h9M3 21h6"/><path d="M18 14l3 3-3 3"/></svg>
-          <span>AI market<br>analysis</span>
+          <span>AI rinkos<br>analizė</span>
         </div>
         <div class="ct3-feat">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
-          <span>Triage the<br>opportunities</span>
+          <span>Geriausios<br>galimybės</span>
         </div>
       </div>
     </div>
 
     <div class="ct3-hero-right-stats">
       <div class="ct3-hero-taglines">
-        <div>BETTER DATA</div>
-        <div>BETTER DECISIONS</div>
-        <div class="ct3-hl">MORE OPPORTUNITIES</div>
+        <div>GERESNI DUOMENYS</div>
+        <div>GERESNI SPRENDIMAI</div>
+        <div class="ct3-hl">DAUGIAU GALIMYBIŲ</div>
         <div class="ct3-hl-line"></div>
       </div>
       <div class="ct3-hero-car-label">
@@ -1184,9 +1220,9 @@
     <div class="ct3-search-inner">
       <div class="ct3-search-top">
         <div class="ct3-search-tabs">
-          <button class="ct3-stab active">Search cars</button>
-          <button class="ct3-stab">Saved searches</button>
-          <button class="ct3-stab">Recent searches</button>
+          <button class="ct3-stab active">Ieškoti automobilių</button>
+          <button class="ct3-stab">Išsaugotos paieškos</button>
+          <button class="ct3-stab">Paskutinės paieškos</button>
         </div>
         <div class="ct3-portals-row">
           <span class="ct3-portals-label">Search across Europe</span>
@@ -1205,10 +1241,10 @@
 
       <div class="ct3-fields">
         <div class="ct3-field">
-          <label>MAKE</label>
+          <label>MARKĖ</label>
           <div class="ct3-select-wrap">
-            <select id="make" onchange="updateModels ? updateModels() : null">
-              <option value="">All makes</option>
+            <select id="marke" onchange="updateModels ? updateModels() : null">
+              <option value="">Visos markės</option>
               <option value="BMW" selected>BMW</option>
               <option>Mercedes-Benz</option>
               <option>Audi</option>
@@ -1221,79 +1257,90 @@
           </div>
         </div>
         <div class="ct3-field">
-          <label>MODEL</label>
+          <label>MODELIS</label>
           <div class="ct3-select-wrap">
-            <select id="model">
-              <option value="">All models</option>
+            <select id="modelis">
+              <option value="">Visi modeliai</option>
               <option value="X5" selected>X5</option>
             </select>
             <svg class="ct3-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
           </div>
         </div>
         <div class="ct3-field">
-          <label>YEAR</label>
+          <label>METAI</label>
           <div class="ct3-range-wrap">
-            <input id="year-from" type="number" placeholder="2018" min="1990" max="2025" style="max-width:52px">
+            <input id="metaiNuo" type="number" placeholder="2018" min="1990" max="2025" style="max-width:52px">
             <span>–</span>
-            <input id="year-to" type="number" placeholder="2024" min="1990" max="2025" style="max-width:52px">
+            <input id="metaiIki" type="number" placeholder="2024" min="1990" max="2025" style="max-width:52px">
             <svg class="ct3-range-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
           </div>
         </div>
         <div class="ct3-field">
-          <label>PRICE</label>
+          <label>KAINA</label>
           <div class="ct3-range-wrap">
-            <input id="price-from" type="number" placeholder="€ Min" style="max-width:60px">
+            <input id="kainaNuo" type="number" placeholder="€ Min" style="max-width:60px">
             <span>–</span>
-            <input id="price-to" type="number" placeholder="Max">
+            <input id="kainaIki" type="number" placeholder="Max">
           </div>
         </div>
         <div class="ct3-field">
-          <label>FUEL</label>
+          <label>KURAS</label>
           <div class="ct3-select-wrap">
             <select id="fuel">
-              <option value="">All</option>
-              <option selected>Diesel</option>
-              <option>Petrol</option>
-              <option>Hybrid</option>
-              <option>Electric</option>
+              <option value="">Visi</option>
+              <option value="dyzelis" selected>Dyzelinas</option>
+              <option value="benzinas">Benzinas</option>
+              <option value="hibridas">Hibridas</option>
+              <option value="elektra">Elektrinis</option>
             </select>
             <svg class="ct3-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
           </div>
         </div>
         <div class="ct3-field">
-          <label>GEARBOX</label>
+          <label>PAVARŲ DĖŽĖ</label>
           <div class="ct3-select-wrap">
-            <select id="gearbox">
-              <option value="">All</option>
-              <option selected>Automatic</option>
-              <option>Manual</option>
+            <select id="pavaru_deze">
+              <option value="">Visi</option>
+              <option value="automatine" selected>Automatinė</option>
+              <option value="mechanine">Mechaninė</option>
             </select>
             <svg class="ct3-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
           </div>
         </div>
       </div>
 
+
+      <!-- Hidden fields required by runSearch() -->
+      <input type="hidden" id="ridaIki" value="">
+      <input type="hidden" id="maxPages" value="3">
+      <!-- Portal selector (toggled by "Visi portalai" button) -->
+      <div id="portal-selector" style="display:none; padding:10px 12px 12px; background:rgba(255,255,255,.04); border-top:1px solid rgba(255,255,255,.07); flex-wrap:wrap; gap:16px;">
+        <label style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text-secondary);cursor:pointer;"><input type="checkbox" id="portal-autoplius" checked> autoplius.lt</label>
+        <label style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text-secondary);cursor:pointer;"><input type="checkbox" id="portal-autogidas" checked> autogidas.lt</label>
+        <label style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text-secondary);cursor:pointer;"><input type="checkbox" id="portal-autoscout24"> autoscout24.com</label>
+        <label style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text-secondary);cursor:pointer;"><input type="checkbox" id="portal-otomoto"> otomoto.pl</label>
+      </div>
       <div class="ct3-search-bottom">
         <div class="ct3-search-bottom-left">
           <button class="ct3-more-btn">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M7 12h10M10 18h4"/></svg>
-            More filters
+            Daugiau filtrų
             <span class="ct3-badge">3</span>
           </button>
-          <button class="ct3-marketplaces-btn">
+          <button class="ct3-marketplaces-btn" onclick="(function(){var s=document.getElementById('portal-selector');s.style.display=s.style.display==='flex'?'none':'flex';})()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M2 12h20M12 2c-3 4-3 12 0 16M12 2c3 4 3 12 0 16"/></svg>
-            All marketplaces
+            Visi portalai
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
           </button>
         </div>
         <div class="ct3-search-bottom-right">
           <button class="ct3-save-btn">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
-            Save search
+            Išsaugoti paiešką
           </button>
           <button class="ct3-search-btn" id="search-btn" onclick="runSearch ? runSearch() : null">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
-            Search &amp; analyze
+            Ieškoti ir analizuoti
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </button>
         </div>
@@ -1307,29 +1354,29 @@
   <div class="ct3-stats-inner">
     <div class="ct3-stat-item">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/><circle cx="12" cy="12" r="1"/></svg>
-      <div><b>12 480</b><span>listings analyzed daily</span></div>
+      <div><b>12 480</b><span>skelbimų analizuojama per dieną</span></div>
     </div>
     <div class="ct3-stat-div"></div>
     <div class="ct3-stat-item">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
-      <div><b>1 200+</b><span>best opportunities found monthly</span></div>
+      <div><b>1 200+</b><span>geriausių pasiūlymų per mėnesį</span></div>
     </div>
     <div class="ct3-stat-div"></div>
     <div class="ct3-stat-item">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h18M3 9h12M3 15h9"/></svg>
-      <div><b>8 European</b><span>marketplaces</span></div>
+      <div><b>8 Europos</b><span>platformų</span></div>
     </div>
     <div class="ct3-stat-div"></div>
     <div class="ct3-stat-item">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      <div><b>Save time</b><span>with AI triage</span></div>
+      <div><b>Taupykite laiką</b><span>su AI triažu</span></div>
     </div>
     <div class="ct3-stat-div"></div>
     <div class="ct3-stat-item">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-      <div><b>Make better deals</b><span>with real market data</span></div>
+      <div><b>Geresnės sandoriai</b><span>su realiais rinkos duomenimis</span></div>
     </div>
-    <div class="ct3-stats-driven">DRIVEN BY <b>DATA</b></div>
+    <div class="ct3-stats-driven">VALDOMA <b>DUOMENŲ</b></div>
   </div>
 </div>
 
