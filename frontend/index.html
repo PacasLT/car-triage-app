@@ -2691,19 +2691,92 @@ let currentData = null;
 function renderResults(data, status, results) {
   currentData = data;
   window.currentData = data;
-  // Rodyti aktyvaus režimo ženklelį šalia rezultatų
+  // Rodyti aktyvaus rezimo zenklelį šalia rezultatų
   const modeLabels = { reseller: '💰 Perpardavinėtojui', personal: '🚗 Automobilis sau', browse: '📋 Naršyti viską', default: '⚖️ Pagrindinis' };
   const modeEl = document.getElementById('ct-active-mode');
   if (modeEl && data.searchMode) modeEl.textContent = modeLabels[data.searchMode] || '';
   const rawNote = data.rawFoundCount && data.rawFoundCount !== data.totalScanned
     ? ` (iš ${data.rawFoundCount} pagal markę/modelį, ${data.totalScanned} atitiko jūsų kainos/ridos/metų filtrus)`
     : '';
-  status.textContent = `Rasta ${data.candidates.length} verti dėmesio${rawNote}:`;
+
+  if (data.searchMode === 'browse') {
+    // Browse mode: nerodyti TOP kortelių – rodyti kompaktišką sąrašą su pirminiu įvertinimu >=60
+    const browseCands = data.candidates.filter(function(c) { return (c.qualityScore || 0) >= 60; });
+    status.textContent = '📋 Naršyti viską: ' + browseCands.length + ' skelbimai su pirminiu įvertinimu ≥60' + rawNote + ':';
+    document.getElementById('sort-bar').style.display = browseCands.length > 0 ? 'flex' : 'none';
+    document.getElementById('sort-select').value = 'quality';
+    results.innerHTML = '';
+    renderBrowseListings(browseCands, results);
+    renderAllListings(data.allListings || []);
+    return;
+  }
+
+  status.textContent = 'Rasta ' + data.candidates.length + ' verti dėmesio' + rawNote + ':';
   document.getElementById('sort-bar').style.display = data.candidates.length > 0 ? 'flex' : 'none';
   document.getElementById('sort-select').value = 'quality';
-
   (window.renderCandidateCards || renderCandidateCards)(data.candidates, results);
   renderAllListings(data.allListings || []);
+}
+
+function renderBrowseListings(candidates, container) {
+  if (candidates.length === 0) {
+    container.innerHTML = '<div style="color:#9a9aa5;padding:20px 0;">Nėra skelbimų su pirminiu įvertinimu ≥60. Pabandykite išplėsti filtrus.</div>';
+    return;
+  }
+  var hdr = document.createElement('div');
+  hdr.style.cssText = 'display:flex;align-items:center;gap:12px;margin-bottom:14px;';
+  hdr.innerHTML = '<div style="display:flex;align-items:center;gap:8px;flex:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent-light)" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span style="font:700 13px/1 var(--font);color:var(--text-primary);">Pirminė apžvalga ≥60</span></div><div style="flex:1;height:1px;background:var(--border);"></div><span style="font:500 10px/1 var(--font-mono);letter-spacing:.08em;color:var(--text-dim);flex:none;">RIKIUOTA PAGAL ĮVERTĮ</span>';
+  container.appendChild(hdr);
+
+  candidates.forEach(function(c, idx) {
+    var panelId = 'browse-detail-' + idx + '-' + c.url.length;
+    var hasDeep = !!c.deepAnalysis;
+    var specs = [c.kuras, c.pavarai, (c.variklioTuris ? c.variklioTuris + 'L' : null), (c.galia ? c.galia + 'kW' : null)].filter(Boolean).join(' · ');
+    var diffTxt = c.diffPct != null ? (c.diffPct >= 0 ? '-' + c.diffPct + '%' : '+' + Math.abs(c.diffPct) + '%') : '–';
+    var diffColor = (c.diffPct != null && c.diffPct >= 0) ? 'var(--success)' : 'var(--danger)';
+    var diffBg = (c.diffPct != null && c.diffPct >= 0) ? 'var(--success-dim)' : 'var(--danger-dim)';
+    var diffBo = (c.diffPct != null && c.diffPct >= 0) ? 'var(--success-border)' : 'var(--danger-border)';
+    var scoreVal = c.qualityScore || 0;
+    var scoreColor = scoreVal >= 80 ? 'var(--success)' : '#f0c674';
+    var detailBtnLabel = hasDeep ? '✨ Pilna apžvalga' : '🔬 Detali apžvalga';
+    var dArgs = "'" + c.url + "', '" + panelId + "', this, false, {kaina:" + (c.kaina||'null') + ", marketMedian:" + (c.marketMedian||'null') + ", marketCount:" + (c.marketCount||'null') + ", diffPct:" + (c.diffPct!=null?c.diffPct:'null') + ", modelis:'" + escJs(c.modelis) + "', pardavejas:" + (c.pardavejas ? ("'" + escJs(c.pardavejas) + "'") : 'null') + ", galia:" + (c.galia||'null') + ", variklioTuris:" + (c.variklioTuris||'null') + "}";
+    var detailClick = hasDeep ? ("ctOpenDetail('" + escJs(c.url) + "')") : ("loadDetail(" + dArgs + ")");
+    window.__ctCardData = window.__ctCardData || {};
+    window.__ctCardData[c.url] = { c: c, analysis: c.deepAnalysis || null, photos: c.photos || (c.photo ? [c.photo] : []) };
+    var isFav = isFavorited(c.url);
+    var favSnap = "{modelis:'" + escJs(c.modelis) + "', kaina:" + (c.kaina||'null') + ", metai:" + (c.metai||'null') + ", rida:" + (c.rida||'null') + ", photo:'" + escJs(c.photo||'') + "', source:'" + escJs(c.source) + "'}";
+    var panelHTML = hasDeep ? buildDetailPanelHTML({ analysis: c.deepAnalysis, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos || [], cached: false }, c.url, panelId) : '';
+
+    var card = document.createElement('div');
+    card.style.cssText = 'padding:10px 0;border-bottom:1px solid var(--border);';
+    card.innerHTML =
+      '<div style="display:flex;gap:12px;align-items:flex-start;">' +
+        '<img src="' + (c.photo || '') + '" onerror="this.style.display='none'" style="width:88px;height:66px;object-fit:cover;border-radius:8px;background:var(--bg-elevated);flex-shrink:0;cursor:pointer;" onclick="window.open('' + c.url + '','_blank')">' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">' +
+            '<a href="' + c.url + '" target="_blank" style="color:var(--text-primary);text-decoration:none;font:600 14px/1.2 var(--font);">' + (c.modelis || '') + '</a>' +
+            '<span class="source-tag">' + (c.source || '') + '</span>' +
+            (hasDeep ? '<span style="font-size:10px;background:#2d4a35;color:#7fd88f;padding:2px 6px;border-radius:4px;">✨ pilna</span>' : '') +
+          '</div>' +
+          '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px;">' +
+            '<span style="font:600 16px/1 var(--font-mono);color:var(--text-primary);">' + formatEUR(c.kaina) + '</span>' +
+            '<span style="font:600 11px/1 var(--font-mono);padding:3px 7px;border-radius:4px;background:' + diffBg + ';color:' + diffColor + ';border:1px solid ' + diffBo + ';">' + diffTxt + '</span>' +
+            '<span style="font:600 10px/1 var(--font-mono);padding:3px 8px;border-radius:4px;background:rgba(124,111,247,.12);color:' + scoreColor + ';border:1px solid rgba(124,111,247,.25);">★ ' + scoreVal + '</span>' +
+          '</div>' +
+          '<div style="font-size:12px;color:var(--text-muted);margin-bottom:' + (c.comment ? '4px' : '0') + ';">' +
+            (c.metai || '?') + ' · ' + (c.rida ? c.rida.toLocaleString('lt-LT').replace(/,/g,' ') + ' km' : '? km') +
+            (specs ? ' · ' + specs : '') + (c.marketMedian ? ' · rinka ' + formatEUR(c.marketMedian) : '') +
+          '</div>' +
+          (c.comment ? '<div style="font-size:12px;color:var(--text-secondary);line-height:1.4;font-style:italic;">' + c.comment + '</div>' : '') +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;align-items:flex-end;">' +
+          '<button class="fav-star' + (isFav ? ' active' : '') + '" onclick="toggleFavorite('' + c.url + '',' + favSnap + ',this)" style="width:28px;height:28px;border-radius:6px;background:transparent;border:1px solid var(--border-light);color:var(--text-muted);font-size:14px;display:grid;place-items:center;">' + (isFav ? '★' : '☆') + '</button>' +
+          '<button class="detail-btn' + (hasDeep ? ' ready' : '') + '" id="' + panelId + '-btn" onclick="' + detailClick + '" style="font-size:12px;padding:6px 10px;white-space:nowrap;">' + detailBtnLabel + '</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="detail-panel" id="' + panelId + '" style="display:none;">' + panelHTML + '</div>';
+    container.appendChild(card);
+  });
 }
 
 function applySorting() {
@@ -2714,7 +2787,13 @@ function applySorting() {
   else if (mode === 'priciest') sorted.sort((a, b) => b.kaina - a.kaina);
   else if (mode === 'biggest-discount') sorted.sort((a, b) => b.diffPct - a.diffPct);
   else sorted.sort((a, b) => b.qualityScore - a.qualityScore);
-  (window.renderCandidateCards || renderCandidateCards)(sorted, document.getElementById('results'));
+  const resultsEl = document.getElementById('results');
+  if (currentData.searchMode === 'browse') {
+    resultsEl.innerHTML = '';
+    renderBrowseListings(sorted.filter(function(c) { return (c.qualityScore || 0) >= 60; }), resultsEl);
+  } else {
+    (window.renderCandidateCards || renderCandidateCards)(sorted, resultsEl);
+  }
 }
 
 function renderCandidateCards(candidates, results) {
