@@ -964,6 +964,21 @@
     </div>
   </div>
 
+  <!-- Favoritai panel -->
+  <div id="favorites-panel" style="display:none; position:fixed; top:60px; right:16px; width:360px; max-height:80vh; overflow-y:auto; background:var(--bg-surface); border:1px solid var(--border-light); border-radius:12px; padding:16px; z-index:200; box-shadow:0 8px 32px rgba(0,0,0,.5);">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+      <span style="font-weight:700; font-size:14px;">★ Favoritai</span>
+      <button onclick="toggleFavoritesPanel()" style="background:none; border:none; color:var(--text-muted); font-size:18px; cursor:pointer; line-height:1;">×</button>
+    </div>
+    <div id="favorites-wrap" style="display:none;">
+      <div id="favorites-list"></div>
+      <div style="margin-top:8px; padding-top:8px; border-top:1px solid var(--border);">
+        <button onclick="checkAllFavorites()" style="font-size:12px; padding:6px 12px; background:var(--bg-elevated); border:1px solid var(--border-light); border-radius:6px; cursor:pointer; color:var(--text-secondary);">🔄 Atnaujinti visus</button>
+      </div>
+    </div>
+    <p id="favorites-empty-msg" style="color:var(--text-muted); font-size:13px; margin:0; padding:8px 0;">Favoritų sąrašas tuščias. Spausk ★ ant kortelės.</p>
+  </div>
+
   <div id="lightbox" onclick="if(event.target.id==='lightbox') closeLightbox();">
     <button id="lightbox-close" onclick="closeLightbox()">✕</button>
     <button class="lightbox-nav" id="lightbox-prev" onclick="lightboxNav(-1)">‹</button>
@@ -992,7 +1007,7 @@
 </div>
 
 <script>
-const APP_VERSION = 'v2.0.1';
+const APP_VERSION = 'v2.0.2';
 const BRAND_MODELS = {
   'BMW': ['1', '2', '3', '4', '5', '6', '7', '8', 'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'Z4', 'M'],
   'Audi': ['A1', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q2', 'Q3', 'Q5', 'Q7', 'Q8'],
@@ -1141,6 +1156,7 @@ function toggleFavorite(url, snapshot, btn) {
 
 function toggleFavoritesPanel() {
   const panel = document.getElementById('favorites-panel');
+  if (!panel) return;
   const isHidden = panel.style.display === 'none';
   panel.style.display = isHidden ? 'block' : 'none';
 }
@@ -1157,6 +1173,7 @@ function renderFavorites() {
   // Mark header button
   const navBtn = document.getElementById('favorites-toggle-btn');
   if (navBtn) navBtn.classList.toggle('has-items', favs.length > 0);
+  if (!wrap || !list) return;
   wrap.style.display = favs.length > 0 ? 'block' : 'none';
   if (favs.length === 0) return;
 
