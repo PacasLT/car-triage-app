@@ -3621,5 +3621,96 @@ function ctNavTab(tab) {
 })();
 
 </script>
+
+<!-- ── AUTH MODAL ─────────────────────────────────────────────────────── -->
+<div id="ct-auth-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+  <div style="background:var(--bg-surface,#1a1f2e);border:1px solid var(--border,#2a3040);border-radius:20px;width:100%;max-width:420px;margin:16px;padding:36px 32px;box-shadow:0 24px 64px rgba(0,0,0,.6);">
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="font-size:28px;margin-bottom:8px;">🚗</div>
+      <h2 id="ct-auth-title" style="margin:0;font-size:20px;color:var(--text-primary,#e8eaf0);">Prisijungti</h2>
+      <p style="margin:6px 0 0;font-size:13px;color:var(--text-secondary,#8892a4);">CarTriige · Automobilių paieška</p>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:24px;background:var(--bg-elevated,#141822);border-radius:10px;padding:4px;">
+      <button onclick="ctShowLogin()" id="ct-tab-login" style="flex:1;padding:8px;border:none;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600;background:var(--accent,#5c6bc0);color:#fff;transition:.2s;">Prisijungti</button>
+      <button onclick="ctShowRegister()" id="ct-tab-reg" style="flex:1;padding:8px;border:none;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600;background:transparent;color:var(--text-secondary,#8892a4);transition:.2s;">Registruotis</button>
+    </div>
+    <div id="ct-auth-error" style="display:none;background:var(--danger-dim,rgba(239,83,80,.15));border:1px solid var(--danger-border,rgba(239,83,80,.3));color:var(--danger,#ef5350);border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:16px;"></div>
+    <form onsubmit="ctAuthSubmit(event)">
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;color:var(--text-secondary,#8892a4);display:block;margin-bottom:5px;">El. paštas</label>
+        <input id="ct-auth-email" type="email" required placeholder="jusu@pastas.lt"
+          style="width:100%;box-sizing:border-box;padding:11px 14px;background:var(--bg-elevated,#141822);border:1px solid var(--border,#2a3040);border-radius:9px;color:var(--text-primary,#e8eaf0);font-size:14px;outline:none;">
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;color:var(--text-secondary,#8892a4);display:block;margin-bottom:5px;">Slaptažodis</label>
+        <input id="ct-auth-pass" type="password" required placeholder="Min. 8 simboliai"
+          style="width:100%;box-sizing:border-box;padding:11px 14px;background:var(--bg-elevated,#141822);border:1px solid var(--border,#2a3040);border-radius:9px;color:var(--text-primary,#e8eaf0);font-size:14px;outline:none;">
+      </div>
+      <div id="ct-invite-wrap" style="display:none;margin-bottom:14px;">
+        <label style="font-size:12px;color:var(--text-secondary,#8892a4);display:block;margin-bottom:5px;">Invite kodas</label>
+        <input id="ct-auth-invite" type="text" placeholder="CARTRIAGE2024"
+          style="width:100%;box-sizing:border-box;padding:11px 14px;background:var(--bg-elevated,#141822);border:1px solid var(--border,#2a3040);border-radius:9px;color:var(--text-primary,#e8eaf0);font-size:14px;outline:none;text-transform:uppercase;">
+      </div>
+      <button type="submit" id="ct-auth-submit"
+        style="width:100%;padding:13px;background:var(--accent,#5c6bc0);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px;transition:opacity .2s;">
+        Prisijungti
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+var _ctMode = 'login';
+function ctShowLogin() {
+  _ctMode='login';
+  document.getElementById('ct-auth-title').textContent='Prisijungti';
+  document.getElementById('ct-auth-submit').textContent='Prisijungti';
+  document.getElementById('ct-invite-wrap').style.display='none';
+  document.getElementById('ct-tab-login').style.background='var(--accent,#5c6bc0)';
+  document.getElementById('ct-tab-login').style.color='#fff';
+  document.getElementById('ct-tab-reg').style.background='transparent';
+  document.getElementById('ct-tab-reg').style.color='var(--text-secondary,#8892a4)';
+  document.getElementById('ct-auth-error').style.display='none';
+}
+function ctShowRegister() {
+  _ctMode='register';
+  document.getElementById('ct-auth-title').textContent='Registruotis';
+  document.getElementById('ct-auth-submit').textContent='Registruotis';
+  document.getElementById('ct-invite-wrap').style.display='block';
+  document.getElementById('ct-tab-reg').style.background='var(--accent,#5c6bc0)';
+  document.getElementById('ct-tab-reg').style.color='#fff';
+  document.getElementById('ct-tab-login').style.background='transparent';
+  document.getElementById('ct-tab-login').style.color='var(--text-secondary,#8892a4)';
+  document.getElementById('ct-auth-error').style.display='none';
+}
+async function ctAuthSubmit(e) {
+  e.preventDefault();
+  var btn = document.getElementById('ct-auth-submit');
+  var errEl = document.getElementById('ct-auth-error');
+  btn.disabled=true; btn.style.opacity='.6';
+  errEl.style.display='none';
+  try {
+    var email = document.getElementById('ct-auth-email').value;
+    var pass  = document.getElementById('ct-auth-pass').value;
+    if (_ctMode==='login') {
+      await window.authAPI.login(email, pass);
+    } else {
+      var inv = document.getElementById('ct-auth-invite').value;
+      await window.authAPI.register(email, pass, inv);
+    }
+    window.location.reload();
+  } catch(err) {
+    errEl.textContent = err.message || 'Klaida';
+    errEl.style.display='block';
+    btn.disabled=false; btn.style.opacity='1';
+  }
+}
+window.showAuthModal = function() {
+  var el = document.getElementById('ct-auth-overlay');
+  el.style.display='flex';
+};
+</script>
+
+<script src="auth_frontend.js"></script>
 </body>
 </html>

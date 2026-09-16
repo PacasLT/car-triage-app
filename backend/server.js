@@ -11,10 +11,16 @@ const cheerio = require('cheerio');
 const puppeteer = require('puppeteer');
 const Anthropic = require('@anthropic-ai/sdk');
 const cache = require('./cache');
+const { requireAuth, handleRegister, handleLogin, handleMe } = require('./auth');
 
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../frontend')));
+
+// ── Auth endpoints ────────────────────────────────────────────────────────
+app.post('/auth/register', handleRegister);
+app.post('/auth/login', handleLogin);
+app.get('/auth/me', requireAuth, handleMe);
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const MODEL = 'claude-sonnet-4-5';
@@ -735,7 +741,7 @@ function extractTotalCount(html, isAutogidas) {
   return null;
 }
 
-app.post('/api/quick-count', async (req, res) => {
+app.post('/api/quick-count', requireAuth, async (req, res) => {
   try {
     const filters = req.body;
     const autopliusUrl = buildAutopliusUrl(filters);
@@ -1473,7 +1479,7 @@ JSON struktura ir sukelia klaida:
 
 // ============ API ============
 
-app.post('/api/search-start', (req, res) => {
+app.post('/api/search-start', requireAuth, (req, res) => {
   const jobId = newJob();
   runSearchJob(jobId, req.body);
   res.json({ jobId });
