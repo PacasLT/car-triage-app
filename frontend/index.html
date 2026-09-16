@@ -429,10 +429,26 @@
   #all-listings { margin-top: 8px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
 
   /* ===== TOAST NOTIFICATIONS ===== */
-  #toast-container { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 3000; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
-  .toast { background: var(--bg-elevated); border: 1px solid var(--border-light); color: var(--text-primary); padding: 10px 18px; border-radius: var(--radius-md); font-size: 13px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); animation: toast-in 0.2s ease-out; white-space: nowrap; pointer-events: all; }
-  .toast.warning { border-color: rgba(240,198,116,0.4); color: var(--warning); }
-  @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; pointer-events: none; }
+  .toast {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: var(--bg-elevated); border: 1px solid var(--border-light); color: var(--text-primary);
+    padding: 12px 16px; border-radius: 10px; font-size: 13px; line-height: 1.4;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6); max-width: 320px;
+    pointer-events: all; cursor: pointer;
+    animation: toast-in 0.25s cubic-bezier(.34,1.56,.64,1);
+    transition: opacity 0.35s, transform 0.35s;
+  }
+  .toast::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; margin-top: 3px; background: var(--text-muted); }
+  .toast.error { border-color: var(--danger-border); background: rgba(30,12,12,.98); color: #ff9999; }
+  .toast.error::before { background: var(--danger); box-shadow: 0 0 6px var(--danger); }
+  .toast.warning { border-color: var(--warning-border); color: var(--warning); }
+  .toast.warning::before { background: var(--warning); }
+  .toast.success { border-color: var(--success-border); color: var(--success); }
+  .toast.success::before { background: var(--success); }
+  .toast-close { flex: none; margin-left: auto; padding-left: 8px; color: var(--text-muted); font-size: 16px; line-height: 1; cursor: pointer; }
+  .toast-close:hover { color: var(--text-primary); }
+  @keyframes toast-in { from { opacity: 0; transform: translateX(24px) scale(.95); } to { opacity: 1; transform: translateX(0) scale(1); } }
 </style>
 <style id="cartriige-v2">
 /* ============================================================
@@ -900,7 +916,7 @@
 .compare-row-val.better { color: var(--success); } .compare-row-val.worse { color: var(--danger); }
 
 /* ===== TOAST ===== */
-.toast { border-radius: var(--radius-md); font-size: 12.5px; box-shadow: 0 8px 24px -12px rgba(0,0,0,.8); }
+/* toast styles unified above */
 
 /* ===== FAVORITES PANEL ===== */
 #favorites-panel { border-radius: var(--radius-lg) !important; }
@@ -1968,6 +1984,10 @@ async function runSearch() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(filters),
     });
+    if (!startResp.ok) {
+      const errText = await startResp.text().catch(() => startResp.statusText);
+      throw new Error('Serverio klaida ' + startResp.status + ': ' + errText.slice(0, 120));
+    }
     const { jobId } = await startResp.json();
 
     let lastLogSnapshot = '';
@@ -1984,6 +2004,7 @@ async function runSearch() {
 
       if (job.status === 'error') {
         status.textContent = 'Klaida: ' + job.error;
+        showToast('Paieška nepavyko: ' + job.error, 'error', 8000);
         break;
       }
       if (job.status === 'done') {
@@ -2002,7 +2023,7 @@ async function runSearch() {
 }
 
 // ============ TOAST PRANESIMAI (vietoj alert()) ============
-function showToast(msg, type = '') {
+function showToast(msg, type = '', duration = 5000) {
   let container = document.getElementById('toast-container');
   if (!container) {
     container = document.createElement('div');
@@ -2011,9 +2032,33 @@ function showToast(msg, type = '') {
   }
   const el = document.createElement('div');
   el.className = 'toast' + (type ? ' ' + type : '');
-  el.textContent = msg;
+
+  const text = document.createElement('span');
+  text.textContent = msg;
+  const closeBtn = document.createElement('span');
+  closeBtn.className = 'toast-close';
+  closeBtn.innerHTML = '&times;';
+  el.appendChild(text);
+  el.appendChild(closeBtn);
   container.appendChild(el);
-  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.3s'; setTimeout(() => el.remove(), 300); }, 3000);
+
+  const dismiss = () => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(24px) scale(.95)';
+    setTimeout(() => el.remove(), 380);
+  };
+  closeBtn.addEventListener('click', dismiss);
+  el.addEventListener('click', dismiss);
+
+  // Progress bar (dingimo laikmatis vizualiai)
+  const bar = document.createElement('div');
+  bar.style.cssText = 'position:absolute;bottom:0;left:0;height:2px;background:currentColor;opacity:0.35;border-radius:0 0 10px 10px;width:100%;transform-origin:left;transition:transform linear ' + (duration/1000) + 's';
+  el.style.position = 'relative'; el.style.overflow = 'hidden';
+  el.appendChild(bar);
+  requestAnimationFrame(() => { bar.style.transform = 'scaleX(0)'; });
+
+  const t = setTimeout(dismiss, duration);
+  closeBtn.addEventListener('click', () => clearTimeout(t));
 }
 
 // ============ TINDER STILIAUS NARSYMAS ============
