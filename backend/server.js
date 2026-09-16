@@ -49,9 +49,11 @@ async function fetchSearchPage(url) {
   let html;
 
   // 1. ScraperAPI (jei raktas nurodytas)
+  const needsRender = /otomoto\.pl|autoscout24\./i.test(url);
   if (SCRAPER_KEY) {
     try {
-      const scraperUrl = `http://api.scraperapi.com?api_key=${SCRAPER_KEY}&url=${encodeURIComponent(url)}&render=false`;
+      const renderParam = needsRender ? 'true' : 'false';
+      const scraperUrl = `http://api.scraperapi.com?api_key=${SCRAPER_KEY}&url=${encodeURIComponent(url)}&render=${renderParam}`;
       console.log(`  ScraperAPI: ${url.slice(0, 60)}...`);
       const response = await axios.get(scraperUrl, { timeout: 60000 });
       if (response.status === 200 && response.data && response.data.length > 500) {
@@ -1009,7 +1011,7 @@ async function runSearchJob(jobId, filters) {
     // vartotojui nereikia paspausti mygtuko, kad matytu pilna vaizda geriausiems variantams.
     // Visi TOP 5 analizuojami LYGIAGRECIAI (ne vienas po kito) - tai ilgiausiai trunkantis
     // zingsnis (web paieska kiekvienam), tad lygiagretumas duoda didziausia pagreitejima.
-    const TOP_N_DEEP = 5;
+    const TOP_N_DEEP = 7;
     const topSlice = candidates.slice(0, TOP_N_DEEP);
     logJob(jobId, `🔬 Ruošiame detalią apžvalgą TOP ${topSlice.length} pasiūlymams (lygiagrečiai)...`);
     await Promise.all(topSlice.map(async (c, i) => {
@@ -1307,22 +1309,25 @@ Grazink TIK JSON (be markdown):
 async function downloadImageAsBase64(url) {
   try {
     const resp = await axios.get(url, { responseType: 'arraybuffer', timeout: 10000 });
-    const rawType = (resp.headers['content-type'] || '').split(';')[0].trim().toLowerCase();
-    // Anthropic priima tik šiuos 4 formatus
-    const ALLOWED = { 'image/jpeg': true, 'image/png': true, 'image/gif': true, 'image/webp': true };
-    // Normaliz uojame variantus
-    const normalize = { 'image/jpg': 'image/jpeg', 'image/jpe': 'image/jpeg', 'image/pjpeg': 'image/jpeg' };
-    let media_type = normalize[rawType] || rawType;
-    // Jei formatas nepriimamas, bandome nustatyti iš URL
-    if (!ALLOWED[media_type]) {
-      const urlLow = url.toLowerCase();
-      if (urlLow.includes('.png')) media_type = 'image/png';
-      else if (urlLow.includes('.gif')) media_type = 'image/gif';
-      else if (urlLow.includes('.webp')) media_type = 'image/webp';
-      else media_type = 'image/jpeg'; // fallback
-    }
-    if (!ALLOWED[media_type]) return null;
-    return { data: Buffer.from(resp.data).toString('base64'), media_type };
+    const buf = Buffer.from(resp.data);
+
+    // Per maža (<2KB) - greičiausiai klaidos puslapis, ne nuotrauka
+    if (buf.length < 2048) return null;
+
+    // Magic bytes validacija - patikriname ar tai tikrai paveikslėlis
+    const isJpeg = buf[0] === 0xFF && buf[1] === 0xD8 && buf[2] === 0xFF;
+    const isPng  = buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4E && buf[3] === 0x47;
+    const isGif  = buf[0] === 0x47 && buf[1] === 0x49 && buf[2] === 0x46;
+    const isWebp = buf.length >= 12 && buf[8] === 0x57 && buf[9] === 0x45 && buf[10] === 0x42 && buf[11] === 0x50;
+
+    let media_type;
+    if (isJpeg)      media_type = 'image/jpeg';
+    else if (isPng)  media_type = 'image/png';
+    else if (isGif)  media_type = 'image/gif';
+    else if (isWebp) media_type = 'image/webp';
+    else return null; // HTML, AVIF, ar kitas nepalaikomas formatas
+
+    return { data: buf.toString('base64'), media_type };
   } catch {
     return null;
   }
