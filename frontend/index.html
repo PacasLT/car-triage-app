@@ -57,147 +57,110 @@
     margin: 0;
     padding: 0;
   }
-  .container { max-width: 1400px; margin: 0 auto; padding: 0 24px 40px; }
+  .container { max-width: 1000px; margin: 0 auto; padding: 0 20px 40px; }
+  button, input, select { font-family: var(--font); }
 
   /* ===== APP HEADER ===== */
-  .app-header {
-    position: sticky; top: 0; z-index: 800;
-    background: rgba(10,12,18,.88);
-    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-    border-bottom: 1px solid var(--border);
-  }
-  .app-header-inner {
-    max-width: 1400px; margin: 0 auto; padding: 0 24px; height: 56px;
-    display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  }
-  .app-logo { display: flex; align-items: center; gap: 9px; text-decoration: none; flex-shrink: 0; }
-  .app-logo-mark {
-    width: 20px; height: 20px; background: var(--accent); border-radius: 3px;
-    transform: rotate(45deg); position: relative; font-size: 0;
-  }
-  .app-logo-mark::after { content: ""; position: absolute; inset: 6px; background: var(--bg-base); border-radius: 1px; }
-  .app-logo-name {
-    font-size: 15px; font-weight: 700; letter-spacing: .11em; text-transform: uppercase;
-    color: var(--text-primary); background: none; -webkit-text-fill-color: currentColor;
-  }
-  #app-version {
-    font: 500 8.5px/1 var(--font-mono); letter-spacing: .14em; color: var(--text-dim);
-    border: 1px solid var(--border-light); border-radius: 3px; padding: 3px 4px; margin-left: 2px;
-    -webkit-text-fill-color: var(--text-dim);
-  }
-  .app-nav { display: flex; align-items: center; gap: 8px; }
-  .nav-btn {
-    background: transparent; border: 1px solid var(--border); color: var(--text-muted);
-    height: 32px; padding: 0 12px; border-radius: var(--radius-md); font-size: 13px; font-weight: 500;
-    cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background .15s, color .15s; white-space: nowrap;
-  }
+  .app-header { position: sticky; top: 0; z-index: 800; background: rgba(10,12,18,.9); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); }
+  .app-header-inner { max-width: 1000px; margin: 0 auto; padding: 0 20px; height: 56px; display: flex; align-items: center; gap: 22px; justify-content: flex-start; }
+  .app-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0; }
+  .app-logo-mark { display: none; }
+  .app-logo-name { font-size: 20px; font-weight: 500; letter-spacing: -.02em; color: var(--text-primary); background: none; -webkit-text-fill-color: currentColor; }
+  .app-logo-name b { font-weight: 700; color: var(--accent-light); }
+  #app-version { font: 500 8.5px/1 var(--font-mono); letter-spacing: .12em; color: var(--text-dim); border: 1px solid var(--border-light); border-radius: 3px; padding: 3px 4px; -webkit-text-fill-color: var(--text-dim); }
+  .app-nav { display: flex; align-items: center; gap: 4px; }
+  .nav-btn { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 13px; border-radius: 8px; background: transparent; border: 1px solid transparent; color: var(--text-muted); font-size: 13.5px; font-weight: 500; text-decoration: none; cursor: pointer; white-space: nowrap; transition: background .15s, color .15s; }
   .nav-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
-  .nav-btn.has-items { color: var(--text-primary); border-color: var(--warning-border); }
-  .nav-badge {
-    background: var(--accent); color: #fff; font: 600 9px/1 var(--font-mono);
-    min-width: 15px; height: 15px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; padding: 0 3px;
-  }
+  .nav-btn.active { background: var(--bg-raised); color: var(--text-primary); border-color: var(--border); }
+  .nav-btn.has-items { color: var(--text-primary); }
+  .nav-badge { background: var(--accent); color: #fff; font: 600 9px/1 var(--font-mono); min-width: 15px; height: 15px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; padding: 0 3px; }
+  .app-tools { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .icon-btn { position: relative; width: 34px; height: 34px; display: grid; place-items: center; background: transparent; border: none; border-radius: 8px; color: var(--text-muted); font-size: 15px; cursor: pointer; }
+  .icon-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
+  .icon-btn.has-dot::after { content: ""; position: absolute; top: 7px; right: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 13px; font-weight: 600; }
 
   /* ===== SEARCH HERO ===== */
-  .search-hero { position: relative; padding: 42px 0 8px; }
-  .search-hero::before {
-    content: ""; position: absolute; top: -8px; right: -24px; bottom: 90px; width: 46%;
-    background-color: #0C0F17;
-    background-image: repeating-linear-gradient(115deg, rgba(255,255,255,.055) 0 1px, transparent 1px 9px);
-    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 55%);
-            mask-image: linear-gradient(90deg, transparent 0%, #000 55%);
-    pointer-events: none; z-index: 0;
-  }
-  .search-hero > * { position: relative; z-index: 1; }
-  .hero-kicker { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-  .hero-kicker .eyebrow-chip {
-    font: 600 9.5px/1 var(--font-mono); letter-spacing: .16em; color: var(--accent);
-    background: var(--accent-dim); border: 1px solid var(--accent-border); border-radius: 4px; padding: 5px 7px;
-  }
-  .hero-kicker .eyebrow-meta { font: 500 10.5px/1 var(--font-mono); letter-spacing: .06em; color: var(--text-dim); }
-  .hero-title {
-    font-size: 40px; font-weight: 600; letter-spacing: -.02em; line-height: 1.08;
-    margin: 0; max-width: 620px; color: var(--text-primary); text-wrap: pretty;
-  }
-  .hero-subtitle {
-    color: var(--text-muted); font-size: 14px; line-height: 1.55; margin: 12px 0 0; max-width: 520px; text-wrap: pretty;
-  }
+  .search-hero { padding: 28px 0 8px; }
+  .hero-top { display: grid; grid-template-columns: minmax(0, 1fr) 420px; grid-template-rows: auto auto; gap: 16px 24px; align-items: stretch; margin-bottom: 18px; }
+  .hero-copy { display: flex; flex-direction: column; justify-content: center; }
+  .hero-eyebrow { font: 600 10.5px/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--accent-light); margin-bottom: 14px; }
+  .hero-title { font-size: 36px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; margin: 0; color: var(--text-primary); }
+  .hero-title em { font-style: normal; color: var(--accent-light); }
+  .hero-subtitle { color: var(--text-muted); font-size: 14.5px; line-height: 1.55; margin: 12px 0 0; max-width: 520px; text-wrap: pretty; }
+  .hero-feats { grid-column: 1; grid-row: 2; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 8px; }
+  .feat { display: flex; align-items: center; gap: 10px; padding: 10px 12px; min-width: 0; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 10px; font-size: 12px; line-height: 1.35; color: var(--text-secondary); }
+  .feat > span:last-child { min-width: 0; overflow-wrap: anywhere; }
+  .feat-ic { flex: none; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; background: var(--accent-dim); color: var(--accent-light); font-size: 14px; }
+  .hero-visual { position: relative; min-height: 240px; grid-row: 1 / 3; grid-column: 2; }
+  .hero-photo { position: absolute; inset: 0; border-radius: 14px; background-color: #0C0F17; background-image: repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 1px, transparent 1px 9px); display: grid; place-items: center; overflow: hidden; }
+  .hero-photo::after { content: ""; position: absolute; inset: 0; background: radial-gradient(70% 70% at 60% 45%, rgba(124,92,255,.12), transparent 70%); pointer-events: none; }
+  .hero-photo span { font: 500 9.5px/1.5 var(--font-mono); letter-spacing: .1em; color: var(--text-dim); text-align: center; padding: 0 40px; }
+  .hero-quote { position: absolute; right: 16px; bottom: 16px; margin: 0; max-width: 160px; font-size: 12px; line-height: 1.45; color: var(--text-secondary); text-align: right; }
+  .hero-quote::after { content: ""; display: block; width: 28px; height: 2px; background: var(--accent); margin: 8px 0 0 auto; }
 
   /* ===== LEGACY COMPAT ===== */
   .subtitle { color: var(--text-muted); margin-bottom: 24px; font-size: 14px; }
 
-  /* ===== FORM FIELDS ===== */
-  .filters {
-    margin-top: 26px; margin-bottom: 24px; padding: 0;
-    background: rgba(17,20,28,.86); border: 1px solid var(--border); border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-panel);
-    display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1px;
-    overflow: hidden;
-  }
-  .filters > div { background: var(--bg-surface); padding: 12px 14px; min-width: 0; outline: 1px solid var(--border); }
-  .filters label {
-    display: block; font: 500 9px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase;
-    color: var(--text-dim); margin-bottom: 7px;
-  }
-  .filters input, .filters select {
-    width: 100%; height: 30px; padding: 0 9px; border-radius: var(--radius-sm);
-    border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text-primary);
-    font-size: 13px; transition: border-color .15s; appearance: none; -webkit-appearance: none;
-  }
-  .filters input[type="number"] { font: 500 12.5px var(--font-mono); font-variant-numeric: tabular-nums; }
-  .filters input::placeholder { color: var(--text-dim); }
-  .filters input:focus, .filters select:focus { outline: none; border-color: var(--border-light); }
-  .filters select {
-    background-image: linear-gradient(45deg, transparent 50%, var(--text-muted) 50%), linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
-    background-position: calc(100% - 13px) 12px, calc(100% - 9px) 12px; background-size: 4px 4px; background-repeat: no-repeat; padding-right: 26px;
-  }
+  /* ===== FILTER PANEL ===== */
+  .filters { display: block; margin: 0 0 22px; padding: 22px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow-panel); }
+  .filters > * + * { margin-top: 18px; }
+  .filters-head { display: flex; align-items: center; gap: 14px; }
+  .filters-head-ic { width: 42px; height: 42px; flex: none; display: grid; place-items: center; border-radius: 10px; background: var(--accent-dim); color: var(--accent-light); }
+  .filters-title { font-size: 17px; font-weight: 600; letter-spacing: -.01em; }
+  .filters-sub { font-size: 12.5px; color: var(--text-muted); margin-top: 3px; }
+  .btn-ghost { height: 36px; padding: 0 14px; background: var(--accent-dim); border: 1px solid var(--accent-border); border-radius: 9px; color: var(--accent-light); font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .btn-ghost:hover { background: rgba(124,92,255,.22); }
+  .filters label { display: block; font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 7px; text-transform: none; letter-spacing: 0; }
+  .filters label small { color: var(--text-dim); font-size: 11px; }
+  .f-grid { display: grid; gap: 14px; }
+  .f-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .f-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .f-ctl { position: relative; display: flex; align-items: center; height: 40px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 9px; transition: border-color .15s; }
+  .f-ctl:focus-within { border-color: var(--accent); }
+  .f-ctl.is-soon { opacity: .55; }
+  .f-ic { flex: none; width: 36px; display: grid; place-items: center; color: var(--text-muted); font-size: 13px; border-right: 1px solid var(--border); height: 100%; }
+  .filters .f-ctl input, .filters .f-ctl select { flex: 1; min-width: 0; height: 100%; padding: 0 30px 0 12px; border: none; background: transparent; color: var(--text-primary); font-size: 13.5px; outline: none; appearance: none; -webkit-appearance: none; border-radius: 0; }
+  .filters .f-ctl input[type="number"] { padding-right: 12px; }
+  .filters .f-ctl input::placeholder { color: var(--text-dim); }
+  .filters .f-ctl select { background-image: linear-gradient(45deg, transparent 50%, var(--text-muted) 50%), linear-gradient(135deg, var(--text-muted) 50%, transparent 50%); background-position: calc(100% - 15px) 17px, calc(100% - 10px) 17px; background-size: 5px 5px; background-repeat: no-repeat; }
+  #generation-hint { font: 500 12px/1.5 var(--font-mono) !important; color: var(--accent-light) !important; background: var(--accent-dim) !important; border-radius: 8px !important; padding: 9px 14px !important; }
+  .f-row-3 { display: flex; align-items: flex-end; gap: 20px; flex-wrap: wrap; }
+  .f-row-3 > div:first-child { width: 270px; }
+  .filters .f-toggle { display: inline-flex; align-items: center; gap: 10px; height: 40px; margin: 0; font-size: 13px; color: var(--text-secondary); cursor: default; white-space: nowrap; }
+  .f-toggle small { color: var(--text-dim); font-size: 11px; }
+  .f-toggle input { display: none; }
+  .f-toggle .knob { position: relative; width: 34px; height: 20px; border-radius: 10px; background: var(--accent); flex: none; }
+  .f-toggle .knob::after { content: ""; position: absolute; top: 3px; left: 17px; width: 14px; height: 14px; border-radius: 50%; background: #fff; }
+  .link-more { display: inline-flex; align-items: center; height: 40px; font-size: 13px; font-weight: 500; color: var(--accent-light); text-decoration: none; }
   .full-row { grid-column: 1 / -1; }
-  .filters .range-pair { display: flex; align-items: center; gap: 6px; }
-  .filters .range-pair span { color: var(--text-dim); font-size: 12px; }
-  #generation-hint {
-    font: 500 11px/1.5 var(--font-mono) !important; color: var(--accent-light) !important;
-    background: var(--accent-dim) !important; border-radius: 0 !important; padding: 9px 14px !important;
-  }
-  .filters .portals-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 22px; padding: 14px; }
-  .portals-row .portals-group { flex: 1; min-width: 280px; }
-  .portals-row .portals-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .portal-chip {
-    display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 8px;
-    background: transparent; border: 1px solid var(--border); border-radius: 14px;
-    color: var(--text-muted); font-size: 12px !important; font-weight: 500 !important; cursor: pointer; user-select: none;
-    text-transform: none !important; letter-spacing: 0 !important; margin: 0 !important;
-    transition: background .15s, border-color .15s, color .15s;
-  }
-  .portal-chip input { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; }
-  .portal-chip .cc { font: 500 9px/1 var(--font-mono); color: var(--text-dim); }
-  .portal-chip .cc::before { content: "○"; margin-right: 5px; }
-  .portal-chip:has(input:checked) { background: var(--bg-raised); border-color: var(--border-light); color: var(--text-primary); }
-  .portal-chip:has(input:checked) .cc::before { content: "●"; color: var(--success); }
-  .portal-chip small { color: var(--text-dim); font-size: 10.5px; }
-  .portals-row .filters-actions { display: flex; gap: 9px; margin-left: auto; align-items: center; }
-  #quick-count-btn {
-    height: 38px !important; padding: 0 16px !important; background: none !important; color: var(--text-primary) !important;
-    border: 1px solid var(--border-light) !important; border-radius: var(--radius-md) !important;
-    font-size: 13px !important; font-weight: 500 !important; cursor: pointer; transition: background .15s;
-  }
+  /* Portals — card checkboxes */
+  .portals { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  .filters label.portal { position: relative; display: flex; align-items: center; gap: 12px; height: 54px; padding: 0 12px; margin: 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; user-select: none; color: var(--text-primary); font-size: 13px; font-weight: 500; text-transform: none; letter-spacing: 0; transition: border-color .15s, background .15s; }
+  .filters label.portal:hover { border-color: var(--border-light); }
+  .filters label.portal:has(input:checked) { border-color: var(--accent-border); background: rgba(124,92,255,.07); }
+  .portal input { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; }
+  .portal .chk { flex: none; width: 20px; height: 20px; border-radius: 5px; border: 1.5px solid var(--border-light); display: grid; place-items: center; color: #fff; font-size: 12px; }
+  .filters label.portal:has(input:checked) .chk { background: var(--accent); border-color: var(--accent); }
+  .filters label.portal:has(input:checked) .chk::after { content: "✓"; font-weight: 700; }
+  .portal .logo { flex: none; width: 26px; height: 26px; border-radius: 5px; display: grid; place-items: center; color: #fff; font: 700 10px/1 var(--font); }
+  .portal .p-name { display: flex; flex-direction: column; gap: 2px; min-width: 0; line-height: 1.2; font-size: 12.5px; }
+  .portal .p-name, .portal .p-name small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+  .portal .p-name small { font-size: 10.5px; color: var(--text-dim); font-weight: 400; margin-top: 2px; }
+  /* Primary CTA */
+  button#search-btn { display: block; width: 100%; height: 48px; margin: 18px 0 0; padding: 0; background: var(--accent); background-image: linear-gradient(90deg, var(--accent), var(--accent-hover)); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; letter-spacing: 0; cursor: pointer; box-shadow: 0 10px 26px -14px rgba(124,92,255,.9); transition: filter .15s; }
+  button#search-btn:hover { filter: brightness(1.08); opacity: 1; transform: none; }
+  button#search-btn:disabled { background: var(--bg-elevated); color: var(--text-muted); box-shadow: none; filter: none; cursor: not-allowed; }
+  .filters-foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  #quick-count-btn { height: 34px !important; padding: 0 12px !important; background: transparent !important; color: var(--text-primary) !important; border: 1px solid var(--border-light) !important; border-radius: 8px !important; font-size: 12.5px !important; font-weight: 600 !important; cursor: pointer; white-space: nowrap; }
   #quick-count-btn:hover { background: var(--bg-elevated) !important; }
-  #quick-count-result { font: 500 10.5px/1 var(--font-mono) !important; color: var(--text-muted) !important; }
-  button#search-btn {
-    grid-column: auto; margin: 0; height: 38px; padding: 0 22px;
-    background: var(--accent); color: #fff; border: 1px solid var(--accent); border-radius: var(--radius-md);
-    font-size: 13px; font-weight: 600; letter-spacing: 0; cursor: pointer; box-shadow: var(--shadow-glow);
-    transition: filter .15s; white-space: nowrap;
-  }
-  button#search-btn:hover { filter: brightness(1.1); opacity: 1; transform: none; }
-  button#search-btn:disabled { background: var(--bg-elevated); border-color: var(--border); color: var(--text-muted); box-shadow: none; filter: none; cursor: not-allowed; }
+  .foot-note { font-size: 12px; color: var(--text-muted); }
+  #quick-count-result { margin-left: auto; font: 500 11px/1 var(--font-mono) !important; color: var(--text-muted) !important; }
   #status { color: var(--text-muted); font-size: 13px; margin-bottom: 14px; min-height: 20px; }
   #search-progress-track-main { height: 3px; background: var(--bg-raised); border-radius: 2px; overflow: hidden; margin-bottom: 6px; }
   #search-progress-fill-main { height: 100%; background: var(--accent); border-radius: 2px; transition: width .5s ease; width: 0%; }
   #search-progress-label { font: 600 11px/1 var(--font-mono); color: var(--accent-light); }
-  #search-history-chips button {
-    background: transparent !important; color: var(--text-muted) !important; border: 1px solid var(--border) !important;
-    height: 28px; padding: 0 10px !important; border-radius: 14px !important; font-size: 12px !important; font-weight: 500;
-  }
+  #search-history-chips button { display: inline-flex; align-items: center; white-space: nowrap; font-family: var(--font); background: transparent !important; color: var(--text-muted) !important; border: 1px solid var(--border) !important; height: 28px; padding: 0 10px !important; border-radius: 14px !important; font-size: 12px !important; font-weight: 500; }
   #search-history-chips button:hover { background: var(--bg-raised) !important; color: var(--text-primary) !important; }
   .card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 14px; display: flex; gap: 16px; border-left: 4px solid var(--accent); position: relative; box-shadow: var(--shadow-card); }
   .fav-star { position: absolute; top: 10px; right: 10px; background: rgba(10,12,16,0.75); border: none; color: var(--text-muted); font-size: 20px; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; z-index: 2; }
@@ -475,15 +438,31 @@
 <header class="app-header">
   <div class="app-header-inner">
     <div class="app-logo">
-      <div class="app-logo-mark"></div>
-      <span class="app-logo-name">CarTriige</span>
+      <span class="app-logo-name"><b>Car</b>Triige</span>
       <span id="app-version"></span>
     </div>
     <nav class="app-nav">
-      <button onclick="toggleFavoritesPanel()" id="favorites-toggle-btn" class="nav-btn">
-        ⭐ Favoritai <span id="favorites-count" class="nav-badge" style="display:none">0</span>
-      </button>
+      <a class="nav-btn active" href="#">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Paieška
+      </a>
+      <button onclick="toggleFavoritesPanel()" id="favorites-toggle-btn" class="nav-btn">★ Favoritai <span id="favorites-count" class="nav-badge" style="display:none">0</span></button>
+      <a class="nav-btn" href="#search-history-wrap">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Istorija
+      </a>
+      <a class="nav-btn" href="#results">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="10" width="3" height="4" rx="1" fill="currentColor"/><rect x="6.5" y="6" width="3" height="8" rx="1" fill="currentColor"/><rect x="11" y="2" width="3" height="12" rx="1" fill="currentColor"/></svg>
+        Palyginimai
+      </a>
     </nav>
+    <div class="app-tools">
+      <button class="icon-btn" title="Tema" type="button">◐</button>
+      <button class="icon-btn has-dot" title="Pranešimai" type="button">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2a4 4 0 0 0-4 4v3l-1 1v1h10v-1l-1-1V6a4 4 0 0 0-4-4z" stroke="currentColor" stroke-width="1.3"/><path d="M6.5 13a1.5 1.5 0 0 0 3 0" stroke="currentColor" stroke-width="1.3"/></svg>
+      </button>
+      <div class="avatar">V</div>
+    </div>
   </div>
 </header>
 
@@ -504,106 +483,140 @@
 
   <!-- Search hero -->
   <section class="search-hero">
-    <div class="hero-kicker">
-      <span class="eyebrow-chip">BETA</span>
-      <span class="eyebrow-meta">Europos automobilių rinkos skaitytuvas</span>
+    <div class="hero-top">
+      <div class="hero-copy">
+        <div class="hero-eyebrow">Automobilių paieška ir analizė</div>
+        <h1 class="hero-title">Rask geriausias <em>galimybes</em></h1>
+        <p class="hero-subtitle">Tūkstančiai automobilių skelbimų vienoje vietoje. AI analizė. Rinkos kainos. Tikri skaičiai. Didesnis pelno potencialas.</p>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-photo" role="img"><span>ĮDĖTI NUOTRAUKĄ · BMW 3/4 PRIEKIS · TAMSUS FONAS</span></div>
+        <blockquote class="hero-quote">„Geresni sprendimai prasideda nuo geresnių duomenų."</blockquote>
+      </div>
+      <div class="hero-feats">
+        <div class="feat"><span class="feat-ic">◫</span><span>3 portalai<br>vienoje paieškoje</span></div>
+        <div class="feat"><span class="feat-ic">▥</span><span>Rinkos kainų<br>palyginimas</span></div>
+        <div class="feat"><span class="feat-ic">◎</span><span>AI analizė ir<br>rizikų vertinimas</span></div>
+        <div class="feat"><span class="feat-ic">⚡</span><span>Pelno potencialo<br>įvertinimas</span></div>
+      </div>
     </div>
-    <h1 class="hero-title">Raskite geriausią sandorį</h1>
-    <p class="hero-subtitle">Suveskite filtrus – sistema nuskaitys portālus, palygins kainas ir įvertins riziką.</p>
 
-  <div class="filters">
-    <!-- Row 1: 6 main filters -->
-    <div><label>Markė</label>
-      <select id="marke" onchange="updateModels(); updateGenerationHint();">
-        <option value="BMW">BMW</option>
-        <option value="Audi">Audi</option>
-        <option value="Volkswagen">Volkswagen</option>
-        <option value="Mercedes-Benz">Mercedes-Benz</option>
-        <option value="Opel">Opel</option>
-        <option value="Ford">Ford</option>
-        <option value="Volvo">Volvo</option>
-        <option value="Toyota">Toyota</option>
-        <option value="Skoda">Skoda</option>
-        <option value="Peugeot">Peugeot</option>
-        <option value="Nissan">Nissan</option>
-        <option value="Hyundai">Hyundai</option>
-        <option value="Kia">Kia</option>
-        <option value="Renault">Renault</option>
-        <option value="Mazda">Mazda</option>
-        <option value="Honda">Honda</option>
-        <option value="Porsche">Porsche</option>
-        <option value="Land Rover">Land Rover</option>
-        <option value="Lexus">Lexus</option>
-      </select>
-    </div>
-    <div><label>Modelis</label>
-      <select id="modelis" onchange="updateGenerationHint()">
-        <option value="">Visi modeliai</option>
-      </select>
-    </div>
-    <div><label>Pavarų dėžė</label>
-      <select id="pavaru_deze">
-        <option value="">Bet kokia</option>
-        <option value="Automatinė">Automatinė</option>
-        <option value="Mechaninė">Mechaninė</option>
-      </select>
-    </div>
-    <div><label>Metai nuo</label><input id="metaiNuo" type="number" placeholder="Nenurodyta" oninput="updateGenerationHint()"></div>
-    <div><label>Metai iki</label><input id="metaiIki" type="number" placeholder="Nenurodyta"></div>
-    <div><label>Rida iki</label>
-      <select id="ridaIki">
-        <option value="">Bet kokia</option>
-        <option value="30000">iki 30 000 km</option>
-        <option value="50000">iki 50 000 km</option>
-        <option value="100000">iki 100 000 km</option>
-        <option value="150000">iki 150 000 km</option>
-        <option value="200000">iki 200 000 km</option>
-        <option value="300000">iki 300 000 km</option>
-      </select>
-    </div>
-    <!-- Generation hint (conditionally visible) -->
-    <div class="full-row" id="generation-hint" style="display:none;"></div>
-    <!-- Row 2: Price + pages -->
-    <div><label>Kaina nuo (€)</label><input id="kainaNuo" type="number" placeholder="Nenurodyta"></div>
-    <div><label>Kaina iki (€)</label><input id="kainaIki" type="number" placeholder="Nenurodyta"></div>
-    <div><label>Puslapių (per portalą)</label>
-      <select id="maxPages">
-        <option value="3" selected>3 — greičiau</option>
-        <option value="5">5</option>
-        <option value="8">8 — daugiau duomenų</option>
-        <option value="10">10 — maksimaliai</option>
-      </select>
-    </div>
-    <!-- Portals + actions (full-row) -->
-    <div class="full-row portals-row">
-      <div class="portals-group">
-        <label>Portalai</label>
-        <div class="portals-chips">
-          <label class="portal-chip">
-            <input type="checkbox" id="portal-autoplius" checked>
-            <span class="cc"></span>autoplius.lt
-          </label>
-          <label class="portal-chip">
-            <input type="checkbox" id="portal-autogidas" checked>
-            <span class="cc"></span>autogidas.lt
-          </label>
-          <label class="portal-chip">
-            <input type="checkbox" id="portal-autoscout24">
-            <span class="cc"></span>autoscout24.com <small>užsienio</small>
-          </label>
-          <label class="portal-chip">
-            <input type="checkbox" id="portal-otomoto">
-            <span class="cc"></span>otomoto.pl <small>PLN→EUR</small>
-          </label>
+    <div class="filters">
+      <div class="filters-head">
+        <div class="filters-head-ic">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="filters-title">Paieškos filtrai</div>
+          <div class="filters-sub">Pasirinkite kriterijus ir leiskite CarTriige rasti geriausius pasiūlymus už jus.</div>
+        </div>
+        <button type="button" class="btn-ghost" style="margin-left:auto">▢ Išsaugoti paiešką</button>
+      </div>
+      <div class="f-grid f-4">
+        <div><label>Markė</label>
+          <div class="f-ctl"><span class="f-ic">◉</span>
+            <select id="marke" onchange="updateModels(); updateGenerationHint();">
+              <option value="BMW">BMW</option>
+              <option value="Audi">Audi</option>
+              <option value="Volkswagen">Volkswagen</option>
+              <option value="Mercedes-Benz">Mercedes-Benz</option>
+              <option value="Opel">Opel</option>
+              <option value="Ford">Ford</option>
+              <option value="Volvo">Volvo</option>
+              <option value="Toyota">Toyota</option>
+              <option value="Skoda">Skoda</option>
+              <option value="Peugeot">Peugeot</option>
+              <option value="Nissan">Nissan</option>
+              <option value="Hyundai">Hyundai</option>
+              <option value="Kia">Kia</option>
+              <option value="Renault">Renault</option>
+              <option value="Mazda">Mazda</option>
+              <option value="Honda">Honda</option>
+              <option value="Porsche">Porsche</option>
+              <option value="Land Rover">Land Rover</option>
+              <option value="Lexus">Lexus</option>
+            </select>
+          </div>
+        </div>
+        <div><label>Modelis</label>
+          <div class="f-ctl">
+            <select id="modelis" onchange="updateGenerationHint()"><option value="">Visi modeliai</option></select>
+          </div>
+        </div>
+        <div><label>Pavarų dėžė</label>
+          <div class="f-ctl"><span class="f-ic">⚙</span>
+            <select id="pavaru_deze">
+              <option value="">Bet kokia</option>
+              <option value="Automatinė">Automatinė</option>
+              <option value="Mechaninė">Mechaninė</option>
+            </select>
+          </div>
+        </div>
+        <div><label>Kuro tipas <small>(netrukus)</small></label>
+          <div class="f-ctl is-soon"><span class="f-ic">⛽</span>
+            <select disabled=""><option>Bet koks</option></select>
+          </div>
         </div>
       </div>
-      <div class="filters-actions">
+      <div class="f-grid f-5">
+        <div><label>Metai nuo</label>
+          <div class="f-ctl"><span class="f-ic">▦</span><input id="metaiNuo" type="number" placeholder="Nenurodyta" oninput="updateGenerationHint()"></div>
+        </div>
+        <div><label>Metai iki</label>
+          <div class="f-ctl"><span class="f-ic">▦</span><input id="metaiIki" type="number" placeholder="Nenurodyta"></div>
+        </div>
+        <div><label>Rida iki (km)</label>
+          <div class="f-ctl"><span class="f-ic">◔</span>
+            <select id="ridaIki">
+              <option value="">Bet kokia</option>
+              <option value="30000">iki 30 000 km</option>
+              <option value="50000">iki 50 000 km</option>
+              <option value="100000">iki 100 000 km</option>
+              <option value="150000">iki 150 000 km</option>
+              <option value="200000">iki 200 000 km</option>
+              <option value="300000">iki 300 000 km</option>
+            </select>
+          </div>
+        </div>
+        <div><label>Kaina nuo (€)</label>
+          <div class="f-ctl"><span class="f-ic">€</span><input id="kainaNuo" type="number" placeholder="Nenurodyta"></div>
+        </div>
+        <div><label>Kaina iki (€)</label>
+          <div class="f-ctl"><span class="f-ic">€</span><input id="kainaIki" type="number" placeholder="Nenurodyta"></div>
+        </div>
+      </div>
+      <div id="generation-hint" style="display:none;"></div>
+      <div class="f-row-3">
+        <div><label>Puslapių skaičius (per portalą)</label>
+          <div class="f-ctl"><span class="f-ic">≡</span>
+            <select id="maxPages">
+              <option value="3" selected>3 — greičiau</option>
+              <option value="5">5</option>
+              <option value="8">8 — daugiau duomenų</option>
+              <option value="10">10 — maksimaliai</option>
+            </select>
+          </div>
+        </div>
+        <label class="f-toggle"><input type="checkbox" checked="" disabled=""><span class="knob"></span><span>Rodyti tik su nuotraukomis <small>(netrukus)</small></span></label>
+        <a class="link-more" href="#">Daugiau filtrų ⌵</a>
+        <button type="button" class="btn-ghost" style="margin-left:auto" onclick="document.getElementById('marke').selectedIndex=0;document.getElementById('modelis').innerHTML='<option value=\'\'>Visi modeliai</option>';document.getElementById('pavaru_deze').value='';document.getElementById('metaiNuo').value='';document.getElementById('metaiIki').value='';document.getElementById('ridaIki').value='';document.getElementById('kainaNuo').value='';document.getElementById('kainaIki').value='';document.getElementById('maxPages').value='3';updateGenerationHint();">↺ Išvalyti filtrus</button>
+      </div>
+      <div>
+        <label>Pasirinkite portalus</label>
+        <div class="portals">
+          <label class="portal"><input type="checkbox" id="portal-autoplius" checked=""><span class="chk"></span><span class="logo" style="background:#D8232A">a</span><span class="p-name">Autoplius.lt<small>Lietuva</small></span></label>
+          <label class="portal"><input type="checkbox" id="portal-autogidas" checked=""><span class="chk"></span><span class="logo" style="background:#1F2A44">AG</span><span class="p-name">Autogidas.lt<small>Lietuva</small></span></label>
+          <label class="portal"><input type="checkbox" id="portal-autoscout24"><span class="chk"></span><span class="logo" style="background:#FFD200;color:#111">S24</span><span class="p-name">AutoScout24.com<small>Europa (užsienis)</small></span></label>
+          <label class="portal"><input type="checkbox" id="portal-otomoto"><span class="chk"></span><span class="logo" style="background:#4A5568">OT</span><span class="p-name">Otomoto.pl<small>Lenkija (PLN→EUR)</small></span></label>
+        </div>
+      </div>
+      <button id="search-btn" onclick="runSearch()">🔍 Ieškoti ir analizuoti →</button>
+      <div class="filters-foot">
+        <button id="quick-count-btn" onclick="runQuickCount()">▥ Patikrinti kiekį</button>
+        <span class="foot-note">Greitas rezultatas be pilnos AI analizės (parodo skelbimų kiekį)</span>
         <span id="quick-count-result"></span>
-        <button id="quick-count-btn" onclick="runQuickCount()">Kiekis</button>
-        <button id="search-btn" onclick="runSearch()">🔍 Ieškoti</button>
       </div>
     </div>
-  </div>
   </section>
 
   <div id="status"></div>
