@@ -665,6 +665,9 @@ function extractOtomotoListings(html) {
       const modelis = `${make} ${model}`.trim() || (item.title || '').trim();
       const url = item.url ? (item.url.startsWith('http') ? item.url : `https://www.otomoto.pl${item.url}`) : null;
       const photo = (item.thumbnail && (item.thumbnail.x2 || item.thumbnail.x1)) || null;
+      // Otomoto kartais turi photos[] masyva tiesiai paieškos rezultatuose
+      const photosArr = (item.photos || []).map((p) => (p && (p.url || p.large || p.src || '')).split('?')[0]).filter(Boolean);
+      const photos = photosArr.length > 0 ? photosArr : (photo ? [photo] : []);
 
       return {
         kaina, kainaBaze: null, pvmPastaba: null, kainaBePvm: null, turiLizingoOpcija: false,
@@ -675,7 +678,7 @@ function extractOtomotoListings(html) {
         galia, variklioTuris,
         reitingas: null, atsiliepimuSkaicius: null,
         rawText: `${modelis} ${kaina}€ (${kainaPlN} PLN) ${metai || ''} ${rida || ''} km`.trim().slice(0, 200),
-        url, photo, photos: photo ? [photo] : [],
+        url, photo, photos,
       };
     }).filter((l) => l && l.url && l.kaina);
   } catch (err) {
