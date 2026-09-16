@@ -2739,6 +2739,116 @@ window.ctResetMoreFilters = function () {
 
 document.addEventListener('DOMContentLoaded', function () { window.ctUpdateMoreBadge(); });
 
+// ---- Triage atvaizdavimo pagalbininkai ----
+const CT_TRIAGE_ORDER = ['top','strong','good','check','weak','rejected'];
+const CT_TRIAGE_META = {
+  top:      { label:'TOP GALIMYBĖ',           color:'#7fd88f', bg:'#2d4a35', desc:'Stipriausios galimybės' },
+  strong:   { label:'LABAI VERTA ANALIZUOTI', color:'#a8d88f', bg:'#2f452e', desc:'Rimti kandidatai' },
+  good:     { label:'VERTA ANALIZUOTI',       color:'#cfd88f', bg:'#41442b', desc:'Verti peržiūros' },
+  check:    { label:'REIKIA PATIKRINTI',      color:'#f0c674', bg:'#4a3b2d', desc:'Reikia papildomo patikrinimo' },
+  weak:     { label:'SILPNESNIS PASIŪLYMAS',  color:'#e0a06a', bg:'#4a352a', desc:'Silpnesni pasiūlymai' },
+  rejected: { label:'ATMESTI',                color:'#e07a6a', bg:'#4a2d2d', desc:'Atmesti – žiūrėkite priežastį' },
+};
+
+// Trys ATSKIRI signalai. Galimybė = kiek įdomus automobilis.
+// Patikimumas = kiek apie jį žinome. Rizika = kokie neigiami signalai RASTI.
+// Jie niekada nesuliejami į vieną skaičių.
+function ctSignalsBlock(c) {
+  if (c.qualityScore == null) return '';
+  const m = CT_TRIAGE_META[c.triageLevel] || {};
+  const r = c.rizikosBusena || {};
+  const cell = (antraste, reiksme, sp) =>
+    '<div style="flex:1;min-width:110px;display:flex;flex-direction:column;gap:4px;">'
+    + '<span style="font:600 8.5px/1 var(--font-mono);letter-spacing:.11em;color:var(--text-dim);">' + antraste + '</span>'
+    + '<b style="font:700 13px/1.2 var(--font-mono);color:' + sp + ';">' + reiksme + '</b></div>';
+  return '<div style="display:flex;gap:14px;flex-wrap:wrap;margin:10px 0 2px;padding:10px 12px;border-radius:9px;background:var(--bg-raised);border:1px solid var(--border);">'
+    + cell('CARTRIIGE GALIMYBĖ', c.qualityScore + '/100', m.color || 'var(--text-primary)')
+    + cell('DUOMENŲ PATIKIMUMAS', (c.pasitikejimas != null ? c.pasitikejimas + '%' : '–'), 'var(--text-primary)')
+    + cell('RIZIKA', (r.emoji ? r.emoji + ' ' : '') + (r.label ? r.label.split('–')[0].trim() : '–'), 'var(--text-primary)')
+    + '</div>';
+}
+
+// Ko įvertinti negalėjome. "Nežinom" niekada nerodoma kaip minusas –
+// tik kaip tai, ką dar verta patikrinti.
+function ctUnknownBlock(c) {
+  const eil = [];
+  if (c.istorijosBusena) eil.push(c.istorijosBusena.emoji + ' ' + c.istorijosBusena.label);
+  if (c.irangosBusena) eil.push('⚙ ' + c.irangosBusena.label);
+  if (c.neivertinta && c.neivertinta.length) {
+    eil.push('ℹ Nepakako duomenų įvertinti: ' + c.neivertinta.join(', ') + ' – šie veiksniai pašalinti iš balo, o ne nubausti.');
+  }
+  if (!eil.length) return '';
+  return '<div style="margin:8px 0 2px;display:flex;flex-direction:column;gap:4px;">'
+    + eil.map(function(e){ return '<div style="font:400 11.5px/1.45 var(--font);color:var(--text-muted);">' + e + '</div>'; }).join('')
+    + '</div>';
+}
+
+function ctTriageBadge(c, maza) {
+  const m = CT_TRIAGE_META[c.triageLevel];
+  if (!m) return '';
+  const pad = maza ? '3px 6px' : '5px 9px';
+  const fs = maza ? '9px' : '10px';
+  return '<span style="font:700 ' + fs + '/1 var(--font-mono);letter-spacing:.07em;padding:' + pad + ';border-radius:5px;background:' + m.bg + ';color:' + m.color + ';white-space:nowrap;">'
+    + (c.qualityScore != null ? c.qualityScore + ' · ' : '') + m.label + '</span>';
+}
+
+// "KODĖL ŠIS AUTO?" – kiekviena eilutė kyla iš konkretaus balo komponento,
+// ne iš laisvos AI nuomonės.
+function ctWhyBlock(c) {
+  if (!c.whyReasons || !c.whyReasons.length) return '';
+  const atmestas = c.triageLevel === 'rejected';
+  const antraste = atmestas ? '⊘ KODĖL ATMESTA?' : 'KODĖL ŠIS AUTO?';
+  const sp = atmestas ? '#e07a6a' : 'var(--accent-light)';
+  return '<div style="margin:10px 0 2px;padding:10px 12px;border-radius:9px;background:var(--bg-raised);border:1px solid var(--border);">'
+    + '<div style="font:700 9px/1 var(--font-mono);letter-spacing:.1em;color:' + sp + ';margin-bottom:7px;">' + antraste + '</div>'
+    + '<ul style="margin:0;padding-left:15px;display:flex;flex-direction:column;gap:3px;">'
+    + c.whyReasons.map(function(r){ return '<li style="font:400 12px/1.45 var(--font);color:var(--text-secondary);">' + r + '</li>'; }).join('')
+    + '</ul>'
+    + '</div>';
+}
+
+// Perpardavėjo skaičiavimai – pelno neskaičiuojam, kai trūksta duomenų.
+function ctResaleBlock(c) {
+  const r = c.resaleMath;
+  if (!r) return '';
+  if (!r.galima) {
+    return '<div style="margin:10px 0 2px;padding:10px 12px;border-radius:9px;background:var(--bg-raised);border:1px solid var(--border);font:400 12px/1.45 var(--font);color:var(--text-muted);">' + r.zinute + '</div>';
+  }
+  const pelnoSp = r.potencialusPelnas >= 0 ? 'var(--success)' : 'var(--danger)';
+  const eil = [
+    ['Pirkimo kaina', formatEUR(r.pirkimoKaina)],
+    ['Bendra investicija', formatEUR(r.bendraInvesticija)],
+    ['Numatoma pardavimo kaina', formatEUR(r.numatomaPardavimo)],
+  ];
+  return '<div style="margin:10px 0 2px;padding:10px 12px;border-radius:9px;background:var(--bg-raised);border:1px solid var(--border);">'
+    + '<div style="font:700 9px/1 var(--font-mono);letter-spacing:.1em;color:var(--accent-light);margin-bottom:8px;">PERPARDAVIMO SKAIČIAVIMAS</div>'
+    + eil.map(function(e){ return '<div style="display:flex;justify-content:space-between;gap:12px;font:400 12px/1.7 var(--font);color:var(--text-secondary);"><span>' + e[0] + '</span><b style="font-family:var(--font-mono);color:var(--text-primary);">' + e[1] + '</b></div>'; }).join('')
+    + '<div style="display:flex;justify-content:space-between;gap:12px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border);font:600 13px/1.6 var(--font);"><span>Potencialus pelnas</span><b style="font-family:var(--font-mono);color:' + pelnoSp + ';">' + formatEUR(r.potencialusPelnas) + ' · ROI ' + r.roi + '%</b></div>'
+    + '<div style="margin-top:7px;font:400 10.5px/1.4 var(--font);color:var(--text-dim);">' + r.pastaba + '</div>'
+    + '</div>';
+}
+
+// Rezultatai grupuojami pagal triage lygį – TOP visada viršuje.
+function ctRenderGrouped(candidates, container, renderFn) {
+  container.innerHTML = '';
+  const grupes = {};
+  candidates.forEach(function(c){ const k = c.triageLevel || 'weak'; (grupes[k] = grupes[k] || []).push(c); });
+  CT_TRIAGE_ORDER.forEach(function(key){
+    const grupe = grupes[key];
+    if (!grupe || !grupe.length) return;
+    const m = CT_TRIAGE_META[key];
+    const hdr = document.createElement('div');
+    hdr.style.cssText = 'display:flex;align-items:center;gap:12px;margin:20px 0 12px;';
+    hdr.innerHTML = '<span style="font:700 11px/1 var(--font-mono);letter-spacing:.1em;padding:6px 10px;border-radius:6px;background:' + m.bg + ';color:' + m.color + ';">' + m.label + '</span>'
+      + '<span style="font:500 11px/1 var(--font);color:var(--text-dim);">' + m.desc + ' · ' + grupe.length + '</span>'
+      + '<div style="flex:1;height:1px;background:var(--border);"></div>';
+    container.appendChild(hdr);
+    const sub = document.createElement('div');
+    container.appendChild(sub);
+    renderFn(grupe, sub);
+  });
+}
+
 function renderResults(data, status, results) {
   currentData = data;
   window.currentData = data;
@@ -2756,16 +2866,16 @@ function renderResults(data, status, results) {
     status.textContent = '📋 Naršyti viską: ' + browseCands.length + ' skelbimai' + rawNote + ':';
     document.getElementById('sort-bar').style.display = browseCands.length > 0 ? 'flex' : 'none';
     document.getElementById('sort-select').value = 'quality';
-    results.innerHTML = '';
-    renderBrowseListings(browseCands, results);
+    ctRenderGrouped(browseCands, results, renderBrowseListings);
     renderAllListings(data.allListings || []);
     return;
   }
 
-  status.textContent = 'Rasta ' + data.candidates.length + ' verti dėmesio' + rawNote + ':';
+  const verti = data.candidates.filter(function(c){ return c.triageLevel && c.triageLevel !== 'weak' && c.triageLevel !== 'rejected'; });
+  status.textContent = 'Įvertinta ' + data.candidates.length + ' skelbimų, iš jų ' + verti.length + ' verti dėmesio' + rawNote + ':';
   document.getElementById('sort-bar').style.display = data.candidates.length > 0 ? 'flex' : 'none';
   document.getElementById('sort-select').value = 'quality';
-  (window.renderCandidateCards || renderCandidateCards)(data.candidates, results);
+  ctRenderGrouped(data.candidates, results, (window.renderCandidateCards || renderCandidateCards));
   renderAllListings(data.allListings || []);
 }
 
@@ -2774,10 +2884,7 @@ function renderBrowseListings(candidates, container) {
     container.innerHTML = '<div style="color:#9a9aa5;padding:20px 0;">Nerasta nė vieno skelbimo. Pabandykite išplėsti filtrus arba pridėti portalų.</div>';
     return;
   }
-  var hdr = document.createElement('div');
-  hdr.style.cssText = 'display:flex;align-items:center;gap:12px;margin-bottom:14px;';
-  hdr.innerHTML = '<div style="display:flex;align-items:center;gap:8px;flex:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent-light)" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span style="font:700 13px/1 var(--font);color:var(--text-primary);">Visi rasti skelbimai</span></div><div style="flex:1;height:1px;background:var(--border);"></div><span style="font:500 10px/1 var(--font-mono);letter-spacing:.08em;color:var(--text-dim);flex:none;">RIKIUOTA PAGAL ĮVERTĮ</span>';
-  container.appendChild(hdr);
+  // Antraste nebepiesiam - ctRenderGrouped jau deda triage lygio antraste virs kiekvienos grupes.
 
   candidates.forEach(function(c, idx) {
     var panelId = 'browse-detail-' + idx + '-' + c.url.length;
@@ -2812,13 +2919,19 @@ function renderBrowseListings(candidates, container) {
           '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px;">' +
             '<span style="font:600 16px/1 var(--font-mono);color:var(--text-primary);">' + formatEUR(c.kaina) + '</span>' +
             '<span style="font:600 11px/1 var(--font-mono);padding:3px 7px;border-radius:4px;background:' + diffBg + ';color:' + diffColor + ';border:1px solid ' + diffBo + ';">' + diffTxt + '</span>' +
-            '<span style="font:600 10px/1 var(--font-mono);padding:3px 8px;border-radius:4px;background:rgba(124,111,247,.12);color:' + scoreColor + ';border:1px solid rgba(124,111,247,.25);">★ ' + scoreVal + '</span>' +
+            ctTriageBadge(c, true) +
           '</div>' +
           '<div style="font-size:12px;color:var(--text-muted);margin-bottom:' + (c.comment ? '4px' : '0') + ';">' +
             (c.metai || '?') + ' · ' + (c.rida ? c.rida.toLocaleString('lt-LT').replace(/,/g,' ') + ' km' : '? km') +
             (specs ? ' · ' + specs : '') + (c.marketMedian ? ' · rinka ' + formatEUR(c.marketMedian) : '') +
           '</div>' +
           (c.comment ? '<div style="font-size:12px;color:var(--text-secondary);line-height:1.4;font-style:italic;">' + c.comment + '</div>' : '') +
+          (c.whyReasons && c.whyReasons.length ? '<div style="margin-top:5px;font:400 11.5px/1.5 var(--font);color:var(--text-muted);">' + c.whyReasons.slice(0, 3).join(' · ') + '</div>' : '') +
+          '<div style="margin-top:4px;font:500 10.5px/1.4 var(--font-mono);color:var(--text-dim);">' +
+            (c.pasitikejimas != null ? 'PATIKIMUMAS ' + c.pasitikejimas + '%' : '') +
+            (c.rizikosBusena ? ' · RIZIKA ' + c.rizikosBusena.emoji : '') +
+            (c.istorijosBusena ? ' · ' + c.istorijosBusena.emoji + ' ' + c.istorijosBusena.label : '') +
+          '</div>' +
         '</div>' +
         '<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;align-items:flex-end;">' +
           '<button class="fav-star' + (isFav ? ' active' : '') + '" onclick="toggleFavorite(\'' + c.url + '\', ' + favSnap + ', this)" style="width:28px;height:28px;border-radius:6px;background:transparent;border:1px solid var(--border-light);color:var(--text-muted);font-size:14px;display:grid;place-items:center;">' + (isFav ? '★' : '☆') + '</button>' +
@@ -2839,11 +2952,13 @@ function applySorting() {
   else if (mode === 'biggest-discount') sorted.sort((a, b) => b.diffPct - a.diffPct);
   else sorted.sort((a, b) => b.qualityScore - a.qualityScore);
   const resultsEl = document.getElementById('results');
-  if (currentData.searchMode === 'browse') {
-    resultsEl.innerHTML = '';
-    renderBrowseListings(sorted, resultsEl);
+  const rikiuotaPagalBala = (mode !== 'cheapest' && mode !== 'priciest' && mode !== 'biggest-discount');
+  const rendFn = currentData.searchMode === 'browse' ? renderBrowseListings : (window.renderCandidateCards || renderCandidateCards);
+  if (rikiuotaPagalBala) {
+    ctRenderGrouped(sorted, resultsEl, rendFn);   // pagal balą – laikom triage grupes
   } else {
-    (window.renderCandidateCards || renderCandidateCards)(sorted, resultsEl);
+    resultsEl.innerHTML = '';                      // pagal kainą/nuolaidą – vientisas sąrašas
+    rendFn(sorted, resultsEl);
   }
 }
 
@@ -2974,7 +3089,7 @@ function renderAllListings(allListings) {
           <img src="${l.photo || ''}" onerror="this.style.display='none'" style="width:60px;height:44px;object-fit:cover;border-radius:4px;background:#2c303a;flex-shrink:0;">
           <div style="flex:1; font-size:13px;">
             <a href="${l.url}" target="_blank" style="color:#e8e8ea; text-decoration:none; font-weight:600;">${l.modelis}</a>
-            <span class="source-tag">${l.source}</span>${candidateBadge}
+            <span class="source-tag">${l.source}</span>${candidateBadge}${l.triageLevel ? ctTriageBadge(l, true) : ''}
             ${l.turiVin ? '<span style="color:#7fd88f;font-size:11px;margin-left:4px;">VIN</span>' : ''}
             <div style="color:#9a9aa5; font-size:12px;">${formatEUR(l.kaina)} · ${l.metai || '?'} · ${l.rida ? l.rida.toLocaleString('lt-LT').replace(/,/g,' ') + ' km' : '?'}${specs ? ' · ' + specs : ''}</div>
             ${rejectionToggle}
@@ -3706,7 +3821,11 @@ function ctNavTab(tab) {
               '<span style="font-size:12.5px;color:var(--text-muted);">Rinkos vidurkis: <b style="color:var(--text-primary);font-weight:600;">' + formatEUR(c.marketMedian) + '</b></span>' +
             '</div>' +
             '<div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">Skirtumas: <b style="color:' + savColor + ';font-weight:600;">' + (skirt != null ? (skirt < 0 ? '−' : '+') + formatEUR(Math.abs(skirt)) : '–') + '</b><span style="color:var(--text-dim);margin-left:8px;">· ' + (c.marketCount||'?') + ' panašių skelbimų</span></div>' +
-            '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">' + chipsHtml + '</div>' +
+            '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">' + chipsHtml + (typeof ctTriageBadge === 'function' ? ctTriageBadge(c) : '') + '</div>' +
+            (typeof ctSignalsBlock === 'function' ? ctSignalsBlock(c) : '') +
+            (typeof ctWhyBlock === 'function' ? ctWhyBlock(c) : '') +
+            (typeof ctUnknownBlock === 'function' ? ctUnknownBlock(c) : '') +
+            (typeof ctResaleBlock === 'function' ? ctResaleBlock(c) : '') +
             (c.comment ? '<div style="display:flex;gap:9px;padding:10px 12px;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:9px;margin-bottom:14px;align-items:flex-start;"><span style="flex:none;font:700 9px/1 var(--font-mono);padding:4px 5px;border-radius:4px;background:var(--accent);color:#fff;height:18px;display:grid;place-items:center;margin-top:1px;">AI</span><p style="margin:0;font-size:12.5px;line-height:1.5;color:var(--text-secondary);">' + esc(c.comment) + '</p></div>' : '') +
             '<div style="padding:12px 0 0;border-top:1px solid var(--border);margin-bottom:12px;">' +
               '<div style="font:500 9px/1 var(--font-mono);letter-spacing:.13em;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;">CARTRIIGE ĮVERTIS</div>' +

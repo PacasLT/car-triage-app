@@ -569,17 +569,29 @@ function kurasAtitinka(kuras, filtras) {
 
 // ============ URL SUDARYMAS PAGAL FILTRUS ============
 
+// Autoplius kuro ID (patikrinta gyvai paieskos formoje):
+const AUTOPLIUS_FUEL_IDS = {
+  benzinas: [30, 36, 31],       // Benzinas, Benzinas/elektra, Benzinas/dujos
+  dyzelis: [32, 17378],         // Dyzelinas, Dyzelinas/elektra
+  hibridas: [36, 17378],        // Benzinas/elektra, Dyzelinas/elektra
+  elektra: [35],                // Elektra
+};
+
 function buildAutopliusUrl(filters) {
   const q = encodeURIComponent(`${filters.marke || ''} ${filters.modelis || ''}`.trim());
   let url = `https://autoplius.lt/skelbimai/naudoti-automobiliai?category_id=2`;
   if (q) url += `&qt=${q}`;
   if (filters.metaiNuo) url += `&make_date_from=${filters.metaiNuo}`;
   if (filters.metaiIki) url += `&make_date_to=${filters.metaiIki}`;
-  if (filters.kainaNuo) url += `&price_from=${filters.kainaNuo}`;
-  if (filters.kainaIki) url += `&price_to=${filters.kainaIki}`;
+  // DEMESIO: autoplius neturi price_from/price_to - teisingi laukai yra sell_price_*.
+  // Su neteisingais pavadinimais kainos filtras buvo tyliai ignoruojamas.
+  if (filters.kainaNuo) url += `&sell_price_from=${filters.kainaNuo}`;
+  if (filters.kainaIki) url += `&sell_price_to=${filters.kainaIki}`;
   if (filters.ridaIki) url += `&kilometrage_to=${filters.ridaIki}`;
   if (filters.pavaru_deze === 'Automatinė') url += `&gearbox_id=38`;
   if (filters.pavaru_deze === 'Mechaninė') url += `&gearbox_id=37`;
+  const fuelIds = AUTOPLIUS_FUEL_IDS[filters.kuras];
+  if (fuelIds) fuelIds.forEach((id) => { url += `&fuel_id%5B${id}%5D=${id}`; });
   return url;
 }
 
@@ -832,6 +844,351 @@ function logJobStep(jobId, startMsg) {
 // Kokybes balas - ne vien % nuolaida, bet ir pasitikejimo signalai. Taip "geriausias"
 // pasiulymas nera tiesiog didziausia nuolaida, o realiai maziausiai rizikingas geras sandoris.
 // mode: 'reseller' | 'personal' | 'browse'
+// ============ CARTRIIGE TRIAGE ENGINE ============
+// Tikslas: ne grazinti skelbimus, atitinkancius filtrus, o ivertinti kiekviena
+// skelbima rinkos kontekste ir pasakyti, kuris vertas demesio ir KODEL.
+//
+// Kiekvienas komponentas grazina 0..100 arba null, kai duomenu tiesiog nera.
+// Null komponento svoris perskirstomas likusiems (o ne skaiciuojamas kaip nulis),
+// todel skelbimas nebaudziamas uz tai, ko portale nera. Kiek balo remiasi
+// tikrais duomenimis, parodo atskiras DATA CONFIDENCE komponentas.
+
+const TRIAGE_WEIGHTS = {
+  // Numatytieji svoriai (is viso 100)
+  default:  { price: 30, mileage: 15, condition: 20, history: 10, equipment: 10, seller: 5, demand: 5, listing: 5 },
+  browse:   { price: 30, mileage: 15, condition: 20, history: 10, equipment: 10, seller: 5, demand: 5, listing: 5 },
+  // Perpardavejui svarbiausia marza, suvaldoma rizika ir kaip greitai parduosi
+  reseller: { price: 40, mileage: 15, condition: 18, history: 7, equipment: 5, seller: 5, demand: 7, listing: 3 },
+  // Sau perkant svarbiausia bukle, rida ir istorija, o ne didziausia nuolaida
+  personal: { price: 18, mileage: 18, condition: 25, history: 15, equipment: 12, seller: 6, demand: 3, listing: 3 },
+};
+
+const TRIAGE_LEVELS = [
+  { min: 85, key: 'top',      label: 'TOP GALIMYBĖ',           color: '#7fd88f', bg: '#2d4a35' },
+  { min: 75, key: 'strong',   label: 'LABAI VERTA ANALIZUOTI', color: '#a8d88f', bg: '#2f452e' },
+  { min: 65, key: 'good',     label: 'VERTA ANALIZUOTI',       color: '#cfd88f', bg: '#41442b' },
+  { min: 55, key: 'check',    label: 'REIKIA PATIKRINTI',      color: '#f0c674', bg: '#4a3b2d' },
+  { min: 45, key: 'weak',     label: 'SILPNESNIS PASIŪLYMAS',  color: '#e0a06a', bg: '#4a352a' },
+  { min: 0,  key: 'rejected', label: 'ATMESTI',                color: '#e07a6a', bg: '#4a2d2d' },
+];
+
+function triageLevel(score) {
+  return TRIAGE_LEVELS.find((t) => score >= t.min) || TRIAGE_LEVELS[TRIAGE_LEVELS.length - 1];
+}
+
+const clamp100 = (n) => Math.max(0, Math.min(100, Math.round(n)));
+
+// --- 1. PRICE VS MARKET (25%) ---
+// Nuolaida verciama i skale taip, kad ITARTINAI didele nuolaida bala MAZINTU:
+// -30% brangiau -> 0, rinkos kaina -> 40, -20% pigiau -> ~92, -45% pigiau -> ~45.
+function scorePrice(l) {
+  if (l.diffPct === null || l.diffPct === undefined) return null;
+  if (!l.marketCount || l.marketCount < 3) return null; // nepatikima rinka - komponento nenaudojam
+  const d = l.diffPct;
+  let s;
+  if (d <= -25) s = 5;
+  else if (d < 0) s = 5 + (d + 25) * (40 / 25);        // -25..0  -> 5..45
+  else if (d <= 10) s = 45 + d * 2.8;                   // 0..10   -> 45..73
+  else if (d <= 20) s = 73 + (d - 10) * 2.0;            // 10..20  -> 73..93
+  else if (d <= 32) s = 93 + (d - 20) * 0.35;           // 20..32  -> 93..97
+  else if (d <= 45) s = 97 - (d - 32) * 1.6;            // 32..45  -> 97..76
+  else s = Math.max(30, 76 - (d - 45) * 2);
+  return clamp100(s);
+}
+
+// --- 2. MILEAGE (15%) ---
+function scoreMileage(l) {
+  if (l.ridaDiffPct !== null && l.ridaDiffPct !== undefined) {
+    return clamp100(60 - l.ridaDiffPct * 0.9);
+  }
+  if (l.rida && l.metai) {
+    const amzius = Math.max(1, new Date().getFullYear() - l.metai);
+    const kmPerMetus = l.rida / amzius;
+    return clamp100(115 - kmPerMetus * 0.003); // 10k/m -> 85, 15k/m -> 70, 25k/m -> 40
+  }
+  return null;
+}
+
+// --- 3. HISTORY / VIN (20%) ---
+// Istorijos NEBUVIMAS yra informacija, ne duomenu trukumas - todel niekada null.
+// UNKNOWN != BAD: jei skelbime nera JOKIU istorijos signalu, komponentas grazina null
+// ir jo svoris persiskirsto kitiems. Uz tai, ko pardavejas tiesiog nenurode, nebaudziam -
+// tik aiskiai pasakom vartotojui, kad sios dalies ivertinti negalejom.
+function scoreHistory(l) {
+  if (!l.turiIstorijosAtaskaita && !l.turiVin && !l.turiGarantija) return null;
+  let s = 45;
+  if (l.turiIstorijosAtaskaita) s += 30;
+  if (l.turiVin) s += 18;
+  if (l.turiGarantija) {
+    s += l.garantijosTipas === 'gamintojo' ? 22 : l.garantijosTipas === 'pardavejo' ? 14 : 8;
+  }
+  return clamp100(s);
+}
+
+// --- 4. CONDITION / RISK (15%) ---
+function scoreCondition(l) {
+  // UNKNOWN = neutralu. Baze auksta todel, kad neigiamu irodymu NERASTA;
+  // balas krenta tik nuo PATVIRTINTU neigiamu signalu, ne nuo tylos skelbime.
+  let s = 88;
+  const def = l.galimiDefektai || [];
+  const sunkus = def.filter((d) => /dauž|degę|skend|po avarijos|korozij/i.test(d));
+  s -= sunkus.length * 30;
+  s -= (def.length - sunkus.length) * 12;
+  if (l.galimasJavImportas) s -= 15;
+  const frazes = l.pardavejoFrazes || [];
+  s -= Math.min(15, frazes.length * 5);
+  return clamp100(s);
+}
+
+// --- 5. EQUIPMENT (10%) ---
+// Komplektacija matoma tik pilnai nuskaitytame skelbime. Kol jos nera - null.
+function scoreEquipment(l) {
+  const eq = l.komplektacija || (l.deepAnalysis && l.deepAnalysis.komplektacija);
+  if (!eq || !eq.length) return null; // UNKNOWN -> issikrenta, o ne "iranga 2/10"
+  return clamp100(68 + Math.min(30, eq.length * 3));
+}
+
+// --- 6. SELLER (5%) ---
+function scoreSeller(l) {
+  if (!l.yraVerslas && !l.reitingas && !l.pardavejas) return null; // UNKNOWN -> issikrenta is skaiciavimo
+  let s = l.yraVerslas ? 75 : 58;
+  if (l.reitingas) {
+    s += (l.reitingas - 4) * 20;
+    if (l.atsiliepimuSkaicius && l.atsiliepimuSkaicius < 5) s -= 10;
+  }
+  return clamp100(s);
+}
+
+// --- 7. LISTING QUALITY (5%) ---
+function scoreListing(l) {
+  const nuotr = (l.photos && l.photos.length) || 0;
+  const aprIlgis = ((l.deepAnalysis && l.deepAnalysis.aprasymas) || l.aprasymas || '').length;
+  if (!nuotr && !aprIlgis) return null;
+  let s = 48;
+  if (nuotr) s += Math.min(32, nuotr * 3);
+  if (aprIlgis) s += Math.min(20, aprIlgis / 40);
+  return clamp100(s);
+}
+
+// --- 8. PAKLAUSA / LIKVIDUMAS (5%) ---
+// Kiek sio modelio skelbimu sukasi rinkoje: daugiau panasiu pasiulymu reiskia
+// aiskesne kaina ir lengviau parduodama masina. Be imties - null.
+function scoreDemand(l) {
+  const n = l.marketCount || 0;
+  if (n < 3) return null;
+  if (n >= 25) return 90;
+  if (n >= 15) return 78;
+  if (n >= 8) return 66;
+  if (n >= 5) return 55;
+  return 45;
+}
+
+// --- DUOMENU PATIKIMUMAS (informacinis, i bala NEIeina) ---
+function scoreConfidence(l) {
+  // Matuoja, kiek sprendimui svarbios informacijos realiai PATIKRINOME,
+  // o ne kiek komponentu pavyko suskaiciuoti. Truksta informacijos ->
+  // krenta PATIKIMUMAS, o ne galimybes balas.
+  let s = 0;
+  // Baziniai faktai (kaina, metai, rida, kuras, deze) - be ju nera ka lyginti
+  if (l.kaina && l.metai && l.rida) s += 20;
+  // Kiek patikima palyginamoji rinkos kaina
+  if (l.marketCount >= 15) s += 25;
+  else if (l.marketCount >= 8) s += 20;
+  else if (l.marketCount >= 3) s += 12;
+  if (l.turiVin) s += 18;
+  if (l.turiIstorijosAtaskaita) s += 20;
+  if (l.turiGarantija) s += 7;
+  const eq = l.komplektacija || (l.deepAnalysis && l.deepAnalysis.komplektacija);
+  if (eq && eq.length >= 6) s += 12;
+  else if (eq && eq.length) s += 6;
+  if (l.yraVerslas || l.pardavejas) s += 8;
+  if (l.photos && l.photos.length >= 8) s += 6;
+  else if (l.photos && l.photos.length) s += 3;
+  // Tas pats auto rastas keliuose portaluose = nepriklausomi saltiniai
+  if (l.kryzminiaiSkelbimai && l.kryzminiaiSkelbimai.length) s += 6;
+  return clamp100(s);
+}
+
+// ---- HARD REJECTION RULES ----
+// Skelbimas, atitinkantis bent viena taisykle, NIEKADA nerodomas kaip TOP,
+// bet lieka matomas su aiskiai ivardyta priezastimi.
+function checkHardRejections(l, filters) {
+  const r = [];
+  const def = l.galimiDefektai || [];
+  const struktur = def.filter((d) => /dauž|po avarijos|skend|degę/i.test(d));
+  if (struktur.length) {
+    r.push('Skelbime nurodyta reikšminga žala (' + struktur.join(', ') + ')' +
+      (l.diffPct !== null && l.diffPct < 20 ? ', o kaina tik ' + l.diffPct + '% žemiau rinkos – rizika nėra pakankamai kompensuojama.' : ' – reikia gyvos apžiūros ir diagnostikos.'));
+  }
+  if (l.rida != null && l.metai) {
+    const amzius = new Date().getFullYear() - l.metai;
+    if (amzius >= 3 && l.rida < 1000) r.push('Ridos neatitikimas: ' + l.metai + ' m. automobilis su vos ' + l.rida + ' km.');
+    if (l.rida > 900000) r.push('Neištikėtina rida: ' + l.rida + ' km – tikėtina klaida skelbime.');
+  }
+  if (filters && filters.marke && l.modelis && !String(l.modelis).toLowerCase().includes(String(filters.marke).toLowerCase())) {
+    r.push('Skelbimas neatitinka pasirinktos markės (' + filters.marke + '): rasta "' + l.modelis + '".');
+  }
+  if (l.kaina && l.marketMedian && l.marketCount >= 3 && l.kaina < l.marketMedian * 0.12) {
+    r.push('Kaina ' + l.kaina + '€ visiškai nesuderinama su šio modelio rinka (' + l.marketMedian + '€) – greičiausiai nurodyta lizingo įmoka arba dalies kaina, ne automobilio kaina.');
+  } else if (l.diffPct !== null && l.diffPct >= 60 && l.marketCount >= 3) {
+    r.push('Kaina ' + l.diffPct + '% žemiau rinkos – toks skirtumas paprastai reiškia žalos, aukciono pradinę kainą arba klaidą, ne sandorį.');
+  }
+  if (l.galimasJavImportas && l.diffPct !== null && l.diffPct >= 35) {
+    r.push('JAV aukciono požymiai kartu su ' + l.diffPct + '% „nuolaida“ – tikėtina, kad rodoma pradinė aukciono kaina be gabenimo, muitų ir remonto.');
+  }
+  return r;
+}
+
+// ---- HISTORY STATUS: VERIFIED / PARTIALLY VERIFIED / NOT VERIFIED / ISSUE FOUND ----
+function istorijosBusena(l) {
+  const ridosProblema = l.rida != null && l.metai &&
+    ((new Date().getFullYear() - l.metai) >= 3 && l.rida < 1000);
+  const rimtaZala = (l.galimiDefektai || []).some((d) => /dauž|po avarijos|skend|degę/i.test(d));
+  if (ridosProblema || rimtaZala) return { key: 'ISSUE_FOUND', emoji: '🔴', label: 'Rasta istorijos problema' };
+  if (l.turiIstorijosAtaskaita) return { key: 'VERIFIED', emoji: '🟢', label: 'Istorija patikrinta' };
+  if (l.turiVin) return { key: 'PARTIALLY_VERIFIED', emoji: '🟡', label: 'Istorija dalinai patikrinta' };
+  return { key: 'NOT_VERIFIED', emoji: '⚪', label: 'Istorija nepatikrinta' };
+}
+
+// ---- EQUIPMENT STATUS ----
+function irangosBusena(l) {
+  const eq = l.komplektacija || (l.deepAnalysis && l.deepAnalysis.komplektacija);
+  if (!eq || !eq.length) return { key: 'UNKNOWN', label: 'Įranga: Nepakankamai duomenų' };
+  if (eq.length < 6) return { key: 'PARTIAL', label: 'Įranga: Dalinai nustatyta' };
+  return { key: 'VERIFIED', label: 'Įranga: Patikrinta' };
+}
+
+// ---- RISK: UNKNOWN = neutralu, o ne bloga ----
+function rizikosBusena(l) {
+  const def = l.galimiDefektai || [];
+  const sunkus = def.filter((d) => /dauž|degę|skend|po avarijos/i.test(d));
+  const ridosProblema = l.rida != null && l.metai &&
+    ((new Date().getFullYear() - l.metai) >= 3 && l.rida < 1000);
+  if (sunkus.length || ridosProblema) {
+    return { key: 'CRITICAL', emoji: '🔴', label: 'Kritinė – patvirtinti rimti neigiami signalai' };
+  }
+  if (def.length || (l.galimasJavImportas && l.diffPct !== null && l.diffPct >= 35)) {
+    return { key: 'RISK', emoji: '🟠', label: 'Didelė – rasta problemos požymių' };
+  }
+  if (!l.turiVin && !l.turiIstorijosAtaskaita) {
+    return { key: 'WARNING', emoji: '🟡', label: 'Vidutinė – reikia patikrinti istoriją' };
+  }
+  return { key: 'LOW', emoji: '🟢', label: 'Žema – neigiamų signalų nerasta' };
+}
+
+function rizikosLygis(conditionScore) {
+  if (conditionScore === null || conditionScore === undefined) return 'nežinoma';
+  if (conditionScore >= 70) return 'žema';
+  if (conditionScore >= 45) return 'vidutinė';
+  return 'aukšta';
+}
+
+// ---- "KODEL SIS AUTO?" ----
+// Kiekviena eilute kyla is konkretaus balo komponento ar duomens, ne is AI nuomones.
+function buildWhyReasons(l, k) {
+  const r = [];
+  if (l.diffPct !== null && l.marketCount >= 3) {
+    if (l.diffPct >= 3) r.push('−' + l.diffPct + '% žemiau rinkos (' + l.marketMedian + '€, imtis ' + l.marketCount + ')');
+    else if (l.diffPct <= -3) r.push('+' + Math.abs(l.diffPct) + '% virš rinkos (' + l.marketMedian + '€)');
+    else r.push('Kaina atitinka rinką (' + l.marketMedian + '€)');
+  } else {
+    r.push('Rinkos kaina nenustatyta – per maža panašių skelbimų imtis');
+  }
+  if (k.mileage !== null) {
+    if (k.mileage >= 72) r.push('Maža rida savo metams');
+    else if (k.mileage <= 32) r.push('Didelė rida');
+  }
+  if (l.turiIstorijosAtaskaita) r.push('Yra istorijos ataskaita');
+  else if (l.turiVin) r.push('Nurodytas VIN');
+  // VIN/istorijos nebuvimas NEminimas kaip minusas – jis atsiduria "neįvertinta" sąraše.
+  if (l.turiGarantija) r.push(l.garantijosTipas === 'gamintojo' ? 'Gamintojo garantija' : l.garantijosTipas === 'pardavejo' ? 'Pardavėjo garantija' : 'Nurodyta garantija');
+  if ((l.galimiDefektai || []).length) r.push('Skelbime minimi defektai: ' + l.galimiDefektai.join(', '));
+  if (l.yraVerslas) r.push('Verslo pardavėjas');
+  if (k.demand !== null && k.demand >= 70) r.push('Likvidus modelis – rinkoje daug panašių pasiūlymų');
+  r.push('Rizika: ' + rizikosLygis(k.condition));
+  return r.slice(0, 6);
+}
+
+// ---- Pagrindinis ivertinimas ----
+function computeTriageScore(l, mode, filters) {
+  const w = TRIAGE_WEIGHTS[mode] || TRIAGE_WEIGHTS.default;
+  const k = {
+    price: scorePrice(l),
+    mileage: scoreMileage(l),
+    condition: scoreCondition(l),
+    history: scoreHistory(l),
+    equipment: scoreEquipment(l),
+    seller: scoreSeller(l),
+    demand: scoreDemand(l),
+    listing: scoreListing(l),
+  };
+  const confidence = scoreConfidence(l);
+
+  // UNKNOWN != BAD: null komponentas neduoda nulio - jo svoris persiskirsto
+  // likusiems, tad balas rodo tik tai, ka realiai imanoma ivertinti.
+  let sumW = 0, sum = 0;
+  Object.keys(k).forEach((key) => {
+    if (k[key] === null || k[key] === undefined || !w[key]) return;
+    sum += k[key] * w[key];
+    sumW += w[key];
+  });
+  let score = sumW ? Math.round(sum / sumW) : 0;
+
+  // Ko ivertinti negalejome - apie tai vartotoja informuojam atvirai.
+  const KOMP_PAVADINIMAI = {
+    price: 'kaina vs rinka', mileage: 'rida', condition: 'būklė / rizika',
+    history: 'VIN / istorija', equipment: 'įranga', seller: 'pardavėjas',
+    demand: 'paklausa rinkoje', listing: 'skelbimo kokybė',
+  };
+  const neivertinta = Object.keys(k)
+    .filter((key) => w[key] && (k[key] === null || k[key] === undefined))
+    .map((key) => KOMP_PAVADINIMAI[key]);
+
+  const rejections = checkHardRejections(l, filters);
+  if (rejections.length) score = Math.min(score, 44); // atmestas niekada netampa TOP
+
+  const level = triageLevel(score);
+  return {
+    score,
+    breakdown: k,
+    weights: w,
+    neivertinta,
+    istorija: istorijosBusena(l),
+    iranga: irangosBusena(l),
+    rizikosBusena: rizikosBusena(l),
+    level: level.key,
+    levelLabel: level.label,
+    levelColor: level.color,
+    levelBg: level.bg,
+    confidence,
+    rizika: rizikosLygis(k.condition),
+    rejections,
+    why: rejections.length ? rejections.slice(0, 3) : buildWhyReasons(l, k),
+  };
+}
+
+// ---- Perpardavejo skaiciavimai ----
+// Specifikacija: pelno neskaiciuojam, kai truksta duomenu - tada aiskiai tai pasakom.
+function computeResaleMath(l) {
+  if (!l.kaina || !l.marketMedian || l.marketCount < 3) {
+    return { galima: false, zinute: 'Trūksta duomenų pelno potencialui apskaičiuoti.' };
+  }
+  const pirkimoKaina = l.kaina;
+  const numatomaPardavimo = l.marketMedian;
+  const bendraInvesticija = pirkimoKaina; // transporto/remonto duomenu portale nera
+  const potencialusPelnas = numatomaPardavimo - bendraInvesticija;
+  const roi = Math.round((potencialusPelnas / bendraInvesticija) * 100);
+  return {
+    galima: true,
+    pirkimoKaina,
+    bendraInvesticija,
+    numatomaPardavimo,
+    potencialusPelnas,
+    roi,
+    pastaba: 'Neskaičiuota: transportas, remontas ir kitos įsigijimo išlaidos – šių duomenų skelbime nėra.',
+  };
+}
+
 function computeQualityScore(l, mode) {
   if (mode === 'reseller') {
     // Tikslas: perpardavinėti – svarbiausia kaina vs rinka ir greitai parduodami kriterijai
@@ -914,11 +1271,19 @@ async function runSearchJob(jobId, filters) {
     const selectedPortals = Array.isArray(filters.portals) && filters.portals.length > 0
       ? filters.portals
       : ['autoplius', 'autogidas']; // atsarginis variantas - jei nenurodyta, tikrinam abu
+    // Rinkos mediana turi remtis VISAIS to modelio skelbimais, ne tik tais, kurie
+    // telpa i vartotojo biudzeta - kitaip "nuolaida nuo rinkos" yra uzdaras ratas
+    // (filtruoji 22-35k, mediana irgi 22-35k, skirtumas ~0). Todel portalams
+    // siunciam marke/modeli/metus/kura/deze, bet NE kainos rezi; kaina taikoma
+    // vietoje, jau atrenkant kandidatus.
+    const scanFilters = { ...filters };
+    delete scanFilters.kainaNuo;
+    delete scanFilters.kainaIki;
     const allUrls = [
-      { key: 'autoplius', url: buildAutopliusUrl(filters), site: 'autoplius.lt' },
-      { key: 'autogidas', url: buildAutogidasUrl(filters), site: 'autogidas.lt' },
-      { key: 'autoscout24', url: buildAutoscout24Url(filters), site: 'autoscout24.com' },
-      { key: 'otomoto', url: buildOtomotoUrl(filters), site: 'otomoto.pl' },
+      { key: 'autoplius', url: buildAutopliusUrl(scanFilters), site: 'autoplius.lt' },
+      { key: 'autogidas', url: buildAutogidasUrl(scanFilters), site: 'autogidas.lt' },
+      { key: 'autoscout24', url: buildAutoscout24Url(scanFilters), site: 'autoscout24.com' },
+      { key: 'otomoto', url: buildOtomotoUrl(scanFilters), site: 'otomoto.pl' },
     ];
     const urls = allUrls.filter((u) => selectedPortals.includes(u.key));
 
@@ -1001,12 +1366,14 @@ async function runSearchJob(jobId, filters) {
     }
 
     logJob(jobId, '📚 Papildome ankstesnių paieškų archyvu...');
-    const modelsInSearch = [...new Set(parsed.map((l) => l.modelis))];
-    let combinedForMedians = [...parsed];
+    const modelsInSearch = [...new Set([...parsed, ...hardRejected].map((l) => l.modelis))];
+    // I rinkos imti iteina ir tie skelbimai, kuriuos atmete vartotojo biudzeto/filtru
+    // rezis - jie vis tiek yra tos pacios rinkos dalis ir be ju mediana butu i sali.
+    let combinedForMedians = [...parsed, ...hardRejected];
     let historyAddedCount = 0;
     for (const model of modelsInSearch) {
       const hist = cache.getHistoryForModel(model);
-      const currentUrls = new Set(parsed.filter((l) => l.modelis === model).map((l) => l.url));
+      const currentUrls = new Set([...parsed, ...hardRejected].filter((l) => l.modelis === model).map((l) => l.url));
       const fromHistory = hist.filter((h) => !currentUrls.has(h.url)).map((h) => ({ modelis: model, kaina: h.kaina, rida: h.rida }));
       combinedForMedians = combinedForMedians.concat(fromHistory);
       historyAddedCount += fromHistory.length;
@@ -1017,7 +1384,9 @@ async function runSearchJob(jobId, filters) {
 
     logJob(jobId, '🧮 Skaičiuojame rinkos vidurkius...');
     const medians = computeMarketMedians(combinedForMedians);
-    cache.addToHistory(parsed); // issaugom sitos paieskos duomenis ateities paieskoms
+    // Kaupiam VISUS nuskaitytus skelbimus - kuo daugiau istorijos, tuo tikslesnes
+    // busimos medianos ir balai jau matytiems modeliams.
+    cache.addToHistory([...parsed, ...hardRejected]);
     const searchMode = filters.searchMode || 'default'; // 'reseller' | 'personal' | 'browse' | 'default'
 
     // Slenkstis pagal rezima:
@@ -1026,7 +1395,8 @@ async function runSearchJob(jobId, filters) {
     // browse:   0%  – visi skelbimai, jokio filtravimo
     // default:  12%
     const THRESHOLD_PCT = searchMode === 'reseller' ? 15 : searchMode === 'personal' ? 5 : searchMode === 'browse' ? -999 : 12;
-    const MAX_CANDIDATES = searchMode === 'browse' ? 999 : 15;
+    // Triage nebeisbraukia skelbimu - rodom placiai, o eiliskuma lemia balas.
+    const MAX_CANDIDATES = searchMode === 'browse' ? 999 : 60;
 
     const enriched = parsed.map((l) => {
       const marketData = l.modelis ? medians[l.modelis] : null;
@@ -1046,13 +1416,35 @@ async function runSearchJob(jobId, filters) {
       };
     });
 
-    let candidates = searchMode === 'browse'
-      ? enriched.slice() // browse: visi skelbimai
-      : enriched.filter((l) => l.diffPct !== null && l.diffPct >= THRESHOLD_PCT);
+    // TRIAGE: kiekvienas skelbimas ivertinamas ir suklasifikuojamas. Nebraukiam
+    // agresyviai - net silpni pasiulymai lieka matomi su savo lygiu ir priezastimis,
+    // o vartotojas mato surikiuota sarasa nuo geriausios galimybes zemyn.
+    enriched.forEach((l) => {
+      const t = computeTriageScore(l, searchMode, filters);
+      l.triage = t;
+      l.qualityScore = t.score;       // suderinamumas su esamu frontend'u
+      l.triageLevel = t.level;
+      l.triageLabel = t.levelLabel;
+      l.triageColor = t.levelColor;
+      l.triageBg = t.levelBg;
+      l.whyReasons = t.why;
+      l.rizika = t.rizika;
+      l.pasitikejimas = t.confidence;      // DATA CONFIDENCE - atskiras nuo balo
+      l.rizikosBusena = t.rizikosBusena;   // RISK - atskiras nuo balo
+      l.istorijosBusena = t.istorija;
+      l.irangosBusena = t.iranga;
+      l.neivertinta = t.neivertinta;
+      l.baloKomponentai = t.breakdown;
+      l.hardRejections = t.rejections;
+      if (searchMode === 'reseller') l.resaleMath = computeResaleMath(l);
+    });
 
-    candidates.forEach((c) => (c.qualityScore = computeQualityScore(c, searchMode)));
-    candidates.sort((a, b) => b.qualityScore - a.qualityScore);
+    let candidates = enriched.slice().sort((a, b) => b.qualityScore - a.qualityScore);
     candidates = candidates.slice(0, MAX_CANDIDATES);
+
+    const pagalLygi = {};
+    candidates.forEach((c) => { pagalLygi[c.triageLabel] = (pagalLygi[c.triageLabel] || 0) + 1; });
+    logJob(jobId, '\u{1F3AF} Triage: ' + Object.keys(pagalLygi).map((k) => k + ' ' + pagalLygi[k]).join(' \u00b7 '));
     const candidateUrls = new Set(candidates.map((c) => c.url));
 
     function explainRejection(l) {
@@ -1149,7 +1541,15 @@ async function runSearchJob(jobId, filters) {
       kuras: l.kuras, pavarai: l.pavarai, turiVin: l.turiVin, galia: l.galia, variklioTuris: l.variklioTuris,
       photo: l.photo, url: l.url, source: l.source, kryzminiaiSkelbimai: l.kryzminiaiSkelbimai || null,
       isCandidate: candidateUrls.has(l.url), pardavejas: l.pardavejas || null,
-      rejectionReasons: candidateUrls.has(l.url) ? [] : explainRejection(l),
+      rejectionReasons: (l.hardRejections && l.hardRejections.length)
+        ? l.hardRejections
+        : (candidateUrls.has(l.url) ? [] : explainRejection(l)),
+      qualityScore: l.qualityScore,
+      triageLevel: l.triageLevel, triageLabel: l.triageLabel,
+      triageColor: l.triageColor, triageBg: l.triageBg,
+      whyReasons: l.whyReasons, rizika: l.rizika, pasitikejimas: l.pasitikejimas,
+      rizikosBusena: l.rizikosBusena, istorijosBusena: l.istorijosBusena,
+      irangosBusena: l.irangosBusena, neivertinta: l.neivertinta,
       diffPct: l.diffPct, marketMedian: l.marketMedian, marketCount: l.marketCount,
     }));
 
@@ -1161,6 +1561,8 @@ async function runSearchJob(jobId, filters) {
       kuras: l.kuras, pavarai: l.pavarai, turiVin: l.turiVin, galia: l.galia, variklioTuris: l.variklioTuris,
       photo: l.photo, url: l.url, source: l.source, kryzminiaiSkelbimai: null,
       isCandidate: false, filteredOut: true, pardavejas: l.pardavejas || null,
+      qualityScore: null, triageLevel: null, triageLabel: null,
+      whyReasons: null, rizika: null, pasitikejimas: null,
       rejectionReasons: ['Neatitinka j\u016bs\u0173 paie\u0161kos filtr\u0173: ' + l.hardRejectReasons.join('; ') + '.'],
       diffPct: null, marketMedian: null, marketCount: 0,
     }));
