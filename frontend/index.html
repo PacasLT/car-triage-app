@@ -1241,7 +1241,13 @@
       <div class="ct3-search-top">
         <div class="ct3-search-tabs">
           <button class="ct3-stab active" onclick="ctSearchTabSwitch('search',this)">Ieškoti automobilių</button>
-          <button class="ct3-stab" onclick="ctSearchTabSwitch('history',this)">Paskutinės paieškos</button>
+          <div style="position:relative">
+            <button class="ct3-stab" id="ct-hist-tab-btn" onclick="ctSearchTabSwitch('history',this)">🕘 Paskutinės paieškos</button>
+            <div id="ct-history-dropdown" style="display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:500;min-width:500px;max-width:760px;background:#12151e;border:1px solid rgba(255,255,255,.13);border-radius:14px;padding:14px 16px 16px;box-shadow:0 16px 56px rgba(0,0,0,.75);max-height:340px;overflow-y:auto">
+              <div style="font:700 9px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-dim);text-transform:uppercase;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.07)">🕘 Paskutinės paieškos</div>
+              <div id="search-history-chips" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+            </div>
+          </div>
         </div>
         <div class="ct3-portals-row">
           <span class="ct3-portals-label">Search across Europe</span>
@@ -1403,11 +1409,7 @@
 
 
 
-  <!-- Paskutinės paieškos section (shown by ctSearchTabSwitch) -->
-  <div id="ct-history-section" style="display:none; max-width:1440px; margin:0 auto; padding:16px 48px 4px; box-sizing:border-box;">
-    <div style="font:700 9px/1 var(--font-mono); letter-spacing:.12em; color:var(--text-dim); text-transform:uppercase; margin-bottom:10px;">🕘 Paskutinės paieškos</div>
-    <div id="search-history-chips" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
-  </div>
+
   <div id="status"></div>
   <div id="search-progress-wrap">
     <div id="search-progress-track-main"><div id="search-progress-fill-main"></div></div>
@@ -2992,15 +2994,24 @@ function openCompareModal() {
 
 // ── Search tab switcher ──
 function ctSearchTabSwitch(tab, btn) {
-  document.querySelectorAll('.ct3-stab').forEach(function(b) { b.classList.remove('active'); });
-  if (btn) btn.classList.add('active');
-  var histSec = document.getElementById('ct-history-section');
+  var dd = document.getElementById('ct-history-dropdown');
   if (tab === 'history') {
-    if (histSec) { histSec.style.display = ''; renderSearchHistory(); setTimeout(function(){ histSec.scrollIntoView({behavior:'smooth',block:'start'}); }, 50); }
-  } else {
-    if (histSec) histSec.style.display = 'none';
+    var isOpen = dd && dd.style.display !== 'none';
+    if (dd) { dd.style.display = isOpen ? 'none' : ''; if (!isOpen) renderSearchHistory(); }
+    // keep "Ieškoti" tab visually active always, just toggle the dropdown
+    return;
   }
+  if (dd) dd.style.display = 'none';
 }
+
+// close history dropdown on outside click
+document.addEventListener('click', function(e) {
+  var dd = document.getElementById('ct-history-dropdown');
+  var btn = document.getElementById('ct-hist-tab-btn');
+  if (dd && dd.style.display !== 'none' && !dd.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+    dd.style.display = 'none';
+  }
+}, true);
 
 // ── Portal dropdown toggle ──
 function ctTogglePortals() {
@@ -3051,9 +3062,9 @@ function ctNavTab(tab) {
     return;
   }
   if (tab === 'istorija') {
-    var hw = document.getElementById('ct-history-section');
+    var hw = document.getElementById('ct-history-dropdown');
     var isOpen = hw && hw.style.display !== 'none';
-    if (hw) { hw.style.display = isOpen ? 'none' : ''; if (!isOpen) { renderSearchHistory(); hw.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }
+    if (hw) { hw.style.display = isOpen ? 'none' : ''; if (!isOpen) renderSearchHistory(); }
     return;
   }
   if (tab === 'palyginti') {
