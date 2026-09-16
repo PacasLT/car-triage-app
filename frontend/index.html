@@ -1908,14 +1908,14 @@ async function toggleTinderDetail() {
 
   extra.style.display = 'block';
   if (c.deepAnalysis) {
-    extra.innerHTML = buildDetailPanelHTML({ analysis: c.deepAnalysis, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, 'tinder-detail-extra');
+    extra.innerHTML = (window.buildDetailPanelHTML || buildDetailPanelHTML)({ analysis: c.deepAnalysis, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, 'tinder-detail-extra');
     extra.dataset.loaded = 'true';
     return;
   }
   // Tikrinti localStorage cache
   const cached = getAnalysisCache(c.url);
   if (cached) {
-    extra.innerHTML = buildDetailPanelHTML(cached, c.url, 'tinder-detail-extra');
+    extra.innerHTML = (window.buildDetailPanelHTML || buildDetailPanelHTML)(cached, c.url, 'tinder-detail-extra');
     extra.dataset.loaded = 'true';
     return;
   }
@@ -1933,7 +1933,7 @@ async function toggleTinderDetail() {
       return;
     }
     setAnalysisCache(c.url, data);
-    extra.innerHTML = buildDetailPanelHTML(data, c.url, 'tinder-detail-extra');
+    extra.innerHTML = (window.buildDetailPanelHTML || buildDetailPanelHTML)(data, c.url, 'tinder-detail-extra');
     extra.dataset.loaded = 'true';
   } catch (err) {
     extra.innerHTML = `<span style="color:#e88;font-size:12px;">Klaida: ${err.message}</span>`;
@@ -2005,7 +2005,7 @@ async function tinderGetAnalysis(url, btn) {
   container.after(resultDiv);
   const cachedGet = getAnalysisCache(url);
   if (cachedGet) {
-    resultDiv.innerHTML = buildDetailPanelHTML(cachedGet, url, 'tinder-summary-result-' + Date.now());
+    resultDiv.innerHTML = (window.buildDetailPanelHTML || buildDetailPanelHTML)(cachedGet, url, 'tinder-summary-result-' + Date.now());
     btn.disabled = false; btn.textContent = '🔍 Analizė'; return;
   }
   try {
@@ -2013,7 +2013,7 @@ async function tinderGetAnalysis(url, btn) {
     const data = await resp.json();
     if (data.error) { resultDiv.innerHTML = `<span style="color:#e88;">Klaida: ${data.error}</span>`; return; }
     setAnalysisCache(url, data);
-    resultDiv.innerHTML = buildDetailPanelHTML(data, url, 'tinder-summary-result-' + Date.now());
+    resultDiv.innerHTML = (window.buildDetailPanelHTML || buildDetailPanelHTML)(data, url, 'tinder-summary-result-' + Date.now());
   } catch(err) { resultDiv.innerHTML = `<span style="color:#e88;">Klaida: ${err.message}</span>`; }
   finally { btn.disabled = false; btn.textContent = '🔍 Analizė'; }
 }
@@ -2192,7 +2192,7 @@ function renderCandidateCards(candidates, results) {
     const hasPreloadedDeep = !!c.deepAnalysis;
     const detailBtnLabel = hasPreloadedDeep ? '✨ Rodyti gilią analizę' : '🔬 Detali apžvalga';
     const preloadedPanelHTML = hasPreloadedDeep
-      ? buildDetailPanelHTML({ analysis: c.deepAnalysis, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, cardId)
+      ? (window.buildDetailPanelHTML || buildDetailPanelHTML)({ analysis: c.deepAnalysis, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, cardId)
       : '';
     const fullBadge = hasPreloadedDeep
       ? `<span style="font-size:10px; background:#2d4a35; color:#7fd88f; padding:2px 6px; border-radius:4px; margin-left:6px;">✨ pilna apžvalga</span>`
@@ -2529,7 +2529,7 @@ async function loadDetail(url, panelId, btn, force, marketContext) {
       panel.innerHTML = `<span style="color:#e88">Klaida: ${data.error}</span>`;
       return;
     }
-    panel.innerHTML = buildDetailPanelHTML(data, url, panelId, marketContext);
+    panel.innerHTML = (window.buildDetailPanelHTML || buildDetailPanelHTML)(data, url, panelId, marketContext);
     panel.dataset.loaded = 'true';
     btn.textContent = '🔼 Slėpti apžvalgą';
     btn.disabled = false;
@@ -2742,7 +2742,7 @@ function loadSavedSearch() {
 /* ============================================================
    CarTriige v2 — kortelės ir detalės panelės atvaizdavimas.
    Įkeliama PO originalaus <script>: perrašo tik renderCandidateCards()
-   ir buildDetailPanelHTML(). Naudoja esamas globalias funkcijas:
+   ir (window.buildDetailPanelHTML || buildDetailPanelHTML)(). Naudoja esamas globalias funkcijas:
    formatEUR, escJs, formatRidaDiff, isFavorited, toggleFavorite,
    toggleCompare, loadDetail, cyclePhoto, openLightbox, lookupVin,
    lookupSeller, currentData.
@@ -2869,7 +2869,7 @@ function loadSavedSearch() {
       if (c.kryzminiaiSkelbimai && c.kryzminiaiSkelbimai.length) notes.push(`<div class="ct-note">Tas pats automobilis taip pat: ${c.kryzminiaiSkelbimai.map((k) => `${esc(k.source)} už ${formatEUR(k.kaina)}`).join(', ')}</div>`);
 
       const detailBtnLabel = hasDeep ? 'Rodyti gilią analizę' : 'Detali apžvalga';
-      const preloadedPanelHTML = hasDeep ? buildDetailPanelHTML({ analysis: a, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, cardId) : '';
+      const preloadedPanelHTML = hasDeep ? (window.buildDetailPanelHTML || buildDetailPanelHTML)({ analysis: a, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, cardId) : '';
       const compareArgs = `'${c.url}', '${escJs(c.modelis)}', ${c.kaina || 'null'}, '${escJs(c.photo || '')}', ${c.metai || 'null'}, ${c.rida || 'null'}, '${escJs(c.kuras || '')}', ${c.galia || 'null'}, ${c.variklioTuris || 'null'}, '${escJs(c.pavarai || '')}', ${c.diffPct != null ? c.diffPct : 'null'}, ${c.marketMedian || 'null'}, '${escJs(c.source || '')}', 'cmp-${cardId}'`;
       const detailArgs = `'${c.url}', '${cardId}', this, false, {kaina:${c.kaina || 'null'}, marketMedian:${c.marketMedian || 'null'}, marketCount:${c.marketCount || 'null'}, diffPct:${c.diffPct != null ? c.diffPct : 'null'}, modelis:'${escJs(c.modelis)}', pardavejas:${c.pardavejas ? `'${escJs(c.pardavejas)}'` : 'null'}, galia:${c.galia || 'null'}, variklioTuris:${c.variklioTuris || 'null'}}`;
 
