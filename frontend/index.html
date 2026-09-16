@@ -935,6 +935,11 @@
     </div>
     <button id="tinder-launch-btn" onclick="startTinder()" style="padding:9px 18px; background:linear-gradient(135deg,var(--accent),var(--accent-light)); color:#fff; border:none; border-radius:20px; font-size:13px; font-weight:600; cursor:pointer; box-shadow:0 4px 14px rgba(124,111,247,0.4);">🔥 Tinder naršymas</button>
   </div>
+  <div id="search-history-wrap" style="display:none; margin: 0 0 12px; padding: 12px 16px; background: var(--bg-surface); border-radius: 10px; border: 1px solid var(--border);">
+    <div style="font-size:11px; color:var(--text-muted); margin-bottom:8px; font-weight:600; letter-spacing:.04em; text-transform:uppercase;">Ankstesnės paieškos</div>
+    <div id="search-history-chips" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+  </div>
+
   <div id="results"></div>
 
   <div id="all-listings-wrap" style="display:none;">
@@ -987,7 +992,7 @@
 </div>
 
 <script>
-const APP_VERSION = 'v2.0.0';
+const APP_VERSION = 'v2.0.1';
 const BRAND_MODELS = {
   'BMW': ['1', '2', '3', '4', '5', '6', '7', '8', 'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'Z4', 'M'],
   'Audi': ['A1', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q2', 'Q3', 'Q5', 'Q7', 'Q8'],
@@ -1067,6 +1072,7 @@ function renderSearchHistory() {
   const history = loadSearchHistory();
   const wrap = document.getElementById('search-history-wrap');
   const chips = document.getElementById('search-history-chips');
+  if (!wrap || !chips) return;
   if (history.length === 0) { wrap.style.display = 'none'; return; }
   wrap.style.display = 'block';
   chips.innerHTML = history.map((h, i) => `
