@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  /* ===== DESIGN TOKENS (v1, overridden below by v2) ===== */
+  /* ===== DESIGN TOKENS (v1) ===== */
   :root {
     --bg-base:       #0a0c10;
     --bg-surface:    #141720;
@@ -502,139 +502,304 @@
 .mono    { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
 /* ============================================================
-   CarTriige — header + search hero styles (v3, pagal referensą)
-   Requires cartriige-tokens.css. Load after the original <style>.
+   CarTriige Hero v3 — pagal dizaino referensą
    ============================================================ */
-.container { max-width: 1000px; margin: 0 auto; padding: 0 20px 40px; }
-button, input, select { font-family: var(--font); }
 
-/* ===== APP HEADER ===== */
-.app-header { position: sticky; top: 0; z-index: 800; background: rgba(10,12,18,.9); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); }
-.app-header-inner { max-width: 1000px; margin: 0 auto; padding: 0 20px; height: 56px; display: flex; align-items: center; gap: 22px; justify-content: flex-start; }
-.app-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0; }
-.app-logo-mark { display: none; }
-.app-logo-name { font-size: 20px; font-weight: 500; letter-spacing: -.02em; color: var(--text-primary); background: none; -webkit-text-fill-color: currentColor; }
-.app-logo-name b { font-weight: 700; color: var(--accent-light); }
-#app-version { font: 500 8.5px/1 var(--font-mono); letter-spacing: .12em; color: var(--text-dim); border: 1px solid var(--border-light); border-radius: 3px; padding: 3px 4px; -webkit-text-fill-color: var(--text-dim); }
-.app-nav { display: flex; align-items: center; gap: 4px; }
-.nav-btn { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 13px; border-radius: 8px; background: transparent; border: 1px solid transparent; color: var(--text-muted); font-size: 13.5px; font-weight: 500; text-decoration: none; cursor: pointer; white-space: nowrap; transition: background .15s, color .15s; }
-.nav-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
-.nav-btn.active { background: var(--bg-raised); color: var(--text-primary); border-color: var(--border); }
-.nav-btn.has-items { color: var(--text-primary); }
-.nav-badge { background: var(--accent); color: #fff; font: 600 9px/1 var(--font-mono); min-width: 15px; height: 15px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; padding: 0 3px; }
-.app-tools { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-.icon-btn { position: relative; width: 34px; height: 34px; display: grid; place-items: center; background: transparent; border: none; border-radius: 8px; color: var(--text-muted); font-size: 15px; cursor: pointer; }
-.icon-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
-.icon-btn.has-dot::after { content: ""; position: absolute; top: 7px; right: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 13px; font-weight: 600; }
-
-/* ===== HERO ===== */
-.search-hero { padding: 28px 0 8px; }
-.hero-top { display: grid; grid-template-columns: minmax(0, 1fr) 420px; grid-template-rows: auto auto; gap: 16px 24px; align-items: stretch; margin-bottom: 18px; }
-.hero-copy { display: flex; flex-direction: column; justify-content: center; }
-.hero-eyebrow { font: 600 10.5px/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--accent-light); margin-bottom: 14px; }
-.hero-title { font-size: 36px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; margin: 0; color: var(--text-primary); }
-.hero-title em { font-style: normal; color: var(--accent-light); }
-.hero-subtitle { color: var(--text-muted); font-size: 14.5px; line-height: 1.55; margin: 12px 0 0; max-width: 520px; text-wrap: pretty; }
-.hero-feats { grid-column: 1; grid-row: 2; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 8px; }
-.feat { display: flex; align-items: center; gap: 10px; padding: 10px 12px; min-width: 0; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 10px; font-size: 12px; line-height: 1.35; color: var(--text-secondary); }
-.feat > span:last-child { min-width: 0; overflow-wrap: anywhere; }
-.feat-ic { flex: none; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; background: var(--accent-dim); color: var(--accent-light); font-size: 14px; }
-.hero-visual { position: relative; min-height: 240px; grid-row: 1 / 3; grid-column: 2; }
-.hero-photo { position: absolute; inset: 0; border-radius: 14px; background-color: #0C0F17; background-image: repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 1px, transparent 1px 9px); display: grid; place-items: center; overflow: hidden; }
-.hero-photo::after { content: ""; position: absolute; inset: 0; background: radial-gradient(70% 70% at 60% 45%, rgba(124,92,255,.12), transparent 70%); pointer-events: none; }
-.hero-photo span { font: 500 9.5px/1.5 var(--font-mono); letter-spacing: .1em; color: var(--text-dim); text-align: center; padding: 0 40px; }
-.hero-quote { position: absolute; right: 16px; bottom: 16px; margin: 0; max-width: 160px; font-size: 12px; line-height: 1.45; color: var(--text-secondary); text-align: right; }
-.hero-quote::after { content: ""; display: block; width: 28px; height: 2px; background: var(--accent); margin: 8px 0 0 auto; }
-/* Su tikra nuotrauka: .hero-photo { background: url(hero.jpg) center/cover; } .hero-photo span { display:none; } */
-
-/* ===== FILTER PANEL ===== */
-.filters { display: block; margin: 0 0 22px; padding: 22px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow-panel); }
-.filters > * + * { margin-top: 18px; }
-.filters-head { display: flex; align-items: center; gap: 14px; }
-.filters-head-ic { width: 42px; height: 42px; flex: none; display: grid; place-items: center; border-radius: 10px; background: var(--accent-dim); color: var(--accent-light); }
-.filters-title { font-size: 17px; font-weight: 600; letter-spacing: -.01em; }
-.filters-sub { font-size: 12.5px; color: var(--text-muted); margin-top: 3px; }
-.btn-ghost { height: 36px; padding: 0 14px; background: var(--accent-dim); border: 1px solid var(--accent-border); border-radius: 9px; color: var(--accent-light); font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
-.btn-ghost:hover { background: rgba(124,92,255,.22); }
-
-.filters label { display: block; font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 7px; text-transform: none; letter-spacing: 0; }
-.filters label small { color: var(--text-dim); font-size: 11px; }
-.f-grid { display: grid; gap: 14px; }
-.f-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.f-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-.f-ctl { position: relative; display: flex; align-items: center; height: 40px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 9px; transition: border-color .15s; }
-.f-ctl:focus-within { border-color: var(--accent); }
-.f-ctl.is-soon { opacity: .55; }
-.f-ic { flex: none; width: 36px; display: grid; place-items: center; color: var(--text-muted); font-size: 13px; border-right: 1px solid var(--border); height: 100%; }
-.filters .f-ctl input, .filters .f-ctl select { flex: 1; min-width: 0; height: 100%; padding: 0 30px 0 12px; border: none; background: transparent; color: var(--text-primary); font-size: 13.5px; outline: none; appearance: none; -webkit-appearance: none; border-radius: 0; }
-.filters .f-ctl input[type="number"] { padding-right: 12px; }
-.filters .f-ctl input::placeholder { color: var(--text-dim); }
-.filters .f-ctl select { background-image: linear-gradient(45deg, transparent 50%, var(--text-muted) 50%), linear-gradient(135deg, var(--text-muted) 50%, transparent 50%); background-position: calc(100% - 15px) 17px, calc(100% - 10px) 17px; background-size: 5px 5px; background-repeat: no-repeat; }
-
-#generation-hint { font: 500 12px/1.5 var(--font-mono) !important; color: var(--accent-light) !important; background: var(--accent-dim) !important; border-radius: 8px !important; padding: 9px 14px !important; }
-
-.f-row-3 { display: flex; align-items: flex-end; gap: 20px; flex-wrap: wrap; }
-.f-row-3 > div:first-child { width: 270px; }
-.filters .f-toggle { display: inline-flex; align-items: center; gap: 10px; height: 40px; margin: 0; font-size: 13px; color: var(--text-secondary); cursor: default; white-space: nowrap; }
-.f-toggle small { color: var(--text-dim); font-size: 11px; }
-.f-toggle input { display: none; }
-.f-toggle .knob { position: relative; width: 34px; height: 20px; border-radius: 10px; background: var(--accent); flex: none; }
-.f-toggle .knob::after { content: ""; position: absolute; top: 3px; left: 17px; width: 14px; height: 14px; border-radius: 50%; background: #fff; }
-.link-more { display: inline-flex; align-items: center; height: 40px; font-size: 13px; font-weight: 500; color: var(--accent-light); text-decoration: none; }
-
-/* Portals — card checkboxes */
-.portals { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
-.filters label.portal { position: relative; display: flex; align-items: center; gap: 12px; height: 54px; padding: 0 12px; margin: 0; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; user-select: none; color: var(--text-primary); font-size: 13px; font-weight: 500; text-transform: none; letter-spacing: 0; transition: border-color .15s, background .15s; }
-.filters label.portal:hover { border-color: var(--border-light); }
-.filters label.portal:has(input:checked) { border-color: var(--accent-border); background: rgba(124,92,255,.07); }
-.portal input { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; }
-.portal .chk { flex: none; width: 20px; height: 20px; border-radius: 5px; border: 1.5px solid var(--border-light); display: grid; place-items: center; color: #fff; font-size: 12px; }
-.filters label.portal:has(input:checked) .chk { background: var(--accent); border-color: var(--accent); }
-.filters label.portal:has(input:checked) .chk::after { content: "✓"; font-weight: 700; }
-.portal .logo { flex: none; width: 26px; height: 26px; border-radius: 5px; display: grid; place-items: center; color: #fff; font: 700 10px/1 var(--font); }
-.portal .p-name { display: flex; flex-direction: column; gap: 2px; min-width: 0; line-height: 1.2; font-size: 12.5px; }
-.portal .p-name, .portal .p-name small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
-.portal .p-name small { font-size: 10.5px; color: var(--text-dim); font-weight: 400; margin-top: 2px; }
-
-/* Primary CTA */
-button#search-btn { display: block; width: 100%; height: 48px; margin: 18px 0 0; padding: 0; background: var(--accent); background-image: linear-gradient(90deg, var(--accent), var(--accent-hover)); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; letter-spacing: 0; cursor: pointer; box-shadow: 0 10px 26px -14px rgba(124,92,255,.9); transition: filter .15s; }
-button#search-btn:hover { filter: brightness(1.08); opacity: 1; transform: none; }
-button#search-btn:disabled { background: var(--bg-elevated); color: var(--text-muted); box-shadow: none; filter: none; cursor: not-allowed; }
-
-.filters-foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-#quick-count-btn { height: 34px !important; padding: 0 12px !important; background: transparent !important; color: var(--text-primary) !important; border: 1px solid var(--border-light) !important; border-radius: 8px !important; font-size: 12.5px !important; font-weight: 600 !important; cursor: pointer; white-space: nowrap; }
-#quick-count-btn:hover { background: var(--bg-elevated) !important; }
-.foot-note { font-size: 12px; color: var(--text-muted); }
-#quick-count-result { margin-left: auto; font: 500 11px/1 var(--font-mono) !important; color: var(--text-muted) !important; }
-
-/* ===== STATUS / PROGRESS / HISTORY ===== */
-#status { color: var(--text-muted); font-size: 13px; margin-bottom: 14px; min-height: 20px; }
-#search-progress-track-main { height: 3px; background: var(--bg-raised); border-radius: 2px; overflow: hidden; margin-bottom: 6px; }
-#search-progress-fill-main { height: 100%; background: var(--accent); border-radius: 2px; transition: width .5s ease; width: 0%; }
-#search-progress-label { font: 600 11px/1 var(--font-mono); color: var(--accent-light); }
-#search-history-chips button { display: inline-flex; align-items: center; white-space: nowrap; font-family: var(--font); background: transparent !important; color: var(--text-muted) !important; border: 1px solid var(--border) !important; height: 28px; padding: 0 10px !important; border-radius: 14px !important; font-size: 12px !important; font-weight: 500; }
-#search-history-chips button:hover { background: var(--bg-raised) !important; color: var(--text-primary) !important; }
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 900px) {
-  .hero-top { grid-template-columns: 1fr; grid-template-rows: auto; }
-  .hero-visual { grid-row: auto; grid-column: 1; min-height: 200px; }
-  .hero-feats { grid-row: auto; }
-  .f-4, .portals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .f-5 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .app-nav .nav-btn:not(#favorites-toggle-btn) { display: none; }
+/* ---- HEADER ---- */
+.ct3-header {
+  position: relative; z-index: 100;
+  background: transparent;
+  border-bottom: none;
 }
-@media (max-width: 640px) {
-  .container { padding: 0 12px 40px; }
-  .app-header-inner { height: 50px; padding: 0 12px; }
-  .hero-title { font-size: 28px; }
-  .hero-feats, .f-4, .f-5, .portals { grid-template-columns: 1fr; }
-  .f-row-3 > div:first-child { width: 100%; }
-  .filters { padding: 16px; }
-  .filters .f-ctl input, .filters .f-ctl select { font-size: 16px; }
-  .filters-head { flex-wrap: wrap; }
+.ct3-header-inner {
+  display: flex; align-items: center; gap: 0;
+  max-width: 1440px; margin: 0 auto;
+  padding: 22px 48px;
 }
+.ct3-logo {
+  display: flex; align-items: center; gap: 14px;
+  text-decoration: none; flex: none;
+}
+.ct3-logo-icon { width: 52px; height: 52px; flex: none; }
+.ct3-logo-text > span { font-size: 28px; font-weight: 400; color: var(--text-primary); letter-spacing: -.01em; line-height: 1; }
+.ct3-logo-text > span b { font-weight: 700; color: var(--accent-light); }
+.ct3-logo-text small { font: 600 9px/1 var(--font-mono); letter-spacing: .15em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+.ct3-nav { display: flex; gap: 4px; margin-left: 56px; flex: 1; }
+.ct3-nav-link {
+  padding: 10px 20px; border-radius: 8px; font-size: 15px; font-weight: 500;
+  color: var(--text-secondary); text-decoration: none; transition: color .15s, background .15s;
+}
+.ct3-nav-link:hover { color: var(--text-primary); background: rgba(255,255,255,.05); }
+.ct3-nav-link.active { color: var(--text-primary); }
+.ct3-premium-btn {
+  display: flex; align-items: center; gap: 7px; height: 42px; padding: 0 22px;
+  border-radius: 21px; border: 1px solid var(--accent); background: transparent;
+  color: var(--accent-light); font: 600 15px var(--font); cursor: pointer;
+  transition: background .15s;
+}
+.ct3-avatar {
+  width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border-light);
+  background: var(--bg-elevated); color: var(--text-secondary); display: grid; place-items: center; cursor: pointer;
+}
+.ct3-header-right { display: flex; align-items: center; gap: 10px; flex: none; }
+.ct3-logo-text { display: flex; flex-direction: column; gap: 1px; }
+.ct3-premium-btn:hover { background: var(--accent-dim); }
+
+/* ---- HERO ---- */
+.ct3-hero {
+  position: relative; min-height: 620px;
+  background: var(--bg-base);
+  overflow: visible;
+  margin-top: -96px;
+}
+.ct3-hero-photo {
+  position: absolute; top: 0; left: 0; right: 0; height: 600px;
+  background: url('../assets/hero-car.png') 40% 55% / cover no-repeat;
+  overflow: hidden;
+}
+.ct3-hero-photo-placeholder { display: none; }
+/* Gradient overlay: dark left, transparent center-right */
+.ct3-hero-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    105deg,
+    rgba(10,12,18,.96) 0%,
+    rgba(10,12,18,.78) 30%,
+    rgba(10,12,18,.4) 60%,
+    rgba(10,12,18,.65) 100%
+  );
+}
+/* Bottom fade into search panel */
+.ct3-hero::after {
+  content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 120px;
+  background: linear-gradient(to bottom, transparent, rgba(10,12,18,.9));
+  pointer-events: none;
+}
+.ct3-hero-content {
+  position: relative; z-index: 10;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  max-width: 1440px; margin: 0 auto;
+  padding: 140px 48px 36px;
+  min-height: 600px;
+}
+.ct3-hero-left { max-width: 540px; }
+.ct3-hero-eyebrow {
+  font: 600 10px/1 var(--font-mono); letter-spacing: .18em; text-transform: uppercase;
+  color: var(--text-dim); margin-bottom: 18px;
+}
+.ct3-hero-title {
+  margin: 0 0 18px; font-size: 52px; font-weight: 700; line-height: 1.08;
+  letter-spacing: -.03em; color: var(--text-primary);
+  text-wrap: balance;
+}
+.ct3-hero-title em { font-style: normal; color: var(--accent-light); }
+.ct3-hero-sub {
+  margin: 0 0 28px; font-size: 15px; line-height: 1.6;
+  color: var(--text-secondary); max-width: 440px; text-wrap: pretty;
+}
+.ct3-hero-feats { display: flex; gap: 28px; flex-wrap: wrap; }
+.ct3-feat { display: flex; align-items: flex-start; gap: 10px; color: var(--text-secondary); }
+.ct3-feat svg { flex: none; margin-top: 2px; color: var(--accent-light); }
+.ct3-feat span { font-size: 13px; line-height: 1.4; }
+
+/* right side */
+.ct3-hero-right-stats {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 32px;
+  text-align: right; flex: none;
+  position: absolute; right: 0; bottom: 36px;
+  width: 200px;
+  padding-right: 48px;
+  pointer-events: none;
+}
+.ct3-hero-taglines { display: flex; flex-direction: column; gap: 4px; }
+.ct3-hero-taglines > div {
+  font: 600 10px/1.4 var(--font-mono); letter-spacing: .18em; text-transform: uppercase;
+  color: rgba(255,255,255,.3);
+}
+.ct3-hero-taglines .ct3-hl { color: var(--text-secondary); }
+.ct3-hl-line { width: 40px; height: 2px; background: var(--accent); margin-top: 6px; margin-left: auto; border-radius: 1px; }
+.ct3-car-watermark {
+  display: flex; align-items: center; gap: 6px;
+  font: 600 10px/1 var(--font-mono); letter-spacing: .12em; color: var(--text-dim);
+  margin-bottom: 8px; justify-content: flex-end;
+}
+.ct3-car-model { font: 700 20px/1 var(--font-mono); letter-spacing: .04em; color: var(--text-primary); margin-bottom: 8px; }
+.ct3-car-attrs { display: flex; flex-direction: column; gap: 3px; align-items: flex-end; }
+.ct3-car-attrs span { font: 600 9px/1 var(--font-mono); letter-spacing: .18em; text-transform: uppercase; color: rgba(255,255,255,.25); }
+
+/* ---- SEARCH PANEL ---- */
+.ct3-search-panel {
+  position: relative; z-index: 20;
+  background: rgba(14,17,26,.97);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 20px;
+  margin: -4px 48px 0;
+  box-shadow: 0 24px 64px rgba(0,0,0,.7);
+}
+.ct3-search-inner { max-width: 1440px; margin: 0 auto; padding: 0 4px; }
+
+/* tabs row */
+.ct3-search-top {
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,.06); padding: 0 12px;
+}
+.ct3-search-tabs { display: flex; gap: 0; }
+.ct3-stab {
+  height: 48px; padding: 0 20px; background: transparent; border: none;
+  font: 500 14px var(--font); color: var(--text-muted); cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap;
+  transition: color .15s;
+}
+.ct3-stab:hover { color: var(--text-primary); }
+.ct3-stab.active { color: var(--text-primary); border-bottom-color: var(--accent); font-weight: 600; }
+.ct3-portals-row { display: flex; align-items: center; gap: 10px; }
+.ct3-portals-label { font: 500 11px/1 var(--font-mono); letter-spacing: .08em; color: var(--text-dim); }
+.ct3-flags { display: flex; align-items: center; gap: 4px; }
+.ct3-flags span { font-size: 18px; line-height: 1; cursor: default; opacity: .9; }
+.ct3-flags-more { font: 600 10px/1 var(--font-mono) !important; color: var(--text-muted) !important; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 4px; padding: 3px 5px; font-size: 10px !important; }
+
+/* fields */
+.ct3-fields {
+  display: grid; grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px; padding: 12px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.ct3-field {
+  display: flex; flex-direction: column; gap: 7px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 10px;
+}
+.ct3-field label { font: 700 9px/1 var(--font-mono); letter-spacing: .15em; color: var(--text-dim); }
+.ct3-select-wrap {
+  position: relative; display: flex; align-items: center;
+  height: 36px; padding: 0 28px 0 0;
+  background: transparent; border: none;
+  border-radius: 0;
+}
+.ct3-select-wrap select {
+  width: 100%; height: 100%; padding: 0;
+  background: transparent; border: none; outline: none;
+  font: 500 15px var(--font); color: var(--text-primary);
+  cursor: pointer; -webkit-appearance: none;
+}
+.ct3-select-wrap select option { background: #1a1f2e; color: var(--text-primary); }
+.ct3-arrow { position: absolute; right: 0; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; flex: none; }
+.ct3-range-wrap {
+  display: flex; align-items: center; gap: 0;
+  height: 36px; padding: 0;
+  background: transparent; border: none;
+  position: relative;
+}
+.ct3-range-wrap input {
+  flex: 1; min-width: 0; height: 100%; padding: 0;
+  background: transparent; border: none; outline: none;
+  font: 500 15px var(--font); color: var(--text-primary);
+}
+.ct3-range-wrap input::placeholder { color: var(--text-dim); }
+.ct3-range-wrap span { color: var(--text-muted); font-size: 14px; flex: none; padding: 0 6px; }
+.ct3-range-arrow { position: absolute; right: -8px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
+
+/* bottom row */
+.ct3-search-bottom {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 12px; gap: 12px;
+}
+.ct3-search-bottom-left { display: flex; align-items: center; gap: 10px; }
+.ct3-search-bottom-right { display: flex; align-items: center; gap: 10px; }
+.ct3-more-btn, .ct3-marketplaces-btn {
+  display: flex; align-items: center; gap: 7px;
+  height: 40px; padding: 0 16px; border-radius: 8px;
+  border: 1px solid var(--border-light); background: transparent;
+  color: var(--text-secondary); font: 500 13px var(--font); cursor: pointer;
+  transition: background .15s;
+}
+.ct3-more-btn:hover, .ct3-marketplaces-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
+.ct3-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 9px;
+  background: var(--accent); color: #fff; font: 700 9px var(--font-mono);
+}
+.ct3-save-btn {
+  display: flex; align-items: center; gap: 7px;
+  height: 44px; padding: 0 20px; border-radius: 10px;
+  border: 1px solid var(--border-light); background: transparent;
+  color: var(--text-secondary); font: 500 14px var(--font); cursor: pointer;
+  transition: background .15s;
+}
+.ct3-save-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
+.ct3-search-btn {
+  display: flex; align-items: center; gap: 8px;
+  height: 44px; padding: 0 24px; border-radius: 10px;
+  border: none; background: var(--accent);
+  color: #fff; font: 600 15px var(--font); cursor: pointer;
+  transition: filter .15s;
+}
+.ct3-search-btn:hover { filter: brightness(1.1); }
+
+/* ---- STATS BAR ---- */
+.ct3-stats-bar {
+  background: rgba(13,16,26,.98);
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  margin: 8px 48px 0;
+  border-radius: 0 0 16px 16px;
+  border: 1px solid rgba(255,255,255,.07);
+  border-top: none;
+}
+.ct3-stats-inner {
+  max-width: 1440px; margin: 0 auto; padding: 16px 24px;
+  display: flex; align-items: center; gap: 0;
+}
+.ct3-stat-item { display: flex; align-items: center; gap: 12px; flex: 1; }
+.ct3-stat-item svg { color: var(--accent-light); flex: none; }
+.ct3-stat-item b { display: block; font: 600 15px var(--font); color: var(--text-primary); line-height: 1.2; white-space: nowrap; }
+.ct3-stat-item span { font-size: 11.5px; color: var(--text-muted); white-space: nowrap; }
+.ct3-stat-div { width: 1px; height: 32px; background: rgba(255,255,255,.07); margin: 0 24px; flex: none; }
+.ct3-stats-driven {
+  margin-left: auto; flex: none; padding-left: 24px;
+  border-left: 1px solid rgba(255,255,255,.07);
+  font: 500 10px/1 var(--font-mono); letter-spacing: .2em;
+  text-transform: uppercase; color: var(--text-dim);
+}
+.ct3-stats-driven b { color: var(--accent-light); font-weight: 700; }
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 1100px) {
+  .ct3-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ct3-hero-title { font-size: 40px; }
+  .ct3-hero-right-stats { display: none; }
+}
+@media (max-width: 768px) {
+  .ct3-header-inner { padding: 14px 20px; }
+  .ct3-logo-icon { width: 38px; height: 38px; }
+  .ct3-logo-text > span { font-size: 22px; }
+  .ct3-nav { display: none; }
+  .ct3-search-panel { margin: -16px 12px 0; border-radius: 14px; }
+  .ct3-stats-bar { margin: 8px 12px 0; border-radius: 0 0 12px 12px; }
+  .ct3-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ct3-hero-content { padding: 110px 20px 40px; }
+  .ct3-hero-title { font-size: 32px; }
+  .ct3-hero-sub { font-size: 14px; }
+  .ct3-search-bottom { flex-direction: column; align-items: stretch; }
+  .ct3-search-bottom-left, .ct3-search-bottom-right { justify-content: space-between; }
+  .ct3-save-btn { flex: 1; justify-content: center; }
+  .ct3-stats-inner { gap: 16px; flex-wrap: wrap; padding: 14px 16px; }
+  .ct3-stat-div { display: none; }
+  .ct3-stats-driven { margin-left: 0; border-left: none; padding-left: 0; }
+}
+@media (max-width: 480px) {
+  .ct3-fields { grid-template-columns: 1fr 1fr; }
+  .ct3-hero-title { font-size: 26px; }
+  .ct3-hero-feats { gap: 16px; }
+  .ct3-portals-row { display: none; }
+  .ct3-search-tabs { overflow-x: auto; }
+  .ct3-stab { font-size: 12px; padding: 0 12px; }
+}
+
+/* Developer note: hero photo path = './hero-car.png' (included in handoff/)
+   For production: copy hero-car.png to your assets folder and update the URL above. */
 
 /* ============================================================
    CarTriige — results, detail panel, compare, sort, log, toast (v2)
@@ -917,24 +1082,33 @@ button#search-btn:disabled { background: var(--bg-elevated); color: var(--text-m
 <body>
 
 <!-- ===== APP HEADER ===== -->
-<header class="app-header">
-  <div class="app-header-inner">
-    <div class="app-logo">
-      <span class="app-logo-name"><b>Car</b>Triige</span>
-      <span id="app-version"></span>
-    </div>
-    <nav class="app-nav">
-      <a class="nav-btn active" href="#"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="4.5"></circle><path d="M10.5 10.5 14 14"></path></svg>Paieška</a>
-      <button onclick="toggleFavoritesPanel()" id="favorites-toggle-btn" class="nav-btn">★ Favoritai <span id="favorites-count" class="nav-badge" style="display:none">0</span></button>
-      <a class="nav-btn" href="#search-history-wrap"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6"></circle><path d="M8 4.5V8l2.5 1.5"></path></svg>Istorija</a>
-      <a class="nav-btn" href="#results"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 13V7M8 13V3M13 13V9"></path></svg>Palyginimai</a>
+<header class="ct3-header">
+  <div class="ct3-header-inner">
+    <a class="ct3-logo" href="#">
+      <svg class="ct3-logo-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="18" y="2" width="20" height="20" rx="3" transform="rotate(45 18 2)" fill="#7C5CFF"/>
+        <rect x="18" y="9" width="11" height="11" rx="2" transform="rotate(45 18 9)" fill="#0A0C12" opacity="0.7"/>
+        <rect x="18" y="13" width="5" height="5" rx="1" transform="rotate(45 18 13)" fill="#7C5CFF" opacity="0.9"/>
+      </svg>
+      <div class="ct3-logo-text">
+        <span>Car<b>Triige</b></span>
+        <small>AUTOMOTIVE MARKET INTELLIGENCE</small>
+      </div>
+    </a>
+    <nav class="ct3-nav">
+      <a class="ct3-nav-link active" href="#">Search</a>
+      <a class="ct3-nav-link" href="#">Favorites</a>
+      <a class="ct3-nav-link" href="#">History</a>
+      <a class="ct3-nav-link" href="#">Compare</a>
     </nav>
-    <div class="app-tools">
-      <button class="icon-btn" title="Tema" type="button">◐</button>
-      <button class="icon-btn has-dot" title="Pranešimai" type="button">
-        <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 11V7a4 4 0 0 1 8 0v4l1 1.5H3z"></path><path d="M6.5 14a1.5 1.5 0 0 0 3 0"></path></svg>
+    <div class="ct3-header-right">
+      <button class="ct3-premium-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V10l6-8 6 8v10"/></svg>
+        Go Premium
       </button>
-      <div class="avatar">V</div>
+      <button class="ct3-avatar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </button>
     </div>
   </div>
 </header>
@@ -955,93 +1129,211 @@ button#search-btn:disabled { background: var(--bg-elevated); color: var(--text-m
   </div>
 
   <!-- Search hero -->
-  <section class="search-hero">
-  <div class="hero-top">
-    <div class="hero-copy">
-      <div class="hero-eyebrow">Automobilių paieška ir analizė</div>
-      <h1 class="hero-title">Rask geriausias <em>galimybes</em></h1>
-      <p class="hero-subtitle">Tūkstančiai automobilių skelbimų vienoje vietoje. AI analizė. Rinkos kainos. Tikri skaičiai. Didesnis pelno potencialas.</p>
+  <section class="ct3-hero">
+  <div class="ct3-hero-photo">
+    <!-- Replace with: background-image: url('your-car-photo.jpg') in CSS -->
+    <div class="ct3-hero-photo-placeholder">HERO PHOTO · BMW X5 / premium SUV at dusk</div>
+  </div>
+  <div class="ct3-hero-overlay"></div>
+
+  <div class="ct3-hero-content">
+    <div class="ct3-hero-left">
+      <div class="ct3-hero-eyebrow">THOUSANDS OF LISTINGS. ONE CLEAR ADVANTAGE.</div>
+      <h1 class="ct3-hero-title">Find the cars<br><em>worth your attention.</em></h1>
+      <p class="ct3-hero-sub">We scan thousands of used-car listings across European marketplaces, analyze the market in real time, and highlight the best opportunities — with the risk attached.</p>
+      <div class="ct3-hero-feats">
+        <div class="ct3-feat">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+          <span>Multi-portal<br>search</span>
+        </div>
+        <div class="ct3-feat">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3h18M3 9h12M3 15h9M3 21h6"/><path d="M18 14l3 3-3 3"/></svg>
+          <span>AI market<br>analysis</span>
+        </div>
+        <div class="ct3-feat">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
+          <span>Triage the<br>opportunities</span>
+        </div>
+      </div>
     </div>
-    <div class="hero-visual">
-      <div class="hero-photo" role="img" aria-label="Automobilio nuotrauka"><span>ĮDĖTI NUOTRAUKĄ · BMW 3/4 PRIEKIS · TAMSUS FONAS</span></div>
-      <blockquote class="hero-quote">„Geresni sprendimai prasideda nuo geresnių duomenų.“</blockquote>
-    </div>
-    <div class="hero-feats">
-      <div class="feat"><span class="feat-ic">◫</span><span>3 portalai<br>vienoje paieškoje</span></div>
-      <div class="feat"><span class="feat-ic">▥</span><span>Rinkos kainų<br>palyginimas</span></div>
-      <div class="feat"><span class="feat-ic">◎</span><span>AI analizė ir<br>rizikų vertinimas</span></div>
-      <div class="feat"><span class="feat-ic">⚡</span><span>Pelno potencialo<br>įvertinimas</span></div>
+
+    <div class="ct3-hero-right-stats">
+      <div class="ct3-hero-taglines">
+        <div>BETTER DATA</div>
+        <div>BETTER DECISIONS</div>
+        <div class="ct3-hl">MORE OPPORTUNITIES</div>
+        <div class="ct3-hl-line"></div>
+      </div>
+      <div class="ct3-hero-car-label">
+        <div class="ct3-car-watermark">
+          <svg width="12" height="12" viewBox="0 0 36 36" fill="none"><rect x="18" y="2" width="20" height="20" rx="3" transform="rotate(45 18 2)" fill="#7C5CFF"/><rect x="18" y="9" width="11" height="11" rx="2" transform="rotate(45 18 9)" fill="rgba(10,12,18,.7)"/><rect x="18" y="13" width="5" height="5" rx="1" transform="rotate(45 18 13)" fill="#7C5CFF"/></svg>
+          CarTriige
+        </div>
+        <div class="ct3-car-model">BMW X5</div>
+        <div class="ct3-car-attrs">
+          <span>PERFORMANCE</span>
+          <span>INTELLIGENCE</span>
+          <span>OPPORTUNITY</span>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="filters">
-    <div class="filters-head">
-      <div class="filters-head-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="M15.5 15.5 21 21"></path></svg></div>
-      <div><div class="filters-title">Paieškos filtrai</div><div class="filters-sub">Pasirinkite kriterijus ir leiskite CarTriige rasti geriausius pasiūlymus už jus.</div></div>
-      <button type="button" class="btn-ghost" style="margin-left:auto">▢ Išsaugoti paiešką</button>
-    </div>
-
-    <div class="f-grid f-4">
-      <div><label>Markė</label>
-        <div class="f-ctl"><span class="f-ic">◉</span>
-        <select id="marke" onchange="updateModels(); updateGenerationHint();">
-          <option value="BMW">BMW</option><option value="Audi">Audi</option><option value="Volkswagen">Volkswagen</option><option value="Mercedes-Benz">Mercedes-Benz</option><option value="Opel">Opel</option><option value="Ford">Ford</option><option value="Volvo">Volvo</option><option value="Toyota">Toyota</option><option value="Skoda">Skoda</option><option value="Peugeot">Peugeot</option><option value="Nissan">Nissan</option><option value="Hyundai">Hyundai</option><option value="Kia">Kia</option><option value="Renault">Renault</option><option value="Mazda">Mazda</option><option value="Honda">Honda</option><option value="Porsche">Porsche</option><option value="Land Rover">Land Rover</option><option value="Lexus">Lexus</option>
-        </select></div>
+  <!-- SEARCH PANEL -->
+  <div class="ct3-search-panel">
+    <div class="ct3-search-inner">
+      <div class="ct3-search-top">
+        <div class="ct3-search-tabs">
+          <button class="ct3-stab active">Search cars</button>
+          <button class="ct3-stab">Saved searches</button>
+          <button class="ct3-stab">Recent searches</button>
+        </div>
+        <div class="ct3-portals-row">
+          <span class="ct3-portals-label">Search across Europe</span>
+          <div class="ct3-flags">
+            <span title="Lietuva">🇱🇹</span>
+            <span title="Lenkija">🇵🇱</span>
+            <span title="Belgija">🇧🇪</span>
+            <span title="Prancūzija">🇫🇷</span>
+            <span title="Italija">🇮🇹</span>
+            <span title="Ispanija">🇪🇸</span>
+            <span title="Švedija">🇸🇪</span>
+            <span class="ct3-flags-more">+6</span>
+          </div>
+        </div>
       </div>
-      <div><label>Modelis</label>
-        <div class="f-ctl"><select id="modelis" onchange="updateGenerationHint()"><option value="">Visi modeliai</option></select></div>
-      </div>
-      <div><label>Pavarų dėžė</label>
-        <div class="f-ctl"><span class="f-ic">⚙</span>
-        <select id="pavaru_deze"><option value="">Bet kokia</option><option value="Automatinė">Automatinė</option><option value="Mechaninė">Mechaninė</option></select></div>
-      </div>
-      <div><label>Kuro tipas <small>(netrukus)</small></label>
-        <div class="f-ctl is-soon"><span class="f-ic">⛽</span><select disabled><option>Visi tipai</option></select></div>
-      </div>
-    </div>
 
-    <div class="f-grid f-5">
-      <div><label>Metai nuo</label><div class="f-ctl"><span class="f-ic">▦</span><input id="metaiNuo" type="number" placeholder="Nenurodyta" oninput="updateGenerationHint()"></div></div>
-      <div><label>Metai iki</label><div class="f-ctl"><span class="f-ic">▦</span><input id="metaiIki" type="number" placeholder="Nenurodyta"></div></div>
-      <div><label>Rida iki (km)</label>
-        <div class="f-ctl"><span class="f-ic">◔</span>
-        <select id="ridaIki"><option value="">Bet kokia</option><option value="30000">30 000</option><option value="50000">50 000</option><option value="100000">100 000</option><option value="150000">150 000</option><option value="200000">200 000</option><option value="300000">300 000</option></select></div>
+      <div class="ct3-fields">
+        <div class="ct3-field">
+          <label>MAKE</label>
+          <div class="ct3-select-wrap">
+            <select id="make" onchange="updateModels ? updateModels() : null">
+              <option value="">All makes</option>
+              <option value="BMW" selected>BMW</option>
+              <option>Mercedes-Benz</option>
+              <option>Audi</option>
+              <option>Volkswagen</option>
+              <option>Toyota</option>
+              <option>Volvo</option>
+              <option>Porsche</option>
+            </select>
+            <svg class="ct3-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+        <div class="ct3-field">
+          <label>MODEL</label>
+          <div class="ct3-select-wrap">
+            <select id="model">
+              <option value="">All models</option>
+              <option value="X5" selected>X5</option>
+            </select>
+            <svg class="ct3-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+        <div class="ct3-field">
+          <label>YEAR</label>
+          <div class="ct3-range-wrap">
+            <input id="year-from" type="number" placeholder="2018" min="1990" max="2025" style="max-width:52px">
+            <span>–</span>
+            <input id="year-to" type="number" placeholder="2024" min="1990" max="2025" style="max-width:52px">
+            <svg class="ct3-range-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+        <div class="ct3-field">
+          <label>PRICE</label>
+          <div class="ct3-range-wrap">
+            <input id="price-from" type="number" placeholder="€ Min" style="max-width:60px">
+            <span>–</span>
+            <input id="price-to" type="number" placeholder="Max">
+          </div>
+        </div>
+        <div class="ct3-field">
+          <label>FUEL</label>
+          <div class="ct3-select-wrap">
+            <select id="fuel">
+              <option value="">All</option>
+              <option selected>Diesel</option>
+              <option>Petrol</option>
+              <option>Hybrid</option>
+              <option>Electric</option>
+            </select>
+            <svg class="ct3-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+        <div class="ct3-field">
+          <label>GEARBOX</label>
+          <div class="ct3-select-wrap">
+            <select id="gearbox">
+              <option value="">All</option>
+              <option selected>Automatic</option>
+              <option>Manual</option>
+            </select>
+            <svg class="ct3-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
       </div>
-      <div><label>Kaina nuo (€)</label><div class="f-ctl"><span class="f-ic">€</span><input id="kainaNuo" type="number" placeholder="Nenurodyta"></div></div>
-      <div><label>Kaina iki (€)</label><div class="f-ctl"><span class="f-ic">€</span><input id="kainaIki" type="number" placeholder="Nenurodyta"></div></div>
-    </div>
 
-    <div id="generation-hint" style="display:none;"></div>
-
-    <div class="f-row-3">
-      <div><label>Puslapių skaičius (per portalą)</label>
-        <div class="f-ctl"><span class="f-ic">≡</span>
-        <select id="maxPages"><option value="3" selected>3 (numatyta)</option><option value="5">5</option><option value="8">8 (daugiau duomenų, ilgiau)</option><option value="10">10 (maksimaliai)</option></select></div>
+      <div class="ct3-search-bottom">
+        <div class="ct3-search-bottom-left">
+          <button class="ct3-more-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M7 12h10M10 18h4"/></svg>
+            More filters
+            <span class="ct3-badge">3</span>
+          </button>
+          <button class="ct3-marketplaces-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M2 12h20M12 2c-3 4-3 12 0 16M12 2c3 4 3 12 0 16"/></svg>
+            All marketplaces
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+        </div>
+        <div class="ct3-search-bottom-right">
+          <button class="ct3-save-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+            Save search
+          </button>
+          <button class="ct3-search-btn" id="search-btn" onclick="runSearch ? runSearch() : null">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+            Search &amp; analyze
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
       </div>
-      <label class="f-toggle"><input type="checkbox" checked disabled><span class="knob"></span><span>Rodyti tik su nuotraukomis <small>(netrukus)</small></span></label>
-      <a class="link-more" href="#">Daugiau filtrų ⌵</a>
-      <button type="button" class="btn-ghost" style="margin-left:auto" onclick="['metaiNuo','metaiIki','kainaNuo','kainaIki'].forEach(function(i){document.getElementById(i).value=''});['modelis','pavaru_deze','ridaIki'].forEach(function(i){document.getElementById(i).value=''});">↺ Išvalyti filtrus</button>
-    </div>
-
-    <div>
-      <label>Pasirinkite portalus</label>
-      <div class="portals">
-        <label class="portal"><input type="checkbox" id="portal-autoplius" checked><span class="chk"></span><span class="logo" style="background:#D8232A">a</span><span class="p-name">Autoplius.lt<small>Lietuva</small></span></label>
-        <label class="portal"><input type="checkbox" id="portal-autogidas" checked><span class="chk"></span><span class="logo" style="background:#1F2A44">AG</span><span class="p-name">Autogidas.lt<small>Lietuva</small></span></label>
-        <label class="portal"><input type="checkbox" id="portal-autoscout24"><span class="chk"></span><span class="logo" style="background:#FFD200;color:#111">S24</span><span class="p-name">AutoScout24.com<small>Europa (užsienis)</small></span></label>
-        <label class="portal"><input type="checkbox" id="portal-otomoto"><span class="chk"></span><span class="logo" style="background:#4A5568">OT</span><span class="p-name">Otomoto.pl<small>Lenkija (PLN→EUR)</small></span></label>
-      </div>
-    </div>
-
-    <button id="search-btn" onclick="runSearch()">🔍 Ieškoti ir analizuoti →</button>
-
-    <div class="filters-foot">
-      <button id="quick-count-btn" onclick="runQuickCount()">▥ Patikrinti kiekį</button>
-      <span class="foot-note">Greitas rezultatas be pilnos AI analizės (parodo skelbimų kiekį)</span>
-      <span id="quick-count-result"></span>
     </div>
   </div>
 </section>
+
+<!-- STATS BAR -->
+<div class="ct3-stats-bar">
+  <div class="ct3-stats-inner">
+    <div class="ct3-stat-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/><circle cx="12" cy="12" r="1"/></svg>
+      <div><b>12 480</b><span>listings analyzed daily</span></div>
+    </div>
+    <div class="ct3-stat-div"></div>
+    <div class="ct3-stat-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
+      <div><b>1 200+</b><span>best opportunities found monthly</span></div>
+    </div>
+    <div class="ct3-stat-div"></div>
+    <div class="ct3-stat-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h18M3 9h12M3 15h9"/></svg>
+      <div><b>8 European</b><span>marketplaces</span></div>
+    </div>
+    <div class="ct3-stat-div"></div>
+    <div class="ct3-stat-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <div><b>Save time</b><span>with AI triage</span></div>
+    </div>
+    <div class="ct3-stat-div"></div>
+    <div class="ct3-stat-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      <div><b>Make better deals</b><span>with real market data</span></div>
+    </div>
+    <div class="ct3-stats-driven">DRIVEN BY <b>DATA</b></div>
+  </div>
+</div>
+
+
 
   <div id="status"></div>
   <div id="search-progress-wrap">
@@ -2295,9 +2587,7 @@ async function lookupSeller(pardavejas, resultId, btn, listingUrl) {
 }
 
 function buildDetailPanelHTML(data, url, panelId) {
-  // v2: delegate to tabbed panel renderer (cartriige-cards-v2 script)
   if (window.buildDetailPanelHTML_v2) return window.buildDetailPanelHTML_v2(data, url, panelId);
-  // fallback to original
   const a = data.analysis;
   const listFmt = (arr) => (arr && arr.length ? '<ul>' + arr.map((x) => `<li>${x}</li>`).join('') + '</ul>' : '<span style="color:#666">–</span>');
   const cacheNote = data.cached
@@ -2720,7 +3010,7 @@ function closeCompareModal() {
     p.querySelectorAll('.ct-tab').forEach((x) => x.classList.toggle('active', x === btn));
   };
 
-  window.buildDetailPanelHTML = function (data, url, panelId) {
+  window.buildDetailPanelHTML_v2 = window.buildDetailPanelHTML = function (data, url, panelId) {
     const a = data.analysis || {};
     const c = findCandidate(url) || {};
     const list = (arr, cls) => (arr && arr.length ? `<ul class="ct-list ${cls || ''}">${arr.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : '<p class="ct-dash">–</p>');
