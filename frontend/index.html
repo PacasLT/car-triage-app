@@ -45,6 +45,38 @@
     --shadow-panel:   0 18px 40px -24px rgba(0,0,0,.8);
     --shadow-glow:    0 8px 22px -12px rgba(124,92,255,.9);
   }
+
+  /* ===== ŠVIESI TEMA ===== */
+  :root[data-theme="light"] {
+    --bg-base:        #F0F2F7;
+    --bg-surface:     #FFFFFF;
+    --bg-elevated:    #E8EAF0;
+    --bg-card:        #FFFFFF;
+    --bg-raised:      #DDE0EA;
+    --border:         rgba(0,0,0,.09);
+    --border-light:   rgba(0,0,0,.16);
+    --accent:         #6B4EE6;
+    --accent-hover:   #7B5EF6;
+    --accent-light:   #7C5CFF;
+    --accent-dim:     rgba(107,78,230,.10);
+    --accent-border:  rgba(107,78,230,.25);
+    --text-primary:   #0E1018;
+    --text-secondary: #2E3347;
+    --text-muted:     #5B6278;
+    --text-dim:       #8C93A6;
+    --shadow-card:    0 1px 0 rgba(0,0,0,.04) inset;
+    --shadow-panel:   0 8px 30px -12px rgba(0,0,0,.18);
+    --shadow-glow:    0 8px 22px -12px rgba(107,78,230,.5);
+  }
+  :root[data-theme="light"] .app-header { background: rgba(240,242,247,.92); }
+  :root[data-theme="light"] select option { background: #FFFFFF; color: #0E1018; }
+  :root[data-theme="light"] .hero-photo { background-color: #E0E3EE; background-image: repeating-linear-gradient(115deg, rgba(0,0,0,.04) 0 1px, transparent 1px 9px); }
+  :root[data-theme="light"] #log-container { background: var(--bg-surface); border-color: var(--border); }
+  :root[data-theme="light"] .toast { background: #FFFFFF; }
+  /* Tema mygtuko ikona pagal temą */
+  [data-theme="light"] .theme-icon::before { content: "☀"; }
+  .theme-icon::before { content: "◐"; }
+
   .eyebrow { font: 500 9px/1 var(--font-mono); letter-spacing: .12em; color: var(--text-dim); text-transform: uppercase; }
   .mono    { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
@@ -509,7 +541,7 @@
       </a>
     </nav>
     <div class="app-tools">
-      <button class="icon-btn" title="Tema" type="button">◐</button>
+      <button class="icon-btn" id="theme-btn" title="Tema" type="button" onclick="toggleTheme()"><span class="theme-icon"></span></button>
       <button class="icon-btn has-dot" title="Pranešimai" type="button">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2a4 4 0 0 0-4 4v3l-1 1v1h10v-1l-1-1V6a4 4 0 0 0-4-4z" stroke="currentColor" stroke-width="1.3"/><path d="M6.5 13a1.5 1.5 0 0 0 3 0" stroke="currentColor" stroke-width="1.3"/></svg>
       </button>
@@ -562,7 +594,7 @@
           <div class="filters-title">Paieškos filtrai</div>
           <div class="filters-sub">Pasirinkite kriterijus ir leiskite CarTriige rasti geriausius pasiūlymus už jus.</div>
         </div>
-        <button type="button" class="btn-ghost" style="margin-left:auto">▢ Išsaugoti paiešką</button>
+        <button type="button" class="btn-ghost" id="save-search-btn" style="margin-left:auto" onclick="saveSearch()">▢ Išsaugoti paiešką</button>
       </div>
       <div class="f-grid f-4">
         <div><label>Markė</label>
@@ -2157,6 +2189,92 @@ function closeCompareModal() {
   document.getElementById('compare-modal').classList.remove('active');
   document.body.style.overflow = '';
 }
+
+// ===== TEMOS PERJUNGIMAS =====
+function toggleTheme() {
+  const root = document.documentElement;
+  const isLight = root.getAttribute('data-theme') === 'light';
+  const newTheme = isLight ? 'dark' : 'light';
+  root.setAttribute('data-theme', newTheme);
+  try { localStorage.setItem('ct-theme', newTheme); } catch(e) {}
+}
+
+function applyStoredTheme() {
+  try {
+    const saved = localStorage.getItem('ct-theme');
+    if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+  } catch(e) {}
+}
+applyStoredTheme();
+document.addEventListener('DOMContentLoaded', loadSavedSearch);
+
+// ===== PAIEŠKOS IŠSAUGOJIMAS =====
+const SAVED_SEARCH_KEY = 'ct-saved-search';
+
+function getFilters() {
+  return {
+    marke:       document.getElementById('marke')?.value || '',
+    modelis:     document.getElementById('modelis')?.value || '',
+    pavaru_deze: document.getElementById('pavaru_deze')?.value || '',
+    metaiNuo:    document.getElementById('metaiNuo')?.value || '',
+    metaiIki:    document.getElementById('metaiIki')?.value || '',
+    ridaIki:     document.getElementById('ridaIki')?.value || '',
+    kainaNuo:    document.getElementById('kainaNuo')?.value || '',
+    kainaIki:    document.getElementById('kainaIki')?.value || '',
+    maxPages:    document.getElementById('maxPages')?.value || '3',
+    portals: [
+      document.getElementById('portal-autoplius')?.checked ? 'autoplius' : null,
+      document.getElementById('portal-autogidas')?.checked ? 'autogidas' : null,
+      document.getElementById('portal-autoscout24')?.checked ? 'autoscout24' : null,
+      document.getElementById('portal-otomoto')?.checked ? 'otomoto' : null,
+    ].filter(Boolean),
+  };
+}
+
+function saveSearch() {
+  const filters = getFilters();
+  try {
+    localStorage.setItem(SAVED_SEARCH_KEY, JSON.stringify(filters));
+    const btn = document.getElementById('save-search-btn');
+    if (btn) {
+      const orig = btn.innerHTML;
+      btn.innerHTML = '✓ Išsaugota!';
+      btn.style.color = 'var(--success)';
+      setTimeout(() => { btn.innerHTML = orig; btn.style.color = ''; }, 2000);
+    }
+    showToast('Paieška išsaugota');
+  } catch(e) { showToast('Nepavyko išsaugoti', 'warning'); }
+}
+
+function loadSavedSearch() {
+  try {
+    const raw = localStorage.getItem(SAVED_SEARCH_KEY);
+    if (!raw) return;
+    const f = JSON.parse(raw);
+    if (f.marke) {
+      const markeEl = document.getElementById('marke');
+      if (markeEl) { markeEl.value = f.marke; updateModels(); }
+    }
+    setTimeout(() => {
+      if (f.modelis) { const el = document.getElementById('modelis'); if (el) el.value = f.modelis; }
+    }, 100);
+    if (f.pavaru_deze) { const el = document.getElementById('pavaru_deze'); if (el) el.value = f.pavaru_deze; }
+    if (f.metaiNuo)    { const el = document.getElementById('metaiNuo');    if (el) el.value = f.metaiNuo; }
+    if (f.metaiIki)    { const el = document.getElementById('metaiIki');    if (el) el.value = f.metaiIki; }
+    if (f.ridaIki)     { const el = document.getElementById('ridaIki');     if (el) el.value = f.ridaIki; }
+    if (f.kainaNuo)    { const el = document.getElementById('kainaNuo');    if (el) el.value = f.kainaNuo; }
+    if (f.kainaIki)    { const el = document.getElementById('kainaIki');    if (el) el.value = f.kainaIki; }
+    if (f.maxPages)    { const el = document.getElementById('maxPages');    if (el) el.value = f.maxPages; }
+    if (f.portals) {
+      document.getElementById('portal-autoplius').checked  = f.portals.includes('autoplius');
+      document.getElementById('portal-autogidas').checked  = f.portals.includes('autogidas');
+      document.getElementById('portal-autoscout24').checked = f.portals.includes('autoscout24');
+      document.getElementById('portal-otomoto').checked    = f.portals.includes('otomoto');
+    }
+    updateGenerationHint();
+  } catch(e) {}
+}
+
 </script>
 </body>
 </html>
