@@ -897,6 +897,8 @@ async function runSearchJob(jobId, filters) {
       if (l.rida && marketData && marketData.ridaMedian && marketData.ridaCount >= 3) {
         ridaDiffPct = Math.round(((l.rida - marketData.ridaMedian) / marketData.ridaMedian) * 100);
       }
+      // Skelbimų kainos stebėjimas per laiką
+      cache.recordListingSnapshot(l.url, l.kaina, l.rida);
       return {
         ...l, diffPct, ridaDiffPct,
         marketCount: marketData ? marketData.count : 0,
@@ -988,6 +990,8 @@ async function runSearchJob(jobId, filters) {
             c.pardavejas = pardavejas || c.pardavejas;
             c.photos = photosForAI;
             cache.setCached('analysis', c.url, { title, photo: photosForAI[0] || detailPhoto, photos: photosForAI, analysis, vin, pardavejas });
+            // Išsaugome kainos/ridos snapshot'ą detalios analizės metu (tikslesni duomenys)
+            cache.recordListingSnapshot(c.url, c.kaina, c.rida);
           } finally {
             stopFake();
           }
@@ -1063,7 +1067,8 @@ async function scrapeSingleListing(url) {
   const SELLER_INFO_SELECTOR = '[class*="seller" i], [class*="dealer" i], [class*="partner" i], [class*="advertiser" i], [class*="agent" i], [class*="contact" i], [class*="profile" i]';
   const photoMatches = $('img').filter(function () {
     const el = $(this);
-    const src = (el.attr('src') || el.attr('data-src') || '').toLowerCase();
+    const srcRaw = el.attr('src') || el.attr('data-src') || el.attr('data-lazy-src') || el.attr('data-original') || el.attr('data-lazy') || '';
+    const src = srcRaw.toLowerCase();
     const CAR_CDN_LIST = ['img.autogidas.lt', 'autoplius-img', 'pictures.autoscout24.net', 'apollo.olxcdn.com', 'ireland.apollo.olxcdn.com', 'img.otomoto.pl'];
     const isFromCarCdn = CAR_CDN_LIST.some((cdn) => src.includes(cdn));
     const looksLikeJunk = NON_CAR_IMAGE_KEYWORDS.some((kw) => src.includes(kw));
@@ -1075,10 +1080,11 @@ async function scrapeSingleListing(url) {
   });
   const photosSet = new Set();
   photoMatches.each(function () {
-    const src = $(this).attr('src');
-    if (src) photosSet.add(src);
+    const el = $(this);
+    const src = el.attr('src') || el.attr('data-src') || el.attr('data-lazy-src') || el.attr('data-original') || el.attr('data-lazy') || null;
+    if (src && src.startsWith('http')) photosSet.add(src);
   });
-  const photos = [...photosSet].slice(0, 12);
+  const photos = [...photosSet].slice(0, 20);
   const photo = photos[0] || null;
 
   // VIN kodas - standartinis formatas: 17 simboliu, be I/O/Q raidziu. Isskiriame atskirai,
@@ -1224,11 +1230,13 @@ matai nuotraukose, nespelioke. Jei nuotraukose akivaizdzios zalos nepastebi, tai
   const engineNote = marketContext && (marketContext.galia || marketContext.variklioTuris)
     ? ` Sio konkretaus automobilio variklis: ${marketContext.variklioTuris ? marketContext.variklioTuris + 'L' : ''}${marketContext.galia ? ' ' + marketContext.galia + 'kW' : ''} - SVARBU: rinkos vidurkis skaiciuotas VISIEMS to modelio variantams kartu, o galingesni/silpnesni varikliai realiai kainuoja skirtingai (galingesnis = brangesnis). Atsizvelk i tai vertindamas, ar si kaina tikrai zema/auksta KONKRECIAM variantui, ne tik modeliui bendrai.`
     : '';
+  const timelineText = marketContext && marketContext.url ? cache.buildListingTimelineText(marketContext.url) : null;
+  const timelineSection = timelineText ? `\n\nSKELBIMO KAINOS/RIDOS ISTORIJA (mūsų sistemos stebėjimas per laiką):\n${timelineText}` : '';
   const marketContextText = marketContext && marketContext.marketMedian
     ? `\n\nRINKOS DUOMENYS (musu sistemos apskaiciuoti, PATIKIMI): sio skelbimo kaina ${marketContext.kaina}€,
 ${marketContext.modelis || 'sio modelio'} rinkos vidurkis ${marketContext.marketMedian}€ (remiantis ${marketContext.marketCount || '?'} panasiu skelbimu imtimi),
-t.y. si kaina yra ${marketContext.diffPct}% ${marketContext.diffPct >= 0 ? 'ZEMESNE' : 'AUKSTESNE'} nei vidurkis.${engineNote}`
-    : '\n\nRinkos vidurkio duomenu sitam skelbimui neturime - jei reikia, remkis bendromis ziniomis/web paieska apie tipine sio modelio/metu kaina.';
+t.y. si kaina yra ${marketContext.diffPct}% ${marketContext.diffPct >= 0 ? 'ZEMESNE' : 'AUKSTESNE'} nei vidurkis.${engineNote}${timelineSection}`
+    : `\n\nRinkos vidurkio duomenu sitam skelbimui neturime - jei reikia, remkis bendromis ziniomis/web paieska apie tipine sio modelio/metu kaina.${timelineSection}`;
 
   const prompt = `Automobilio skelbimo puslapio turinys:
 Pavadinimas: ${title}
@@ -1367,7 +1375,9 @@ app.post('/api/analyze-single', async (req, res) => {
     }
 
     const { title, fullText, photo, photos, vin, pardavejas } = await scrapeSingleListing(url);
-    const marketContext = marketMedian ? { kaina, marketMedian, marketCount, diffPct, modelis, galia, variklioTuris } : null;
+    // Išsaugome snapshot iš detalaus puslapio
+    if (req && req.body && req.body.kaina) cache.recordListingSnapshot(url, req.body.kaina, req.body.rida || null);
+    const marketContext = marketMedian ? { kaina, marketMedian, marketCount, diffPct, modelis, galia, variklioTuris, url } : null;
     const analysis = await generateDeepAnalysis(title, fullText, photos, marketContext);
     const result = { title, photo, photos, analysis, vin, pardavejas: pardavejas || knownPardavejas || null };
     cache.setCached('analysis', url, result);

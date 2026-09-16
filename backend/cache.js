@@ -24,7 +24,7 @@ function saveCache(cache) {
   }
 }
 
-const PAGE_TTL_MS = 30 * 60 * 1000; // 30 min - paieskos puslapiu sarasas keiciasi greitai
+const PAGE_TTL_MS = 120 * 60 * 1000; // 2 val - visas nuskaitymas tik kas 2h
 const ANALYSIS_TTL_MS = 24 * 60 * 60 * 1000; // 24 val - detali analize ilgiau aktuali
 
 function getCached(namespace, key, ttlMs) {
@@ -89,6 +89,66 @@ function addToHistory(listings) {
 function getHistoryForModel(modelis) {
   const history = loadHistory();
   return history[modelis] || [];
+}
+
+
+// ============ SKELBIMŲ KAINOS/RIDOS ISTORIJA (per URL) ============
+// Kiekvieną kartą aptikus skelbimą – išsaugome kainą ir ridą su laiku.
+// Leidžia AI analizei pamatyti ar kaina buvo mažinta, ar rida kinta.
+const LISTING_TIMELINE_FILE = path.join(__dirname, 'listing-timeline.json');
+
+function loadListingTimeline() {
+  try { return JSON.parse(fs.readFileSync(LISTING_TIMELINE_FILE, 'utf-8')); }
+  catch { return {}; }
+}
+
+function saveListingTimeline(data) {
+  try { fs.writeFileSync(LISTING_TIMELINE_FILE, JSON.stringify(data)); }
+  catch (err) { console.error('Nepavyko išsaugoti timeline:', err.message); }
+}
+
+function recordListingSnapshot(url, kaina, rida) {
+  if (!url || !kaina) return;
+  const data = loadListingTimeline();
+  if (!data[url]) data[url] = [];
+  const arr = data[url];
+  const now = Date.now();
+  // Nesaugome jei per 30min jau yra įrašas su ta pačia kaina
+  const recent = arr[arr.length - 1];
+  if (recent && recent.kaina === kaina && (now - recent.t) < 30 * 60 * 1000) return;
+  arr.push({ t: now, k: kaina, r: rida || null });
+  // Laikome iki 60 snapshot'ų per URL
+  if (arr.length > 60) arr.splice(0, arr.length - 60);
+  saveListingTimeline(data);
+}
+
+function getListingTimeline(url) {
+  if (!url) return [];
+  const data = loadListingTimeline();
+  return data[url] || [];
+}
+
+function buildListingTimelineText(url) {
+  const tl = getListingTimeline(url);
+  if (tl.length < 2) return null;
+  const fmt = (t) => {
+    const d = Math.round((Date.now() - t) / 86400000);
+    return d === 0 ? 'šiandien' : d === 1 ? 'vakar' : `prieš ${d}d`;
+  };
+  const first = tl[0];
+  const last = tl[tl.length - 1];
+  const prev = tl.length > 1 ? tl[tl.length - 2] : null;
+  let lines = [];
+  lines.push(`Pirmas stebėjimas (${fmt(first.t)}): kaina ${first.k}€${first.r ? ', rida ' + first.r + ' km' : ''}`);
+  if (prev && prev !== first) {
+    lines.push(`Ankstesnis stebėjimas (${fmt(prev.t)}): kaina ${prev.k}€${prev.r ? ', rida ' + prev.r + ' km' : ''}`);
+  }
+  lines.push(`Paskutinis stebėjimas (${fmt(last.t)}): kaina ${last.k}€${last.r ? ', rida ' + last.r + ' km' : ''}`);
+  const priceDiff = last.k - first.k;
+  if (priceDiff < 0) lines.push(`KAINA MAŽINTA: ${priceDiff}€ (nuo ${first.k}€ iki ${last.k}€) - gali rodyti, kad niekas nepirkė, yra problema arba yra vietos deryboms`);
+  if (priceDiff > 0) lines.push(`KAINA DIDINTA: +${priceDiff}€ - neįprasta, gali rodyti klaidą arba pakeitė skelbimą`);
+  if (last.r && first.r && last.r - first.r > 500) lines.push(`RIDA PADIDĖJO: ${last.r - first.r} km (nuo ${first.r} iki ${last.r}) - skelbimas senas, auto vis dar naudojamas`);
+  return lines.join('\n');
 }
 
 module.exports = {
