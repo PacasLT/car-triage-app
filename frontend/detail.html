@@ -232,9 +232,9 @@ button{font-family:inherit;cursor:pointer}
     </a>
     <nav class="ct3-nav">
       <a class="ct3-nav-link" href="index.html">Paieška</a>
-      <a class="ct3-nav-link" href="index.html">Mėgstamiausi</a>
-      <a class="ct3-nav-link" href="index.html">Istorija</a>
-      <a class="ct3-nav-link" href="index.html">Palyginti</a>
+      <a class="ct3-nav-link" href="index.html?tab=megstamiausi">Mėgstamiausi</a>
+      <a class="ct3-nav-link" href="index.html?tab=istorija">Istorija</a>
+      <a class="ct3-nav-link" href="#" onclick="event.preventDefault();dpAddToCompare()">Palyginti</a>
     </nav>
     <div class="ct3-header-right">
       <button class="ct3-premium-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V10l6-8 6 8v10"/></svg>Go Premium</button>
@@ -639,10 +639,57 @@ button{font-family:inherit;cursor:pointer}
     if (!window.__dpUrl) return;
     var favs = [];
     try { favs = JSON.parse(localStorage.getItem('carTriageFavorites') || '[]'); } catch(e) {}
-    var idx = favs.indexOf(window.__dpUrl);
-    if (idx === -1) { favs.push(window.__dpUrl); } else { favs.splice(idx, 1); }
+    var idx = favs.findIndex(function(f) { return (typeof f === 'object' ? f.url : f) === window.__dpUrl; });
+    if (idx === -1) {
+      var car = window.__dpCar || {};
+      var ph = window.__dpPhotos || [];
+      favs.unshift({
+        url: window.__dpUrl,
+        modelis: car.modelis || '?',
+        kaina: car.kaina || 0,
+        metai: car.metai || null,
+        rida: car.rida || null,
+        photo: ph[0] || '',
+        source: car.source || '',
+        savedAt: Date.now(),
+        lastKnownPrice: car.kaina || 0,
+        lastCheckedAt: null,
+        status: 'active',
+      });
+    } else {
+      favs.splice(idx, 1);
+    }
     localStorage.setItem('carTriageFavorites', JSON.stringify(favs));
-    updateSaveBtn(favs.indexOf(window.__dpUrl) !== -1);
+    updateSaveBtn(favs.some(function(f) { return (typeof f === 'object' ? f.url : f) === window.__dpUrl; }));
+  };
+
+  window.dpAddToCompare = function() {
+    if (!window.__dpCar) { alert('Skelbimo duomenys dar neįkelti.'); return; }
+    var car = window.__dpCar;
+    var ph = window.__dpPhotos || [];
+    var item = {
+      url: window.__dpUrl,
+      modelis: car.modelis || '?',
+      kaina: car.kaina || 0,
+      photo: ph[0] || '',
+      metai: car.metai || null,
+      rida: car.rida || null,
+      kuras: car.kuras || '',
+      galia: car.galia || null,
+      variklioTuris: car.variklioTuris || null,
+      pavarai: car.pavarai || '',
+      diffPct: car.diffPct != null ? car.diffPct : null,
+      marketMedian: car.marketMedian || null,
+      source: car.source || '',
+    };
+    try {
+      var list = JSON.parse(localStorage.getItem('ct_compare_pending_list') || '[]');
+      list = list.filter(function(x) { return x.url !== item.url; });
+      if (list.length >= 3) { alert('Galima palyginti ne daugiau kaip 3 automobilius.'); return; }
+      list.push(item);
+      localStorage.setItem('ct_compare_pending_list', JSON.stringify(list));
+    } catch(e) {}
+    window.location.href = 'index.html?tab=palyginti';
   };
 
   function addSpec(specsEl, icon, text, pos) {
@@ -669,6 +716,8 @@ button{font-family:inherit;cursor:pointer}
       } catch(e) {}
     }
     window.__dpUrl = c.url || '';
+    window.__dpCar = c;
+    window.__dpPhotos = photos;
     document.getElementById('dp-empty').style.display = 'none';
     document.getElementById('dp-content').style.display = '';
 

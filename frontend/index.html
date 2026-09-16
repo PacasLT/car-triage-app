@@ -1149,9 +1149,9 @@
     </a>
     <nav class="ct3-nav">
       <a class="ct3-nav-link active" href="#">Paieška</a>
-      <a class="ct3-nav-link" href="#">Mėgstamiausi</a>
-      <a class="ct3-nav-link" href="#">Istorija</a>
-      <a class="ct3-nav-link" href="#">Palyginti</a>
+      <a class="ct3-nav-link" href="#" onclick="event.preventDefault();ctNavTab('megstamiausi')">Mėgstamiausi</a>
+      <a class="ct3-nav-link" href="#" onclick="event.preventDefault();ctNavTab('istorija')">Istorija</a>
+      <a class="ct3-nav-link" href="#" onclick="event.preventDefault();ctNavTab('palyginti')">Palyginti</a>
     </nav>
     <div class="ct3-header-right">
       <button class="ct3-premium-btn">
@@ -2457,6 +2457,7 @@ let currentData = null;
 
 function renderResults(data, status, results) {
   currentData = data;
+  window.currentData = data;
   const rawNote = data.rawFoundCount && data.rawFoundCount !== data.totalScanned
     ? ` (iš ${data.rawFoundCount} pagal markę/modelį, ${data.totalScanned} atitiko jūsų kainos/ridos/metų filtrus)`
     : '';
@@ -2978,6 +2979,74 @@ function closeCompareModal() {
   document.getElementById('compare-modal').classList.remove('active');
   document.body.style.overflow = '';
 }
+
+// ── Tab navigation helper (used by header nav links in both pages) ──
+function ctNavTab(tab) {
+  var navLinks = document.querySelectorAll('.ct3-nav-link');
+  navLinks.forEach(function(l) { l.classList.remove('active'); });
+  if (tab === 'megstamiausi') {
+    renderFavorites();
+    var wrap = document.getElementById('favorites-wrap');
+    var panel = document.getElementById('favorites-panel');
+    var isOpen = wrap && wrap.style.display !== 'none';
+    if (wrap) wrap.style.display = isOpen ? 'none' : 'block';
+    if (panel) panel.style.display = 'block';
+    if (!isOpen && wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return;
+  }
+  if (tab === 'istorija') {
+    var hw = document.getElementById('search-history-wrap');
+    var isOpen = hw && hw.style.display !== 'none';
+    if (hw) hw.style.display = isOpen ? 'none' : 'block';
+    if (!isOpen && hw) hw.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return;
+  }
+  if (tab === 'palyginti') {
+    if (compareList.length >= 2) {
+      openCompareModal();
+    } else {
+      if (typeof showToast === 'function') showToast('Pasirinkite bent 2 automobilius palyginimui kuriant palyginti sąrašą.', 'info');
+    }
+    return;
+  }
+  document.querySelector('.ct3-nav-link')?.classList.add('active');
+}
+
+// ── On-load: handle ?tab= param (e.g. coming from detail.html) ──
+(function() {
+  function handleTabParam() {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      var tab = params.get('tab');
+      if (!tab) return;
+      // Remove param from URL without reload
+      var url = window.location.pathname + (window.location.hash || '');
+      if (history.replaceState) history.replaceState(null, '', url);
+      // Restore compare items from pending list
+      if (tab === 'compare' || tab === 'palyginti') {
+        var pending = null;
+        try { pending = JSON.parse(localStorage.getItem('ct_compare_pending_list') || 'null'); } catch(e) {}
+        if (pending && pending.length) {
+          localStorage.removeItem('ct_compare_pending_list');
+          pending.forEach(function(item) {
+            if (compareList.length < 3 && !compareList.some(function(x){ return x.url === item.url; })) {
+              compareList.push(item);
+            }
+          });
+          renderCompareBar();
+          if (compareList.length >= 2) setTimeout(openCompareModal, 400);
+        }
+        return;
+      }
+      setTimeout(function() { ctNavTab(tab); }, 300);
+    } catch(e) { console.warn('tab param error', e); }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', handleTabParam);
+  } else {
+    handleTabParam();
+  }
+})();
 </script>
 <script id="cartriige-cards-v2">
 /* ============================================================
