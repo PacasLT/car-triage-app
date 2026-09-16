@@ -90,6 +90,42 @@ async function fetchSearchPage(url) {
   return html;
 }
 
+// Specialiai skelbimo puslapiui - naudoja render=true, kad gautume JS-renderinta HTML
+// (galeriją, lazy-loaded nuotraukų src). Brangiau ScraperAPI kreditais, bet tik TOP 5.
+async function fetchListingPage(url) {
+  const cached = cache.getCached('pages', url, cache.PAGE_TTL_MS);
+  if (cached) {
+    console.log(`  (talpykla: ${url.slice(0, 60)}...)`);
+    return cached;
+  }
+
+  const SCRAPER_KEY = process.env.SCRAPER_API_KEY;
+  let html;
+
+  // render=true galerijos JS ivykdymui
+  if (SCRAPER_KEY) {
+    try {
+      const scraperUrl = `http://api.scraperapi.com?api_key=${SCRAPER_KEY}&url=${encodeURIComponent(url)}&render=true`;
+      console.log(`  ScraperAPI (render=true): ${url.slice(0, 60)}...`);
+      const response = await axios.get(scraperUrl, { timeout: 90000 });
+      if (response.status === 200 && response.data && response.data.length > 500) {
+        html = response.data;
+        console.log(`  ScraperAPI OK (${html.length} simboliu)`);
+      }
+    } catch (err) {
+      console.log(`  ScraperAPI render=true klaida: ${err.message}`);
+    }
+  }
+
+  // Atsarginis: Puppeteer (jei ScraperAPI neprieinamas)
+  if (!html) html = await fetchWithPuppeteer(url);
+  // Paskutinis atsarginis: paprasta uzklasa
+  if (!html) html = await fetchSearchPage(url);
+
+  cache.setCached('pages', url, html);
+  return html;
+}
+
 function extractField(text, regex) {
   const m = text.match(regex);
   if (!m) return null;
@@ -1054,7 +1090,7 @@ function cleanFinancingNoise(text) {
 }
 
 async function scrapeSingleListing(url) {
-  const html = await fetchSearchPage(url);
+  const html = await fetchListingPage(url);
   const $ = cheerio.load(html);
 
   // Meta zymos (keywords/description) DAZNAI jau turi svaru, struktura faktu santrauka
@@ -1073,24 +1109,61 @@ async function scrapeSingleListing(url) {
     `[PILNAS PUSLAPIO TEKSTAS]: ${bodyText}`,
   ].filter(Boolean).join('\n\n');
 
-  const NON_CAR_IMAGE_KEYWORDS = ['logo', 'avatar', 'icon', 'placeholder', 'map', 'pin', 'default', 'staticmap', 'sprite'];
+  const NON_CAR_IMAGE_KEYWORDS = ['logo', 'avatar', 'icon', 'placeholder', 'map', 'pin', 'default', 'staticmap', 'sprite', 'banner', 'ad-', '/ads/'];
+  const CAR_CDN_PATTERNS = ['img.autogidas.lt', 'autogidas.lt', 'autoplius-img', 'autoplius.lt', 'pictures.autoscout24.net', 'ireland.apollo.olxcdn', 'otomoto', 'img-sc24', 'static.autogidas', 'cf.autogidas', 'carsdata', 'img.gumtree', 'cars.img'];
   const SELLER_INFO_SELECTOR = '[class*="seller" i], [class*="dealer" i], [class*="partner" i], [class*="advertiser" i], [class*="agent" i], [class*="contact" i], [class*="profile" i]';
-  const photoMatches = $('img').filter(function () {
+
+  function isCarCdnUrl(src) {
+    if (!src) return false;
+    const s = src.toLowerCase();
+    return CAR_CDN_PATTERNS.some((p) => s.includes(p));
+  }
+
+  const photosSet = new Set();
+
+  // 1. img tagai - tikriname src, data-src, data-lazy-src, data-original, data-large-src
+  const IMG_ATTRS = ['src', 'data-src', 'data-lazy-src', 'data-original', 'data-large-src', 'data-image', 'data-zoom-image', 'data-full', 'data-hi-res'];
+  $('img, source').each(function () {
     const el = $(this);
-    const src = (el.attr('src') || '').toLowerCase();
-    const isFromCarCdn = src.includes('img.autogidas.lt') || src.includes('autoplius-img') || src.includes('pictures.autoscout24.net');
-    const looksLikeJunk = NON_CAR_IMAGE_KEYWORDS.some((kw) => src.includes(kw));
-    const isNearSellerInfo = el.closest(SELLER_INFO_SELECTOR).length > 0;
+    if (el.closest(SELLER_INFO_SELECTOR).length > 0) return;
     const w = parseInt(el.attr('width'), 10);
     const h = parseInt(el.attr('height'), 10);
-    const looksLikeSmallSquareIcon = w && h && Math.abs(w - h) < 10 && w < 160;
-    return isFromCarCdn && !looksLikeJunk && !isNearSellerInfo && !looksLikeSmallSquareIcon;
+    if (w && h && Math.abs(w - h) < 10 && w < 160) return; // maža ikona
+    for (const attr of IMG_ATTRS) {
+      const val = el.attr(attr) || '';
+      if (isCarCdnUrl(val) && !NON_CAR_IMAGE_KEYWORDS.some((kw) => val.toLowerCase().includes(kw))) {
+        photosSet.add(val.split('?')[0]); // be query params
+      }
+    }
   });
-  const photosSet = new Set();
-  photoMatches.each(function () {
-    const src = $(this).attr('src');
-    if (src) photosSet.add(src);
+
+  // 2. JSON-LD structured data (dazniausiai turi pilna nuotrauku sarasa)
+  $('script[type="application/ld+json"]').each(function () {
+    try {
+      const data = JSON.parse($(this).html());
+      const imgs = data.image || data.photo || (data['@graph'] && data['@graph'].flatMap((g) => g.image || g.photo || [])) || [];
+      const arr = Array.isArray(imgs) ? imgs : [imgs];
+      arr.forEach((img) => {
+        const url = typeof img === 'string' ? img : (img && img.url);
+        if (url && isCarCdnUrl(url) && !NON_CAR_IMAGE_KEYWORDS.some((kw) => url.toLowerCase().includes(kw))) {
+          photosSet.add(url.split('?')[0]);
+        }
+      });
+    } catch {}
   });
+
+  // 3. Inline script'ai - ieskome masyvų su CDN URL (autogidas.lt naudoja JS galeriją)
+  if (photosSet.size < 3) {
+    $('script:not([src])').each(function () {
+      const txt = $(this).html() || '';
+      const matches = txt.match(/["'](https?:\/\/[^"']*(?:img\.autogidas\.lt|autoplius-img|pictures\.autoscout24\.net)[^"']*\.(jpe?g|png|webp)[^"']*)/gi) || [];
+      matches.forEach((m) => {
+        const url = m.replace(/^["']|["']$/g, '').split('?')[0];
+        if (!NON_CAR_IMAGE_KEYWORDS.some((kw) => url.toLowerCase().includes(kw))) photosSet.add(url);
+      });
+    });
+  }
+
   const photos = [...photosSet].slice(0, 15);
   const photo = photos[0] || null;
 
