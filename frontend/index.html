@@ -657,11 +657,12 @@
 .ct-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border-light); background: rgba(10,12,18,.8); color: #fff; font-size: 18px; line-height: 1; padding: 0; cursor: pointer; transition: background .15s; }
 .ct-nav-l { left: 8px; } .ct-nav-r { right: 8px; }
 .ct-count { position: absolute; left: 10px; bottom: 10px; font: 600 10px/1 var(--font-mono); padding: 5px 7px; border-radius: 5px; background: rgba(10,12,18,.82); border: 1px solid var(--border-light); color: var(--text-secondary); }
-.ct-thumbs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
-.ct-thumbs img, .ct-thumbs button { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-elevated); cursor: pointer; display: block; padding: 0; }
+.ct-thumbs { display: flex; gap: 5px; margin-top: 6px; height: 58px; overflow: hidden; }
+.ct-thumbs img { flex: 1; min-width: 0; height: 58px; width: auto; object-fit: cover; border-radius: 6px; border: 1.5px solid transparent; background: var(--bg-elevated); cursor: pointer; display: block; padding: 0; transition: border-color .15s, opacity .15s; opacity: .85; }
+.ct-thumbs img.ct-thumb-active, .ct-thumbs img:hover { border-color: var(--accent-light); opacity: 1; }
 .ct-thumbs img[src=""] { display: none; }
-.ct-thumbs img:hover { border-color: var(--border-light); }
-.ct-thumbs button { color: var(--text-muted); font: 600 11px var(--font-mono); }
+.ct-thumbs .ct-thumb-more { flex: none; width: 58px; height: 58px; border-radius: 6px; border: 1.5px solid var(--border); background: var(--bg-elevated); cursor: pointer; display: flex; align-items: center; justify-content: center; font: 700 12px var(--font-mono); color: var(--text-muted); white-space: nowrap; }
+.ct-thumbs .ct-thumb-more:hover { border-color: var(--accent-light); color: var(--text-primary); }
 
 .ct-main { padding: 18px 20px 16px; min-width: 0; }
 .ct-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -1899,6 +1900,11 @@ function cyclePhoto(cardId, dir) {
   if (img) img.src = photos[idx];
   const counter = document.getElementById(cardId + '-photocount');
   if (counter) counter.textContent = `${idx + 1}/${photos.length}`;
+  // Aktyvinamas thumbnail
+  const thumbs = img && img.closest('.ct-photo') && img.closest('.ct-photo').querySelectorAll('.ct-thumbs img');
+  if (thumbs && thumbs.length) {
+    thumbs.forEach((t, i) => t.classList.toggle('ct-thumb-active', i === idx));
+  }
 }
 
 function escJs(s) {
@@ -2646,7 +2652,10 @@ function loadSavedSearch() {
       const diffTone = c.diffPct >= 39 ? 'neg' : c.diffPct >= 8 ? 'pos' : 'warn';
       const skirtumas = c.marketMedian && c.kaina ? c.kaina - c.marketMedian : null;
 
-      const thumbs = multi ? `<div class="ct-thumbs">${photos.slice(0, 5).map((p, i) => `<img src="${p}" loading="lazy" onclick="window.__cardPhotoIndex['${cardId}']=${i}; cyclePhoto('${cardId}', 0)" onerror="this.style.display='none'">`).join('')}${photos.length > 5 ? `<button onclick="openLightbox(window.__galleryStore['${cardId}-strip'], 5)">+${photos.length - 5}</button>` : ''}</div>` : '';
+      const thumbs = multi ? `<div class="ct-thumbs">
+        ${photos.slice(0, 5).map((p, i) => `<img src="${p}" loading="lazy" class="ct-thumb${i===0?' ct-thumb-active':''}" onclick="window.__cardPhotoIndex['${cardId}']=${i}; cyclePhoto('${cardId}', 0); this.closest('.ct-thumbs').querySelectorAll('img').forEach(x=>x.classList.remove('ct-thumb-active')); this.classList.add('ct-thumb-active');" onerror="this.style.display='none'">`).join('')}
+        ${photos.length > 5 ? `<button class="ct-thumb-more" onclick="openLightbox(window.__galleryStore['${cardId}-strip'], 5)">📷 ${photos.length}</button>` : ''}
+      </div>` : '';
 
       const chips = [
         c.metai ? ['▦', c.metai] : null,
