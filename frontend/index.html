@@ -3,107 +3,253 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-<title>Car Triage - Automobilių paieškos įrankis</title>
+<title>CarTriige — Europos automobilių rinkos analizė</title>
 <style>
+  /* ===== DESIGN TOKENS ===== */
+  :root {
+    --bg-base:       #0a0c10;
+    --bg-surface:    #141720;
+    --bg-elevated:   #1c2030;
+    --bg-card:       #16192a;
+    --border:        #252a38;
+    --border-light:  #2e3448;
+    --accent:        #7c6ff7;
+    --accent-hover:  #6c5ce7;
+    --accent-light:  #a78bfa;
+    --accent-dim:    rgba(124,111,247,0.12);
+    --success:       #7fd88f;
+    --danger:        #ff9d9d;
+    --warning:       #f0c674;
+    --text-primary:  #e8e8ea;
+    --text-secondary:#b0b0c0;
+    --text-muted:    #6e7080;
+    --radius-sm:     6px;
+    --radius-md:     10px;
+    --radius-lg:     14px;
+    --radius-xl:     20px;
+    --font:          -apple-system, 'Segoe UI', Arial, sans-serif;
+    --shadow-card:   0 2px 16px rgba(0,0,0,0.4);
+    --shadow-glow:   0 0 20px rgba(124,111,247,0.25);
+  }
+
+  /* ===== RESET & BASE ===== */
   * { box-sizing: border-box; }
-  body { font-family: -apple-system, Segoe UI, Arial, sans-serif; background: #0f1115; color: #e8e8ea; margin: 0; padding: 24px; }
-  .container { max-width: 900px; margin: 0 auto; }
-  h1 { font-size: 22px; margin-bottom: 4px; }
-  .subtitle { color: #9a9aa5; margin-bottom: 24px; font-size: 14px; }
-  .filters { background: #1a1d24; border-radius: 12px; padding: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
-  .filters label { display: block; font-size: 12px; color: #9a9aa5; margin-bottom: 4px; }
-  .filters input, .filters select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #2c303a; background: #0f1115; color: #e8e8ea; font-size: 14px; }
+  body {
+    font-family: var(--font);
+    background: var(--bg-base);
+    color: var(--text-primary);
+    margin: 0;
+    padding: 0;
+  }
+  .container { max-width: 920px; margin: 0 auto; padding: 0 20px 40px; }
+
+  /* ===== APP HEADER ===== */
+  .app-header {
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 800;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .app-header-inner {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 0 20px;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .app-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+  .app-logo-mark {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+  .app-logo-name {
+    font-size: 18px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff 40%, var(--accent-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.3px;
+  }
+  #app-version {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-left: 2px;
+    letter-spacing: 0.5px;
+    -webkit-text-fill-color: var(--text-muted);
+  }
+  .app-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .nav-btn {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .nav-btn:hover { background: var(--border); color: var(--text-primary); }
+  .nav-btn.has-items { color: var(--warning); border-color: rgba(240,198,116,0.3); }
+  .nav-badge {
+    background: var(--accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+  }
+
+  /* ===== SEARCH HERO ===== */
+  .search-hero {
+    padding: 32px 0 8px;
+  }
+  .hero-title {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin: 0 0 6px;
+    color: var(--text-primary);
+  }
+  .hero-subtitle {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin: 0 0 24px;
+    line-height: 1.5;
+  }
+
+  /* ===== LEGACY COMPAT (subtitle class still used nowhere, kept for safety) ===== */
+  .subtitle { color: var(--text-muted); margin-bottom: 24px; font-size: 14px; }
+
+  /* ===== FORM FIELDS ===== */
+  .filters { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+  .filters label { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .filters input, .filters select { width: 100%; padding: 9px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text-primary); font-size: 14px; transition: border-color 0.15s; }
+  .filters input:focus, .filters select:focus { outline: none; border-color: var(--accent); }
   .full-row { grid-column: 1 / -1; }
-  button#search-btn { grid-column: 1 / -1; padding: 12px; background: #6c5ce7; color: white; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; margin-top: 8px; }
-  button#search-btn:hover { background: #5b4bd1; }
-  button#search-btn:disabled { background: #444; cursor: not-allowed; }
-  #status { color: #9a9aa5; font-size: 14px; margin-bottom: 16px; min-height: 20px; }
-  .card { background: #1a1d24; border-radius: 12px; padding: 16px; margin-bottom: 14px; display: flex; gap: 16px; border-left: 4px solid #6c5ce7; position: relative; }
-  .fav-star { position: absolute; top: 10px; right: 10px; background: rgba(15,17,21,0.7); border: none; color: #666; font-size: 20px; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; z-index: 2; }
-  .fav-star.active { color: #f0c674; }
-  .card img { width: 140px; height: 100px; object-fit: cover; border-radius: 8px; background: #2c303a; flex-shrink: 0; }
+  button#search-btn { grid-column: 1 / -1; padding: 13px; background: linear-gradient(135deg, var(--accent), var(--accent-light)); color: white; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 6px; letter-spacing: 0.2px; box-shadow: 0 4px 14px rgba(124,111,247,0.35); transition: opacity 0.15s, transform 0.15s; }
+  button#search-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  button#search-btn:disabled { background: var(--bg-elevated); color: var(--text-muted); cursor: not-allowed; box-shadow: none; transform: none; }
+  #status { color: var(--text-muted); font-size: 14px; margin-bottom: 16px; min-height: 20px; }
+  .card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 14px; display: flex; gap: 16px; border-left: 4px solid var(--accent); position: relative; box-shadow: var(--shadow-card); }
+  .fav-star { position: absolute; top: 10px; right: 10px; background: rgba(10,12,16,0.75); border: none; color: var(--text-muted); font-size: 20px; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; z-index: 2; }
+  .fav-star.active { color: var(--warning); }
+  .card img { width: 140px; height: 100px; object-fit: cover; border-radius: var(--radius-md); background: var(--bg-elevated); flex-shrink: 0; }
   .card-body { flex: 1; min-width: 0; }
-  .card-title { font-weight: 600; font-size: 16px; }
-  .card-price { color: #6c5ce7; font-weight: 700; font-size: 17px; }
-  .card-meta { color: #9a9aa5; font-size: 13px; margin: 4px 0; }
-  .card-diff { display: inline-block; background: #2c303a; padding: 2px 8px; border-radius: 6px; font-size: 12px; margin-left: 8px; }
-  .card-diff.high-risk { background: #4a1f1f; color: #ff8080; }
-  .risk-banner { background: #3a1f1f; border: 1px solid #7a3030; color: #ff9d9d; padding: 8px 10px; border-radius: 6px; font-size: 12px; margin: 6px 0; }
-  .card-signals { font-size: 12px; color: #7fd88f; margin: 6px 0; }
-  .card-comment { font-size: 13px; color: #d0d0d8; margin-top: 6px; line-height: 1.4; }
-  .card-link { display: inline-block; margin-top: 8px; color: #6c5ce7; font-size: 13px; text-decoration: none; }
-  .source-tag { font-size: 11px; padding: 1px 6px; border-radius: 4px; background: #2c303a; color: #9a9aa5; margin-left: 6px; }
+  .card-title { font-weight: 600; font-size: 16px; color: var(--text-primary); }
+  .card-price { color: var(--accent-light); font-weight: 700; font-size: 17px; }
+  .card-meta { color: var(--text-muted); font-size: 13px; margin: 4px 0; }
+  .card-diff { display: inline-block; background: var(--bg-elevated); padding: 2px 8px; border-radius: var(--radius-sm); font-size: 12px; margin-left: 8px; }
+  .card-diff.high-risk { background: rgba(255,128,128,0.1); color: #ff8080; border: 1px solid rgba(255,128,128,0.25); }
+  .risk-banner { background: rgba(255,100,100,0.08); border: 1px solid rgba(122,48,48,0.6); color: var(--danger); padding: 8px 10px; border-radius: var(--radius-sm); font-size: 12px; margin: 6px 0; }
+  .card-signals { font-size: 12px; color: var(--success); margin: 6px 0; }
+  .card-comment { font-size: 13px; color: var(--text-secondary); margin-top: 6px; line-height: 1.5; }
+  .card-link { display: inline-block; margin-top: 8px; color: var(--accent-light); font-size: 13px; text-decoration: none; }
+  .source-tag { font-size: 11px; padding: 1px 7px; border-radius: var(--radius-sm); background: var(--bg-elevated); color: var(--text-muted); margin-left: 6px; border: 1px solid var(--border); }
   #search-progress-wrap { display: none; margin: -8px 0 14px; }
-  #search-progress-track-main { height: 4px; background: #1a1d24; border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
-  #search-progress-fill-main { height: 100%; background: linear-gradient(90deg, #6c5ce7, #a78bfa); border-radius: 4px; transition: width 0.5s ease; width: 0%; }
-  #search-progress-label { font-size: 12px; color: #6c5ce7; font-weight: 600; }
+  #search-progress-track-main { height: 3px; background: var(--bg-surface); border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
+  #search-progress-fill-main { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-light)); border-radius: 4px; transition: width 0.5s ease; width: 0%; }
+  #search-progress-label { font-size: 12px; color: var(--accent-light); font-weight: 600; }
   #log-container { margin-bottom: 16px; display: none; }
-  #log-header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #1a1d24; border: 1px solid #2c303a; border-radius: 10px; cursor: pointer; font-size: 13px; color: #b8b8c0; user-select: none; }
-  #log-header:hover { background: #20232b; }
-  #log-header .chevron { margin-left: auto; transition: transform 0.2s; color: #666; }
+  #log-header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); cursor: pointer; font-size: 13px; color: var(--text-secondary); user-select: none; }
+  #log-header:hover { background: var(--bg-elevated); }
+  #log-header .chevron { margin-left: auto; transition: transform 0.2s; color: var(--text-muted); }
   #log-header.expanded .chevron { transform: rotate(180deg); }
-  #log-box { background: #14161c; border: 1px solid #2c303a; border-top: none; border-radius: 0 0 10px 10px; padding: 4px; max-height: 260px; overflow-y: auto; display: none; }
-  .log-step { display: flex; align-items: center; gap: 10px; padding: 8px 12px; font-size: 13px; color: #b8b8c0; border-bottom: 1px solid #22252c; }
+  #log-box { background: var(--bg-base); border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius-md) var(--radius-md); padding: 4px; max-height: 260px; overflow-y: auto; display: none; }
+  .log-step { display: flex; align-items: center; gap: 10px; padding: 8px 12px; font-size: 13px; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
   .log-step:last-child { border-bottom: none; }
-  .log-step .spinner { width: 14px; height: 14px; border: 2px solid #3a3f4c; border-top-color: #6c5ce7; border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
-  .log-step .done-check { color: #7fd88f; flex-shrink: 0; }
+  .log-step .spinner { width: 14px; height: 14px; border: 2px solid var(--border-light); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+  .log-step .done-check { color: var(--success); flex-shrink: 0; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .log-step.current { color: #e8e8ea; font-weight: 500; }
-  .card-actions { margin-top: 10px; display: flex; gap: 10px; align-items: center; }
-  .detail-btn { background: #2c303a; color: #e8e8ea; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
-  .detail-btn.ready { background: linear-gradient(135deg, #6c5ce7, #a78bfa); color: #fff; font-weight: 600; box-shadow: 0 0 14px rgba(108,92,231,0.45); animation: pulse-glow 2.5s ease-in-out infinite; }
-  @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 8px rgba(108,92,231,0.35); } 50% { box-shadow: 0 0 18px rgba(167,139,250,0.6); } }
-  .detail-btn:hover { background: #3a3f4c; }
-  .detail-panel { margin-top: 12px; padding: 12px; background: #12151b; border-radius: 8px; border-left: 3px solid #7fd88f; font-size: 13px; display: none; }
-  .detail-panel h4 { margin: 8px 0 4px; font-size: 12px; color: #9a9aa5; text-transform: uppercase; }
-  .detail-panel ul { margin: 4px 0; padding-left: 18px; }
-  .detail-panel .verdict { color: #7fd88f; font-weight: 600; }
+  .log-step.current { color: var(--text-primary); font-weight: 500; }
+  .card-actions { margin-top: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .detail-btn { background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border); padding: 7px 13px; border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; transition: all 0.15s; }
+  .detail-btn:hover { background: var(--border); color: var(--text-primary); }
+  .detail-btn.ready { background: linear-gradient(135deg, var(--accent), var(--accent-light)); color: #fff; font-weight: 600; border-color: transparent; box-shadow: 0 0 14px rgba(124,111,247,0.4); animation: pulse-glow 2.5s ease-in-out infinite; }
+  @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 8px rgba(124,111,247,0.3); } 50% { box-shadow: 0 0 20px rgba(167,139,250,0.55); } }
+  .detail-panel { margin-top: 12px; padding: 14px; background: var(--bg-base); border-radius: var(--radius-md); border-left: 3px solid var(--success); font-size: 13px; display: none; }
+  .detail-panel h4 { margin: 10px 0 5px; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.7px; }
+  .detail-panel ul { margin: 4px 0; padding-left: 18px; color: var(--text-secondary); }
+  .detail-panel .verdict { color: var(--success); font-weight: 600; font-size: 14px; line-height: 1.5; }
   .photo-gallery { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
-  .photo-gallery img { width: 76px; height: 58px; object-fit: cover; border-radius: 6px; flex-shrink: 0; background: #2c303a; cursor: pointer; }
-  #lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 2000; align-items: center; justify-content: center; flex-direction: column; }
+  .photo-gallery img { width: 76px; height: 58px; object-fit: cover; border-radius: var(--radius-sm); flex-shrink: 0; background: var(--bg-elevated); cursor: pointer; }
+  #lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.93); z-index: 2000; align-items: center; justify-content: center; flex-direction: column; }
   #lightbox.active { display: flex; }
-  #lightbox img { max-width: 92vw; max-height: 76vh; object-fit: contain; border-radius: 6px; }
-  #lightbox-counter { color: #9a9aa5; font-size: 13px; margin-top: 10px; }
-  #lightbox-close { position: absolute; top: 16px; right: 20px; background: rgba(255,255,255,0.1); color: #fff; border: none; width: 38px; height: 38px; border-radius: 50%; font-size: 18px; cursor: pointer; }
-  .lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.1); color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 20px; cursor: pointer; }
+  #lightbox img { max-width: 92vw; max-height: 76vh; object-fit: contain; border-radius: var(--radius-sm); }
+  #lightbox-counter { color: var(--text-muted); font-size: 13px; margin-top: 10px; }
+  #lightbox-close { position: absolute; top: 16px; right: 20px; background: rgba(255,255,255,0.08); color: #fff; border: none; width: 38px; height: 38px; border-radius: 50%; font-size: 18px; cursor: pointer; }
+  .lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.08); color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 20px; cursor: pointer; }
   #lightbox-prev { left: 12px; }
   #lightbox-next { right: 12px; }
   .card-photo-wrap { position: relative; flex-shrink: 0; line-height: 0; }
   .card-photo-wrap img { display: block; }
-  .card-photo-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(15,17,21,0.65); color: #fff; border: none; width: 26px; height: 26px; border-radius: 50%; font-size: 15px; cursor: pointer; line-height: 1; padding: 0; }
+  .card-photo-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(10,12,16,0.7); color: #fff; border: none; width: 26px; height: 26px; border-radius: 50%; font-size: 15px; cursor: pointer; line-height: 1; padding: 0; }
   .card-photo-nav.prev { left: 4px; }
   .card-photo-nav.next { right: 4px; }
-  .card-photo-count { position: absolute; bottom: 4px; right: 6px; background: rgba(15,17,21,0.7); color: #cfcbf5; font-size: 10px; padding: 1px 6px; border-radius: 10px; }
+  .card-photo-count { position: absolute; bottom: 4px; right: 6px; background: rgba(10,12,16,0.75); color: var(--accent-light); font-size: 10px; padding: 1px 6px; border-radius: 10px; }
 
   /* ============ PALYGINIMAS ============ */
   .compare-toggle {
-    background: #1a1d24; color: #9a9aa5; border: 1px solid #2c303a;
-    padding: 5px 10px; border-radius: 6px; font-size: 11px; cursor: pointer;
+    background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border);
+    padding: 5px 10px; border-radius: var(--radius-sm); font-size: 11px; cursor: pointer;
     transition: all 0.15s; white-space: nowrap;
   }
-  .compare-toggle.active { background: #2d4a63; color: #74c0fc; border-color: #4a90d9; }
+  .compare-toggle.active { background: rgba(74,144,217,0.15); color: #74c0fc; border-color: rgba(74,144,217,0.4); }
   #compare-bar {
     display: none; position: fixed; bottom: 0; left: 0; right: 0;
-    background: linear-gradient(135deg, #1a1d24, #20232b);
-    border-top: 1px solid #2c303a;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-light);
     padding: 12px 20px; z-index: 900;
-    display: none; align-items: center; justify-content: space-between; gap: 12px;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+    align-items: center; justify-content: space-between; gap: 12px;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.6);
   }
   #compare-bar.visible { display: flex; }
   #compare-bar-items { display: flex; gap: 8px; flex: 1; overflow: hidden; }
   .compare-bar-chip {
-    background: #2c303a; border-radius: 8px; padding: 6px 10px;
-    font-size: 12px; color: #e8e8ea; display: flex; align-items: center; gap: 6px;
+    background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px 10px;
+    font-size: 12px; color: var(--text-primary); display: flex; align-items: center; gap: 6px;
     max-width: 160px; overflow: hidden;
   }
   .compare-bar-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .compare-bar-chip button { background: none; border: none; color: #9a9aa5; cursor: pointer; font-size: 14px; padding: 0; flex-shrink: 0; }
+  .compare-bar-chip button { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; padding: 0; flex-shrink: 0; }
   #compare-btn {
-    background: linear-gradient(135deg, #6c5ce7, #a78bfa); color: #fff;
-    border: none; padding: 10px 20px; border-radius: 10px; font-size: 14px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-light)); color: #fff;
+    border: none; padding: 10px 20px; border-radius: var(--radius-md); font-size: 14px;
     font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0;
-    box-shadow: 0 4px 14px rgba(108,92,231,0.4);
+    box-shadow: 0 4px 14px rgba(124,111,247,0.4);
   }
   #compare-modal {
     display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88);
@@ -111,25 +257,25 @@
   }
   #compare-modal.active { display: block; }
   #compare-modal-inner {
-    max-width: 960px; margin: 0 auto; background: #14161c;
-    border-radius: 16px; padding: 20px; position: relative;
+    max-width: 960px; margin: 0 auto; background: var(--bg-surface);
+    border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 20px; position: relative;
   }
   .compare-grid { display: grid; gap: 14px; }
   .compare-col {
-    background: #1a1d24; border-radius: 12px; padding: 14px; overflow: hidden;
+    background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px; overflow: hidden;
   }
-  .compare-col img { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; background: #2c303a; }
-  .compare-col-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-  .compare-col-price { color: #a78bfa; font-size: 18px; font-weight: 800; margin-bottom: 10px; }
-  .compare-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #22252c; font-size: 12px; }
+  .compare-col img { width: 100%; height: 160px; object-fit: cover; border-radius: var(--radius-md); margin-bottom: 10px; background: var(--bg-base); }
+  .compare-col-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; color: var(--text-primary); }
+  .compare-col-price { color: var(--accent-light); font-size: 18px; font-weight: 800; margin-bottom: 10px; }
+  .compare-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
   .compare-row:last-child { border-bottom: none; }
-  .compare-row-label { color: #9a9aa5; }
-  .compare-row-val { color: #e8e8ea; font-weight: 500; text-align: right; max-width: 60%; }
-  .compare-row-val.better { color: #7fd88f; }
-  .compare-row-val.worse { color: #ff9d9d; }
+  .compare-row-label { color: var(--text-muted); }
+  .compare-row-val { color: var(--text-primary); font-weight: 500; text-align: right; max-width: 60%; }
+  .compare-row-val.better { color: var(--success); }
+  .compare-row-val.worse { color: var(--danger); }
   #compare-close {
     position: absolute; top: 16px; right: 16px;
-    background: rgba(255,255,255,0.08); color: #fff; border: none;
+    background: rgba(255,255,255,0.06); color: #fff; border: 1px solid var(--border);
     width: 36px; height: 36px; border-radius: 50%; font-size: 16px; cursor: pointer;
   }
   @media (max-width: 640px) {
@@ -139,22 +285,25 @@
     #compare-modal { padding: 10px; }
     #compare-modal-inner { padding: 14px; }
     .compare-col img { height: 110px; }
-    .compare-bar-items { gap: 4px; }
+    #compare-bar-items { gap: 4px; }
   }
   /* ============ MOBILUS ISDESTYMAS ============ */
   @media (max-width: 640px) {
-    body { padding: 12px; }
-    h1 { font-size: 19px; }
-    .subtitle { font-size: 13px; margin-bottom: 16px; }
+    .container { padding: 0 12px 40px; }
+    .search-hero { padding: 20px 0 4px; }
+    .hero-title { font-size: 19px; }
+    .hero-subtitle { font-size: 13px; margin-bottom: 16px; }
+    .app-header-inner { height: 50px; }
+    .app-logo-name { font-size: 16px; }
     .filters { grid-template-columns: 1fr; padding: 14px; gap: 10px; }
-    .filters input, .filters select { padding: 11px; font-size: 16px; } /* 16px - apsaugo nuo iOS auto-zoom paspaudus lauka */
+    .filters input, .filters select { padding: 11px; font-size: 16px; } /* 16px - apsaugo nuo iOS auto-zoom */
     button#search-btn { padding: 14px; font-size: 15px; }
     .card { flex-direction: column; padding: 12px; gap: 10px; }
     .card img { width: 100%; height: 180px; }
     .card-title { font-size: 15px; }
     .card-price { font-size: 16px; }
     .card-actions { flex-direction: column; align-items: stretch; gap: 8px; }
-    .card-actions .card-link { padding: 10px; text-align: center; background: #2c303a; border-radius: 6px; }
+    .card-actions .card-link { padding: 10px; text-align: center; background: var(--bg-elevated); border-radius: var(--radius-sm); }
     .detail-btn { padding: 11px 12px; font-size: 13px; width: 100%; }
     #log-header { font-size: 12px; padding: 12px; }
     #sort-bar select { width: 100%; margin-top: 6px; }
@@ -166,12 +315,12 @@
     #all-listings .detail-btn { width: 100%; margin-top: 6px; }
   }
 
-  /* ============ TINDER STILIAUS NARSYMAS - TIK MOBILE ============ */
-  #tinder-launch-btn { display: none; }
+  /* ============ TINDER NARSYMAS (visi ekranai) ============ */
+  #tinder-launch-btn { display: inline-flex; align-items: center; gap: 6px; }
   #tinder-view {
     display: none;
     position: fixed; inset: 0;
-    background: #0a0b0e;
+    background: var(--bg-base);
     z-index: 1000;
     flex-direction: column; align-items: center;
   }
@@ -182,13 +331,13 @@
     padding: 14px 16px 10px;
     flex-shrink: 0;
   }
-  #tinder-counter { font-size: 12px; color: #9a9aa5; }
+  #tinder-counter { font-size: 12px; color: var(--text-muted); }
   #tinder-close {
-    background: rgba(44,48,58,0.8); color: #e8e8ea; border: none;
+    background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-secondary);
     width: 36px; height: 36px; border-radius: 50%; font-size: 16px; cursor: pointer;
   }
-  #tinder-progress-track { flex: 1; margin: 0 12px; height: 3px; background: #2c303a; border-radius: 4px; overflow: hidden; }
-  #tinder-progress-fill { height: 100%; background: linear-gradient(90deg, #6c5ce7, #a78bfa); border-radius: 4px; transition: width 0.3s; }
+  #tinder-progress-track { flex: 1; margin: 0 12px; height: 3px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  #tinder-progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-light)); border-radius: 4px; transition: width 0.3s; }
   #tinder-stack {
     position: relative; width: 100%; max-width: 480px;
     flex: 1; padding: 0 12px 8px;
@@ -197,18 +346,19 @@
   .tinder-card {
     position: absolute; width: calc(100% - 24px); max-width: 456px;
     top: 0; bottom: 0;
-    background: #1a1d24;
-    border-radius: 20px; overflow: hidden;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl); overflow: hidden;
     box-shadow: 0 8px 40px rgba(0,0,0,0.6);
     cursor: grab; user-select: none; touch-action: none;
     display: flex; flex-direction: column;
   }
   .tinder-photo-wrap { position: relative; flex-shrink: 0; height: 52%; overflow: hidden; transition: height 0.3s ease; }
   .tinder-photo-wrap.shrunk { height: 22%; }
-  .tinder-photo-wrap img { width: 100%; height: 100%; object-fit: cover; background: #2c303a; display: block; }
+  .tinder-photo-wrap img { width: 100%; height: 100%; object-fit: cover; background: var(--bg-elevated); display: block; }
   .tinder-photo-gradient {
     position: absolute; bottom: 0; left: 0; right: 0; height: 60%;
-    background: linear-gradient(to top, rgba(10,11,14,0.95) 0%, rgba(10,11,14,0.5) 50%, transparent 100%);
+    background: linear-gradient(to top, rgba(10,12,16,0.96) 0%, rgba(10,12,16,0.5) 50%, transparent 100%);
     pointer-events: none;
   }
   .tinder-photo-info {
@@ -216,21 +366,19 @@
     pointer-events: none;
   }
   .tinder-card-title { font-size: 20px; font-weight: 700; color: #fff; line-height: 1.2; }
-  .tinder-card-price {
-    display: flex; align-items: center; gap: 8px; margin-top: 3px;
-  }
-  .tinder-price-val { color: #a78bfa; font-size: 22px; font-weight: 800; }
+  .tinder-card-price { display: flex; align-items: center; gap: 8px; margin-top: 3px; }
+  .tinder-price-val { color: var(--accent-light); font-size: 22px; font-weight: 800; }
   .tinder-price-diff {
-    background: rgba(108,92,231,0.25); border: 1px solid rgba(108,92,231,0.5);
-    color: #a78bfa; font-size: 12px; font-weight: 700;
+    background: var(--accent-dim); border: 1px solid rgba(124,111,247,0.5);
+    color: var(--accent-light); font-size: 12px; font-weight: 700;
     padding: 2px 8px; border-radius: 20px;
   }
   .tinder-card-body { padding: 12px 16px 10px; overflow-y: auto; flex: 1; min-height: 0; }
-  .tinder-card-meta { color: #9a9aa5; font-size: 13px; margin-bottom: 6px; line-height: 1.5; }
-  .tinder-card-comment { font-size: 13px; color: #d0d0d8; line-height: 1.45; margin-bottom: 8px; }
-  .tinder-card-signals { font-size: 12px; color: #7fd88f; margin-bottom: 8px; }
+  .tinder-card-meta { color: var(--text-muted); font-size: 13px; margin-bottom: 6px; line-height: 1.5; }
+  .tinder-card-comment { font-size: 13px; color: var(--text-secondary); line-height: 1.45; margin-bottom: 8px; }
+  .tinder-card-signals { font-size: 12px; color: var(--success); margin-bottom: 8px; }
   .tinder-detail-btn {
-    background: rgba(44,48,58,0.8); color: #cfcbf5; border: 1px solid #3a3f4c;
+    background: var(--bg-elevated); color: var(--accent-light); border: 1px solid var(--border-light);
     padding: 8px 16px; border-radius: 20px; font-size: 12px; cursor: pointer;
     display: inline-flex; align-items: center; gap: 5px;
   }
@@ -239,58 +387,89 @@
     padding: 5px 14px; border-radius: 8px; border: 3px solid;
     opacity: 0; pointer-events: none; z-index: 5; letter-spacing: 1px;
   }
-  .tinder-badge.like { right: 16px; color: #7fd88f; border-color: #7fd88f; transform: rotate(-12deg); }
-  .tinder-badge.skip { left: 16px; color: #ff8080; border-color: #ff8080; transform: rotate(12deg); }
+  .tinder-badge.like { right: 16px; color: var(--success); border-color: var(--success); transform: rotate(-12deg); }
+  .tinder-badge.skip { left: 16px; color: var(--danger); border-color: var(--danger); transform: rotate(12deg); }
   #tinder-actions {
     width: 100%; max-width: 480px; padding: 12px 16px 20px;
     display: flex; justify-content: center; gap: 24px; align-items: center; flex-shrink: 0;
   }
   .tinder-btn-skip {
-    width: 62px; height: 62px; border-radius: 50%; border: 2px solid #ff8080;
-    background: rgba(255,128,128,0.1); color: #ff8080;
+    width: 62px; height: 62px; border-radius: 50%; border: 2px solid var(--danger);
+    background: rgba(255,157,157,0.08); color: var(--danger);
     font-size: 26px; cursor: pointer; display: flex; align-items: center; justify-content: center;
     transition: all 0.15s; -webkit-tap-highlight-color: transparent;
   }
-  .tinder-btn-skip:active { background: rgba(255,128,128,0.25); transform: scale(0.92); }
+  .tinder-btn-skip:active { background: rgba(255,157,157,0.2); transform: scale(0.92); }
   .tinder-btn-like {
-    width: 72px; height: 72px; border-radius: 50%; border: 2px solid #7fd88f;
-    background: rgba(127,216,143,0.1); color: #7fd88f;
+    width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--success);
+    background: rgba(127,216,143,0.08); color: var(--success);
     font-size: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center;
     transition: all 0.15s; -webkit-tap-highlight-color: transparent;
   }
-  .tinder-btn-like:active { background: rgba(127,216,143,0.25); transform: scale(0.92); }
+  .tinder-btn-like:active { background: rgba(127,216,143,0.2); transform: scale(0.92); }
   .tinder-btn-info {
-    width: 48px; height: 48px; border-radius: 50%; border: 2px solid #6c5ce7;
-    background: rgba(108,92,231,0.1); color: #a78bfa;
+    width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--accent);
+    background: var(--accent-dim); color: var(--accent-light);
     font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
     transition: all 0.15s; -webkit-tap-highlight-color: transparent;
   }
-  .tinder-btn-info:active { background: rgba(108,92,231,0.25); transform: scale(0.92); }
-  #tinder-hint { color: #555; font-size: 11px; padding: 0 16px 6px; text-align: center; flex-shrink: 0; }
-  @media (max-width: 640px) {
-    #tinder-launch-btn { display: inline-block; }
-  }
+  .tinder-btn-info:active { background: rgba(124,111,247,0.25); transform: scale(0.92); }
+  #tinder-hint { color: var(--text-muted); font-size: 11px; padding: 0 16px 6px; text-align: center; flex-shrink: 0; }
+
+  /* ===== SORT BAR ===== */
+  #sort-bar { display: none; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; align-items: center; }
+  #sort-select { padding: 7px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-surface); color: var(--text-primary); font-size: 13px; }
+
+  /* ===== ALL LISTINGS ===== */
+  #all-listings-wrap { margin-top: 30px; }
+  #toggle-all-btn { background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-muted); padding: 10px 16px; border-radius: var(--radius-md); cursor: pointer; width: 100%; text-align: left; font-size: 13px; transition: all 0.15s; }
+  #toggle-all-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
+  #all-listings { margin-top: 8px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+
+  /* ===== TOAST NOTIFICATIONS ===== */
+  #toast-container { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 3000; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
+  .toast { background: var(--bg-elevated); border: 1px solid var(--border-light); color: var(--text-primary); padding: 10px 18px; border-radius: var(--radius-md); font-size: 13px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); animation: toast-in 0.2s ease-out; white-space: nowrap; pointer-events: all; }
+  .toast.warning { border-color: rgba(240,198,116,0.4); color: var(--warning); }
+  @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
 <body>
-<div class="container">
-  <h1>🚗 Car Triage <span id="app-version" style="font-size:11px; color:#3a3f4c; font-weight:400; margin-left:6px; letter-spacing:0.5px;"></span></h1>
-  <div class="subtitle">Suveskite filtrus – sistema nuskaitys automobilių portalus, palygins kainas ir įvertins riziką.</div>
 
-  <div id="favorites-wrap" style="display:none; margin-bottom:18px;">
-    <button onclick="toggleFavoritesPanel()" id="favorites-toggle-btn" style="background:#1a1d24; color:#f0c674; border:1px solid #2c303a; padding:10px 16px; border-radius:8px; cursor:pointer; width:100%; text-align:left; font-size:13px;">
-      ⭐ Favoritai (<span id="favorites-count">0</span>) ▾
-    </button>
-    <div id="favorites-panel" style="display:none; margin-top:10px; background:#1a1d24; border-radius:8px; padding:10px;">
-      <button onclick="checkAllFavorites()" style="margin-bottom:8px; padding:8px 12px; background:#2c303a; color:#e8e8ea; border:none; border-radius:6px; font-size:12px; cursor:pointer;">🔄 Patikrinti visus pakeitimus</button>
+<!-- ===== APP HEADER ===== -->
+<header class="app-header">
+  <div class="app-header-inner">
+    <div class="app-logo">
+      <div class="app-logo-mark">🎯</div>
+      <span class="app-logo-name">CarTriige</span>
+      <span id="app-version"></span>
+    </div>
+    <nav class="app-nav">
+      <button onclick="toggleFavoritesPanel()" id="favorites-toggle-btn" class="nav-btn">
+        ⭐ Favoritai <span id="favorites-count" class="nav-badge" style="display:none">0</span>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<div class="container">
+  <!-- Favorites panel (collapsible, below header) -->
+  <div id="favorites-wrap" style="display:none; margin-top:16px;">
+    <div id="favorites-panel" style="display:none; background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:14px; margin-top:8px;">
+      <button onclick="checkAllFavorites()" style="margin-bottom:10px; padding:8px 12px; background:var(--bg-elevated); color:var(--text-secondary); border:1px solid var(--border); border-radius:var(--radius-sm); font-size:12px; cursor:pointer;">🔄 Patikrinti visus pakeitimus</button>
       <div id="favorites-list"></div>
     </div>
   </div>
 
-  <div id="search-history-wrap" style="display:none; margin-bottom:16px;">
-    <div style="font-size:12px; color:#9a9aa5; margin-bottom:6px;">🕘 Ankstesnės paieškos (paspauskite, kad užpildytumėte filtrus):</div>
+  <!-- Search history chips -->
+  <div id="search-history-wrap" style="display:none; margin-top:12px;">
+    <div style="font-size:11px; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; font-weight:600;">🕘 Ankstesnės paieškos</div>
     <div id="search-history-chips" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
   </div>
+
+  <!-- Search hero -->
+  <section class="search-hero">
+    <h1 class="hero-title">Europos automobilių rinkos analizė</h1>
+    <p class="hero-subtitle">Suveskite filtrus – sistema nuskaitys portālus, palygins kainas ir įvertins riziką.</p>
 
   <div class="filters">
     <div><label>Markė</label>
@@ -375,6 +554,7 @@
       <span id="quick-count-result" style="font-size:12px; color:#9a9aa5;"></span>
     </div>
   </div>
+  </section>
 
   <div id="status"></div>
   <div id="search-progress-wrap">
@@ -389,25 +569,25 @@
     </div>
     <div id="log-box"></div>
   </div>
-  <div id="sort-bar" style="display:none; margin-bottom:14px; flex-wrap:wrap; gap:10px; align-items:center;">
+  <div id="sort-bar" style="display:none;">
     <div>
-      <label style="font-size:12px; color:#9a9aa5; margin-right:8px;">Rūšiuoti:</label>
-      <select id="sort-select" onchange="applySorting()" style="padding:6px; border-radius:6px; border:1px solid #2c303a; background:#1a1d24; color:#e8e8ea;">
+      <label style="font-size:12px; color:var(--text-muted); margin-right:8px;">Rūšiuoti:</label>
+      <select id="sort-select" onchange="applySorting()">
         <option value="quality">Kaina/kokybės santykis (numatyta)</option>
         <option value="cheapest">Pigiausi pirmiausia</option>
         <option value="priciest">Brangiausi pirmiausia</option>
         <option value="biggest-discount">Didžiausia nuolaida %</option>
       </select>
     </div>
-    <button id="tinder-launch-btn" onclick="startTinder()" style="padding:10px 18px; background:linear-gradient(135deg,#6c5ce7,#a78bfa); color:#fff; border:none; border-radius:20px; font-size:13px; font-weight:600; cursor:pointer; box-shadow:0 4px 14px rgba(108,92,231,0.4);">🔥 Tinder naršymas</button>
+    <button id="tinder-launch-btn" onclick="startTinder()" style="padding:9px 18px; background:linear-gradient(135deg,var(--accent),var(--accent-light)); color:#fff; border:none; border-radius:20px; font-size:13px; font-weight:600; cursor:pointer; box-shadow:0 4px 14px rgba(124,111,247,0.4);">🔥 Tinder naršymas</button>
   </div>
   <div id="results"></div>
 
-  <div id="all-listings-wrap" style="display:none; margin-top:30px;">
-    <button onclick="toggleAllListings()" id="toggle-all-btn" style="background:#1a1d24; color:#9a9aa5; border:1px solid #2c303a; padding:10px 16px; border-radius:8px; cursor:pointer; width:100%; text-align:left;">
+  <div id="all-listings-wrap" style="display:none;">
+    <button onclick="toggleAllListings()" id="toggle-all-btn">
       📋 Rodyti visus nuskaitytus skelbimus (naršykite patys) ▾
     </button>
-    <div id="all-listings" style="display:none; margin-top:10px;"></div>
+    <div id="all-listings" style="display:none;"></div>
   </div>
 
   <div id="tinder-view">
@@ -433,6 +613,9 @@
     <div id="lightbox-counter"></div>
   </div>
 </div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
 
 <!-- Palyginimo juosta apačioje -->
 <div id="compare-bar">
@@ -533,7 +716,7 @@ function renderSearchHistory() {
   if (history.length === 0) { wrap.style.display = 'none'; return; }
   wrap.style.display = 'block';
   chips.innerHTML = history.map((h, i) => `
-    <button onclick="applyHistoryFilters(${i})" style="background:#1a1d24; color:#cfcbf5; border:1px solid #2c303a; padding:6px 10px; border-radius:16px; font-size:12px; cursor:pointer;">${historyLabel(h.filters)}</button>
+    <button onclick="applyHistoryFilters(${i})" style="background:var(--bg-elevated); color:var(--accent-light); border:1px solid var(--border-light); padding:6px 12px; border-radius:16px; font-size:12px; cursor:pointer; transition:all 0.15s;">${historyLabel(h.filters)}</button>
   `).join('');
 }
 
@@ -600,8 +783,6 @@ function toggleFavoritesPanel() {
   const panel = document.getElementById('favorites-panel');
   const isHidden = panel.style.display === 'none';
   panel.style.display = isHidden ? 'block' : 'none';
-  document.getElementById('favorites-toggle-btn').innerHTML =
-    `⭐ Favoritai (<span id="favorites-count">${loadFavorites().length}</span>) ${isHidden ? '▴' : '▾'}`;
 }
 
 function renderFavorites() {
@@ -609,7 +790,13 @@ function renderFavorites() {
   const wrap = document.getElementById('favorites-wrap');
   const countEl = document.getElementById('favorites-count');
   const list = document.getElementById('favorites-list');
-  if (countEl) countEl.textContent = favs.length;
+  if (countEl) {
+    countEl.textContent = favs.length;
+    countEl.style.display = favs.length > 0 ? 'inline-flex' : 'none';
+  }
+  // Mark header button
+  const navBtn = document.getElementById('favorites-toggle-btn');
+  if (navBtn) navBtn.classList.toggle('has-items', favs.length > 0);
   wrap.style.display = favs.length > 0 ? 'block' : 'none';
   if (favs.length === 0) return;
 
@@ -982,7 +1169,23 @@ async function runSearch() {
   }
 }
 
+// ============ TOAST PRANESIMAI (vietoj alert()) ============
+function showToast(msg, type = '') {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    document.body.appendChild(container);
+  }
+  const el = document.createElement('div');
+  el.className = 'toast' + (type ? ' ' + type : '');
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.3s'; setTimeout(() => el.remove(), 300); }, 3000);
+}
+
 // ============ TINDER STILIAUS NARSYMAS ============
+let tinderPhase = 'top';
 let tinderQueue = [];
 let tinderLiked = [];
 let tinderSkipped = [];
@@ -990,6 +1193,7 @@ let tinderIndex = 0;
 
 function startTinder() {
   if (!currentData || !currentData.candidates || currentData.candidates.length === 0) return;
+  tinderPhase = 'top';
   tinderQueue = [...currentData.candidates];
   tinderLiked = [];
   tinderSkipped = [];
@@ -1741,7 +1945,7 @@ function toggleCompare(url, modelis, kaina, photo, metai, rida, kuras, galia, va
     compareList.splice(existIdx, 1);
   } else {
     if (compareList.length >= 3) {
-      alert('Galima palyginti tik iki 3 automobilių. Pašalinkite vieną ir bandykite dar kartą.');
+      showToast('Galima palyginti tik iki 3 automobilių. Pašalinkite vieną ir bandykite dar kartą.', 'warning');
       return;
     }
     compareList.push({ url, modelis, kaina, photo, metai, rida, kuras, galia, variklioTuris, pavarai, diffPct, marketMedian, source });
@@ -1786,7 +1990,7 @@ function removeFromCompare(idx) {
 }
 
 function openCompareModal() {
-  if (compareList.length < 2) { alert('Pasirinkite bent 2 automobilius palyginimui.'); return; }
+  if (compareList.length < 2) { showToast('Pasirinkite bent 2 automobilius palyginimui.', 'warning'); return; }
   const modal = document.getElementById('compare-modal');
   const wrap = document.getElementById('compare-grid-wrap');
   modal.classList.add('active');
