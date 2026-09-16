@@ -515,10 +515,290 @@
   .toast.warning { border-color: rgba(240,198,116,0.4); color: var(--warning); }
   @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 </style>
+<style id="cartriige-v2">
+/* === CarTriige v2 — results + cards CSS (from handoff) === */
+/* ============================================================
+   CarTriige — results, detail panel, compare, sort, log, toast (v2)
+   CSS-ONLY overrides for JS-generated markup (no JS changes).
+   Load after the original <style> and after cartriige-hero.css.
+   ============================================================ */
+
+/* ===== SORT BAR ===== */
+#sort-bar { margin: 6px 0 14px; align-items: center; gap: 12px; }
+#sort-bar label { font: 500 9px/1 var(--font-mono) !important; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim) !important; }
+#sort-select { height: 28px; padding: 0 26px 0 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-surface); color: var(--text-primary); font-size: 12px; font-weight: 500; appearance: none; }
+#tinder-launch-btn { background: transparent !important; color: var(--text-primary) !important; border: 1px solid var(--border-light) !important; border-radius: var(--radius-md) !important; box-shadow: none !important; height: 32px; padding: 0 14px !important; font-size: 12.5px !important; }
+#tinder-launch-btn:hover { background: var(--bg-elevated) !important; }
+
+/* ===== LOG ===== */
+#log-header { background: var(--bg-surface); border-color: var(--border); border-radius: var(--radius-lg); font-size: 12.5px; }
+#log-box { border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+.log-step { font-size: 12.5px; }
+.log-step .spinner { border-color: var(--bg-raised); border-top-color: var(--accent); }
+
+/* ===== RESULT CARD ===== */
+.card {
+  background: var(--bg-surface); border: 1px solid var(--border); border-left: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 0; gap: 0; margin-bottom: 10px; box-shadow: none; overflow: hidden;
+  transition: border-color .15s;
+}
+.card:hover { border-color: var(--border-light); }
+.card-photo-wrap { background: #141822; border-right: 1px solid var(--border); align-self: flex-start; }
+.card img, .card-photo-wrap img { width: 216px; height: 158px; border-radius: 0; object-fit: cover; }
+.card-photo-count { background: rgba(10,12,18,.82); border: 1px solid var(--border-light); color: var(--text-muted); font: 600 9.5px/1 var(--font-mono); padding: 4px 6px; border-radius: 3px; bottom: 8px; right: 8px; }
+.card-photo-nav { background: rgba(10,12,18,.75); border: 1px solid var(--border-light); width: 24px; height: 24px; }
+.card-body { padding: 14px 18px 14px; }
+.fav-star { top: 12px; right: 12px; width: 34px; height: 34px; border-radius: var(--radius-md); background: transparent; border: 1px solid var(--border-light); color: var(--text-muted); font-size: 14px; line-height: 1; display: grid; place-items: center; padding: 0; }
+.fav-star:hover { background: var(--bg-elevated); }
+.fav-star.active { color: var(--warning); background: var(--warning-dim); border-color: var(--warning-border); }
+
+.card-title { font-size: 17px; font-weight: 600; letter-spacing: -.01em; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding-right: 44px; }
+.source-tag { font: 600 9px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; padding: 4px 6px; border-radius: 3px; background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border); margin-left: 0; }
+.card-title > span[style] { font: 600 9px/1 var(--font-mono) !important; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; background: var(--success-dim) !important; color: var(--success) !important; border: 1px solid var(--success-border); border-radius: 3px !important; padding: 4px 6px !important; margin-left: 0 !important; }
+
+.card-price { font: 600 25px/1 var(--font-mono); letter-spacing: -.02em; color: var(--text-primary); margin-top: 10px; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.card-diff { display: inline-flex; align-items: baseline; gap: 6px; white-space: nowrap; font: 600 13px/1 var(--font-mono); background: transparent; color: var(--success); border: 1px solid var(--success-border); border-radius: 4px; padding: 6px 8px; margin-left: 0; }
+.card-diff::after { content: "žemiau rinkos"; font: 400 11px/1 var(--font); color: var(--text-muted); }
+.card-diff.high-risk { color: var(--danger); border-color: var(--danger-border); background: var(--danger-dim); }
+.card-diff.high-risk::after { content: "tikrinti"; }
+
+.card-meta { font: 500 12px/1.6 var(--font-mono); color: var(--text-muted); margin: 10px 0 0; font-variant-numeric: tabular-nums; }
+.card-body > div[style*="color:#666"] { color: var(--text-dim) !important; font-family: var(--font-mono); font-size: 10.5px !important; }
+.risk-banner { background: var(--danger-dim); border: 1px solid var(--danger-border); color: var(--danger); border-radius: var(--radius-sm); font-size: 12px; padding: 8px 10px; margin: 10px 0 0; }
+.card-signals { font: 500 10.5px/1.3 var(--font-mono); letter-spacing: .04em; color: var(--success); margin: 10px 0 0; display: inline-block; width: auto; max-width: 100%; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 4px; padding: 5px 8px; }
+.card-comment { font-size: 12.5px; line-height: 1.5; color: var(--text-secondary); margin-top: 10px; padding-left: 26px; position: relative; text-wrap: pretty; }
+.card-comment::before { content: "AI"; position: absolute; left: 0; top: 2px; font: 600 9px/1.6 var(--font-mono); letter-spacing: .1em; color: var(--accent); }
+
+.card-actions { margin-top: 12px; gap: 6px; }
+.card-link { margin-top: 0; font-size: 12.5px; font-weight: 500; color: var(--text-muted); height: 34px; display: inline-flex; align-items: center; white-space: nowrap; padding: 0 12px; border: 1px solid var(--border-light); border-radius: var(--radius-md); }
+.card-link:hover { color: var(--text-primary); background: var(--bg-elevated); }
+.detail-btn { height: 34px; padding: 0 14px; white-space: nowrap; display: inline-flex; align-items: center; background: transparent; border: 1px solid var(--border-light); color: var(--text-primary); border-radius: var(--radius-md); font-size: 12.5px; font-weight: 600; }
+.detail-btn:hover { background: var(--bg-elevated); }
+.detail-btn.ready { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: var(--shadow-glow); animation: none; }
+.compare-toggle { height: 34px; padding: 0 12px; display: inline-flex; align-items: center; white-space: nowrap; background: transparent; border: 1px solid var(--border-light); color: var(--text-muted); border-radius: var(--radius-md); font-size: 12px; font-weight: 500; }
+.compare-toggle.active { background: var(--accent-dim); color: var(--text-primary); border-color: var(--accent); }
+
+/* ===== DETAIL PANEL ===== */
+.detail-panel { margin: 14px -18px -14px; padding: 18px; background: var(--bg-base); border-top: 1px solid var(--border); border-left: none; border-radius: 0; font-size: 13px; }
+.detail-panel .verdict { color: var(--text-primary); font-weight: 500; font-size: 13.5px; line-height: 1.6; padding: 14px 16px; background: var(--bg-surface); border: 1px solid var(--accent-border); border-radius: var(--radius-lg); text-wrap: pretty; }
+.detail-panel .verdict::before { content: "AI TRIAGE VERDICT"; display: block; font: 600 9px/1 var(--font-mono); letter-spacing: .13em; color: var(--accent); margin-bottom: 9px; }
+.detail-panel h4 { margin: 20px 0 8px; font: 500 9px/1 var(--font-mono); letter-spacing: .13em; color: var(--text-dim); }
+.detail-panel ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.detail-panel li { padding: 10px 12px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-secondary); font-size: 12.5px; line-height: 1.5; }
+.detail-panel h4 + ul li { border-left: 2px solid var(--border-light); }
+/* colour the list borders by section order: verdict, [blocks], Privalumai, Rizikos, Ką patikrinti, Klausimai */
+.detail-panel h4:nth-of-type(1) + ul li { border-left-color: var(--success); }
+.detail-panel h4:nth-of-type(2) + ul li { border-left-color: var(--danger); }
+.detail-panel h4:nth-of-type(3) + ul li { border-left-color: var(--warning); }
+.detail-panel h4:nth-of-type(4) + ul li { border-left-color: var(--accent); }
+.detail-panel h4:last-of-type + div { padding: 12px 14px; background: var(--bg-surface); border: 1px solid var(--warning-border); border-radius: var(--radius-lg); color: var(--text-secondary); line-height: 1.55; }
+.detail-panel code { font: 600 12.5px var(--font-mono); letter-spacing: .05em; }
+.detail-panel button[style] { background: transparent !important; color: var(--text-primary) !important; border: 1px solid var(--border-light) !important; border-radius: var(--radius-sm) !important; height: 26px; padding: 0 9px !important; font-size: 11px !important; white-space: nowrap; display: inline-flex; align-items: center; vertical-align: middle; }
+.detail-panel button[style]:hover { background: var(--bg-elevated) !important; }
+.detail-panel > div[style*="background:#1a1d24"] { background: var(--bg-surface) !important; border: 1px solid var(--success-border) !important; border-radius: var(--radius-lg) !important; padding: 14px 16px !important; }
+.detail-panel > div[style*="background:#2a1a1a"] { background: var(--danger-dim) !important; border: 1px solid var(--danger-border) !important; border-radius: var(--radius-lg) !important; }
+.detail-panel > div[style*="background:#2a1a1a"] li { background: transparent; border: none; padding: 4px 0; }
+.detail-panel div[style*="background:#12151b"] { background: var(--bg-surface) !important; border: 1px solid var(--border) !important; border-radius: var(--radius-md) !important; }
+.photo-gallery { margin-top: 16px; gap: 8px; }
+.photo-gallery img { width: 96px; height: 68px; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+
+/* ===== ALL LISTINGS ===== */
+#toggle-all-btn { background: var(--bg-surface); border: 1px dashed var(--border-light); border-radius: var(--radius-lg); padding: 14px 18px; font-size: 13px; color: var(--text-muted); }
+#all-listings { border-radius: var(--radius-lg); }
+
+/* ===== COMPARE ===== */
+#compare-bar { background: rgba(17,20,28,.95); backdrop-filter: blur(14px); border-top: 1px solid var(--border-light); box-shadow: none; padding: 12px 24px; }
+.compare-bar-chip { background: var(--bg-elevated); border-radius: var(--radius-md); }
+#compare-btn { background: var(--accent); border-radius: var(--radius-md); font-size: 12.5px; box-shadow: none; height: 36px; padding: 0 18px; }
+#compare-modal-inner { border-radius: var(--radius-xl); }
+.compare-col { border-radius: var(--radius-lg); }
+.compare-col-price { color: var(--text-primary); font: 600 18px/1 var(--font-mono); }
+.compare-row-val.better { color: var(--success); } .compare-row-val.worse { color: var(--danger); }
+
+/* ===== TOAST ===== */
+.toast { border-radius: var(--radius-md); font-size: 12.5px; box-shadow: 0 8px 24px -12px rgba(0,0,0,.8); }
+
+/* ===== FAVORITES PANEL ===== */
+#favorites-panel { border-radius: var(--radius-lg) !important; }
+#favorites-panel > button { background: transparent !important; border: 1px solid var(--border-light) !important; border-radius: var(--radius-md) !important; color: var(--text-primary) !important; height: 32px; padding: 0 12px !important; }
+
+/* ===== MOBILE ===== */
+@media (max-width: 640px) {
+  .card { flex-direction: column; }
+  .card img, .card-photo-wrap img { width: 100%; height: 180px; min-height: 0; }
+  .card-photo-wrap { border-right: none; border-bottom: 1px solid var(--border); }
+  .card-body { padding: 12px 14px; }
+  .card-price { font-size: 21px; }
+  .detail-panel { margin: 12px -14px -12px; padding: 14px; }
+  .card-actions .card-link { background: transparent; }
+}
+
+
+/* ============================================================
+   CarTriige v2 — kortelės + detalės panelė (markup iš cartriige-cards.js)
+   ============================================================ */
+.ct-empty { color: var(--text-muted); font-size: 13px; padding: 20px; text-align: center; border: 1px dashed var(--border-light); border-radius: 12px; }
+
+/* tonai */
+.ct-pos { color: var(--success) !important; } .ct-warn { color: var(--warning) !important; } .ct-neg { color: var(--danger) !important; }
+.ct-bg-pos { background: var(--success) !important; color: #0A0C12 !important; } .ct-bg-warn { background: var(--warning) !important; color: #0A0C12 !important; } .ct-bg-neg { background: var(--danger) !important; color: #fff !important; } .ct-bg-ac { background: var(--accent) !important; color: #fff !important; }
+
+/* ===== KORTELĖ ===== */
+.card.ct-card { display: block; padding: 0; gap: 0; margin-bottom: 14px; background: var(--bg-surface); border: 1px solid var(--border); border-left: 1px solid var(--border); border-radius: 16px; box-shadow: none; overflow: hidden; }
+.card.ct-card:hover { border-color: var(--border-light); }
+.card.ct-top1 { border-color: var(--accent-border); }
+.ct-grid { display: grid; grid-template-columns: 300px minmax(0, 1fr) 230px; grid-template-rows: auto auto; gap: 0; }
+.ct-photo { grid-row: 1 / 3; padding: 14px 0 14px 14px; display: flex; flex-direction: column; gap: 8px; }
+.ct-photo-main { position: relative; aspect-ratio: 4 / 3; border-radius: 12px; overflow: hidden; background: #141822 repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 1px, transparent 1px 9px); }
+.ct-photo-main img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; display: block; }
+.ct-rank { white-space: nowrap; position: absolute; top: 10px; left: 10px; font: 600 10px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; padding: 6px 8px; border-radius: 6px; background: rgba(10,12,18,.82); border: 1px solid var(--border-light); color: var(--text-primary); }
+.ct-rank-top { background: var(--success); border-color: var(--success); color: #0A0C12; }
+.ct-full { white-space: nowrap; position: absolute; top: 10px; right: 10px; font: 600 10px/1 var(--font-mono); letter-spacing: .06em; padding: 6px 8px; border-radius: 6px; background: var(--accent-dim); border: 1px solid var(--accent-border); color: var(--accent-light); }
+.ct-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-light); background: rgba(10,12,18,.75); color: #fff; font-size: 16px; line-height: 1; padding: 0; cursor: pointer; }
+.ct-nav-l { left: 8px; } .ct-nav-r { right: 8px; }
+.ct-count { position: absolute; left: 10px; bottom: 10px; font: 600 10px/1 var(--font-mono); padding: 5px 7px; border-radius: 5px; background: rgba(10,12,18,.82); border: 1px solid var(--border-light); color: var(--text-secondary); }
+.ct-thumbs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.ct-thumbs img, .ct-thumbs button { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-elevated); cursor: pointer; display: block; padding: 0; }
+.ct-thumbs img[src=""] { display: none; }
+.ct-thumbs img:hover { border-color: var(--border-light); }
+.ct-thumbs button { color: var(--text-muted); font: 600 11px var(--font-mono); }
+
+.ct-main { padding: 16px 18px 14px; min-width: 0; }
+.ct-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ct-title-row h3 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -.01em; }
+.ct-card .source-tag { font: 600 9px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; padding: 4px 6px; border-radius: 4px; background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border); margin: 0; }
+.ct-card .fav-star.ct-fav { position: static; margin-left: auto; width: 32px; height: 32px; border-radius: 8px; background: transparent; border: 1px solid var(--border-light); color: var(--text-muted); font-size: 14px; display: grid; place-items: center; padding: 0; }
+.ct-card .fav-star.ct-fav.active { color: var(--warning); background: var(--warning-dim); border-color: var(--warning-border); }
+.ct-price-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+.ct-price { font: 600 26px/1 var(--font-mono); letter-spacing: -.02em; color: var(--accent-light); }
+.ct-diff { font: 700 12px/1 var(--font-mono); padding: 6px 8px; border-radius: 6px; }
+.ct-market { font-size: 12.5px; color: var(--text-muted); }
+.ct-market b { color: var(--text-primary); font-weight: 600; }
+.ct-market small { color: var(--text-dim); }
+.ct-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.ct-chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 7px; background: var(--bg-elevated); border: 1px solid var(--border); font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+.ct-chip i { font-style: normal; color: var(--text-dim); font-size: 11px; }
+.ct-chip-pos { color: var(--success); border-color: var(--success-border); background: var(--success-dim); }
+.ct-note { margin-top: 8px; padding: 8px 10px; border-radius: 7px; font-size: 12px; line-height: 1.45; color: var(--text-muted); background: var(--bg-elevated); border: 1px solid var(--border); }
+.ct-note.ct-neg { background: var(--danger-dim); border-color: var(--danger-border); }
+.ct-note.ct-warn { background: var(--warning-dim); border-color: var(--warning-border); }
+.ct-note.ct-pos { background: var(--success-dim); border-color: var(--success-border); }
+.ct-comment { display: flex; gap: 8px; margin-top: 12px; }
+.ct-comment span { flex: none; font: 700 9px/1 var(--font-mono); padding: 5px 5px; border-radius: 4px; background: var(--accent); color: #fff; height: 18px; display: grid; place-items: center; }
+.ct-comment p { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--text-secondary); text-wrap: pretty; }
+.ct-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.ct-btn, .ct-card .compare-toggle.ct-btn, .ct-card .detail-btn.ct-btn { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border-radius: 8px; background: transparent; border: 1px solid var(--border-light); color: var(--text-primary); font-size: 12.5px; font-weight: 600; text-decoration: none; cursor: pointer; white-space: nowrap; transition: background .15s; }
+.ct-btn:hover, .ct-card .compare-toggle.ct-btn:hover, .ct-card .detail-btn.ct-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
+.ct-card .compare-toggle.ct-btn.active { background: var(--accent-dim); border-color: var(--accent); }
+.ct-card .detail-btn.ct-btn-primary, .ct-card .detail-btn.ct-btn-primary.ready { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: none; animation: none; }
+.ct-card .detail-btn.ct-btn-primary:hover { filter: brightness(1.08); }
+.ct-card .detail-btn:disabled { opacity: .6; cursor: progress; }
+
+/* score */
+.ct-score { grid-column: 3; padding: 16px 16px 8px 0; }
+.ct-eyebrow { font: 500 9px/1 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px; }
+.ct-score-row { display: flex; gap: 12px; align-items: center; }
+.ct-ring { flex: none; width: 74px; height: 74px; border-radius: 50%; display: grid; place-items: center; position: relative; background: conic-gradient(currentColor calc(var(--pct) * 1%), var(--bg-raised) 0); }
+.ct-ring::before { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: var(--bg-surface); }
+.ct-ring > div { position: relative; text-align: center; line-height: 1; }
+.ct-ring b { display: block; font: 700 19px/1 var(--font-mono); color: var(--text-primary); }
+.ct-ring small { font: 500 9px/1 var(--font-mono); color: var(--text-dim); }
+.ct-subs { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.ct-subs > div { display: grid; grid-template-columns: 66px minmax(0,1fr) 24px; align-items: center; gap: 6px; font: 500 10px/1 var(--font-mono); color: var(--text-muted); }
+.ct-subs i { height: 4px; border-radius: 2px; background: var(--bg-raised); overflow: hidden; display: block; }
+.ct-subs em { display: block; height: 100%; border-radius: 2px; }
+.ct-subs b { text-align: right; font-weight: 600; }
+.ct-subs span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* šoniniai blokai: pelnas + rizikos */
+.ct-sides { grid-column: 2 / 4; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px 14px 18px; }
+.ct-side { padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-elevated); font-size: 12.5px; color: var(--text-secondary); }
+.ct-side-pos { background: var(--success-dim); border-color: var(--success-border); } .ct-side-pos .ct-side-ic { background: var(--success); color: #0A0C12; } .ct-side-pos .ct-side-big { color: var(--success); }
+.ct-side-warn { background: var(--warning-dim); border-color: var(--warning-border); } .ct-side-warn .ct-side-ic { background: var(--warning); color: #0A0C12; } .ct-side-warn .ct-side-big { color: var(--warning); }
+.ct-side-neg { background: var(--danger-dim); border-color: var(--danger-border); } .ct-side-neg .ct-side-ic { background: var(--danger); color: #fff; }
+.ct-side-muted .ct-side-ic { background: var(--bg-raised); color: var(--text-muted); }
+.ct-side-h { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.ct-side-h b { margin-left: auto; font: 600 11px/1 var(--font-mono); padding: 4px 6px; border-radius: 5px; background: rgba(10,12,18,.4); color: var(--text-secondary); }
+.ct-side-ic { width: 22px; height: 22px; border-radius: 6px; display: grid; place-items: center; font: 700 11px/1 var(--font-mono); flex: none; }
+.ct-side-big { font-size: 15px; font-weight: 700; margin-top: 8px; } .ct-side-big span { font: 600 12px var(--font-mono); opacity: .8; }
+.ct-side p { margin: 8px 0 0; color: var(--text-muted); font-size: 12px; line-height: 1.45; }
+.ct-side ul { margin: 8px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.ct-side li { position: relative; padding-left: 12px; font-size: 12px; line-height: 1.4; color: var(--text-secondary); }
+.ct-side li::before { content: ""; position: absolute; left: 0; top: 7px; width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: .6; }
+.ct-kv { display: flex; justify-content: space-between; gap: 10px; margin-top: 7px; font-size: 12px; } .ct-kv span { color: var(--text-muted); } .ct-kv b { color: var(--text-primary); font-weight: 600; text-align: right; }
+.ct-mini { margin-top: 10px; height: 28px; padding: 0 10px; border-radius: 6px; background: transparent; border: 1px solid var(--border-light); color: var(--text-primary); font-size: 11.5px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.ct-mini:hover { background: rgba(255,255,255,.06); }
+
+/* ===== DETALĖS PANELĖ ===== */
+.ct-card .detail-panel.ct-panel { margin: 0; padding: 0 16px 16px; background: var(--bg-surface); border-top: 1px solid var(--border); border-left: none; border-radius: 0; font-size: 13px; }
+.ct-card .detail-panel.ct-panel > span { display: block; padding: 14px 0; color: var(--text-muted); font-size: 12.5px; }
+.ct-cache { font: 500 10.5px/1 var(--font-mono); color: var(--text-dim); padding: 10px 0 0; } .ct-cache a { color: var(--accent-light); }
+.ct-tabs { display: flex; gap: 4px; overflow-x: auto; padding: 12px 0; border-bottom: 1px solid var(--border); margin-bottom: 14px; scrollbar-width: none; }
+.ct-tabs::-webkit-scrollbar { display: none; }
+.ct-tab { flex: none; height: 32px; padding: 0 12px; border-radius: 8px; background: transparent; border: 1px solid transparent; color: var(--text-muted); font-size: 12.5px; font-weight: 500; cursor: pointer; white-space: nowrap; }
+.ct-tab:hover { background: var(--bg-elevated); color: var(--text-primary); }
+.ct-tab.active { background: var(--accent-dim); border-color: var(--accent-border); color: var(--accent-light); font-weight: 600; }
+.ct-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.ct-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ct-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.ct-box { padding: 14px; border-radius: 12px; background: var(--bg-elevated); border: 1px solid var(--border); min-width: 0; }
+.ct-box-ai { border-color: var(--accent-border); } .ct-box-warn { border-color: var(--warning-border); } .ct-box-neg { border-color: var(--danger-border); }
+.ct-box-h { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 10px; }
+.ct-box-ic { width: 22px; height: 22px; border-radius: 6px; display: grid; place-items: center; font: 700 10px/1 var(--font-mono); background: var(--bg-raised); color: var(--text-muted); flex: none; }
+.ct-box p { margin: 0; font-size: 12.5px; line-height: 1.55; color: var(--text-secondary); text-wrap: pretty; }
+.ct-box p + p { margin-top: 8px; }
+.ct-muted { color: var(--text-muted) !important; }
+.ct-dash { color: var(--text-dim) !important; }
+.ct-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.ct-list li { position: relative; padding-left: 16px; font-size: 12.5px; line-height: 1.45; color: var(--text-secondary); }
+.ct-list li::before { content: ""; position: absolute; left: 0; top: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--text-dim); }
+.ct-list-pos li::before { background: var(--success); } .ct-list-warn li::before { background: var(--warning); } .ct-list-neg li::before { background: var(--danger); }
+.ct-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.ct-tags span { white-space: nowrap; font-size: 12px; padding: 6px 9px; border-radius: 6px; background: var(--bg-raised); border: 1px solid var(--border); color: var(--text-secondary); }
+.ct-tags .ct-tag-more { color: var(--accent-light); border-color: var(--accent-border); background: var(--accent-dim); cursor: pointer; }
+.ct-table > div { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 12.5px; }
+.ct-table > div:last-child { border-bottom: none; } .ct-table span { color: var(--text-muted); } .ct-table b { font-weight: 600; text-align: right; }
+.ct-vin { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ct-vin code { font: 600 13px var(--font-mono); letter-spacing: .05em; color: var(--text-primary); }
+.ct-vin .ct-mini { margin-top: 0; }
+.ct-stat { padding: 14px; border-radius: 12px; background: var(--bg-elevated); border: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
+.ct-stat span { font: 500 9px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); }
+.ct-stat b { font: 700 20px/1 var(--font-mono); letter-spacing: -.02em; color: var(--text-primary); }
+.ct-stat small { font-size: 11.5px; color: var(--text-muted); }
+.ct-posbar { position: relative; height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--success), var(--bg-raised) 50%, var(--danger)); opacity: .9; }
+.ct-posbar em { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--border-light); }
+.ct-posbar i { position: absolute; top: -4px; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); border: 3px solid var(--bg-elevated); transform: translateX(-50%); box-shadow: 0 0 0 1px var(--accent); }
+.ct-posbar-l { display: flex; justify-content: space-between; margin-top: 10px; font: 500 10px/1 var(--font-mono); color: var(--text-dim); }
+.ct-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+.ct-gallery img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); cursor: zoom-in; background: var(--bg-elevated); }
+
+/* Panelė kitur (tinder / visi skelbimai) — be kortelės konteksto */
+.detail-panel:not(.ct-panel) .ct-tabs { padding-top: 0; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .ct-grid { grid-template-columns: 240px minmax(0, 1fr); }
+  .ct-photo { grid-row: 1; }
+  .ct-score { grid-column: 1 / 3; padding: 0 16px 8px 14px; }
+  .ct-sides { grid-column: 1 / 3; padding: 0 16px 14px 14px; }
+  .ct-cols, .ct-cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .ct-grid { grid-template-columns: 1fr; }
+  .ct-photo { padding: 12px 12px 0; }
+  .ct-main { padding: 12px; }
+  .ct-score, .ct-sides { grid-column: 1; padding: 0 12px 12px; }
+  .ct-sides, .ct-cols, .ct-cols-2, .ct-cols-3 { grid-template-columns: 1fr; }
+  .ct-price { font-size: 22px; }
+}
+
+</style>
 </head>
 <body>
 
 <!-- ===== APP HEADER ===== -->
+<!-- CarTriige — header + search hero markup (v3, pagal referensą). Visi id / onclick išlaikyti. -->
+
 <header class="app-header">
   <div class="app-header-inner">
     <div class="app-logo">
@@ -526,182 +806,109 @@
       <span id="app-version"></span>
     </div>
     <nav class="app-nav">
-      <a class="nav-btn active" href="#">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        Paieška
-      </a>
+      <a class="nav-btn active" href="#"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="4.5"></circle><path d="M10.5 10.5 14 14"></path></svg>Paieška</a>
       <button onclick="toggleFavoritesPanel()" id="favorites-toggle-btn" class="nav-btn">★ Favoritai <span id="favorites-count" class="nav-badge" style="display:none">0</span></button>
-      <a class="nav-btn" href="#search-history-wrap">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        Istorija
-      </a>
-      <a class="nav-btn" href="#results">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="10" width="3" height="4" rx="1" fill="currentColor"/><rect x="6.5" y="6" width="3" height="8" rx="1" fill="currentColor"/><rect x="11" y="2" width="3" height="12" rx="1" fill="currentColor"/></svg>
-        Palyginimai
-      </a>
+      <a class="nav-btn" href="#search-history-wrap"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6"></circle><path d="M8 4.5V8l2.5 1.5"></path></svg>Istorija</a>
+      <a class="nav-btn" href="#results"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 13V7M8 13V3M13 13V9"></path></svg>Palyginimai</a>
     </nav>
     <div class="app-tools">
       <button class="icon-btn" id="theme-btn" title="Tema" type="button" onclick="toggleTheme()"><span class="theme-icon"></span></button>
       <button class="icon-btn has-dot" title="Pranešimai" type="button">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2a4 4 0 0 0-4 4v3l-1 1v1h10v-1l-1-1V6a4 4 0 0 0-4-4z" stroke="currentColor" stroke-width="1.3"/><path d="M6.5 13a1.5 1.5 0 0 0 3 0" stroke="currentColor" stroke-width="1.3"/></svg>
+        <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 11V7a4 4 0 0 1 8 0v4l1 1.5H3z"></path><path d="M6.5 14a1.5 1.5 0 0 0 3 0"></path></svg>
       </button>
       <div class="avatar">V</div>
     </div>
   </div>
 </header>
 
-<div class="container">
-  <!-- Favorites panel (collapsible, below header) -->
-  <div id="favorites-wrap" style="display:none; margin-top:16px;">
-    <div id="favorites-panel" style="display:none; background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:14px; margin-top:8px;">
-      <button onclick="checkAllFavorites()" style="margin-bottom:10px; padding:8px 12px; background:var(--bg-elevated); color:var(--text-secondary); border:1px solid var(--border); border-radius:var(--radius-sm); font-size:12px; cursor:pointer;">🔄 Patikrinti visus pakeitimus</button>
-      <div id="favorites-list"></div>
+<section class="search-hero">
+  <div class="hero-top">
+    <div class="hero-copy">
+      <div class="hero-eyebrow">Automobilių paieška ir analizė</div>
+      <h1 class="hero-title">Rask geriausias <em>galimybes</em></h1>
+      <p class="hero-subtitle">Tūkstančiai automobilių skelbimų vienoje vietoje. AI analizė. Rinkos kainos. Tikri skaičiai. Didesnis pelno potencialas.</p>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-photo" role="img" aria-label="Automobilio nuotrauka"><span>ĮDĖTI NUOTRAUKĄ · BMW 3/4 PRIEKIS · TAMSUS FONAS</span></div>
+      <blockquote class="hero-quote">„Geresni sprendimai prasideda nuo geresnių duomenų.“</blockquote>
+    </div>
+    <div class="hero-feats">
+      <div class="feat"><span class="feat-ic">◫</span><span>3 portalai<br>vienoje paieškoje</span></div>
+      <div class="feat"><span class="feat-ic">▥</span><span>Rinkos kainų<br>palyginimas</span></div>
+      <div class="feat"><span class="feat-ic">◎</span><span>AI analizė ir<br>rizikų vertinimas</span></div>
+      <div class="feat"><span class="feat-ic">⚡</span><span>Pelno potencialo<br>įvertinimas</span></div>
     </div>
   </div>
 
-  <!-- Search history chips -->
-  <div id="search-history-wrap" style="display:none; margin-top:12px;">
-    <div style="font-size:11px; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; font-weight:600;">🕘 Ankstesnės paieškos</div>
-    <div id="search-history-chips" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+  <div class="filters">
+    <div class="filters-head">
+      <div class="filters-head-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="M15.5 15.5 21 21"></path></svg></div>
+      <div><div class="filters-title">Paieškos filtrai</div><div class="filters-sub">Pasirinkite kriterijus ir leiskite CarTriige rasti geriausius pasiūlymus už jus.</div></div>
+      <button type="button" class="btn-ghost" id="save-search-btn" style="margin-left:auto" onclick="saveSearch()">▢ Išsaugoti paiešką</button>
+    </div>
+
+    <div class="f-grid f-4">
+      <div><label>Markė</label>
+        <div class="f-ctl"><span class="f-ic">◉</span>
+        <select id="marke" onchange="updateModels(); updateGenerationHint();">
+          <option value="BMW">BMW</option><option value="Audi">Audi</option><option value="Volkswagen">Volkswagen</option><option value="Mercedes-Benz">Mercedes-Benz</option><option value="Opel">Opel</option><option value="Ford">Ford</option><option value="Volvo">Volvo</option><option value="Toyota">Toyota</option><option value="Skoda">Skoda</option><option value="Peugeot">Peugeot</option><option value="Nissan">Nissan</option><option value="Hyundai">Hyundai</option><option value="Kia">Kia</option><option value="Renault">Renault</option><option value="Mazda">Mazda</option><option value="Honda">Honda</option><option value="Porsche">Porsche</option><option value="Land Rover">Land Rover</option><option value="Lexus">Lexus</option>
+        </select></div>
+      </div>
+      <div><label>Modelis</label>
+        <div class="f-ctl"><select id="modelis" onchange="updateGenerationHint()"><option value="">Visi modeliai</option></select></div>
+      </div>
+      <div><label>Pavarų dėžė</label>
+        <div class="f-ctl"><span class="f-ic">⚙</span>
+        <select id="pavaru_deze"><option value="">Bet kokia</option><option value="Automatinė">Automatinė</option><option value="Mechaninė">Mechaninė</option></select></div>
+      </div>
+      <div><label>Kuro tipas <small>(netrukus)</small></label>
+        <div class="f-ctl is-soon"><span class="f-ic">⛽</span><select disabled><option>Visi tipai</option></select></div>
+      </div>
+    </div>
+
+    <div class="f-grid f-5">
+      <div><label>Metai nuo</label><div class="f-ctl"><span class="f-ic">▦</span><input id="metaiNuo" type="number" placeholder="Nenurodyta" oninput="updateGenerationHint()"></div></div>
+      <div><label>Metai iki</label><div class="f-ctl"><span class="f-ic">▦</span><input id="metaiIki" type="number" placeholder="Nenurodyta"></div></div>
+      <div><label>Rida iki (km)</label>
+        <div class="f-ctl"><span class="f-ic">◔</span>
+        <select id="ridaIki"><option value="">Bet kokia</option><option value="30000">30 000</option><option value="50000">50 000</option><option value="100000">100 000</option><option value="150000">150 000</option><option value="200000">200 000</option><option value="300000">300 000</option></select></div>
+      </div>
+      <div><label>Kaina nuo (€)</label><div class="f-ctl"><span class="f-ic">€</span><input id="kainaNuo" type="number" placeholder="Nenurodyta"></div></div>
+      <div><label>Kaina iki (€)</label><div class="f-ctl"><span class="f-ic">€</span><input id="kainaIki" type="number" placeholder="Nenurodyta"></div></div>
+    </div>
+
+    <div id="generation-hint" style="display:none;"></div>
+
+    <div class="f-row-3">
+      <div><label>Puslapių skaičius (per portalą)</label>
+        <div class="f-ctl"><span class="f-ic">≡</span>
+        <select id="maxPages"><option value="3" selected>3 (numatyta)</option><option value="5">5</option><option value="8">8 (daugiau duomenų, ilgiau)</option><option value="10">10 (maksimaliai)</option></select></div>
+      </div>
+      <label class="f-toggle"><input type="checkbox" checked disabled><span class="knob"></span><span>Rodyti tik su nuotraukomis <small>(netrukus)</small></span></label>
+      <a class="link-more" href="#">Daugiau filtrų ⌵</a>
+      <button type="button" class="btn-ghost" style="margin-left:auto" onclick="['metaiNuo','metaiIki','kainaNuo','kainaIki'].forEach(function(i){document.getElementById(i).value=''});['modelis','pavaru_deze','ridaIki'].forEach(function(i){document.getElementById(i).value=''});">↺ Išvalyti filtrus</button>
+    </div>
+
+    <div>
+      <label>Pasirinkite portalus</label>
+      <div class="portals">
+        <label class="portal"><input type="checkbox" id="portal-autoplius" checked><span class="chk"></span><span class="logo" style="background:#D8232A">a</span><span class="p-name">Autoplius.lt<small>Lietuva</small></span></label>
+        <label class="portal"><input type="checkbox" id="portal-autogidas" checked><span class="chk"></span><span class="logo" style="background:#1F2A44">AG</span><span class="p-name">Autogidas.lt<small>Lietuva</small></span></label>
+        <label class="portal"><input type="checkbox" id="portal-autoscout24"><span class="chk"></span><span class="logo" style="background:#FFD200;color:#111">S24</span><span class="p-name">AutoScout24.com<small>Europa (užsienis)</small></span></label>
+        <label class="portal"><input type="checkbox" id="portal-otomoto"><span class="chk"></span><span class="logo" style="background:#4A5568">OT</span><span class="p-name">Otomoto.pl<small>Lenkija (PLN→EUR)</small></span></label>
+      </div>
+    </div>
+
+    <button id="search-btn" onclick="runSearch()">🔍 Ieškoti ir analizuoti →</button>
+
+    <div class="filters-foot">
+      <button id="quick-count-btn" onclick="runQuickCount()">▥ Patikrinti kiekį</button>
+      <span class="foot-note">Greitas rezultatas be pilnos AI analizės (parodo skelbimų kiekį)</span>
+      <span id="quick-count-result"></span>
+    </div>
   </div>
+</section>
 
-  <!-- Search hero -->
-  <section class="search-hero">
-    <div class="hero-top">
-      <div class="hero-copy">
-        <div class="hero-eyebrow">Automobilių paieška ir analizė</div>
-        <h1 class="hero-title">Rask geriausias <em>galimybes</em></h1>
-        <p class="hero-subtitle">Tūkstančiai automobilių skelbimų vienoje vietoje. AI analizė. Rinkos kainos. Tikri skaičiai. Didesnis pelno potencialas.</p>
-      </div>
-      <div class="hero-visual">
-        <div class="hero-photo" role="img"><span>ĮDĖTI NUOTRAUKĄ · BMW 3/4 PRIEKIS · TAMSUS FONAS</span></div>
-        <blockquote class="hero-quote">„Geresni sprendimai prasideda nuo geresnių duomenų."</blockquote>
-      </div>
-      <div class="hero-feats">
-        <div class="feat"><span class="feat-ic">◫</span><span>3 portalai<br>vienoje paieškoje</span></div>
-        <div class="feat"><span class="feat-ic">▥</span><span>Rinkos kainų<br>palyginimas</span></div>
-        <div class="feat"><span class="feat-ic">◎</span><span>AI analizė ir<br>rizikų vertinimas</span></div>
-        <div class="feat"><span class="feat-ic">⚡</span><span>Pelno potencialo<br>įvertinimas</span></div>
-      </div>
-    </div>
-
-    <div class="filters">
-      <div class="filters-head">
-        <div class="filters-head-ic">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        </div>
-        <div>
-          <div class="filters-title">Paieškos filtrai</div>
-          <div class="filters-sub">Pasirinkite kriterijus ir leiskite CarTriige rasti geriausius pasiūlymus už jus.</div>
-        </div>
-        <button type="button" class="btn-ghost" id="save-search-btn" style="margin-left:auto" onclick="saveSearch()">▢ Išsaugoti paiešką</button>
-      </div>
-      <div class="f-grid f-4">
-        <div><label>Markė</label>
-          <div class="f-ctl"><span class="f-ic">◉</span>
-            <select id="marke" onchange="updateModels(); updateGenerationHint();">
-              <option value="BMW">BMW</option>
-              <option value="Audi">Audi</option>
-              <option value="Volkswagen">Volkswagen</option>
-              <option value="Mercedes-Benz">Mercedes-Benz</option>
-              <option value="Opel">Opel</option>
-              <option value="Ford">Ford</option>
-              <option value="Volvo">Volvo</option>
-              <option value="Toyota">Toyota</option>
-              <option value="Skoda">Skoda</option>
-              <option value="Peugeot">Peugeot</option>
-              <option value="Nissan">Nissan</option>
-              <option value="Hyundai">Hyundai</option>
-              <option value="Kia">Kia</option>
-              <option value="Renault">Renault</option>
-              <option value="Mazda">Mazda</option>
-              <option value="Honda">Honda</option>
-              <option value="Porsche">Porsche</option>
-              <option value="Land Rover">Land Rover</option>
-              <option value="Lexus">Lexus</option>
-            </select>
-          </div>
-        </div>
-        <div><label>Modelis</label>
-          <div class="f-ctl">
-            <select id="modelis" onchange="updateGenerationHint()"><option value="">Visi modeliai</option></select>
-          </div>
-        </div>
-        <div><label>Pavarų dėžė</label>
-          <div class="f-ctl"><span class="f-ic">⚙</span>
-            <select id="pavaru_deze">
-              <option value="">Bet kokia</option>
-              <option value="Automatinė">Automatinė</option>
-              <option value="Mechaninė">Mechaninė</option>
-            </select>
-          </div>
-        </div>
-        <div><label>Kuro tipas <small>(netrukus)</small></label>
-          <div class="f-ctl is-soon"><span class="f-ic">⛽</span>
-            <select disabled=""><option>Bet koks</option></select>
-          </div>
-        </div>
-      </div>
-      <div class="f-grid f-5">
-        <div><label>Metai nuo</label>
-          <div class="f-ctl"><span class="f-ic">▦</span><input id="metaiNuo" type="number" placeholder="Nenurodyta" oninput="updateGenerationHint()"></div>
-        </div>
-        <div><label>Metai iki</label>
-          <div class="f-ctl"><span class="f-ic">▦</span><input id="metaiIki" type="number" placeholder="Nenurodyta"></div>
-        </div>
-        <div><label>Rida iki (km)</label>
-          <div class="f-ctl"><span class="f-ic">◔</span>
-            <select id="ridaIki">
-              <option value="">Bet kokia</option>
-              <option value="30000">iki 30 000 km</option>
-              <option value="50000">iki 50 000 km</option>
-              <option value="100000">iki 100 000 km</option>
-              <option value="150000">iki 150 000 km</option>
-              <option value="200000">iki 200 000 km</option>
-              <option value="300000">iki 300 000 km</option>
-            </select>
-          </div>
-        </div>
-        <div><label>Kaina nuo (€)</label>
-          <div class="f-ctl"><span class="f-ic">€</span><input id="kainaNuo" type="number" placeholder="Nenurodyta"></div>
-        </div>
-        <div><label>Kaina iki (€)</label>
-          <div class="f-ctl"><span class="f-ic">€</span><input id="kainaIki" type="number" placeholder="Nenurodyta"></div>
-        </div>
-      </div>
-      <div id="generation-hint" style="display:none;"></div>
-      <div class="f-row-3">
-        <div><label>Puslapių skaičius (per portalą)</label>
-          <div class="f-ctl"><span class="f-ic">≡</span>
-            <select id="maxPages">
-              <option value="3" selected>3 — greičiau</option>
-              <option value="5">5</option>
-              <option value="8">8 — daugiau duomenų</option>
-              <option value="10">10 — maksimaliai</option>
-            </select>
-          </div>
-        </div>
-        <label class="f-toggle"><input type="checkbox" checked="" disabled=""><span class="knob"></span><span>Rodyti tik su nuotraukomis <small>(netrukus)</small></span></label>
-        <a class="link-more" href="#">Daugiau filtrų ⌵</a>
-        <button type="button" class="btn-ghost" style="margin-left:auto" onclick="document.getElementById('marke').selectedIndex=0;document.getElementById('modelis').innerHTML='<option value=\'\'>Visi modeliai</option>';document.getElementById('pavaru_deze').value='';document.getElementById('metaiNuo').value='';document.getElementById('metaiIki').value='';document.getElementById('ridaIki').value='';document.getElementById('kainaNuo').value='';document.getElementById('kainaIki').value='';document.getElementById('maxPages').value='3';updateGenerationHint();">↺ Išvalyti filtrus</button>
-      </div>
-      <div>
-        <label>Pasirinkite portalus</label>
-        <div class="portals">
-          <label class="portal"><input type="checkbox" id="portal-autoplius" checked=""><span class="chk"></span><span class="logo" style="background:#D8232A">a</span><span class="p-name">Autoplius.lt<small>Lietuva</small></span></label>
-          <label class="portal"><input type="checkbox" id="portal-autogidas" checked=""><span class="chk"></span><span class="logo" style="background:#1F2A44">AG</span><span class="p-name">Autogidas.lt<small>Lietuva</small></span></label>
-          <label class="portal"><input type="checkbox" id="portal-autoscout24"><span class="chk"></span><span class="logo" style="background:#FFD200;color:#111">S24</span><span class="p-name">AutoScout24.com<small>Europa (užsienis)</small></span></label>
-          <label class="portal"><input type="checkbox" id="portal-otomoto"><span class="chk"></span><span class="logo" style="background:#4A5568">OT</span><span class="p-name">Otomoto.pl<small>Lenkija (PLN→EUR)</small></span></label>
-        </div>
-      </div>
-      <button id="search-btn" onclick="runSearch()">🔍 Ieškoti ir analizuoti →</button>
-      <div class="filters-foot">
-        <button id="quick-count-btn" onclick="runQuickCount()">▥ Patikrinti kiekį</button>
-        <span class="foot-note">Greitas rezultatas be pilnos AI analizės (parodo skelbimų kiekį)</span>
-        <span id="quick-count-result"></span>
-      </div>
-    </div>
-  </section>
 
   <div id="status"></div>
   <div id="search-progress-wrap">
@@ -780,7 +987,7 @@
 </div>
 
 <script>
-const APP_VERSION = 'v1.5.0';
+const APP_VERSION = 'v2.0.0';
 const BRAND_MODELS = {
   'BMW': ['1', '2', '3', '4', '5', '6', '7', '8', 'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'Z4', 'M'],
   'Audi': ['A1', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q2', 'Q3', 'Q5', 'Q7', 'Q8'],
@@ -2274,6 +2481,284 @@ function loadSavedSearch() {
     updateGenerationHint();
   } catch(e) {}
 }
+
+</script>
+<script id="cartriige-cards-v2">
+/* ============================================================
+   CarTriige v2 — kortelės ir detalės panelės atvaizdavimas.
+   Įkeliama PO originalaus <script>: perrašo tik renderCandidateCards()
+   ir buildDetailPanelHTML(). Naudoja esamas globalias funkcijas:
+   formatEUR, escJs, formatRidaDiff, isFavorited, toggleFavorite,
+   toggleCompare, loadDetail, cyclePhoto, openLightbox, lookupVin,
+   lookupSeller, currentData.
+   ============================================================ */
+(function () {
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const fmtKm = (n) => (n ? n.toLocaleString('lt-LT').replace(/,/g, ' ') + ' km' : '? km');
+  const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+  // Išvestinis CarTriige įvertis (0–10) iš turimų duomenų — skaidrus, ne "AI magija".
+  function ctScore(c, a) {
+    const pr = a && a.perikupo_radaras;
+    const kaina = clamp(5 + (c.diffPct || 0) / 6, 0, 10);
+    const rida = c.ridaDiffPct == null ? 6.5 : clamp(7 - c.ridaDiffPct / 10, 0, 10);
+    const iranga = a ? clamp(5 + 0.5 * ((a.irangos_akcentai || []).length), 5, 9.5) : 6;
+    const istorija = clamp(5 + (c.turiVin ? 1.5 : 0) + (c.turiIstorijosAtaskaita ? 2 : 0) + (c.garantijosTipas ? 1 : 0) + (c.yraVerslas ? 0.5 : 0), 0, 10);
+    const potencialas = pr && pr.procentas != null ? clamp(pr.procentas / 10, 0, 10) : 6;
+    let total = kaina * 0.3 + rida * 0.15 + iranga * 0.15 + istorija * 0.2 + potencialas * 0.2;
+    if ((c.diffPct || 0) >= 39) total -= 1.5;
+    if (a && (a.nuotrauku_pastebejimai || []).length) total -= 1;
+    total = clamp(total, 0, 10);
+    return { total, parts: [['Kaina', kaina], ['Rida', rida], ['Įranga', iranga], ['Istorija', istorija], ['Potencialas', potencialas]] };
+  }
+  const tone = (v) => (v >= 7.5 ? 'pos' : v >= 5.5 ? 'warn' : 'neg');
+  const pelnoLabel = { aukstas: 'Aukštas', vidutinis: 'Vidutinis', zemas: 'Žemas', neverta: 'Neverta' };
+  const prTone = (pr) => (pr.procentas >= 60 ? 'pos' : pr.procentas >= 30 ? 'warn' : 'neg');
+
+  function findCandidate(url) {
+    if (!window.currentData) return null;
+    return (currentData.candidates || []).find((c) => c.url === url) || (currentData.allListings || []).find((c) => c.url === url) || null;
+  }
+
+  function scoreBlock(c, a) {
+    const s = ctScore(c, a);
+    const t = tone(s.total);
+    return `
+      <div class="ct-score">
+        <div class="ct-eyebrow">CarTriige įvertis</div>
+        <div class="ct-score-row">
+          <div class="ct-ring ct-${t}" style="--pct:${Math.round(s.total * 10)}"><div><b>${s.total.toFixed(1)}</b><small>/10</small></div></div>
+          <div class="ct-subs">${s.parts.map(([k, v]) => `<div><span>${k}</span><i><em style="width:${v * 10}%" class="ct-bg-${tone(v)}"></em></i><b class="ct-${tone(v)}">${v.toFixed(1)}</b></div>`).join('')}</div>
+        </div>
+      </div>`;
+  }
+
+  function profitBlock(a, cardId, hasDeep, btnId) {
+    const pr = a && a.perikupo_radaras;
+    if (!pr) return `<div class="ct-side ct-side-muted"><div class="ct-side-h"><span class="ct-side-ic">€</span>Pelno potencialas</div><p>Skaičiuojamas detalioje apžvalgoje.</p>${hasDeep ? '' : `<button class="ct-mini" onclick="document.getElementById('${btnId}').click()">Analizuoti →</button>`}</div>`;
+    return `
+      <div class="ct-side ct-side-${prTone(pr)}">
+        <div class="ct-side-h"><span class="ct-side-ic">€</span>Pelno potencialas</div>
+        <div class="ct-side-big">${pelnoLabel[pr.pelno_potencialas] || pr.pelno_potencialas || ''} <span>(${pr.procentas}%)</span></div>
+        ${pr.numatoma_investicija ? `<div class="ct-kv"><span>Numatoma investicija</span><b>${esc(pr.numatoma_investicija)}</b></div>` : ''}
+        ${pr.numatomas_pardavimo_diapazonas ? `<div class="ct-kv"><span>Galima pardavimo kaina</span><b>${esc(pr.numatomas_pardavimo_diapazonas)}</b></div>` : ''}
+      </div>`;
+  }
+
+  function riskBlock(a, c, hasDeep, btnId) {
+    const risks = a && a.rizikos && a.rizikos.length ? a.rizikos : null;
+    if (!risks) {
+      const auto = [];
+      if ((c.diffPct || 0) >= 39) auto.push(`${c.diffPct}% nuolaida – statistiškai dažni paslėpti defektai`);
+      if (c.ridaDiffPct != null && c.ridaDiffPct >= 20) auto.push(`Rida ${formatRidaDiff(c.ridaDiffPct)} virš imties vidurkio`);
+      if (!c.turiVin) auto.push('VIN skelbime nenurodytas');
+      return `<div class="ct-side ${auto.length ? 'ct-side-neg' : 'ct-side-muted'}"><div class="ct-side-h"><span class="ct-side-ic">!</span>Rizikos</div>${auto.length ? `<ul>${auto.map((r) => `<li>${esc(r)}</li>`).join('')}</ul>` : '<p>Pirminių signalų nėra. Pilnas vertinimas – detalioje apžvalgoje.</p>'}</div>`;
+    }
+    return `
+      <div class="ct-side ct-side-neg">
+        <div class="ct-side-h"><span class="ct-side-ic">!</span>Rizikos <b>${risks.length}</b></div>
+        <ul>${risks.slice(0, 3).map((r) => `<li>${esc(r)}</li>`).join('')}</ul>
+        ${risks.length > 3 ? `<button class="ct-mini" onclick="document.getElementById('${btnId}').click(); setTimeout(function(){ var p=document.getElementById('${btnId.replace(/-btn$/, '')}'); var t=p&&p.querySelector('[data-tab=risk]'); if(t) t.click(); }, 50)">Plačiau →</button>` : ''}
+      </div>`;
+  }
+
+  // ---------- KORTELĖS ----------
+  window.renderCandidateCards = function (candidates, results) {
+    results.innerHTML = '';
+    if (candidates.length === 0) {
+      results.innerHTML = '<div class="ct-empty">Nieko nerasta pagal šiuos kriterijus, arba visos kainos atitinka rinkos vidurkį.</div>';
+      return;
+    }
+    window.__galleryStore = window.__galleryStore || {};
+    window.__cardPhotoIndex = window.__cardPhotoIndex || {};
+
+    candidates.forEach((c, idx) => {
+      const cardId = `detail-${idx}-${c.url.length}`;
+      const btnId = `${cardId}-btn`;
+      const a = c.deepAnalysis || null;
+      const hasDeep = !!a;
+      const photos = c.photos && c.photos.length ? c.photos : (c.photo ? [c.photo] : []);
+      const multi = photos.length > 1;
+      if (multi) { window.__galleryStore[cardId + '-strip'] = photos; window.__cardPhotoIndex[cardId] = 0; }
+
+      const isFav = isFavorited(c.url);
+      const favSnapshot = `{modelis:'${escJs(c.modelis)}', kaina:${c.kaina || 'null'}, metai:${c.metai || 'null'}, rida:${c.rida || 'null'}, photo:'${escJs(c.photo || '')}', source:'${escJs(c.source)}'}`;
+      const diffTone = c.diffPct >= 39 ? 'neg' : c.diffPct >= 8 ? 'pos' : 'warn';
+      const skirtumas = c.marketMedian && c.kaina ? c.kaina - c.marketMedian : null;
+
+      const thumbs = multi ? `<div class="ct-thumbs">${photos.slice(0, 5).map((p, i) => `<img src="${p}" loading="lazy" onclick="window.__cardPhotoIndex['${cardId}']=${i}; cyclePhoto('${cardId}', 0)" onerror="this.style.display='none'">`).join('')}${photos.length > 5 ? `<button onclick="openLightbox(window.__galleryStore['${cardId}-strip'], 5)">+${photos.length - 5}</button>` : ''}</div>` : '';
+
+      const chips = [
+        c.metai ? ['▦', c.metai] : null,
+        ['◔', fmtKm(c.rida)],
+        (c.variklioTuris || c.kuras) ? ['◉', [c.variklioTuris ? c.variklioTuris + ' l' : null, c.kuras ? `(${c.kuras.toLowerCase()})` : null].filter(Boolean).join(' ')] : null,
+        c.galia ? ['⚡', `${c.galia} kW`] : null,
+        c.pavarai ? ['⚙', c.pavarai] : null,
+      ].filter(Boolean).map(([ic, t]) => `<span class="ct-chip"><i>${ic}</i>${esc(t)}</span>`).join('');
+
+      const signals = [];
+      if (c.yraVerslas) signals.push('Verslas / dealeris');
+      if (c.turiIstorijosAtaskaita) signals.push('Patikrinta istorija');
+      if (c.garantijosTipas) signals.push('Garantija');
+      if (c.turiVin) signals.push('VIN nurodytas');
+      const signalChips = signals.map((s) => `<span class="ct-chip ct-chip-pos">✓ ${s}</span>`).join('');
+
+      const notes = [];
+      if (c.pvmPastaba) notes.push(`<div class="ct-note ct-warn">${esc(c.pvmPastaba)}</div>`);
+      else if (c.kainaBePvm) notes.push(`<div class="ct-note">Skelbime taip pat nurodyta ${formatEUR(c.kainaBePvm)} be PVM / eksportui.</div>`);
+      if (c.diffPct >= 39) notes.push(`<div class="ct-note ct-neg">${c.diffPct}% nuolaida yra labai didelė – statistiškai tokie skelbimai dažnai turi paslėptų defektų. Būtina kruopšti apžiūra.</div>`);
+      if (c.ridaDiffPct != null && c.ridaDiffPct >= 20) notes.push(`<div class="ct-note ct-neg">Rida ${formatRidaDiff(c.ridaDiffPct)} aukštesnė nei imties vidurkis (${fmtKm(c.ridaMedian)}).</div>`);
+      else if (c.ridaDiffPct != null && c.ridaDiffPct <= -20) notes.push(`<div class="ct-note ct-pos">Rida ${Math.abs(c.ridaDiffPct)}% žemesnė nei imties vidurkis (${fmtKm(c.ridaMedian)}).</div>`);
+      if (c.kryzminiaiSkelbimai && c.kryzminiaiSkelbimai.length) notes.push(`<div class="ct-note">Tas pats automobilis taip pat: ${c.kryzminiaiSkelbimai.map((k) => `${esc(k.source)} už ${formatEUR(k.kaina)}`).join(', ')}</div>`);
+
+      const detailBtnLabel = hasDeep ? 'Rodyti gilią analizę' : 'Detali apžvalga';
+      const preloadedPanelHTML = hasDeep ? buildDetailPanelHTML({ analysis: a, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, cardId) : '';
+      const compareArgs = `'${c.url}', '${escJs(c.modelis)}', ${c.kaina || 'null'}, '${escJs(c.photo || '')}', ${c.metai || 'null'}, ${c.rida || 'null'}, '${escJs(c.kuras || '')}', ${c.galia || 'null'}, ${c.variklioTuris || 'null'}, '${escJs(c.pavarai || '')}', ${c.diffPct != null ? c.diffPct : 'null'}, ${c.marketMedian || 'null'}, '${escJs(c.source || '')}', 'cmp-${cardId}'`;
+      const detailArgs = `'${c.url}', '${cardId}', this, false, {kaina:${c.kaina || 'null'}, marketMedian:${c.marketMedian || 'null'}, marketCount:${c.marketCount || 'null'}, diffPct:${c.diffPct != null ? c.diffPct : 'null'}, modelis:'${escJs(c.modelis)}', pardavejas:${c.pardavejas ? `'${escJs(c.pardavejas)}'` : 'null'}, galia:${c.galia || 'null'}, variklioTuris:${c.variklioTuris || 'null'}}`;
+
+      const card = document.createElement('div');
+      card.className = 'card ct-card' + (idx === 0 ? ' ct-top1' : '');
+      card.innerHTML = `
+        <div class="ct-grid">
+          <div class="ct-photo">
+            <div class="ct-photo-main">
+              <img id="${cardId}-img" src="${photos[0] || ''}" onclick="${multi ? `openLightbox(window.__galleryStore['${cardId}-strip'], window.__cardPhotoIndex['${cardId}']||0)` : ''}" onerror="this.style.visibility='hidden'">
+              <span class="ct-rank ${idx === 0 ? 'ct-rank-top' : ''}">${idx === 0 ? '★ Top pasiūlymas' : '#' + (idx + 1)}</span>
+              ${hasDeep ? '<span class="ct-full">✦ Pilna apžvalga</span>' : ''}
+              ${multi ? `<button class="ct-nav ct-nav-l" onclick="event.stopPropagation(); cyclePhoto('${cardId}', -1)">‹</button><button class="ct-nav ct-nav-r" onclick="event.stopPropagation(); cyclePhoto('${cardId}', 1)">›</button><span class="ct-count" id="${cardId}-photocount">1/${photos.length}</span>` : ''}
+            </div>
+            ${thumbs}
+          </div>
+
+          <div class="ct-main">
+            <div class="ct-title-row">
+              <h3>${esc(c.modelis)}</h3>
+              <span class="source-tag">${esc(c.source)}</span>
+              <button class="fav-star ct-fav${isFav ? ' active' : ''}" title="Išsaugoti" onclick="toggleFavorite('${c.url}', ${favSnapshot}, this)">${isFav ? '★' : '☆'}</button>
+            </div>
+            <div class="ct-price-row">
+              <span class="ct-price">${formatEUR(c.kaina)}</span>
+              <span class="ct-diff ct-bg-${diffTone}">−${c.diffPct}%</span>
+              <span class="ct-market">Rinkos vidurkis: <b>${formatEUR(c.marketMedian)}</b>${skirtumas != null ? ` · Skirtumas: <b class="ct-${diffTone}">${skirtumas > 0 ? '+' : '−'}${formatEUR(Math.abs(skirtumas))}</b>` : ''} <small>(imtis ${c.marketCount || '?'})</small></span>
+            </div>
+            <div class="ct-chips">${chips}${signalChips}</div>
+            ${notes.join('')}
+            ${c.comment ? `<div class="ct-comment"><span>AI</span><p>${esc(c.comment)}</p></div>` : ''}
+            <div class="ct-actions">
+              <a class="ct-btn" href="${c.url}" target="_blank">Žiūrėti skelbimą ↗</a>
+              <button class="compare-toggle ct-btn" id="cmp-${cardId}" onclick="toggleCompare(${compareArgs})">⇄ Palyginti</button>
+              <button class="detail-btn ct-btn ct-btn-primary${hasDeep ? ' ready' : ''}" id="${btnId}" data-closed-label="${detailBtnLabel}" onclick="loadDetail(${detailArgs})">${detailBtnLabel}</button>
+            </div>
+          </div>
+
+          ${scoreBlock(c, a)}
+          <div class="ct-sides">${profitBlock(a, cardId, hasDeep, btnId)}${riskBlock(a, c, hasDeep, btnId)}</div>
+        </div>
+        <div class="detail-panel ct-panel" id="${cardId}" data-loaded="${hasDeep}" style="display:none">${preloadedPanelHTML}</div>
+      `;
+      results.appendChild(card);
+    });
+  };
+
+  // ---------- DETALĖS PANELĖ SU TABAIS ----------
+  window.ctTab = function (panelId, key, btn) {
+    const p = document.getElementById(panelId);
+    if (!p) return;
+    p.querySelectorAll('.ct-pane').forEach((x) => { x.style.display = x.dataset.pane === key ? '' : 'none'; });
+    p.querySelectorAll('.ct-tab').forEach((x) => x.classList.toggle('active', x === btn));
+  };
+
+  window.buildDetailPanelHTML = function (data, url, panelId) {
+    const a = data.analysis || {};
+    const c = findCandidate(url) || {};
+    const list = (arr, cls) => (arr && arr.length ? `<ul class="ct-list ${cls || ''}">${arr.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : '<p class="ct-dash">–</p>');
+    const cacheNote = data.cached
+      ? `<div class="ct-cache">Iš talpyklos (prieš ${data.cacheAgeMinutes} min.) · <a href="#" onclick="event.preventDefault(); loadDetail('${url}', '${panelId}', document.getElementById('${panelId}-btn'), true); return false;">atnaujinti</a></div>`
+      : '';
+    window.__galleryStore = window.__galleryStore || {};
+    window.__galleryStore[panelId] = data.photos || [];
+    const pr = a.perikupo_radaras;
+    const vinResultId = `${panelId}-vin-result`, sellerResultId = `${panelId}-seller-result`;
+
+    const tabs = [
+      ['ai', 'AI analizė'], ['tech', 'Techninė informacija'], ['equip', 'Įrangos akcentai'], ['risk', 'Rizikos ir derybos'],
+      ['vin', 'Istorija / VIN'], ['market', 'Rinkos analizė'], ['seller', 'Pardavėjas'], ['photos', `Nuotraukos${data.photos && data.photos.length ? ' · ' + data.photos.length : ''}`],
+    ];
+    const tabBar = `<div class="ct-tabs">${tabs.map(([k, l], i) => `<button class="ct-tab${i === 0 ? ' active' : ''}" data-tab="${k}" onclick="ctTab('${panelId}', '${k}', this)">${l}</button>`).join('')}</div>`;
+
+    const paneAI = `
+      <div class="ct-pane" data-pane="ai">
+        <div class="ct-cols">
+          <div class="ct-box ct-box-ai"><div class="ct-box-h"><span class="ct-box-ic ct-bg-ac">AI</span>AI santrauka</div><p>${esc(a.verdiktas || '–')}</p>${a.technine_specifikacija ? `<p class="ct-muted">${esc(a.technine_specifikacija)}</p>` : ''}</div>
+          <div class="ct-box"><div class="ct-box-h"><span class="ct-box-ic ct-bg-pos">✓</span>Privalumai</div>${list(a.privalumai, 'ct-list-pos')}</div>
+          <div class="ct-box ct-box-warn"><div class="ct-box-h"><span class="ct-box-ic ct-bg-warn">!</span>Ką verta patikrinti</div>${list(a.ka_patikrinti_gyvai, 'ct-list-warn')}</div>
+          <div class="ct-box"><div class="ct-box-h"><span class="ct-box-ic ct-bg-ac">★</span>Įrangos akcentai</div>${a.irangos_akcentai && a.irangos_akcentai.length ? `<div class="ct-tags">${a.irangos_akcentai.slice(0, 9).map((x) => `<span>${esc(x)}</span>`).join('')}${a.irangos_akcentai.length > 9 ? `<span class="ct-tag-more" onclick="ctTab('${panelId}','equip',this.closest('.ct-panel').querySelector('[data-tab=equip]'))">+ ${a.irangos_akcentai.length - 9} daugiau</span>` : ''}</div>` : '<p class="ct-dash">–</p>'}</div>
+        </div>
+      </div>`;
+
+    const specRows = [
+      ['Metai', c.metai], ['Rida', c.rida ? fmtKm(c.rida) : null], ['Kuras', c.kuras], ['Pavarų dėžė', c.pavarai],
+      ['Variklis', c.variklioTuris ? c.variklioTuris + ' l' : null], ['Galia', c.galia ? c.galia + ' kW' : null], ['Portalas', c.source],
+    ].filter((r) => r[1] != null && r[1] !== '');
+    const paneTech = `
+      <div class="ct-pane" data-pane="tech" style="display:none">
+        <div class="ct-cols ct-cols-2">
+          <div class="ct-box"><div class="ct-box-h"><span class="ct-box-ic">⚙</span>Specifikacija</div><p>${esc(a.technine_specifikacija || 'Specifikacija nepateikta.')}</p></div>
+          <div class="ct-box"><div class="ct-box-h"><span class="ct-box-ic">▦</span>Skelbimo duomenys</div><div class="ct-table">${specRows.map(([k, v]) => `<div><span>${k}</span><b>${esc(v)}</b></div>`).join('') || '<p class="ct-dash">–</p>'}</div></div>
+        </div>
+      </div>`;
+
+    const paneEquip = `<div class="ct-pane" data-pane="equip" style="display:none"><div class="ct-box"><div class="ct-box-h"><span class="ct-box-ic ct-bg-ac">★</span>Įrangos akcentai</div>${a.irangos_akcentai && a.irangos_akcentai.length ? `<div class="ct-tags">${a.irangos_akcentai.map((x) => `<span>${esc(x)}</span>`).join('')}</div>` : '<p class="ct-dash">Įrangos akcentai nenurodyti.</p>'}</div></div>`;
+
+    const paneRisk = `
+      <div class="ct-pane" data-pane="risk" style="display:none">
+        <div class="ct-cols ct-cols-3">
+          <div class="ct-box ct-box-neg"><div class="ct-box-h"><span class="ct-box-ic ct-bg-neg">!</span>Rizikos</div>${list(a.rizikos, 'ct-list-neg')}</div>
+          <div class="ct-box"><div class="ct-box-h"><span class="ct-box-ic">?</span>Klausimai pardavėjui</div>${list(a.klausimai_pardavejui)}</div>
+          <div class="ct-box ct-box-warn"><div class="ct-box-h"><span class="ct-box-ic ct-bg-warn">€</span>Derybų patarimas</div><p>${esc(a.derybu_patarimas || '–')}</p>${pr ? `<div class="ct-kv"><span>Pelno potencialas</span><b class="ct-${prTone(pr)}">${pelnoLabel[pr.pelno_potencialas] || pr.pelno_potencialas} (${pr.procentas}%)</b></div>${pr.paaiskinimas ? `<p class="ct-muted">${esc(pr.paaiskinimas)}</p>` : ''}` : ''}</div>
+        </div>
+      </div>`;
+
+    const paneVin = `
+      <div class="ct-pane" data-pane="vin" style="display:none">
+        <div class="ct-cols ct-cols-2">
+          <div class="ct-box"><div class="ct-box-h"><span class="ct-box-ic">#</span>VIN ir istorija</div>
+            ${data.vin ? `<div class="ct-vin"><code>${esc(data.vin)}</code><button class="ct-mini" onclick="lookupVin('${data.vin}', '${vinResultId}', this)">Ieškoti VIN istorijos ↗</button></div><div id="${vinResultId}"></div>` : '<p class="ct-dash">VIN skelbime nenurodytas.</p>'}
+            <div class="ct-table" style="margin-top:12px">${[['Patikrinta istorija', c.turiIstorijosAtaskaita ? 'Taip' : 'Nenurodyta'], ['Garantija', c.garantijosTipas || 'Nenurodyta'], ['Pardavėjo tipas', c.yraVerslas ? 'Verslas / dealeris' : 'Privatus / nenurodyta']].map(([k, v]) => `<div><span>${k}</span><b>${esc(v)}</b></div>`).join('')}</div>
+          </div>
+          <div class="ct-box ${a.nuotrauku_pastebejimai && a.nuotrauku_pastebejimai.length ? 'ct-box-neg' : ''}"><div class="ct-box-h"><span class="ct-box-ic ${a.nuotrauku_pastebejimai && a.nuotrauku_pastebejimai.length ? 'ct-bg-neg' : ''}">◉</span>AI nuotraukų peržiūra</div>${a.nuotrauku_pastebejimai && a.nuotrauku_pastebejimai.length ? list(a.nuotrauku_pastebejimai, 'ct-list-neg') : '<p class="ct-muted">Matomų pažeidimų nuotraukose neaptikta.</p>'}</div>
+        </div>
+      </div>`;
+
+    const diffBar = c.marketMedian && c.kaina ? clamp(50 + ((c.kaina - c.marketMedian) / c.marketMedian) * 100 * 1.5, 4, 96) : 50;
+    const paneMarket = `
+      <div class="ct-pane" data-pane="market" style="display:none">
+        <div class="ct-cols ct-cols-3">
+          <div class="ct-stat"><span>Rinkos vidurkis</span><b>${formatEUR(c.marketMedian)}</b><small>${c.marketCount || '?'} palyginamų skelbimų</small></div>
+          <div class="ct-stat"><span>Šis skelbimas</span><b class="ct-${c.diffPct >= 39 ? 'neg' : c.diffPct >= 8 ? 'pos' : 'warn'}">${formatEUR(c.kaina)}</b><small>−${c.diffPct != null ? c.diffPct : '?'}% nuo vidurkio</small></div>
+          <div class="ct-stat"><span>Ridos vidurkis imtyje</span><b>${c.ridaMedian ? fmtKm(c.ridaMedian) : '–'}</b><small>${c.ridaDiffPct != null ? (c.ridaDiffPct > 0 ? '+' : '') + c.ridaDiffPct + '% šio automobilio rida' : ''}</small></div>
+        </div>
+        <div class="ct-box" style="margin-top:12px"><div class="ct-box-h"><span class="ct-box-ic">▥</span>Pozicija rinkoje</div>
+          <div class="ct-posbar"><i style="left:${diffBar}%"></i><em></em></div>
+          <div class="ct-posbar-l"><span>−30%</span><span>Rinkos vidurkis</span><span>+30%</span></div>
+        </div>
+      </div>`;
+
+    const paneSeller = `
+      <div class="ct-pane" data-pane="seller" style="display:none">
+        <div class="ct-box"><div class="ct-box-h"><span class="ct-box-ic">◫</span>Pardavėjas</div>
+          ${data.pardavejas ? `<div class="ct-vin"><b>${esc(data.pardavejas)}</b><button class="ct-mini" onclick="lookupSeller('${escJs(data.pardavejas)}', '${sellerResultId}', this, '${escJs(url)}')">Ieškoti informacijos ↗</button></div><div id="${sellerResultId}"></div>` : '<p class="ct-dash">Pardavėjo pavadinimas nenustatytas.</p>'}
+        </div>
+      </div>`;
+
+    const panePhotos = `
+      <div class="ct-pane" data-pane="photos" style="display:none">
+        ${data.photos && data.photos.length ? `<div class="ct-gallery">${data.photos.map((p, i) => `<img src="${p}" loading="lazy" onclick="openLightbox(window.__galleryStore['${panelId}'], ${i})" onerror="this.style.display='none'">`).join('')}</div>` : '<p class="ct-dash">Nuotraukų nėra.</p>'}
+      </div>`;
+
+    return `${cacheNote}${tabBar}${paneAI}${paneTech}${paneEquip}${paneRisk}${paneVin}${paneMarket}${paneSeller}${panePhotos}`;
+  };
+})();
 
 </script>
 </body>
