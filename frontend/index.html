@@ -1487,7 +1487,7 @@
 </div>
 
 <script>
-const APP_VERSION = 'v1.7.0';
+const APP_VERSION = 'v1.8.0';
 const BRAND_MODELS = {
   'BMW': ['1', '2', '3', '4', '5', '6', '7', '8', 'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'Z4', 'M'],
   'Audi': ['A1', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q2', 'Q3', 'Q5', 'Q7', 'Q8'],
@@ -3265,10 +3265,10 @@ function ctNavTab(tab) {
       if (c.kryzminiaiSkelbimai && c.kryzminiaiSkelbimai.length) notes.push(`<div class="ct-note">Tas pats automobilis taip pat: ${c.kryzminiaiSkelbimai.map((k) => `${esc(k.source)} už ${formatEUR(k.kaina)}`).join(', ')}</div>`);
 
       const detailBtnLabel = hasDeep ? 'Pilna apžvalga →' : 'Detali apžvalga';
+      const detailArgs = `'${c.url}', '${cardId}', this, false, {kaina:${c.kaina || 'null'}, marketMedian:${c.marketMedian || 'null'}, marketCount:${c.marketCount || 'null'}, diffPct:${c.diffPct != null ? c.diffPct : 'null'}, modelis:'${escJs(c.modelis)}', pardavejas:${c.pardavejas ? `'${escJs(c.pardavejas)}'` : 'null'}, galia:${c.galia || 'null'}, variklioTuris:${c.variklioTuris || 'null'}}`;
       const detailOnclick = hasDeep ? `ctOpenDetail('${escJs(c.url)}')` : `loadDetail(${detailArgs})`;
       const preloadedPanelHTML = hasDeep ? buildDetailPanelHTML({ analysis: a, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, cardId) : '';
       const compareArgs = `'${c.url}', '${escJs(c.modelis)}', ${c.kaina || 'null'}, '${escJs(c.photo || '')}', ${c.metai || 'null'}, ${c.rida || 'null'}, '${escJs(c.kuras || '')}', ${c.galia || 'null'}, ${c.variklioTuris || 'null'}, '${escJs(c.pavarai || '')}', ${c.diffPct != null ? c.diffPct : 'null'}, ${c.marketMedian || 'null'}, '${escJs(c.source || '')}', 'cmp-${cardId}'`;
-      const detailArgs = `'${c.url}', '${cardId}', this, false, {kaina:${c.kaina || 'null'}, marketMedian:${c.marketMedian || 'null'}, marketCount:${c.marketCount || 'null'}, diffPct:${c.diffPct != null ? c.diffPct : 'null'}, modelis:'${escJs(c.modelis)}', pardavejas:${c.pardavejas ? `'${escJs(c.pardavejas)}'` : 'null'}, galia:${c.galia || 'null'}, variklioTuris:${c.variklioTuris || 'null'}}`;
 
       // Saugome kortele detail puslapiui
       window.__ctCardData[c.url] = { c: c, analysis: a, photos: photos };
