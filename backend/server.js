@@ -817,22 +817,54 @@ function logJobStep(jobId, startMsg) {
 
 // Kokybes balas - ne vien % nuolaida, bet ir pasitikejimo signalai. Taip "geriausias"
 // pasiulymas nera tiesiog didziausia nuolaida, o realiai maziausiai rizikingas geras sandoris.
-function computeQualityScore(l) {
+// mode: 'reseller' | 'personal' | 'browse'
+function computeQualityScore(l, mode) {
+  if (mode === 'reseller') {
+    // Tikslas: perpardavinėti – svarbiausia kaina vs rinka ir greitai parduodami kriterijai
+    let score = l.diffPct * 2; // kaina yra viskas
+    if (l.galimiDefektai.length > 0) score -= 60; // defektai = didelė rizika pelningumui
+    if (l.galimasJavImportas && l.diffPct >= 39) score -= 20;
+    if (l.diffPct >= 39) score -= 10; // perdaug pigu = įtartina
+    if (l.ridaDiffPct !== null) {
+      if (l.ridaDiffPct >= 50) score -= 20; // labai daug rida = sunku parduoti
+      else if (l.ridaDiffPct >= 30) score -= 10;
+      else if (l.ridaDiffPct <= -20) score += 10; // maža rida = geras perpardavimas
+    }
+    if (l.turiIstorijosAtaskaita) score += 10; // istorija = lengviau parduoti
+    if (l.yraVerslas) score += 5; // verslo pardavėjas = mažesnė rizika
+    return Math.round(score);
+  }
+
+  if (mode === 'personal') {
+    // Tikslas: sau – balansas tarp kainos, ridos, komplektacijos, patikimumo
+    let score = (l.diffPct || 0) * 0.7; // kaina svarbu bet ne vienintelis kriterijus
+    if (l.turiIstorijosAtaskaita) score += 20; // patikimumas svarbiausia
+    if (l.turiGarantija) score += 18;
+    if (l.yraVerslas) score += 10;
+    if (l.reitingas && l.reitingas >= 4.5) score += 12;
+    if (l.galimiDefektai.length > 0) score -= 50;
+    if (!l.turiIstorijosAtaskaita && !l.turiGarantija && !l.yraVerslas) score -= 15;
+    if (l.diffPct >= 39) score -= 15; // perdaug pigu = įtartina
+    if (l.galimasJavImportas && l.diffPct >= 39) score -= 20;
+    if (l.ridaDiffPct !== null) {
+      if (l.ridaDiffPct >= 40) score -= 20; // daug rida = daugiau remonto
+      else if (l.ridaDiffPct >= 20) score -= 10;
+      else if (l.ridaDiffPct <= -30) score += 15; // nedidelė rida = ilgesnis tarnavimas
+      else if (l.ridaDiffPct <= -15) score += 8;
+    }
+    return Math.round(score);
+  }
+
+  // Numatytasis (originalus) režimas
   let score = l.diffPct;
   if (l.turiIstorijosAtaskaita) score += 15;
   if (l.turiGarantija) score += 15;
   if (l.yraVerslas) score += 8;
   if (l.reitingas && l.reitingas >= 4.5) score += 10;
   if (l.galimiDefektai.length > 0) score -= 40;
-  if (!l.turiIstorijosAtaskaita && !l.turiGarantija && !l.yraVerslas) score -= 10; // visiskai "aklas" pirkimas
-  // >=39% nuolaida statistiskai daznai reiskia dauzta/su defektu automobili - net jei kiti
-  // signalai geri, tokie pasiulymai neturi pretenduoti i pacius pirmus rikiavimo vietas.
+  if (!l.turiIstorijosAtaskaita && !l.turiGarantija && !l.yraVerslas) score -= 10;
   if (l.diffPct >= 39) score -= 20;
-  // JAV kilmes + didele nuolaida = kaina gali buti tik aukciono pradine kaina, be pervezimo/
-  // muitu/remonto kastu - papildoma bauda, kad tokie skelbimai patektu ZEMIAU tikru pasiulymu.
   if (l.galimasJavImportas && l.diffPct >= 39) score -= 15;
-  // Rida virs imties vidurkio = daugiau nusidevejimo (variklis, salonas) - mazina balus.
-  // Rida gerokai zemiau vidurkio = privalumas, pridedam.
   if (l.ridaDiffPct !== null) {
     if (l.ridaDiffPct >= 40) score -= 15;
     else if (l.ridaDiffPct >= 20) score -= 8;
@@ -943,10 +975,16 @@ async function runSearchJob(jobId, filters) {
     logJob(jobId, '🧮 Skaičiuojame rinkos vidurkius...');
     const medians = computeMarketMedians(combinedForMedians);
     cache.addToHistory(parsed); // issaugom sitos paieskos duomenis ateities paieskoms
-    const THRESHOLD_PCT = 12;
-    // Papildomus laukus (diffPct, ridaDiffPct ir t.t.) skaiciuojame VISIEMS nuskaitytiems
-    // skelbimams, ne tik kandidatams - reikalinga, kad galetume paaiskinti, kodel
-    // konkretus skelbimas NEPATEKO i "verti demesio" sarasa.
+    const searchMode = filters.searchMode || 'default'; // 'reseller' | 'personal' | 'browse' | 'default'
+
+    // Slenkstis pagal rezima:
+    // reseller: 15% – tik tikros nuolaidos, galima perpardavineti
+    // personal: 5%  – net nedidelė nuolaida gali reikšti gerą sandorį su gera komplektacija
+    // browse:   0%  – visi skelbimai, jokio filtravimo
+    // default:  12%
+    const THRESHOLD_PCT = searchMode === 'reseller' ? 15 : searchMode === 'personal' ? 5 : searchMode === 'browse' ? -999 : 12;
+    const MAX_CANDIDATES = searchMode === 'browse' ? 999 : 15;
+
     const enriched = parsed.map((l) => {
       const marketData = l.modelis ? medians[l.modelis] : null;
       const hasReliableMarket = marketData && marketData.count >= 3;
@@ -965,14 +1003,15 @@ async function runSearchJob(jobId, filters) {
       };
     });
 
-    let candidates = enriched.filter((l) => l.diffPct !== null && l.diffPct >= THRESHOLD_PCT);
-    candidates.forEach((c) => (c.qualityScore = computeQualityScore(c)));
+    let candidates = searchMode === 'browse'
+      ? enriched.slice() // browse: visi skelbimai
+      : enriched.filter((l) => l.diffPct !== null && l.diffPct >= THRESHOLD_PCT);
+
+    candidates.forEach((c) => (c.qualityScore = computeQualityScore(c, searchMode)));
     candidates.sort((a, b) => b.qualityScore - a.qualityScore);
-    candidates = candidates.slice(0, 15);
+    candidates = candidates.slice(0, MAX_CANDIDATES);
     const candidateUrls = new Set(candidates.map((c) => c.url));
 
-    // Kiekvienam NEATRINKTAM skelbimui paruosiame iki 3 konkreciu priezasciu, kodel jis
-    // nepateko i "verti demesio" sarasa - vien is jau apskaiciuotu skaiciu, be jokiu AI kvietimu.
     function explainRejection(l) {
       const reasons = [];
       if (!l.kaina) {
@@ -980,11 +1019,13 @@ async function runSearchJob(jobId, filters) {
       } else if (l.marketCount < 3) {
         reasons.push(`Per mažai panašių skelbimų (rasta tik ${l.marketCount}) šiam modeliui – neužtenka patikimam rinkos vidurkiui.`);
       } else if (l.diffPct < 0) {
-        reasons.push(`Kaina ${Math.abs(l.diffPct)}% AUKŠTESNĖ nei rinkos vidurkis (${l.marketMedian}€) – brangiau nei įprasta.`);
+        const modeNote = searchMode === 'reseller' ? ` Perpardavinėjimui netinka.` : '';
+        reasons.push(`Kaina ${Math.abs(l.diffPct)}% AUKŠTESNĖ nei rinkos vidurkis (${l.marketMedian}€) – brangiau nei įprasta.${modeNote}`);
       } else if (l.diffPct < THRESHOLD_PCT) {
-        reasons.push(`Kaina tik ${l.diffPct}% žemesnė nei rinkos vidurkis (${l.marketMedian}€) – reikia bent ${THRESHOLD_PCT}%, kad patektų į "vertus dėmesio".`);
+        const modeLabel = searchMode === 'reseller' ? 'perpardavinėjimui reikia bent 15%' : searchMode === 'personal' ? 'reikia bent 5%' : `reikia bent ${THRESHOLD_PCT}%`;
+        reasons.push(`Kaina tik ${l.diffPct}% žemesnė nei rinkos vidurkis (${l.marketMedian}€) – ${modeLabel}.`);
       } else if (!candidateUrls.has(l.url)) {
-        reasons.push(`Nuolaida ${l.diffPct}% atitiko ribą, bet kokybės balas žemesnis nei kitų TOP 15 pasiūlymų šioje paieškoje.`);
+        reasons.push(`Nuolaida ${l.diffPct}% atitiko ribą, bet kokybės balas žemesnis nei kitų TOP pasiūlymų šioje paieškoje.`);
       }
       if (l.ridaDiffPct !== null && l.ridaDiffPct >= 30) {
         reasons.push(`Rida ${l.ridaDiffPct}% aukštesnė nei imties vidurkis (${l.ridaMedian} km) – daugiau nusidėvėjimo.`);
@@ -1069,7 +1110,7 @@ async function runSearchJob(jobId, filters) {
       diffPct: l.diffPct, marketMedian: l.marketMedian, marketCount: l.marketCount,
     })).sort((a, b) => (a.kaina || 0) - (b.kaina || 0));
 
-    const searchResult = { totalScanned: parsed.length, rawFoundCount, medians, candidates, allListings };
+    const searchResult = { totalScanned: parsed.length, rawFoundCount, medians, candidates, allListings, searchMode };
     cache.setSearchCached(filterHash, searchResult);
     jobs[jobId].result = searchResult;
   } catch (err) {

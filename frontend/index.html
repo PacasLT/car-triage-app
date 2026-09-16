@@ -162,6 +162,20 @@
   .filters input, .filters select { width: 100%; padding: 9px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text-primary); font-size: 14px; transition: border-color 0.15s; }
   .filters input:focus, .filters select:focus { outline: none; border-color: var(--accent); }
   .full-row { grid-column: 1 / -1; }
+  /* Search mode selector */
+  .ct-mode-selector { display: flex; gap: 8px; margin-bottom: 14px; }
+  .ct-mode-btn {
+    flex: 1; padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--border);
+    background: var(--bg-elevated); color: var(--text-secondary); font: 600 12px var(--font);
+    cursor: pointer; transition: all .15s; text-align: left; display: flex; flex-direction: column; gap: 3px;
+  }
+  .ct-mode-btn:hover { border-color: var(--accent); color: var(--text-primary); }
+  .ct-mode-btn.active { border-color: var(--accent); background: var(--accent-dim); color: var(--accent-light); }
+  .ct-mode-btn b { font-size: 13px; display: block; }
+  .ct-mode-btn span { font: 400 10px var(--font); color: var(--text-dim); line-height: 1.3; }
+  .ct-mode-btn.active span { color: var(--text-muted); }
+  .ct-mode-ic { font-size: 16px; margin-bottom: 2px; }
+  @media (max-width: 600px) { .ct-mode-selector { flex-direction: column; } }
   button#search-btn { grid-column: 1 / -1; padding: 13px; background: linear-gradient(135deg, var(--accent), var(--accent-light)); color: white; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 6px; letter-spacing: 0.2px; box-shadow: 0 4px 14px rgba(124,111,247,0.35); transition: opacity 0.15s, transform 0.15s; }
   button#search-btn:hover { opacity: 0.9; transform: translateY(-1px); }
   button#search-btn:disabled { background: var(--bg-elevated); color: var(--text-muted); cursor: not-allowed; box-shadow: none; transform: none; }
@@ -1513,6 +1527,28 @@
             </div>
           </div>
         </div>
+        <div class="ct-mode-selector">
+          <button class="ct-mode-btn active" id="mode-btn-default" onclick="ctSetMode('default',this)">
+            <span class="ct-mode-ic">⚖️</span>
+            <b>Pagrindinis</b>
+            <span>Balansuotas filtras – kaina, rida, būklė. 12%+ nuolaida.</span>
+          </button>
+          <button class="ct-mode-btn" id="mode-btn-reseller" onclick="ctSetMode('reseller',this)">
+            <span class="ct-mode-ic">💰</span>
+            <b>Perpardavinėtojui</b>
+            <span>Tik didelės nuolaidos (15%+). Svarbiausia marža.</span>
+          </button>
+          <button class="ct-mode-btn" id="mode-btn-personal" onclick="ctSetMode('personal',this)">
+            <span class="ct-mode-ic">🚗</span>
+            <b>Automobilis sau</b>
+            <span>Nuo 5% nuolaidos. Svarbu: istorija, garantija, komplektacija.</span>
+          </button>
+          <button class="ct-mode-btn" id="mode-btn-browse" onclick="ctSetMode('browse',this)">
+            <span class="ct-mode-ic">📋</span>
+            <b>Naršyti viską</b>
+            <span>Visi skelbimai be filtro. Pirminė apžvalga + detali pagal poreikį.</span>
+          </button>
+        </div>
         <div class="ct3-search-bottom-right">
           <button class="ct3-save-btn">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
@@ -1586,6 +1622,7 @@
         <option value="biggest-discount">Didžiausia nuolaida %</option>
       </select>
     </div>
+    <span id="ct-active-mode" style="font:600 11px var(--font-mono);letter-spacing:.06em;color:var(--text-muted);background:var(--bg-elevated);padding:4px 10px;border-radius:20px;border:1px solid var(--border);"></span>
     <button id="tinder-launch-btn" onclick="startTinder()" style="padding:9px 18px; background:linear-gradient(135deg,var(--accent),var(--accent-light)); color:#fff; border:none; border-radius:20px; font-size:13px; font-weight:600; cursor:pointer; box-shadow:0 4px 14px rgba(124,111,247,0.4);">🔥 Tinder naršymas</button>
   </div>
   <div id="results"></div>
@@ -1697,6 +1734,14 @@ function loadSearchHistory() {
   } catch {
     return [];
   }
+}
+
+// Paieškos režimų valdymas
+let _ctSearchMode = 'default';
+function ctSetMode(mode, btn) {
+  _ctSearchMode = mode;
+  document.querySelectorAll('.ct-mode-btn').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
 }
 
 function saveSearchToHistory(filters) {
@@ -2119,6 +2164,7 @@ async function runSearch() {
     kainaNuo: document.getElementById('kainaNuo').value,
     kainaIki: document.getElementById('kainaIki').value,
     maxPages: document.getElementById('maxPages').value,
+    searchMode: _ctSearchMode || 'default',
     portals: [
       document.getElementById('portal-autoplius').checked ? 'autoplius' : null,
       document.getElementById('portal-autogidas').checked ? 'autogidas' : null,
@@ -2633,6 +2679,10 @@ let currentData = null;
 function renderResults(data, status, results) {
   currentData = data;
   window.currentData = data;
+  // Rodyti aktyvaus režimo ženklelį šalia rezultatų
+  const modeLabels = { reseller: '💰 Perpardavinėtojui', personal: '🚗 Automobilis sau', browse: '📋 Naršyti viską', default: '⚖️ Pagrindinis' };
+  const modeEl = document.getElementById('ct-active-mode');
+  if (modeEl && data.searchMode) modeEl.textContent = modeLabels[data.searchMode] || '';
   const rawNote = data.rawFoundCount && data.rawFoundCount !== data.totalScanned
     ? ` (iš ${data.rawFoundCount} pagal markę/modelį, ${data.totalScanned} atitiko jūsų kainos/ridos/metų filtrus)`
     : '';
