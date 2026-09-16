@@ -1549,24 +1549,14 @@
         </div>
         <div class="ct-mode-selector">
           <button class="ct-mode-btn active" id="mode-btn-default" onclick="ctSetMode('default',this)">
-            <span class="ct-mode-ic">⚖️</span>
-            <b>Pagrindinis</b>
-            <span>Balansuotas filtras – kaina, rida, būklė. 12%+ nuolaida.</span>
-          </button>
-          <button class="ct-mode-btn" id="mode-btn-reseller" onclick="ctSetMode('reseller',this)">
-            <span class="ct-mode-ic">💰</span>
-            <b>Perpardavinėtojui</b>
-            <span>Tik didelės nuolaidos (15%+). Svarbiausia marža.</span>
-          </button>
-          <button class="ct-mode-btn" id="mode-btn-personal" onclick="ctSetMode('personal',this)">
-            <span class="ct-mode-ic">🚗</span>
-            <b>Automobilis sau</b>
-            <span>Nuo 5% nuolaidos. Svarbu: istorija, garantija, komplektacija.</span>
+            <span class="ct-mode-ic">🎯</span>
+            <b>CarTriige analizė</b>
+            <span>Kiekvienas skelbimas įvertinamas ir suskirstomas: galimybė, duomenų patikimumas, rizika.</span>
           </button>
           <button class="ct-mode-btn" id="mode-btn-browse" onclick="ctSetMode('browse',this)">
             <span class="ct-mode-ic">📋</span>
             <b>Naršyti viską</b>
-            <span>Visi skelbimai be filtro. Pirminė apžvalga + detali pagal poreikį.</span>
+            <span>Visi rasti skelbimai be atrankos – naršyk pats.</span>
           </button>
         </div>
         <div class="ct3-search-bottom-right">
@@ -2831,6 +2821,10 @@ function ctResaleBlock(c) {
 // Rezultatai grupuojami pagal triage lygį – TOP visada viršuje.
 function ctRenderGrouped(candidates, container, renderFn) {
   container.innerHTML = '';
+  // Anksciau tuscias sarasas tiesiog nieko nepiesdavo - vartotojas matydavo tuscia
+  // ekrana be jokio paaiskinimo. Dabar perduodam tuscia masyva, kad renderFn
+  // parodytu savo "nieko nerasta" busena.
+  if (!candidates || !candidates.length) { renderFn([], container); return; }
   const grupes = {};
   candidates.forEach(function(c){ const k = c.triageLevel || 'weak'; (grupes[k] = grupes[k] || []).push(c); });
   CT_TRIAGE_ORDER.forEach(function(key){
@@ -2872,7 +2866,9 @@ function renderResults(data, status, results) {
   }
 
   const verti = data.candidates.filter(function(c){ return c.triageLevel && c.triageLevel !== 'weak' && c.triageLevel !== 'rejected'; });
-  status.textContent = 'Įvertinta ' + data.candidates.length + ' skelbimų, iš jų ' + verti.length + ' verti dėmesio' + rawNote + ':';
+  status.textContent = data.candidates.length === 0
+    ? 'Nė vienas iš ' + (data.rawFoundCount || 0) + ' rastų skelbimų neatitiko filtrų' + rawNote + ':'
+    : 'Įvertinta ' + data.candidates.length + ' skelbimų, iš jų ' + verti.length + ' verti dėmesio' + rawNote + ':';
   document.getElementById('sort-bar').style.display = data.candidates.length > 0 ? 'flex' : 'none';
   document.getElementById('sort-select').value = 'quality';
   ctRenderGrouped(data.candidates, results, (window.renderCandidateCards || renderCandidateCards));
@@ -2881,7 +2877,15 @@ function renderResults(data, status, results) {
 
 function renderBrowseListings(candidates, container) {
   if (candidates.length === 0) {
-    container.innerHTML = '<div style="color:#9a9aa5;padding:20px 0;">Nerasta nė vieno skelbimo. Pabandykite išplėsti filtrus arba pridėti portalų.</div>';
+    const rasta = (window.currentData && window.currentData.rawFoundCount) || 0;
+    const viso = (window.currentData && window.currentData.allListings) ? window.currentData.allListings.length : 0;
+    container.innerHTML =
+      '<div style="padding:18px 20px;border-radius:12px;background:var(--bg-elevated);border:1px solid var(--border);">'
+      + '<div style="font:600 14px/1.4 var(--font);color:var(--text-primary);margin-bottom:6px;">Nė vienas rastas skelbimas neatitiko jūsų filtrų</div>'
+      + (rasta ? '<div style="font:400 12.5px/1.6 var(--font);color:var(--text-secondary);">Portaluose rasta <b>' + rasta + '</b> šio modelio skelbimų, bet nė vienas nepateko į jūsų kainos, metų, ridos, kuro ar pavarų dėžės rėžius.</div>' : '')
+      + (viso ? '<div style="margin-top:8px;font:400 12.5px/1.6 var(--font);color:var(--text-secondary);">Išskleiskite <b>„Rodyti visus nuskaitytus skelbimus"</b> žemiau – ten surašyti visi ' + viso + ' rasti skelbimai ir prie kiekvieno parašyta, kuris būtent filtras jį atmetė.</div>' : '')
+      + '<div style="margin-top:10px;font:400 12px/1.5 var(--font);color:var(--text-dim);">Dažniausiai padeda: praplėsti kainos rėžį, pasirinkti kurą „Visi" arba pridėti daugiau portalų.</div>'
+      + '</div>';
     return;
   }
   // Antraste nebepiesiam - ctRenderGrouped jau deda triage lygio antraste virs kiekvienos grupes.
@@ -2963,6 +2967,7 @@ function applySorting() {
 }
 
 function renderCandidateCards(candidates, results) {
+  if (!candidates.length) { renderBrowseListings([], results); return; }
   results.innerHTML = '';
   if (candidates.length === 0) {
     results.innerHTML = '<div style="color:#9a9aa5">Nieko nerasta pagal šiuos kriterijus, arba visos kainos atitinka rinkos vidurkį.</div>';
@@ -3685,6 +3690,7 @@ function ctNavTab(tab) {
 
   // ---------- KORTELĖS ----------
   window.renderCandidateCards = function (candidates, results) {
+    if (!candidates.length) { renderBrowseListings([], results); return; }
     try {
     results.innerHTML = '';
     if (!candidates || candidates.length === 0) {

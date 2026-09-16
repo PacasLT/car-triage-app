@@ -1244,9 +1244,13 @@ function computeQualityScore(l, mode) {
   return Math.round(score);
 }
 
+// Keiciant triage varikli ar filtru logika BUTINA pakelti sita numeri - kitaip
+// 20 min. podelis grazins sena rezultata be nauju lauku ir atrodys, kad nieko neveikia.
+const SEARCH_ENGINE_VERSION = 'triage-v2';
+
 function hashFilters(f) {
   const keys = Object.keys(f).filter((k) => f[k] != null && f[k] !== '' && !(Array.isArray(f[k]) && f[k].length === 0)).sort();
-  const normalized = {};
+  const normalized = { __v: SEARCH_ENGINE_VERSION };
   for (const k of keys) {
     normalized[k] = Array.isArray(f[k]) ? [...f[k]].sort().join(',') : String(f[k]);
   }
@@ -1387,7 +1391,8 @@ async function runSearchJob(jobId, filters) {
     // Kaupiam VISUS nuskaitytus skelbimus - kuo daugiau istorijos, tuo tikslesnes
     // busimos medianos ir balai jau matytiems modeliams.
     cache.addToHistory([...parsed, ...hardRejected]);
-    const searchMode = filters.searchMode || 'default'; // 'reseller' | 'personal' | 'browse' | 'default'
+    // Palikti tik du rezimai: 'default' (CarTriige analize) ir 'browse' (visi skelbimai).
+    const searchMode = filters.searchMode === 'browse' ? 'browse' : 'default';
 
     // Slenkstis pagal rezima:
     // reseller: 15% – tik tikros nuolaidos, galima perpardavineti
