@@ -823,6 +823,146 @@ button{font-family:inherit;cursor:pointer}
     }
   }
 
+
+    // --- TECH TAB ---
+    (function() {
+      var techSpec = (a && a.technine_specifikacija) || {};
+      var rows = [];
+      function addRow(label, val) { if (val != null && val !== '') rows.push([label, String(val)]); }
+      addRow('Metai', c.metai);
+      addRow('Rida', c.rida ? fmt(c.rida) + ' km' : null);
+      addRow('Kuras', techSpec.kuras || c.kuras);
+      addRow('Galia', (techSpec.galia || c.galia) ? ((techSpec.galia || c.galia) + ' AG') : null);
+      addRow('Variklio tūris', techSpec.variklio_turis || (c.variklioTuris ? c.variklioTuris + ' l' : null));
+      addRow('Pavarų dėžė', techSpec.pavaru_deze || c.pavarai);
+      addRow('Pavara', techSpec.pavara);
+      addRow('Spalva', techSpec.spalva);
+      addRow('Kėbulas', techSpec.kebulas);
+      if (techSpec.duru_skaicius) addRow('Durys', techSpec.duru_skaicius + ' durų');
+      if (techSpec.sedzimu_vietu_skaicius) addRow('Sėdimos vietos', techSpec.sedzimu_vietu_skaicius + ' vietų');
+
+      var html = '';
+      if (rows.length) {
+        html += '<table style="width:100%;border-collapse:collapse;font-size:13px">';
+        rows.forEach(function(r) {
+          html += '<tr><td style="padding:7px 10px;color:var(--text-muted);white-space:nowrap;border-bottom:1px solid var(--border)">' + r[0] + '</td><td style="padding:7px 10px;font-weight:600;border-bottom:1px solid var(--border)">' + r[1] + '</td></tr>';
+        });
+        html += '</table>';
+      }
+      if (a && a.irangos_akcentai && a.irangos_akcentai.length) {
+        html += '<div style="margin-top:18px;font-weight:700;font-size:13px;letter-spacing:.04em;color:var(--text-muted);margin-bottom:8px">IŠSKIRTINĖ ĮRANGA</div>';
+        html += '<div style="display:flex;flex-direction:column;gap:6px">';
+        a.irangos_akcentai.forEach(function(item) {
+          html += '<div style="display:flex;gap:10px;align-items:flex-start"><span style="flex:none;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font:700 9px sans-serif;background:var(--accent);color:#fff;margin-top:1px">★</span><span style="font-size:13px">' + item + '</span></div>';
+        });
+        html += '</div>';
+      }
+      document.getElementById('dp-pane-tech').innerHTML = html || '<div style="color:var(--text-muted);font-size:13px;padding:20px">Techninių duomenų nerasta.</div>';
+    })();
+
+    // --- RISK TAB ---
+    (function() {
+      var html = '';
+      if (a && a.rizikos && a.rizikos.length) {
+        html += '<div style="margin-bottom:16px"><div style="font-weight:700;font-size:13px;letter-spacing:.04em;color:var(--text-muted);margin-bottom:10px">RIZIKOS</div>';
+        a.rizikos.forEach(function(r) {
+          html += '<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:8px"><span style="flex:none;color:#f59e0b;font-size:16px;line-height:1.3">⚠</span><span style="font-size:13px">' + r + '</span></div>';
+        });
+        html += '</div>';
+      }
+      if (a && a.derybos_patarime) {
+        html += '<div style="margin-bottom:16px"><div style="font-weight:700;font-size:13px;letter-spacing:.04em;color:var(--text-muted);margin-bottom:10px">DERYBŲ PATARIMAS</div>';
+        html += '<div style="font-size:13px;line-height:1.6;padding:12px 14px;background:rgba(124,92,255,.08);border-left:3px solid var(--accent);border-radius:4px">' + a.derybos_patarime + '</div></div>';
+      }
+      if (a && a.klausimai_pardavejui && a.klausimai_pardavejui.length) {
+        html += '<div><div style="font-weight:700;font-size:13px;letter-spacing:.04em;color:var(--text-muted);margin-bottom:10px">KLAUSIMAI PARDAVĖJUI</div>';
+        a.klausimai_pardavejui.forEach(function(q, i) {
+          html += '<div style="font-size:13px;padding:7px 0;border-bottom:1px solid var(--border);display:flex;gap:10px"><span style="flex:none;color:var(--accent);font-weight:700">' + (i+1) + '.</span><span>' + q + '</span></div>';
+        });
+        html += '</div>';
+      }
+      document.getElementById('dp-pane-risk').innerHTML = html || '<div style="color:var(--text-muted);font-size:13px;padding:20px">Rizikų duomenų nerasta.</div>';
+    })();
+
+    // --- VIN TAB ---
+    (function() {
+      var html = '<div style="display:flex;flex-direction:column;gap:14px">';
+      html += '<div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:10px">';
+      html += '<div style="font-weight:700;font-size:13px;letter-spacing:.04em;color:var(--text-muted);margin-bottom:10px">VIN KODAS</div>';
+      if (c.vin) {
+        html += '<div style="font-family:monospace;font-size:16px;font-weight:700;letter-spacing:.08em;color:var(--accent)">' + c.vin + '</div>';
+      } else {
+        html += '<div style="font-size:13px;color:var(--text-muted)">VIN kodas skelbime nenurodytas</div>';
+      }
+      html += '</div>';
+      html += '<div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:10px">';
+      html += '<div style="font-weight:700;font-size:13px;letter-spacing:.04em;color:var(--text-muted);margin-bottom:10px">ISTORIJOS ATASKAITA</div>';
+      if (c.turiIstorijosAtaskaita) {
+        html += '<div style="display:flex;gap:8px;align-items:center"><span style="color:#22c55e;font-size:18px">✓</span><span style="font-size:13px">Istorijos ataskaita prieinama</span></div>';
+      } else {
+        html += '<div style="display:flex;gap:8px;align-items:center"><span style="color:#f59e0b;font-size:18px">⚠</span><span style="font-size:13px">Istorijos ataskaita nerasta arba neprieinama</span></div>';
+      }
+      html += '</div></div>';
+      document.getElementById('dp-pane-vin').innerHTML = html;
+    })();
+
+    // --- MARKET TAB ---
+    (function() {
+      var html = '<div style="display:flex;flex-direction:column;gap:14px">';
+      if (c.marketMedian || c.marketCount) {
+        var diff = c.diffPct != null ? c.diffPct : null;
+        var diffColor = diff == null ? 'var(--text-muted)' : (diff <= 0 ? '#22c55e' : '#ef4444');
+        var diffText = diff == null ? '—' : (diff > 0 ? '+' : '') + diff + '%';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+        html += '<div style="padding:14px;background:var(--card);border:1px solid var(--border);border-radius:10px;text-align:center"><div style="font-size:11px;letter-spacing:.06em;color:var(--text-muted);font-weight:600;margin-bottom:6px">RINKOS VIDURKIS</div><div style="font-size:20px;font-weight:700">' + (c.marketMedian ? fmt(c.marketMedian) + ' €' : '—') + '</div></div>';
+        html += '<div style="padding:14px;background:var(--card);border:1px solid var(--border);border-radius:10px;text-align:center"><div style="font-size:11px;letter-spacing:.06em;color:var(--text-muted);font-weight:600;margin-bottom:6px">KAINŲ SKIRTUMAS</div><div style="font-size:20px;font-weight:700;color:' + diffColor + '">' + diffText + '</div></div>';
+        html += '</div>';
+        if (c.marketCount) {
+          html += '<div style="font-size:12px;color:var(--text-muted);text-align:center">Lyginant su ' + c.marketCount + ' panašiais skelbimais</div>';
+        }
+      } else {
+        html += '<div style="color:var(--text-muted);font-size:13px;padding:10px">Rinkos duomenų nerasta.</div>';
+      }
+      if (c.kryzminiaiSkelbimai && c.kryzminiaiSkelbimai.length) {
+        html += '<div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:10px">';
+        html += '<div style="font-weight:700;font-size:13px;letter-spacing:.04em;color:var(--text-muted);margin-bottom:10px">KRYŽMINIAI SKELBIMAI (' + c.kryzminiaiSkelbimai.length + ')</div>';
+        c.kryzminiaiSkelbimai.slice(0, 5).forEach(function(s) {
+          var label = (typeof s === 'object') ? (s.pavadinimas || s.url || JSON.stringify(s)) : String(s);
+          html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:12.5px"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;margin-right:8px">' + label + '</span>';
+          if (typeof s === 'object' && s.kaina) html += '<span style="flex:none;font-weight:700">' + fmt(s.kaina) + ' €</span>';
+          html += '</div>';
+        });
+        html += '</div>';
+      }
+      html += '</div>';
+      document.getElementById('dp-pane-market').innerHTML = html;
+    })();
+
+    // --- SELLER TAB ---
+    (function() {
+      var html = '<div style="display:flex;flex-direction:column;gap:14px">';
+      html += '<div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:10px">';
+      html += '<div style="font-weight:700;font-size:13px;letter-spacing:.04em;color:var(--text-muted);margin-bottom:10px">PARDAVĖJAS</div>';
+      if (c.pardavejas) {
+        html += '<div style="font-size:14px;font-weight:600;margin-bottom:6px">' + c.pardavejas + '</div>';
+      }
+      html += '<div style="font-size:13px;color:var(--text-muted);margin-bottom:6px">' + (c.yraVerslas ? '🏢 Verslo pardavėjas' : '👤 Privatus asmuo') + '</div>';
+      if (c.garantijosTipas) {
+        html += '<div style="font-size:13px;margin-top:6px"><span style="font-weight:600">Garantija:</span> ' + c.garantijosTipas + '</div>';
+      }
+      html += '</div>';
+      if (a && a.klausimai_pardavejui && a.klausimai_pardavejui.length) {
+        html += '<div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:10px">';
+        html += '<div style="font-weight:700;font-size:13px;letter-spacing:.04em;color:var(--text-muted);margin-bottom:10px">REKOMENDUOJAMI KLAUSIMAI</div>';
+        a.klausimai_pardavejui.slice(0, 3).forEach(function(q, i) {
+          html += '<div style="font-size:13px;padding:7px 0;border-bottom:1px solid var(--border);display:flex;gap:10px"><span style="flex:none;color:var(--accent);font-weight:700">' + (i+1) + '.</span><span>' + q + '</span></div>';
+        });
+        html += '</div>';
+      }
+      html += '</div>';
+      document.getElementById('dp-pane-seller').innerHTML = html;
+    })();
+
   function showEmpty() {
     document.getElementById('dp-empty').style.display = '';
     document.getElementById('dp-content').style.display = 'none';
