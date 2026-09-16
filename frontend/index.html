@@ -449,6 +449,122 @@
   .toast-close { flex: none; margin-left: auto; padding-left: 8px; color: var(--text-muted); font-size: 16px; line-height: 1; cursor: pointer; }
   .toast-close:hover { color: var(--text-primary); }
   @keyframes toast-in { from { opacity: 0; transform: translateX(24px) scale(.95); } to { opacity: 1; transform: translateX(0) scale(1); } }
+
+/* ── Auth modal overlay ── */
+#ct-auth-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 7, 12, 0.84);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 9000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: ct-fade-in .18s ease;
+}
+#ct-auth-overlay.ct-open { display: flex; }
+
+@keyframes ct-fade-in  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ct-slide-up { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+.ct-auth-card {
+  width: 100%; max-width: 400px;
+  background: rgba(15, 18, 28, 0.95);
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 22px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.04) inset, 0 40px 100px rgba(0,0,0,.75);
+  backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+  overflow: hidden; position: relative;
+  animation: ct-slide-up .22s cubic-bezier(.34,1.3,.64,1);
+}
+.ct-auth-card::before {
+  content: ""; position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
+  width: 240px; height: 160px;
+  background: radial-gradient(ellipse, rgba(124,92,255,.32) 0%, transparent 70%);
+  pointer-events: none;
+}
+.ct-auth-close {
+  position: absolute; top: 14px; right: 14px; z-index: 2;
+  width: 28px; height: 28px; border-radius: 8px;
+  background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08);
+  color: #8C93A6; font-size: 14px; line-height: 1;
+  display: grid; place-items: center;
+  cursor: pointer; transition: background .14s, color .14s; font-family: inherit;
+}
+.ct-auth-close:hover { background: rgba(255,255,255,.1); color: #E9EBF2; }
+.ct-auth-tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,.075); }
+.ct-auth-tab {
+  flex: 1; height: 48px; background: transparent; border: none;
+  font: 500 14px 'Archivo', -apple-system, Helvetica, sans-serif;
+  color: #8C93A6; cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: color .14s, border-color .14s;
+}
+.ct-auth-tab:hover { color: #E9EBF2; }
+.ct-auth-tab.ct-active { color: #E9EBF2; border-bottom-color: #7C5CFF; font-weight: 600; }
+.ct-auth-body { padding: 26px 28px 24px; }
+.ct-auth-logo { display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 22px; }
+.ct-auth-logo svg { width: 32px; height: 32px; flex: none; }
+.ct-auth-logo-text { font: 400 20px 'Archivo',-apple-system,Helvetica,sans-serif; color: #E9EBF2; letter-spacing: -.01em; }
+.ct-auth-logo-text b { font-weight: 700; color: #A78BFA; }
+.ct-auth-msg {
+  display: none; padding: 10px 12px; border-radius: 9px;
+  font: 500 13px/1.45 'Archivo',-apple-system,Helvetica,sans-serif; margin-bottom: 14px;
+}
+.ct-auth-msg.ct-err { display: block; background: rgba(239,83,80,.13); border: 1px solid rgba(239,83,80,.35); color: #ef5350; }
+.ct-auth-msg.ct-ok  { display: block; background: rgba(102,187,106,.13); border: 1px solid rgba(102,187,106,.35); color: #66bb6a; }
+.ct-auth-field { display: flex; flex-direction: column; gap: 7px; margin-bottom: 13px; }
+.ct-auth-field label { font: 700 9px/1 'IBM Plex Mono', ui-monospace, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; color: #5E6578; }
+.ct-auth-wrap { position: relative; display: flex; align-items: center; }
+.ct-auth-input {
+  width: 100%; height: 46px; padding: 0 40px 0 14px;
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+  border-radius: 10px; color: #E9EBF2;
+  font: 500 14px 'Archivo',-apple-system,Helvetica,sans-serif;
+  outline: none; transition: border-color .15s, background .15s;
+}
+.ct-auth-input::placeholder { color: #5E6578; }
+.ct-auth-input:focus { border-color: rgba(124,92,255,.45); background: rgba(124,92,255,.06); }
+.ct-auth-icon { position: absolute; right: 12px; color: #5E6578; pointer-events: none; }
+.ct-auth-eye {
+  position: absolute; right: 10px; background: transparent; border: none;
+  color: #8C93A6; cursor: pointer; padding: 4px; display: grid; place-items: center; font-family: inherit;
+}
+.ct-auth-eye:hover { color: #E9EBF2; }
+.ct-auth-invite-badge {
+  display: inline-flex; align-items: center; gap: 5px; margin-bottom: 16px;
+  font: 600 10px/1 'IBM Plex Mono', ui-monospace, monospace; letter-spacing: .1em;
+  padding: 5px 9px; border-radius: 6px;
+  background: rgba(124,92,255,.15); border: 1px solid rgba(124,92,255,.3); color: #A78BFA;
+}
+.ct-auth-submit {
+  width: 100%; height: 46px; border-radius: 10px; border: none;
+  background: #7C5CFF; color: #fff;
+  font: 600 15px 'Archivo',-apple-system,Helvetica,sans-serif;
+  cursor: pointer; margin-top: 4px; position: relative; overflow: hidden;
+  transition: filter .15s, opacity .15s;
+}
+.ct-auth-submit::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(255,255,255,.08), transparent); pointer-events: none; }
+.ct-auth-submit:hover { filter: brightness(1.1); }
+.ct-auth-submit:disabled { opacity: .5; cursor: not-allowed; filter: none; }
+.ct-auth-submit .ct-spin { display: none; width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,.25); border-top-color: #fff; animation: ct-spin .7s linear infinite; margin: 0 auto; }
+@keyframes ct-spin { to { transform: rotate(360deg); } }
+.ct-auth-submit.ct-loading .ct-lbl  { display: none; }
+.ct-auth-submit.ct-loading .ct-spin { display: block; }
+.ct-auth-note { text-align: center; margin-top: 18px; font: 500 12px/1.5 'Archivo',-apple-system,Helvetica,sans-serif; color: #5E6578; }
+.ct-auth-note a { color: #A78BFA; text-decoration: none; }
+.ct-auth-note a:hover { color: #E9EBF2; }
+.ct-auth-view { animation: ct-slide-up .18s ease; }
+#ct-logout-btn {
+  display: none; align-items: center; gap: 7px;
+  height: 42px; padding: 0 18px; border-radius: 21px;
+  border: 1px solid rgba(255,255,255,.12); background: transparent;
+  color: #8C93A6; font: 600 15px 'Archivo',-apple-system,Helvetica,sans-serif;
+  cursor: pointer; transition: background .14s;
+}
+#ct-logout-btn:hover { background: rgba(255,255,255,.06); color: #E9EBF2; }
 </style>
 <style id="cartriige-v2">
 /* ============================================================
@@ -3622,95 +3738,197 @@ function ctNavTab(tab) {
 
 </script>
 
-<!-- ── AUTH MODAL ─────────────────────────────────────────────────────── -->
-<div id="ct-auth-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
-  <div style="background:var(--bg-surface,#1a1f2e);border:1px solid var(--border,#2a3040);border-radius:20px;width:100%;max-width:420px;margin:16px;padding:36px 32px;box-shadow:0 24px 64px rgba(0,0,0,.6);">
-    <div style="text-align:center;margin-bottom:28px;">
-      <div style="font-size:28px;margin-bottom:8px;">🚗</div>
-      <h2 id="ct-auth-title" style="margin:0;font-size:20px;color:var(--text-primary,#e8eaf0);">Prisijungti</h2>
-      <p style="margin:6px 0 0;font-size:13px;color:var(--text-secondary,#8892a4);">CarTriige · Automobilių paieška</p>
+
+<!-- AUTH MODAL (design Claude v1.0) -->
+<div id="ct-auth-overlay" onclick="if(event.target===this)window.hideAuthModal()">
+  <div class="ct-auth-card">
+    <button class="ct-auth-close" onclick="window.hideAuthModal()">&#x2715;</button>
+    <div class="ct-auth-tabs">
+      <button class="ct-auth-tab ct-active" id="ct-tab-login"    onclick="ctAuthSwitch('login')">Prisijungti</button>
+      <button class="ct-auth-tab"           id="ct-tab-register" onclick="ctAuthSwitch('register')">Registruotis</button>
     </div>
-    <div style="display:flex;gap:8px;margin-bottom:24px;background:var(--bg-elevated,#141822);border-radius:10px;padding:4px;">
-      <button onclick="ctShowLogin()" id="ct-tab-login" style="flex:1;padding:8px;border:none;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600;background:var(--accent,#5c6bc0);color:#fff;transition:.2s;">Prisijungti</button>
-      <button onclick="ctShowRegister()" id="ct-tab-reg" style="flex:1;padding:8px;border:none;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600;background:transparent;color:var(--text-secondary,#8892a4);transition:.2s;">Registruotis</button>
+    <div class="ct-auth-body">
+      <div class="ct-auth-logo">
+        <svg viewBox="0 0 36 36" fill="none">
+          <rect x="18" y="2" width="20" height="20" rx="3" transform="rotate(45 18 2)" fill="#7C5CFF"/>
+          <rect x="18" y="9" width="11" height="11" rx="2" transform="rotate(45 18 9)" fill="#0A0C12" opacity="0.7"/>
+          <rect x="18" y="13" width="5" height="5" rx="1" transform="rotate(45 18 13)" fill="#7C5CFF" opacity="0.9"/>
+        </svg>
+        <span class="ct-auth-logo-text">Car<b>Triige</b></span>
+      </div>
+      <div class="ct-auth-msg" id="ct-auth-msg"></div>
+      <div id="ct-view-login" class="ct-auth-view">
+        <div class="ct-auth-field">
+          <label>El. paštas</label>
+          <div class="ct-auth-wrap">
+            <input class="ct-auth-input" type="email" id="ct-login-email" placeholder="jusu@pastas.lt" autocomplete="email">
+            <span class="ct-auth-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg></span>
+          </div>
+        </div>
+        <div class="ct-auth-field">
+          <label>Slaptažodis</label>
+          <div class="ct-auth-wrap">
+            <input class="ct-auth-input" type="password" id="ct-login-pass" placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;" autocomplete="current-password">
+            <button class="ct-auth-eye" type="button" onclick="ctTogglePass('ct-login-pass')" tabindex="-1">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <button class="ct-auth-submit" id="ct-login-btn" onclick="ctDoLogin()">
+          <span class="ct-lbl">Prisijungti</span><div class="ct-spin"></div>
+        </button>
+        <div class="ct-auth-note">Neturite paskyros? <a href="#" onclick="event.preventDefault();ctAuthSwitch('register')">Registruotis</a></div>
+      </div>
+      <div id="ct-view-register" class="ct-auth-view" style="display:none">
+        <div class="ct-auth-invite-badge">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Tik pakvietimo pagrindu
+        </div>
+        <div class="ct-auth-field">
+          <label>El. paštas</label>
+          <div class="ct-auth-wrap">
+            <input class="ct-auth-input" type="email" id="ct-reg-email" placeholder="jusu@pastas.lt" autocomplete="email">
+            <span class="ct-auth-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg></span>
+          </div>
+        </div>
+        <div class="ct-auth-field">
+          <label>Slaptažodis</label>
+          <div class="ct-auth-wrap">
+            <input class="ct-auth-input" type="password" id="ct-reg-pass" placeholder="Min. 8 simboliai" autocomplete="new-password">
+            <button class="ct-auth-eye" type="button" onclick="ctTogglePass('ct-reg-pass')" tabindex="-1">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="ct-auth-field">
+          <label>Pakvietimo kodas</label>
+          <div class="ct-auth-wrap">
+            <input class="ct-auth-input" type="text" id="ct-reg-invite" placeholder="XXXX-XXXX" autocomplete="off" style="letter-spacing:.08em;font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;">
+            <span class="ct-auth-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+          </div>
+        </div>
+        <button class="ct-auth-submit" id="ct-reg-btn" onclick="ctDoRegister()">
+          <span class="ct-lbl">Sukurti paskyrą</span><div class="ct-spin"></div>
+        </button>
+        <div class="ct-auth-note">Jau turite paskyrą? <a href="#" onclick="event.preventDefault();ctAuthSwitch('login')">Prisijungti</a></div>
+      </div>
     </div>
-    <div id="ct-auth-error" style="display:none;background:var(--danger-dim,rgba(239,83,80,.15));border:1px solid var(--danger-border,rgba(239,83,80,.3));color:var(--danger,#ef5350);border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:16px;"></div>
-    <form onsubmit="ctAuthSubmit(event)">
-      <div style="margin-bottom:14px;">
-        <label style="font-size:12px;color:var(--text-secondary,#8892a4);display:block;margin-bottom:5px;">El. paštas</label>
-        <input id="ct-auth-email" type="email" required placeholder="jusu@pastas.lt"
-          style="width:100%;box-sizing:border-box;padding:11px 14px;background:var(--bg-elevated,#141822);border:1px solid var(--border,#2a3040);border-radius:9px;color:var(--text-primary,#e8eaf0);font-size:14px;outline:none;">
-      </div>
-      <div style="margin-bottom:14px;">
-        <label style="font-size:12px;color:var(--text-secondary,#8892a4);display:block;margin-bottom:5px;">Slaptažodis</label>
-        <input id="ct-auth-pass" type="password" required placeholder="Min. 8 simboliai"
-          style="width:100%;box-sizing:border-box;padding:11px 14px;background:var(--bg-elevated,#141822);border:1px solid var(--border,#2a3040);border-radius:9px;color:var(--text-primary,#e8eaf0);font-size:14px;outline:none;">
-      </div>
-      <div id="ct-invite-wrap" style="display:none;margin-bottom:14px;">
-        <label style="font-size:12px;color:var(--text-secondary,#8892a4);display:block;margin-bottom:5px;">Invite kodas</label>
-        <input id="ct-auth-invite" type="text" placeholder="CARTRIAGE2024"
-          style="width:100%;box-sizing:border-box;padding:11px 14px;background:var(--bg-elevated,#141822);border:1px solid var(--border,#2a3040);border-radius:9px;color:var(--text-primary,#e8eaf0);font-size:14px;outline:none;text-transform:uppercase;">
-      </div>
-      <button type="submit" id="ct-auth-submit"
-        style="width:100%;padding:13px;background:var(--accent,#5c6bc0);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px;transition:opacity .2s;">
-        Prisijungti
-      </button>
-    </form>
   </div>
 </div>
+<button id="ct-logout-btn" onclick="window.ctLogout()">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+  Atsijungti
+</button>
 
 <script>
-var _ctMode = 'login';
-function ctShowLogin() {
-  _ctMode='login';
-  document.getElementById('ct-auth-title').textContent='Prisijungti';
-  document.getElementById('ct-auth-submit').textContent='Prisijungti';
-  document.getElementById('ct-invite-wrap').style.display='none';
-  document.getElementById('ct-tab-login').style.background='var(--accent,#5c6bc0)';
-  document.getElementById('ct-tab-login').style.color='#fff';
-  document.getElementById('ct-tab-reg').style.background='transparent';
-  document.getElementById('ct-tab-reg').style.color='var(--text-secondary,#8892a4)';
-  document.getElementById('ct-auth-error').style.display='none';
-}
-function ctShowRegister() {
-  _ctMode='register';
-  document.getElementById('ct-auth-title').textContent='Registruotis';
-  document.getElementById('ct-auth-submit').textContent='Registruotis';
-  document.getElementById('ct-invite-wrap').style.display='block';
-  document.getElementById('ct-tab-reg').style.background='var(--accent,#5c6bc0)';
-  document.getElementById('ct-tab-reg').style.color='#fff';
-  document.getElementById('ct-tab-login').style.background='transparent';
-  document.getElementById('ct-tab-login').style.color='var(--text-secondary,#8892a4)';
-  document.getElementById('ct-auth-error').style.display='none';
-}
-async function ctAuthSubmit(e) {
-  e.preventDefault();
-  var btn = document.getElementById('ct-auth-submit');
-  var errEl = document.getElementById('ct-auth-error');
-  btn.disabled=true; btn.style.opacity='.6';
-  errEl.style.display='none';
-  try {
-    var email = document.getElementById('ct-auth-email').value;
-    var pass  = document.getElementById('ct-auth-pass').value;
-    if (_ctMode==='login') {
-      await window.authAPI.login(email, pass);
-    } else {
-      var inv = document.getElementById('ct-auth-invite').value;
-      await window.authAPI.register(email, pass, inv);
-    }
-    window.location.reload();
-  } catch(err) {
-    errEl.textContent = err.message || 'Klaida';
-    errEl.style.display='block';
-    btn.disabled=false; btn.style.opacity='1';
+(function () {
+  function $(id) { return document.getElementById(id); }
+  function val(id) { return ($( id)?.value || '').trim(); }
+  function ctMsg(type, text) {
+    var el = $('ct-auth-msg');
+    if (!el) return;
+    el.className = 'ct-auth-msg' + (type ? ' ct-' + type : '');
+    el.textContent = text;
   }
-}
-window.showAuthModal = function() {
-  var el = document.getElementById('ct-auth-overlay');
-  el.style.display='flex';
-};
-</script>
+  function ctClearMsg() { ctMsg('', ''); }
+  function ctSetLoading(btnId, on) {
+    var btn = $(btnId);
+    if (!btn) return;
+    btn.classList.toggle('ct-loading', on);
+    btn.disabled = on;
+  }
+  window.ctTogglePass = function(id) {
+    var el = $(id);
+    if (el) el.type = el.type === 'password' ? 'text' : 'password';
+  };
+  function getToken() { try { return localStorage.getItem('ct_token'); } catch { return null; } }
+  function saveToken(tok) { try { localStorage.setItem('ct_token', tok); } catch {} }
+  function clearToken() { try { localStorage.removeItem('ct_token'); localStorage.removeItem('ct_email'); } catch {} }
 
+  window.ctAuthSwitch = function (view) {
+    ctClearMsg();
+    var isLogin = view === 'login';
+    $('ct-view-login')    && ($('ct-view-login').style.display    = isLogin ? '' : 'none');
+    $('ct-view-register') && ($('ct-view-register').style.display = isLogin ? 'none' : '');
+    $('ct-tab-login')    ?.classList.toggle('ct-active',  isLogin);
+    $('ct-tab-register') ?.classList.toggle('ct-active', !isLogin);
+  };
+  window.showAuthModal = function () {
+    var el = $('ct-auth-overlay');
+    if (el) el.classList.add('ct-open');
+    ctClearMsg(); ctAuthSwitch('login');
+    setTimeout(function () { $('ct-login-email')?.focus(); }, 80);
+  };
+  window.hideAuthModal = function () {
+    var el = $('ct-auth-overlay');
+    if (el) el.classList.remove('ct-open');
+  };
+  window.ctDoLogin = async function () {
+    var email = val('ct-login-email');
+    var pass  = $('ct-login-pass')?.value || '';
+    if (!email || !pass) { ctMsg('err', 'Iveskite el. pasta ir slaptazodi.'); return; }
+    ctClearMsg(); ctSetLoading('ct-login-btn', true);
+    try {
+      var api = window.authAPI;
+      if (!api) throw new Error('authAPI nerastas');
+      var result = await api.login(email, pass);
+      var tok = result?.access_token || result?.token;
+      if (tok) {
+        saveToken(tok);
+        ctMsg('ok', 'Prisijungta! Kraunama...');
+        ctUpdateHeader();
+        setTimeout(function () { window.location.reload(); }, 700);
+      } else { throw new Error(result?.detail || result?.message || 'Neteisingi duomenys.'); }
+    } catch (err) { ctMsg('err', err.message || 'Klaida prisijungiant.'); }
+    finally { ctSetLoading('ct-login-btn', false); }
+  };
+  window.ctDoRegister = async function () {
+    var email  = val('ct-reg-email');
+    var pass   = $('ct-reg-pass')?.value || '';
+    var invite = val('ct-reg-invite');
+    if (!email || !pass) { ctMsg('err', 'Iveskite el. pasta ir slaptazodi.'); return; }
+    if (pass.length < 8) { ctMsg('err', 'Slaptazodis turi buti min. 8 simboliu.'); return; }
+    if (!invite)         { ctMsg('err', 'Iveskite pakvietimo koda.'); return; }
+    ctClearMsg(); ctSetLoading('ct-reg-btn', true);
+    try {
+      var api = window.authAPI;
+      if (!api) throw new Error('authAPI nerastas');
+      var result = await api.register(email, pass, invite);
+      var tok = result?.access_token || result?.token;
+      if (tok) {
+        saveToken(tok);
+        ctMsg('ok', 'Paskyra sukurta! Kraunama...');
+        ctUpdateHeader();
+        setTimeout(function () { window.location.reload(); }, 700);
+      } else { throw new Error(result?.detail || result?.message || 'Registracija nepavyko.'); }
+    } catch (err) { ctMsg('err', err.message || 'Klaida registruojantis.'); }
+    finally { ctSetLoading('ct-reg-btn', false); }
+  };
+  window.ctLogout = function () {
+    clearToken(); ctUpdateHeader(); window.location.reload();
+  };
+  function ctUpdateHeader() {
+    var hasToken = !!getToken();
+    var logoutBtn = $('ct-logout-btn');
+    if (logoutBtn) logoutBtn.style.display = hasToken ? 'flex' : 'none';
+  }
+  document.addEventListener('DOMContentLoaded', function () {
+    ctUpdateHeader();
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') window.hideAuthModal();
+    });
+    [$('ct-login-email'), $('ct-login-pass')].forEach(function (el) {
+      el?.addEventListener('keydown', function (e) { if (e.key === 'Enter') window.ctDoLogin(); });
+    });
+    [$('ct-reg-email'), $('ct-reg-pass'), $('ct-reg-invite')].forEach(function (el) {
+      el?.addEventListener('keydown', function (e) { if (e.key === 'Enter') window.ctDoRegister(); });
+    });
+    // Rodyti modalas jei neprisijunges
+    if (!getToken()) window.showAuthModal();
+  });
+})();
+</script>
 <script src="auth_frontend.js"></script>
+
 </body>
 </html>
