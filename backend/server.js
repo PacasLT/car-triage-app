@@ -1316,10 +1316,10 @@ async function downloadImageAsBase64(url) {
 }
 
 async function generateDeepAnalysis(title, fullText, photos, marketContext) {
-  // Visada siunčiame pirmas 3 nuotraukas AI - vizuali automobilio būklės analizė visada naudinga.
+  // Siunčiame iki 12 nuotraukų AI - vizuali automobilio būklės analizė visada naudinga.
   let imageBlocks = [];
   if (photos && photos.length > 0) {
-    const downloaded = await Promise.all(photos.slice(0, 3).map(downloadImageAsBase64));
+    const downloaded = await Promise.all(photos.slice(0, 12).map(downloadImageAsBase64));
     imageBlocks = downloaded.filter(Boolean).map((img) => ({
       type: 'image',
       source: { type: 'base64', media_type: img.media_type, data: img.data },
