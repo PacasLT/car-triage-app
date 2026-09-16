@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Automobilio apžvalga — CarTriige</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ── */
+:root {
+  --bg-base:#0A0C12;--bg-surface:#11141C;--bg-elevated:#171B25;--bg-card:#11141C;--bg-raised:#1F2431;
+  --border:rgba(255,255,255,.075);--border-light:rgba(255,255,255,.14);
+  --accent:#7C5CFF;--accent-hover:#8B6FFF;--accent-light:#A78BFA;--accent-dim:rgba(124,92,255,.14);--accent-border:rgba(124,92,255,.30);
+  --success:oklch(.75 .15 158);--success-dim:oklch(.75 .15 158/.13);--success-border:oklch(.75 .15 158/.30);
+  --warning:oklch(.81 .13 78);--warning-dim:oklch(.81 .13 78/.13);--warning-border:oklch(.81 .13 78/.30);
+  --danger:oklch(.66 .19 25);--danger-dim:oklch(.66 .19 25/.13);--danger-border:oklch(.66 .19 25/.30);
+  --text-primary:#E9EBF2;--text-secondary:#C3C9D8;--text-muted:#8C93A6;--text-dim:#5E6578;
+  --radius-sm:6px;--radius-md:7px;--radius-lg:11px;--radius-xl:12px;
+  --font:'Archivo',-apple-system,'Segoe UI',Helvetica,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg-base);color:var(--text-primary);min-height:100vh}
+a{color:var(--accent-light);text-decoration:none}a:hover{color:var(--text-primary)}
+button{font-family:inherit;cursor:pointer}
+
+/* ── HEADER ── */
+.ct3-header{position:sticky;top:0;z-index:200;background:rgba(10,12,18,0.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.07)}
+.ct3-header-inner{display:flex;align-items:center;max-width:1440px;margin:0 auto;padding:22px 48px}
+.ct3-logo{display:flex;align-items:center;gap:14px;text-decoration:none;flex:none}
+.ct3-logo-icon{width:52px;height:52px;flex:none}
+.ct3-logo-text{display:flex;flex-direction:column;gap:1px}
+.ct3-logo-text>span{font-size:28px;font-weight:400;color:var(--text-primary);letter-spacing:-.01em;line-height:1}
+.ct3-logo-text>span b{font-weight:700;color:var(--accent-light)}
+.ct3-logo-text small{font:600 9px/1 var(--font-mono);letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim);margin-top:4px}
+.ct3-nav{display:flex;gap:4px;margin-left:56px;flex:1}
+.ct3-nav-link{padding:10px 20px;border-radius:8px;font-size:15px;font-weight:500;color:var(--text-secondary);text-decoration:none;transition:color .15s,background .15s}
+.ct3-nav-link:hover{color:var(--text-primary);background:rgba(255,255,255,.05)}
+.ct3-premium-btn{display:flex;align-items:center;gap:7px;height:42px;padding:0 22px;border-radius:21px;border:1px solid var(--accent);background:transparent;color:var(--accent-light);font:600 15px var(--font);cursor:pointer;transition:background .15s}
+.ct3-premium-btn:hover{background:var(--accent-dim)}
+.ct3-avatar{width:42px;height:42px;border-radius:50%;border:1px solid var(--border-light);background:var(--bg-elevated);color:var(--text-secondary);display:grid;place-items:center;cursor:pointer}
+.ct3-header-right{display:flex;align-items:center;gap:10px;flex:none}
+@media(max-width:768px){
+  .ct3-header-inner{padding:14px 20px}
+  .ct3-logo-icon{width:38px;height:38px}
+  .ct3-logo-text>span{font-size:20px}
+  .ct3-nav{display:none}
+  .ct3-premium-btn{display:none}
+}
+
+/* ── PAGE LAYOUT ── */
+.dp-wrap{max-width:1440px;margin:0 auto;padding:0 32px 64px}
+@media(max-width:768px){.dp-wrap{padding:0 16px 48px}}
+
+/* ── BREADCRUMB ── */
+.dp-bc{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);margin-bottom:24px;flex-wrap:wrap;gap:10px}
+.dp-bc-left{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-muted)}
+.dp-bc-left a{color:var(--text-secondary);font-weight:500}
+.dp-bc-left a:hover{color:var(--text-primary)}
+.dp-bc-left .sep{color:var(--text-dim)}
+.dp-bc-back{display:flex;align-items:center;gap:6px;color:var(--text-secondary);font-weight:500;margin-right:6px}
+.dp-bc-right{display:flex;align-items:center;gap:10px}
+.dp-bc-id{font:500 11px/1 var(--font-mono);color:var(--text-dim);letter-spacing:.08em}
+.dp-bc-btn{display:flex;align-items:center;gap:6px;height:32px;padding:0 14px;border-radius:8px;border:1px solid var(--border-light);background:transparent;color:var(--text-secondary);font:500 13px var(--font)}
+.dp-bc-btn:hover{background:var(--bg-elevated);color:var(--text-primary)}
+.dp-bc-btn.save{color:var(--accent-light);border-color:var(--accent-border);background:var(--accent-dim)}
+
+/* ── MAIN 3-COL ── */
+.dp-main{display:grid;grid-template-columns:280px minmax(0,1fr) 200px;gap:18px;align-items:start}
+@media(max-width:900px){.dp-main{grid-template-columns:1fr}}
+
+/* ── PHOTO COL ── */
+.dp-photo{display:flex;flex-direction:column;gap:10px}
+.dp-photo-main{position:relative;aspect-ratio:4/3;border-radius:14px;overflow:hidden;background:var(--bg-elevated);border:1px solid var(--border)}
+.dp-photo-main img{width:100%;height:100%;object-fit:cover;display:block}
+.dp-photo-count{position:absolute;top:10px;left:10px;font:600 11px/1 var(--font-mono);padding:5px 8px;border-radius:6px;background:rgba(10,12,18,.82);border:1px solid var(--border-light);color:var(--text-secondary)}
+.dp-nav{position:absolute;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;border:1px solid var(--border-light);background:rgba(10,12,18,.75);color:#fff;font-size:18px;display:grid;place-items:center;cursor:pointer}
+.dp-nav-l{left:10px}.dp-nav-r{right:10px}
+.dp-thumbs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.dp-thumb{aspect-ratio:4/3;border-radius:8px;overflow:hidden;border:1px solid var(--border);background:var(--bg-elevated);cursor:pointer;position:relative}
+.dp-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.dp-thumb.dp-thumb-active{border-color:var(--accent)}
+.dp-ai-insight{padding:12px 14px;border-radius:10px;background:rgba(124,92,255,.08);border:1px solid rgba(124,92,255,.2);display:flex;gap:10px;align-items:flex-start}
+.dp-ai-badge{flex:none;width:24px;height:24px;border-radius:6px;background:var(--accent);color:#fff;font:700 10px/1 var(--font-mono);display:grid;place-items:center}
+.dp-ai-text{flex:1;font-size:12.5px;line-height:1.5;color:var(--text-secondary)}
+.dp-ai-link{display:inline-flex;align-items:center;gap:4px;font:600 12px var(--font);color:var(--accent-light);margin-top:8px;cursor:pointer}
+
+/* ── INFO COL ── */
+.dp-info{display:flex;flex-direction:column;gap:0}
+.dp-tags{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.dp-tag{font:600 10px/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;padding:5px 8px;border-radius:5px;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-muted)}
+.dp-tag-source{background:var(--bg-elevated);color:var(--text-secondary);border-color:var(--border-light)}
+.dp-title{font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin-bottom:4px}
+.dp-subtitle{font-size:14px;color:var(--text-muted);margin-bottom:16px}
+.dp-price-row{display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:nowrap}
+.dp-price{font:700 28px/1 var(--font-mono);letter-spacing:-.02em;white-space:nowrap}
+.dp-diff-badge{display:inline-flex;align-items:center;height:28px;padding:0 10px;border-radius:7px;font:700 13px var(--font-mono)}
+.dp-diff-pos{background:var(--success);color:#0A0C12}
+.dp-diff-neg-badge{background:var(--danger);color:#fff}
+.dp-market-row{font-size:13px;color:var(--text-muted);margin-bottom:16px}
+.dp-market-row b{color:var(--text-primary);font-weight:600}
+.dp-diff-green{color:var(--success);font-weight:600}
+.dp-specs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.dp-spec{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:7px;background:var(--bg-elevated);border:1px solid var(--border);font-size:12.5px;color:var(--text-secondary)}
+.dp-spec-pos{color:var(--success);border-color:var(--success-border);background:var(--success-dim)}
+.dp-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.dp-act{display:flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--border-light);background:transparent;color:var(--text-primary);font:500 12.5px var(--font);white-space:nowrap}
+.dp-act:hover{background:var(--bg-elevated)}
+.dp-act-primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.dp-act-primary:hover{filter:brightness(1.1)}
+
+/* ── SELLER COL ── */
+.dp-seller{background:var(--bg-surface);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:14px}
+.dp-seller-label{font:700 9px/1 var(--font-mono);letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim)}
+.dp-seller-name-row{display:flex;align-items:center;gap:10px}
+.dp-seller-icon{width:32px;height:32px;border-radius:8px;overflow:hidden;flex:none;background:var(--bg-elevated);border:1px solid var(--border);display:grid;place-items:center;font-size:18px}
+.dp-seller-name{font:600 14px var(--font);color:var(--text-primary)}
+.dp-seller-type{font-size:12px;color:var(--text-muted)}
+.dp-seller-link{display:flex;align-items:center;gap:5px;font:500 12.5px var(--font);color:var(--accent-light)}
+.dp-seller-div{height:1px;background:var(--border)}
+.dp-seller-loc-wrap{font-size:12.5px;color:var(--text-muted);display:flex;flex-direction:column;gap:3px}
+.dp-seller-loc-wrap b{color:var(--text-primary);font-weight:600;font-size:13px}
+
+/* ── SCORE SECTION ── */
+.dp-score-section{margin-top:24px;padding:18px 20px;background:var(--bg-surface);border:1px solid var(--border);border-radius:14px;display:grid;grid-template-columns:auto 1fr 200px;gap:20px;align-items:center}
+@media(max-width:900px){.dp-score-section{grid-template-columns:1fr}}
+.dp-score-title{font:600 11px/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:14px}
+.dp-score-left{display:flex;align-items:center;gap:18px}
+.dp-ring-lg{flex:none;width:84px;height:84px;border-radius:50%;background:conic-gradient(var(--score-color,var(--warning)) calc(var(--pct,70)*1%),var(--bg-raised) 0);display:grid;place-items:center;position:relative}
+.dp-ring-lg::before{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--bg-surface)}
+.dp-ring-lg>div{position:relative;text-align:center}
+.dp-ring-lg b{display:block;font:700 22px/1 var(--font-mono)}
+.dp-ring-lg small{font:500 10px/1 var(--font-mono);color:var(--text-dim)}
+.dp-score-verdict{max-width:200px}
+.dp-score-verdict p{font-size:13px;line-height:1.5;color:var(--text-secondary)}
+.dp-score-bars{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;flex:1}
+@media(max-width:600px){.dp-score-bars{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.dp-sbar{display:flex;flex-direction:column;gap:8px}
+.dp-sbar-label{font:700 8px/1 var(--font-mono);letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim)}
+.dp-sbar-val{font:700 18px/1 var(--font-mono)}
+.dp-sbar-track{height:4px;border-radius:2px;background:var(--bg-raised);overflow:hidden}
+.dp-sbar-fill{height:100%;border-radius:2px}
+.dp-score-info{padding:14px 16px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);align-self:stretch;display:flex;flex-direction:column;justify-content:space-between}
+.dp-score-info-h{display:flex;align-items:center;gap:7px;font:600 12px var(--font);color:var(--text-secondary);margin-bottom:8px}
+.dp-score-info p{font-size:11.5px;line-height:1.55;color:var(--text-muted)}
+
+/* ── PROFIT/RISK BLOCKS ── */
+.dp-pr-blocks{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+@media(max-width:600px){.dp-pr-blocks{grid-template-columns:1fr}}
+.dp-pr-block{display:flex;align-items:center;gap:16px;padding:16px 20px;border-radius:12px;border:1px solid var(--border);background:var(--bg-surface)}
+.dp-pr-block.profit{border-color:var(--success-border);background:var(--success-dim)}
+.dp-pr-block.risk{border-color:var(--warning-border);background:var(--warning-dim)}
+.dp-pr-icon{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;flex:none}
+.dp-pr-block.profit .dp-pr-icon{background:var(--success);color:#0A0C12}
+.dp-pr-block.risk .dp-pr-icon{background:var(--warning);color:#0A0C12}
+.dp-pr-text{flex:1;min-width:0}
+.dp-pr-text h4{font:600 15px var(--font);color:var(--text-primary);margin-bottom:3px}
+.dp-pr-text p{font-size:12.5px;color:var(--text-muted)}
+
+/* ── TABS ── */
+.dp-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-top:24px;overflow-x:auto;scrollbar-width:none}
+.dp-tabs::-webkit-scrollbar{display:none}
+.dp-tab{display:flex;align-items:center;gap:7px;height:46px;padding:0 18px;background:transparent;border:none;font:500 13.5px var(--font);color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;flex:none;transition:color .15s}
+.dp-tab:hover{color:var(--text-primary)}
+.dp-tab.active{color:var(--accent-light);border-bottom-color:var(--accent);font-weight:600}
+
+/* ── TAB PANES ── */
+.dp-pane{display:none;padding-top:24px}
+.dp-pane.active{display:block}
+.dp-placeholder{padding:48px;text-align:center;color:var(--text-muted);font-size:13.5px;border:1px dashed var(--border);border-radius:12px}
+.dp-placeholder h3{color:var(--text-secondary);font-size:15px;margin-top:12px}
+.dp-placeholder p{margin-top:6px;font-size:12px;color:var(--text-dim)}
+
+/* ── AI PANE ── */
+.dp-ai-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px}
+.dp-ai-header-left{display:flex;align-items:center;gap:10px}
+.dp-ai-badge-lg{width:28px;height:28px;border-radius:7px;background:var(--accent);color:#fff;font:700 11px var(--font-mono);display:grid;place-items:center;flex:none}
+.dp-ai-header h3{font:600 16px var(--font);color:var(--text-primary)}
+.dp-ai-meta{font:500 11px/1 var(--font-mono);color:var(--text-dim)}
+.dp-ai-body{font-size:13.5px;line-height:1.65;color:var(--text-secondary);margin-bottom:16px}
+.dp-spec-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.dp-spec-chip{font:500 12px var(--font-mono);padding:6px 10px;border-radius:6px;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-secondary)}
+.dp-3cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media(max-width:768px){.dp-3cols{grid-template-columns:1fr}}
+.dp-col-box{background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;padding:16px}
+.dp-col-box.green{border-color:var(--success-border)}
+.dp-col-box.amber{border-color:var(--warning-border)}
+.dp-col-box.purple{border-color:var(--accent-border);background:var(--accent-dim)}
+.dp-col-h{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.dp-col-h-ic{width:24px;height:24px;border-radius:6px;display:grid;place-items:center;flex:none;font:700 12px var(--font-mono)}
+.dp-col-h-ic.green{background:var(--success);color:#0A0C12}
+.dp-col-h-ic.amber{background:var(--warning);color:#0A0C12}
+.dp-col-h-ic.purple{background:var(--accent);color:#fff}
+.dp-col-h span{font:600 14px var(--font);color:var(--text-primary)}
+.dp-col-list{list-style:none;display:flex;flex-direction:column;gap:10px}
+.dp-col-list li{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;line-height:1.45;color:var(--text-secondary)}
+.dp-col-list li .bullet{flex:none;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;margin-top:1px;font:700 9px sans-serif}
+.dp-col-list li .bullet.green{background:var(--success);color:#0A0C12}
+.dp-col-list li .bullet.amber{background:var(--warning);color:#0A0C12}
+.dp-col-list li .bullet.purple{background:var(--accent);color:#fff}
+.dp-equip-item{display:flex;align-items:flex-start;gap:8px;margin-bottom:10px}
+.dp-equip-item:last-child{margin-bottom:0}
+.dp-equip-name{font-size:12.5px;color:var(--text-primary);line-height:1.4;flex:1}
+
+/* ── FOOTER ── */
+.dp-footer{margin-top:48px;padding:20px 0;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.dp-footer-logo{display:flex;align-items:center;gap:10px}
+.dp-footer-logo svg{width:28px;height:28px}
+.dp-footer-logo-text span{font-size:16px;font-weight:400}
+.dp-footer-logo-text span b{color:var(--accent-light);font-weight:700}
+.dp-footer-logo-text small{display:block;font:600 7px/1 var(--font-mono);letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim);margin-top:2px}
+.dp-footer-tag{font:500 13px var(--font);color:var(--text-muted)}
+.dp-footer-tag em{font-style:normal;color:var(--accent-light)}
+.dp-footer-right{font:500 11px/1.6 var(--font-mono);letter-spacing:.06em;color:var(--text-dim);text-align:right}
+
+/* ── EMPTY STATE ── */
+.dp-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;text-align:center}
+.dp-empty h2{font-size:20px;color:var(--text-secondary)}
+.dp-empty p{font-size:14px;color:var(--text-muted);max-width:360px}
+.dp-empty a{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 20px;border-radius:10px;background:var(--accent);color:#fff;font:600 14px var(--font);margin-top:8px}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="ct3-header">
+  <div class="ct3-header-inner">
+    <a class="ct3-logo" href="index.html">
+      <svg class="ct3-logo-icon" viewBox="0 0 36 36" fill="none"><rect x="18" y="2" width="20" height="20" rx="3" transform="rotate(45 18 2)" fill="#7C5CFF"/><rect x="18" y="9" width="11" height="11" rx="2" transform="rotate(45 18 9)" fill="#0A0C12" opacity="0.7"/><rect x="18" y="13" width="5" height="5" rx="1" transform="rotate(45 18 13)" fill="#7C5CFF" opacity="0.9"/></svg>
+      <div class="ct3-logo-text"><span>Car<b>Triige</b></span><small>AUTOMOTIVE MARKET INTELLIGENCE</small></div>
+    </a>
+    <nav class="ct3-nav">
+      <a class="ct3-nav-link" href="index.html">Paieška</a>
+      <a class="ct3-nav-link" href="index.html">Mėgstamiausi</a>
+      <a class="ct3-nav-link" href="index.html">Istorija</a>
+      <a class="ct3-nav-link" href="index.html">Palyginti</a>
+    </nav>
+    <div class="ct3-header-right">
+      <button class="ct3-premium-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V10l6-8 6 8v10"/></svg>Go Premium</button>
+      <button class="ct3-avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<!-- EMPTY STATE -->
+<div class="dp-wrap" id="dp-empty" style="display:none">
+  <div class="dp-empty">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+    <h2>Duomenys nerasti</h2>
+    <p>Skelbimo duomenys neprieinami. Grįžkite į paieškos rezultatus ir atidarykite skelbimą iš ten.</p>
+    <a href="index.html">&#8592; Grįžti į paiešką</a>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="dp-wrap" id="dp-content" style="display:none">
+
+  <!-- BREADCRUMB -->
+  <div class="dp-bc">
+    <div class="dp-bc-left">
+      <a class="dp-bc-back" href="index.html">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        Atgal į rezultatus
+      </a>
+      <span class="sep">/</span>
+      <a href="index.html">Paieškos rezultatai</a>
+      <span class="sep">/</span>
+      <span id="dp-bc-title">—</span>
+    </div>
+    <div class="dp-bc-right">
+      <span class="dp-bc-id" id="dp-bc-source"></span>
+      <button class="dp-bc-btn" onclick="dpShare()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+        Dalintis
+      </button>
+      <button class="dp-bc-btn save" id="dp-save-btn" onclick="dpToggleSave()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        Išsaugoti
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN 3-COL -->
+  <div class="dp-main">
+
+    <!-- PHOTO COL -->
+    <div class="dp-photo">
+      <div class="dp-photo-main" id="dp-photo-main">
+        <img id="dp-main-img" src="" alt="" style="display:none">
+        <div id="dp-no-photo" style="width:100%;height:100%;background:linear-gradient(135deg,#1a1f2e,#0d1020);display:flex;align-items:center;justify-content:center;color:var(--text-dim);font:500 11px var(--font-mono);letter-spacing:.1em">BEZ NUOTRAUKOS</div>
+        <span class="dp-photo-count" id="dp-photo-count" style="display:none"></span>
+        <button class="dp-nav dp-nav-l" id="dp-nav-l" onclick="dpPhotoNav(-1)" style="display:none">&#8249;</button>
+        <button class="dp-nav dp-nav-r" id="dp-nav-r" onclick="dpPhotoNav(1)" style="display:none">&#8250;</button>
+      </div>
+      <div class="dp-thumbs" id="dp-thumbs"></div>
+      <div class="dp-ai-insight" id="dp-ai-insight" style="display:none">
+        <div class="dp-ai-badge">AI</div>
+        <div>
+          <div class="dp-ai-text" id="dp-ai-insight-text"></div>
+          <span class="dp-ai-link" onclick="dpTab('ai',document.querySelectorAll('.dp-tab')[0])">Visas AI vertinimas &#8594;</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- INFO COL -->
+    <div class="dp-info">
+      <div class="dp-tags" id="dp-tags"></div>
+      <h1 class="dp-title" id="dp-title">—</h1>
+      <div class="dp-subtitle" id="dp-subtitle"></div>
+      <div class="dp-price-row">
+        <span class="dp-price" id="dp-price">—</span>
+        <span class="dp-diff-badge" id="dp-diff-badge" style="display:none"></span>
+      </div>
+      <div class="dp-market-row" id="dp-market-row"></div>
+      <div class="dp-specs" id="dp-specs"></div>
+      <div class="dp-actions">
+        <a class="dp-act dp-act-primary" id="dp-listing-link" href="#" target="_blank" rel="noopener">Žiūrėti skelbimą &#8599;</a>
+        <button class="dp-act" onclick="dpToggleSave()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          Išsaugoti
+        </button>
+      </div>
+    </div>
+
+    <!-- SELLER COL -->
+    <div class="dp-seller">
+      <div class="dp-seller-label">Pardavėjas</div>
+      <div class="dp-seller-name-row">
+        <div class="dp-seller-icon" id="dp-seller-icon">&#128663;</div>
+        <div>
+          <div class="dp-seller-name" id="dp-seller-name">—</div>
+          <div class="dp-seller-type" id="dp-seller-type"></div>
+        </div>
+      </div>
+      <a class="dp-seller-link" id="dp-seller-link" href="#" target="_blank">Žiūrėti skelbimą &#8594;</a>
+      <div class="dp-seller-div"></div>
+      <div class="dp-seller-loc-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span>Šalis / portalas</span>
+        <b id="dp-seller-loc">—</b>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCORE SECTION -->
+  <div class="dp-score-section">
+    <div>
+      <div class="dp-score-title">CarTriige Score</div>
+      <div class="dp-score-left">
+        <div class="dp-ring-lg" id="dp-ring">
+          <div><b id="dp-ring-val" style="color:var(--warning)">—</b><small>/10</small></div>
+        </div>
+        <div class="dp-score-verdict">
+          <p id="dp-score-verdict" style="font-weight:600;color:var(--text-primary);margin-bottom:4px"></p>
+          <p id="dp-score-verdict2" style="color:var(--text-secondary);font-size:12px;line-height:1.5"></p>
+        </div>
+      </div>
+    </div>
+    <div class="dp-score-bars" id="dp-score-bars"></div>
+    <div class="dp-score-info">
+      <div>
+        <div class="dp-score-info-h">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+          Kaip vertiname?
+        </div>
+        <p>CarTriige Score parodo bendrą galimybę, remiantis kaina, rida, įranga, istorija ir rinkos potencialu.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFIT / RISK BLOCKS -->
+  <div class="dp-pr-blocks">
+    <div class="dp-pr-block profit">
+      <div class="dp-pr-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <div class="dp-pr-text">
+        <h4>Pelno potencialas</h4>
+        <p id="dp-profit-text">Kraunama...</p>
+      </div>
+    </div>
+    <div class="dp-pr-block risk">
+      <div class="dp-pr-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div class="dp-pr-text">
+        <h4>Rizikos</h4>
+        <p id="dp-risk-text">Kraunama...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="dp-tabs">
+    <button class="dp-tab active" onclick="dpTab('ai',this)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M8 12l2 2 4-4"/></svg>
+      AI analizė
+    </button>
+    <button class="dp-tab" onclick="dpTab('tech',this)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+      Techninė įranga
+    </button>
+    <button class="dp-tab" onclick="dpTab('risk',this)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+      Rizikos ir derybos
+    </button>
+    <button class="dp-tab" onclick="dpTab('vin',this)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 9h8M8 13h5"/></svg>
+      Istorija / VIN
+    </button>
+    <button class="dp-tab" onclick="dpTab('market',this)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h18M3 9h12M3 15h9"/></svg>
+      Rinkos analizė
+    </button>
+    <button class="dp-tab" onclick="dpTab('seller',this)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Pardavėjas
+    </button>
+    <button class="dp-tab" onclick="dpTab('photos',this)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+      Nuotraukos
+    </button>
+  </div>
+
+  <!-- AI PANE -->
+  <div class="dp-pane active" id="dp-pane-ai">
+    <div class="dp-ai-header">
+      <div class="dp-ai-header-left">
+        <div class="dp-ai-badge-lg">AI</div>
+        <h3>AI santrauka</h3>
+      </div>
+      <div class="dp-ai-meta" id="dp-ai-meta">CarTriige AI</div>
+    </div>
+    <p class="dp-ai-body" id="dp-ai-body">Analizė kraunama...</p>
+    <div class="dp-spec-chips" id="dp-spec-chips"></div>
+    <div class="dp-3cols">
+      <div class="dp-col-box green">
+        <div class="dp-col-h"><div class="dp-col-h-ic green">&#10003;</div><span>Privalumai</span></div>
+        <ul class="dp-col-list" id="dp-privalumai"></ul>
+      </div>
+      <div class="dp-col-box amber">
+        <div class="dp-col-h"><div class="dp-col-h-ic amber">!</div><span>Ką verta patikrinti</span></div>
+        <ul class="dp-col-list" id="dp-patikrinti"></ul>
+      </div>
+      <div class="dp-col-box purple">
+        <div class="dp-col-h"><div class="dp-col-h-ic purple">&#9733;</div><span>Įrangos akcentai</span></div>
+        <div id="dp-iranga"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OTHER PANES -->
+  <div class="dp-pane" id="dp-pane-tech">
+    <div class="dp-placeholder">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+      <h3>Techninė specifikacija ir įranga</h3>
+      <p>Pilnas techninės specifikacijos sąrašas ir skelbimo duomenys bus rodomi čia.</p>
+    </div>
+  </div>
+  <div class="dp-pane" id="dp-pane-risk">
+    <div class="dp-placeholder">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <h3>Rizikos, derybos ir klausimai</h3>
+      <p>Rizikos, klausimai pardavėjui ir derybų patarimas rodomi čia.</p>
+    </div>
+  </div>
+  <div class="dp-pane" id="dp-pane-vin">
+    <div class="dp-placeholder">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 9h8M8 13h5"/></svg>
+      <h3>VIN ir istorija</h3>
+      <p>VIN kodas, istorijos ataskaita ir kiti patikros duomenys rodomi čia.</p>
+    </div>
+  </div>
+  <div class="dp-pane" id="dp-pane-market">
+    <div class="dp-placeholder">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="1.5"><path d="M3 3h18M3 9h12M3 15h9"/></svg>
+      <h3>Rinkos analizė</h3>
+      <p>Rinkos vidurkis, kainų palyginimas ir pozicija rodomi čia.</p>
+    </div>
+  </div>
+  <div class="dp-pane" id="dp-pane-seller">
+    <div class="dp-placeholder">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      <h3>Pardavėjo informacija</h3>
+      <p>Pardavėjo istorija, kiti skelbimai ir patikimumo rodikliai rodomi čia.</p>
+    </div>
+  </div>
+  <div class="dp-pane" id="dp-pane-photos">
+    <div id="dp-photos-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;"></div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="dp-footer">
+    <div class="dp-footer-logo">
+      <svg viewBox="0 0 36 36" fill="none"><rect x="18" y="2" width="20" height="20" rx="3" transform="rotate(45 18 2)" fill="#7C5CFF"/><rect x="18" y="9" width="11" height="11" rx="2" transform="rotate(45 18 9)" fill="#0A0C12" opacity="0.7"/><rect x="18" y="13" width="5" height="5" rx="1" transform="rotate(45 18 13)" fill="#7C5CFF" opacity="0.9"/></svg>
+      <div class="dp-footer-logo-text"><span>Car<b>Triige</b></span><small>AUTOMOTIVE MARKET INTELLIGENCE</small></div>
+    </div>
+    <div class="dp-footer-tag">Find the cars <em>worth your attention.</em></div>
+    <div class="dp-footer-right">Better data. Better decisions.<br>More opportunities.</div>
+  </div>
+
+</div>
+
+<script>
+(function() {
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+  function fmt(n) { return n != null ? Number(n).toLocaleString('lt-LT') : '—'; }
+
+  function ctScore(c, a) {
+    var pr = a && a.perikupo_radaras;
+    var kaina = clamp(5 + (c.diffPct || 0) / 6, 0, 10);
+    var rida = c.ridaDiffPct == null ? 6.5 : clamp(7 - c.ridaDiffPct / 10, 0, 10);
+    var iranga = a ? clamp(5 + 0.5 * ((a.irangos_akcentai || []).length), 5, 9.5) : 6;
+    var istorija = clamp(5 + (c.turiVin ? 1.5 : 0) + (c.turiIstorijosAtaskaita ? 2 : 0) + (c.garantijosTipas ? 1 : 0) + (c.yraVerslas ? 0.5 : 0), 0, 10);
+    var potencialas = pr && pr.procentas != null ? clamp(pr.procentas / 10, 0, 10) : 6;
+    var total = kaina * 0.3 + rida * 0.15 + iranga * 0.15 + istorija * 0.2 + potencialas * 0.2;
+    if ((c.diffPct || 0) >= 39) total -= 1.5;
+    if (a && (a.nuotrauku_pastebejimai || []).length) total -= 1;
+    total = clamp(total, 0, 10);
+    return { total: total, parts: [['Kaina', kaina], ['Rida', rida], ['Iranga', iranga], ['Istorija', istorija], ['Potencialas', potencialas]] };
+  }
+
+  function scoreColor(v) {
+    if (v >= 7.5) return 'var(--success)';
+    if (v >= 5.5) return 'var(--warning)';
+    return 'var(--danger)';
+  }
+
+  function scoreVerdict(v) {
+    if (v >= 8) return ['Puikus pasirinkimas.', 'Aukštas įvertinimas visose kategorijose. Verta imtis.'];
+    if (v >= 7) return ['Geras pasirinkimas.', 'Patraukli kaina ir rida, yra keletas dalykų patikrinti.'];
+    if (v >= 5.5) return ['Vidutinis pasirinkimas.', 'Keletas rizikų. Derinkite kainą prieš pirkdami.'];
+    return ['Rizikingas pasirinkimas.', 'Žemas įvertinimas. Atidžiai tikrinkite prieš sudarant sandorį.'];
+  }
+
+  var _photos = [];
+  var _photoIdx = 0;
+
+  window.dpPhotoNav = function(dir) {
+    if (!_photos.length) return;
+    _photoIdx = (_photoIdx + dir + _photos.length) % _photos.length;
+    dpShowPhoto(_photoIdx);
+  };
+
+  function dpShowPhoto(idx) {
+    _photoIdx = idx;
+    var img = document.getElementById('dp-main-img');
+    var noPhoto = document.getElementById('dp-no-photo');
+    var count = document.getElementById('dp-photo-count');
+    if (_photos.length) {
+      img.src = _photos[idx];
+      img.style.display = '';
+      noPhoto.style.display = 'none';
+      count.style.display = '';
+      count.textContent = '📷 ' + (idx + 1) + ' / ' + _photos.length;
+      document.getElementById('dp-nav-l').style.display = _photos.length > 1 ? '' : 'none';
+      document.getElementById('dp-nav-r').style.display = _photos.length > 1 ? '' : 'none';
+      document.querySelectorAll('.dp-thumb[data-idx]').forEach(function(t) {
+        t.classList.toggle('dp-thumb-active', parseInt(t.dataset.idx) === idx);
+      });
+    }
+  }
+
+  function buildThumbs(photos) {
+    var el = document.getElementById('dp-thumbs');
+    el.innerHTML = '';
+    var max = Math.min(photos.length, 5);
+    for (var i = 0; i < max; i++) {
+      (function(i) {
+        var d = document.createElement('div');
+        d.className = 'dp-thumb' + (i === 0 ? ' dp-thumb-active' : '');
+        d.dataset.idx = i;
+        if (i === 4 && photos.length > 5) {
+          var img = document.createElement('img');
+          img.src = photos[i];
+          img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
+          d.appendChild(img);
+          var ov = document.createElement('div');
+          ov.style.cssText = 'position:absolute;inset:0;background:rgba(10,12,18,.6);display:flex;align-items:center;justify-content:center;font:600 12px var(--font-mono);color:var(--text-secondary)';
+          ov.textContent = '+' + (photos.length - 4);
+          d.appendChild(ov);
+        } else {
+          var img = document.createElement('img');
+          img.src = photos[i];
+          img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
+          d.appendChild(img);
+        }
+        d.onclick = function() { dpShowPhoto(i); };
+        el.appendChild(d);
+      })(i);
+    }
+  }
+
+  window.dpTab = function(key, btn) {
+    document.querySelectorAll('.dp-pane').forEach(function(p) { p.classList.remove('active'); });
+    document.querySelectorAll('.dp-tab').forEach(function(b) { b.classList.remove('active'); });
+    document.getElementById('dp-pane-' + key).classList.add('active');
+    if (btn) btn.classList.add('active');
+  };
+
+  function buildPhotosGrid(photos) {
+    var grid = document.getElementById('dp-photos-grid');
+    if (!photos.length) {
+      grid.innerHTML = '<div class="dp-placeholder"><p>Šiam skelbimui nuotraukų nėra.</p></div>';
+      return;
+    }
+    grid.innerHTML = '';
+    photos.forEach(function(url, i) {
+      var div = document.createElement('div');
+      div.style.cssText = 'aspect-ratio:4/3;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:var(--bg-elevated);cursor:pointer';
+      var img = document.createElement('img');
+      img.src = url;
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
+      img.onclick = (function(i2) { return function() { dpShowPhoto(i2); dpTab('ai', document.querySelectorAll('.dp-tab')[0]); }; })(i);
+      div.appendChild(img);
+      grid.appendChild(div);
+    });
+  }
+
+  window.dpShare = function() {
+    var url = window.__dpUrl || window.location.href;
+    if (navigator.share) {
+      navigator.share({ title: document.title, url: url }).catch(function() {});
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(function() { alert('Nuoroda nukopijuota!'); }).catch(function() {});
+    }
+  };
+
+  function updateSaveBtn(saved) {
+    var btn = document.getElementById('dp-save-btn');
+    if (!btn) return;
+    btn.innerHTML = (saved ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Išsaugota' : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Išsaugoti');
+  }
+
+  window.dpToggleSave = function() {
+    if (!window.__dpUrl) return;
+    var favs = [];
+    try { favs = JSON.parse(localStorage.getItem('carTriageFavorites') || '[]'); } catch(e) {}
+    var idx = favs.indexOf(window.__dpUrl);
+    if (idx === -1) { favs.push(window.__dpUrl); } else { favs.splice(idx, 1); }
+    localStorage.setItem('carTriageFavorites', JSON.stringify(favs));
+    updateSaveBtn(favs.indexOf(window.__dpUrl) !== -1);
+  };
+
+  function addSpec(specsEl, icon, text, pos) {
+    var s = document.createElement('span');
+    s.className = 'dp-spec' + (pos ? ' dp-spec-pos' : '');
+    s.innerHTML = (icon ? icon + ' ' : '') + text;
+    specsEl.appendChild(s);
+  }
+
+  function load() {
+    var raw;
+    try { raw = localStorage.getItem('ct_detail'); } catch(e) {}
+    if (!raw) { showEmpty(); return; }
+    var data;
+    try { data = JSON.parse(raw); } catch(e) { showEmpty(); return; }
+    var c = data.c;
+    var a = data.analysis;
+    var photos = data.photos || [];
+    if (!c) { showEmpty(); return; }
+    if (!a && c.url) {
+      try {
+        var cache = JSON.parse(localStorage.getItem('carTriageAnalysisCache') || '{}');
+        a = cache[c.url];
+      } catch(e) {}
+    }
+    window.__dpUrl = c.url || '';
+    document.getElementById('dp-empty').style.display = 'none';
+    document.getElementById('dp-content').style.display = '';
+
+    var title = c.modelis || 'Automobilis';
+    document.getElementById('dp-bc-title').textContent = title;
+    document.getElementById('dp-bc-source').textContent = (c.source || '').toUpperCase();
+    document.title = title + ' — CarTriige';
+
+    var tagsEl = document.getElementById('dp-tags');
+    if (c.source) { var t = document.createElement('span'); t.className = 'dp-tag dp-tag-source'; t.textContent = c.source.toUpperCase(); tagsEl.appendChild(t); }
+    if (c.yraVerslas) { var t2 = document.createElement('span'); t2.className = 'dp-tag'; t2.textContent = 'VERSLAS'; tagsEl.appendChild(t2); }
+
+    document.getElementById('dp-title').textContent = title;
+    var sub = [];
+    if (c.metai) sub.push(c.metai);
+    if (c.variklioTuris) sub.push(c.variklioTuris + ' l');
+    if (c.galia) sub.push(c.galia + ' AG');
+    if (c.kuras) sub.push(c.kuras);
+    if (c.pavarai) sub.push(c.pavarai);
+    document.getElementById('dp-subtitle').textContent = sub.join(' · ');
+
+    document.getElementById('dp-price').textContent = c.kaina ? fmt(c.kaina) + ' €' : '—';
+    if (c.diffPct != null) {
+      var badge = document.getElementById('dp-diff-badge');
+      badge.style.display = '';
+      badge.textContent = (c.diffPct > 0 ? '+' : '') + Math.round(c.diffPct) + '%';
+      badge.className = 'dp-diff-badge ' + (c.diffPct < 0 ? 'dp-diff-pos' : 'dp-diff-neg-badge');
+    }
+
+    if (c.marketMedian || c.marketCount) {
+      var mr = document.getElementById('dp-market-row');
+      var parts = [];
+      if (c.marketMedian) parts.push('Rinkos vidurkis: <b>' + fmt(c.marketMedian) + ' €</b>');
+      if (c.diffPct != null && c.kaina && c.marketMedian) {
+        var diff = Math.round(c.kaina - c.marketMedian);
+        var diffStr = (diff < 0 ? '−' : '+') + fmt(Math.abs(diff)) + ' €';
+        parts.push('Skirtumas: <span class="dp-diff-green">' + diffStr + '</span>');
+      }
+      if (c.marketCount) parts.push('Imtis: ' + c.marketCount);
+      mr.innerHTML = parts.join('  ·  ');
+    }
+
+    var specsEl = document.getElementById('dp-specs');
+    var calIcon = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
+    var odoIcon = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg>';
+    var fuelIcon = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 15V9a4 4 0 0 1 8 0v6"/><circle cx="8" cy="17" r="2"/><path d="M14 7h6M17 4v6"/></svg>';
+    var gearIcon = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>';
+    if (c.metai) addSpec(specsEl, calIcon, c.metai);
+    if (c.rida) addSpec(specsEl, odoIcon, fmt(c.rida) + ' km');
+    if (c.variklioTuris || c.kuras) addSpec(specsEl, fuelIcon, [(c.variklioTuris ? c.variklioTuris + ' l' : ''), c.kuras].filter(Boolean).join(' '));
+    if (c.pavarai) addSpec(specsEl, gearIcon, c.pavarai);
+    if (c.ridaDiffPct != null && c.ridaDiffPct < -20) addSpec(specsEl, '', '✓ Maža rida', true);
+    if (c.turiVin) addSpec(specsEl, '', '✓ VIN', true);
+    if (c.turiIstorijosAtaskaita) addSpec(specsEl, '', '✓ Istorija', true);
+
+    if (c.url) document.getElementById('dp-listing-link').href = c.url;
+
+    var srcIconMap = {'autoplius.lt': '🇱🇹', 'autogidas.lt': '🇱🇹', 'autoscout24.com': '🇩🇪', 'otomoto.pl': '🇵🇱'};
+    document.getElementById('dp-seller-icon').textContent = srcIconMap[c.source] || '🌐';
+    document.getElementById('dp-seller-name').textContent = c.pardavejas || c.source || '—';
+    document.getElementById('dp-seller-type').textContent = c.yraVerslas ? 'Verslo pardavėjas' : 'Privatus pardavėjas';
+    document.getElementById('dp-seller-link').href = c.url || '#';
+    document.getElementById('dp-seller-loc').textContent = c.source || '—';
+
+    var favs = []; try { favs = JSON.parse(localStorage.getItem('carTriageFavorites') || '[]'); } catch(e) {}
+    updateSaveBtn(c.url && favs.indexOf(c.url) !== -1);
+
+    var sc = ctScore(c, a);
+    var pct = Math.round(sc.total * 10);
+    var col = scoreColor(sc.total);
+    var ring = document.getElementById('dp-ring');
+    ring.style.setProperty('--pct', pct);
+    ring.style.setProperty('--score-color', col);
+    var rv = document.getElementById('dp-ring-val');
+    rv.textContent = sc.total.toFixed(1);
+    rv.style.color = col;
+    var verd = scoreVerdict(sc.total);
+    document.getElementById('dp-score-verdict').textContent = verd[0];
+    document.getElementById('dp-score-verdict2').textContent = verd[1];
+
+    var barsEl = document.getElementById('dp-score-bars');
+    barsEl.innerHTML = '';
+    var barLabels = ['Kaina', 'Rida', 'Įranga', 'Istorija', 'Potencialas'];
+    sc.parts.forEach(function(p, i) {
+      var val = p[1];
+      var barCol = scoreColor(val);
+      var div = document.createElement('div');
+      div.className = 'dp-sbar';
+      div.innerHTML = '<div class="dp-sbar-label">' + barLabels[i].toUpperCase() + '</div><div class="dp-sbar-val" style="color:' + barCol + '">' + val.toFixed(1) + '</div><div class="dp-sbar-track"><div class="dp-sbar-fill" style="width:' + (val * 10) + '%;background:' + barCol + '"></div></div>';
+      barsEl.appendChild(div);
+    });
+
+    var pr = a && a.perikupo_radaras;
+    if (pr && pr.pelno_potencialas) {
+      document.getElementById('dp-profit-text').textContent = pr.pelno_potencialas;
+    } else if (pr && pr.procentas != null) {
+      document.getElementById('dp-profit-text').textContent = 'Apytiksliai ' + pr.procentas + '% grąža';
+    } else {
+      document.getElementById('dp-profit-text').textContent = 'Reikia analizės duomenų';
+    }
+    var riskTexts = [];
+    if (!c.turiVin) riskTexts.push('VIN skelbime nenurodytas');
+    if (!c.turiIstorijosAtaskaita) riskTexts.push('Istorijos ataskaita nerasta');
+    if (a && a.rizikos && a.rizikos.length) riskTexts = [a.rizikos[0]];
+    document.getElementById('dp-risk-text').textContent = riskTexts.join('; ') || 'Nėra nustatytų rizikų';
+
+    _photos = photos;
+    if (photos.length) { buildThumbs(photos); dpShowPhoto(0); }
+    buildPhotosGrid(photos);
+
+    if (a) {
+      var insight = document.getElementById('dp-ai-insight');
+      if (a.verdiktas) {
+        var short = a.verdiktas.length > 140 ? a.verdiktas.substring(0, 137) + '...' : a.verdiktas;
+        document.getElementById('dp-ai-insight-text').textContent = short;
+        insight.style.display = '';
+      }
+      document.getElementById('dp-ai-body').textContent = a.verdiktas || c.comment || 'Analizė neprieinama.';
+
+      var chipsEl = document.getElementById('dp-spec-chips');
+      var techSpec = a.technine_specifikacija || {};
+      var chipVals = [];
+      if (techSpec.variklio_turis) chipVals.push(techSpec.variklio_turis);
+      if (techSpec.kuras || c.kuras) chipVals.push(techSpec.kuras || c.kuras);
+      if (techSpec.galia || c.galia) chipVals.push((techSpec.galia || c.galia) + ' AG');
+      if (techSpec.pavaru_deze || c.pavarai) chipVals.push(techSpec.pavaru_deze || c.pavarai);
+      if (techSpec.pavara) chipVals.push(techSpec.pavara);
+      if (chipVals.length === 0 && c.variklioTuris) chipVals.push(c.variklioTuris + ' l');
+      chipVals.forEach(function(v) { var s = document.createElement('span'); s.className = 'dp-spec-chip'; s.textContent = v; chipsEl.appendChild(s); });
+      if (!chipVals.length) chipsEl.style.display = 'none';
+
+      var privEl = document.getElementById('dp-privalumai');
+      (a.privalumai || []).forEach(function(item) { var li = document.createElement('li'); li.innerHTML = '<span class="bullet green">✓</span>' + item; privEl.appendChild(li); });
+      if (!privEl.children.length) privEl.innerHTML = '<li><span class="bullet green">✓</span>Duomenų nepakanka</li>';
+
+      var patEl = document.getElementById('dp-patikrinti');
+      (a.ka_patikrinti_gyvai || []).forEach(function(item) { var li = document.createElement('li'); li.innerHTML = '<span class="bullet amber">!</span>' + item; patEl.appendChild(li); });
+      if (!patEl.children.length) patEl.innerHTML = '<li><span class="bullet amber">!</span>Duomenų nepakanka</li>';
+
+      var irangaEl = document.getElementById('dp-iranga');
+      (a.irangos_akcentai || []).forEach(function(item) {
+        var d = document.createElement('div');
+        d.className = 'dp-equip-item';
+        d.innerHTML = '<span style="flex:none;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font:700 9px sans-serif;background:var(--accent);color:#fff;margin-top:2px">★</span><div class="dp-equip-name">' + item + '</div>';
+        irangaEl.appendChild(d);
+      });
+      if (!irangaEl.children.length) irangaEl.innerHTML = '<div style="color:var(--text-muted);font-size:12.5px">Duomenų nepakanka</div>';
+    } else {
+      document.getElementById('dp-ai-body').textContent = c.comment || 'AI analizė šiam skelbimui neprieinama.';
+      document.getElementById('dp-privalumai').innerHTML = '<li><span class="bullet green">✓</span>AI analizė neprieinama</li>';
+      document.getElementById('dp-patikrinti').innerHTML = '<li><span class="bullet amber">!</span>AI analizė neprieinama</li>';
+      document.getElementById('dp-iranga').innerHTML = '<div style="color:var(--text-muted);font-size:12.5px">AI analizė neprieinama</div>';
+      document.getElementById('dp-spec-chips').style.display = 'none';
+    }
+  }
+
+  function showEmpty() {
+    document.getElementById('dp-empty').style.display = '';
+    document.getElementById('dp-content').style.display = 'none';
+  }
+
+  load();
+})();
+</script>
+</body>
+</html>

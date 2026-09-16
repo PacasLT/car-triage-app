@@ -2899,6 +2899,18 @@ function closeCompareModal() {
     return { total, parts: [['Kaina', kaina], ['Rida', rida], ['Įranga', iranga], ['Istorija', istorija], ['Potencialas', potencialas]] };
   }
   const tone = (v) => (v >= 7.5 ? 'pos' : v >= 5.5 ? 'warn' : 'neg');
+
+  // Pilna apžvalga — duomenų saugykla ir navigacija
+  window.__ctCardData = window.__ctCardData || {};
+  window.ctOpenDetail = function (url) {
+    var d = window.__ctCardData[url];
+    if (!d) { alert('Duomenys nerasti. Bandykite iš naujo.'); return; }
+    try {
+      localStorage.setItem('ct_detail', JSON.stringify({ c: d.c, analysis: d.analysis, photos: d.photos }));
+    } catch (e) { console.warn('localStorage klaida', e); }
+    window.location.href = 'detail.html';
+  };
+
   const pelnoLabel = { aukstas: 'Aukštas', vidutinis: 'Vidutinis', zemas: 'Žemas', neverta: 'Neverta' };
   const prTone = (pr) => (pr.procentas >= 60 ? 'pos' : pr.procentas >= 30 ? 'warn' : 'neg');
 
@@ -3005,6 +3017,9 @@ function closeCompareModal() {
       const compareArgs = `'${c.url}', '${escJs(c.modelis)}', ${c.kaina || 'null'}, '${escJs(c.photo || '')}', ${c.metai || 'null'}, ${c.rida || 'null'}, '${escJs(c.kuras || '')}', ${c.galia || 'null'}, ${c.variklioTuris || 'null'}, '${escJs(c.pavarai || '')}', ${c.diffPct != null ? c.diffPct : 'null'}, ${c.marketMedian || 'null'}, '${escJs(c.source || '')}', 'cmp-${cardId}'`;
       const detailArgs = `'${c.url}', '${cardId}', this, false, {kaina:${c.kaina || 'null'}, marketMedian:${c.marketMedian || 'null'}, marketCount:${c.marketCount || 'null'}, diffPct:${c.diffPct != null ? c.diffPct : 'null'}, modelis:'${escJs(c.modelis)}', pardavejas:${c.pardavejas ? `'${escJs(c.pardavejas)}'` : 'null'}, galia:${c.galia || 'null'}, variklioTuris:${c.variklioTuris || 'null'}}`;
 
+      // Saugome kortele detail puslapiui
+      window.__ctCardData[c.url] = { c: c, analysis: a, photos: photos };
+
       const card = document.createElement('div');
       card.className = 'card ct-card' + (idx === 0 ? ' ct-top1' : '');
       card.innerHTML = `
@@ -3013,7 +3028,7 @@ function closeCompareModal() {
             <div class="ct-photo-main">
               <img id="${cardId}-img" src="${photos[0] || ''}" onclick="${multi ? `openLightbox(window.__galleryStore['${cardId}-strip'], window.__cardPhotoIndex['${cardId}']||0)` : ''}" onerror="this.style.visibility='hidden'">
               <span class="ct-rank ${idx === 0 ? 'ct-rank-top' : ''}">${idx === 0 ? '★ Top pasiūlymas' : '#' + (idx + 1)}</span>
-              ${hasDeep ? '<span class="ct-full">✦ Pilna apžvalga</span>' : ''}
+              ${hasDeep ? `<span class="ct-full" style="cursor:pointer" onclick="event.stopPropagation();ctOpenDetail('${escJs(c.url)}')">✦ Pilna apžvalga</span>` : ''}
               ${multi ? `<button class="ct-nav ct-nav-l" onclick="event.stopPropagation(); cyclePhoto('${cardId}', -1)">‹</button><button class="ct-nav ct-nav-r" onclick="event.stopPropagation(); cyclePhoto('${cardId}', 1)">›</button><span class="ct-count" id="${cardId}-photocount">1/${photos.length}</span>` : ''}
             </div>
             ${thumbs}
