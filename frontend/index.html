@@ -1319,7 +1319,7 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V10l6-8 6 8v10"/></svg>
         Tapti Premium
       </button>
-      <button class="ct3-avatar">
+      <button class="ct3-avatar" id="ct3-avatar-btn" onclick="window.__ctAvatarClick()" title="Paskyra">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
       </button>
     </div>
@@ -2162,6 +2162,11 @@ async function runSearch() {
       body: JSON.stringify(filters),
     });
     if (!startResp.ok) {
+      if (startResp.status === 401) {
+        status.textContent = '';
+        if (typeof window.showAuthModal === 'function') window.showAuthModal();
+        return;
+      }
       const errText = await startResp.text().catch(() => startResp.statusText);
       throw new Error('Serverio klaida ' + startResp.status + ': ' + errText.slice(0, 120));
     }
@@ -3908,6 +3913,20 @@ function ctNavTab(tab) {
   };
   window.ctLogout = function () {
     clearToken(); ctUpdateHeader(); window.location.reload();
+  };
+  window.__ctAvatarClick = function () {
+    if (!getToken()) { window.showAuthModal(); return; }
+    // Logged in — show simple dropdown with email + logout
+    var existing = document.getElementById('ct-user-dropdown');
+    if (existing) { existing.remove(); return; }
+    var email = (typeof ctGetEmail === 'function' ? ctGetEmail() : null) || localStorage.getItem('ct_email') || '';
+    var d = document.createElement('div');
+    d.id = 'ct-user-dropdown';
+    d.style.cssText = 'position:fixed;top:56px;right:16px;z-index:9999;background:#1a1d24;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:12px 16px;min-width:200px;box-shadow:0 8px 32px rgba(0,0,0,.5);';
+    d.innerHTML = '<div style="font:600 12px var(--font);color:var(--text-primary);margin-bottom:10px;">'+email+'</div>'
+      + '<button onclick="window.ctLogout()" style="width:100%;padding:8px;background:transparent;border:1px solid rgba(255,255,255,.1);border-radius:6px;color:var(--text-secondary);font:500 12px var(--font);cursor:pointer;">Atsijungti</button>';
+    document.body.appendChild(d);
+    setTimeout(function(){ document.addEventListener('click', function rm(e){ if(!d.contains(e.target)&&e.target.id!=='ct3-avatar-btn'){d.remove();document.removeEventListener('click',rm);} }); }, 10);
   };
   function ctUpdateHeader() {
     var hasToken = !!getToken();
