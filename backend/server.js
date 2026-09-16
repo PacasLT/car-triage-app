@@ -1307,9 +1307,22 @@ Grazink TIK JSON (be markdown):
 async function downloadImageAsBase64(url) {
   try {
     const resp = await axios.get(url, { responseType: 'arraybuffer', timeout: 10000 });
-    const contentType = (resp.headers['content-type'] || 'image/jpeg').split(';')[0];
-    if (!contentType.startsWith('image/')) return null;
-    return { data: Buffer.from(resp.data).toString('base64'), media_type: contentType };
+    const rawType = (resp.headers['content-type'] || '').split(';')[0].trim().toLowerCase();
+    // Anthropic priima tik šiuos 4 formatus
+    const ALLOWED = { 'image/jpeg': true, 'image/png': true, 'image/gif': true, 'image/webp': true };
+    // Normaliz uojame variantus
+    const normalize = { 'image/jpg': 'image/jpeg', 'image/jpe': 'image/jpeg', 'image/pjpeg': 'image/jpeg' };
+    let media_type = normalize[rawType] || rawType;
+    // Jei formatas nepriimamas, bandome nustatyti iš URL
+    if (!ALLOWED[media_type]) {
+      const urlLow = url.toLowerCase();
+      if (urlLow.includes('.png')) media_type = 'image/png';
+      else if (urlLow.includes('.gif')) media_type = 'image/gif';
+      else if (urlLow.includes('.webp')) media_type = 'image/webp';
+      else media_type = 'image/jpeg'; // fallback
+    }
+    if (!ALLOWED[media_type]) return null;
+    return { data: Buffer.from(resp.data).toString('base64'), media_type };
   } catch {
     return null;
   }
