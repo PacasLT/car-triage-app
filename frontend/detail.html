@@ -203,6 +203,20 @@ button{font-family:inherit;cursor:pointer}
 .dp-equip-item:last-child{margin-bottom:0}
 .dp-equip-name{font-size:12.5px;color:var(--text-primary);line-height:1.4;flex:1}
 
+/* ── PHOTOS AI ANALYZE ── */
+.dp-photo-ai-btn{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 20px;border-radius:10px;border:1px solid var(--accent-border);background:var(--accent-dim);color:var(--accent-light);font:600 13px var(--font);cursor:pointer;transition:background .15s}
+.dp-photo-ai-btn:hover{background:rgba(124,92,255,.2)}
+.dp-photo-ai-btn:disabled{opacity:.5;cursor:default}
+.dp-photo-ai-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.dp-photo-ai-result{background:var(--bg-surface);border:1px solid var(--accent-border);border-radius:12px;padding:16px;margin-bottom:16px;display:none}
+.dp-photo-ai-result-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;font:600 13px var(--font);color:var(--text-primary)}
+.dp-photo-ai-result-badge{width:22px;height:22px;border-radius:6px;background:var(--accent);color:#fff;font:700 10px var(--font-mono);display:grid;place-items:center;flex:none}
+.dp-photo-ai-obs{list-style:none;display:flex;flex-direction:column;gap:7px}
+.dp-photo-ai-obs li{display:flex;align-items:flex-start;gap:7px;font-size:12.5px;line-height:1.45;color:var(--text-secondary)}
+.dp-photo-ai-obs li .dot{flex:none;width:14px;height:14px;border-radius:50%;display:grid;place-items:center;font:700 8px sans-serif;margin-top:1px}
+.dp-photo-ai-obs li .dot.ok{background:var(--success);color:#0A0C12}
+.dp-photo-ai-obs li .dot.warn{background:var(--warning);color:#0A0C12}
+
 /* ── FOOTER ── */
 .dp-footer{margin-top:48px;padding:20px 0;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
 .dp-footer-logo{display:flex;align-items:center;gap:10px}
@@ -492,6 +506,20 @@ button{font-family:inherit;cursor:pointer}
     </div>
   </div>
   <div class="dp-pane" id="dp-pane-photos">
+    <div class="dp-photo-ai-bar">
+      <span style="font:500 12px var(--font-mono);color:var(--text-dim)" id="dp-photo-count-label"></span>
+      <button class="dp-photo-ai-btn" id="dp-photo-ai-btn" onclick="dpRunPhotoAI()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        Analizuoti su AI
+      </button>
+    </div>
+    <div class="dp-photo-ai-result" id="dp-photo-ai-result">
+      <div class="dp-photo-ai-result-header">
+        <div class="dp-photo-ai-result-badge">AI</div>
+        <span>Vizualinė nuotraukų analizė</span>
+      </div>
+      <ul class="dp-photo-ai-obs" id="dp-photo-ai-obs"></ul>
+    </div>
     <div id="dp-photos-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;"></div>
   </div>
 
@@ -622,6 +650,61 @@ button{font-family:inherit;cursor:pointer}
       grid.appendChild(div);
     });
   }
+
+  window.dpRunPhotoAI = function() {
+    var btn = document.getElementById('dp-photo-ai-btn');
+    var resultBox = document.getElementById('dp-photo-ai-result');
+    var obsList = document.getElementById('dp-photo-ai-obs');
+    var c = window.__dpCar || {};
+    var photos = window.__dpPhotos || _photos || [];
+    if (!c.url) { alert('Skelbimo URL nerastas.'); return; }
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Analizuojama...'; }
+    fetch('/api/analyze-single', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        url: c.url, kaina: c.kaina, marketMedian: c.marketMedian,
+        marketCount: c.marketCount, diffPct: c.diffPct, modelis: c.modelis,
+        galia: c.galia, variklioTuris: c.variklioTuris
+      })
+    }).then(function(r) { return r.json(); }).then(function(resp) {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg> Analizuoti su AI';
+      }
+      var a = resp.analysis;
+      var obs = (a && a.nuotrauku_pastebejimai) || [];
+      if (!obsList) return;
+      obsList.innerHTML = '';
+      if (!obs.length || (obs.length === 1 && obs[0].toLowerCase().includes('nepastebeta'))) {
+        var li = document.createElement('li');
+        li.innerHTML = '<span class="dot ok">✓</span><span>Akivaizdžių vizualinių pažeidimų nuotraukose nepastebėta</span>';
+        obsList.appendChild(li);
+      } else {
+        obs.forEach(function(txt) {
+          var isOk = /nepastebeta|gera|tvarkinga|švarūs|švari|normalus|normaliai/i.test(txt);
+          var li = document.createElement('li');
+          li.innerHTML = '<span class="dot ' + (isOk ? 'ok">✓' : 'warn">!') + '</span><span>' + txt + '</span>';
+          obsList.appendChild(li);
+        });
+      }
+      if (resultBox) resultBox.style.display = '';
+      // Also update new photos if fetched more
+      var newPhotos = resp.photos || [];
+      if (newPhotos.length > (window.__dpPhotos || []).length) {
+        _photos = newPhotos;
+        window.__dpPhotos = newPhotos;
+        buildThumbs(newPhotos);
+        dpShowPhoto(0);
+        buildPhotosGrid(newPhotos);
+        var lbl = document.getElementById('dp-photo-count-label');
+        if (lbl) lbl.textContent = newPhotos.length + ' nuotrauk' + (newPhotos.length === 1 ? 'a' : newPhotos.length < 10 ? 'os' : 'ų');
+      }
+    }).catch(function(err) {
+      if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg> Analizuoti su AI'; }
+      alert('AI analizės klaida: ' + err.message);
+    });
+  };
 
   window.dpShare = function() {
     var url = window.__dpUrl || window.location.href;
@@ -841,6 +924,13 @@ button{font-family:inherit;cursor:pointer}
     _photos = photos;
     if (photos.length) { buildThumbs(photos); dpShowPhoto(0); }
     buildPhotosGrid(photos);
+    // Atnaujinti nuotraukų skaičiaus etiketę
+    (function() {
+      var lbl = document.getElementById('dp-photo-count-label');
+      if (lbl && photos.length) {
+        lbl.textContent = photos.length + ' nuotrauk' + (photos.length === 1 ? 'a' : photos.length < 10 ? 'os' : 'ų');
+      }
+    })();
     // populate AI tab photo strip
     (function() {
       var strip = document.getElementById('dp-ai-photo-strip');
