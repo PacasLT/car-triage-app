@@ -422,11 +422,21 @@ function mergeDuplicatesAcrossPortals(listings) {
   return merged;
 }
 
+function fuelCategory(kuras) {
+  if (!kuras) return 'unknown';
+  const k = kuras.toLowerCase();
+  if (k.includes('dyzel') || k.includes('diesel')) return 'diesel';
+  if (k.includes('benzin') || k.includes('petrol') || k.includes('gasolin')) return 'petrol';
+  if (k.includes('elektra') || k.includes('electric')) return 'electric';
+  return 'other';
+}
+
 function computeMarketMedians(parsedListings) {
   const byModel = {};       // modelis -> visos kainos (visus metai)
   const ridaByModel = {};
   const byModelYear = {};   // 'modelis::metai' -> kainos
   const ridaByModelYear = {};
+  const ridaByModelYearFuel = {}; // 'modelis::metai::fuelCat' -> ridos (dyzelis atskirai nuo benzino)
 
   parsedListings.forEach((l) => {
     const m = l.modelis;
@@ -442,6 +452,7 @@ function computeMarketMedians(parsedListings) {
       const yk = `${m}::${l.metai}`;
       if (l.kaina) { if (!byModelYear[yk]) byModelYear[yk] = []; byModelYear[yk].push(l.kaina); }
       if (l.rida)  { if (!ridaByModelYear[yk]) ridaByModelYear[yk] = []; ridaByModelYear[yk].push(l.rida); }
+      if (l.rida) { const fc = fuelCategory(l.kuras); if (fc !== 'unknown') { const fk = `${m}::${l.metai}::${fc}`; if (!ridaByModelYearFuel[fk]) ridaByModelYearFuel[fk] = []; ridaByModelYearFuel[fk].push(l.rida); } }
     }
   });
 
@@ -458,30 +469,39 @@ function computeMarketMedians(parsedListings) {
     };
   }
 
-  return { medians, byModelYear, ridaByModelYear };
+  return { medians, byModelYear, ridaByModelYear, ridaByModelYearFuel };
 }
 
 // Randa tiksliausią rinkos vidurkį konkrečiam skelbimui
-// Pirmiausia bando ±0 metu, tada ±1, tada ±2, gale - visus metus
-function getMarketDataForListing(listing, medians, byModelYear, ridaByModelYear) {
+// Kainos mediana: modelis+metai±N, fallback - visi metai
+// Ridos mediana: to paties degalų tipo (dyzelis ≠ benzinas), jei >= 3 taškų
+function getMarketDataForListing(listing, medians, byModelYear, ridaByModelYear, ridaByModelYearFuel) {
   const m = listing.modelis;
   const y = listing.metai;
+  const fc = fuelCategory(listing.kuras);
   if (y && byModelYear && ridaByModelYear) {
     for (const range of [0, 1, 2]) {
-      const prices = [], ridas = [];
+      const prices = [], ridas = [], ridasFuel = [];
       for (let yr = y - range; yr <= y + range; yr++) {
         const yk = `${m}::${yr}`;
-        if (byModelYear[yk])    prices.push(...byModelYear[yk]);
+        if (byModelYear[yk])     prices.push(...byModelYear[yk]);
         if (ridaByModelYear[yk]) ridas.push(...ridaByModelYear[yk]);
+        if (ridaByModelYearFuel && fc !== 'unknown') {
+          const fk = `${m}::${yr}::${fc}`;
+          if (ridaByModelYearFuel[fk]) ridasFuel.push(...ridaByModelYearFuel[fk]);
+        }
       }
       if (prices.length >= 3) {
         const sorted = [...prices].sort((a, b) => a - b);
-        const ridaSorted = [...ridas].sort((a, b) => a - b);
+        // Dyzelio rida lyginamas su dyzeliais, benzino - su benzinais
+        const ridaPool = ridasFuel.length >= 3 ? ridasFuel : ridas;
+        const ridaSorted = [...ridaPool].sort((a, b) => a - b);
         return {
           median: sorted[Math.floor(sorted.length / 2)],
           count: sorted.length,
           ridaMedian: ridaSorted.length > 0 ? ridaSorted[Math.floor(ridaSorted.length / 2)] : null,
           ridaCount: ridaSorted.length,
+          ridaFuelSpecific: ridasFuel.length >= 3,
           yearRange: range,
         };
       }
@@ -923,14 +943,14 @@ async function runSearchJob(jobId, filters) {
     }
 
     logJob(jobId, '🧮 Skaičiuojame rinkos vidurkius...');
-    const { medians, byModelYear, ridaByModelYear } = computeMarketMedians(combinedForMedians);
+    const { medians, byModelYear, ridaByModelYear, ridaByModelYearFuel } = computeMarketMedians(combinedForMedians);
     cache.addToHistory(parsed); // issaugom sitos paieskos duomenis ateities paieskoms
     const THRESHOLD_PCT = 12;
     // Papildomus laukus (diffPct, ridaDiffPct ir t.t.) skaiciuojame VISIEMS nuskaitytiems
     // skelbimams, ne tik kandidatams - reikalinga, kad galetume paaiskinti, kodel
     // konkretus skelbimas NEPATEKO i "verti demesio" sarasa.
     const enriched = parsed.map((l) => {
-      const marketData = l.modelis ? getMarketDataForListing(l, medians, byModelYear, ridaByModelYear) : null;
+      const marketData = l.modelis ? getMarketDataForListing(l, medians, byModelYear, ridaByModelYear, ridaByModelYearFuel) : null;
       const hasReliableMarket = marketData && marketData.count >= 3;
       let diffPct = null, ridaDiffPct = null;
       if (l.kaina && hasReliableMarket) {
@@ -947,6 +967,7 @@ async function runSearchJob(jobId, filters) {
         marketMedian: marketData ? marketData.median : null,
         ridaMedian: marketData ? marketData.ridaMedian : null,
         marketYearRange: marketData ? (marketData.yearRange != null ? marketData.yearRange : null) : null,
+        ridaFuelSpecific: marketData ? !!marketData.ridaFuelSpecific : false,
       };
     });
 
