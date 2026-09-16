@@ -934,7 +934,7 @@ async function runSearchJob(jobId, filters) {
     for (const model of modelsInSearch) {
       const hist = cache.getHistoryForModel(model);
       const currentUrls = new Set(parsed.filter((l) => l.modelis === model).map((l) => l.url));
-      const fromHistory = hist.filter((h) => !currentUrls.has(h.url)).map((h) => ({ modelis: model, kaina: h.kaina, rida: h.rida, metai: h.metai || null, kuras: h.kuras || null, galia: h.galia || null }));
+      const fromHistory = hist.filter((h) => !currentUrls.has(h.url)).map((h) => ({ modelis: model, kaina: h.kaina, rida: h.rida, metai: h.metai || null, kuras: h.kuras || null, galia: h.galia || null, pavarai: h.pavarai || null, variklioTuris: h.variklioTuris || null }));
       combinedForMedians = combinedForMedians.concat(fromHistory);
       historyAddedCount += fromHistory.length;
     }
@@ -954,7 +954,7 @@ async function runSearchJob(jobId, filters) {
       // Suskaičiuojame kiek turime combinedForMedians šiam modeliui±1 metai
       const yr = l.metai;
       const count = combinedForMedians.filter((c) => c.modelis === l.modelis && c.metai && Math.abs(c.metai - yr) <= 1).length;
-      if (count < 8) thinModels.set(key, { modelis: l.modelis, metai: l.metai });
+      if (count < 15) thinModels.set(key, { modelis: l.modelis, metai: l.metai });
     }
     if (thinModels.size > 0) {
       logJob(jobId, `📡 Papildomai ieškome rinkos duomenų (${thinModels.size} modelių su mažai duomenų)...`);
