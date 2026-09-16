@@ -553,6 +553,20 @@ iskaitant rida. Grazink TIK ta sakini.`;
   }
 }
 
+// Ar skelbimo kuras atitinka vartotojo pasirinkta filtra.
+// Filtro reiksmes ateina is frontend'o: dyzelis | benzinas | hibridas | elektra.
+// Skelbimuose kuras buna ivairiu formu: "Dyzelinas", "Benzinas / elektra", "Hibridas", "Elektra"...
+function kurasAtitinka(kuras, filtras) {
+  if (!filtras) return true;
+  if (!kuras) return true; // nezinomas kuras - nefiltruojam, kad neismestume gero skelbimo
+  const k = String(kuras).toLowerCase();
+  if (filtras === 'dyzelis')  return k.includes('dyzelin');
+  if (filtras === 'benzinas') return k.includes('benzin');
+  if (filtras === 'hibridas') return k.includes('hibrid') || (k.includes('elektra') && (k.includes('benzin') || k.includes('dyzelin')));
+  if (filtras === 'elektra')  return k === 'elektra' || k.includes('elektrin');
+  return true;
+}
+
 // ============ URL SUDARYMAS PAGAL FILTRUS ============
 
 function buildAutopliusUrl(filters) {
@@ -940,16 +954,45 @@ async function runSearchJob(jobId, filters) {
     const ridaIki = parseInt(filters.ridaIki, 10) || null;
 
     const rawFoundCount = parsed.length;
+    const hardRejected = [];
     parsed = parsed.filter((l) => {
-      if (metaiNuo && l.metai && l.metai < metaiNuo) return false;
-      if (metaiIki && l.metai && l.metai > metaiIki) return false;
-      if (kainaNuo && l.kaina && l.kaina < kainaNuo) return false;
-      if (kainaIki && l.kaina && l.kaina > kainaIki) return false;
-      if (ridaIki && l.rida && l.rida > ridaIki) return false;
-      if (filters.pavaru_deze && l.pavarai && l.pavarai !== filters.pavaru_deze) return false;
+      const why = [];
+      if (metaiNuo && l.metai && l.metai < metaiNuo) why.push('Metai ' + l.metai + ' < ' + metaiNuo);
+      if (metaiIki && l.metai && l.metai > metaiIki) why.push('Metai ' + l.metai + ' > ' + metaiIki);
+      if (kainaNuo && l.kaina && l.kaina < kainaNuo) why.push('Kaina ' + l.kaina + '\u20ac < ' + kainaNuo + '\u20ac');
+      if (kainaIki && l.kaina && l.kaina > kainaIki) why.push('Kaina ' + l.kaina + '\u20ac > ' + kainaIki + '\u20ac');
+      if (ridaIki && l.rida && l.rida > ridaIki) why.push('Rida ' + l.rida + ' km > ' + ridaIki + ' km');
+      if (filters.pavaru_deze && l.pavarai && l.pavarai !== filters.pavaru_deze) why.push('Pavaru deze: ' + l.pavarai + ', reikia ' + filters.pavaru_deze);
+      if (filters.kuras && !kurasAtitinka(l.kuras, filters.kuras)) why.push('Kuras: ' + (l.kuras || 'nenurodytas') + ', reikia ' + filters.kuras);
+      if (why.length) { l.hardRejectReasons = why; hardRejected.push(l); return false; }
       return true;
     });
     logJob(jobId, `🧹 ${rawFoundCount} rasta pagal markę/modelį → ${parsed.length} atitinka jūsų kainos/metų/ridos filtrus`);
+
+    // ---- DIAGNOSTIKA: kodel skelbimai atkrito ir ar kainos nuskaitytos teisingai ----
+    if (hardRejected.length) {
+      const pagalPriezasti = {};
+      hardRejected.forEach((l) => {
+        const kategorija = l.hardRejectReasons[0].split(' ')[0];
+        pagalPriezasti[kategorija] = (pagalPriezasti[kategorija] || 0) + 1;
+      });
+      logJob(jobId, '\u{1F50E} Atmesta filtrais: ' + hardRejected.length + ' \u2014 ' +
+        Object.keys(pagalPriezasti).map((k) => k + ': ' + pagalPriezasti[k]).join(', '));
+      hardRejected.slice(0, 8).forEach((l) => logJob(jobId,
+        '   \u2022 ' + (l.modelis || '?') + ' | ' + (l.kaina || '?') + '\u20ac | ' + (l.metai || '?') +
+        ' | ' + (l.rida || '?') + ' km | ' + (l.kuras || '?') + ' | ' + (l.pavarai || '?') +
+        ' \u2192 ' + l.hardRejectReasons.join('; ')));
+    }
+    const visosKainos = parsed.concat(hardRejected).map((l) => l.kaina).filter(Boolean).sort((a, b) => a - b);
+    if (visosKainos.length) {
+      logJob(jobId, '\u{1F4B6} Nuskaitytos kainos (n=' + visosKainos.length + '): min ' + visosKainos[0] +
+        '\u20ac \u00b7 mediana ' + visosKainos[Math.floor(visosKainos.length / 2)] +
+        '\u20ac \u00b7 max ' + visosKainos[visosKainos.length - 1] + '\u20ac');
+      const itartinaiPigus = visosKainos.filter((k) => k < 2000).length;
+      if (itartinaiPigus > 0) {
+        logJob(jobId, '   \u26a0\ufe0f ' + itartinaiPigus + ' skelbim\u0173 kaina <2000\u20ac \u2013 galimai nuskaityta lizingo \u012fmoka, ne automobilio kaina!');
+      }
+    }
 
     const beforeDedup = parsed.length;
     parsed = mergeDuplicatesAcrossPortals(parsed);
@@ -1101,16 +1144,31 @@ async function runSearchJob(jobId, filters) {
     logJob(jobId, '🎉 Baigta!');
     jobs[jobId].status = 'done';
     // Visi nuskaityti skelbimai (ne tik "verti demesio") - kad vartotojas galetu pats pasiziureti.
-    const allListings = enriched.map((l) => ({
+    const allListingsBase = enriched.map((l) => ({
       modelis: l.modelis, kaina: l.kaina, metai: l.metai, rida: l.rida,
       kuras: l.kuras, pavarai: l.pavarai, turiVin: l.turiVin, galia: l.galia, variklioTuris: l.variklioTuris,
       photo: l.photo, url: l.url, source: l.source, kryzminiaiSkelbimai: l.kryzminiaiSkelbimai || null,
       isCandidate: candidateUrls.has(l.url), pardavejas: l.pardavejas || null,
       rejectionReasons: candidateUrls.has(l.url) ? [] : explainRejection(l),
       diffPct: l.diffPct, marketMedian: l.marketMedian, marketCount: l.marketCount,
-    })).sort((a, b) => (a.kaina || 0) - (b.kaina || 0));
+    }));
 
-    const searchResult = { totalScanned: parsed.length, rawFoundCount, medians, candidates, allListings, searchMode };
+    // Skelbimai, kuriuos atmete kietasis filtras (kaina/metai/rida/deze/kuras).
+    // Anksciau jie dingdavo cia pat ir vartotojas ju niekada nepamatydavo - dabar
+    // grazinami su konkrecia priezastimi, kad matytusi VISI rasti skelbimai.
+    const filtruAtmesti = hardRejected.map((l) => ({
+      modelis: l.modelis, kaina: l.kaina, metai: l.metai, rida: l.rida,
+      kuras: l.kuras, pavarai: l.pavarai, turiVin: l.turiVin, galia: l.galia, variklioTuris: l.variklioTuris,
+      photo: l.photo, url: l.url, source: l.source, kryzminiaiSkelbimai: null,
+      isCandidate: false, filteredOut: true, pardavejas: l.pardavejas || null,
+      rejectionReasons: ['Neatitinka j\u016bs\u0173 paie\u0161kos filtr\u0173: ' + l.hardRejectReasons.join('; ') + '.'],
+      diffPct: null, marketMedian: null, marketCount: 0,
+    }));
+
+    const allListings = allListingsBase.concat(filtruAtmesti)
+      .sort((a, b) => (a.kaina || 0) - (b.kaina || 0));
+
+    const searchResult = { totalScanned: parsed.length, rawFoundCount, hardRejectedCount: hardRejected.length, medians, candidates, allListings, searchMode };
     cache.setSearchCached(filterHash, searchResult);
     jobs[jobId].result = searchResult;
   } catch (err) {

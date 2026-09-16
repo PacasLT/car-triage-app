@@ -1502,16 +1502,36 @@
       </div>
 
 
-      <!-- Hidden fields required by runSearch() -->
-      <input type="hidden" id="ridaIki" value="">
-      <input type="hidden" id="maxPages" value="3">
+      <!-- Papildomi filtrai (atidaromi mygtuku "Daugiau filtrų") -->
+      <div id="more-filters" style="display:none; margin:0 0 10px; padding:14px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:12px;">
+        <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:flex-end;">
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <label style="font:600 10px/1 var(--font-mono); letter-spacing:.08em; color:var(--text-dim);">RIDA IKI (KM)</label>
+            <input id="ridaIki" type="number" min="0" step="10000" placeholder="pvz. 200000" oninput="ctUpdateMoreBadge()"
+                   style="width:150px; padding:8px 10px; background:var(--bg-base); border:1px solid var(--border-light); border-radius:8px; color:var(--text-primary); font:500 13px/1 var(--font);">
+          </div>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <label style="font:600 10px/1 var(--font-mono); letter-spacing:.08em; color:var(--text-dim);">PUSLAPIŲ KIEKIS</label>
+            <select id="maxPages" onchange="ctUpdateMoreBadge()"
+                    style="width:150px; padding:8px 10px; background:var(--bg-base); border:1px solid var(--border-light); border-radius:8px; color:var(--text-primary); font:500 13px/1 var(--font);">
+              <option value="1">1 (greičiausia)</option>
+              <option value="2">2</option>
+              <option value="3" selected>3 (numatyta)</option>
+              <option value="5">5 (lėčiausia)</option>
+            </select>
+          </div>
+          <button type="button" onclick="ctResetMoreFilters()"
+                  style="padding:8px 14px; background:transparent; border:1px solid var(--border-light); border-radius:8px; color:var(--text-muted); font:500 12px/1 var(--font); cursor:pointer;">Išvalyti</button>
+        </div>
+        <div style="margin-top:10px; font-size:11px; color:var(--text-dim);">Daugiau puslapių = daugiau skelbimų, bet lėtesnė paieška ir daugiau AI užklausų.</div>
+      </div>
 
       <div class="ct3-search-bottom">
         <div class="ct3-search-bottom-left">
-          <button class="ct3-more-btn">
+          <button class="ct3-more-btn" type="button" onclick="ctToggleMoreFilters()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M7 12h10M10 18h4"/></svg>
             Daugiau filtrų
-            <span class="ct3-badge">3</span>
+            <span class="ct3-badge" id="more-filters-badge" style="display:none;">0</span>
           </button>
           <div style="position:relative;">
             <button class="ct3-marketplaces-btn" id="portal-toggle-btn" onclick="ctTogglePortals()">
@@ -2096,6 +2116,7 @@ async function runQuickCount() {
     marke: document.getElementById('marke').value,
     modelis: document.getElementById('modelis').value,
     pavaru_deze: document.getElementById('pavaru_deze').value,
+    kuras: document.getElementById('fuel').value,
     metaiNuo: document.getElementById('metaiNuo').value,
     metaiIki: document.getElementById('metaiIki').value,
     ridaIki: document.getElementById('ridaIki').value,
@@ -2158,6 +2179,7 @@ async function runSearch() {
     marke: document.getElementById('marke').value,
     modelis: document.getElementById('modelis').value,
     pavaru_deze: document.getElementById('pavaru_deze').value,
+    kuras: document.getElementById('fuel').value,
     metaiNuo: document.getElementById('metaiNuo').value,
     metaiIki: document.getElementById('metaiIki').value,
     ridaIki: document.getElementById('ridaIki').value,
@@ -2688,6 +2710,35 @@ let currentData = null;
   } catch(e) { console.warn('Rezultatų atstatymas nepavyko', e); }
 })();
 
+// ---- "Daugiau filtrų" panelė ----
+window.ctToggleMoreFilters = function () {
+  const el = document.getElementById('more-filters');
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+};
+
+window.ctUpdateMoreBadge = function () {
+  const badge = document.getElementById('more-filters-badge');
+  if (!badge) return;
+  let n = 0;
+  const rida = document.getElementById('ridaIki');
+  const pages = document.getElementById('maxPages');
+  if (rida && rida.value) n++;
+  if (pages && pages.value !== '3') n++;
+  badge.textContent = n;
+  badge.style.display = n > 0 ? '' : 'none';
+};
+
+window.ctResetMoreFilters = function () {
+  const rida = document.getElementById('ridaIki');
+  const pages = document.getElementById('maxPages');
+  if (rida) rida.value = '';
+  if (pages) pages.value = '3';
+  window.ctUpdateMoreBadge();
+};
+
+document.addEventListener('DOMContentLoaded', function () { window.ctUpdateMoreBadge(); });
+
 function renderResults(data, status, results) {
   currentData = data;
   window.currentData = data;
@@ -2700,9 +2751,9 @@ function renderResults(data, status, results) {
     : '';
 
   if (data.searchMode === 'browse') {
-    // Browse mode: nerodyti TOP kortelių – rodyti kompaktišką sąrašą su pirminiu įvertinimu >=60
-    const browseCands = data.candidates.filter(function(c) { return (c.qualityScore || 0) >= 60; });
-    status.textContent = '📋 Naršyti viską: ' + browseCands.length + ' skelbimai su pirminiu įvertinimu ≥60' + rawNote + ':';
+    // Browse mode: rodom VISUS skelbimus, be jokios balo ribos – taip, kaip žada režimo aprašymas.
+    const browseCands = data.candidates.slice();
+    status.textContent = '📋 Naršyti viską: ' + browseCands.length + ' skelbimai' + rawNote + ':';
     document.getElementById('sort-bar').style.display = browseCands.length > 0 ? 'flex' : 'none';
     document.getElementById('sort-select').value = 'quality';
     results.innerHTML = '';
@@ -2720,12 +2771,12 @@ function renderResults(data, status, results) {
 
 function renderBrowseListings(candidates, container) {
   if (candidates.length === 0) {
-    container.innerHTML = '<div style="color:#9a9aa5;padding:20px 0;">Nėra skelbimų su pirminiu įvertinimu ≥60. Pabandykite išplėsti filtrus.</div>';
+    container.innerHTML = '<div style="color:#9a9aa5;padding:20px 0;">Nerasta nė vieno skelbimo. Pabandykite išplėsti filtrus arba pridėti portalų.</div>';
     return;
   }
   var hdr = document.createElement('div');
   hdr.style.cssText = 'display:flex;align-items:center;gap:12px;margin-bottom:14px;';
-  hdr.innerHTML = '<div style="display:flex;align-items:center;gap:8px;flex:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent-light)" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span style="font:700 13px/1 var(--font);color:var(--text-primary);">Pirminė apžvalga ≥60</span></div><div style="flex:1;height:1px;background:var(--border);"></div><span style="font:500 10px/1 var(--font-mono);letter-spacing:.08em;color:var(--text-dim);flex:none;">RIKIUOTA PAGAL ĮVERTĮ</span>';
+  hdr.innerHTML = '<div style="display:flex;align-items:center;gap:8px;flex:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent-light)" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span style="font:700 13px/1 var(--font);color:var(--text-primary);">Visi rasti skelbimai</span></div><div style="flex:1;height:1px;background:var(--border);"></div><span style="font:500 10px/1 var(--font-mono);letter-spacing:.08em;color:var(--text-dim);flex:none;">RIKIUOTA PAGAL ĮVERTĮ</span>';
   container.appendChild(hdr);
 
   candidates.forEach(function(c, idx) {
@@ -2790,7 +2841,7 @@ function applySorting() {
   const resultsEl = document.getElementById('results');
   if (currentData.searchMode === 'browse') {
     resultsEl.innerHTML = '';
-    renderBrowseListings(sorted.filter(function(c) { return (c.qualityScore || 0) >= 60; }), resultsEl);
+    renderBrowseListings(sorted, resultsEl);
   } else {
     (window.renderCandidateCards || renderCandidateCards)(sorted, resultsEl);
   }
@@ -2903,10 +2954,13 @@ function renderAllListings(allListings) {
     const reasonId = `all-reason-${idx}`;
     const candidateBadge = l.isCandidate
       ? '<span style="font-size:10px; background:#2d4a35; color:#7fd88f; padding:2px 6px; border-radius:4px; margin-left:4px;">✓ TOP</span>'
-      : '';
+      : (l.filteredOut
+        ? '<span style="font-size:10px; background:#4a3b2d; color:#f0c674; padding:2px 6px; border-radius:4px; margin-left:4px;">⊘ neatitinka filtro</span>'
+        : '');
+    const reasonLabel = l.filteredOut ? 'Kodėl neatitinka filtro?' : 'Kodėl neatrinktas?';
     const rejectionToggle = (!l.isCandidate && l.rejectionReasons && l.rejectionReasons.length > 0)
       ? `<div>
-          <a href="#" onclick="event.preventDefault(); toggleReason('${reasonId}', this);" style="color:#9a9aa5; font-size:11px;">❓ Kodėl neatrinktas? ▾</a>
+          <a href="#" onclick="event.preventDefault(); toggleReason('${reasonId}', this, '${reasonLabel}');" style="color:#9a9aa5; font-size:11px;">❓ ${reasonLabel} ▾</a>
           <div id="${reasonId}" style="display:none; margin-top:4px;">
             <ul style="margin:0; padding-left:16px; font-size:11px; color:#9a9aa5;">
               ${l.rejectionReasons.map((r) => `<li>${r}</li>`).join('')}
@@ -2933,11 +2987,12 @@ function renderAllListings(allListings) {
   }).join('');
 }
 
-function toggleReason(id, link) {
+function toggleReason(id, link, label) {
   const el = document.getElementById(id);
+  const txt = label || 'Kodėl neatrinktas?';
   const isHidden = el.style.display === 'none';
   el.style.display = isHidden ? 'block' : 'none';
-  link.textContent = isHidden ? '❓ Kodėl neatrinktas? ▴' : '❓ Kodėl neatrinktas? ▾';
+  link.textContent = isHidden ? '❓ ' + txt + ' ▴' : '❓ ' + txt + ' ▾';
 }
 
 function toggleAllListings() {
