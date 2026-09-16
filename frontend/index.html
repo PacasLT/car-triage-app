@@ -1347,10 +1347,10 @@
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transition:transform .2s" id="portal-chevron"><path d="M6 9l6 6 6-6"/></svg>
             </button>
             <div id="portal-selector" style="display:none; position:absolute; z-index:300; bottom:calc(100% + 8px); left:0; min-width:230px; background:#12151e; border:1px solid rgba(255,255,255,.13); border-radius:12px; padding:6px; box-shadow:0 8px 36px rgba(0,0,0,.6);">
-              <label class="ct3-portal-row"><input type="checkbox" id="portal-autoplius" checked onchange="ctUpdatePortalBtn()"><span class="ct3-portal-badge" style="background:#19b86a20;border-color:#19b86a60;color:#19b86a">AP</span><span class="ct3-portal-name">autoplius.lt</span><span class="ct3-portal-flag">🇱🇹</span></label>
-              <label class="ct3-portal-row"><input type="checkbox" id="portal-autogidas" checked onchange="ctUpdatePortalBtn()"><span class="ct3-portal-badge" style="background:#2D6FCA20;border-color:#2D6FCA60;color:#2D6FCA">AG</span><span class="ct3-portal-name">autogidas.lt</span><span class="ct3-portal-flag">🇱🇹</span></label>
-              <label class="ct3-portal-row"><input type="checkbox" id="portal-autoscout24" onchange="ctUpdatePortalBtn()"><span class="ct3-portal-badge" style="background:#E84C0A20;border-color:#E84C0A60;color:#E84C0A">AS</span><span class="ct3-portal-name">autoscout24.com</span><span class="ct3-portal-flag">🇪🇺</span></label>
-              <label class="ct3-portal-row"><input type="checkbox" id="portal-otomoto" onchange="ctUpdatePortalBtn()"><span class="ct3-portal-badge" style="background:#C0392B20;border-color:#C0392B60;color:#C0392B">OT</span><span class="ct3-portal-name">otomoto.pl</span><span class="ct3-portal-flag">🇵🇱</span></label>
+              <label class="ct3-portal-row"><input type="checkbox" id="portal-autoplius" checked onchange="ctUpdatePortalBtn()"><svg viewBox="0 0 32 32" width="22" height="22" style="flex:none;border-radius:5px"><rect width="32" height="32" rx="7" fill="#19b86a"/><text x="16" y="22" font-family="system-ui,sans-serif" font-weight="900" font-size="15" fill="#fff" text-anchor="middle">AP</text></svg><span class="ct3-portal-name">autoplius.lt</span><span class="ct3-portal-flag">🇱🇹</span></label>
+              <label class="ct3-portal-row"><input type="checkbox" id="portal-autogidas" checked onchange="ctUpdatePortalBtn()"><svg viewBox="0 0 32 32" width="22" height="22" style="flex:none;border-radius:5px"><rect width="32" height="32" rx="7" fill="#2D6FCA"/><text x="16" y="22" font-family="system-ui,sans-serif" font-weight="900" font-size="15" fill="#fff" text-anchor="middle">AG</text></svg><span class="ct3-portal-name">autogidas.lt</span><span class="ct3-portal-flag">🇱🇹</span></label>
+              <label class="ct3-portal-row"><input type="checkbox" id="portal-autoscout24" onchange="ctUpdatePortalBtn()"><svg viewBox="0 0 32 32" width="22" height="22" style="flex:none;border-radius:5px"><rect width="32" height="32" rx="7" fill="#F06A00"/><text x="16" y="22" font-family="system-ui,sans-serif" font-weight="900" font-size="13" fill="#fff" text-anchor="middle">AS24</text></svg><span class="ct3-portal-name">autoscout24.com</span><span class="ct3-portal-flag">🇪🇺</span></label>
+              <label class="ct3-portal-row"><input type="checkbox" id="portal-otomoto" onchange="ctUpdatePortalBtn()"><svg viewBox="0 0 32 32" width="22" height="22" style="flex:none;border-radius:5px"><rect width="32" height="32" rx="7" fill="#C0392B"/><text x="16" y="22" font-family="system-ui,sans-serif" font-weight="900" font-size="15" fill="#fff" text-anchor="middle">OT</text></svg><span class="ct3-portal-name">otomoto.pl</span><span class="ct3-portal-flag">🇵🇱</span></label>
             </div>
           </div>
         </div>
@@ -1556,9 +1556,17 @@ function saveSearchToHistory(filters) {
 
 function historyLabel(f) {
   const parts = [f.marke, f.modelis].filter(Boolean).join(' ');
-  const years = [f.metaiNuo, f.metaiIki].filter(Boolean).join('–');
-  const price = f.kainaIki ? `≤${Number(f.kainaIki).toLocaleString('lt-LT')}€` : '';
-  return [parts, years, price].filter(Boolean).join(' · ') || 'Paieška';
+  const years = (f.metaiNuo || f.metaiIki) ? [f.metaiNuo||'...', f.metaiIki||'...'].join('–') : '';
+  const priceFrom = f.kainaNuo ? Number(f.kainaNuo).toLocaleString('lt-LT')+'€' : '';
+  const priceTo   = f.kainaIki ? Number(f.kainaIki).toLocaleString('lt-LT')+'€' : '';
+  const priceRange = priceFrom && priceTo ? priceFrom+'–'+priceTo : (priceTo ? '≤'+priceTo : (priceFrom ? priceFrom+'+' : ''));
+  const km  = f.ridaIki  ? `≤${Number(f.ridaIki).toLocaleString('lt-LT')} km` : '';
+  const gearMap = {manual:'Mech.', automatic:'Automat.', '':''}; 
+  const gear = gearMap[f.pavaru_deze||''] || (f.pavaru_deze ? f.pavaru_deze.charAt(0).toUpperCase()+f.pavaru_deze.slice(1) : '');
+  const portalAbbr = {autoplius:'AP', autogidas:'AG', autoscout24:'AS', otomoto:'OT'};
+  const portals = (f.portals && f.portals.length && f.portals.length < 4) ? f.portals.map(p=>portalAbbr[p]||p).join('+') : '';
+  const chips = [parts||'Visi', years, priceRange, km, gear, portals].filter(Boolean);
+  return chips.join(' · ') || 'Paieška';
 }
 
 function renderSearchHistory() {
@@ -1817,7 +1825,6 @@ function updateGenerationHint() {
   hintEl.innerHTML = `📖 ${marke} ${modelis}${metaiNuo ? ` (${metaiNuo})` : ''} → <b>${match.gen}</b> karta (${match.years[0]}–${match.years[1]}), ${match.body}. <span style="color:#666">(orientacinė informacija)</span>`;
 }
 updateGenerationHint();
-renderSearchHistory();
 renderFavorites();
 document.getElementById('app-version').textContent = APP_VERSION;
 

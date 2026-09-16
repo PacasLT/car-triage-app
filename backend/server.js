@@ -1070,7 +1070,7 @@ async function scrapeSingleListing(url) {
     const src = $(this).attr('src');
     if (src) photosSet.add(src);
   });
-  const photos = [...photosSet].slice(0, 12);
+  const photos = [...photosSet].slice(0, 15);
   const photo = photos[0] || null;
 
   // VIN kodas - standartinis formatas: 17 simboliu, be I/O/Q raidziu. Isskiriame atskirai,
