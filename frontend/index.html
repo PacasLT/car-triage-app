@@ -2751,7 +2751,7 @@ function renderBrowseListings(candidates, container) {
     card.style.cssText = 'padding:10px 0;border-bottom:1px solid var(--border);';
     card.innerHTML =
       '<div style="display:flex;gap:12px;align-items:flex-start;">' +
-        '<img src="' + (c.photo || '') + '" onerror="this.style.display='none'" style="width:88px;height:66px;object-fit:cover;border-radius:8px;background:var(--bg-elevated);flex-shrink:0;cursor:pointer;" onclick="window.open('' + c.url + '','_blank')">' +
+        '<img src="' + (c.photo || '') + '" onerror="this.style.display=\'none\'" style="width:88px;height:66px;object-fit:cover;border-radius:8px;background:var(--bg-elevated);flex-shrink:0;cursor:pointer;" onclick="window.open(\'' + c.url + '\',\'_blank\')">' +
         '<div style="flex:1;min-width:0;">' +
           '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">' +
             '<a href="' + c.url + '" target="_blank" style="color:var(--text-primary);text-decoration:none;font:600 14px/1.2 var(--font);">' + (c.modelis || '') + '</a>' +
@@ -2770,7 +2770,7 @@ function renderBrowseListings(candidates, container) {
           (c.comment ? '<div style="font-size:12px;color:var(--text-secondary);line-height:1.4;font-style:italic;">' + c.comment + '</div>' : '') +
         '</div>' +
         '<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;align-items:flex-end;">' +
-          '<button class="fav-star' + (isFav ? ' active' : '') + '" onclick="toggleFavorite('' + c.url + '',' + favSnap + ',this)" style="width:28px;height:28px;border-radius:6px;background:transparent;border:1px solid var(--border-light);color:var(--text-muted);font-size:14px;display:grid;place-items:center;">' + (isFav ? '★' : '☆') + '</button>' +
+          '<button class="fav-star' + (isFav ? ' active' : '') + '" onclick="toggleFavorite(\'' + c.url + '\', ' + favSnap + ', this)" style="width:28px;height:28px;border-radius:6px;background:transparent;border:1px solid var(--border-light);color:var(--text-muted);font-size:14px;display:grid;place-items:center;">' + (isFav ? '★' : '☆') + '</button>' +
           '<button class="detail-btn' + (hasDeep ? ' ready' : '') + '" id="' + panelId + '-btn" onclick="' + detailClick + '" style="font-size:12px;padding:6px 10px;white-space:nowrap;">' + detailBtnLabel + '</button>' +
         '</div>' +
       '</div>' +
