@@ -469,9 +469,7 @@ button{font-family:inherit;cursor:pointer}
 
   <!-- AI PANE -->
   <div class="dp-pane active" id="dp-pane-ai">
-    <div id="dp-ai-photo-strip" style="display:none; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; margin-bottom:14px; border-radius:10px; overflow:hidden;">
-      <div id="dp-ai-photo-strip-inner" style="display:flex; gap:6px; min-width:max-content;"></div>
-    </div>
+
     <div class="dp-ai-header">
       <div class="dp-ai-header-left">
         <div class="dp-ai-badge-lg">AI</div>
@@ -716,7 +714,7 @@ button{font-family:inherit;cursor:pointer}
           obsList.appendChild(li);
         });
       }
-      if (resultBox) resultBox.style.display = '';
+      if (resultBox) resultBox.style.display = 'block';
       // Also update new photos if fetched more
       var newPhotos = resp.photos || [];
       if (newPhotos.length > (window.__dpPhotos || []).length) {
@@ -977,23 +975,7 @@ button{font-family:inherit;cursor:pointer}
         lbl.textContent = photos.length + ' nuotrauk' + (photos.length === 1 ? 'a' : photos.length < 10 ? 'os' : 'ų');
       }
     })();
-    // populate AI tab photo strip
-    (function() {
-      var strip = document.getElementById('dp-ai-photo-strip');
-      var inner = document.getElementById('dp-ai-photo-strip-inner');
-      if (!strip || !inner || !photos.length) return;
-      inner.innerHTML = '';
-      photos.slice(0, 10).forEach(function(url, i) {
-        var img = document.createElement('img');
-        img.src = url; img.loading = 'lazy';
-        img.style.cssText = 'height:120px;width:auto;object-fit:cover;border-radius:8px;cursor:pointer;flex:none;border:2px solid transparent;transition:border-color .15s;';
-        img.onclick = (function(idx) { return function() { dpShowPhoto(idx); }; })(i);
-        img.onmouseover = function() { this.style.borderColor = 'var(--accent)'; };
-        img.onmouseout = function() { this.style.borderColor = 'transparent'; };
-        inner.appendChild(img);
-      });
-      if (photos.length >= 1) strip.style.display = '';
-    })();
+
 
     if (a) {
       var insight = document.getElementById('dp-ai-insight');
@@ -1437,21 +1419,7 @@ button{font-family:inherit;cursor:pointer}
           dpShowPhoto(0);
           buildPhotosGrid(newPhotos);
           // Atnaujinti AI tab photo strip
-          var strip2 = document.getElementById('dp-ai-photo-strip');
-          var inner2 = document.getElementById('dp-ai-photo-strip-inner');
-          if (strip2 && inner2) {
-            inner2.innerHTML = '';
-            newPhotos.slice(0, 10).forEach(function(purl, pi) {
-              var img2 = document.createElement('img');
-              img2.src = purl; img2.loading = 'lazy';
-              img2.style.cssText = 'height:120px;width:auto;object-fit:cover;border-radius:8px;cursor:pointer;flex:none;border:2px solid transparent;transition:border-color .15s;';
-              img2.onclick = (function(pidx) { return function() { dpShowPhoto(pidx); }; })(pi);
-              img2.onmouseover = function() { this.style.borderColor = 'var(--accent)'; };
-              img2.onmouseout = function() { this.style.borderColor = 'transparent'; };
-              inner2.appendChild(img2);
-            });
-            if (newPhotos.length >= 1) strip2.style.display = '';
-          }
+
         }
       }).catch(function() {
         var msg = document.getElementById('dp-photo-load-msg');
