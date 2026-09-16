@@ -1231,7 +1231,9 @@
     </div>
   </div>
 
-  <!-- SEARCH PANEL -->
+</section>
+
+<!-- SEARCH PANEL -->
   <div class="ct3-search-panel">
     <div class="ct3-search-inner">
       <div class="ct3-search-top">
@@ -1363,7 +1365,7 @@
       </div>
     </div>
   </div>
-</section>
+
 
 <!-- STATS BAR -->
 <div class="ct3-stats-bar">
@@ -1795,6 +1797,7 @@ function updateGenerationHint() {
   const modelis = document.getElementById('modelis').value;
   const metaiNuo = parseInt(document.getElementById('metaiNuo').value, 10);
   const hintEl = document.getElementById('generation-hint');
+  if (!hintEl) return; // element not yet in DOM
   const key = `${marke} ${modelis}`;
   const entries = GENERATION_INFO[key];
   if (!entries || !modelis) {
