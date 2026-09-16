@@ -1908,14 +1908,14 @@ async function toggleTinderDetail() {
 
   extra.style.display = 'block';
   if (c.deepAnalysis) {
-    extra.innerHTML = (window.buildDetailPanelHTML || buildDetailPanelHTML)({ analysis: c.deepAnalysis, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, 'tinder-detail-extra');
+    extra.innerHTML = buildDetailPanelHTML({ analysis: c.deepAnalysis, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, 'tinder-detail-extra');
     extra.dataset.loaded = 'true';
     return;
   }
   // Tikrinti localStorage cache
   const cached = getAnalysisCache(c.url);
   if (cached) {
-    extra.innerHTML = (window.buildDetailPanelHTML || buildDetailPanelHTML)(cached, c.url, 'tinder-detail-extra');
+    extra.innerHTML = buildDetailPanelHTML(cached, c.url, 'tinder-detail-extra');
     extra.dataset.loaded = 'true';
     return;
   }
@@ -1933,7 +1933,7 @@ async function toggleTinderDetail() {
       return;
     }
     setAnalysisCache(c.url, data);
-    extra.innerHTML = (window.buildDetailPanelHTML || buildDetailPanelHTML)(data, c.url, 'tinder-detail-extra');
+    extra.innerHTML = buildDetailPanelHTML(data, c.url, 'tinder-detail-extra');
     extra.dataset.loaded = 'true';
   } catch (err) {
     extra.innerHTML = `<span style="color:#e88;font-size:12px;">Klaida: ${err.message}</span>`;
@@ -2005,7 +2005,7 @@ async function tinderGetAnalysis(url, btn) {
   container.after(resultDiv);
   const cachedGet = getAnalysisCache(url);
   if (cachedGet) {
-    resultDiv.innerHTML = (window.buildDetailPanelHTML || buildDetailPanelHTML)(cachedGet, url, 'tinder-summary-result-' + Date.now());
+    resultDiv.innerHTML = buildDetailPanelHTML(cachedGet, url, 'tinder-summary-result-' + Date.now());
     btn.disabled = false; btn.textContent = '🔍 Analizė'; return;
   }
   try {
@@ -2013,7 +2013,7 @@ async function tinderGetAnalysis(url, btn) {
     const data = await resp.json();
     if (data.error) { resultDiv.innerHTML = `<span style="color:#e88;">Klaida: ${data.error}</span>`; return; }
     setAnalysisCache(url, data);
-    resultDiv.innerHTML = (window.buildDetailPanelHTML || buildDetailPanelHTML)(data, url, 'tinder-summary-result-' + Date.now());
+    resultDiv.innerHTML = buildDetailPanelHTML(data, url, 'tinder-summary-result-' + Date.now());
   } catch(err) { resultDiv.innerHTML = `<span style="color:#e88;">Klaida: ${err.message}</span>`; }
   finally { btn.disabled = false; btn.textContent = '🔍 Analizė'; }
 }
@@ -2192,7 +2192,7 @@ function renderCandidateCards(candidates, results) {
     const hasPreloadedDeep = !!c.deepAnalysis;
     const detailBtnLabel = hasPreloadedDeep ? '✨ Rodyti gilią analizę' : '🔬 Detali apžvalga';
     const preloadedPanelHTML = hasPreloadedDeep
-      ? (window.buildDetailPanelHTML || buildDetailPanelHTML)({ analysis: c.deepAnalysis, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, cardId)
+      ? buildDetailPanelHTML({ analysis: c.deepAnalysis, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, cardId)
       : '';
     const fullBadge = hasPreloadedDeep
       ? `<span style="font-size:10px; background:#2d4a35; color:#7fd88f; padding:2px 6px; border-radius:4px; margin-left:6px;">✨ pilna apžvalga</span>`
@@ -2413,6 +2413,8 @@ async function lookupSeller(pardavejas, resultId, btn, listingUrl) {
 }
 
 function buildDetailPanelHTML(data, url, panelId) {
+  // Delegate to v2 tabbed version if registered
+  if (window.buildDetailPanelHTML_v2) return window.buildDetailPanelHTML_v2(data, url, panelId, arguments[3]);
   const a = data.analysis;
   const listFmt = (arr) => (arr && arr.length ? '<ul>' + arr.map((x) => `<li>${x}</li>`).join('') + '</ul>' : '<span style="color:#666">–</span>');
   const cacheNote = data.cached
@@ -2529,7 +2531,7 @@ async function loadDetail(url, panelId, btn, force, marketContext) {
       panel.innerHTML = `<span style="color:#e88">Klaida: ${data.error}</span>`;
       return;
     }
-    panel.innerHTML = (window.buildDetailPanelHTML || buildDetailPanelHTML)(data, url, panelId, marketContext);
+    panel.innerHTML = buildDetailPanelHTML(data, url, panelId, marketContext);
     panel.dataset.loaded = 'true';
     btn.textContent = '🔼 Slėpti apžvalgą';
     btn.disabled = false;
@@ -2742,7 +2744,7 @@ function loadSavedSearch() {
 /* ============================================================
    CarTriige v2 — kortelės ir detalės panelės atvaizdavimas.
    Įkeliama PO originalaus <script>: perrašo tik renderCandidateCards()
-   ir (window.buildDetailPanelHTML || buildDetailPanelHTML)(). Naudoja esamas globalias funkcijas:
+   ir buildDetailPanelHTML(). Naudoja esamas globalias funkcijas:
    formatEUR, escJs, formatRidaDiff, isFavorited, toggleFavorite,
    toggleCompare, loadDetail, cyclePhoto, openLightbox, lookupVin,
    lookupSeller, currentData.
@@ -2869,7 +2871,7 @@ function loadSavedSearch() {
       if (c.kryzminiaiSkelbimai && c.kryzminiaiSkelbimai.length) notes.push(`<div class="ct-note">Tas pats automobilis taip pat: ${c.kryzminiaiSkelbimai.map((k) => `${esc(k.source)} už ${formatEUR(k.kaina)}`).join(', ')}</div>`);
 
       const detailBtnLabel = hasDeep ? 'Rodyti gilią analizę' : 'Detali apžvalga';
-      const preloadedPanelHTML = hasDeep ? (window.buildDetailPanelHTML || buildDetailPanelHTML)({ analysis: a, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, cardId) : '';
+      const preloadedPanelHTML = hasDeep ? buildDetailPanelHTML({ analysis: a, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, cardId) : '';
       const compareArgs = `'${c.url}', '${escJs(c.modelis)}', ${c.kaina || 'null'}, '${escJs(c.photo || '')}', ${c.metai || 'null'}, ${c.rida || 'null'}, '${escJs(c.kuras || '')}', ${c.galia || 'null'}, ${c.variklioTuris || 'null'}, '${escJs(c.pavarai || '')}', ${c.diffPct != null ? c.diffPct : 'null'}, ${c.marketMedian || 'null'}, '${escJs(c.source || '')}', 'cmp-${cardId}'`;
       const detailArgs = `'${c.url}', '${cardId}', this, false, {kaina:${c.kaina || 'null'}, marketMedian:${c.marketMedian || 'null'}, marketCount:${c.marketCount || 'null'}, diffPct:${c.diffPct != null ? c.diffPct : 'null'}, modelis:'${escJs(c.modelis)}', pardavejas:${c.pardavejas ? `'${escJs(c.pardavejas)}'` : 'null'}, galia:${c.galia || 'null'}, variklioTuris:${c.variklioTuris || 'null'}}`;
 
@@ -2925,7 +2927,7 @@ function loadSavedSearch() {
     p.querySelectorAll('.ct-tab').forEach((x) => x.classList.toggle('active', x === btn));
   };
 
-  window.buildDetailPanelHTML = function (data, url, panelId, marketCtx) {
+  window.buildDetailPanelHTML_v2 = function (data, url, panelId, marketCtx) {
     const a = data.analysis || {};
     const c = Object.assign({}, findCandidate(url) || {}, marketCtx || {});
     const list = (arr, cls) => (arr && arr.length ? `<ul class="ct-list ${cls || ''}">${arr.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : '<p class="ct-dash">–</p>');
