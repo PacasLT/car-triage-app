@@ -2428,6 +2428,33 @@ function formatRidaDiff(pct) {
 
 let currentData = null;
 
+// Restore last search results when returning from detail.html
+(function() {
+  try {
+    var saved = localStorage.getItem('ct_last_results');
+    if (!saved) return;
+    localStorage.removeItem('ct_last_results');
+    var data = JSON.parse(saved);
+    if (!data || !data.candidates) return;
+    // Wait for DOM to be ready
+    function restoreResults() {
+      var status = document.getElementById('status');
+      var results = document.getElementById('results');
+      if (!status || !results) return;
+      renderResults(data, status, results);
+      // Scroll to results
+      setTimeout(function() {
+        results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 150);
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', restoreResults);
+    } else {
+      restoreResults();
+    }
+  } catch(e) { console.warn('Rezultatų atstatymas nepavyko', e); }
+})();
+
 function renderResults(data, status, results) {
   currentData = data;
   const rawNote = data.rawFoundCount && data.rawFoundCount !== data.totalScanned
@@ -2986,8 +3013,16 @@ function closeCompareModal() {
   window.__ctCardData = window.__ctCardData || {};
   window.ctOpenDetail = function (url) {
     var d = window.__ctCardData[url];
-    if (!d) { alert('Duomenys nerasti. Bandykite iš naujo.'); return; }
+    if (!d) {
+      if (typeof showToast === 'function') showToast('Duomenys nerasti. Bandykite iš naujo.', 'error');
+      else alert('Duomenys nerasti. Bandykite iš naujo.');
+      return;
+    }
     try {
+      // Save current search results so we can restore them on back navigation
+      if (window.currentData) {
+        localStorage.setItem('ct_last_results', JSON.stringify(window.currentData));
+      }
       localStorage.setItem('ct_detail', JSON.stringify({ c: d.c, analysis: d.analysis, photos: d.photos }));
     } catch (e) { console.warn('localStorage klaida', e); }
     window.location.href = 'detail.html';
