@@ -154,4 +154,5 @@ function buildListingTimelineText(url) {
 module.exports = {
   getCached, setCached, cacheAgeMinutes, PAGE_TTL_MS, ANALYSIS_TTL_MS,
   addToHistory, getHistoryForModel,
+  recordListingSnapshot, getListingTimeline, buildListingTimelineText,
 };
