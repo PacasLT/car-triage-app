@@ -889,10 +889,13 @@ function scorePrice(l) {
   if (d <= -25) s = 5;
   else if (d < 0) s = 5 + (d + 25) * (40 / 25);        // -25..0  -> 5..45
   else if (d <= 10) s = 45 + d * 2.8;                   // 0..10   -> 45..73
-  else if (d <= 20) s = 73 + (d - 10) * 2.0;            // 10..20  -> 73..93
-  else if (d <= 32) s = 93 + (d - 20) * 0.35;           // 20..32  -> 93..97
-  else if (d <= 45) s = 97 - (d - 32) * 1.6;            // 32..45  -> 97..76
-  else s = Math.max(30, 76 - (d - 45) * 2);
+  else if (d <= 18) s = 73 + (d - 10) * 2.1;            // 10..18  -> 73..90  (sveikas sandoris)
+  else if (d <= 25) s = 90 + (d - 18) * 0.29;           // 18..25  -> 90..92  (pikas)
+  // Nuo ~25% prasideda itarimu zona: tokia nuolaida trejus metus turinciam
+  // automobiliui daznai reiskia zala, aukciona arba nutyleta informacija.
+  else if (d <= 35) s = 92 - (d - 25) * 2.4;            // 25..35  -> 92..68
+  else if (d <= 50) s = 68 - (d - 35) * 1.9;            // 35..50  -> 68..40
+  else s = Math.max(25, 40 - (d - 50) * 1.5);
   return clamp100(s);
 }
 
@@ -1014,6 +1017,11 @@ function scoreConfidence(l) {
 // bet lieka matomas su aiskiai ivardyta priezastimi.
 function checkHardRejections(l, filters) {
   const r = [];
+  // Narsymo rezime skelbimai, neatitinkantys vartotojo filtru, nera ismetami -
+  // jie parodomi su konkrecia priezastimi, kuris rezis nesutapo.
+  if (l.hardRejectReasons && l.hardRejectReasons.length) {
+    r.push('Neatitinka jūsų paieškos filtrų: ' + l.hardRejectReasons.join('; ') + '.');
+  }
   const def = l.galimiDefektai || [];
   const struktur = def.filter((d) => /dauž|po avarijos|skend|degę/i.test(d));
   if (struktur.length) {
@@ -1070,6 +1078,11 @@ function rizikosBusena(l) {
   if (def.length || (l.galimasJavImportas && l.diffPct !== null && l.diffPct >= 35)) {
     return { key: 'RISK', emoji: '🟠', label: 'Didelė – rasta problemos požymių' };
   }
+  // Nepaaiskinta didele nuolaida pati savaime yra signalas: skelbime apie zala
+  // neparasyta, bet tokia kaina be priezasties nebuna.
+  if (l.diffPct !== null && l.marketCount >= 3 && l.diffPct >= 28) {
+    return { key: 'RISK', emoji: '🟠', label: 'Didelė – kaina gerokai žemiau rinkos be paaiškinimo' };
+  }
   if (!l.turiVin && !l.turiIstorijosAtaskaita) {
     return { key: 'WARNING', emoji: '🟡', label: 'Vidutinė – reikia patikrinti istoriją' };
   }
@@ -1103,9 +1116,15 @@ function buildWhyReasons(l, k) {
   // VIN/istorijos nebuvimas NEminimas kaip minusas – jis atsiduria "neįvertinta" sąraše.
   if (l.turiGarantija) r.push(l.garantijosTipas === 'gamintojo' ? 'Gamintojo garantija' : l.garantijosTipas === 'pardavejo' ? 'Pardavėjo garantija' : 'Nurodyta garantija');
   if ((l.galimiDefektai || []).length) r.push('Skelbime minimi defektai: ' + l.galimiDefektai.join(', '));
+  else if (l.diffPct !== null && l.marketCount >= 3 && l.diffPct >= 28) {
+    r.push('⚠ ' + l.diffPct + '% žemiau rinkos be paaiškinimo skelbime – tokia kaina dažniausiai reiškia žalą, aukcioną arba nutylėtą informaciją. Būtina apžiūra ir istorijos patikra.');
+  }
   if (l.yraVerslas) r.push('Verslo pardavėjas');
   if (k.demand !== null && k.demand >= 70) r.push('Likvidus modelis – rinkoje daug panašių pasiūlymų');
-  r.push('Rizika: ' + rizikosLygis(k.condition));
+  // Rizika imama is tos pacios busenu masinos, kuria rodo kortele -
+  // kitaip sarasas prastu "Rizika: zema", kai virsuje svyti oranzinis ispejimas.
+  const rb = rizikosBusena(l);
+  r.push('Rizika: ' + rb.emoji + ' ' + rb.label);
   return r.slice(0, 6);
 }
 
@@ -1246,7 +1265,7 @@ function computeQualityScore(l, mode) {
 
 // Keiciant triage varikli ar filtru logika BUTINA pakelti sita numeri - kitaip
 // 20 min. podelis grazins sena rezultata be nauju lauku ir atrodys, kad nieko neveikia.
-const SEARCH_ENGINE_VERSION = 'triage-v2';
+const SEARCH_ENGINE_VERSION = 'triage-v3';
 
 function hashFilters(f) {
   const keys = Object.keys(f).filter((k) => f[k] != null && f[k] !== '' && !(Array.isArray(f[k]) && f[k].length === 0)).sort();
@@ -1361,6 +1380,14 @@ async function runSearchJob(jobId, filters) {
       if (itartinaiPigus > 0) {
         logJob(jobId, '   \u26a0\ufe0f ' + itartinaiPigus + ' skelbim\u0173 kaina <2000\u20ac \u2013 galimai nuskaityta lizingo \u012fmoka, ne automobilio kaina!');
       }
+    }
+
+    // "Narsyti viska" reiskia BUTENT viska: filtro neatitinkantys skelbimai lieka
+    // sarase, tik pazymeti ir nustumti i ATMESTI grupe su konkrecia priezastimi.
+    // Griezta atranka taikoma tik CarTriige analizes rezime.
+    if ((filters.searchMode === 'browse') && hardRejected.length) {
+      logJob(jobId, '📋 Naršymo režimas: ' + hardRejected.length + ' filtro neatitinkančių skelbimų paliekami sąraše su priežastimis.');
+      parsed = parsed.concat(hardRejected.splice(0, hardRejected.length));
     }
 
     const beforeDedup = parsed.length;
@@ -1575,7 +1602,25 @@ async function runSearchJob(jobId, filters) {
     const allListings = allListingsBase.concat(filtruAtmesti)
       .sort((a, b) => (a.kaina || 0) - (b.kaina || 0));
 
-    const searchResult = { totalScanned: parsed.length, rawFoundCount, hardRejectedCount: hardRejected.length, medians, candidates, allListings, searchMode };
+    // Rinkos santrauka: leidzia tuscia rezultata paaiskinti konkreciai -
+    // "tokiu automobiliu uz sia kaina rinkoje nera", o ne tiesiog "nieko nerasta".
+    const visosRastosKainos = [...parsed, ...hardRejected].map((l) => l.kaina)
+      .filter((k) => k && k > 2000).sort((a, b) => a - b);
+    const rinkosSantrauka = visosRastosKainos.length ? {
+      n: visosRastosKainos.length,
+      minKaina: visosRastosKainos[0],
+      maxKaina: visosRastosKainos[visosRastosKainos.length - 1],
+      mediana: visosRastosKainos[Math.floor(visosRastosKainos.length / 2)],
+      vartotojoNuo: parseInt(filters.kainaNuo, 10) || null,
+      vartotojoIki: parseInt(filters.kainaIki, 10) || null,
+      // Kiek rastu skelbimu telpa BUTENT i kainos rezi - taip atskiriam,
+      // ar kalta kaina, ar kiti filtrai (kuras, deze, metai).
+      kiekTelpaIKaina: visosRastosKainos.filter((k) =>
+        (!filters.kainaNuo || k >= parseInt(filters.kainaNuo, 10)) &&
+        (!filters.kainaIki || k <= parseInt(filters.kainaIki, 10))).length,
+    } : null;
+
+    const searchResult = { totalScanned: parsed.length, rawFoundCount, hardRejectedCount: hardRejected.length, medians, candidates, allListings, searchMode, rinkosSantrauka };
     cache.setSearchCached(filterHash, searchResult);
     jobs[jobId].result = searchResult;
   } catch (err) {

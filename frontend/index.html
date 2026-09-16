@@ -2819,6 +2819,40 @@ function ctResaleBlock(c) {
 }
 
 // Rezultatai grupuojami pagal triage lygį – TOP visada viršuje.
+// Kai nieko nerandama, dazniausia priezastis nera "blogas filtras", o ta,
+// kad rinkoje tokiu automobiliu uz tokia kaina tiesiog nera. Parodom skaicius.
+function ctRinkosPalyginimas() {
+  const r = window.currentData && window.currentData.rinkosSantrauka;
+  if (!r || !r.n) return '';
+  const fmt = (v) => (typeof formatEUR === 'function' ? formatEUR(v) : v + ' €');
+  let s = '<div style="margin-top:12px;padding:12px 14px;border-radius:9px;background:var(--bg-raised);border:1px solid var(--border);">'
+    + '<div style="font:700 9px/1 var(--font-mono);letter-spacing:.1em;color:var(--accent-light);margin-bottom:8px;">KĄ RODO RINKA</div>'
+    + '<div style="font:400 12.5px/1.7 var(--font);color:var(--text-secondary);">'
+    + 'Rasta <b>' + r.n + '</b> šio modelio skelbimų. Pigiausias <b>' + fmt(r.minKaina) + '</b>, '
+    + 'mediana <b>' + fmt(r.mediana) + '</b>, brangiausias <b>' + fmt(r.maxKaina) + '</b>.'
+    + '</div>';
+  if (r.vartotojoIki && r.minKaina > r.vartotojoIki) {
+    // Kaina yra vienintelis stabdis - net pigiausias rinkoje yra brangesnis nei biudzetas.
+    const skirtumas = Math.round(((r.minKaina - r.vartotojoIki) / r.vartotojoIki) * 100);
+    s += '<div style="margin-top:8px;font:400 12.5px/1.7 var(--font);color:#f0c674;">'
+      + 'Jūsų maksimali kaina <b>' + fmt(r.vartotojoIki) + '</b> yra <b>' + skirtumas + '%</b> žemiau už pigiausią rinkoje esantį. '
+      + 'Tokių automobilių už šią kainą šiuo metu tiesiog nėra – reikėtų kelti biudžetą arba rinktis senesnius metus ar kitą modelį.'
+      + '</div>';
+  } else if (r.kiekTelpaIKaina === 0) {
+    s += '<div style="margin-top:8px;font:400 12.5px/1.7 var(--font);color:#f0c674;">'
+      + 'Į jūsų kainos rėžį nepatenka nė vienas iš ' + r.n + ' rastų skelbimų.'
+      + '</div>';
+  } else {
+    // Kaina TINKA, atkrenta del kitu filtru - tai visai kita problema.
+    s += '<div style="margin-top:8px;font:400 12.5px/1.7 var(--font);color:#f0c674;">'
+      + 'Į jūsų kainos rėžį patenka <b>' + r.kiekTelpaIKaina + '</b> iš ' + r.n + ' skelbimų, '
+      + 'bet jie atkrenta dėl <b>kitų filtrų</b> – kuro, pavarų dėžės, metų ar ridos. '
+      + 'Pabandykite kurą „Visi" arba praplėskite metų rėžį.'
+      + '</div>';
+  }
+  return s + '</div>';
+}
+
 function ctRenderGrouped(candidates, container, renderFn) {
   container.innerHTML = '';
   // Anksciau tuscias sarasas tiesiog nieko nepiesdavo - vartotojas matydavo tuscia
@@ -2884,6 +2918,7 @@ function renderBrowseListings(candidates, container) {
       + '<div style="font:600 14px/1.4 var(--font);color:var(--text-primary);margin-bottom:6px;">Nė vienas rastas skelbimas neatitiko jūsų filtrų</div>'
       + (rasta ? '<div style="font:400 12.5px/1.6 var(--font);color:var(--text-secondary);">Portaluose rasta <b>' + rasta + '</b> šio modelio skelbimų, bet nė vienas nepateko į jūsų kainos, metų, ridos, kuro ar pavarų dėžės rėžius.</div>' : '')
       + (viso ? '<div style="margin-top:8px;font:400 12.5px/1.6 var(--font);color:var(--text-secondary);">Išskleiskite <b>„Rodyti visus nuskaitytus skelbimus"</b> žemiau – ten surašyti visi ' + viso + ' rasti skelbimai ir prie kiekvieno parašyta, kuris būtent filtras jį atmetė.</div>' : '')
+      + ctRinkosPalyginimas()
       + '<div style="margin-top:10px;font:400 12px/1.5 var(--font);color:var(--text-dim);">Dažniausiai padeda: praplėsti kainos rėžį, pasirinkti kurą „Visi" arba pridėti daugiau portalų.</div>'
       + '</div>';
     return;
