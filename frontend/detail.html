@@ -379,6 +379,7 @@ button{font-family:inherit;cursor:pointer}
         <h4>Pelno potencialas</h4>
         <p id="dp-profit-text">Kraunama...</p>
       </div>
+      <button class="dp-pr-btn" onclick="dpTab('ai',document.querySelector('.dp-tab'))" style="margin-left:auto;flex:none;padding:7px 14px;border-radius:8px;border:1px solid var(--success-border);background:transparent;color:var(--success);font:600 12px var(--font-sans);cursor:pointer;white-space:nowrap">Analizuoti →</button>
     </div>
     <div class="dp-pr-block risk">
       <div class="dp-pr-icon">
@@ -388,6 +389,7 @@ button{font-family:inherit;cursor:pointer}
         <h4>Rizikos</h4>
         <p id="dp-risk-text">Kraunama...</p>
       </div>
+      <button class="dp-pr-btn" onclick="dpTab('risk',document.querySelectorAll('.dp-tab')[2])" style="margin-left:auto;flex:none;padding:7px 14px;border-radius:8px;border:1px solid var(--warning-border);background:transparent;color:var(--warning);font:600 12px var(--font-sans);cursor:pointer;white-space:nowrap">Peržiūrėti →</button>
     </div>
   </div>
 
@@ -889,6 +891,8 @@ button{font-family:inherit;cursor:pointer}
       html += '<div style="font-weight:700;font-size:13px;letter-spacing:.04em;color:var(--text-muted);margin-bottom:10px">VIN KODAS</div>';
       if (c.vin) {
         html += '<div style="font-family:monospace;font-size:16px;font-weight:700;letter-spacing:.08em;color:var(--accent)">' + c.vin + '</div>';
+        html += '<button id="dp-vin-lookup-btn" onclick="dpVinLookup()" style="margin-top:12px;padding:9px 18px;border-radius:8px;border:none;background:var(--accent);color:#fff;font:600 13px var(--font-sans);cursor:pointer;display:flex;align-items:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Tikrinti VIN istoriją</button>';
+        html += '<div id="dp-vin-result" style="margin-top:12px"></div>';
       } else {
         html += '<div style="font-size:13px;color:var(--text-muted)">VIN kodas skelbime nenurodytas</div>';
       }
@@ -901,7 +905,38 @@ button{font-family:inherit;cursor:pointer}
         html += '<div style="display:flex;gap:8px;align-items:center"><span style="color:#f59e0b;font-size:18px">⚠</span><span style="font-size:13px">Istorijos ataskaita nerasta arba neprieinama</span></div>';
       }
       html += '</div></div>';
-      document.getElementById('dp-pane-vin').innerHTML = html;
+      var vinPane = document.getElementById('dp-pane-vin');
+      vinPane.innerHTML = html;
+
+      window.dpVinLookup = function() {
+        var btn = document.getElementById('dp-vin-lookup-btn');
+        if (btn) { btn.textContent = 'Ieškoma...'; btn.disabled = true; }
+        fetch('/api/vin-lookup', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ vin: c.vin })
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(d) {
+          var res = document.getElementById('dp-vin-result');
+          if (!res) return;
+          if (!d.rasta) {
+            res.innerHTML = '<div style="font-size:13px;color:var(--text-muted)">Viešose aukciono/patikros duomenų bazėse įrašų nerasta.</div>';
+          } else {
+            var h = '';
+            if (d.saltinis) h += '<div style="font-size:12px;color:var(--text-muted);margin-bottom:6px">Šaltinis: ' + d.saltinis + '</div>';
+            if (d.zalos_aprasas) h += '<div style="font-size:13px;margin-bottom:6px;padding:10px;border-radius:6px;background:rgba(239,68,68,.1);border-left:3px solid #ef4444">⚠ ' + d.zalos_aprasas + '</div>';
+            if (d.aukciono_kaina) h += '<div style="font-size:13px;margin-bottom:6px"><span style="color:var(--text-muted)">Aukciono kaina:</span> <strong>' + d.aukciono_kaina + '</strong></div>';
+            if (d.papildoma_info) h += '<div style="font-size:13px;margin-bottom:6px">' + d.papildoma_info + '</div>';
+            if (d.nuoroda) h += '<a href="' + d.nuoroda + '" target="_blank" style="font-size:12px;color:var(--accent)">Šaltinis →</a>';
+            res.innerHTML = h;
+          }
+        })
+        .catch(function() {
+          var res = document.getElementById('dp-vin-result');
+          if (res) res.innerHTML = '<div style="color:#ef4444;font-size:13px">Klaida tikrinant VIN.</div>';
+        });
+      };
     })();
 
     // --- MARKET TAB ---
@@ -938,27 +973,65 @@ button{font-family:inherit;cursor:pointer}
 
     // --- SELLER TAB ---
     (function() {
-      var html = '<div style="display:flex;flex-direction:column;gap:14px">';
-      html += '<div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:10px">';
-      html += '<div style="font-weight:700;font-size:13px;letter-spacing:.04em;color:var(--text-muted);margin-bottom:10px">PARDAVĖJAS</div>';
-      if (c.pardavejas) {
-        html += '<div style="font-size:14px;font-weight:600;margin-bottom:6px">' + c.pardavejas + '</div>';
-      }
-      html += '<div style="font-size:13px;color:var(--text-muted);margin-bottom:6px">' + (c.yraVerslas ? '🏢 Verslo pardavėjas' : '👤 Privatus asmuo') + '</div>';
-      if (c.garantijosTipas) {
-        html += '<div style="font-size:13px;margin-top:6px"><span style="font-weight:600">Garantija:</span> ' + c.garantijosTipas + '</div>';
-      }
-      html += '</div>';
-      if (a && a.klausimai_pardavejui && a.klausimai_pardavejui.length) {
+      var sellerPane = document.getElementById('dp-pane-seller');
+      function renderSellerBase(extraHtml) {
+        var html = '<div style="display:flex;flex-direction:column;gap:14px">';
         html += '<div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:10px">';
-        html += '<div style="font-weight:700;font-size:13px;letter-spacing:.04em;color:var(--text-muted);margin-bottom:10px">REKOMENDUOJAMI KLAUSIMAI</div>';
-        a.klausimai_pardavejui.slice(0, 3).forEach(function(q, i) {
-          html += '<div style="font-size:13px;padding:7px 0;border-bottom:1px solid var(--border);display:flex;gap:10px"><span style="flex:none;color:var(--accent);font-weight:700">' + (i+1) + '.</span><span>' + q + '</span></div>';
-        });
+        html += '<div style="font-weight:700;font-size:13px;letter-spacing:.04em;color:var(--text-muted);margin-bottom:10px">PARDAVĖJAS</div>';
+        if (c.pardavejas) {
+          html += '<div style="font-size:14px;font-weight:600;margin-bottom:6px">' + c.pardavejas + '</div>';
+        }
+        html += '<div style="font-size:13px;color:var(--text-muted);margin-bottom:6px">' + (c.yraVerslas ? '🏢 Verslo pardavėjas' : '👤 Privatus asmuo') + '</div>';
+        if (c.garantijosTipas) {
+          html += '<div style="font-size:13px;margin-top:6px"><span style="font-weight:600">Garantija:</span> ' + c.garantijosTipas + '</div>';
+        }
+        if (c.pardavejas) {
+          html += '<button id="dp-seller-analyze-btn" onclick="dpSellerAnalyze()" style="margin-top:12px;padding:9px 18px;border-radius:8px;border:none;background:var(--accent);color:#fff;font:600 13px var(--font-sans);cursor:pointer;display:flex;align-items:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Analizuoti pardavėją</button>';
+        }
         html += '</div>';
+        if (extraHtml) html += extraHtml;
+        if (a && a.klausimai_pardavejui && a.klausimai_pardavejui.length) {
+          html += '<div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:10px">';
+          html += '<div style="font-weight:700;font-size:13px;letter-spacing:.04em;color:var(--text-muted);margin-bottom:10px">REKOMENDUOJAMI KLAUSIMAI</div>';
+          a.klausimai_pardavejui.slice(0, 3).forEach(function(q, i) {
+            html += '<div style="font-size:13px;padding:7px 0;border-bottom:1px solid var(--border);display:flex;gap:10px"><span style="flex:none;color:var(--accent);font-weight:700">' + (i+1) + '.</span><span>' + q + '</span></div>';
+          });
+          html += '</div>';
+        }
+        html += '</div>';
+        sellerPane.innerHTML = html;
       }
-      html += '</div>';
-      document.getElementById('dp-pane-seller').innerHTML = html;
+
+      window.dpSellerAnalyze = function() {
+        var btn = document.getElementById('dp-seller-analyze-btn');
+        if (btn) { btn.textContent = 'Ieškoma...'; btn.disabled = true; }
+        fetch('/api/seller-lookup', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ pardavejas: c.pardavejas, listingUrl: c.url })
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(d) {
+          var extra = '<div id="dp-seller-result" style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:10px">';
+          extra += '<div style="font-weight:700;font-size:13px;letter-spacing:.04em;color:var(--text-muted);margin-bottom:12px">PARDAVĖJO INFORMACIJA</div>';
+          if (!d.rasta) {
+            extra += '<div style="font-size:13px;color:var(--text-muted)">Viešos informacijos apie šį pardavėją nerasta.</div>';
+          } else {
+            if (d.imones_pavadinimas) extra += '<div style="font-size:14px;font-weight:700;margin-bottom:8px">' + d.imones_pavadinimas + '</div>';
+            if (d.veiklos_trukme) extra += '<div style="font-size:13px;margin-bottom:6px"><span style="color:var(--text-muted)">Veikia:</span> ' + d.veiklos_trukme + '</div>';
+            if (d.atsiliepimu_santrauka) extra += '<div style="font-size:13px;margin-bottom:6px;line-height:1.5"><span style="color:var(--text-muted)">Atsiliepimai:</span> ' + d.atsiliepimu_santrauka + '</div>';
+            if (d.ispejimai) extra += '<div style="font-size:13px;padding:10px 12px;border-radius:6px;background:rgba(239,68,68,.1);border-left:3px solid #ef4444;margin-bottom:6px">⚠ ' + d.ispejimai + '</div>';
+            if (d.nuoroda) extra += '<a href="' + d.nuoroda + '" target="_blank" style="font-size:12px;color:var(--accent)">Šaltinis →</a>';
+          }
+          extra += '</div>';
+          renderSellerBase(extra);
+        })
+        .catch(function() {
+          renderSellerBase('<div style="color:#ef4444;font-size:13px;padding:10px">Klaida ieškant pardavėjo informacijos.</div>');
+        });
+      };
+
+      renderSellerBase(null);
     })();
 
   }
