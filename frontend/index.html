@@ -1967,6 +1967,11 @@ async function runSearch() {
   btn.disabled = true;
   btn.textContent = '⏳ Vyksta paieška...';
   status.textContent = 'Paleidžiama...';
+
+  // Perspejimas jei paieska per ilgai uzrunka
+  const slowWarningTimer = setTimeout(() => {
+    if (btn.disabled) showToast('Paieska vis dar vyksta... tai gali uztrukti iki 2 min.', 'warning', 10000);
+  }, 30000);
   // Scroll žemiau kad matytusi statusas ir rezultatai
   setTimeout(() => {
     const el = document.getElementById('log-container') || document.getElementById('status');
@@ -2019,6 +2024,7 @@ async function runSearch() {
     status.textContent = 'Klaida: ' + err.message;
     showToast('Klaida: ' + err.message, 'error');
   } finally {
+    clearTimeout(slowWarningTimer);
     btn.disabled = false;
     btn.textContent = '🔍 Ieškoti ir analizuoti';
     document.getElementById('search-progress-wrap').style.display = 'none';
@@ -2063,6 +2069,27 @@ function showToast(msg, type = '', duration = 5000) {
   const t = setTimeout(dismiss, duration);
   closeBtn.addEventListener('click', () => clearTimeout(t));
 }
+
+// ============ GLOBALUS KLAIDŲ GAUDYMAS ============
+// Pagauna nekontroliuojamas klaidas ir rodo vartotojui toastu
+window.addEventListener('error', function(e) {
+  // Ignoruoti klaidas iš išorinių skriptų ar tinklo
+  if (!e.filename || e.filename.includes('extension')) return;
+  var msg = e.message || 'Nežinoma klaida';
+  // Nekazoti dėl smulkių dalykų (pvz., ResizeObserver, cross-origin)
+  if (msg.toLowerCase().includes('resizeobserver') || msg.toLowerCase().includes('script error')) return;
+  if (typeof showToast === 'function') {
+    showToast('⚠ Puslapio klaida: ' + msg, 'error', 8000);
+  }
+});
+
+window.addEventListener('unhandledrejection', function(e) {
+  var msg = (e.reason && (e.reason.message || String(e.reason))) || 'Async klaida';
+  if (msg.length > 150) msg = msg.slice(0, 150) + '…';
+  if (typeof showToast === 'function') {
+    showToast('⚠ ' + msg, 'error', 8000);
+  }
+});
 
 // ============ TINDER STILIAUS NARSYMAS ============
 let tinderPhase = 'top';
