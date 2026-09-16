@@ -2384,7 +2384,7 @@ async function toggleTinderDetail() {
 
   extra.style.display = 'block';
   if (c.deepAnalysis) {
-    extra.innerHTML = buildDetailPanelHTML({ analysis: c.deepAnalysis, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, 'tinder-detail-extra');
+    extra.innerHTML = buildDetailPanelHTML({ analysis: c.deepAnalysis, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos || [], cached: false }, c.url, 'tinder-detail-extra');
     extra.dataset.loaded = 'true';
     return;
   }
@@ -2691,7 +2691,7 @@ function renderCandidateCards(candidates, results) {
     const hasPreloadedDeep = !!c.deepAnalysis;
     const detailBtnLabel = hasPreloadedDeep ? '✨ Rodyti gilią analizę' : '🔬 Detali apžvalga';
     const preloadedPanelHTML = hasPreloadedDeep
-      ? buildDetailPanelHTML({ analysis: c.deepAnalysis, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, cardId)
+      ? buildDetailPanelHTML({ analysis: c.deepAnalysis, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos || [], cached: false }, c.url, cardId)
       : '';
     const fullBadge = hasPreloadedDeep
       ? `<span style="font-size:10px; background:#2d4a35; color:#7fd88f; padding:2px 6px; border-radius:4px; margin-left:6px;">✨ pilna apžvalga</span>`
@@ -3369,8 +3369,9 @@ function ctNavTab(tab) {
 
   // ---------- KORTELĖS ----------
   window.renderCandidateCards = function (candidates, results) {
+    try {
     results.innerHTML = '';
-    if (candidates.length === 0) {
+    if (!candidates || candidates.length === 0) {
       results.innerHTML = '<div class="ct-empty">Nieko nerasta pagal šiuos kriterijus, arba visos kainos atitinka rinkos vidurkį.</div>';
       return;
     }
@@ -3432,7 +3433,7 @@ function ctNavTab(tab) {
       var dArgs = "'" + c.url + "', '" + cardId + "', this, false, {kaina:" + (c.kaina||'null') + ", marketMedian:" + (c.marketMedian||'null') + ", marketCount:" + (c.marketCount||'null') + ", diffPct:" + (c.diffPct!=null?c.diffPct:'null') + ", modelis:'" + escJs(c.modelis) + "', pardavejas:" + (c.pardavejas ? ("'" + escJs(c.pardavejas) + "'") : 'null') + ", galia:" + (c.galia||'null') + ", variklioTuris:" + (c.variklioTuris||'null') + "}";
       var detailClick = hasDeep ? ("ctOpenDetail('" + escJs(c.url) + "')") : ("loadDetail(" + dArgs + ")");
       var cmpArgs = "'" + c.url + "', '" + escJs(c.modelis) + "', " + (c.kaina||'null') + ", '" + escJs(c.photo||'') + "', " + (c.metai||'null') + ", " + (c.rida||'null') + ", '" + escJs(c.kuras||'') + "', " + (c.galia||'null') + ", " + (c.variklioTuris||'null') + ", '" + escJs(c.pavarai||'') + "', " + (c.diffPct!=null?c.diffPct:'null') + ", " + (c.marketMedian||'null') + ", '" + escJs(c.source||'') + "', 'cmp-" + cardId + "'";
-      var panelHTML = hasDeep ? buildDetailPanelHTML({ analysis: a, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, cardId) : '';
+      var panelHTML = hasDeep ? buildDetailPanelHTML({ analysis: a, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos || [], cached: false }, c.url, cardId) : '';
 
       var diffCls = _diffCls(c.diffPct);
       var skirt = (c.marketMedian && c.kaina) ? Math.round(c.kaina - c.marketMedian) : null;
@@ -3555,7 +3556,7 @@ function ctNavTab(tab) {
       var detailBtnLabel = hasDeep ? 'Pilna apžvalga →' : 'Detales →';
       var dArgs = "'" + c.url + "', '" + cardId + "', this, false, {kaina:" + (c.kaina||'null') + ", marketMedian:" + (c.marketMedian||'null') + ", marketCount:" + (c.marketCount||'null') + ", diffPct:" + (c.diffPct!=null?c.diffPct:'null') + ", modelis:'" + escJs(c.modelis) + "', pardavejas:" + (c.pardavejas ? ("'" + escJs(c.pardavejas) + "'") : 'null') + ", galia:" + (c.galia||'null') + ", variklioTuris:" + (c.variklioTuris||'null') + "}";
       var detailClick = hasDeep ? ("ctOpenDetail('" + escJs(c.url) + "')") : ("loadDetail(" + dArgs + ")");
-      var panelHTML = hasDeep ? buildDetailPanelHTML({ analysis: a, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos, cached: false }, c.url, cardId) : '';
+      var panelHTML = hasDeep ? buildDetailPanelHTML({ analysis: a, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos || [], cached: false }, c.url, cardId) : '';
 
       var chipsHtml = [
         c.metai ? '<span class="chip" style="height:22px;font-size:11px;padding:0 7px;">' + c.metai + '</span>' : '',
@@ -3599,6 +3600,7 @@ function ctNavTab(tab) {
         '<div class="detail-panel ct-panel" id="' + cardId + '" data-loaded="' + hasDeep + '" style="display:none">' + panelHTML + '</div>';
       results.appendChild(card);
     });
+    } catch(e) { console.error('[CT] renderCandidateCards klaida:', e, e.stack); results.innerHTML = '<div style="color:#f87;padding:20px">Rodymo klaida: ' + e.message + '</div>'; }
   };
 
 
