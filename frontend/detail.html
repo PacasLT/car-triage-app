@@ -111,16 +111,24 @@ button{font-family:inherit;cursor:pointer}
 .dp-act-primary:hover{filter:brightness(1.1)}
 
 /* ── SELLER COL ── */
-.dp-seller{background:var(--bg-surface);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:14px}
-.dp-seller-label{font:700 9px/1 var(--font-mono);letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim)}
-.dp-seller-name-row{display:flex;align-items:center;gap:10px}
-.dp-seller-icon{width:32px;height:32px;border-radius:8px;overflow:hidden;flex:none;background:var(--bg-elevated);border:1px solid var(--border);display:grid;place-items:center;font-size:18px}
-.dp-seller-name{font:600 14px var(--font);color:var(--text-primary)}
-.dp-seller-type{font-size:12px;color:var(--text-muted)}
-.dp-seller-link{display:flex;align-items:center;gap:5px;font:500 12.5px var(--font);color:var(--accent-light)}
-.dp-seller-div{height:1px;background:var(--border)}
-.dp-seller-loc-wrap{font-size:12.5px;color:var(--text-muted);display:flex;flex-direction:column;gap:3px}
-.dp-seller-loc-wrap b{color:var(--text-primary);font-weight:600;font-size:13px}
+/* ── SELLER CARD ── */
+.dp-seller{background:var(--bg-surface);border:1px solid var(--border);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:0}
+.dp-seller-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.dp-seller-label{font:700 9px/1 var(--font-mono);letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim);margin-bottom:0}
+.dp-seller-menu{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-muted);display:grid;place-items:center;cursor:pointer;flex:none}
+.dp-seller-name-row{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+.dp-seller-icon{width:44px;height:44px;border-radius:12px;overflow:hidden;flex:none;background:var(--bg-elevated);display:grid;place-items:center}
+.dp-seller-name{font:700 15px var(--font);color:var(--text-primary);line-height:1.3}
+.dp-seller-verified{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#5b8af5;color:#fff;font:700 9px sans-serif;margin-left:5px;flex:none;vertical-align:middle}
+.dp-seller-type{font-size:12px;color:var(--text-muted);margin-top:2px}
+.dp-seller-link-btn{display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:10px;border:1px solid var(--accent-border);background:transparent;color:var(--text-primary);font:600 13.5px var(--font);text-decoration:none;margin:14px 0;transition:background .15s;justify-content:space-between}
+.dp-seller-link-btn:hover{background:var(--accent-dim)}
+.dp-seller-link-btn-left{display:flex;align-items:center;gap:9px;color:var(--text-secondary)}
+.dp-seller-bottom{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;padding-top:14px;border-top:1px solid var(--border)}
+.dp-seller-bottom-col-label{font:700 8.5px/1 var(--font-mono);letter-spacing:.13em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px}
+.dp-seller-portal-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-elevated)}
+.dp-seller-portal-badge span{font:700 11px var(--font-mono)}
+.dp-seller-loc-val{display:flex;align-items:center;gap:6px;font:500 13px var(--font);color:var(--text-secondary)}
 
 /* ── SCORE SECTION ── */
 .dp-score-section{margin-top:24px;padding:18px 20px;background:var(--bg-surface);border:1px solid var(--border);border-radius:14px;display:grid;grid-template-columns:auto 1fr 200px;gap:20px;align-items:center}
@@ -339,20 +347,40 @@ button{font-family:inherit;cursor:pointer}
 
     <!-- SELLER COL -->
     <div class="dp-seller">
-      <div class="dp-seller-label">Pardavėjas</div>
+      <div class="dp-seller-top">
+        <div class="dp-seller-label">Pardavėjas</div>
+        <button class="dp-seller-menu" title="Daugiau">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+        </button>
+      </div>
       <div class="dp-seller-name-row">
-        <div class="dp-seller-icon" id="dp-seller-icon">&#128663;</div>
+        <div class="dp-seller-icon" id="dp-seller-icon"></div>
         <div>
-          <div class="dp-seller-name" id="dp-seller-name">—</div>
+          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:2px">
+            <span class="dp-seller-name" id="dp-seller-name">—</span>
+            <span class="dp-seller-verified" id="dp-seller-verified" style="display:none">✓</span>
+          </div>
           <div class="dp-seller-type" id="dp-seller-type"></div>
         </div>
       </div>
-      <a class="dp-seller-link" id="dp-seller-link" href="#" target="_blank">Žiūrėti skelbimą &#8594;</a>
-      <div class="dp-seller-div"></div>
-      <div class="dp-seller-loc-wrap">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        <span>Portalas / šalis</span>
-        <span id="dp-seller-loc" style="display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:2px;">—</span>
+      <a class="dp-seller-link-btn" id="dp-seller-link" href="#" target="_blank" rel="noopener">
+        <span class="dp-seller-link-btn-left">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6v6M15 9l-6 6"/></svg>
+          Žiūrėti skelbimą
+        </span>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <div class="dp-seller-bottom">
+        <div>
+          <div class="dp-seller-bottom-col-label">Portalas / šaltinis</div>
+          <div class="dp-seller-portal-badge" id="dp-seller-portal-badge">
+            <span id="dp-seller-portal-text">—</span>
+          </div>
+        </div>
+        <div>
+          <div class="dp-seller-bottom-col-label">Vieta</div>
+          <div class="dp-seller-loc-val" id="dp-seller-loc">—</div>
+        </div>
       </div>
     </div>
   </div>
@@ -868,16 +896,34 @@ button{font-family:inherit;cursor:pointer}
       'otomoto.pl':      { abbr:'OT', bg:'#C0392B', country:'🇵🇱 Lenkija' },
     };
     var pm = portalMeta[c.source] || { abbr:'?', bg:'#6b7280', country:'🌐' };
+    // Seller icon
     document.getElementById('dp-seller-icon').innerHTML =
-      '<div style="width:100%;height:100%;background:'+pm.bg+';border-radius:7px;display:grid;place-items:center;color:#fff;font:700 11px/1 var(--font-mono);">'+pm.abbr+'</div>';
+      '<div style="width:100%;height:100%;background:'+pm.bg+';border-radius:12px;display:grid;place-items:center;color:#fff;font:700 13px/1 var(--font-mono);">'+pm.abbr+'</div>';
+    // Seller name + verified badge (verslo = verified)
     document.getElementById('dp-seller-name').textContent = c.pardavejas || c.source || '—';
     document.getElementById('dp-seller-type').textContent = c.yraVerslas ? 'Verslo pardavėjas' : 'Privatus pardavėjas';
+    var verBadge = document.getElementById('dp-seller-verified');
+    if (verBadge) verBadge.style.display = c.yraVerslas ? '' : 'none';
+    // Link
     document.getElementById('dp-seller-link').href = c.url || '#';
-        var locEl = document.getElementById('dp-seller-loc');
-    var locHTML = '';
-    if (c.source) locHTML += '<span style="display:inline-block;padding:2px 9px;border-radius:20px;font:700 10.5px var(--font-mono);background:'+pm.bg+';color:#fff;letter-spacing:.04em">'+c.source+'</span>';
-    locHTML += '<span style="display:block;margin-top:3px;font-size:12px;color:var(--text-secondary)">'+pm.country+(c.miestas ? ' &nbsp;·&nbsp; <span style=\'color:var(--text-muted)\'>' + c.miestas + '</span>' : '')+'</span>';
-    locEl.innerHTML = locHTML;
+    // Portal badge
+    var pbEl = document.getElementById('dp-seller-portal-badge');
+    var ptEl = document.getElementById('dp-seller-portal-text');
+    if (pbEl && ptEl && c.source) {
+      pbEl.style.borderColor = pm.bg + '55';
+      ptEl.innerHTML = '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+pm.bg+';margin-right:4px;vertical-align:middle"></span>'
+        + '<span style="color:var(--text-primary);font:700 11px var(--font-mono)">'+c.source+'</span>';
+    }
+    // Location
+    var locEl = document.getElementById('dp-seller-loc');
+    if (locEl) {
+      var flag = pm.country ? pm.country.split(' ')[0] : '';
+      var country = pm.country ? pm.country.split(' ').slice(1).join(' ') : '';
+      var city = c.miestas || '';
+      locEl.innerHTML = (flag ? '<span style="font-size:16px">'+flag+'</span>' : '')
+        + '<span>' + (city ? '<strong style="color:var(--text-primary);font-weight:600">'+city+'</strong><br>' : '')
+        + '<span style="color:var(--text-muted);font-size:12px">'+country+'</span></span>';
+    }
 
     var favs = []; try { favs = JSON.parse(localStorage.getItem('carTriageFavorites') || '[]'); } catch(e) {}
     updateSaveBtn(c.url && favs.indexOf(c.url) !== -1);
