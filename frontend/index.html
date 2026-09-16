@@ -1338,7 +1338,7 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
             Išsaugoti paiešką
           </button>
-          <button class="ct3-search-btn" id="search-btn" onclick="runSearch ? runSearch() : null">
+          <button class="ct3-search-btn" id="search-btn" onclick="console.log('search-btn clicked, runSearch=', typeof runSearch); if(typeof runSearch==='function'){ runSearch(); } else { showToast('runSearch nerasta — perkraukite puslapį', 'error'); }">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
             Ieškoti ir analizuoti
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -1948,6 +1948,11 @@ async function runSearch() {
   btn.disabled = true;
   btn.textContent = '⏳ Vyksta paieška...';
   status.textContent = 'Paleidžiama...';
+  // Scroll žemiau kad matytusi statusas ir rezultatai
+  setTimeout(() => {
+    const el = document.getElementById('log-container') || document.getElementById('status');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
   // Apskaičiuojame apytikslį žingsnių kiekį pagal filtrus
   window.__estimatedSearchSteps = Math.max(30, filters.portals.length * parseInt(filters.maxPages || '3') * 4 + 20);
   const progressWrap = document.getElementById('search-progress-wrap');
@@ -1988,6 +1993,7 @@ async function runSearch() {
     }
   } catch (err) {
     status.textContent = 'Klaida: ' + err.message;
+    showToast('Klaida: ' + err.message, 'error');
   } finally {
     btn.disabled = false;
     btn.textContent = '🔍 Ieškoti ir analizuoti';
