@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const Database = require('better-sqlite3');
 const path = require('path');
+const fs = require('fs');
 
 const SECRET_KEY = process.env.JWT_SECRET_KEY || 'PAKEISK_SITA_PRODUCTION!';
 const TOKEN_EXPIRE = '72h';
@@ -19,6 +20,8 @@ const INVITE_CODES = new Set(
 );
 
 // ── DB ─────────────────────────────────────────────────────────────────────
+// Ensure the directory for DB_PATH exists (needed when using Railway Volumes)
+fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 const db = new Database(DB_PATH);
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
