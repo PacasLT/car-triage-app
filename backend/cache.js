@@ -1,131 +1,122 @@
 // cache.js
-// Paprasta failine talpykla. Issaugo duomenis i JSON faila, kad:
-// 1) nereiketu kaskart is naujo scrapinti tu paciu paieskos puslapiu (trumpas TTL)
-// 2) detalios skelbimo analizes islikty tarp serverio perkrovimu (ilgas TTL)
+// Atmintines talpykla. Duomenys ikelti VIENKARTI i atmintine paleidus serveri -
+// nereikia skaityti failo kiekvienam getCached/setCached kvietimui (greiciau).
+// Failas naudojamas tik islikimui tarp serverio perkrovimu.
 
 const fs = require('fs');
 const path = require('path');
 
 const CACHE_FILE = path.join(__dirname, 'cache.json');
 
-function loadCache() {
-  try {
-    return JSON.parse(fs.readFileSync(CACHE_FILE, 'utf-8'));
-  } catch {
-    return { pages: {}, analysis: {} };
-  }
-}
+const PAGE_TTL_MS = 120 * 60 * 1000;       // 2 val - puslapiu nuskaitymas
+const ANALYSIS_TTL_MS = 24 * 60 * 60 * 1000; // 24 val - detali analize
+const SEARCH_TTL_MS = 20 * 60 * 1000;       // 20 min - tos pacios filtru paieskos talpykla
 
-function saveCache(cache) {
-  try {
-    fs.writeFileSync(CACHE_FILE, JSON.stringify(cache, null, 2));
-  } catch (err) {
-    console.error('Nepavyko issaugoti talpyklos:', err.message);
-  }
-}
+// --- PAGRINDINĖ ATMINTINĖ (ikeliam VIENKARTI paleidus) ---
+let _cache = (() => {
+  try { return JSON.parse(fs.readFileSync(CACHE_FILE, 'utf-8')); }
+  catch { return { pages: {}, analysis: {} }; }
+})();
 
-const PAGE_TTL_MS = 120 * 60 * 1000; // 2 val - visas nuskaitymas tik kas 2h
-const ANALYSIS_TTL_MS = 24 * 60 * 60 * 1000; // 24 val - detali analize ilgiau aktuali
+function saveCache() {
+  try { fs.writeFileSync(CACHE_FILE, JSON.stringify(_cache, null, 2)); }
+  catch (err) { console.error('Nepavyko issaugoti talpyklos:', err.message); }
+}
 
 function getCached(namespace, key, ttlMs) {
-  const cache = loadCache();
-  const entry = cache[namespace] && cache[namespace][key];
+  const entry = _cache[namespace] && _cache[namespace][key];
   if (!entry) return null;
   if (Date.now() - entry.time > ttlMs) return null;
   return entry.data;
 }
 
 function setCached(namespace, key, data) {
-  const cache = loadCache();
-  if (!cache[namespace]) cache[namespace] = {};
-  cache[namespace][key] = { time: Date.now(), data };
-  saveCache(cache);
+  if (!_cache[namespace]) _cache[namespace] = {};
+  _cache[namespace][key] = { time: Date.now(), data };
+  saveCache();
 }
 
 function cacheAgeMinutes(namespace, key) {
-  const cache = loadCache();
-  const entry = cache[namespace] && cache[namespace][key];
+  const entry = _cache[namespace] && _cache[namespace][key];
   if (!entry) return null;
   return Math.round((Date.now() - entry.time) / 60000);
 }
 
-// ============ ISTORINIS RINKOS DUOMENU KAUPIMAS ============
-// Kuo daugiau kartu naudojama sistema, tuo daugiau skelbimu sukaupiama istorijoje -
-// tai duoda tikslesnius kainos/ridos vidurkius net jei viena konkreti paieska rado mazai.
-const HISTORY_FILE = path.join(__dirname, 'market-history.json');
-const MAX_HISTORY_PER_MODEL = 1000; // Daugiau istorijos = tikslesni vidurkiai
+// --- PAIESKOS REZULTATU ATMINTINĖ (tik atmintyje, 20 min TTL) ---
+// Ta pati paieska (tie patys filtrai) grazinama is talpyklos be jokio skenuojimo.
+const _searchCache = new Map(); // filterHash -> { time, data }
 
-function loadHistory() {
-  try {
-    return JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf-8'));
-  } catch {
-    return {}; // { [modelis]: [{ kaina, rida, metai, url, time }] }
-  }
+function getSearchCached(filterHash) {
+  const entry = _searchCache.get(filterHash);
+  if (!entry) return null;
+  if (Date.now() - entry.time > SEARCH_TTL_MS) { _searchCache.delete(filterHash); return null; }
+  return entry.data;
 }
 
-function saveHistory(history) {
-  try {
-    fs.writeFileSync(HISTORY_FILE, JSON.stringify(history));
-  } catch (err) {
-    console.error('Nepavyko issaugoti istorijos:', err.message);
-  }
+function setSearchCached(filterHash, data) {
+  _searchCache.set(filterHash, { time: Date.now(), data });
+}
+
+// ============ ISTORINIS RINKOS DUOMENU KAUPIMAS ============
+const HISTORY_FILE = path.join(__dirname, 'market-history.json');
+const MAX_HISTORY_PER_MODEL = 1000;
+
+let _history = (() => {
+  try { return JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf-8')); }
+  catch { return {}; }
+})();
+
+function saveHistory() {
+  try { fs.writeFileSync(HISTORY_FILE, JSON.stringify(_history)); }
+  catch (err) { console.error('Nepavyko issaugoti istorijos:', err.message); }
 }
 
 function addToHistory(listings) {
-  const history = loadHistory();
   for (const l of listings) {
     if (!l.kaina || !l.modelis) continue;
-    if (!history[l.modelis]) history[l.modelis] = [];
-    const arr = history[l.modelis];
+    if (!_history[l.modelis]) _history[l.modelis] = [];
+    const arr = _history[l.modelis];
     const existingIdx = arr.findIndex((e) => e.url === l.url);
     const entry = { url: l.url, kaina: l.kaina, rida: l.rida, metai: l.metai, kuras: l.kuras || null, galia: l.galia || null, pavarai: l.pavarai || null, variklioTuris: l.variklioTuris || null, time: Date.now() };
     if (existingIdx >= 0) arr[existingIdx] = entry;
     else arr.push(entry);
     if (arr.length > MAX_HISTORY_PER_MODEL) arr.splice(0, arr.length - MAX_HISTORY_PER_MODEL);
   }
-  saveHistory(history);
+  saveHistory();
 }
 
 function getHistoryForModel(modelis) {
-  const history = loadHistory();
-  return history[modelis] || [];
+  return _history[modelis] || [];
 }
-
 
 // ============ SKELBIMŲ KAINOS/RIDOS ISTORIJA (per URL) ============
-// Kiekvieną kartą aptikus skelbimą – išsaugome kainą ir ridą su laiku.
-// Leidžia AI analizei pamatyti ar kaina buvo mažinta, ar rida kinta.
 const LISTING_TIMELINE_FILE = path.join(__dirname, 'listing-timeline.json');
 
-function loadListingTimeline() {
+let _listingTimeline = (() => {
   try { return JSON.parse(fs.readFileSync(LISTING_TIMELINE_FILE, 'utf-8')); }
   catch { return {}; }
-}
+})();
 
-function saveListingTimeline(data) {
-  try { fs.writeFileSync(LISTING_TIMELINE_FILE, JSON.stringify(data)); }
+function saveListingTimeline() {
+  try { fs.writeFileSync(LISTING_TIMELINE_FILE, JSON.stringify(_listingTimeline)); }
   catch (err) { console.error('Nepavyko išsaugoti timeline:', err.message); }
 }
 
 function recordListingSnapshot(url, kaina, rida) {
   if (!url || !kaina) return;
-  const data = loadListingTimeline();
-  if (!data[url]) data[url] = [];
-  const arr = data[url];
+  if (!_listingTimeline[url]) _listingTimeline[url] = [];
+  const arr = _listingTimeline[url];
   const now = Date.now();
-  // Nesaugome jei per 30min jau yra įrašas su ta pačia kaina
   const recent = arr[arr.length - 1];
   if (recent && recent.kaina === kaina && (now - recent.t) < 30 * 60 * 1000) return;
   arr.push({ t: now, k: kaina, r: rida || null });
-  // Laikome iki 60 snapshot'ų per URL
   if (arr.length > 60) arr.splice(0, arr.length - 60);
-  saveListingTimeline(data);
+  saveListingTimeline();
 }
 
 function getListingTimeline(url) {
   if (!url) return [];
-  const data = loadListingTimeline();
-  return data[url] || [];
+  return _listingTimeline[url] || [];
 }
 
 function buildListingTimelineText(url) {
@@ -153,6 +144,7 @@ function buildListingTimelineText(url) {
 
 module.exports = {
   getCached, setCached, cacheAgeMinutes, PAGE_TTL_MS, ANALYSIS_TTL_MS,
+  getSearchCached, setSearchCached,
   addToHistory, getHistoryForModel,
   recordListingSnapshot, getListingTimeline, buildListingTimelineText,
 };

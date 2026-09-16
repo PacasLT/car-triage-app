@@ -1273,6 +1273,56 @@ button{font-family:inherit;cursor:pointer}
       renderSellerBase(null);
     })();
 
+    // Auto-fetch nuotraukos jei neturime (ne-TOP5 skelbimai turi tik 1 thumbnail)
+    if (c.url && photos.length < 2) {
+      var photoLoadMsg = document.createElement('div');
+      photoLoadMsg.id = 'dp-photo-load-msg';
+      photoLoadMsg.style.cssText = 'text-align:center;padding:16px;color:var(--text-muted);font-size:13px';
+      photoLoadMsg.textContent = '⏳ Kraunamos visos nuotraukos iš skelbimo...';
+      var pgrid = document.getElementById('dp-photos-grid');
+      if (pgrid) pgrid.insertBefore(photoLoadMsg, pgrid.firstChild);
+
+      fetch('/api/analyze-single', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          url: c.url, kaina: c.kaina, marketMedian: c.marketMedian,
+          marketCount: c.marketCount, diffPct: c.diffPct, modelis: c.modelis,
+          galia: c.galia, variklioTuris: c.variklioTuris
+        })
+      }).then(function(r) { return r.json(); }).then(function(resp) {
+        var msg = document.getElementById('dp-photo-load-msg');
+        if (msg) msg.remove();
+        var newPhotos = resp.photos || [];
+        if (newPhotos.length > photos.length) {
+          _photos = newPhotos;
+          window.__dpPhotos = newPhotos;
+          buildThumbs(newPhotos);
+          dpShowPhoto(0);
+          buildPhotosGrid(newPhotos);
+          // Atnaujinti AI tab photo strip
+          var strip2 = document.getElementById('dp-ai-photo-strip');
+          var inner2 = document.getElementById('dp-ai-photo-strip-inner');
+          if (strip2 && inner2) {
+            inner2.innerHTML = '';
+            newPhotos.slice(0, 10).forEach(function(purl, pi) {
+              var img2 = document.createElement('img');
+              img2.src = purl; img2.loading = 'lazy';
+              img2.style.cssText = 'height:120px;width:auto;object-fit:cover;border-radius:8px;cursor:pointer;flex:none;border:2px solid transparent;transition:border-color .15s;';
+              img2.onclick = (function(pidx) { return function() { dpShowPhoto(pidx); }; })(pi);
+              img2.onmouseover = function() { this.style.borderColor = 'var(--accent)'; };
+              img2.onmouseout = function() { this.style.borderColor = 'transparent'; };
+              inner2.appendChild(img2);
+            });
+            if (newPhotos.length >= 1) strip2.style.display = '';
+          }
+        }
+      }).catch(function() {
+        var msg = document.getElementById('dp-photo-load-msg');
+        if (msg) msg.remove();
+      });
+    }
+
   }
 
   function showEmpty() {

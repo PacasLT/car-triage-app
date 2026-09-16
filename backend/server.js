@@ -794,8 +794,27 @@ function computeQualityScore(l) {
   return Math.round(score);
 }
 
+function hashFilters(f) {
+  const keys = Object.keys(f).filter((k) => f[k] != null && f[k] !== '' && !(Array.isArray(f[k]) && f[k].length === 0)).sort();
+  const normalized = {};
+  for (const k of keys) {
+    normalized[k] = Array.isArray(f[k]) ? [...f[k]].sort().join(',') : String(f[k]);
+  }
+  return JSON.stringify(normalized);
+}
+
 async function runSearchJob(jobId, filters) {
   try {
+    // Jei ta pati paieska per 20 min - grazinam is talpyklos nedarydam is naujo skenuojant
+    const filterHash = hashFilters(filters);
+    const cachedSearch = cache.getSearchCached(filterHash);
+    if (cachedSearch) {
+      logJob(jobId, '\u26a1 Rezultatai i\u0161 talpyklos \u2014 ta pati paie\u0161ka < 20 min. Taupome laik\u0105!');
+      jobs[jobId].result = cachedSearch;
+      jobs[jobId].status = 'done';
+      return;
+    }
+
     const requestedPages = parseInt(filters.maxPages, 10);
     const maxPages = Math.min(Math.max(requestedPages || parseInt(process.env.MAX_PAGES || '3', 10), 1), 10);
     const modelQuery = (filters.modelis || '').toLowerCase().trim();
@@ -992,6 +1011,9 @@ async function runSearchJob(jobId, filters) {
     }));
 
     logJob(jobId, '🎉 Baigta!');
+    // Issaugom rezultatus talpykloje - tos pacios filtru paieskos atsakymas bus greitas
+    const searchResult = { totalScanned: parsed.length, rawFoundCount, medians, candidates, allListings };
+    cache.setSearchCached(filterHash, searchResult);
     jobs[jobId].status = 'done';
     // Visi nuskaityti skelbimai (ne tik "verti demesio") - kad vartotojas galetu pats pasiziureti.
     const allListings = enriched.map((l) => ({
@@ -1191,12 +1213,10 @@ async function downloadImageAsBase64(url) {
 }
 
 async function generateDeepAnalysis(title, fullText, photos, marketContext) {
-  // Vizualia zalos patikra atliekame TIK jei tekste jau yra pozymiu, kad automobilis
-  // galimai dauztas/su defektais - taupome kastus, nesiunciant nuotrauku kiekvienam skelbimui.
-  const suspectsDamage = /dau[žz]t|po avarijos|defekt|avarij[ųu]|remontuot/i.test(fullText.slice(0, 4000));
+  // Visada siunčiame pirmas 3 nuotraukas AI - vizuali automobilio būklės analizė visada naudinga.
   let imageBlocks = [];
-  if (suspectsDamage && photos && photos.length > 0) {
-    const downloaded = await Promise.all(photos.slice(0, 4).map(downloadImageAsBase64));
+  if (photos && photos.length > 0) {
+    const downloaded = await Promise.all(photos.slice(0, 3).map(downloadImageAsBase64));
     imageBlocks = downloaded.filter(Boolean).map((img) => ({
       type: 'image',
       source: { type: 'base64', media_type: img.media_type, data: img.data },
@@ -1204,12 +1224,12 @@ async function generateDeepAnalysis(title, fullText, photos, marketContext) {
   }
 
   const photoInstructions = imageBlocks.length > 0
-    ? `\n\nPRIE SIO PRANESIMO PRISEGTOS ${imageBlocks.length} SKELBIMO NUOTRAUKOS. Tekste yra
-pozymiu, kad automobilis galimai dauztas/su defektais - ATIDZIAI PERZIUREK nuotraukas ir
-"nuotrauku_pastebejimai" lauke KONKRECIAI apraszyk, kokius MATOMUS pazeidimus/defektus
-pastebejai (subraizymus, iprovejimus, sukratymus, nelygu lakavima, neatitinkancias spragas
-tarp detaliu, korozija, sudauzytus zibintus/bamperius ir pan.) - remkis TIK tuo, ka tikrai
-matai nuotraukose, nespelioke. Jei nuotraukose akivaizdzios zalos nepastebi, taip ir parasyk.`
+    ? `\n\nPRIE SIO PRANESIMO PRISEGTOS ${imageBlocks.length} SKELBIMO NUOTRAUKOS. ATIDZIAI
+PERZIUREK visas nuotraukas ir "nuotrauku_pastebejimai" lauke apraszyk: bendra automobilio
+bukle (puiki/gera/vidutine/prasta), spalva, matomas detales ir SVARBIAUSIA - ar matomos
+kokios zalos (subraizymai, iprovimai, korozija, nelygu lakaviams, neatitinkancios tarpes tarp
+detaliu, sulauzyta plastika, sudauzyta bamperiai/zibintai ir pan.). Remkis TIK tuo, ka tikrai
+matai nuotraukose. Jei zalos nepastebi, aprasyk bendra gera bukle.`
     : '';
 
   const engineNote = marketContext && (marketContext.galia || marketContext.variklioTuris)
