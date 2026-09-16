@@ -1011,9 +1011,6 @@ async function runSearchJob(jobId, filters) {
     }));
 
     logJob(jobId, '🎉 Baigta!');
-    // Issaugom rezultatus talpykloje - tos pacios filtru paieskos atsakymas bus greitas
-    const searchResult = { totalScanned: parsed.length, rawFoundCount, medians, candidates, allListings };
-    cache.setSearchCached(filterHash, searchResult);
     jobs[jobId].status = 'done';
     // Visi nuskaityti skelbimai (ne tik "verti demesio") - kad vartotojas galetu pats pasiziureti.
     const allListings = enriched.map((l) => ({
@@ -1025,7 +1022,9 @@ async function runSearchJob(jobId, filters) {
       diffPct: l.diffPct, marketMedian: l.marketMedian, marketCount: l.marketCount,
     })).sort((a, b) => (a.kaina || 0) - (b.kaina || 0));
 
-    jobs[jobId].result = { totalScanned: parsed.length, rawFoundCount, medians, candidates, allListings };
+    const searchResult = { totalScanned: parsed.length, rawFoundCount, medians, candidates, allListings };
+    cache.setSearchCached(filterHash, searchResult);
+    jobs[jobId].result = searchResult;
   } catch (err) {
     console.error(err);
     logJob(jobId, `❌ Klaida: ${err.message}`);
