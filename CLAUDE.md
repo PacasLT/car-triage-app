@@ -44,6 +44,13 @@
 - Įranga: du nepriklausomi šaltiniai (nuotrauka + skelbimo sąrašas) = 🟢; vienas = 🟡 su prierašu, kad gamyklinė komplektacija nepatvirtinta.
 - Gilioji analizė nuotraukų nebegauna – ji gauna `tekstasAnalizei()` rezultatą (`VIZUALUS_SLUOKSNIS=0` grąžina seną elgesį).
 
+## Gamyklinė komplektacija (build sheet)
+
+- `backend/komplektacija.js`: `dekoderisPagalVin()` – markės dekoderio nuoroda (BMW/MINI → mdecoder.com su tiesiogine nuoroda, Mercedes → mbdecoder.com, VAG → auto.vin PR kodai, Porsche/JLR → vinanalytics, kita → 7zap).
+- **Svetimų dekoderių NESKAITOME automatiškai** – `mdecoder.com/robots.txt` draudžia `/decode/`, `bimmer.work` – `/query.php`. Vartotojas atidaro pats ir įklijuoja sąrašą į `/api/build-sheet` (nemokama, be AI).
+- `sulyginti()` grąžina tris grupes: `patvirtinta` (gamykla + skelbimas), `tikGamykloje` (derybų argumentas), `tikSkelbime` (klausimas pardavėjui). Bazinė įranga (ABS, ESP, ISOFIX…) į `tikSkelbime` neįtraukiama, kad nebūtų triukšmo.
+- Formuluotė visada atsargi: neteigiame, kad pardavėjas meluoja – pavadinimai gali skirtis arba įranga sumontuota vėliau.
+
 ## VIN
 
 - `/api/vin-check` – **nemokamas**: `backend/vin-tikrinimas.js` (WMI, šalis, modelio metai, kontrolinis skaitmuo) + nemokama NHTSA vPIC + sutapimas su skelbimu + ar tą VIN jau matėme.

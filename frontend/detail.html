@@ -1749,6 +1749,68 @@ window.ctApi = function (kelias, params) {
       // v1.23.0 NEMOKAMAS pirminis patikrinimas: ka pasako pats VIN kodas (gamintojas,
       // salis, modelio metai, kontrolinis skaitmuo) + nemokama NHTSA baze + ar sutampa
       // su skelbimo duomenimis. Kreditu nenaudoja - todel kvieciam automatiskai.
+      // v1.26.0 GAMYKLINĖ KOMPLEKTACIJA: mūsų standartas draudžia iš nuotraukos teigti,
+      // kad įranga gamyklinė. Tai pasako tik gamyklinis sąrašas pagal VIN. Svetimų dekoderių
+      // automatiškai neskaitom (jų taisyklės to neleidžia) - atidarom vartotojui ir
+      // pasiūlom įklijuoti sąrašą atgal: tada sulyginam su skelbimu savo pusėje, nemokamai.
+      window.dpGamyklineKomplektacija = function (dek, vinas) {
+        var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (m) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[m]; }); };
+        var box = document.getElementById('dp-vin-pirminis');
+        if (!box || !dek) return;
+        var h = '<div style="margin-top:12px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:9px;padding:11px 13px">'
+          + '<div style="font:600 9px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-dim);margin-bottom:8px">GAMYKLINĖ KOMPLEKTACIJA PAGAL VIN · NEMOKAMA</div>'
+          + '<div style="font:400 12px/1.55 var(--font);color:var(--text-secondary);margin-bottom:9px">'
+          + esc(dek.pavadinimas) + ' parodo ' + esc(dek.duoda) + '. ' + esc(dek.pastaba) + '</div>'
+          + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'
+          + '<a href="' + esc(dek.nuoroda) + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:9px;border:1px solid var(--accent-border);background:var(--accent-dim);color:var(--accent-light);font:600 12px var(--font);text-decoration:none">Atidaryti ' + esc(dek.pavadinimas) + ' ↗</a>'
+          + (vinas ? '<button type="button" id="dp-vin-kopijuoti" style="padding:8px 12px;border-radius:9px;border:1px solid var(--border-light);background:transparent;color:var(--text-secondary);font:600 12px var(--font);cursor:pointer">Kopijuoti VIN</button>' : '')
+          + '</div>'
+          + '<label style="display:block;font:600 9px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-dim);margin:12px 0 6px">ĮKLIJUOKITE GAMYKLINĮ SĄRAŠĄ ČIA</label>'
+          + '<textarea id="dp-bs-laukas" rows="3" placeholder="pvz. S337A Sportinis paketas M&#10;S688A Harman Kardon" style="width:100%;box-sizing:border-box;padding:9px 11px;border-radius:9px;border:1px solid var(--border-light);background:var(--bg-base);color:var(--text-primary);font:400 12px/1.5 var(--font-mono);resize:vertical"></textarea>'
+          + '<button type="button" id="dp-bs-btn" style="margin-top:7px;padding:8px 14px;border-radius:9px;border:none;background:var(--accent);color:#fff;font:600 12px var(--font);cursor:pointer">Sulyginti su skelbimu</button>'
+          + '<div id="dp-bs-rez" style="margin-top:10px"></div></div>';
+        box.insertAdjacentHTML('beforeend', h);
+        var kop = document.getElementById('dp-vin-kopijuoti');
+        if (kop) kop.addEventListener('click', function () {
+          try { navigator.clipboard.writeText(vinas); kop.textContent = '✓ Nukopijuota'; setTimeout(function () { kop.textContent = 'Kopijuoti VIN'; }, 1800); } catch (e) {}
+        });
+        var btn = document.getElementById('dp-bs-btn');
+        if (btn) btn.addEventListener('click', function () {
+          var t = (document.getElementById('dp-bs-laukas') || {}).value || '';
+          var rez = document.getElementById('dp-bs-rez');
+          if (!t.trim()) { rez.innerHTML = '<div style="font:400 11.5px var(--font);color:var(--warning)">Pirma įklijuokite sąrašą.</div>'; return; }
+          btn.disabled = true; btn.textContent = 'Lyginame…';
+          ctApi('/api/build-sheet', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tekstas: t, url: c.url || null }) })
+          .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+          .then(function (res) {
+            btn.disabled = false; btn.textContent = 'Sulyginti su skelbimu';
+            if (!res.ok) { rez.innerHTML = '<div style="font:400 11.5px var(--font);color:var(--warning)">' + esc((res.j && res.j.error) || 'Nepavyko') + '</div>'; return; }
+            var d2 = res.j, k = d2.kiek || {};
+            var blokas = function (antraste, sarasas, spalva, fonas, remelis, paaisk) {
+              if (!sarasas.length) return '';
+              return '<div style="margin-top:9px"><div style="font:600 10px/1 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:' + spalva + ';margin-bottom:6px">' + antraste + ' · ' + sarasas.length + '</div>'
+                + '<div style="display:flex;flex-wrap:wrap;gap:6px">'
+                + sarasas.slice(0, 40).map(function (x) {
+                    return '<span style="display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 10px;border-radius:7px;background:' + fonas + ';border:1px solid ' + remelis + ';font:500 12px var(--font);color:' + spalva + '">'
+                      + (x.kodas ? '<b style="font:700 10px var(--font-mono);opacity:.8">' + esc(x.kodas) + '</b> ' : '') + esc(x.pavadinimas || x.kodas || '') + '</span>';
+                  }).join('')
+                + '</div>' + (paaisk ? '<div style="margin-top:5px;font:400 10.5px/1.5 var(--font);color:var(--text-dim)">' + paaisk + '</div>' : '') + '</div>';
+            };
+            var h2 = '<div style="font:400 12px/1.55 var(--font);color:var(--text-secondary)">Gamykliniame sąraše ' + (k.gamykloje || 0)
+              + ' pozicijos, skelbime ' + (k.skelbime || 0) + '.' + (d2.beSkelbimoIrangos ? ' Skelbimo įrangos dar neturime – paruoškite analizę, tada sulyginsime.' : '') + '</div>';
+            (d2.ispejimai || []).forEach(function (x) {
+              h2 += '<div style="margin-top:8px;padding:9px 11px;border-radius:8px;background:rgba(224,122,106,.10);border:1px solid rgba(224,122,106,.28);font:400 12px/1.5 var(--font);color:#e07a6a">⚠ ' + esc(x.tekstas) + '</div>';
+            });
+            h2 += blokas('🟢 Patvirtinta gamyklos duomenimis', d2.patvirtinta || [], '#7fd88f', 'rgba(127,216,143,.10)', 'rgba(127,216,143,.26)', 'Yra ir gamykliniame sąraše, ir skelbime.');
+            h2 += blokas('🔵 Yra gamykloje, skelbime nepaminėta', d2.tikGamykloje || [], 'var(--accent-light)', 'var(--accent-dim)', 'var(--accent-border)', 'Vertinga įranga, kurios pardavėjas neišnaudoja – geras argumentas derantis.');
+            h2 += blokas('🟡 Skelbime yra, gamykliniame sąraše nerasta', d2.tikSkelbime || [], '#f0c674', 'rgba(240,198,116,.10)', 'rgba(240,198,116,.26)', 'Gali būti kitoks pavadinimas arba vėliau sumontuota (ne gamyklinė) įranga.');
+            rez.innerHTML = h2;
+          })
+          .catch(function () { btn.disabled = false; btn.textContent = 'Sulyginti su skelbimu'; rez.innerHTML = '<div style="font:400 11.5px var(--font);color:var(--warning)">Nepavyko susisiekti su serveriu.</div>'; });
+        });
+      };
+
       window.dpVinPirminis = function (vinIvestas) {
         var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (m) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[m]; }); };
         var vinas = (typeof vinIvestas === 'string' && vinIvestas.trim()) ? vinIvestas.trim().toUpperCase() : (c.vin || null);
@@ -1793,6 +1855,8 @@ window.ctApi = function (kelias, params) {
           });
           h += '<div style="margin-top:9px;font:400 11px/1.5 var(--font);color:var(--text-dim)">Tai tik VIN kodo iššifravimas ir sutapimo patikra. Žalų, aukcionų ir ridos istorija – žemiau, mokamame patikrinime.</div>';
           box.innerHTML = h + '</div>';
+          // v1.26.0: gamyklinė komplektacija pagal VIN (nemokama)
+          if (d.dekoderis) window.dpGamyklineKomplektacija(d.dekoderis, vinas);
         })
         .catch(function () { box.innerHTML = ''; });
       };

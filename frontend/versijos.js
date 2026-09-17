@@ -8,6 +8,17 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.26.0', data: '2026-09-17', pavadinimas: 'Gamyklinė komplektacija pagal VIN',
+    pakeitimai: [
+      'VIN kortelėje – nuoroda į jūsų markės gamyklinės komplektacijos dekoderį (BMW/MINI – ///M Decoder, Mercedes – MBDecoder, VW/Audi/Škoda/SEAT – PR kodai, Porsche/Land Rover/Jaguar – VIN Analytics, kitoms markėms – universalus 7zap)',
+      'BMW atveju nuoroda atsidaro iš karto su jūsų VIN; kitoms markėms VIN nukopijuojamas vienu paspaudimu',
+      'Naujas nemokamas įrankis: įklijuokite gamyklinį komplektacijos sąrašą ir mes jį sulyginsime su skelbimu',
+      '🟢 patvirtinta gamyklos duomenimis · 🔵 yra gamykloje, bet skelbime nepaminėta (argumentas deryboms) · 🟡 skelbime yra, gamykliniame sąraše nerasta',
+      'Įspėjame, jei kelios skelbime deklaruotos įrangos pozicijos gamykliniame sąraše nerandamos – bet nekaltiname, nes pavadinimai gali skirtis',
+      'Svetimų dekoderių automatiškai nenuskaitome – jų taisyklės to neleidžia, todėl sąrašą atidarote ir įklijuojate patys',
+    ],
+  },
+  {
     versija: '1.25.0', data: '2026-09-17', pavadinimas: 'Galios ir varančiųjų filtrai, PVM kainoje, tvarkingi mėgstamiausi',
     pakeitimai: [
       'Nauji pagrindiniai filtrai: varančiųjų ratų tipas ir variklio galia (kW) – jie dabar šalia markės ir kuro, o ne paslėpti „Daugiau filtrų“',

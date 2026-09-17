@@ -14,6 +14,7 @@ const cache = require('./cache');
 const autopliusIds = require('./autoplius-ids');
 const vinTikrinimas = require('./vin-tikrinimas');
 const nuotrAnalize = require('./nuotrauku-analize');
+const komplektacija = require('./komplektacija');
 const { requireAuth, handleRegister, handleLogin, handleMe, planai, duomenys } = require('./auth');
 
 const app = express();
@@ -3547,10 +3548,39 @@ app.post('/api/vin-check', requireAuth, async (req, res) => {
         tekstas: `Šį VIN mūsų sistema jau matė ${matyta.length} kitame skelbime – žemiau matote, kada ir už kiek jis buvo siūlomas.`,
       });
     }
+    // v1.26.0: kur vartotojas gali pats pasiziureti GAMYKLINE komplektacija pagal VIN
+    r.dekoderis = komplektacija.dekoderisPagalVin(r.vin, r.dekodavimas && r.dekodavimas.gamintojas);
     res.json({ ...r, matytaAnksciau: matyta });
   } catch (err) {
     console.error('[VIN-CHECK]', err.message);
     res.status(500).json({ error: 'Nepavyko patikrinti VIN' });
+  }
+});
+
+// v1.26.0 NEMOKAMA: vartotojo ikliuotas gamyklinis komplektacijos sarasas sulyginamas
+// su skelbimo iranga. Jokio AI, jokiu kreditu - tik tekstine analize musu puseje.
+// Automatiskai svetimu dekoderiu NEnuskaitom (pvz. mdecoder.com robots.txt to draudzia).
+app.post('/api/build-sheet', requireAuth, (req, res) => {
+  try {
+    const { tekstas, url } = req.body || {};
+    if (!tekstas || String(tekstas).trim().length < 10) {
+      return res.status(400).json({ error: 'Įklijuokite gamyklinės komplektacijos sąrašą' });
+    }
+    const gamykliniai = komplektacija.parseBuildSheet(tekstas);
+    if (!gamykliniai.length) {
+      return res.status(400).json({ error: 'Sąraše neradome nė vienos įrangos pozicijos – patikrinkite, ką nukopijavote' });
+    }
+    // Skelbimo iranga imam is jau padarytos analizes podelio (jei yra)
+    let iranga = null, aprasymas = null;
+    if (url) {
+      const c = cache.getCached('analysis', url, ANALIZES_PODELIS_MS);
+      if (c) { iranga = c.iranga || null; aprasymas = c.aprasymas || null; }
+    }
+    const rez = komplektacija.sulyginti(gamykliniai, iranga, aprasymas);
+    res.json({ ...rez, beSkelbimoIrangos: !iranga });
+  } catch (err) {
+    console.error('[BUILD-SHEET]', err.message);
+    res.status(500).json({ error: 'Nepavyko apdoroti sąrašo' });
   }
 });
 
