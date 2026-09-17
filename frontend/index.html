@@ -1907,6 +1907,144 @@
   border-radius: 8px !important; flex: none !important; margin: 0 !important;
 }
 </style>
+
+<style id="ct-korteles-v3">
+/* ── 1. HIERARCHIJA — kaina ir įvertis dominuoja ── */
+/* Kaina atskiriama nuo likusio turinio */
+.top-info-col > div[style*="26px"] { /* price row - padded bottom */
+  padding-bottom: 12px !important;
+  border-bottom: 1px solid var(--border) !important;
+  margin-bottom: 12px !important;
+}
+
+/* ── 2. ŽENKLELIAI — faktiniai vs kokybiniai ── */
+/* Faktiniai: .chip — mono, stačiakampiai (jau yra) */
+.chip {
+  font-family: var(--font-mono) !important;
+  font-variant-numeric: tabular-nums !important;
+  letter-spacing: -.01em !important;
+}
+/* Kokybiniai: .chip-pos, .chip-ac — pilulės forma, sans-serif */
+.chip-pos, .chip-ac {
+  font-family: var(--font) !important;
+  font-weight: 600 !important;
+  border-radius: 12px !important;
+  height: 24px !important;
+  padding: 0 10px !important;
+}
+
+/* ── 3. SIGNALAI — trys nepriklausomi rodikliai ── */
+.ct-signals-wrap {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 0 !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  background: var(--bg-elevated) !important;
+  margin: 10px 0 !important;
+  padding: 0 !important;
+}
+.ct-signals-wrap > div {
+  flex: none !important;
+  min-width: 0 !important;
+  padding: 10px 12px !important;
+  border-right: 1px solid var(--border) !important;
+}
+.ct-signals-wrap > div:last-child { border-right: none !important; }
+.ct-signals-wrap > div > span:first-child { /* label */
+  font: 600 8px/1 var(--font-mono) !important;
+  letter-spacing: .12em !important;
+  display: block !important;
+  margin-bottom: 5px !important;
+  color: var(--text-dim) !important;
+}
+.ct-signals-wrap > div > b { font: 700 14px/1.2 var(--font-mono) !important; }
+
+@media (max-width: 600px) {
+  .ct-signals-wrap { grid-template-columns: 1fr !important; }
+  .ct-signals-wrap > div { border-right: none !important; border-bottom: 1px solid var(--border) !important; padding: 8px 12px !important; }
+  .ct-signals-wrap > div:last-child { border-bottom: none !important; }
+  /* Compact: show as one line per signal */
+  .ct-signals-wrap > div { display: flex !important; align-items: center !important; gap: 8px !important; }
+  .ct-signals-wrap > div > span:first-child { margin-bottom: 0 !important; white-space: nowrap; flex: none !important; width: 120px !important; }
+}
+
+/* ── 4. ĮVERČIO JUOSTOS — etiketės mobiliame ── */
+/* Override inline white-space:nowrap on bar labels */
+.score-bars > div > span:first-child {
+  white-space: normal !important;
+  line-height: 1.3 !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  font-size: 8px !important;
+}
+@media (max-width: 600px) {
+  /* PATAISYTA: juostos yra flex vaikas su flex:1;min-width:0, todel telefone
+     jas suspausdavo ziedas ir verdikto dezute - stulpeliui likdavo 38 px,
+     o "Potencialas" reikia 60 px. Dabar jos persilauzia i atskira eilute. */
+  .score-bars { flex: 1 0 100% !important; width: 100% !important;
+    grid-template-columns: repeat(3, minmax(0,1fr)) !important; gap: 8px !important; }
+  .score-bars > div > span:first-child { font-size: 9px !important; }
+}
+@media (max-width: 400px) {
+  .score-bars { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+}
+
+/* ── 5. EILUTĖS KORTELĖ — mini thumbnail vietoj nulios ── */
+@media (max-width: 480px) {
+  .std-photo-col {
+    display: flex !important;
+    width: 72px !important;
+    min-height: 80px !important;
+    flex: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  /* Photo image fills the thumbnail */
+  .std-photo-col img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    min-height: 80px !important;
+  }
+  .std-card-inner {
+    border-left: none !important;
+    padding: 10px 10px 10px 0 !important;
+  }
+}
+
+/* ── 6. AUTO ISTORIJA — svarbos vizualizacija ── */
+/* .ct-istorija-auksta — amber, išsiskiria */
+.ct-istorija-auksta {
+  background: oklch(.81 .13 78/.08) !important;
+  border: 1px solid oklch(.81 .13 78/.25) !important;
+  border-radius: 8px !important;
+}
+.ct-istorija-auksta > span:first-child { /* ikona */
+  color: var(--warning) !important;
+}
+.ct-istorija-zema { opacity: .75 !important; }
+
+/* TOP kortelė istorija: kompaktiškesnė */
+.ct-top-card .ct-istorija > div {
+  border-radius: 10px !important;
+  background: var(--bg-base) !important;
+  border: 1px solid var(--border) !important;
+  padding: 12px 14px !important;
+}
+.ct-std-card > .ct-istorija { padding: 0 12px 12px !important; }
+.ct-std-card > .ct-istorija > div { 
+  border-radius: 8px !important;
+  background: var(--bg-base) !important;
+  border: 1px solid var(--border) !important;
+  padding: 10px 12px !important;
+}
+
+/* Išlaikome būtinas taisykles */
+.ct-std-card { display: flex !important; flex-wrap: wrap !important; }
+.ct-std-card > .ct-istorija { flex: 0 0 100% !important; }
+</style>
 </head>
 <body>
 
@@ -3102,7 +3240,7 @@ function renderTinderCard() {
           <div class="tinder-card-title">${c.modelis} <span class="source-tag" style="font-size:10px;">${c.source}</span></div>
           <div class="tinder-card-price">
             <span class="tinder-price-val">${formatEUR(c.kaina)}</span>
-            <span class="tinder-price-diff">-${c.diffPct}%</span>
+            ${c.diffPct != null ? `<span class="tinder-price-diff"${c.diffPct < 0 ? ' style="background:var(--danger-dim);color:var(--danger);border-color:var(--danger-border)"' : ''}>${c.diffPct > 0 ? '−' : '+'}${Math.abs(c.diffPct)}%</span>` : ''}
           </div>
         </div>
       </div>
@@ -3456,6 +3594,7 @@ function ctIstorijosHTML(sk) {
     + (virsus.length ? '<span style="font:500 10.5px/1 var(--font-mono);color:var(--text-dim);">' + virsus.join(' · ') + '</span>' : '')
     + '</div>'
     + sk.pastabos.map(function (pa) {
+        const svarbaClass = pa.svarba === 'auksta' ? ' ct-istorija-auksta' : pa.svarba === 'zema' ? ' ct-istorija-zema' : '';
         const st = SP[pa.svarba] || SP.vidutine;
         const IKONOS = { 'ridos-suktumas': '🔴', 'perparduodamas': '🔁', 'ikeltas-is-naujo': '♻️',
                          'kituose-portaluose': '🌐', 'kita-kaina-kitur': '🌐', 'dingo': '📤' };
@@ -3471,7 +3610,7 @@ function ctIstorijosHTML(sk) {
                   + (n.kaina ? ' · ' + Number(n.kaina).toLocaleString('lt-LT') + ' €' : '') + ' ↗</a>';
               }).join('') + '</span>'
           : '';
-        return '<div style="display:flex;gap:8px;padding:8px 10px;border-radius:8px;margin-bottom:5px;'
+        return '<div class="ct-istorija-item' + svarbaClass + '" style="display:flex;gap:8px;padding:8px 10px;border-radius:8px;margin-bottom:5px;'
           + 'background:' + st[1] + ';border:1px solid ' + st[2] + ';">'
           + '<span style="flex:none;color:' + st[0] + ';font-size:12px;line-height:1.5;">' + ikona + '</span>'
           + '<span style="min-width:0;"><b style="display:block;font:600 12px/1.45 var(--font);color:var(--text-primary);">' + ctEsc(pa.tekstas) + '</b>'
@@ -3503,7 +3642,7 @@ function ctSignalsBlock(c) {
     '<div style="flex:1;min-width:110px;display:flex;flex-direction:column;gap:4px;">'
     + '<span style="font:600 8.5px/1 var(--font-mono);letter-spacing:.11em;color:var(--text-dim);">' + antraste + '</span>'
     + '<b style="font:700 13px/1.2 var(--font-mono);color:' + sp + ';">' + reiksme + '</b></div>';
-  return '<div style="display:flex;gap:14px;flex-wrap:wrap;margin:10px 0 2px;padding:10px 12px;border-radius:9px;background:var(--bg-raised);border:1px solid var(--border);">'
+  return '<div class="ct-signals-wrap" style="display:flex;gap:14px;flex-wrap:wrap;margin:10px 0 2px;padding:10px 12px;border-radius:9px;background:var(--bg-raised);border:1px solid var(--border);">'
     + cell('CARTRIIGE GALIMYBĖ', c.qualityScore + '/100', m.color || 'var(--text-primary)')
     + cell('DUOMENŲ PATIKIMUMAS', (c.pasitikejimas != null ? c.pasitikejimas + '%' : '–'), 'var(--text-primary)')
     + cell('RIZIKA', (r.emoji ? r.emoji + ' ' : '') + (r.label ? r.label.split('–')[0].trim() : '–'), 'var(--text-primary)')
@@ -3742,7 +3881,7 @@ function renderBrowseListings(candidates, container) {
           '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px;">' +
             '<span style="font:600 16px/1 var(--font-mono);color:var(--text-primary);">' + formatEUR(c.kaina) + '</span>' +
             '<span style="font:600 11px/1 var(--font-mono);padding:3px 7px;border-radius:4px;background:' + diffBg + ';color:' + diffColor + ';border:1px solid ' + diffBo + ';">' + diffTxt + '</span>' +
-            ctTriageBadge(c, true) +
+            /* PASALINTA: triage zenkliukas */ '' +
           '</div>' +
           '<div style="font-size:12px;color:var(--text-muted);margin-bottom:' + (c.comment ? '4px' : '0') + ';">' +
             (c.metai || '?') + ' · ' + (c.rida ? c.rida.toLocaleString('lt-LT').replace(/,/g,' ') + ' km' : '? km') +
@@ -4949,7 +5088,9 @@ function ctNavTab(tab) {
               '<span style="font-size:12.5px;color:var(--text-muted);">Rinkos vidurkis: <b style="color:var(--text-primary);font-weight:600;">' + formatEUR(c.marketMedian) + '</b></span>' +
             '</div>' +
             '<div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">Skirtumas: <b style="color:' + savColor + ';font-weight:600;">' + (skirt != null ? (skirt < 0 ? '−' : '+') + formatEUR(Math.abs(skirt)) : '–') + '</b><span style="color:var(--text-dim);margin-left:8px;">· ' + (c.marketCount||'?') + ' panašių skelbimų</span></div>' +
-            '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">' + chipsHtml + (typeof ctTriageBadge === 'function' ? ctTriageBadge(c) : '') + '</div>' +
+            // PASALINTA: "72 · VERTA ANALIZUOTI" zenkliukas. Ta pati informacija jau rodoma
+            // dukart zemiau - bloke "CARTRIIGE GALIMYBE 72/100" ir verdikto mygtuke prie ivercio.
+            '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">' + chipsHtml + '</div>' +
             (typeof ctSignalsBlock === 'function' ? ctSignalsBlock(c) : '') +
             (typeof ctWhyBlock === 'function' ? ctWhyBlock(c) : '') +
             (typeof ctUnknownBlock === 'function' ? ctUnknownBlock(c) : '') +
@@ -5037,7 +5178,7 @@ function ctNavTab(tab) {
               // Atmestiems / be rinkos duomenu skelbimams nerodom "−null%"
               (c.diffPct != null ? '<span class="' + diffCls + '" style="font:700 11px/1 var(--font-mono);padding:4px 7px;border-radius:5px;">' + (c.diffPct >= 0 ? '−' : '+') + Math.abs(c.diffPct) + '%</span>' : '') +
               (c.marketMedian ? '<span style="font-size:11px;color:var(--text-dim);">vs ' + formatEUR(c.marketMedian) + '</span>' : '') +
-              (typeof ctTriageBadge === 'function' ? ctTriageBadge(c, true) : '') +
+              /* PASALINTA: triage zenkliukas - verdiktas rodomas desineje prie ziedo */
             '</div>' +
           '</div>' +
           '<div class="std-right" style="flex:none;display:flex;align-items:center;gap:10px;">' +
