@@ -1624,13 +1624,16 @@
   </div>
   <div id="sort-bar" style="display:none;">
     <div>
-      <label style="font-size:12px; color:var(--text-muted); margin-right:8px;">Rūšiuoti:</label>
-      <select id="sort-select" onchange="applySorting()">
-        <option value="quality">Kaina/kokybės santykis (numatyta)</option>
-        <option value="cheapest">Pigiausi pirmiausia</option>
-        <option value="priciest">Brangiausi pirmiausia</option>
-        <option value="biggest-discount">Didžiausia nuolaida %</option>
-      </select>
+      <label style="font:600 10px/1 var(--font-mono);letter-spacing:.1em;color:var(--text-dim);margin-right:10px;">RŪŠIUOTI</label>
+      <input type="hidden" id="sort-select" value="quality">
+      <div id="ct-sort" style="position:relative;display:inline-block;vertical-align:middle;">
+        <button type="button" id="ct-sort-btn" onclick="ctSortToggle(event)"
+          style="display:inline-flex;align-items:center;gap:9px;height:34px;padding:0 12px;border-radius:9px;border:1px solid var(--border-light);background:var(--bg-surface);color:var(--text-primary);font:500 12.5px var(--font);cursor:pointer;white-space:nowrap;">
+          <span id="ct-sort-label">Kaina/kokybės santykis</span>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="opacity:.6;transition:transform .18s" id="ct-sort-chev"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div id="ct-sort-menu" style="display:none;position:absolute;z-index:400;top:calc(100% + 6px);left:0;min-width:248px;padding:5px;border-radius:11px;background:#12151e;border:1px solid rgba(255,255,255,.13);box-shadow:0 10px 38px rgba(0,0,0,.6);"></div>
+      </div>
     </div>
     <span id="ct-active-mode" style="font:600 11px var(--font-mono);letter-spacing:.06em;color:var(--text-muted);background:var(--bg-elevated);padding:4px 10px;border-radius:20px;border:1px solid var(--border);"></span>
     <button id="tinder-launch-btn" onclick="startTinder()" style="padding:9px 18px; background:linear-gradient(135deg,var(--accent),var(--accent-light)); color:#fff; border:none; border-radius:20px; font-size:13px; font-weight:600; cursor:pointer; box-shadow:0 4px 14px rgba(124,111,247,0.4);">🔥 Tinder naršymas</button>
@@ -2925,8 +2928,12 @@ function renderResults(data, status, results) {
     const browseCands = data.candidates.slice();
     status.textContent = '📋 Naršyti viską: ' + browseCands.length + ' skelbimai' + rawNote + ':';
     document.getElementById('sort-bar').style.display = browseCands.length > 0 ? 'flex' : 'none';
-    document.getElementById('sort-select').value = 'quality';
-    ctRenderGrouped(browseCands, results, renderBrowseListings);
+    window.ctSortSetLabel('quality');
+    // Vienas dizainas visur: narsymo rezultatai piesiami tuo paciu korteliu
+    // rendereriu kaip ir analizes rezimas - skiriasi tik tai, kad cia nera AI apzvalgu.
+    results.innerHTML = '';
+    if (!browseCands.length) renderBrowseListings([], results);
+    else (window.renderCandidateCards || renderCandidateCards)(browseCands, results);
     renderAllListings(data.allListings || []);
     return;
   }
@@ -2936,7 +2943,7 @@ function renderResults(data, status, results) {
     ? 'Nė vienas iš ' + (data.rawFoundCount || 0) + ' rastų skelbimų neatitiko filtrų' + rawNote + ':'
     : 'Įvertinta ' + data.candidates.length + ' skelbimų, iš jų ' + verti.length + ' verti dėmesio' + rawNote + ':';
   document.getElementById('sort-bar').style.display = data.candidates.length > 0 ? 'flex' : 'none';
-  document.getElementById('sort-select').value = 'quality';
+  window.ctSortSetLabel('quality');
   results.innerHTML = '';
   (window.renderCandidateCards || renderCandidateCards)(data.candidates, results);
   renderAllListings(data.allListings || []);
@@ -3015,6 +3022,61 @@ function renderBrowseListings(candidates, container) {
   });
 }
 
+// ---- Rūšiavimo dropdown (sisteminio <select> parinkčių apipavidalinti neįmanoma) ----
+const CT_SORT_OPTS = [
+  { v: 'quality',          l: 'Kaina/kokybės santykis', s: 'CarTriige balas, geriausi viršuje' },
+  { v: 'cheapest',         l: 'Pigiausi pirmiausia',    s: 'Nuo mažiausios kainos' },
+  { v: 'priciest',         l: 'Brangiausi pirmiausia',  s: 'Nuo didžiausios kainos' },
+  { v: 'biggest-discount', l: 'Didžiausia nuolaida',    s: 'Nuo didžiausio skirtumo vs rinka' },
+];
+
+window.ctSortSetLabel = function (v) {
+  const el = document.getElementById('sort-select');
+  if (el) el.value = v;
+  const o = CT_SORT_OPTS.find(function (x) { return x.v === v; });
+  const lab = document.getElementById('ct-sort-label');
+  if (lab && o) lab.textContent = o.l;
+};
+
+window.ctSortToggle = function (ev) {
+  if (ev) ev.stopPropagation();
+  const menu = document.getElementById('ct-sort-menu');
+  const chev = document.getElementById('ct-sort-chev');
+  if (!menu) return;
+  if (menu.style.display === 'block') { menu.style.display = 'none'; if (chev) chev.style.transform = ''; return; }
+  const dabartinis = document.getElementById('sort-select').value;
+  menu.innerHTML = CT_SORT_OPTS.map(function (o) {
+    const akt = o.v === dabartinis;
+    const bg = akt ? 'rgba(124,111,247,.14)' : 'transparent';
+    return '<div onclick="ctSortPick(\'' + o.v + '\')" style="padding:9px 11px;border-radius:8px;cursor:pointer;display:flex;align-items:flex-start;gap:9px;background:' + bg + ';"'
+      + ' onmouseover="this.style.background=\'rgba(255,255,255,.06)\'" onmouseout="this.style.background=\'' + bg + '\'">'
+      + '<span style="width:14px;flex:none;color:var(--accent-light);font-size:12px;line-height:1.4;">' + (akt ? '✓' : '') + '</span>'
+      + '<span style="min-width:0;"><span style="display:block;font:600 12.5px/1.3 var(--font);color:var(--text-primary);">' + o.l + '</span>'
+      + '<span style="display:block;font:400 11px/1.4 var(--font);color:var(--text-dim);margin-top:1px;">' + o.s + '</span></span></div>';
+  }).join('');
+  menu.style.display = 'block';
+  if (chev) chev.style.transform = 'rotate(180deg)';
+};
+
+window.ctSortPick = function (v) {
+  window.ctSortSetLabel(v);
+  const menu = document.getElementById('ct-sort-menu');
+  const chev = document.getElementById('ct-sort-chev');
+  if (menu) menu.style.display = 'none';
+  if (chev) chev.style.transform = '';
+  applySorting();
+};
+
+document.addEventListener('click', function (e) {
+  const wrap = document.getElementById('ct-sort');
+  const menu = document.getElementById('ct-sort-menu');
+  if (menu && wrap && !wrap.contains(e.target)) {
+    menu.style.display = 'none';
+    const chev = document.getElementById('ct-sort-chev');
+    if (chev) chev.style.transform = '';
+  }
+});
+
 function applySorting() {
   if (!currentData) return;
   const mode = document.getElementById('sort-select').value;
@@ -3025,15 +3087,8 @@ function applySorting() {
   else sorted.sort((a, b) => b.qualityScore - a.qualityScore);
   const resultsEl = document.getElementById('results');
   const rikiuotaPagalBala = (mode !== 'cheapest' && mode !== 'priciest' && mode !== 'biggest-discount');
-  if (currentData.searchMode === 'browse') {
-    // Kompaktiskos eilutes - grupes pagal triage lygi cia atrodo gerai
-    if (rikiuotaPagalBala) ctRenderGrouped(sorted, resultsEl, renderBrowseListings);
-    else { resultsEl.innerHTML = ''; renderBrowseListings(sorted, resultsEl); }
-  } else {
-    // Korteliu dizainas turi savo rangus ir TOP-5 antraste - vienas kvietimas
-    resultsEl.innerHTML = '';
-    (window.renderCandidateCards || renderCandidateCards)(sorted, resultsEl);
-  }
+  resultsEl.innerHTML = '';
+  (window.renderCandidateCards || renderCandidateCards)(sorted, resultsEl);
 }
 
 function renderCandidateCards(candidates, results) {
@@ -3133,48 +3188,19 @@ function renderCandidateCards(candidates, results) {
 function renderAllListings(allListings) {
   const wrap = document.getElementById('all-listings-wrap');
   const container = document.getElementById('all-listings');
-  if (allListings.length === 0) {
-    wrap.style.display = 'none';
-    return;
-  }
+  if (!allListings.length) { wrap.style.display = 'none'; return; }
   wrap.style.display = 'block';
-  container.innerHTML = allListings.map((l, idx) => {
-    const specs = [l.kuras, l.pavarai, (l.variklioTuris ? `${l.variklioTuris}L` : null), (l.galia ? `${l.galia}kW` : null)].filter(Boolean).join(' · ');
-    const panelId = `all-detail-${idx}`;
-    const reasonId = `all-reason-${idx}`;
-    const candidateBadge = l.isCandidate
-      ? '<span style="font-size:10px; background:#2d4a35; color:#7fd88f; padding:2px 6px; border-radius:4px; margin-left:4px;">✓ TOP</span>'
-      : (l.filteredOut
-        ? '<span style="font-size:10px; background:#4a3b2d; color:#f0c674; padding:2px 6px; border-radius:4px; margin-left:4px;">⊘ neatitinka filtro</span>'
-        : '');
-    const reasonLabel = l.filteredOut ? 'Kodėl neatitinka filtro?' : 'Kodėl neatrinktas?';
-    const rejectionToggle = (!l.isCandidate && l.rejectionReasons && l.rejectionReasons.length > 0)
-      ? `<div>
-          <a href="#" onclick="event.preventDefault(); toggleReason('${reasonId}', this, '${reasonLabel}');" style="color:#9a9aa5; font-size:11px;">❓ ${reasonLabel} ▾</a>
-          <div id="${reasonId}" style="display:none; margin-top:4px;">
-            <ul style="margin:0; padding-left:16px; font-size:11px; color:#9a9aa5;">
-              ${l.rejectionReasons.map((r) => `<li>${r}</li>`).join('')}
-            </ul>
-          </div>
-        </div>`
-      : '';
-    return `
-      <div style="padding:8px; border-bottom:1px solid #2c303a;">
-        <div style="display:flex; gap:10px; align-items:center;">
-          <img src="${l.photo || ''}" onerror="this.style.display='none'" style="width:60px;height:44px;object-fit:cover;border-radius:4px;background:#2c303a;flex-shrink:0;">
-          <div style="flex:1; font-size:13px;">
-            <a href="${l.url}" target="_blank" style="color:#e8e8ea; text-decoration:none; font-weight:600;">${l.modelis}</a>
-            <span class="source-tag">${l.source}</span>${candidateBadge}${l.triageLevel ? ctTriageBadge(l, true) : ''}
-            ${l.turiVin ? '<span style="color:#7fd88f;font-size:11px;margin-left:4px;">VIN</span>' : ''}
-            <div style="color:#9a9aa5; font-size:12px;">${formatEUR(l.kaina)} · ${l.metai || '?'} · ${l.rida ? l.rida.toLocaleString('lt-LT').replace(/,/g,' ') + ' km' : '?'}${specs ? ' · ' + specs : ''}</div>
-            ${rejectionToggle}
-          </div>
-          <button class="detail-btn" id="${panelId}-btn" onclick="loadDetail('${l.url}', '${panelId}', this, false, {kaina:${l.kaina||'null'}, marketMedian:${l.marketMedian||'null'}, marketCount:${l.marketCount||'null'}, diffPct:${l.diffPct!=null?l.diffPct:'null'}, modelis:'${escJs(l.modelis)}', pardavejas:${l.pardavejas ? `'${escJs(l.pardavejas)}'` : 'null'}, galia:${l.galia||'null'}, variklioTuris:${l.variklioTuris||'null'}})" style="flex-shrink:0;">🔬 Detali apžvalga</button>
-        </div>
-        <div class="detail-panel" id="${panelId}"></div>
-      </div>
-    `;
-  }).join('');
+  container.innerHTML = '';
+
+  // Identiskas dizainas kaip ir pagrindiniame sarase. Skelbimai, kuriuos atmete
+  // filtras, atpazistami is zenklelio "neatitinka filtro", o ne is kitokio isvaizdos.
+  const surikiuoti = allListings.slice().sort(function (a, b) {
+    const sa = a.qualityScore == null ? -1 : a.qualityScore;
+    const sb = b.qualityScore == null ? -1 : b.qualityScore;
+    if (sb !== sa) return sb - sa;
+    return (a.kaina || 0) - (b.kaina || 0);
+  });
+  (window.renderCandidateCards || renderCandidateCards)(surikiuoti, container, { beTopSekcijos: true });
 }
 
 function toggleReason(id, link, label) {
@@ -3773,7 +3799,10 @@ function ctNavTab(tab) {
   }
 
   // ---------- KORTELĖS ----------
-  window.renderCandidateCards = function (candidates, results) {
+  window.renderCandidateCards = function (candidates, results, opts) {
+    // beTopSekcijos: naudojama suskleistam "visi skelbimai" sarasui - ten nereikia
+    // nei TOP-5 didziuju korteliu, nei antrasciu, tik vientisos eilutes.
+    opts = opts || {};
     if (!candidates.length) { renderBrowseListings([], results); return; }
     try {
     results.innerHTML = '';
@@ -3806,15 +3835,25 @@ function ctNavTab(tab) {
     // Verdiktas imamas is to paties triage lygio, kuri rodo zenklelis virsuje.
     const _verdictFor = (c, v) => (c && c.triageLabel) ? c.triageLabel : _verdictBase(v);
     const _diffCls = (d) => (d||0) >= 39 ? 'diff-neg' : (d||0) >= 8 ? 'diff-pos' : 'diff-warn';
+    // Palyginimo mygtuko argumentai - vienoje vietoje, kad visos korteles elgtusi vienodai.
+    const _cmpArgs = (c, cardId) => 'toggleCompare(' + [
+      "'" + escJs(c.url) + "'", "'" + escJs(c.modelis || '') + "'", (c.kaina || 'null'),
+      "'" + escJs(c.photo || '') + "'", (c.metai || 'null'), (c.rida || 'null'),
+      "'" + escJs(c.kuras || '') + "'", (c.galia || 'null'), (c.variklioTuris || 'null'),
+      "'" + escJs(c.pavarai || '') + "'", (c.diffPct != null ? c.diffPct : 'null'),
+      (c.marketMedian || 'null'), "'" + escJs(c.source || '') + "'", "'cmp-" + cardId + "'",
+    ].join(', ') + ')';
 
-    const TOP_N = 5;
+    const TOP_N = opts.beTopSekcijos ? 0 : 5;
     const topCands = candidates.slice(0, TOP_N);
     const restCands = candidates.slice(TOP_N);
 
     // ── TOP header ──
+    if (!opts.beTopSekcijos && topCands.length) {
     const _th = document.createElement('div');
     _th.innerHTML = '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;"><div style="display:flex;align-items:center;gap:9px;flex:none;"><div style="width:22px;height:22px;border-radius:6px;background:var(--accent);display:grid;place-items:center;flex:none;"><svg width=\'12\' height=\'12\' viewBox=\'0 0 24 24\' fill=\'#fff\'><path d=\'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z\'/></svg></div><span style="font:700 13px/1 var(--font);color:var(--text-primary);">TOP ' + topCands.length + ' Pasiūlymai</span></div><div style="flex:1;height:1px;background:var(--border);"></div><span style="font:500 10px/1 var(--font-mono);letter-spacing:.08em;color:var(--text-dim);flex:none;">AI IŠRYŠKINTOS GERIAUSIOS GALIMYBĖS</span></div>';
     results.appendChild(_th.firstElementChild);
+    }
 
     // ── TOP cards ──
     topCands.forEach(function(c, idx) {
@@ -3944,7 +3983,7 @@ function ctNavTab(tab) {
     });
 
     // ── REST header ──
-    if (restCands.length > 0) {
+    if (restCands.length > 0 && !opts.beTopSekcijos) {
       var _rh = document.createElement('div');
       _rh.innerHTML = '<div style="display:flex;align-items:center;gap:12px;margin:24px 0 14px;"><div style="display:flex;align-items:center;gap:8px;flex:none;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span style="font:600 13px/1 var(--font);color:var(--text-secondary);">Kiti skelbimai</span><span style="font:500 10px/1 var(--font-mono);color:var(--text-dim);">' + (TOP_N + 1) + ' – ' + candidates.length + '</span></div><div style="flex:1;height:1px;background:var(--border);"></div></div>';
       results.appendChild(_rh.firstElementChild);
@@ -3995,17 +4034,21 @@ function ctNavTab(tab) {
             '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;">' + chipsHtml + '</div>' +
             '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
               '<span style="font:600 17px/1 var(--font-mono);letter-spacing:-.01em;">' + formatEUR(c.kaina) + '</span>' +
-              '<span class="' + diffCls + '" style="font:700 11px/1 var(--font-mono);padding:4px 7px;border-radius:5px;">−' + c.diffPct + '%</span>' +
-              '<span style="font-size:11px;color:var(--text-dim);">vs ' + formatEUR(c.marketMedian) + '</span>' +
+              // Atmestiems / be rinkos duomenu skelbimams nerodom "−null%"
+              (c.diffPct != null ? '<span class="' + diffCls + '" style="font:700 11px/1 var(--font-mono);padding:4px 7px;border-radius:5px;">' + (c.diffPct >= 0 ? '−' : '+') + Math.abs(c.diffPct) + '%</span>' : '') +
+              (c.marketMedian ? '<span style="font-size:11px;color:var(--text-dim);">vs ' + formatEUR(c.marketMedian) + '</span>' : '') +
+              (typeof ctTriageBadge === 'function' ? ctTriageBadge(c, true) : '') +
             '</div>' +
           '</div>' +
           '<div class="std-right" style="flex:none;display:flex;align-items:center;gap:10px;">' +
-            '<div class="ct-ring ct-ring-sm" style="--pct:' + scorePct + ';color:' + scoreColor + ';">' +
-              '<div class="ct-ring-inner"><b style="color:' + scoreColor + ';">' + s.total.toFixed(1) + '</b><small>/10</small></div>' +
+            (c.filteredOut ? '' :
+              '<div class="ct-ring ct-ring-sm" style="--pct:' + scorePct + ';color:' + scoreColor + ';">' +
+                '<div class="ct-ring-inner"><b style="color:' + scoreColor + ';">' + s.total.toFixed(1) + '</b><small>/10</small></div>' +
+              '</div>') +
+            '<div style="padding:6px 10px;border-radius:7px;background:' + (c.filteredOut ? '#4a3b2d' : _toneDim(s.total)) + ';border:1px solid ' + (c.filteredOut ? 'rgba(240,198,116,.3)' : _toneBo(s.total)) + ';">' +
+              '<span style="font:600 11px/1.3 var(--font);color:' + (c.filteredOut ? '#f0c674' : scoreColor) + ';white-space:nowrap;">' + (c.filteredOut ? '⊘ Neatitinka filtro' : _verdictFor(c, s.total)) + '</span>' +
             '</div>' +
-            '<div style="padding:6px 10px;border-radius:7px;background:' + _toneDim(s.total) + ';border:1px solid ' + _toneBo(s.total) + ';">' +
-              '<span style="font:600 11px/1.3 var(--font);color:' + scoreColor + ';white-space:nowrap;">' + _verdictFor(c, s.total) + '</span>' +
-            '</div>' +
+            '<button class="compare-toggle ct-btn" id="cmp-' + cardId + '" title="Pridėti palyginimui" style="flex:none;height:32px;padding:0 11px;border-radius:8px;border:1px solid var(--border-light);background:transparent;color:var(--text-muted);font:600 12px var(--font);cursor:pointer;white-space:nowrap;" onclick="' + _cmpArgs(c, cardId) + '">⚖️</button>' +
             '<button class="detail-btn ct-btn' + (hasDeep ? ' ready' : '') + '" id="' + btnId + '" data-closed-label="' + detailBtnLabel + '" style="display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 13px;border-radius:8px;border:1px solid var(--border-light);color:var(--text-primary);font:600 12px var(--font);white-space:nowrap;background:transparent;cursor:pointer;" onclick="' + detailClick + '">Detales <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>' +
           '</div>' +
         '</div>' +

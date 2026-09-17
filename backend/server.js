@@ -1527,6 +1527,13 @@ async function runSearchJob(jobId, filters) {
       return reasons.slice(0, 3);
     }
 
+    // NARSYMO rezimas = tik nuskrapinti ir ivertinti pagal turimus duomenis.
+    // Jokiu AI komentaru ir jokios gilios analizes - vartotojas prase tik sarasa,
+    // o kiekviena gili apzvalga yra atskira apmokama uzklausa.
+    if (searchMode === 'browse') {
+      logJob(jobId, `📋 Naršymo režimas: rodomi ${candidates.length} skelbimai su vertinimu, be AI apžvalgų (jas galima užsakyti atskirai kiekvienam skelbimui).`);
+    } else {
+
     logJob(jobId, `🤖 Claude apmąsto ${candidates.length} geriausius pasiūlymus (lygiagrečiai)...`);
     await Promise.all(candidates.map(async (c, i) => {
       const pct = Math.round(((i + 1) / candidates.length) * 100);
@@ -1595,6 +1602,8 @@ async function runSearchJob(jobId, filters) {
         }
       }
     }));
+
+    } // <- narsymo rezimo saka baigiasi cia: AI komentarai ir gili analize praleisti
 
     logJob(jobId, '🎉 Baigta!');
     jobs[jobId].status = 'done';

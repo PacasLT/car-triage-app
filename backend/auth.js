@@ -22,6 +22,25 @@ const INVITE_CODES = new Set(
 // ── DB ─────────────────────────────────────────────────────────────────────
 // Ensure the directory for DB_PATH exists (needed when using Railway Volumes)
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
+
+// --- DIAGNOSTIKA: be sios eilutes neimanoma pasakyti, ar DB tikrai gula ant
+// persistentinio Railway Volume, ar i konteinerio vidu, kuris dingsta po kiekvieno deploy'aus.
+(function logDbDiagnostiką() {
+  const kat = path.dirname(DB_PATH);
+  let bylosDydis = null, buvoPries = false;
+  try { const st = fs.statSync(DB_PATH); bylosDydis = st.size; buvoPries = true; } catch (e) {}
+  let rasomas = true;
+  try { fs.accessSync(kat, fs.constants.W_OK); } catch (e) { rasomas = false; }
+  const isEnv = !!process.env.DB_PATH;
+  console.log('[DB] kelias           :', DB_PATH, isEnv ? '(is DB_PATH env)' : '(numatytasis - env NENURODYTAS!)');
+  console.log('[DB] katalogas rasomas:', rasomas);
+  console.log('[DB] byla egzistavo   :', buvoPries, buvoPries ? `(${bylosDydis} baitu)` : '(kuriama nauja - vartotojai bus prarasti!)');
+  if (!isEnv || !DB_PATH.startsWith('/data')) {
+    console.log('[DB] ⚠ DEMESIO: DB nera po /data - po kiekvieno deploy\'aus vartotojai DINGS.');
+    console.log('[DB] ⚠ Railway Variables nustatykite DB_PATH=/data/users.db ir Volume mount path /data');
+  }
+})();
+
 const db = new Database(DB_PATH);
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
@@ -39,6 +58,11 @@ function getUserByEmail(email) {
 
 function createUser(email, hashedPassword) {
   db.prepare('INSERT INTO users (email, hashed_password) VALUES (?, ?)').run(email, hashedPassword);
+  console.log('[DB] Sukurtas vartotojas:', email, '| is viso:', vartotojuSkaicius());
+}
+
+function vartotojuSkaicius() {
+  try { return db.prepare('SELECT COUNT(*) AS n FROM users').get().n; } catch (e) { return -1; }
 }
 
 // ── JWT ────────────────────────────────────────────────────────────────────
@@ -114,4 +138,8 @@ function handleMe(req, res) {
 }
 
 // ── Eksportas ──────────────────────────────────────────────────────────────
+console.log('[DB] Vartotoju duomenu bazeje:', (function () {
+  try { return db.prepare('SELECT COUNT(*) AS n FROM users').get().n; } catch (e) { return 'nepavyko suskaiciuoti'; }
+})());
+
 module.exports = { requireAuth, handleRegister, handleLogin, handleMe };
