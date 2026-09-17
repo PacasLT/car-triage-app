@@ -328,16 +328,24 @@ function autopliusAmzius(tekstas) {
 // dazniausiai tai menesine lizingo imoka arba klaidingai ivesta suma (5 500 vietoj 55 000).
 // Tokie skelbimai nedalyvauja rinkos medianos skaiciavime ir pazymimi vartotojui.
 const MIN_REALI_KAINA = parseInt(process.env.MIN_REALI_KAINA || '4000', 10);
+// Sena, daug vaziuota masina realiai gali kainuoti maziau nei 4000 € - tai NE klaida.
+// Itartina tik tada, kai tokia kaina rodoma palyginti naujam automobiliui.
+const SENAS_METAI = new Date().getFullYear() - 10;
+const SENAS_RIDA = 200000;
 
-function kainosPatikra(kaina, tekstas, lizingoSuma) {
+function kainosPatikra(kaina, tekstas, lizingoSuma, meta) {
   if (!kaina || kaina >= MIN_REALI_KAINA) return null;
+  // autoplius lizingo blokas (data-amount) rodo AUTOMOBILIO kaina, ne imoka - jei sutampa, kaina tikra
+  if (lizingoSuma && Math.abs(lizingoSuma - kaina) / kaina < 0.05) return null;
   if (lizingoSuma && lizingoSuma > kaina * 3) {
     return { tipas: 'lizingo-imoka', tekstas: `Rodoma ${kaina} € greičiausiai yra mėnesinė įmoka – skelbime nurodyta ${lizingoSuma} € automobilio kaina.` };
   }
   if (/\/\s*mėn|per\s*mėn|mėnesiui/i.test(tekstas || '')) {
     return { tipas: 'lizingo-imoka', tekstas: `Rodoma ${kaina} € yra mėnesinė lizingo įmoka, ne automobilio kaina.` };
   }
-  return { tipas: 'itartinai-maza', tekstas: `Neįprastai maža kaina (${kaina} €) – tikėtina lizingo įmoka arba klaidingai įvesta suma. Patikrinkite skelbime.` };
+  const m = meta || {};
+  if ((m.metai && m.metai <= SENAS_METAI) || (m.rida && m.rida >= SENAS_RIDA)) return null;
+  return { tipas: 'itartinai-maza', tekstas: `Neįprastai maža kaina (${kaina} €) tokio amžiaus automobiliui – tikėtina lizingo įmoka arba klaidingai įvesta suma. Patikrinkite skelbime.` };
 }
 
 function extractAutopliusStructured(html) {
@@ -351,7 +359,10 @@ function extractAutopliusStructured(html) {
     if (!url.includes('/skelbimai/')) return;
 
     const img = el.find('.announcement-photo img').first();
-    const photo = img.attr('src') || img.attr('data-src') || null;
+    let photo = img.attr('src') || img.attr('data-src') || img.attr('data-original') || img.attr('data-lazy') || null;
+    if (!photo) { const ss = img.attr('srcset'); if (ss) photo = ss.split(',')[0].trim().split(' ')[0]; }
+    if (photo && photo.startsWith('//')) photo = 'https:' + photo;
+    if (photo && /^data:|placeholder|blank\./i.test(photo)) photo = null;
     const modelis = el.find('.announcement-title').first().text().trim() || null;
 
     // Pirma parametru eilute: "2023-10", "Visureigis / Krosoveris"
@@ -419,7 +430,7 @@ function extractAutopliusStructured(html) {
 
     // Jei rodoma menesine imoka, o skelbime yra reali kaina (loan data-amount) - naudojam ja,
     // o vartotojui paliekam pastaba. Tik kai realios kainos nera - skelbimas zymimas itartinu.
-    let ispejimas = kainosPatikra(kaina, kainosBlokas, lizingoSuma), kainosPastaba = null;
+    let ispejimas = kainosPatikra(kaina, kainosBlokas, lizingoSuma, { metai, rida }), kainosPastaba = null;
     if (ispejimas && ispejimas.tipas === 'lizingo-imoka' && lizingoSuma) {
       kainosPastaba = `Skelbime matoma ${kaina} € mėnesinė įmoka – naudojama reali kaina ${lizingoSuma} €`;
       kaina = lizingoSuma; ispejimas = null;

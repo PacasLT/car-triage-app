@@ -5695,7 +5695,7 @@ function ctNavTab(tab) {
 
       // PRIDETA: skelbimo amzius portale ir mokamas iskelimas (badge-rise) - tai NE kokybes zenklas
       var amzChip = c.ikeltaTekstas ? '<span class="chip" title="Kada skelbimas įkeltas į portalą">🕒 ' + esc(c.ikeltaTekstas) + '</span>' : '';
-      var iskChip = c.iskeltas ? '<span class="chip" style="color:var(--text-dim)" title="Pardavėjas mokamai iškėlė skelbimą į viršų – tai nėra kokybės ženklas">↑ iškeltas ' + c.iskeltas + '</span>' : '';
+      var iskChip = (c.iskeltas >= 5) ? '<span class="chip" style="color:var(--text-dim)" title="Pardavėjas mokamai iškėlė skelbimą į viršų ' + c.iskeltas + ' k. – tai nėra kokybės ženklas, o požymis, kad skelbimas kabo ilgai">↑ iškeltas ' + c.iskeltas + '×</span>' : '';
       var chipsHtml = [
         amzChip, iskChip,
         c.metai ? '<span class="chip">📅 ' + (c.pirmaRegistracija || c.metai) + '</span>' : '',
@@ -5822,7 +5822,7 @@ function ctNavTab(tab) {
 
       var chipsHtml = [
         c.ikeltaTekstas ? '<span class="chip" style="height:22px;font-size:11px;padding:0 7px;" title="Kada įkeltas į portalą">🕒 ' + esc(c.ikeltaTekstas) + '</span>' : '',
-        c.iskeltas ? '<span class="chip" style="height:22px;font-size:11px;padding:0 7px;color:var(--text-dim)" title="Mokamas iškėlimas į viršų – ne kokybės ženklas">↑ ' + c.iskeltas + '</span>' : '',
+        (c.iskeltas >= 5) ? '<span class="chip" style="height:22px;font-size:11px;padding:0 7px;color:var(--text-dim)" title="Mokamai iškeltas ' + c.iskeltas + ' k. – požymis, kad skelbimas kabo ilgai">↑ ' + c.iskeltas + '×</span>' : '',
         c.metai ? '<span class="chip" style="height:22px;font-size:11px;padding:0 7px;">' + (c.pirmaRegistracija || c.metai) + '</span>' : '',
         c.rida ? '<span class="chip" style="height:22px;font-size:11px;padding:0 7px;">' + fmtKm(c.rida) + '</span>' : '',
         c.kuras ? '<span class="chip" style="height:22px;font-size:11px;padding:0 7px;">' + esc(c.kuras) + '</span>' : '',

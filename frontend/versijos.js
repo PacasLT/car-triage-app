@@ -8,8 +8,10 @@
 
 window.CT_VERSIJOS = [
   {
-    versija: '1.20.0', data: '2026-09-17', pavadinimas: 'Tikslus autoplius nuskaitymas ir nauji filtrai',
+    versija: '1.20.1', data: '2026-09-17', pavadinimas: 'Tikslus autoplius nuskaitymas ir nauji filtrai',
     pakeitimai: [
+      'Patikrinta gyvuose skelbimuose: sena pigi mašina (pvz. 1998 m. už 1 300 €) nebežymima klaidinga kaina – įspėjame tik kai maža kaina rodoma naujam automobiliui',
+      'Ženklelis „iškeltas“ rodomas tik dažnai keliamiems skelbimams – požymis, kad skelbimas kabo ilgai',
       'Markė ir modelis siunčiami autoplius tikrais ID – nebegauname svetimų modelių ir aksesuarų, paieška pigesnė',
       'Skaitome nuo naujausio skelbimo: mokamai iškelti skelbimai nebeužstoja šviežių pasiūlymų',
       'Kortelėse matosi, prieš kiek laiko skelbimas įkeltas ir ar jis mokamai iškeltas į viršų',
