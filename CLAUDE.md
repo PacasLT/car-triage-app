@@ -69,6 +69,17 @@
 - `/api/vin-check` – **nemokamas**: `backend/vin-tikrinimas.js` (WMI, šalis, modelio metai, kontrolinis skaitmuo) + nemokama NHTSA vPIC + sutapimas su skelbimu + ar tą VIN jau matėme.
 - `/api/vin-lookup` – mokamas (1 kr): AI web paieška aukcionų/žalų istorijai.
 
+## Dizaino sistema (v1.29.0) – KUR IEŠKOTI, JEI KAS NORS ATRODO NE TAIP
+
+- `frontend/ct-dizainas.css` – vienintelis tokenų + komponentų failas. Prijungtas **paskutine eilute prieš `</body>`** visuose penkiuose puslapiuose (ne `<head>`, nes `<style>` blokų yra ir po `</head>`: `index.html` 6346 eil., `compare.html` 1824 eil. – iš head jis pralaimėtų).
+- **ATJUNGIMAS (jei po deploy kas nors sulūžo):** ištrinti `<link rel="stylesheet" href="ct-dizainas.css">` eilutę iš to puslapio. Jokie seni stiliai nebuvo pakeisti ar ištrinti, tad puslapis grįžta į v1.28.0 išvaizdą iškart.
+- `index.html` `<style>` blokų tikroji eilės tvarka: `<style>` (9) → `cartriige-v2` (628) → `ct-mobile-responsive` (1358) → `ct-compare-redesign` (1576) → `ct-korteles-v3` (2017) → `ct-hist-redesign` (2155) → `ct-planai-css` (6346). **Mobilųjį bloką perrašo keturi blokai po jo** – neišspręsta skola.
+- Septyni mirę `:root` blokai (`index.html` 11 + 634, `compare.html` 13 + 593, `ct-bendras.css` 1 + 68, `detail.html` 11) palikti sąmoningai – `ct-dizainas.css` eina paskutinis, tad jo tokenai laimi. Trinti atskiru pakeitimu.
+- ⚪ „neįvertinta“ juosta veikia tik todėl, kad `index.html` (~5801 eil.) `subBarsHtml` išduoda klases `is-unrated` ir `is-unrated-val`, o fonas rašomas `background-color` (ne `background`, kuris nutrintų dryžius). **Nekeisti atgal į `background`.**
+- `--text-dim` pašviesinta iki `#7E8699`; mono etiketės ne mažesnės nei 11 px.
+- `html, body { overflow-x: clip }` – ne `hidden`: `hidden` padaro `body` slinkimo konteineriu ir sulaužo `position: sticky` antraštę.
+- Negyvi selektoriai jo faile (`.dp-score-num`, `.dp-spec-v`, `.dp-tab-bar`) – tokių klasių pas mus nėra, nieko nedaro.
+
 ## Saugumas
 
 - `ANTHROPIC_API_KEY`, `SCRAPER_API_KEY`, `JWT_SECRET`, `ADMIN_EMAILS`, `INVITE_CODES` – tik Railway Variables, **niekada į kodą ar GitHub**.

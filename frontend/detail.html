@@ -479,7 +479,7 @@ button{font-family:inherit;cursor:pointer}
     <!-- PHOTO COL -->
     <div class="dp-photo">
       <div class="dp-photo-main" id="dp-photo-main">
-        <img id="dp-main-img" src="" alt="" style="display:none" onclick="dpLightbox(window.__dpPhotoIdx||0)" title="Padidinti">
+        <img id="dp-main-img" alt="" style="display:none" onclick="dpLightbox(window.__dpPhotoIdx||0)" title="Padidinti">
         <div id="dp-no-photo" style="width:100%;height:100%;background:linear-gradient(135deg,#1a1f2e,#0d1020);display:flex;align-items:center;justify-content:center;color:var(--text-dim);font:500 11px var(--font-mono);letter-spacing:.1em">BEZ NUOTRAUKOS</div>
         <span class="dp-photo-count" id="dp-photo-count" style="display:none"></span>
         <button class="dp-nav dp-nav-l" id="dp-nav-l" onclick="dpPhotoNav(-1)" style="display:none">&#8249;</button>
@@ -2237,5 +2237,9 @@ window.ctApi = function (kelias, params) {
 <script src="versijos.js"></script>
 <script src="megstami-meniu.js"></script>
 <script src="paskyra-meniu.js"></script>
+<!-- CarTriige dizaino sistema (v1.29.0). Ideta PASKUTINE pries </body> - is <head>
+     ji pralaimetu, nes <style> bloku yra ir po </head>.
+     ATJUNGIMAS: istrinti sia viena eilute. Jokie kiti stiliai nepakeisti. -->
+<link rel="stylesheet" href="ct-dizainas.css">
 </body>
 </html>

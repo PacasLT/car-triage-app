@@ -2628,7 +2628,7 @@
   <div id="lightbox" onclick="if(event.target.id==='lightbox') closeLightbox();">
     <button id="lightbox-close" onclick="closeLightbox()">✕</button>
     <button class="lightbox-nav" id="lightbox-prev" onclick="lightboxNav(-1)">‹</button>
-    <img id="lightbox-img" src="">
+    <img id="lightbox-img" alt="">
     <button class="lightbox-nav" id="lightbox-next" onclick="lightboxNav(1)">›</button>
     <div id="lightbox-counter"></div>
   </div>
@@ -5797,7 +5797,7 @@ function ctNavTab(tab) {
 
       var subBarsHtml = s.parts.map(function(part) {
         var label = part[0]; var val = part[1];
-        if (val == null) return '<div style="display:flex;flex-direction:column;gap:5px;"><span style="font:500 9px/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + label + '</span><b style="font:700 12px/1 var(--font-mono);color:var(--text-dim);" title="Šio rodiklio įvertinti nepavyko – trūksta duomenų skelbime">–</b><div style="height:3px;border-radius:2px;background:var(--bg-raised);"></div></div>';
+        if (val == null) return '<div style="display:flex;flex-direction:column;gap:5px;"><span style="font:500 9px/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + label + '</span><b class="is-unrated-val" style="font:700 12px/1 var(--font-mono);" title="Šio rodiklio įvertinti nepavyko – trūksta duomenų skelbime">–</b><div class="ct-bar is-unrated" style="height:3px;border-radius:2px;background-color:var(--bg-raised);"></div></div>';
         var bc = _tone(val);
         return '<div style="display:flex;flex-direction:column;gap:5px;"><span style="font:500 9px/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + label + '</span><b style="font:700 12px/1 var(--font-mono);color:' + bc + ';">' + val.toFixed(1) + '</b><div style="height:3px;border-radius:2px;background:var(--bg-raised);overflow:hidden;"><div class="ct-bar-fill" style="--w:' + (val*10) + '%;background:' + bc + ';"></div></div></div>';
       }).join('');
@@ -6570,5 +6570,9 @@ document.addEventListener('DOMContentLoaded', function () {
 window.addEventListener('storage', function (e) { if (e.key === 'ct_token') ctIkeltiPlana(); });
 </script>
 
+<!-- CarTriige dizaino sistema (v1.29.0). Ideta PASKUTINE pries </body> - is <head>
+     ji pralaimetu, nes <style> bloku yra ir po </head>.
+     ATJUNGIMAS: istrinti sia viena eilute. Jokie kiti stiliai nepakeisti. -->
+<link rel="stylesheet" href="ct-dizainas.css">
 </body>
 </html>

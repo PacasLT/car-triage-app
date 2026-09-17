@@ -8,6 +8,20 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.29.0', data: '2026-09-18', pavadinimas: 'Vieninga dizaino sistema – visi puslapiai atrodo kaip vienas produktas',
+    pakeitimai: [
+      'Visi penki puslapiai dabar naudoja tą pačią spalvų paletę, tipografiją ir tarpus – anksčiau kiekvienas turėjo savo',
+      'Neįvertintas rodiklis („–“) dabar turi dryžuotą juostą, kad nebūtų palaikytas nuliu – tai ne blogas balas, o dar nežinoma sritis',
+      'Tekstas ant tamsaus fono tapo šviesesnis ir geriau įskaitomas; smulkiausios etiketės padidintos iki 11 px',
+      'Telefone mygtukai ir skirtukai gavo pilną 44 px paspaudimo zoną',
+      'Skirtukų juosta telefone rodo, kad ji tęsiasi į šoną',
+      'Nebeliko horizontalaus slinkimo ataskaitų ir mėgstamiausių puslapiuose telefone',
+      'Klaviatūra naršant matomas aiškus fokuso žiedas',
+      'Jei sistemoje įjungtas judesio mažinimas, animacijos nebegroja',
+      'Pataisytos dvi tylios klaidos naršyklės konsolėje (tuščias nuotraukos adresas skelbimo ir galerijos languose)',
+    ],
+  },
+  {
     versija: '1.28.0', data: '2026-09-17', pavadinimas: 'autogidas.lt nuskaitomas taip pat kruopščiai kaip autoplius',
     pakeitimai: [
       'autogidas skelbimuose dabar matote ir variklio galią (kW), ir tikslią vietą (miestas, šalis) – anksčiau šių duomenų iš šio portalo negaudavome',

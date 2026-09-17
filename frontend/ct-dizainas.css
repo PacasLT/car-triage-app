@@ -1,0 +1,764 @@
+/* ============================================================================
+   ct-dizainas.css · CarTriige v1.28 · VIENAS tokenų + komponentų failas
+   ----------------------------------------------------------------------------
+   PRIJUNGIMAS — svarbu, kur:
+
+     <link rel="stylesheet" href="ct-dizainas.css">   <!-- PASKUTINIS pries </body> -->
+
+   Ne head viduje: index.html turi <style> bloka 6346 eil., compare.html 1824 eil.,
+   abu PO </head>, tad is head sis failas pralaimetu. Paskutinis pries </body> yra
+   vienintele vieta, is kurios jis nugali be ne vieno !important.
+   <link> body viduje HTML5 leidziamas; jei patogiau, ta pati turini galima ideti
+   i <style> bloka toje pacioje vietoje — rezultatas identiskas.
+
+   ATJUNGIMAS: istrinti ta viena eilute. Jusu CSS nepaliestas.
+   Po prijungimo iš index.html, detail.html, compare.html, ct-bendras.css
+   pašalinti jų :root blokus — čia jie visi sulieti į vieną.
+
+   Kintamųjų pavadinimai sąmoningai IŠSAUGOTI tokie, kokie jau naudojami
+   abiejuose failuose (--bg-base, --accent, --radius-md, --text-muted, …),
+   todėl esamas CSS ir inline var() kreipiniai detail.html JS'e veikia toliau.
+
+   Sulyginimo sprendimai (buvo → dabar):
+     --bg-base      #0a0c10 / #0A0C12   → #0A0C12
+     --accent       #7c6ff7 / #7C5CFF   → #7C5CFF
+     --success      #7fd88f / oklch     → oklch (senasis nesiekė 4.5:1)
+     --danger       #ff9d9d / oklch     → oklch
+     --radius-md    10px / 7px          → 10px
+     --radius-lg    14px / 11px         → 14px
+
+   ⚠ DU DALYKAI, KURIUOS RADOME AUDITO METU — PATVIRTINKITE PRIEŠ TVARKANT:
+
+   1. `ct-bendras.css` ir `compare.html` KIEKVIENAS turi PO DU :root blokus:
+      senoji v1 paletė failo pradžioje ir naujoji v2 paletė žemiau, kuri ją
+      perrašo. Vadinasi nesutampa ne tik puslapiai tarpusavyje, bet ir tas
+      pats failas su savimi. Trinant dublikatus reikia ištrinti ABU, ne pirmą.
+        ct-bendras.css  → :root 1 eil. (v1) + :root 68 eil. (v2)
+        compare.html    → :root 13 eil. (v1) + :root 593 eil. (v2)
+
+   2. `detail.html` JS generuojamame HTML yra `var(--bg)` ir `var(--card)`,
+      kurie NIEKUR neapibrėžti (eil. ~1138 VIN blokas, ~1294 pardavėjo blokas)
+      — tie blokai šiandien lieka be fono. Žemiau jie pridėti kaip aliasai, kad
+      iškart susitvarkytų; sutvarkius patį HTML, aliasus galima išmesti.
+   ========================================================================== */
+
+:root {
+  /* ── 1. PAVIRŠIAI · trys aiškūs lygiai ────────────────────────────────────
+     Taisyklė: kortelė niekada nesideda ant to paties lygio paviršiaus.
+     fonas(base) → kortelė(surface) → pakylėta(elevated) → aukščiausia(raised) */
+  --bg-base:        #0A0C12;
+  --bg-surface:     #11141C;
+  --bg-elevated:    #171B25;
+  --bg-raised:      #1F2431;
+  --bg-card:        var(--bg-surface);   /* suderinamumui su detail.html */
+  --bg-sunken:      #070910;             /* log'ai, kodo blokai, įdubos */
+  --bg-scrim:       rgba(5, 6, 10, .72); /* modalų fonas */
+  /* BŪTINI aliasai. detail.html JS naudoja var(--card) 18 vietose ir var(--bg) —
+     nė vienas niekur neapibrėžtas, tad tie blokai šiandien lieka be fono.
+     Nešalinti tol, kol tas HTML nebus sutvarkytas. */
+  --bg:             var(--bg-base);
+  --card:           var(--bg-surface);
+
+  --border:         rgba(255, 255, 255, .075);
+  --border-light:   rgba(255, 255, 255, .14);
+  --border-strong:  rgba(255, 255, 255, .22);
+
+  /* ── 2. TEKSTAS ───────────────────────────────────────────────────────────
+     primary/secondary/muted tinka pagrindiniam tekstui (≥ 4.5:1 ant base).
+     --text-dim yra ~3:1 → TIK mono etiketėms, versijoms, poraštėms. */
+  --text-primary:   #E9EBF2;
+  --text-secondary: #C3C9D8;
+  --text-muted:     #8C93A6;
+  /* Buvo #5E6578 (~3:1) ir naudojama 11 px mono etiketėms — per mažai net etiketėms.
+     Pašviesinta iki 4,7:1 ant --bg-elevated ir 5,2:1 ant --bg-base, tad tinka ir
+     11 px tekstui. Vis tiek matomai blankesnė už --text-muted (5,9:1). */
+  --text-dim:       #7E8699;
+  --text-on-accent: #FFFFFF;
+  --text-on-light:  #0A0C12;   /* tekstas ant šviesaus žalio/geltono užpildo */
+
+  /* ── 3. SEMANTINĖS SPALVOS · turi prasmę, dekoracijai NENAUDOJAMOS ────────
+     žalia = patvirtinta / gerai        geltona = galimas signalas / dėmesio
+     raudona = rimta rizika             pilka  = neįvertinta
+     violetinė = veiksmas ir „mūsų" AI */
+  --accent:         #7C5CFF;
+  --accent-hover:   #8B6FFF;
+  /* Tekstą nešančiam užpildui: #fff ant --accent duoda 4,35:1 — nepraeina AA.
+     --accent-strong duoda 4,66:1, hover 5,6:1. Mygtukams su tekstu VISADA šie. */
+  --accent-strong:  #7856F7;
+  --accent-strong-hover: #6A45EE;
+  --accent-light:   #A78BFA;
+  --accent-dim:     rgba(124, 92, 255, .14);
+  --accent-border:  rgba(124, 92, 255, .30);
+
+  --success:        oklch(.75 .15 158);
+  --success-dim:    oklch(.75 .15 158 / .13);
+  --success-border: oklch(.75 .15 158 / .30);
+
+  --warning:        oklch(.81 .13 78);
+  --warning-dim:    oklch(.81 .13 78 / .13);
+  --warning-border: oklch(.81 .13 78 / .30);
+
+  --danger:         oklch(.66 .19 25);
+  --danger-dim:     oklch(.66 .19 25 / .13);
+  --danger-border:  oklch(.66 .19 25 / .30);
+
+  --neutral:        oklch(.68 .02 250);
+  --neutral-dim:    oklch(.68 .02 250 / .10);
+  --neutral-border: oklch(.68 .02 250 / .26);
+
+  /* ── 4. TRYS ŽINOJIMO LYGIAI · produkto pagrindinė informacinė sistema ────
+     Visada per šiuos tokenus, ne per success/warning tiesiogiai — kad vėliau
+     būtų galima pakeisti vienoje vietoje. ⚪ NĖRA minusas: neutrali, ne blanki. */
+  --k-confirmed:        var(--success);          /* 🟢 patvirtinta */
+  --k-confirmed-dim:    var(--success-dim);
+  --k-confirmed-border: var(--success-border);
+  --k-signal:           var(--warning);          /* 🟡 galimas signalas */
+  --k-signal-dim:       var(--warning-dim);
+  --k-signal-border:    var(--warning-border);
+  --k-unknown:          var(--neutral);          /* ⚪ neįvertinta */
+  --k-unknown-dim:      var(--neutral-dim);
+  --k-unknown-border:   var(--neutral-border);
+
+  /* ── 5. TIPOGRAFIJA · 7 dydžiai, ne daugiau ───────────────────────────────
+     Skaičiams (kainos, balai, rida, VIN, datos) — VISADA --font-mono. */
+  --font:      'Archivo', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  --font-sans: var(--font);   /* suderinamumui su detail.html inline var() */
+
+  --fs-100: 11px;    /* mono etiketės, CAPS, versijos ženklelis */
+  --fs-200: 12.5px;  /* antriniai meta, žymės */
+  --fs-300: 14px;    /* pagrindinis tekstas */
+  --fs-400: 16px;    /* kortelės pavadinimas, sekcijos antraštė */
+  --fs-500: 20px;    /* puslapio poskyris */
+  --fs-600: 26px;    /* kaina kortelėje, puslapio H1 */
+  --fs-700: 34px;    /* balas 0–10, didysis skaičius */
+
+  --lh-tight: 1.2;
+  --lh-snug:  1.4;
+  --lh-body:  1.55;
+
+  --fw-regular: 400;
+  --fw-medium:  500;
+  --fw-semi:    600;
+  --fw-bold:    700;
+
+  --caps: .08em;     /* letter-spacing CAPS etiketėms */
+  --mono-ls: .04em;
+
+  /* ── 6. TARPAI · 4 px bazė ────────────────────────────────────────────────*/
+  --s-1:  4px;
+  --s-2:  8px;
+  --s-3:  12px;
+  --s-4:  16px;
+  --s-5:  24px;
+  --s-6:  32px;
+  --s-7:  48px;
+
+  /* ── 7. RADIUSAI ──────────────────────────────────────────────────────────*/
+  --radius-sm:   6px;    /* žymės, input'ai, maži mygtukai */
+  --radius-md:   10px;   /* mygtukai, miniatiūros, vidiniai blokai */
+  --radius-lg:   14px;   /* kortelės */
+  --radius-xl:   18px;   /* modalai, dideli konteineriai */
+  --radius-pill: 999px;
+
+  /* ── 8. ŠEŠĖLIAI · tik pakylėjimui, ne dekoracijai ────────────────────────*/
+  --shadow-1:    0 1px 2px rgba(0, 0, 0, .35);
+  --shadow-2:    0 4px 16px rgba(0, 0, 0, .40);
+  --shadow-3:    0 16px 48px rgba(0, 0, 0, .55);
+  --shadow-card: var(--shadow-2);   /* suderinamumui su index.html */
+  --shadow-panel: 0 18px 40px -24px rgba(0, 0, 0, .8);   /* iškrentantys meniu, modalai */
+  --shadow-glow:  0 8px 22px -12px rgba(124, 92, 255, .9); /* TIK pirminis CTA */
+
+  /* ── 9. FOKUSAS · matomas visur, hover niekada nėra vienintelis būdas ─────*/
+  --focus-ring:   0 0 0 2px var(--bg-base), 0 0 0 4px var(--accent-light);
+  --focus-offset: 2px;
+
+  /* ── 10. MAKETAS ──────────────────────────────────────────────────────────*/
+  --content-max:  1240px;   /* 1400 px ekrane turinys nesitęsia be ribos */
+  --doc-max:      760px;    /* skaitomi dokumentai: gilus palyginimas, ataskaitos */
+  --header-h:     64px;
+  --tap-min:      44px;     /* minimali paspaudimo zona mobiliajame */
+
+  /* ── 11. JUDĖJIMAS ────────────────────────────────────────────────────────*/
+  --dur-fast: .12s;
+  --dur-base: .2s;
+  --dur-slow: .35s;
+  --ease:     cubic-bezier(.32, .72, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-fast: 0s; --dur-base: 0s; --dur-slow: 0s; }
+  *, *::before, *::after { animation-duration: .001s !important; transition-duration: .001s !important; }
+}
+
+/* ============================================================================
+   BAZĖ
+   ========================================================================== */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: var(--fs-300);
+  line-height: var(--lh-body);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  text-wrap: pretty;
+}
+
+a { color: var(--accent-light); text-decoration: none; }
+a:hover { color: var(--text-primary); }
+
+button { font-family: inherit; cursor: pointer; }
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--radius-sm);
+}
+
+/* Skaičiai visada mono ir lygiuoti stulpeliuose */
+.ct-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--mono-ls);
+}
+
+.ct-label {
+  font: var(--fw-semi) var(--fs-100) / 1 var(--font-mono);
+  letter-spacing: var(--caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.ct-wrap { width: 100%; max-width: var(--content-max); margin-inline: auto; padding-inline: var(--s-4); }
+.ct-doc  { width: 100%; max-width: var(--doc-max);     margin-inline: auto; }
+
+.ct-sr {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ============================================================================
+   KOMPONENTAS · KORTELĖ (antraštė + turinys + poraštė)
+   Naudojimas:
+     <section class="ct-card">
+       <header class="ct-card-h"><h3>VIN ir istorija</h3><span class="ct-label">1 kr</span></header>
+       <div class="ct-card-b"> … </div>
+       <footer class="ct-card-f"><button class="ct-btn ct-btn-primary">Tikrinti</button></footer>
+     </section>
+   ========================================================================== */
+
+.ct-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.ct-card-h {
+  display: flex; align-items: center; gap: var(--s-2);
+  padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--border);
+}
+.ct-card-h > :first-child { flex: 1; min-width: 0; font: var(--fw-semi) var(--fs-400) / var(--lh-tight) var(--font); margin: 0; }
+.ct-card-b { padding: var(--s-4); display: flex; flex-direction: column; gap: var(--s-3); }
+.ct-card-f {
+  display: flex; align-items: center; gap: var(--s-2);
+  padding: var(--s-3) var(--s-4);
+  border-top: 1px solid var(--border);
+  background: var(--bg-base);
+}
+/* Kortelė kortelėje — pakylėtas lygis, kad nesusilietų */
+.ct-card .ct-card { background: var(--bg-elevated); }
+.ct-card .ct-card .ct-card { background: var(--bg-raised); }
+
+/* Prislopinta kortelė — atmesti skelbimai („Kiti skelbimai") */
+.ct-card-muted { background: var(--bg-base); border-style: dashed; }
+.ct-card-muted .ct-card-b { opacity: .72; }
+.ct-card-muted:hover .ct-card-b, .ct-card-muted:focus-within .ct-card-b { opacity: 1; }
+
+/* Rizikos akcentas: pastebimas, bet kortelė lieka skaitoma (NE „viskas raudona") */
+.ct-card-risk { border-color: var(--danger-border); }
+.ct-card-risk > .ct-card-h { background: var(--danger-dim); }
+
+/* ============================================================================
+   KOMPONENTAS · MYGTUKAS
+   ========================================================================== */
+
+.ct-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
+  min-height: 36px; padding: 0 var(--s-3);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-primary);
+  font: var(--fw-medium) var(--fs-200) / 1 var(--font);
+  transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.ct-btn:hover { background: var(--bg-elevated); }
+.ct-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+.ct-btn-primary {
+  background: var(--accent-strong); border-color: var(--accent-strong);
+  color: var(--text-on-accent); font-weight: var(--fw-semi);
+}
+.ct-btn-primary:hover { background: var(--accent-strong-hover); border-color: var(--accent-strong-hover); }
+
+.ct-btn-quiet { border-color: transparent; color: var(--text-secondary); }
+.ct-btn-quiet:hover { background: var(--bg-elevated); color: var(--text-primary); }
+
+.ct-btn-lg { min-height: 44px; padding: 0 var(--s-5); font-size: var(--fs-300); }
+
+/* Kreditų kaina mygtuke — skaičius iš serverio, formatuojame tik vizualiai */
+.ct-btn .ct-cost {
+  font: var(--fw-semi) var(--fs-100) / 1 var(--font-mono);
+  letter-spacing: var(--mono-ls);
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, .12);
+}
+
+@media (max-width: 600px) {
+  .ct-btn { min-height: var(--tap-min); }
+}
+
+/* ============================================================================
+   KOMPONENTAS · ŽYMĖ
+   ========================================================================== */
+
+.ct-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px var(--s-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  font-size: var(--fs-200);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.ct-tag-good   { background: var(--success-dim); border-color: var(--success-border); color: var(--success); }
+.ct-tag-signal { background: var(--warning-dim); border-color: var(--warning-border); color: var(--warning); }
+.ct-tag-risk   { background: var(--danger-dim);  border-color: var(--danger-border);  color: var(--danger); }
+.ct-tag-ai     { background: var(--accent-dim);  border-color: var(--accent-border);  color: var(--accent-light); }
+
+/* ============================================================================
+   KOMPONENTAS · TRYS ŽINOJIMO LYGIAI
+   Skirtumas turi būti matomas per pusę sekundės, todėl skiriasi TRYS dalykai:
+   spalva + taško forma + etiketės tekstas. Ne vien spalva (daltonizmas).
+
+   <span class="ct-k ct-k-confirmed"><i></i>Patvirtinta</span>
+   <span class="ct-k ct-k-signal"><i></i>Galimas signalas</span>
+   <span class="ct-k ct-k-unknown"><i></i>Neįvertinta</span>
+   ========================================================================== */
+
+.ct-k {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px var(--s-2) 3px 7px;
+  border: 1px solid;
+  border-radius: var(--radius-pill);
+  font: var(--fw-semi) var(--fs-200) / 1.3 var(--font);
+  white-space: nowrap;
+}
+.ct-k > i { flex: none; width: 9px; height: 9px; }
+
+/* 🟢 patvirtinta — pilnas skritulys */
+.ct-k-confirmed { color: var(--k-confirmed); background: var(--k-confirmed-dim); border-color: var(--k-confirmed-border); }
+.ct-k-confirmed > i { border-radius: 50%; background: currentColor; }
+
+/* 🟡 galimas signalas — rombas (kita forma, ne tik kita spalva) */
+.ct-k-signal { color: var(--k-signal); background: var(--k-signal-dim); border-color: var(--k-signal-border); }
+.ct-k-signal > i { background: currentColor; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+
+/* ⚪ neįvertinta — tuščias apskritimas. Neutralu: ne klaida ir ne minusas. */
+.ct-k-unknown { color: var(--text-muted); background: var(--k-unknown-dim); border-color: var(--k-unknown-border); }
+.ct-k-unknown > i { border-radius: 50%; background: transparent; box-shadow: inset 0 0 0 1.5px currentColor; }
+
+/* Neįvertintas LAUKAS (ne žymė): brūkšnys „–" nėra nulis ir nėra klaida.
+   <dd class="ct-unrated"><span class="ct-unrated-dash ct-num">–</span> Duomenų nepakanka</dd> */
+.ct-unrated { display: flex; align-items: baseline; gap: var(--s-2); color: var(--text-muted); font-size: var(--fs-200); }
+.ct-unrated-dash {
+  font-size: var(--fs-400); font-weight: var(--fw-semi);
+  color: var(--text-dim);
+  /* brūkšnys plačiau, kad nebūtų palaikytas minuso ženklu prie skaičiaus */
+  padding-inline: 2px;
+}
+
+/* Įverčio dedamosios juosta; „neįvertinta" dedamoji — dryžuota, ne tuščia */
+.ct-bar { height: 6px; border-radius: var(--radius-pill); background: var(--bg-raised); overflow: hidden; }
+.ct-bar > span { display: block; height: 100%; border-radius: inherit; background: var(--success); }
+.ct-bar-unknown {
+  background-image: repeating-linear-gradient(
+    -45deg, var(--k-unknown-dim) 0 4px, transparent 4px 8px);
+  box-shadow: inset 0 0 0 1px var(--k-unknown-border);
+}
+
+/* ============================================================================
+   KOMPONENTAS · MODALAS
+   ========================================================================== */
+
+.ct-modal-scrim {
+  position: fixed; inset: 0; z-index: 2000;
+  display: grid; place-items: center;
+  padding: var(--s-4);
+  background: var(--bg-scrim);
+  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+}
+.ct-modal {
+  width: 100%; max-width: 520px; max-height: min(86vh, 760px);
+  display: flex; flex-direction: column;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-3);
+  overflow: hidden;
+}
+.ct-modal-h {
+  display: flex; align-items: center; gap: var(--s-3);
+  padding: var(--s-4);
+  border-bottom: 1px solid var(--border);
+}
+.ct-modal-h > :first-child { flex: 1; min-width: 0; font: var(--fw-semi) var(--fs-500) / var(--lh-tight) var(--font); margin: 0; }
+.ct-modal-b { padding: var(--s-4); overflow-y: auto; display: flex; flex-direction: column; gap: var(--s-3); }
+.ct-modal-f {
+  display: flex; justify-content: flex-end; gap: var(--s-2);
+  padding: var(--s-3) var(--s-4);
+  border-top: 1px solid var(--border); background: var(--bg-base);
+}
+.ct-modal-x {
+  flex: none; width: 32px; height: 32px; border-radius: var(--radius-sm);
+  border: none; background: transparent; color: var(--text-muted); font-size: var(--fs-400);
+}
+.ct-modal-x:hover { background: var(--bg-elevated); color: var(--text-primary); }
+
+/* Mobiliajame modalas = apatinis lapelis (filtrai, patvirtinimai) */
+@media (max-width: 600px) {
+  .ct-modal-scrim { place-items: end center; padding: 0; }
+  .ct-modal {
+    max-width: none; max-height: 88vh;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    border-bottom: none;
+  }
+  .ct-modal-f { position: sticky; bottom: 0; padding-bottom: max(var(--s-3), env(safe-area-inset-bottom)); }
+}
+
+/* ============================================================================
+   BŪSENOS · tuščia / kraunasi / klaida / nepakanka kreditų
+   ========================================================================== */
+
+.ct-state {
+  display: flex; flex-direction: column; align-items: center; gap: var(--s-3);
+  padding: var(--s-7) var(--s-4);
+  text-align: center;
+}
+.ct-state-ic {
+  width: 44px; height: 44px; border-radius: var(--radius-pill);
+  display: grid; place-items: center;
+  background: var(--bg-elevated); color: var(--text-muted);
+  font: var(--fw-semi) var(--fs-500) / 1 var(--font-mono);
+}
+.ct-state h3 { margin: 0; font: var(--fw-semi) var(--fs-500) / var(--lh-tight) var(--font); color: var(--text-primary); }
+.ct-state p  { margin: 0; max-width: 44ch; font-size: var(--fs-300); color: var(--text-muted); }
+
+.ct-state-error   .ct-state-ic { background: var(--danger-dim);  color: var(--danger); }
+.ct-state-credits .ct-state-ic { background: var(--warning-dim); color: var(--warning); }
+
+/* Kraunasi: paieška 30–90 s → žurnalas, kuris pasako KĄ sistema daro dabar */
+.ct-progress { height: 3px; border-radius: var(--radius-pill); background: var(--bg-raised); overflow: hidden; }
+.ct-progress > span {
+  display: block; height: 100%; border-radius: inherit;
+  background: var(--accent);
+  transition: width var(--dur-slow) var(--ease);
+}
+.ct-step {
+  display: flex; align-items: center; gap: var(--s-2);
+  padding: var(--s-2) var(--s-3);
+  border-bottom: 1px solid var(--border);
+  font-size: var(--fs-200); color: var(--text-muted);
+}
+.ct-step:last-child { border-bottom: none; }
+.ct-step-now  { color: var(--text-primary); font-weight: var(--fw-medium); }
+.ct-step-done { color: var(--text-secondary); }
+.ct-step-done::before { content: '✓'; color: var(--success); font-family: var(--font-mono); }
+.ct-spinner {
+  flex: none; width: 13px; height: 13px; border-radius: 50%;
+  border: 2px solid var(--border-light); border-top-color: var(--accent);
+  animation: ct-spin .8s linear infinite;
+}
+@keyframes ct-spin { to { transform: rotate(360deg); } }
+
+/* Skeletas — tik tam, kas tikrai bus užpildyta */
+.ct-skeleton {
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--bg-elevated) 25%, var(--bg-raised) 37%, var(--bg-elevated) 63%);
+  background-size: 400% 100%;
+  animation: ct-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes ct-shimmer { from { background-position: 100% 0; } to { background-position: 0 0; } }
+
+/* ============================================================================
+   BE HORIZONTALAUS SLINKIMO · 390 px apsauga
+   ========================================================================== */
+
+/* clip, ne hidden — hidden sulauzytu position: sticky antraste */
+html, body { overflow-x: clip; }
+img, svg, video, canvas { max-width: 100%; height: auto; }
+
+/* Slenkamos juostos (skirtukai, žymės) — su matoma užuomina, kad yra daugiau */
+.ct-scroller {
+  display: flex; gap: var(--s-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  /* dešinysis kraštas nublunka = užuomina, kad juosta tęsiasi */
+  mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 24px), transparent 100%);
+}
+.ct-scroller::-webkit-scrollbar { display: none; }
+.ct-scroller > * { scroll-snap-align: start; flex: none; }
+
+
+
+
+/* ============================================================================
+   TILTAS · pries jusu tikrus selektorius
+   ----------------------------------------------------------------------------
+   Ideti PASKUTINI pries </body>. Selektoriai zemiau parasyti tokios pat arba
+   didesnes specifikos kaip jusu cartriige-v2 sluoksnis (pvz. jusu
+   .ct-card .detail-btn.ct-btn-primary = 0,3,0, tad paprastas .detail-btn
+   pralaimetu ir cia jo nera).
+
+   KAM NUSILEIDAU IR KAM NE — tikslus atsakymas:
+
+   index.html turi SESIS <style id=...> blokus. Tikroji failo eiles tvarka:
+     <style> (9 eil.) -> cartriige-v2 (628) -> ct-mobile-responsive (1358)
+     -> ct-compare-redesign (1576) -> ct-korteles-v3 (2017)
+     -> ct-hist-redesign (2155) -> ct-planai-css (6346)
+   Korteliu sluoksnis, kuris realiai laimi, yra ct-korteles-v3 (2017), ne
+   cartriige-v2 — jis eina veliau. Sis failas prijungtas pries </body>, tad
+   nugali visus sesis; nusileidimas korteliu sluoksniui yra SPRENDIMAS
+   neperdazyti korteliu, ne specifikos apribojimas.
+
+   DETAIL.HTML IR COMPARE.HTML TOKIO SLUOKSNIO NETURI: detail.html turi tik
+   <style> + dp-mobile-responsive (289 eil.), compare.html — tris bevardzius
+   <style>. Todel jiems zemiau yra atskira komponentu dalis (9 skyrius).
+
+   DEMESIO · dp-mobile-responsive: sis failas ji nugali, o 3 ir 5 skyriai
+   (44 px paspaudimo zona, skirtuku juostos uzuomina) yra @media max-width 640px,
+   t. y. tame paciame diapazone. Jei mobilus detail.html kur nors nesutampa su
+   jusu dp-mobile-responsive intencija — kaltas tas persidengimas, ne bazinis
+   sluoksnis. Trys vietos, kuriose tai galetu matytis: .dp-tab aukstis,
+   .dp-act/.dp-bc-btn min-height ir .dp-tabs mask-image.
+   ========================================================================== */
+
+/* ── 1. FOKUSAS · nera ne viename faile ─────────────────────────────────────*/
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--radius-sm);
+}
+
+/* ── 2. TEKSTA NESANTIS AKCENTAS · AA ───────────────────────────────────────
+   #fff ant --accent (#7C5CFF) = 4,35:1, nepraeina. --accent-strong = 4,66:1.
+   Specifika suderinta su .ct-card .detail-btn.ct-btn-primary (0,3,0).       */
+
+.ct-card .detail-btn.ct-btn-primary,
+.card.ct-card .detail-btn.ct-btn-primary,
+.ct-card .detail-btn.ready,
+.card .detail-btn.ready,
+.detail-btn.detail-btn.ready,
+button#search-btn,
+#compare-btn,
+.dp-act.dp-act-primary,
+.dp-bc-btn.dp-bc-primary,
+.dp-empty a[href] {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+  color: var(--text-on-accent);
+}
+.ct-card .detail-btn.ct-btn-primary:hover,
+.card.ct-card .detail-btn.ct-btn-primary:hover,
+.ct-card .detail-btn.ready:hover,
+.card .detail-btn.ready:hover,
+.detail-btn.detail-btn.ready:hover,
+button#search-btn:hover,
+#compare-btn:hover,
+.dp-act.dp-act-primary:hover,
+.dp-bc-btn.dp-bc-primary:hover,
+.dp-empty a[href]:hover {
+  background: var(--accent-strong-hover);
+  border-color: var(--accent-strong-hover);
+  filter: none;
+}
+
+/* Pulsavimas prie kainos: po 2 s nebeinformuoja, o nuolatinis judesys prie
+   pinigu mazina pasitikejima. Zenklas lieka, animacija ne.                  */
+.ct-card .detail-btn.ready,
+.detail-btn.detail-btn.ready { animation: none; box-shadow: none; }
+
+/* ── 3. PASPAUDIMO ZONA 390 px ──────────────────────────────────────────────*/
+
+@media (max-width: 640px) {
+  .ct-card .detail-btn,
+  .card .detail-btn,
+  .ct-card .compare-toggle,
+  .card .compare-toggle,
+  .app-header .nav-btn,
+  .ct-card .fav-star,
+  .dp-act.dp-act,
+  .dp-bc-btn.dp-bc-btn,
+  .dp-tab.dp-tab,
+  .ct3-nav-link.ct3-nav-link,
+  .dp-photo-ai-btn.dp-photo-ai-btn,
+  button#search-btn,
+  #compare-btn,
+  #toggle-all-btn,
+  #sort-select {
+    min-height: var(--tap-min);
+  }
+}
+
+/* ── 4. NEIVERTINTA ⚪ ──────────────────────────────────────────────────────
+   Balo dedamoji, kurios reiksme null, rodoma tuscia juosta — o tuscia juosta
+   skaitosi kaip 0 balu. Dryzuota vaga reiskia „neivertinta".
+
+   REIKIA VIENO PAKEITIMO JS PUSEJE: toms juostoms, kur
+   baloKomponentai[x] === null, prideti klase is-unrated, o reiksmes elementui
+   is-unrated-val. Kol ju nera, sios taisykles nieko nedaro.                 */
+
+.is-unrated {
+  background-image: repeating-linear-gradient(
+    -45deg, var(--k-unknown-dim) 0 4px, transparent 4px 8px);
+  box-shadow: inset 0 0 0 1px var(--k-unknown-border);
+}
+/* Specifika: .ct-bar > span yra 0,1,1, tad .is-unrated > * (0,1,0) pralaimetu ir
+   uzpildas nusidazytu ant dryzuotos vagos — „neivertinta" atrodytu kaip tikras
+   balas. Todel !important, kaip ir 6 skyriuje. */
+.is-unrated > * { display: none !important; }
+.is-unrated-val {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  padding-inline: 2px;
+}
+
+/* ── 5. SKIRTUKU JUOSTA 390 px · uzuomina, kad juosta tesiasi ──────────────*/
+
+@media (max-width: 640px) {
+  .dp-tabs, .dp-tab-bar, .ct-tabs, #sort-bar {
+    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 24px), transparent 100%);
+    mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 24px), transparent 100%);
+    scrollbar-width: none;
+  }
+  .dp-tabs::-webkit-scrollbar,
+  .dp-tab-bar::-webkit-scrollbar,
+  .ct-tabs::-webkit-scrollbar { display: none; }
+}
+
+/* ── 6. MONO ETIKETES ──────────────────────────────────────────────────────
+   9 px mono etiketes yra per mazos bet kokiam tekstui. Spalva jau
+   pasviesinta (zr. --text-dim), bet dydi keliame iki 11 px minimumo.
+   !important, nes jusu sluoksnis sius dydzius raso taip pat.               */
+
+#sort-bar label,
+.ct3-field label,
+.dp-ai-meta,
+.dp-footer-logo-text small,
+.ct3-logo-text small {
+  font-size: 11px !important;
+  color: var(--text-dim);
+}
+
+/* ── 7. HORIZONTALAUS SLINKIMO APSAUGA ─────────────────────────────────────*/
+
+/* clip, ne hidden: hidden padaro body slinkimo konteineriu ir sulauzia
+   position: sticky antraste (.ct3-header). clip slinkimo konteinerio nekuria. */
+html, body { overflow-x: clip; }
+img, svg, video, canvas { max-width: 100%; }
+
+/* ── 8. JUDEJIMO MAZINIMAS ─────────────────────────────────────────────────*/
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001s !important;
+    transition-duration: .001s !important;
+  }
+}
+
+
+/* ── 9. detail.html KOMPONENTAI ─────────────────────────────────────────────
+   detail.html neturi cartriige-v2 / ct-korteles-v3 sluoksnio, tad be sios
+   dalies jis atrodytu kaip anksciau. compare.html tas klases naudoja tik
+   dalinai — kas nesutampa, tas tiesiog nieko nedaro.                        */
+
+/* Vientisas boksu stilius: skiltyse skyresi parastes, antrasciu dydziai ir
+   remeliu stiprumas — ypac VIN skiltyje su keturiais blokais. */
+.dp-col-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--s-4);
+}
+.dp-col-box.green  { border-color: var(--success-border); }
+.dp-col-box.amber  { border-color: var(--warning-border); }
+.dp-col-box.purple { border-color: var(--accent-border); background: var(--accent-dim); }
+.dp-col-h span { font-size: var(--fs-400); font-weight: var(--fw-semi); }
+.dp-col-h-ic { border-radius: var(--radius-sm); }
+
+/* Skirtukai */
+.dp-tab { height: 46px; font-size: var(--fs-200); font-weight: var(--fw-medium); color: var(--text-muted); }
+.dp-tab:hover { color: var(--text-primary); }
+.dp-tab.active { color: var(--accent-light); border-bottom-color: var(--accent); font-weight: var(--fw-semi); }
+
+/* Veiksmai */
+.dp-act { min-height: 38px; border-radius: var(--radius-md); border-color: var(--border-light); font-size: var(--fs-200); }
+.dp-act:hover { background: var(--bg-elevated); }
+.dp-bc-btn { min-height: 34px; border-radius: var(--radius-md); border-color: var(--border-light); font-size: var(--fs-200); }
+.dp-bc-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
+.dp-bc-btn.save { background: var(--accent-dim); border-color: var(--accent-border); color: var(--accent-light); }
+
+/* Galerija */
+.dp-thumb { border-radius: var(--radius-md); background: var(--bg-elevated); }
+.dp-thumb.dp-thumb-active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+
+/* AI blokai */
+.dp-ai-insight {
+  border-radius: var(--radius-lg);
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  padding: var(--s-3) var(--s-4);
+}
+.dp-ai-badge, .dp-ai-badge-lg { background: var(--accent); border-radius: var(--radius-sm); }
+.dp-ai-text { font-size: var(--fs-200); line-height: var(--lh-body); color: var(--text-secondary); }
+.dp-ai-header h3 { font-size: var(--fs-400); font-weight: var(--fw-semi); }
+
+/* Pardavejas ir nuotrauku analize */
+.dp-seller-link-btn { min-height: 42px; border-radius: var(--radius-md); border-color: var(--accent-border); }
+.dp-seller-link-btn:hover { background: var(--accent-dim); }
+.dp-photo-ai-btn {
+  border-radius: var(--radius-md);
+  border-color: var(--accent-border);
+  background: var(--accent-dim);
+  color: var(--accent-light);
+}
+.dp-photo-ai-result { border-radius: var(--radius-lg); border-color: var(--accent-border); }
+.dp-photo-ai-result-badge { background: var(--accent); border-radius: var(--radius-sm); }
+
+/* Antraste */
+.ct3-nav-link { border-radius: var(--radius-md); font-size: var(--fs-300); color: var(--text-secondary); }
+.ct3-nav-link:hover { background: var(--bg-elevated); color: var(--text-primary); }
+.ct3-premium-btn { border-radius: var(--radius-pill); border-color: var(--accent); color: var(--accent-light); }
+.ct3-premium-btn:hover { background: var(--accent-dim); }
+.ct3-avatar { border-color: var(--border-light); background: var(--bg-elevated); }
+
+/* Skaiciai — mono ir lygiuoti stulpeliuose */
+.dp-price, .dp-market-row b, .dp-spec-v, .dp-score-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
