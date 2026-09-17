@@ -2172,14 +2172,15 @@
     </a>
     <nav class="ct3-nav">
       <a class="ct3-nav-link active" href="#">Paieška</a>
-      <a class="ct3-nav-link" href="#" onclick="event.preventDefault();ctNavTab('megstamiausi')">Mėgstamiausi</a>
+      <a class="ct3-nav-link" href="megstamiausi.html">Mėgstamiausi</a>
+      <a class="ct3-nav-link" href="ataskaitos.html">Ataskaitos</a>
       <a class="ct3-nav-link" href="#" onclick="event.preventDefault();ctNavTab('istorija')">Istorija</a>
       <a class="ct3-nav-link" href="#" onclick="event.preventDefault();ctNavTab('palyginti')">Palyginti</a>
     </nav>
     <div class="ct3-header-right">
-      <button class="ct3-premium-btn">
+      <button class="ct3-premium-btn" id="ct-planas-btn" onclick="ctPlanuModalas()" title="Planas ir kreditai">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V10l6-8 6 8v10"/></svg>
-        Tapti Premium
+        <span id="ct-planas-btn-text">Planas</span>
       </button>
       <button class="ct3-avatar" id="ct3-avatar-btn" onclick="window.__ctAvatarClick()" title="Paskyra">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
@@ -2532,7 +2533,7 @@
       </div>
       <button id="deep-compare-btn" onclick="ctGilusPalyginimas()">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-        Gilus palyginimas su AI
+        Gilus palyginimas su AI · 2 kr
       </button>
       <button id="compare-close" onclick="closeCompareModal()" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--text-muted);font-size:16px;display:grid;place-items:center;cursor:pointer;flex:none">✕</button>
     </div>
@@ -2557,7 +2558,21 @@ window.ctApi = function (kelias, params) {
   if (t) h['Authorization'] = 'Bearer ' + t;
   if (p.body && !h['Content-Type']) h['Content-Type'] = 'application/json';
   p.headers = h;
-  return fetch(kelias, p);
+  return fetch(kelias, p).then(function (r) {
+    // Kreditu likutis ateina antrasteje po kiekvieno mokamo veiksmo
+    try {
+      const lik = r.headers.get('X-Kreditai-Likutis');
+      if (lik != null && window.ctPlanas) { window.ctPlanas.kreditai.viso = parseInt(lik, 10); ctAtnaujintiPlanoZenkleli(); }
+    } catch (e) {}
+    // 402 = paieskos riba arba nepakanka kreditu - rodom plana, o ne raudona klaida
+    if (r.status === 402 && !/history-counts/.test(String(kelias))) {   // +N nauju - tyliai, be lango
+      r.clone().json().then(function (d) {
+        if (d && d.busena) { window.ctPlanas = d.busena; ctAtnaujintiPlanoZenkleli(); }
+        ctPlanuModalas(d && d.error);
+      }).catch(function () { ctPlanuModalas(); });
+    }
+    return r;
+  });
 };
 
 const APP_VERSION = 'v1.12.0';
@@ -2851,7 +2866,8 @@ function loadFavorites() {
 }
 
 function saveFavorites(list) {
-  localStorage.setItem(FAVORITES_KEY, JSON.stringify(list));
+  try { localStorage.setItem(FAVORITES_KEY, JSON.stringify(list)); }
+  catch (e) { if (typeof showToast === 'function') showToast('Naršyklės atmintis pilna – mėgstamiausi saugomi tik serveryje.', 'error'); }
 }
 
 function isFavorited(url) {
@@ -2861,20 +2877,52 @@ function isFavorited(url) {
 function toggleFavorite(url, snapshot, btn) {
   let favs = loadFavorites();
   const idx = favs.findIndex((f) => f.url === url);
-  if (idx >= 0) {
+  const salinam = idx >= 0;
+  if (salinam) {
     favs.splice(idx, 1);
     if (btn) { btn.textContent = '☆'; btn.classList.remove('active'); }
   } else {
     favs.unshift({
       url, modelis: snapshot.modelis, kaina: snapshot.kaina, metai: snapshot.metai,
       rida: snapshot.rida, photo: snapshot.photo, source: snapshot.source,
+      kuras: snapshot.kuras, pavarai: snapshot.pavarai, diffPct: snapshot.diffPct, marketMedian: snapshot.marketMedian,
       savedAt: Date.now(), lastKnownPrice: snapshot.kaina, lastCheckedAt: null, status: 'active',
     });
     if (btn) { btn.textContent = '★'; btn.classList.add('active'); }
   }
   saveFavorites(favs);
   renderFavorites();
+  // PRIDETA: megstamiausi saugomi ir prie paskyros (matomi is kitu irenginiu, megstamiausi.html)
+  if (window.ctToken && window.ctToken()) {
+    const iras = salinam ? null : favs[0];
+    ctApi('/api/megstamiausi', salinam
+      ? { method: 'DELETE', body: JSON.stringify({ url }) }
+      : { method: 'POST', body: JSON.stringify(iras) }
+    ).catch(function () {});
+  }
 }
+
+// Paleidziant: serverio sarasas -> narsykle, kad zvaigzdutes sutaptu visuose irenginiuose
+async function ctSinchronizuotiMegstamus() {
+  if (!window.ctToken || !window.ctToken()) return;
+  try {
+    const r = await ctApi('/api/megstamiausi');
+    if (!r.ok) return;
+    const d = await r.json();
+    if (Array.isArray(d.sarasas)) {
+      const vietiniai = loadFavorites();
+      // vietiniai, kuriu serveris dar neturi (pvz. issaugoti prisijungus kitame irenginyje seniau) - nusiunciam
+      const serverioUrl = new Set(d.sarasas.map((x) => x.url));
+      vietiniai.filter((v) => !serverioUrl.has(v.url)).slice(0, 50).forEach((v) => {
+        ctApi('/api/megstamiausi', { method: 'POST', body: JSON.stringify(v) }).catch(function () {});
+      });
+      const sujungti = d.sarasas.concat(vietiniai.filter((v) => !serverioUrl.has(v.url)));
+      saveFavorites(sujungti);
+      if (typeof renderFavorites === 'function') renderFavorites();
+    }
+  } catch (e) {}
+}
+document.addEventListener('DOMContentLoaded', function () { setTimeout(ctSinchronizuotiMegstamus, 400); });
 
 function toggleFavoritesPanel() {
   const panel = document.getElementById('favorites-panel');
@@ -3297,6 +3345,11 @@ async function runSearch() {
         // Token rejected — clear and re-prompt
         try { localStorage.removeItem('ct_token'); localStorage.removeItem('ct_email'); } catch(e) {}
         if (typeof window.showAuthModal === 'function') window.showAuthModal();
+        return;
+      }
+      if (startResp.status === 402) {
+        // Paieskos riba - planu langas jau atidarytas per ctApi, raudonos klaidos nereikia
+        status.textContent = '';
         return;
       }
       const errText = await startResp.text().catch(() => startResp.statusText);
@@ -4243,13 +4296,13 @@ function renderBrowseListings(candidates, container) {
     var diffBo = (c.diffPct != null && c.diffPct >= 0) ? 'var(--success-border)' : 'var(--danger-border)';
     var scoreVal = c.qualityScore || 0;
     var scoreColor = scoreVal >= 80 ? 'var(--success)' : '#f0c674';
-    var detailBtnLabel = hasDeep ? '✨ Pilna apžvalga' : '🔬 Detali apžvalga';
-    var dArgs = "'" + c.url + "', '" + panelId + "', this, false, {kaina:" + (c.kaina||'null') + ", marketMedian:" + (c.marketMedian||'null') + ", marketCount:" + (c.marketCount||'null') + ", diffPct:" + (c.diffPct!=null?c.diffPct:'null') + ", modelis:'" + escJs(c.modelis) + "', pardavejas:" + (c.pardavejas ? ("'" + escJs(c.pardavejas) + "'") : 'null') + ", galia:" + (c.galia||'null') + ", variklioTuris:" + (c.variklioTuris||'null') + "}";
+    var detailBtnLabel = hasDeep ? '✨ Pilna apžvalga' : '🔬 Detali apžvalga · 1 kr';
+    var dArgs = "'" + c.url + "', '" + panelId + "', this, false, {kaina:" + (c.kaina||'null') + ", marketMedian:" + (c.marketMedian||'null') + ", marketCount:" + (c.marketCount||'null') + ", diffPct:" + (c.diffPct!=null?c.diffPct:'null') + ", modelis:'" + escJs(c.modelis) + "', pardavejas:" + (c.pardavejas ? ("'" + escJs(c.pardavejas) + "'") : 'null') + ", galia:" + (c.galia||'null') + ", variklioTuris:" + (c.variklioTuris||'null') + ", metai:" + (c.metai||'null') + ", rida:" + (c.rida||'null') + ", kuras:'" + escJs(c.kuras||'') + "', pavarai:'" + escJs(c.pavarai||'') + "', source:'" + escJs(c.source||'') + "', photo:'" + escJs(c.photo||'') + "'}";
     var detailClick = hasDeep ? ("ctOpenDetail('" + escJs(c.url) + "')") : ("loadDetail(" + dArgs + ")");
     window.__ctCardData = window.__ctCardData || {};
     window.__ctCardData[c.url] = { c: c, analysis: c.deepAnalysis || null, photos: c.photos || (c.photo ? [c.photo] : []) };
     var isFav = isFavorited(c.url);
-    var favSnap = "{modelis:'" + escJs(c.modelis) + "', kaina:" + (c.kaina||'null') + ", metai:" + (c.metai||'null') + ", rida:" + (c.rida||'null') + ", photo:'" + escJs(c.photo||'') + "', source:'" + escJs(c.source) + "'}";
+    var favSnap = "{modelis:'" + escJs(c.modelis) + "', kaina:" + (c.kaina||'null') + ", metai:" + (c.metai||'null') + ", rida:" + (c.rida||'null') + ", photo:'" + escJs(c.photo||'') + "', source:'" + escJs(c.source) + "', kuras:'" + escJs(c.kuras||'') + "', pavarai:'" + escJs(c.pavarai||'') + "', diffPct:" + (c.diffPct!=null?c.diffPct:'null') + ", marketMedian:" + (c.marketMedian||'null') + "}";
     var panelHTML = hasDeep ? buildDetailPanelHTML({ analysis: c.deepAnalysis, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos || [], cached: false }, c.url, panelId) : '';
 
     var card = document.createElement('div');
@@ -4399,7 +4452,7 @@ function renderCandidateCards(candidates, results) {
     // TOP 5 kandidatai jau ateina su pilna analize is backend - rodome is karto,
     // be poreikio spausti mygtuka. Likusiems - iprastas mygtukas su leftiniu uzkrovimu.
     const hasPreloadedDeep = !!c.deepAnalysis;
-    const detailBtnLabel = hasPreloadedDeep ? '✨ Rodyti gilią analizę' : '🔬 Detali apžvalga';
+    const detailBtnLabel = hasPreloadedDeep ? '✨ Rodyti gilią analizę' : '🔬 Detali apžvalga · 1 kr';
     const preloadedPanelHTML = hasPreloadedDeep
       ? buildDetailPanelHTML({ analysis: c.deepAnalysis, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos || [], cached: false }, c.url, cardId)
       : '';
@@ -4408,7 +4461,7 @@ function renderCandidateCards(candidates, results) {
       : '';
 
     const isFav = isFavorited(c.url);
-    const favSnapshot = `{modelis:'${escJs(c.modelis)}', kaina:${c.kaina || 'null'}, metai:${c.metai || 'null'}, rida:${c.rida || 'null'}, photo:'${escJs(c.photo || '')}', source:'${escJs(c.source)}'}`;
+    const favSnapshot = `{modelis:'${escJs(c.modelis)}', kaina:${c.kaina || 'null'}, metai:${c.metai || 'null'}, rida:${c.rida || 'null'}, photo:'${escJs(c.photo || '')}', source:'${escJs(c.source)}', kuras:'${escJs(c.kuras || '')}', pavarai:'${escJs(c.pavarai || '')}', diffPct:${c.diffPct != null ? c.diffPct : 'null'}, marketMedian:${c.marketMedian || 'null'}}`;
 
     const hasMultiplePhotos = c.photos && c.photos.length > 1;
     if (hasMultiplePhotos) {
@@ -4650,7 +4703,7 @@ function buildDetailPanelHTML(data, url, panelId) {
   const vinBlock = data.vin
     ? `<div style="font-size:12px; color:#9a9aa5; margin:6px 0;">
         🔑 VIN: <code style="color:#e8e8ea;">${data.vin}</code>
-        <button onclick="lookupVin('${data.vin}', '${vinResultId}', this)" style="margin-left:8px; font-size:11px; padding:3px 8px; background:#2c303a; color:#e8e8ea; border:none; border-radius:5px; cursor:pointer;">🔎 Ieškoti VIN istorijos internete</button>
+        <button onclick="lookupVin('${data.vin}', '${vinResultId}', this)" style="margin-left:8px; font-size:11px; padding:3px 8px; background:#2c303a; color:#e8e8ea; border:none; border-radius:5px; cursor:pointer;">🔎 Ieškoti VIN istorijos internete · 1 kr</button>
         <div id="${vinResultId}" style="margin-top:6px;"></div>
       </div>`
     : '';
@@ -4658,7 +4711,7 @@ function buildDetailPanelHTML(data, url, panelId) {
   const sellerBlock = data.pardavejas
     ? `<div style="font-size:12px; color:#9a9aa5; margin:6px 0;">
         🏢 Pardavėjas: <b style="color:#e8e8ea;">${data.pardavejas}</b>
-        <button onclick="lookupSeller('${data.pardavejas.replace(/'/g, "\\'")}', '${sellerResultId}', this, '${escJs(url)}')" style="margin-left:8px; font-size:11px; padding:3px 8px; background:#2c303a; color:#e8e8ea; border:none; border-radius:5px; cursor:pointer;">🔎 Ieškoti informacijos apie pardavėją</button>
+        <button onclick="lookupSeller('${data.pardavejas.replace(/'/g, "\\'")}', '${sellerResultId}', this, '${escJs(url)}')" style="margin-left:8px; font-size:11px; padding:3px 8px; background:#2c303a; color:#e8e8ea; border:none; border-radius:5px; cursor:pointer;">🔎 Ieškoti informacijos apie pardavėją · 1 kr</button>
         <div id="${sellerResultId}" style="margin-top:6px;"></div>
       </div>`
     : '';
@@ -5102,7 +5155,7 @@ window.ctGilusPalyginimasModale = async function () {
     st.innerHTML = '<div class="dc-error"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Nepavyko atlikti gilaus palyginimo: ' + ctEsc(String(e.message).slice(0, 200)) + '</div>';
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '🔬 Gilus palyginimas su AI';
+    btn.innerHTML = '🔬 Gilus palyginimas su AI · 2 kr';
   }
 };
 
@@ -5401,9 +5454,9 @@ function ctNavTab(tab) {
       var scoreColor = _tone(s.total);
       var scorePct = Math.round(s.total * 10);
       var isFav = isFavorited(c.url);
-      var favSnap = "{modelis:'" + escJs(c.modelis) + "', kaina:" + (c.kaina||'null') + ", metai:" + (c.metai||'null') + ", rida:" + (c.rida||'null') + ", photo:'" + escJs(c.photo||'') + "', source:'" + escJs(c.source) + "'}";
-      var detailBtnLabel = hasDeep ? 'Pilna apžvalga →' : 'Detali apžvalga';
-      var dArgs = "'" + c.url + "', '" + cardId + "', this, false, {kaina:" + (c.kaina||'null') + ", marketMedian:" + (c.marketMedian||'null') + ", marketCount:" + (c.marketCount||'null') + ", diffPct:" + (c.diffPct!=null?c.diffPct:'null') + ", modelis:'" + escJs(c.modelis) + "', pardavejas:" + (c.pardavejas ? ("'" + escJs(c.pardavejas) + "'") : 'null') + ", galia:" + (c.galia||'null') + ", variklioTuris:" + (c.variklioTuris||'null') + "}";
+      var favSnap = "{modelis:'" + escJs(c.modelis) + "', kaina:" + (c.kaina||'null') + ", metai:" + (c.metai||'null') + ", rida:" + (c.rida||'null') + ", photo:'" + escJs(c.photo||'') + "', source:'" + escJs(c.source) + "', kuras:'" + escJs(c.kuras||'') + "', pavarai:'" + escJs(c.pavarai||'') + "', diffPct:" + (c.diffPct!=null?c.diffPct:'null') + ", marketMedian:" + (c.marketMedian||'null') + "}";
+      var detailBtnLabel = hasDeep ? 'Pilna apžvalga →' : 'Detali apžvalga · 1 kr';
+      var dArgs = "'" + c.url + "', '" + cardId + "', this, false, {kaina:" + (c.kaina||'null') + ", marketMedian:" + (c.marketMedian||'null') + ", marketCount:" + (c.marketCount||'null') + ", diffPct:" + (c.diffPct!=null?c.diffPct:'null') + ", modelis:'" + escJs(c.modelis) + "', pardavejas:" + (c.pardavejas ? ("'" + escJs(c.pardavejas) + "'") : 'null') + ", galia:" + (c.galia||'null') + ", variklioTuris:" + (c.variklioTuris||'null') + ", metai:" + (c.metai||'null') + ", rida:" + (c.rida||'null') + ", kuras:'" + escJs(c.kuras||'') + "', pavarai:'" + escJs(c.pavarai||'') + "', source:'" + escJs(c.source||'') + "', photo:'" + escJs(c.photo||'') + "'}";
       var detailClick = hasDeep ? ("ctOpenDetail('" + escJs(c.url) + "')") : ("loadDetail(" + dArgs + ")");
       var cmpArgs = "'" + c.url + "', '" + escJs(c.modelis) + "', " + (c.kaina||'null') + ", '" + escJs(c.photo||'') + "', " + (c.metai||'null') + ", " + (c.rida||'null') + ", '" + escJs(c.kuras||'') + "', " + (c.galia||'null') + ", " + (c.variklioTuris||'null') + ", '" + escJs(c.pavarai||'') + "', " + (c.diffPct!=null?c.diffPct:'null') + ", " + (c.marketMedian||'null') + ", '" + escJs(c.source||'') + "', 'cmp-" + cardId + "'";
       var panelHTML = hasDeep ? buildDetailPanelHTML({ analysis: a, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos || [], cached: false }, c.url, cardId) : '';
@@ -5533,8 +5586,8 @@ function ctNavTab(tab) {
       var scorePct = Math.round(s.total * 10);
       var accentLine = scoreColor;
       var diffCls = _diffCls(c.diffPct);
-      var detailBtnLabel = hasDeep ? 'Pilna apžvalga →' : 'Detales →';
-      var dArgs = "'" + c.url + "', '" + cardId + "', this, false, {kaina:" + (c.kaina||'null') + ", marketMedian:" + (c.marketMedian||'null') + ", marketCount:" + (c.marketCount||'null') + ", diffPct:" + (c.diffPct!=null?c.diffPct:'null') + ", modelis:'" + escJs(c.modelis) + "', pardavejas:" + (c.pardavejas ? ("'" + escJs(c.pardavejas) + "'") : 'null') + ", galia:" + (c.galia||'null') + ", variklioTuris:" + (c.variklioTuris||'null') + "}";
+      var detailBtnLabel = hasDeep ? 'Pilna apžvalga →' : 'Detalės · 1 kr →';
+      var dArgs = "'" + c.url + "', '" + cardId + "', this, false, {kaina:" + (c.kaina||'null') + ", marketMedian:" + (c.marketMedian||'null') + ", marketCount:" + (c.marketCount||'null') + ", diffPct:" + (c.diffPct!=null?c.diffPct:'null') + ", modelis:'" + escJs(c.modelis) + "', pardavejas:" + (c.pardavejas ? ("'" + escJs(c.pardavejas) + "'") : 'null') + ", galia:" + (c.galia||'null') + ", variklioTuris:" + (c.variklioTuris||'null') + ", metai:" + (c.metai||'null') + ", rida:" + (c.rida||'null') + ", kuras:'" + escJs(c.kuras||'') + "', pavarai:'" + escJs(c.pavarai||'') + "', source:'" + escJs(c.source||'') + "', photo:'" + escJs(c.photo||'') + "'}";
       var detailClick = hasDeep ? ("ctOpenDetail('" + escJs(c.url) + "')") : ("loadDetail(" + dArgs + ")");
       var panelHTML = hasDeep ? buildDetailPanelHTML({ analysis: a, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos || [], cached: false }, c.url, cardId) : '';
 
@@ -5659,7 +5712,7 @@ function ctNavTab(tab) {
       <div class="ct-pane" data-pane="vin" style="display:none">
         <div class="ct-cols ct-cols-2">
           <div class="ct-box"><div class="ct-box-h"><span class="ct-box-ic">#</span>VIN ir istorija</div>
-            ${data.vin ? `<div class="ct-vin"><code>${esc(data.vin)}</code><button class="ct-mini" onclick="lookupVin('${data.vin}', '${vinResultId}', this)">Ieškoti VIN istorijos ↗</button></div><div id="${vinResultId}"></div>` : '<p class="ct-dash">VIN skelbime nenurodytas.</p>'}
+            ${data.vin ? `<div class="ct-vin"><code>${esc(data.vin)}</code><button class="ct-mini" onclick="lookupVin('${data.vin}', '${vinResultId}', this)">Ieškoti VIN istorijos · 1 kr ↗</button></div><div id="${vinResultId}"></div>` : '<p class="ct-dash">VIN skelbime nenurodytas.</p>'}
             <div class="ct-table" style="margin-top:12px">${[['Patikrinta istorija', c.turiIstorijosAtaskaita ? 'Taip' : 'Nenurodyta'], ['Garantija', c.garantijosTipas || 'Nenurodyta'], ['Pardavėjo tipas', c.yraVerslas ? 'Verslas / dealeris' : 'Privatus / nenurodyta']].map(([k, v]) => `<div><span>${k}</span><b>${esc(v)}</b></div>`).join('')}</div>
           </div>
           <div class="ct-box ${a.nuotrauku_pastebejimai && a.nuotrauku_pastebejimai.length ? 'ct-box-neg' : ''}"><div class="ct-box-h"><span class="ct-box-ic ${a.nuotrauku_pastebejimai && a.nuotrauku_pastebejimai.length ? 'ct-bg-neg' : ''}">◉</span>AI nuotraukų peržiūra</div>${a.nuotrauku_pastebejimai && a.nuotrauku_pastebejimai.length ? list(a.nuotrauku_pastebejimai, 'ct-list-neg') : '<p class="ct-muted">Matomų pažeidimų nuotraukose neaptikta.</p>'}</div>
@@ -5683,7 +5736,7 @@ function ctNavTab(tab) {
     const paneSeller = `
       <div class="ct-pane" data-pane="seller" style="display:none">
         <div class="ct-box"><div class="ct-box-h"><span class="ct-box-ic">◫</span>Pardavėjas</div>
-          ${data.pardavejas ? `<div class="ct-vin"><b>${esc(data.pardavejas)}</b><button class="ct-mini" onclick="lookupSeller('${escJs(data.pardavejas)}', '${sellerResultId}', this, '${escJs(url)}')">Ieškoti informacijos ↗</button></div><div id="${sellerResultId}"></div>` : '<p class="ct-dash">Pardavėjo pavadinimas nenustatytas.</p>'}
+          ${data.pardavejas ? `<div class="ct-vin"><b>${esc(data.pardavejas)}</b><button class="ct-mini" onclick="lookupSeller('${escJs(data.pardavejas)}', '${sellerResultId}', this, '${escJs(url)}')">Ieškoti informacijos · 1 kr ↗</button></div><div id="${sellerResultId}"></div>` : '<p class="ct-dash">Pardavėjo pavadinimas nenustatytas.</p>'}
         </div>
       </div>`;
 
@@ -5919,6 +5972,7 @@ function ctNavTab(tab) {
   };
   function ctUpdateHeader() {
     var hasToken = !!getToken();
+    if (typeof ctIkeltiPlana === 'function') setTimeout(ctIkeltiPlana, 50);
     var logoutBtn = $('ct-logout-btn');
     if (logoutBtn) logoutBtn.style.display = hasToken ? 'flex' : 'none';
     // Update avatar button to show logged-in state visually
@@ -5954,6 +6008,231 @@ function ctNavTab(tab) {
 })();
 </script>
 <script src="auth_frontend.js"></script>
+
+
+<!-- ═══ PLANAI IR KREDITAI ═══ -->
+<style id="ct-planai-css">
+/* ═══════════ PLANAI IR KREDITAI ═══════════ */
+#ct-planas-btn { gap: 7px !important; }
+#ct-planas-btn .ct-pl-kr { font: 700 11px/1 var(--font-mono); padding: 3px 7px; border-radius: 6px;
+  background: var(--accent-dim); color: var(--accent-light); border: 1px solid var(--accent-border); }
+#ct-planas-btn .ct-pl-kr.maza { background: var(--warning-dim); color: var(--warning); border-color: var(--warning-border); }
+#ct-planas-btn .ct-pl-kr.nulis { background: var(--danger-dim); color: var(--danger); border-color: var(--danger-border); }
+@media (max-width: 900px) {
+  .ct3-premium-btn#ct-planas-btn { display: inline-flex !important; padding: 0 10px !important; height: 34px; font-size: 12px; }
+  #ct-planas-btn > svg { display: none; }
+}
+
+#ct-pl-modal { display: none; position: fixed; inset: 0; z-index: 1600; background: rgba(0,0,0,.85); overflow-y: auto; padding: 20px; }
+#ct-pl-modal.open { display: block; }
+#ct-pl-inner { max-width: 860px; margin: 0 auto; background: var(--bg-surface); border: 1px solid var(--border-light);
+  border-radius: 16px; overflow: hidden; }
+.ct-pl-head { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+.ct-pl-head h2 { margin: 0; font: 700 17px var(--font); color: var(--text-primary); flex: 1; }
+.ct-pl-close { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
+  color: var(--text-muted); font-size: 16px; display: grid; place-items: center; cursor: pointer; }
+.ct-pl-body { padding: 18px 20px 22px; }
+.ct-pl-zinute { padding: 12px 14px; border-radius: 10px; background: var(--warning-dim); border: 1px solid var(--warning-border);
+  color: var(--warning); font: 500 13px/1.5 var(--font); margin-bottom: 16px; }
+.ct-pl-dabar { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-bottom: 20px; }
+.ct-pl-dabar > div { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+.ct-pl-dabar small { display: block; font: 600 9px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 7px; }
+.ct-pl-dabar b { font: 700 20px/1 var(--font-mono); color: var(--text-primary); }
+.ct-pl-dabar span { font: 400 11.5px var(--font); color: var(--text-muted); margin-left: 6px; }
+.ct-pl-planai { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-bottom: 18px; }
+.ct-pl-planas { border: 1px solid var(--border); border-radius: 12px; padding: 14px; background: var(--bg-elevated); position: relative; }
+.ct-pl-planas.dabartinis { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.ct-pl-planas.dabartinis::after { content: 'JŪSŲ'; position: absolute; top: 10px; right: 10px; font: 700 9px/1 var(--font-mono);
+  letter-spacing: .1em; color: var(--accent-light); background: var(--accent-dim); border: 1px solid var(--accent-border); padding: 3px 6px; border-radius: 5px; }
+.ct-pl-planas h3 { margin: 0 0 2px; font: 700 15px var(--font); color: var(--text-primary); }
+.ct-pl-planas .kaina { font: 700 22px/1.1 var(--font-mono); color: var(--text-primary); margin: 6px 0 10px; }
+.ct-pl-planas .kaina small { font: 500 11px var(--font); color: var(--text-muted); }
+.ct-pl-planas ul { margin: 0; padding: 0; list-style: none; }
+.ct-pl-planas li { font: 400 12.5px/1.7 var(--font); color: var(--text-secondary); padding-left: 16px; position: relative; }
+.ct-pl-planas li::before { content: '✓'; position: absolute; left: 0; color: var(--success); font-weight: 700; }
+.ct-pl-planas li.ne::before { content: '–'; color: var(--text-dim); }
+.ct-pl-kainos { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.ct-pl-kainos span { font: 500 12px var(--font); color: var(--text-secondary); background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 20px; padding: 5px 11px; }
+.ct-pl-kainos b { font-family: var(--font-mono); color: var(--accent-light); }
+.ct-pl-paketai { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+.ct-pl-paketai div { flex: 1; min-width: 140px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+.ct-pl-paketai b { font: 700 16px/1 var(--font-mono); color: var(--text-primary); }
+.ct-pl-paketai span { display: block; font: 400 12px var(--font); color: var(--text-muted); margin-top: 4px; }
+.ct-pl-kaip { font: 400 12.5px/1.6 var(--font); color: var(--text-muted); padding: 12px 14px; background: var(--bg-elevated); border-radius: 10px; border: 1px dashed var(--border-light); }
+.ct-pl-kaip b { color: var(--text-primary); }
+.ct-pl-h { font: 700 10px/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--text-dim); margin: 0 0 10px; }
+
+/* Admin */
+.ct-adm { margin-top: 24px; border-top: 1px solid var(--border); padding-top: 18px; }
+.ct-adm table { width: 100%; border-collapse: collapse; font: 400 12px var(--font); }
+.ct-adm th { text-align: left; font: 700 9px/1 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.ct-adm td { padding: 8px; border-bottom: 1px solid var(--border); color: var(--text-secondary); vertical-align: middle; }
+.ct-adm td.el { color: var(--text-primary); font-weight: 600; }
+.ct-adm input, .ct-adm select { height: 28px; padding: 0 8px; border-radius: 6px; border: 1px solid var(--border-light); background: var(--bg-raised); color: var(--text-primary); font: 500 12px var(--font); }
+.ct-adm input[type=number] { width: 64px; }
+.ct-adm input[type=date] { width: 128px; }
+.ct-adm button { height: 28px; padding: 0 10px; border-radius: 6px; border: 1px solid var(--accent-border); background: var(--accent-dim); color: var(--accent-light); font: 600 12px var(--font); cursor: pointer; }
+.ct-adm button:hover { background: var(--accent); color: #fff; }
+.ct-adm .eil { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.ct-adm-wrap { overflow-x: auto; }
+@media (max-width: 640px) {
+  .ct-pl-dabar, .ct-pl-planai { grid-template-columns: 1fr; }
+  #ct-pl-modal { padding: 10px; }
+}
+</style>
+
+<div id="ct-pl-modal" onclick="if(event.target.id==='ct-pl-modal') ctUzdarytiPlanus()">
+  <div id="ct-pl-inner">
+    <div class="ct-pl-head">
+      <h2>Planas ir kreditai</h2>
+      <button class="ct-pl-close" onclick="ctUzdarytiPlanus()">✕</button>
+    </div>
+    <div class="ct-pl-body" id="ct-pl-body"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════ PLANAI IR KREDITAI ═══════════
+window.ctPlanas = null;
+
+function ctEscP(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+
+function ctAtnaujintiPlanoZenkleli() {
+  var el = document.getElementById('ct-planas-btn-text');
+  if (!el) return;
+  var b = window.ctPlanas;
+  if (!b) { el.textContent = 'Planas'; return; }
+  var kr = b.kreditai.viso;
+  var kl = kr <= 0 ? 'nulis' : (kr <= 2 ? 'maza' : '');
+  el.innerHTML = ctEscP(b.planoPavadinimas) + ' <span class="ct-pl-kr ' + kl + '">' + kr + ' kr</span>';
+}
+
+async function ctIkeltiPlana() {
+  if (!window.ctToken || !window.ctToken()) { window.ctPlanas = null; ctAtnaujintiPlanoZenkleli(); return null; }
+  try {
+    var r = await ctApi('/api/planas');
+    if (!r.ok) return null;
+    window.ctPlanas = await r.json();
+    ctAtnaujintiPlanoZenkleli();
+    return window.ctPlanas;
+  } catch (e) { return null; }
+}
+
+function ctUzdarytiPlanus() {
+  var m = document.getElementById('ct-pl-modal');
+  if (m) m.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function ctPlanoKortele(raktas, p, dabartinis) {
+  var eil = [];
+  if (raktas === 'trial') eil.push('<li>1 bandomoji paieška</li><li>1 kreditas – pamatyti gilią analizę</li><li class="ne">Kainų sekimas, „+N naujų"</li>');
+  if (raktas === 'pro') eil.push('<li>100 paieškų per mėnesį</li><li>15 kreditų per mėnesį</li><li>VIN, pardavėjo patikra, palyginimas</li><li>Auto istorija</li><li class="ne">Kainų sekimas, „+N naujų"</li>');
+  if (raktas === 'business') eil.push('<li>Neribotos paieškos</li><li>100 kreditų per mėnesį</li><li>Viskas iš Pro</li><li>Kainų sekimas ir „+N naujų" istorijoje</li><li>Perpardavimo skaičiuoklė</li>');
+  var kaina = p.kaina ? '€' + p.kaina.toFixed(2).replace('.', ',') + ' <small>/ mėn.</small>' : '€0';
+  return '<div class="ct-pl-planas' + (dabartinis ? ' dabartinis' : '') + '"><h3>' + ctEscP(p.pavadinimas) + '</h3>'
+    + '<div class="kaina">' + kaina + '</div><ul>' + eil.join('') + '</ul></div>';
+}
+
+async function ctPlanuModalas(zinute) {
+  var m = document.getElementById('ct-pl-modal'), body = document.getElementById('ct-pl-body');
+  if (!m || !body) return;
+  m.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  body.innerHTML = '<div style="color:var(--text-muted);font-size:13px">Kraunama…</div>';
+  var b = window.ctPlanas || await ctIkeltiPlana();
+  if (!b) {
+    body.innerHTML = '<div class="ct-pl-kaip">Prisijunkite, kad matytumėte savo planą.</div>';
+    return;
+  }
+  var k = b.kainos, pk = b.paketai || [];
+  var paieskos = b.paieskos.liko === null ? 'neribota' : b.paieskos.liko;
+  var paieskuPast = b.paieskos.ribosTipas === 'viso' ? 'iš viso' : (b.paieskos.ribosTipas === 'menesi' ? 'šį mėnesį' : '');
+  var html = '';
+  if (zinute) html += '<div class="ct-pl-zinute">' + ctEscP(zinute) + '</div>';
+  if (b.pasibaiges) html += '<div class="ct-pl-zinute">Jūsų planas baigė galioti ' + ctEscP(b.planIki) + '. Dabar galioja bandomojo plano ribos.</div>';
+  html += '<div class="ct-pl-dabar">'
+    + '<div><small>Planas</small><b style="font-size:16px">' + ctEscP(b.planoPavadinimas) + '</b>' + (b.planIki && !b.pasibaiges ? '<span>iki ' + ctEscP(b.planIki) + '</span>' : '') + '</div>'
+    + '<div><small>Kreditai</small><b>' + b.kreditai.viso + '</b><span>' + b.kreditai.plano + ' plano · ' + b.kreditai.pirkti + ' pirkti</span></div>'
+    + '<div><small>Paieškos liko</small><b>' + paieskos + '</b><span>' + paieskuPast + '</span></div>'
+    + '</div>';
+  html += '<p class="ct-pl-h">Kiek kainuoja veiksmai</p><div class="ct-pl-kainos">'
+    + '<span>Gili analizė <b>' + k.analize + ' kr</b></span><span>VIN istorija <b>' + k.vin + ' kr</b></span>'
+    + '<span>Pardavėjo patikra <b>' + k.pardavejas + ' kr</b></span><span>Palyginimas <b>' + k.palyginimas + ' kr</b></span>'
+    + '<span>Tas pats skelbimas per 24 val. <b>nemokamai</b></span></div>';
+  html += '<p class="ct-pl-h">Planai</p><div class="ct-pl-planai">'
+    + ctPlanoKortele('trial', b.planai.trial, b.planas === 'trial')
+    + ctPlanoKortele('pro', b.planai.pro, b.planas === 'pro')
+    + ctPlanoKortele('business', b.planai.business, b.planas === 'business') + '</div>';
+  if (pk.length) {
+    html += '<p class="ct-pl-h">Papildomi kreditai</p><div class="ct-pl-paketai">'
+      + pk.map(function (x) { return '<div><b>' + x.kreditai + ' kr</b><span>€' + x.kaina.toFixed(2).replace('.', ',') + ' · nesibaigia</span></div>'; }).join('') + '</div>';
+  }
+  html += '<div class="ct-pl-kaip">Norėdami įsigyti planą ar kreditų – <b>parašykite mums</b>, ir priskirsime per kelias valandas. Mokėjimas kortele bus netrukus.</div>';
+  if (b.isAdmin) html += '<div class="ct-adm" id="ct-adm"><p class="ct-pl-h">Administravimas</p><div style="color:var(--text-muted);font-size:12px">Kraunama…</div></div>';
+  body.innerHTML = html;
+  if (b.isAdmin) ctAdminIkelti();
+}
+
+// ── Administravimas ──
+async function ctAdminIkelti() {
+  var el = document.getElementById('ct-adm'); if (!el) return;
+  try {
+    var r = await ctApi('/admin/vartotojai');
+    if (!r.ok) { el.innerHTML += '<div style="color:var(--danger);font-size:12px">Nepavyko įkelti vartotojų (' + r.status + ')</div>'; return; }
+    var d = await r.json();
+    var eil = d.vartotojai.map(function (u) {
+      var b = u.busena, id = 'adm-' + u.id;
+      return '<tr>'
+        + '<td class="el">' + ctEscP(u.email) + (u.is_admin ? ' <span style="font:600 9px var(--font-mono);color:var(--accent-light)">ADMIN</span>' : '') + '</td>'
+        + '<td>' + ctEscP(b.planoPavadinimas) + (u.plan_iki ? '<br><span style="color:var(--text-dim);font-size:11px">iki ' + ctEscP(u.plan_iki) + (b.pasibaiges ? ' (baigėsi)' : '') + '</span>' : '') + '</td>'
+        + '<td><b style="font-family:var(--font-mono);color:var(--text-primary)">' + b.kreditai.viso + '</b><br><span style="color:var(--text-dim);font-size:11px">' + b.kreditai.plano + '+' + b.kreditai.pirkti + '</span></td>'
+        + '<td>' + b.paieskos.menesi + ' / mėn.<br><span style="color:var(--text-dim);font-size:11px">' + b.paieskos.viso + ' viso</span></td>'
+        + '<td><div class="eil"><select id="' + id + '-p"><option value="trial"' + (u.plan === 'trial' ? ' selected' : '') + '>Bandomasis</option><option value="pro"' + (u.plan === 'pro' ? ' selected' : '') + '>Pro</option><option value="business"' + (u.plan === 'business' ? ' selected' : '') + '>Verslas</option></select>'
+        + '<input type="date" id="' + id + '-d" value="' + ctEscP(u.plan_iki || '') + '" title="Galioja iki (tuščia = 30 d.)">'
+        + '<button onclick="ctAdminPlanas(\'' + ctEscP(u.email) + '\',\'' + id + '\')">Nustatyti</button></div>'
+        + '<div class="eil" style="margin-top:6px"><input type="number" id="' + id + '-k" placeholder="+kr" step="1">'
+        + '<button onclick="ctAdminKreditai(\'' + ctEscP(u.email) + '\',\'' + id + '\')">Pridėti kreditų</button></div></td>'
+        + '</tr>';
+    }).join('');
+    el.innerHTML = '<p class="ct-pl-h">Administravimas · ' + d.vartotojai.length + ' vartot.</p><div class="ct-adm-wrap"><table>'
+      + '<thead><tr><th>El. paštas</th><th>Planas</th><th>Kreditai</th><th>Paieškos</th><th>Veiksmai</th></tr></thead><tbody>' + eil + '</tbody></table></div>';
+  } catch (e) { el.innerHTML += '<div style="color:var(--danger);font-size:12px">' + ctEscP(e.message) + '</div>'; }
+}
+
+async function ctAdminPlanas(email, id) {
+  var planas = document.getElementById(id + '-p').value, iki = document.getElementById(id + '-d').value || null;
+  var r = await ctApi('/admin/planas', { method: 'POST', body: JSON.stringify({ email: email, planas: planas, iki: iki }) });
+  var d = await r.json().catch(function () { return {}; });
+  if (!r.ok) { showToast('Nepavyko: ' + (d.error || r.status), 'error'); return; }
+  showToast(email + ' → ' + planas + (d.busena && d.busena.planIki ? ' iki ' + d.busena.planIki : ''), 'success');
+  ctAdminIkelti(); ctIkeltiPlana();
+}
+
+async function ctAdminKreditai(email, id) {
+  var kiekis = parseInt(document.getElementById(id + '-k').value, 10);
+  if (!kiekis) { showToast('Įveskite kiekį', 'error'); return; }
+  var r = await ctApi('/admin/kreditai', { method: 'POST', body: JSON.stringify({ email: email, kiekis: kiekis, pastaba: 'admin skydelis' }) });
+  var d = await r.json().catch(function () { return {}; });
+  if (!r.ok) { showToast('Nepavyko: ' + (d.error || r.status), 'error'); return; }
+  showToast(email + ': ' + (kiekis > 0 ? '+' : '') + kiekis + ' kr → ' + d.busena.kreditai.viso, 'success');
+  ctAdminIkelti(); ctIkeltiPlana();
+}
+
+// Ikeliam prisijungus ir paleidziant
+document.addEventListener('DOMContentLoaded', function () {
+  setTimeout(ctIkeltiPlana, 200);
+  try {
+    var pp = new URLSearchParams(location.search);
+    if (pp.get('planas') === '1') {
+      pp.delete('planas');
+      history.replaceState(null, '', location.pathname + (pp.toString() ? '?' + pp.toString() : ''));
+      setTimeout(function () { ctPlanuModalas(); }, 500);
+    }
+  } catch (e) {}
+});
+window.addEventListener('storage', function (e) { if (e.key === 'ct_token') ctIkeltiPlana(); });
+</script>
 
 </body>
 </html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ataskaitos — CarTriige</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="ct-bendras.css">
+<style>
+body { background: var(--bg-base); color: var(--text-primary); font-family: var(--font); margin: 0; }
+.pg { max-width: 1240px; margin: 0 auto; padding: 26px 16px 80px; }
+.pg-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+.pg-head h1 { margin: 0; font: 700 22px/1.2 var(--font); flex: 1; }
+.pg-head .kiek { font: 600 11px/1 var(--font-mono); color: var(--accent-light); background: var(--accent-dim); border: 1px solid var(--accent-border); padding: 5px 9px; border-radius: 7px; }
+.pg-sub { color: var(--text-muted); font-size: 13px; margin: -8px 0 18px; }
+.pg-tuscia { text-align: center; padding: 60px 20px; background: var(--bg-surface); border: 1px dashed var(--border-light); border-radius: 16px; color: var(--text-muted); font-size: 14px; }
+.pg-tuscia b { display: block; color: var(--text-primary); font-size: 16px; margin-bottom: 8px; }
+.pg-tuscia a { color: var(--accent-light); }
+.filtrai { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+.filtrai button { height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-surface); color: var(--text-secondary); font: 500 12.5px var(--font); cursor: pointer; }
+.filtrai button.on { background: var(--accent-dim); border-color: var(--accent-border); color: var(--accent-light); }
+.filtrai button b { font-family: var(--font-mono); font-weight: 600; margin-left: 5px; opacity: .8; }
+.at-card { display: flex; gap: 14px; align-items: center; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
+.at-card:hover { border-color: var(--border-light); }
+.at-ic { width: 44px; height: 44px; border-radius: 10px; flex: none; display: grid; place-items: center; font-size: 18px; background: var(--bg-elevated); border: 1px solid var(--border); overflow: hidden; }
+.at-ic img { width: 100%; height: 100%; object-fit: cover; }
+.at-info { flex: 1; min-width: 0; }
+.at-tipas { font: 600 9px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; padding: 3px 6px; border-radius: 5px; display: inline-block; margin-bottom: 5px; }
+.at-tipas.analize { background: var(--accent-dim); color: var(--accent-light); border: 1px solid var(--accent-border); }
+.at-tipas.palyginimas { background: var(--success-dim); color: var(--success); border: 1px solid var(--success-border); }
+.at-tipas.vin { background: var(--warning-dim); color: var(--warning); border: 1px solid var(--warning-border); }
+.at-tipas.pardavejas { background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border-light); }
+.at-title { font: 700 14px var(--font); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.at-sant { font: 400 12.5px/1.5 var(--font); color: var(--text-muted); margin-top: 3px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.at-meta { font: 500 10.5px var(--font-mono); color: var(--text-dim); margin-top: 6px; }
+.at-right { flex: none; display: flex; gap: 8px; align-items: center; }
+.at-btn { height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border-light); background: transparent; color: var(--text-primary); font: 500 12.5px var(--font); cursor: pointer; white-space: nowrap; }
+.at-btn.ac { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.at-btn.ac:hover { background: var(--accent-light); }
+.at-btn.del { color: var(--text-muted); width: 34px; padding: 0; }
+.at-btn.del:hover { color: var(--danger); border-color: var(--danger-border); }
+/* VIN / pardavėjo ataskaita rodoma vietoje */
+.at-inline { grid-column: 1 / -1; width: 100%; margin-top: 10px; padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; font: 400 13px/1.6 var(--font); color: var(--text-secondary); white-space: pre-wrap; }
+.at-inline b { color: var(--text-primary); }
+.at-card.open { flex-wrap: wrap; }
+@media (max-width: 640px) {
+  .at-card { flex-wrap: wrap; }
+  .at-right { width: 100%; justify-content: flex-end; }
+}
+</style>
+</head>
+<body>
+
+<header class="ct3-header">
+  <div class="ct3-header-inner">
+    <a class="ct3-logo" href="index.html">
+      <svg class="ct3-logo-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="18" y="2" width="20" height="20" rx="3" transform="rotate(45 18 2)" fill="#7C5CFF"/>
+        <rect x="18" y="9" width="11" height="11" rx="2" transform="rotate(45 18 9)" fill="#0A0C12" opacity="0.7"/>
+        <rect x="18" y="13" width="5" height="5" rx="1" transform="rotate(45 18 13)" fill="#7C5CFF" opacity="0.9"/>
+      </svg>
+      <div class="ct3-logo-text">
+        <span>Car<b>Triige</b></span>
+        <small>AUTOMOTIVE MARKET INTELLIGENCE</small>
+      </div>
+    </a>
+    <nav class="ct3-nav">
+      <a class="ct3-nav-link" href="index.html">Paieška</a>
+      <a class="ct3-nav-link" href="megstamiausi.html">Mėgstamiausi</a>
+      <a class="ct3-nav-link active" href="ataskaitos.html">Ataskaitos</a>
+    </nav>
+    <div class="ct3-header-right">
+      <button class="ct3-premium-btn" id="ct-planas-btn" onclick="location.href='index.html?planas=1'"><span id="ct-planas-btn-text">Planas</span></button>
+      <a class="ct3-avatar" href="index.html" title="Paskyra"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></a>
+    </div>
+  </div>
+</header>
+
+<div class="pg">
+  <div class="pg-head"><h1>Ataskaitos</h1><span class="kiek" id="kiek">–</span></div>
+  <p class="pg-sub">Viskas, ką sugeneravote už kreditus: gilios analizės, palyginimai, VIN ir pardavėjų patikros. Atidaromos nemokamai.</p>
+  <div class="filtrai" id="filtrai"></div>
+  <div id="sarasas"><div class="pg-tuscia">Kraunama…</div></div>
+</div>
+
+<script src="ct-bendras.js"></script>
+<script>
+const TIPAI = { analize: ['Gili analizė', '🔬'], palyginimas: ['Palyginimas', '⚖️'], vin: ['VIN istorija', '🔑'], pardavejas: ['Pardavėjas', '🏢'] };
+let visos = [], filtras = '';
+
+(async function () {
+  const el = document.getElementById('sarasas');
+  if (!ctToken()) { el.innerHTML = '<div class="pg-tuscia"><b>Prisijunkite</b>Ataskaitos saugomos prie paskyros.<br><br><a href="index.html">Į paiešką →</a></div>'; return; }
+  try {
+    const r = await ctApi('/api/ataskaitos');
+    if (r.status === 401) { el.innerHTML = '<div class="pg-tuscia"><b>Sesija baigėsi</b><a href="index.html">Prisijunkite iš naujo →</a></div>'; return; }
+    visos = (await r.json()).sarasas || [];
+  } catch (e) { el.innerHTML = '<div class="pg-tuscia">Nepavyko įkelti: ' + ctEsc(e.message) + '</div>'; return; }
+  piesti();
+})();
+
+function piesti() {
+  const el = document.getElementById('sarasas'), kiek = document.getElementById('kiek'), fl = document.getElementById('filtrai');
+  kiek.textContent = visos.length;
+  const kiekTipo = {}; visos.forEach(function (a) { kiekTipo[a.tipas] = (kiekTipo[a.tipas] || 0) + 1; });
+  fl.innerHTML = '<button class="' + (filtras ? '' : 'on') + '" onclick="filtruoti(\'\')">Visos<b>' + visos.length + '</b></button>'
+    + Object.keys(TIPAI).filter(function (t) { return kiekTipo[t]; }).map(function (t) {
+      return '<button class="' + (filtras === t ? 'on' : '') + '" onclick="filtruoti(\'' + t + '\')">' + TIPAI[t][0] + '<b>' + kiekTipo[t] + '</b></button>';
+    }).join('');
+  const list = filtras ? visos.filter(function (a) { return a.tipas === filtras; }) : visos;
+  if (!list.length) { el.innerHTML = '<div class="pg-tuscia"><b>Ataskaitų dar nėra</b>Paieškoje paspauskite „Detali apžvalga" – ataskaita atsiras čia.<br><br><a href="index.html">Į paiešką →</a></div>'; return; }
+  el.innerHTML = list.map(function (a) {
+    const t = TIPAI[a.tipas] || [a.tipas, '📄'];
+    const inline = (a.tipas === 'vin' || a.tipas === 'pardavejas');
+    return '<div class="at-card" id="at-' + a.id + '">'
+      + '<div class="at-ic">' + (a.photo ? '<img src="' + ctEsc(a.photo) + '" alt="" loading="lazy">' : t[1]) + '</div>'
+      + '<div class="at-info"><span class="at-tipas ' + ctEsc(a.tipas) + '">' + t[0] + '</span>'
+      + '<div class="at-title">' + ctEsc(a.pavadinimas || a.raktas) + '</div>'
+      + (a.santrauka ? '<div class="at-sant">' + ctEsc(a.santrauka) + '</div>' : '')
+      + '<div class="at-meta">' + ctLaikas(a.laikas) + '</div></div>'
+      + '<div class="at-right">'
+      + '<button class="at-btn ac" onclick="atidaryti(' + a.id + ', this)">' + (inline ? 'Rodyti' : 'Atidaryti →') + '</button>'
+      + '<button class="at-btn del" title="Ištrinti" onclick="trinti(' + a.id + ', this)">✕</button>'
+      + '</div></div>';
+  }).join('');
+}
+
+function filtruoti(t) { filtras = t; piesti(); }
+
+async function atidaryti(id, btn) {
+  btn.disabled = true; const buvo = btn.textContent; btn.textContent = '…';
+  try {
+    const r = await ctApi('/api/ataskaitos/' + id);
+    if (!r.ok) throw new Error('Nepavyko įkelti (' + r.status + ')');
+    const a = await r.json(), d = a.duomenys || {};
+    if (a.tipas === 'analize') {
+      // Ta pati struktura, kuria naudoja index.html -> detail.html perdavimas
+      try {
+        localStorage.setItem('ct_detail', JSON.stringify({ c: d.c || { url: a.raktas }, analysis: d.analysis || null, photos: d.photos || [] }));
+        // detail.html analize ima is narsykles podelio pagal url
+        const cache = JSON.parse(localStorage.getItem('carTriageAnalysisCache') || '{}');
+        cache[a.raktas] = { data: { analysis: d.analysis, photos: d.photos, vin: d.vin, pardavejas: d.pardavejas }, savedAt: Date.now() };
+        localStorage.setItem('carTriageAnalysisCache', JSON.stringify(cache));
+      } catch (e) {}
+      location.href = 'detail.html'; return;
+    }
+    if (a.tipas === 'palyginimas') {
+      try {
+        localStorage.setItem('ct_compare_list', JSON.stringify(d.autos || []));
+        localStorage.setItem('ct_compare_result', JSON.stringify({ autosRaktas: (d.autos || []).map(function (x) { return x.url; }).join('|'), duomenys: d.rezultatas }));
+      } catch (e) {}
+      location.href = 'compare.html'; return;
+    }
+    // VIN / pardavejas - rodom cia pat
+    const card = document.getElementById('at-' + id);
+    let sen = card.querySelector('.at-inline');
+    if (sen) { sen.remove(); card.classList.remove('open'); btn.textContent = 'Rodyti'; btn.disabled = false; return; }
+    const r0 = a.tipas === 'pardavejas' ? (d.rezultatas || d) : d;
+    const eil = [];
+    Object.keys(r0 || {}).forEach(function (k) {
+      if (['cached', 'cacheAgeMinutes', 'nuoroda'].indexOf(k) !== -1) return;
+      const v = r0[k]; if (v == null || v === '' || (Array.isArray(v) && !v.length)) return;
+      eil.push('<b>' + ctEsc(k.replace(/_/g, ' ')) + ':</b> ' + ctEsc(Array.isArray(v) ? v.join('; ') : (typeof v === 'object' ? JSON.stringify(v) : v)));
+    });
+    if (r0 && r0.nuoroda && /^https?:\/\//i.test(String(r0.nuoroda))) eil.push('<a href="' + ctEsc(r0.nuoroda) + '" target="_blank" rel="noopener" style="color:var(--accent-light)">Šaltinis ↗</a>');
+    card.classList.add('open');
+    card.insertAdjacentHTML('beforeend', '<div class="at-inline">' + (eil.join('\n') || 'Duomenų nėra.') + '</div>');
+    btn.textContent = 'Slėpti'; btn.disabled = false;
+  } catch (e) { btn.textContent = buvo; btn.disabled = false; alert(e.message); }
+}
+
+async function trinti(id, btn) {
+  if (!confirm('Ištrinti šią ataskaitą?')) return;
+  btn.disabled = true;
+  try {
+    await ctApi('/api/ataskaitos/' + id, { method: 'DELETE' });
+    visos = visos.filter(function (a) { return a.id !== id; }); piesti();
+  } catch (e) { btn.disabled = false; alert('Nepavyko ištrinti'); }
+}
+</script>
+</body>
+</html>

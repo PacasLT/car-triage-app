@@ -76,6 +76,11 @@ db.exec(`
     created_at TEXT DEFAULT (datetime('now'))
   )
 `);
+// Planai ir kreditai – atskiras modulis, dirba su ta pačia DB
+const planai = require('./planai');
+planai.prijungti(db);
+const duomenys = require('./vartotojo-duomenys');
+duomenys.prijungti(db);
 
 function getUserByEmail(email) {
   return db.prepare('SELECT * FROM users WHERE email = ?').get(email);
@@ -122,9 +127,11 @@ function requireAuth(req, res, next) {
 
 // ── Route handler'iai ──────────────────────────────────────────────────────
 async function handleRegister(req, res) {
-  const { email, password, invite_code } = req.body;
+  const { email, password, invite_code } = req.body || {};
   if (!email || !password || !invite_code)
     return res.status(400).json({ detail: 'Trūksta laukų' });
+  if (typeof email !== 'string' || typeof password !== 'string' || typeof invite_code !== 'string')
+    return res.status(400).json({ detail: 'Netinkamas laukų formatas' });
 
   if (!INVITE_CODES.has(invite_code.toUpperCase()))
     return res.status(403).json({ detail: 'Neteisingas invite kodas' });
@@ -136,7 +143,11 @@ async function handleRegister(req, res) {
     return res.status(400).json({ detail: 'Slaptažodis turi būti bent 8 simboliai' });
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  createUser(email, hashedPassword);
+  try { createUser(email, hashedPassword); }
+  catch (e) {
+    if (/UNIQUE/i.test(String(e.message))) return res.status(400).json({ detail: 'Šis el. paštas jau užregistruotas' });
+    throw e;
+  }
 
   const token = createToken(email);
   res.json({ access_token: token, token_type: 'bearer', email });
@@ -159,7 +170,9 @@ async function handleLogin(req, res) {
 }
 
 function handleMe(req, res) {
-  res.json({ email: req.user.email, created_at: req.user.created_at });
+  let busena = null;
+  try { busena = planai.busena(req.user); } catch (e) { console.error('[PLANAI] busena:', e.message); }
+  res.json({ email: req.user.email, created_at: req.user.created_at, isAdmin: planai.arAdmin(req.user), planas: busena });
 }
 
 // ── Eksportas ──────────────────────────────────────────────────────────────
@@ -167,4 +180,14 @@ console.log('[DB] Vartotoju duomenu bazeje:', (function () {
   try { return db.prepare('SELECT COUNT(*) AS n FROM users').get().n; } catch (e) { return 'nepavyko suskaiciuoti'; }
 })());
 
-module.exports = { requireAuth, handleRegister, handleLogin, handleMe };
+// Async marsrutai be try/catch palikdavo uzklausa kaboti (Express 4 negaudo promise'u)
+const asyncRoute = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch((e) => {
+  console.error('[AUTH] klaida:', e.message);
+  if (!res.headersSent) res.status(500).json({ detail: 'Vidinė klaida' });
+});
+
+module.exports = {
+  requireAuth, handleMe, planai, duomenys,
+  handleRegister: asyncRoute(handleRegister),
+  handleLogin: asyncRoute(handleLogin),
+};

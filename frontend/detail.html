@@ -381,11 +381,12 @@ button{font-family:inherit;cursor:pointer}
     </a>
     <nav class="ct3-nav">
       <a class="ct3-nav-link" href="index.html">Paieška</a>
-      <a class="ct3-nav-link" href="index.html?tab=megstamiausi">Mėgstamiausi</a>
+      <a class="ct3-nav-link" href="megstamiausi.html">Mėgstamiausi</a>
+      <a class="ct3-nav-link" href="ataskaitos.html">Ataskaitos</a>
       <a class="ct3-nav-link" href="#" onclick="event.preventDefault();dpAddToCompare()">Palyginti</a>
     </nav>
     <div class="ct3-header-right">
-      <button class="ct3-premium-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V10l6-8 6 8v10"/></svg>Go Premium</button>
+      <button class="ct3-premium-btn" id="ct-planas-btn" onclick="location.href='index.html?planas=1'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V10l6-8 6 8v10"/></svg><span id="ct-planas-btn-text">Planas</span></button>
       <button class="ct3-avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></button>
     </div>
   </div>
@@ -678,6 +679,17 @@ button{font-family:inherit;cursor:pointer}
 window.ctToken = function () {
   try { return localStorage.getItem('ct_token'); } catch (e) { return null; }
 };
+(async function () {
+  await new Promise(function (r) { setTimeout(r, 300); });
+  var el = document.getElementById('ct-planas-btn-text'), btn = document.getElementById('ct-planas-btn');
+  var t = null; try { t = localStorage.getItem('ct_token'); } catch (e) {}
+  if (!el || !t) { if (btn) btn.style.display = 'none'; return; }
+  try {
+    var r = await ctApi('/api/planas'); if (!r.ok) return;
+    var b = await r.json(); var kr = b.kreditai.viso;
+    el.innerHTML = String(b.planoPavadinimas).replace(/[<>&]/g, '') + ' <span class="ct-pl-kr" style="font:700 11px/1 var(--font-mono);padding:3px 7px;border-radius:6px;background:var(--accent-dim);color:var(--accent-light);border:1px solid var(--accent-border)">' + kr + ' kr</span>';
+  } catch (e) {}
+})();
 window.ctApi = function (kelias, params) {
   const p = Object.assign({}, params || {});
   const h = Object.assign({}, p.headers || {});
@@ -685,7 +697,17 @@ window.ctApi = function (kelias, params) {
   if (t) h['Authorization'] = 'Bearer ' + t;
   if (p.body && !h['Content-Type']) h['Content-Type'] = 'application/json';
   p.headers = h;
-  return fetch(kelias, p);
+  return fetch(kelias, p).then(function (r) {
+    if (r.status === 402) {
+      r.clone().json().then(function (d) {
+        var z = (d && d.error) || 'Nepakanka kreditų.';
+        if (confirm(z + '\n\nAtidaryti planų ir kreditų langą paieškos puslapyje?')) {
+          location.href = 'index.html?planas=1';
+        }
+      }).catch(function () {});
+    }
+    return r;
+  });
 };
 
 (function() {

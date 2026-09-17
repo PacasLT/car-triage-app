@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mėgstamiausi — CarTriige</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="ct-bendras.css">
+<style>
+body { background: var(--bg-base); color: var(--text-primary); font-family: var(--font); margin: 0; }
+.pg { max-width: 1240px; margin: 0 auto; padding: 26px 16px 80px; }
+.pg-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+.pg-head h1 { margin: 0; font: 700 22px/1.2 var(--font); flex: 1; }
+.pg-head .kiek { font: 600 11px/1 var(--font-mono); color: var(--accent-light); background: var(--accent-dim); border: 1px solid var(--accent-border); padding: 5px 9px; border-radius: 7px; }
+.pg-sub { color: var(--text-muted); font-size: 13px; margin: -8px 0 20px; }
+.pg-tuscia { text-align: center; padding: 60px 20px; background: var(--bg-surface); border: 1px dashed var(--border-light); border-radius: 16px; color: var(--text-muted); font-size: 14px; }
+.pg-tuscia b { display: block; color: var(--text-primary); font-size: 16px; margin-bottom: 8px; }
+.pg-tuscia a { color: var(--accent-light); }
+.mg-card { display: flex; flex-wrap: wrap; align-items: stretch; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 8px; }
+.mg-card:hover { border-color: var(--border-light); }
+.mg-photo { width: 192px; flex: none; border-right: 1px solid var(--border); position: relative; min-height: 96px; background: #141822; }
+.mg-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mg-body { flex: 1; min-width: 0; padding: 12px 14px; display: flex; align-items: center; gap: 14px; }
+.mg-info { flex: 1; min-width: 0; }
+.mg-title { font: 700 14px var(--font); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.mg-chips { display: flex; flex-wrap: wrap; gap: 5px; margin: 7px 0; }
+.mg-chips .chip { height: 22px; font-size: 11px; padding: 0 7px; }
+.mg-price { font: 700 17px var(--font-mono); letter-spacing: -.02em; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.mg-price small { font: 400 11px var(--font); color: var(--text-dim); }
+.mg-right { flex: none; display: flex; align-items: center; gap: 8px; }
+.mg-btn { height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border-light); background: transparent; color: var(--text-primary); font: 500 12.5px var(--font); cursor: pointer; white-space: nowrap; }
+.mg-btn:hover { background: var(--bg-elevated); }
+.mg-btn.ac { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.mg-btn.ac:hover { background: var(--accent-light); }
+.mg-btn.del { color: var(--text-muted); width: 34px; padding: 0; }
+.mg-btn.del:hover { color: var(--danger); border-color: var(--danger-border); }
+.mg-data { font: 500 10.5px var(--font-mono); color: var(--text-dim); margin-top: 6px; }
+@media (max-width: 640px) {
+  .mg-photo { width: 100%; height: 160px; border-right: none; border-bottom: 1px solid var(--border); }
+  .mg-body { flex-direction: column; align-items: stretch; }
+  .mg-right { justify-content: flex-end; }
+}
+</style>
+</head>
+<body>
+
+<header class="ct3-header">
+  <div class="ct3-header-inner">
+    <a class="ct3-logo" href="index.html">
+      <svg class="ct3-logo-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="18" y="2" width="20" height="20" rx="3" transform="rotate(45 18 2)" fill="#7C5CFF"/>
+        <rect x="18" y="9" width="11" height="11" rx="2" transform="rotate(45 18 9)" fill="#0A0C12" opacity="0.7"/>
+        <rect x="18" y="13" width="5" height="5" rx="1" transform="rotate(45 18 13)" fill="#7C5CFF" opacity="0.9"/>
+      </svg>
+      <div class="ct3-logo-text">
+        <span>Car<b>Triige</b></span>
+        <small>AUTOMOTIVE MARKET INTELLIGENCE</small>
+      </div>
+    </a>
+    <nav class="ct3-nav">
+      <a class="ct3-nav-link" href="index.html">Paieška</a>
+      <a class="ct3-nav-link active" href="megstamiausi.html">Mėgstamiausi</a>
+      <a class="ct3-nav-link" href="ataskaitos.html">Ataskaitos</a>
+    </nav>
+    <div class="ct3-header-right">
+      <button class="ct3-premium-btn" id="ct-planas-btn" onclick="location.href='index.html?planas=1'"><span id="ct-planas-btn-text">Planas</span></button>
+      <a class="ct3-avatar" href="index.html" title="Paskyra"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></a>
+    </div>
+  </div>
+</header>
+
+<div class="pg">
+  <div class="pg-head"><h1>Mėgstamiausi</h1><span class="kiek" id="kiek">–</span></div>
+  <p class="pg-sub">Skelbimai, kuriuos pažymėjote ★. Saugomi prie paskyros – matysite iš bet kurio įrenginio.</p>
+  <div id="sarasas"><div class="pg-tuscia">Kraunama…</div></div>
+</div>
+
+<script src="ct-bendras.js"></script>
+<script>
+(async function () {
+  const el = document.getElementById('sarasas'), kiek = document.getElementById('kiek');
+  if (!ctToken()) { el.innerHTML = '<div class="pg-tuscia"><b>Prisijunkite</b>Mėgstamiausi saugomi prie paskyros.<br><br><a href="index.html">Į paiešką →</a></div>'; kiek.textContent = '0'; return; }
+  let sarasas = [];
+  try {
+    const r = await ctApi('/api/megstamiausi');
+    if (r.status === 401) { el.innerHTML = '<div class="pg-tuscia"><b>Sesija baigėsi</b><a href="index.html">Prisijunkite iš naujo →</a></div>'; return; }
+    sarasas = (await r.json()).sarasas || [];
+  } catch (e) { el.innerHTML = '<div class="pg-tuscia">Nepavyko įkelti: ' + ctEsc(e.message) + '</div>'; return; }
+  // sinchronizuojam su narsykles kopija, kad zvaigzdutes paieskoje sutaptu
+  try { localStorage.setItem('carTriageFavorites', JSON.stringify(sarasas)); } catch (e) {}
+  piesti(sarasas);
+
+  function piesti(list) {
+    kiek.textContent = list.length;
+    if (!list.length) { el.innerHTML = '<div class="pg-tuscia"><b>Dar nieko neišsaugota</b>Paieškos rezultatuose paspauskite ★ ant kortelės.<br><br><a href="index.html">Į paiešką →</a></div>'; return; }
+    el.innerHTML = list.map(function (f) {
+      const chips = [f.metai, f.rida ? Number(f.rida).toLocaleString('lt-LT').replace(/,/g, ' ') + ' km' : null, f.kuras, f.pavarai]
+        .filter(Boolean).map(function (x) { return '<span class="chip">' + ctEsc(x) + '</span>'; }).join('');
+      const diff = f.diffPct != null ? '<span class="chip ' + (f.diffPct >= 8 ? 'chip-pos' : (f.diffPct < 0 ? 'chip-neg' : '')) + '">' + (f.diffPct > 0 ? '−' : '+') + Math.abs(f.diffPct) + '%</span>' : '';
+      const data = new Date(f.savedAt || Date.now()).toLocaleDateString('lt-LT');
+      return '<div class="mg-card" data-url="' + ctEsc(f.url) + '">'
+        + '<div class="mg-photo">' + (f.photo ? '<img src="' + ctEsc(f.photo) + '" alt="" loading="lazy">' : '') + '</div>'
+        + '<div class="mg-body"><div class="mg-info">'
+        + '<div class="mg-title">' + ctEsc(f.modelis || 'Skelbimas') + (f.source ? '<span class="source-tag">' + ctEsc(f.source) + '</span>' : '') + '</div>'
+        + '<div class="mg-chips">' + chips + '</div>'
+        + '<div class="mg-price">' + (f.kaina ? Number(f.kaina).toLocaleString('lt-LT').replace(/,/g, ' ') + ' €' : '–') + diff
+        + (f.marketMedian ? '<small>vs ' + Number(f.marketMedian).toLocaleString('lt-LT').replace(/,/g, ' ') + ' €</small>' : '') + '</div>'
+        + '<div class="mg-data">išsaugota ' + data + '</div>'
+        + '</div><div class="mg-right">'
+        + '<a class="mg-btn" href="' + ctEsc(f.url) + '" target="_blank" rel="noopener">Skelbimas ↗</a>'
+        + '<button class="mg-btn ac" onclick="atidaryti(' + ctEsc(JSON.stringify(f.url)) + ')">Detali apžvalga →</button>'
+        + '<button class="mg-btn del" title="Pašalinti" onclick="salinti(' + ctEsc(JSON.stringify(f.url)) + ', this)">✕</button>'
+        + '</div></div></div>';
+    }).join('');
+  }
+
+  window.atidaryti = function (url) {
+    const f = sarasas.find(function (x) { return x.url === url; }); if (!f) return;
+    try { localStorage.setItem('ct_detail', JSON.stringify({ c: f, analysis: null, photos: f.photo ? [f.photo] : [] })); } catch (e) {}
+    location.href = 'detail.html';
+  };
+  window.salinti = async function (url, btn) {
+    btn.disabled = true;
+    try {
+      const r = await ctApi('/api/megstamiausi', { method: 'DELETE', body: JSON.stringify({ url: url }) });
+      const d = await r.json(); sarasas = d.sarasas || sarasas.filter(function (x) { return x.url !== url; });
+      try { localStorage.setItem('carTriageFavorites', JSON.stringify(sarasas)); } catch (e) {}
+      piesti(sarasas);
+    } catch (e) { btn.disabled = false; alert('Nepavyko pašalinti'); }
+  };
+})();
+</script>
+</body>
+</html>

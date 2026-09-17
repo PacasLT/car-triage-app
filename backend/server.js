@@ -11,7 +11,7 @@ const cheerio = require('cheerio');
 const puppeteer = require('puppeteer');
 const Anthropic = require('@anthropic-ai/sdk');
 const cache = require('./cache');
-const { requireAuth, handleRegister, handleLogin, handleMe } = require('./auth');
+const { requireAuth, handleRegister, handleLogin, handleMe, planai, duomenys } = require('./auth');
 
 const app = express();
 app.use(express.json());
@@ -21,6 +21,75 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 app.post('/auth/register', handleRegister);
 app.post('/auth/login', handleLogin);
 app.get('/auth/me', requireAuth, handleMe);
+
+// ── Planai ir kreditai ──────────────────────────────────────────────────────
+app.get('/api/planas', requireAuth, (req, res) => {
+  try { res.json(planai.busena(req.user)); }
+  catch (e) { res.status(500).json({ error: 'Nepavyko gauti plano' }); }
+});
+app.get('/api/planas/zurnalas', requireAuth, (req, res) => {
+  try { res.json({ irasai: planai.zurnalas(req.user.id, 50) }); }
+  catch (e) { res.status(500).json({ error: 'Nepavyko gauti žurnalo' }); }
+});
+
+// ── Mėgstamiausi (DB, prie paskyros) ────────────────────────────────────────
+app.get('/api/megstamiausi', requireAuth, (req, res) => {
+  try { res.json({ sarasas: duomenys.megstamiausi(req.user.id) }); }
+  catch (e) { res.status(500).json({ error: 'Nepavyko įkelti' }); }
+});
+app.post('/api/megstamiausi', requireAuth, (req, res) => {
+  try { res.json({ sarasas: duomenys.pridetiMegstama(req.user.id, req.body || {}) }); }
+  catch (e) { res.status(400).json({ error: e.message }); }
+});
+app.delete('/api/megstamiausi', requireAuth, (req, res) => {
+  try {
+    const url = (req.body && req.body.url) || req.query.url;
+    if (!url) return res.status(400).json({ error: 'Trūksta url' });
+    res.json({ sarasas: duomenys.pasalintiMegstama(req.user.id, url) });
+  } catch (e) { res.status(500).json({ error: 'Nepavyko pašalinti' }); }
+});
+
+// ── Ataskaitos (viskas, kas sugeneruota už kreditus) ─────────────────────────
+app.get('/api/ataskaitos', requireAuth, (req, res) => {
+  try { res.json({ sarasas: duomenys.ataskaitos(req.user.id, req.query.tipas || null) }); }
+  catch (e) { res.status(500).json({ error: 'Nepavyko įkelti' }); }
+});
+app.get('/api/ataskaitos/:id', requireAuth, (req, res) => {
+  try {
+    const a = duomenys.ataskaita(req.user.id, parseInt(req.params.id, 10));
+    if (!a) return res.status(404).json({ error: 'Nerasta' });
+    res.json(a);
+  } catch (e) { res.status(500).json({ error: 'Nepavyko įkelti' }); }
+});
+app.delete('/api/ataskaitos/:id', requireAuth, (req, res) => {
+  try { res.json({ ok: duomenys.pasalintiAtaskaita(req.user.id, parseInt(req.params.id, 10)) }); }
+  catch (e) { res.status(500).json({ error: 'Nepavyko pašalinti' }); }
+});
+
+// ── Administravimas (ADMIN_EMAILS env) ──────────────────────────────────────
+app.get('/admin/vartotojai', requireAuth, planai.reikalautiAdmin, (req, res) => {
+  try { res.json({ vartotojai: planai.visiVartotojai() }); }
+  catch (e) { res.status(500).json({ error: e.message }); }
+});
+app.post('/admin/planas', requireAuth, planai.reikalautiAdmin, (req, res) => {
+  try {
+    const { email, planas, iki } = req.body || {};
+    res.json({ ok: true, busena: planai.nustatytiPlana(email, planas, iki, req.user.email) });
+  } catch (e) { res.status(400).json({ error: e.message }); }
+});
+app.post('/admin/kreditai', requireAuth, planai.reikalautiAdmin, (req, res) => {
+  try {
+    const { email, kiekis, pastaba } = req.body || {};
+    res.json({ ok: true, busena: planai.pridetiKreditu(email, kiekis, pastaba, req.user.email) });
+  } catch (e) { res.status(400).json({ error: e.message }); }
+});
+app.get('/admin/zurnalas', requireAuth, planai.reikalautiAdmin, (req, res) => {
+  try {
+    const id = parseInt(req.query.userId, 10);
+    if (!id) return res.status(400).json({ error: 'Trūksta userId' });
+    res.json({ irasai: planai.zurnalas(id, 100) });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const MODEL = 'claude-sonnet-4-5';
@@ -876,7 +945,7 @@ async function paieskosKiekis(filtraiIn) {
   return reiksmes.reduce((a, b) => a + b, 0);
 }
 
-app.post('/api/history-counts', requireAuth, async (req, res) => {
+app.post('/api/history-counts', requireAuth, planai.reikalautiPlano('business'), async (req, res) => {
   try {
     const paieskos = (req.body && req.body.paieskos) || [];
     if (!Array.isArray(paieskos) || !paieskos.length) return res.json({ rezultatai: [] });
@@ -1713,20 +1782,29 @@ async function runSearchJob(jobId, filters) {
     // vartotojui nereikia paspausti mygtuko, kad matytu pilna vaizda geriausiems variantams.
     // Visi TOP 5 analizuojami LYGIAGRECIAI (ne vienas po kito) - tai ilgiausiai trunkantis
     // zingsnis (web paieska kiekvienam), tad lygiagretumas duoda didziausia pagreitejima.
-    const TOP_N_DEEP = 7;
-    const topSlice = candidates.slice(0, TOP_N_DEEP);
-    logJob(jobId, `🔬 Ruošiame detalią apžvalgą TOP ${topSlice.length} pasiūlymams (lygiagrečiai)...`);
-    await Promise.all(topSlice.map(async (c, i) => {
-      const label = `[${i + 1}/${TOP_N_DEEP}] ${c.modelis} ${c.kaina}€`;
+    // PAKEISTA (planai ir kreditai): gili analize nebedaroma automatiskai -
+    // tai buvo 87 % paieskos kainos ($0,46 is $0,53), o vartotojas atsidaro 1-3.
+    // Dabar ji uz kredita, paspaudus. Jei analize JAU yra podelyje - prisegam
+    // nemokamai, kad pakartotines paieskos nenuskurstu.
+    // AUTO_DEEP_TOP env leidzia grazinti sena elgesi (pvz. 3) testavimui.
+    const TOP_N_DEEP = parseInt(process.env.AUTO_DEEP_TOP || '0', 10);
+    const topSlice = candidates.slice(0, Math.max(TOP_N_DEEP, 20));
+    let isPodelio = 0;
+    topSlice.forEach((c) => {
+      const cachedDeep = cache.getCached('analysis', c.url, cache.ANALYSIS_TTL_MS);
+      if (cachedDeep && !c.deepAnalysis) {
+        c.deepAnalysis = cachedDeep.analysis; c.vin = cachedDeep.vin;
+        c.pardavejas = cachedDeep.pardavejas; c.photos = cachedDeep.photos;
+        isPodelio++;
+      }
+    });
+    if (isPodelio) logJob(jobId, `✅ ${isPodelio} skelbim${isPodelio === 1 ? 'ui' : 'ams'} detali apžvalga jau buvo paruošta – prisegta nemokamai`);
+    const generuoti = candidates.slice(0, TOP_N_DEEP).filter((c) => !c.deepAnalysis);
+    if (generuoti.length) logJob(jobId, `🔬 Ruošiame detalią apžvalgą TOP ${generuoti.length} pasiūlymams (lygiagrečiai)...`);
+    await Promise.all(generuoti.map(async (c, i) => {
+      const label = `[${i + 1}/${generuoti.length}] ${c.modelis} ${c.kaina}€`;
       try {
-        const cachedDeep = cache.getCached('analysis', c.url, cache.ANALYSIS_TTL_MS);
-        if (cachedDeep) {
-          logJob(jobId, `   ✅ ${label} - rasta talpykloje`);
-          c.deepAnalysis = cachedDeep.analysis;
-          c.vin = cachedDeep.vin;
-          c.pardavejas = cachedDeep.pardavejas;
-          c.photos = cachedDeep.photos;
-        } else {
+        {
           const stopFake = startFakeProgress(jobId, [
             `   🔍 ${label} - skaitau pilną skelbimo aprašymą...`,
             `   🔧 ${label} - renku techninę specifikaciją...`,
@@ -2283,7 +2361,7 @@ JSON struktura ir sukelia klaida:
 
 // ============ API ============
 
-app.post('/api/search-start', requireAuth, (req, res) => {
+app.post('/api/search-start', requireAuth, planai.reikalautiPaieskos(), (req, res) => {
   const jobId = newJob();
   runSearchJob(jobId, req.body);
   res.json({ jobId });
@@ -2295,7 +2373,7 @@ app.get('/api/search-status/:jobId', requireAuth, (req, res) => {
   res.json(job);
 });
 
-app.post('/api/analyze-single', requireAuth, async (req, res) => {
+app.post('/api/analyze-single', requireAuth, planai.reikalautiKreditu('analize', (r) => (r.body && r.body.url) ? String(r.body.url) + (r.body.force ? '#force' + Date.now() : '') : null), async (req, res) => {
   try {
     const { url, force, kaina, marketMedian, marketCount, diffPct, modelis, pardavejas: knownPardavejas, galia, variklioTuris } = req.body;
     if (!url) return res.status(400).json({ error: 'Trūksta URL' });
@@ -2304,6 +2382,7 @@ app.post('/api/analyze-single', requireAuth, async (req, res) => {
       const cached = cache.getCached('analysis', url, cache.ANALYSIS_TTL_MS);
       if (cached) {
         const ageMin = cache.cacheAgeMinutes('analysis', url);
+        issaugotiAnalizesAtaskaita(req, url, cached);
         return res.json({ ...cached, cached: true, cacheAgeMinutes: ageMin });
       }
     }
@@ -2320,12 +2399,32 @@ app.post('/api/analyze-single', requireAuth, async (req, res) => {
       pardavejas: pardavejas || knownPardavejas || null,
     };
     cache.setCached('analysis', url, result);
+    issaugotiAnalizesAtaskaita(req, url, result);
     res.json({ ...result, cached: false });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
+
+// Kiekviena gili analize - i vartotojo ataskaitas (kartu su skelbimo duomenimis is uzklausos,
+// kad ataskaita butu galima atidaryti detail.html be pakartotinio nuskaitymo)
+function issaugotiAnalizesAtaskaita(req, url, rezultatas) {
+  try {
+    const b = req.body || {};
+    const c = {
+      url, kaina: b.kaina || null, marketMedian: b.marketMedian || null, marketCount: b.marketCount || null,
+      diffPct: b.diffPct != null ? b.diffPct : null, modelis: b.modelis || rezultatas.title || null,
+      galia: b.galia || null, variklioTuris: b.variklioTuris || null, metai: b.metai || null, rida: b.rida || null,
+      kuras: b.kuras || null, pavarai: b.pavarai || null, source: b.source || null,
+      photo: rezultatas.photo || b.photo || null, pardavejas: rezultatas.pardavejas || null, vin: rezultatas.vin || null,
+    };
+    const a = rezultatas.analysis || {};
+    const pav = (b.modelis || rezultatas.title || url).toString().slice(0, 120) + (b.kaina ? ` · ${Number(b.kaina).toLocaleString('lt-LT')} €` : '');
+    duomenys.issaugotiAtaskaita(req.user.id, 'analize', url, pav, a.verdiktas || null, c.photo,
+      { c, analysis: rezultatas.analysis || null, photos: rezultatas.photos || [], vin: rezultatas.vin || null, pardavejas: rezultatas.pardavejas || null });
+  } catch (e) { console.error('[DUOMENYS] analizės ataskaita:', e.message); }
+}
 
 // ============ GILUS DVIEJU/TRIJU AUTO PALYGINIMAS ============
 // Kiekvienam automobiliui atliekamas PILNAS nuskaitymas (skelbimo tekstas, visos
@@ -2424,7 +2523,7 @@ Grazink TIK JSON (be markdown, be paaiskinimu aplink), tokios strukturos:
   }
 }
 
-app.post('/api/compare-deep', requireAuth, async (req, res) => {
+app.post('/api/compare-deep', requireAuth, planai.reikalautiKreditu('palyginimas', (r) => Array.isArray(r.body && r.body.autos) ? r.body.autos.map((a) => a && a.url).filter(Boolean).sort().join('|') : null), async (req, res) => {
   const { autos } = req.body; // [{url, kaina, marketMedian, marketCount, diffPct, modelis, metai, rida, ...}]
   if (!Array.isArray(autos) || autos.length < 2) {
     return res.status(400).json({ error: 'Palyginimui reikia bent dvieju automobiliu.' });
@@ -2439,14 +2538,23 @@ app.post('/api/compare-deep', requireAuth, async (req, res) => {
       diffPct: a.diffPct, modelis: a.modelis, galia: a.galia, variklioTuris: a.variklioTuris,
     })));
     const verdiktas = await generuotiPalyginimoVerdikta(profiliai, autos);
-    res.json({
+    const atsakymas = {
       profiliai: profiliai.map((p, i) => ({
         url: p.url, title: p.title, photos: p.photos || [], vin: p.vin || null,
         pardavejas: p.pardavejas || null, analysis: p.analysis || null,
         isPodelio: p.isPodelio, meta: autos[i],
       })),
       verdiktas,
-    });
+    };
+    try {
+      const raktas = autos.map((a) => a.url).filter(Boolean).sort().join('|');
+      const pav = autos.map((a) => (a.modelis || 'Auto') + (a.kaina ? ` ${Number(a.kaina).toLocaleString('lt-LT')} €` : '')).join(' vs ');
+      const sant = verdiktas && (verdiktas.trumpas_verdiktas || verdiktas.laimetojo_pagrindimas) || null;
+      const foto = (atsakymas.profiliai.find((p) => p.photos && p.photos.length) || {}).photos;
+      duomenys.issaugotiAtaskaita(req.user.id, 'palyginimas', raktas, pav, sant, foto ? foto[0] : null,
+        { autos, rezultatas: atsakymas });
+    } catch (e) { console.error('[DUOMENYS] palyginimo ataskaita:', e.message); }
+    res.json(atsakymas);
   } catch (err) {
     console.error('compare-deep KLAIDA:', err);
     const aiKl = typeof aiKlaidosZinute === 'function' ? aiKlaidosZinute(err) : null;
@@ -2708,7 +2816,7 @@ app.get('/api/model-trends', requireAuth, (req, res) => {
 });
 
 // Frontend praneša, kuriuos skelbimus verta sekti (išsaugoti lieka naršyklėje)
-app.post('/api/watch', requireAuth, (req, res) => {
+app.post('/api/watch', requireAuth, planai.reikalautiPlano('business'), (req, res) => {
   const { urls, meta } = req.body || {};
   if (!Array.isArray(urls)) return res.status(400).json({ error: 'urls turi būti masyvas' });
   const nauji = cache.pridetiSekimui(urls.slice(0, 200), meta || null);
@@ -2824,7 +2932,7 @@ app.post('/api/run-tracking', requireAuth, (req, res) => {
   res.json({ paleista: true, sekama: cache.sekamiUrlai().length });
 });
 
-app.post('/api/vin-lookup', requireAuth, async (req, res) => {
+app.post('/api/vin-lookup', requireAuth, planai.reikalautiKreditu('vin', (r) => (r.body && r.body.vin) ? String(r.body.vin).toUpperCase() : null), async (req, res) => {
   try {
     const { vin, force } = req.body;
     if (!vin || vin.length !== 17) return res.status(400).json({ error: 'Neteisingas VIN kodas (turi būti 17 simbolių)' });
@@ -2833,12 +2941,14 @@ app.post('/api/vin-lookup', requireAuth, async (req, res) => {
       const cached = cache.getCached('vin', vin, cache.ANALYSIS_TTL_MS);
       if (cached) {
         const ageMin = cache.cacheAgeMinutes('vin', vin);
+        duomenys.issaugotiAtaskaita(req.user.id, 'vin', String(vin).toUpperCase(), 'VIN ' + String(vin).toUpperCase(), cached.santrauka || cached.zalos_aprasas || null, null, cached);
         return res.json({ ...cached, cached: true, cacheAgeMinutes: ageMin });
       }
     }
 
     const result = await searchVinHistory(vin);
     cache.setCached('vin', vin, result);
+    duomenys.issaugotiAtaskaita(req.user.id, 'vin', String(vin).toUpperCase(), 'VIN ' + String(vin).toUpperCase(), result.santrauka || result.zalos_aprasas || null, null, result);
     res.json({ ...result, cached: false });
   } catch (err) {
     console.error(err);
@@ -2846,7 +2956,7 @@ app.post('/api/vin-lookup', requireAuth, async (req, res) => {
   }
 });
 
-app.post('/api/seller-lookup', requireAuth, async (req, res) => {
+app.post('/api/seller-lookup', requireAuth, planai.reikalautiKreditu('pardavejas', (r) => (r.body && r.body.pardavejas) ? String(r.body.pardavejas).toLowerCase().trim() : null), async (req, res) => {
   try {
     const { pardavejas, force, listingUrl } = req.body;
     if (!pardavejas) return res.status(400).json({ error: 'Trūksta pardavėjo pavadinimo' });
@@ -2855,12 +2965,14 @@ app.post('/api/seller-lookup', requireAuth, async (req, res) => {
       const cached = cache.getCached('seller', pardavejas, cache.ANALYSIS_TTL_MS);
       if (cached) {
         const ageMin = cache.cacheAgeMinutes('seller', pardavejas);
+        duomenys.issaugotiAtaskaita(req.user.id, 'pardavejas', String(pardavejas).toLowerCase().trim(), 'Pardavėjas: ' + pardavejas, cached.santrauka || cached.reputacija || null, null, { pardavejas, listingUrl, rezultatas: cached });
         return res.json({ ...cached, cached: true, cacheAgeMinutes: ageMin });
       }
     }
 
     const result = await searchSellerInfo(pardavejas, listingUrl);
     cache.setCached('seller', pardavejas, result);
+    duomenys.issaugotiAtaskaita(req.user.id, 'pardavejas', String(pardavejas).toLowerCase().trim(), 'Pardavėjas: ' + pardavejas, result.santrauka || result.reputacija || null, null, { pardavejas, listingUrl, rezultatas: result });
     res.json({ ...result, cached: false });
   } catch (err) {
     console.error(err);
