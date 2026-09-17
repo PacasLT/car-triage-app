@@ -183,6 +183,12 @@
   .ct-rs-sub { margin-top: 4px; font: 400 12px/1.5 var(--font); color: var(--text-muted); display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
   .ct-rs-sub b { font-family: var(--font-mono); color: var(--text-secondary); }
   .ct-rs-sub i { font-style: normal; opacity: .5; }
+  .ct-pfiltrai { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+  .ct-pfiltrai label { display: inline-flex; align-items: center; gap: 7px; font: 500 12.5px var(--font); color: var(--text-secondary); cursor: pointer; }
+  .ct-pfiltrai input { width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer; }
+  .ct-pfiltrai label:hover span { color: var(--text-primary); }
+  .ct-kaina-isp { display: flex; align-items: flex-start; gap: 7px; margin: 8px 0 0; padding: 8px 10px; border-radius: 8px; background: var(--warning-dim); border: 1px solid var(--warning-border); font: 500 11.5px/1.45 var(--font); color: var(--warning); }
+  .ct-kaina-past { display: block; margin-top: 4px; font: 400 11px/1.4 var(--font); color: var(--text-dim); }
   .ct-rs:has(.ct-rs-bad) { background: var(--warning-dim); border-color: var(--warning-border); }
   .ct-rs:has(.ct-rs-bad) .ct-rs-ic { background: var(--warning); }
   #tinder-launch-btn { display: none !important; }
@@ -2436,10 +2442,33 @@
               <option value="5">5 (lėčiausia)</option>
             </select>
           </div>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <label style="font:600 10px/1 var(--font-mono); letter-spacing:.08em; color:var(--text-dim);">VARANTIEJI RATAI</label>
+            <select id="varantieji" onchange="ctUpdateMoreBadge()"
+                    style="width:150px; padding:8px 10px; background:var(--bg-base); border:1px solid var(--border-light); border-radius:8px; color:var(--text-primary); font:500 13px/1 var(--font);">
+              <option value="">Visi</option>
+              <option value="visi">Visi varantys (4x4)</option>
+              <option value="priekiniai">Priekiniai</option>
+              <option value="galiniai">Galiniai</option>
+            </select>
+          </div>
           <button type="button" onclick="ctResetMoreFilters()"
                   style="padding:8px 14px; background:transparent; border:1px solid var(--border-light); border-radius:8px; color:var(--text-muted); font:500 12px/1 var(--font); cursor:pointer;">Išvalyti</button>
         </div>
-        <div style="margin-top:10px; font-size:11px; color:var(--text-dim);">Daugiau puslapių = daugiau skelbimų, bet lėtesnė paieška ir daugiau AI užklausų.</div>
+        <!-- PRIDETA: filtrai, kuriuos pritaiko PATS portalas - taip nuskaitom maziau nereikalingu skelbimu -->
+        <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--border);">
+          <div style="font:600 10px/1 var(--font-mono); letter-spacing:.08em; color:var(--text-dim); margin-bottom:9px;">PORTALO FILTRAI (TAIKOMI DAR PRIEŠ NUSKAITYMĄ)</div>
+          <div class="ct-pfiltrai">
+            <label><input type="checkbox" id="pf-beJav" onchange="ctUpdateMoreBadge()"><span>Išskyrus JAV</span></label>
+            <label><input type="checkbox" id="pf-tikSuVin" onchange="ctUpdateMoreBadge()"><span>Tik su VIN</span></label>
+            <label><input type="checkbox" id="pf-tikSuIstorija" onchange="ctUpdateMoreBadge()"><span>Tik su istorijos ataskaita</span></label>
+            <label><input type="checkbox" id="pf-beDefektu" onchange="ctUpdateMoreBadge()"><span>Be defektų</span></label>
+            <label><input type="checkbox" id="pf-beVairoDesineje" onchange="ctUpdateMoreBadge()"><span>Be vairo dešinėje</span></label>
+            <label><input type="checkbox" id="pf-tikLietuvoje" onchange="ctUpdateMoreBadge()"><span>Tik automobiliai Lietuvoje</span></label>
+          </div>
+          <div style="margin-top:8px; font-size:11px; color:var(--text-dim);">Kol kas veikia autoplius.lt skelbimams.</div>
+        </div>
+        <div style="margin-top:10px; font-size:11px; color:var(--text-dim);">Daugiau puslapių = daugiau skelbimų, bet lėtesnė paieška ir daugiau AI užklausų. Skaitome nuo naujausio skelbimo.</div>
       </div>
 
       <div class="ct3-search-bottom">
@@ -3379,6 +3408,13 @@ async function runSearch() {
     kainaNuo: document.getElementById('kainaNuo').value,
     kainaIki: document.getElementById('kainaIki').value,
     maxPages: document.getElementById('maxPages').value,
+    varantieji: (document.getElementById('varantieji') || {}).value || '',
+    beJav: !!(document.getElementById('pf-beJav') || {}).checked,
+    tikSuVin: !!(document.getElementById('pf-tikSuVin') || {}).checked,
+    tikSuIstorija: !!(document.getElementById('pf-tikSuIstorija') || {}).checked,
+    beDefektu: !!(document.getElementById('pf-beDefektu') || {}).checked,
+    beVairoDesineje: !!(document.getElementById('pf-beVairoDesineje') || {}).checked,
+    tikLietuvoje: !!(document.getElementById('pf-tikLietuvoje') || {}).checked,
     searchMode: _ctSearchMode || 'default',
     portals: [
       document.getElementById('portal-autoplius').checked ? 'autoplius' : null,
@@ -4063,6 +4099,8 @@ window.ctUpdateMoreBadge = function () {
   const pages = document.getElementById('maxPages');
   if (rida && rida.value) n++;
   if (pages && pages.value !== '3') n++;
+  const vr = document.getElementById('varantieji'); if (vr && vr.value) n++;
+  document.querySelectorAll('.ct-pfiltrai input:checked').forEach(function () { n++; });
   badge.textContent = n;
   badge.style.display = n > 0 ? '' : 'none';
 };
@@ -4072,6 +4110,8 @@ window.ctResetMoreFilters = function () {
   const pages = document.getElementById('maxPages');
   if (rida) rida.value = '';
   if (pages) pages.value = '3';
+  const vr = document.getElementById('varantieji'); if (vr) vr.value = '';
+  document.querySelectorAll('.ct-pfiltrai input').forEach(function (c) { c.checked = false; });
   window.ctUpdateMoreBadge();
 };
 
@@ -5653,8 +5693,12 @@ function ctNavTab(tab) {
         }
       }
 
+      // PRIDETA: skelbimo amzius portale ir mokamas iskelimas (badge-rise) - tai NE kokybes zenklas
+      var amzChip = c.ikeltaTekstas ? '<span class="chip" title="Kada skelbimas įkeltas į portalą">🕒 ' + esc(c.ikeltaTekstas) + '</span>' : '';
+      var iskChip = c.iskeltas ? '<span class="chip" style="color:var(--text-dim)" title="Pardavėjas mokamai iškėlė skelbimą į viršų – tai nėra kokybės ženklas">↑ iškeltas ' + c.iskeltas + '</span>' : '';
       var chipsHtml = [
-        c.metai ? '<span class="chip">📅 ' + c.metai + '</span>' : '',
+        amzChip, iskChip,
+        c.metai ? '<span class="chip">📅 ' + (c.pirmaRegistracija || c.metai) + '</span>' : '',
         c.rida ? '<span class="chip">🛣 ' + fmtKm(c.rida) + '</span>' : '',
         c.kuras ? '<span class="chip">⛽ ' + esc(c.kuras) + '</span>' : '',
         c.pavarai ? '<span class="chip">⚙ ' + esc(c.pavarai) + '</span>' : '',
@@ -5709,7 +5753,9 @@ function ctNavTab(tab) {
               '<span class="' + diffCls + '" style="font:700 12px/1 var(--font-mono);padding:6px 9px;border-radius:6px;">−' + c.diffPct + '%</span>' +
               '<span style="font-size:12.5px;color:var(--text-muted);">Rinkos vidurkis: <b style="color:var(--text-primary);font-weight:600;">' + formatEUR(c.marketMedian) + '</b></span>' +
             '</div>' +
-            '<div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">Skirtumas: <b style="color:' + savColor + ';font-weight:600;">' + (skirt != null ? (skirt < 0 ? '−' : '+') + formatEUR(Math.abs(skirt)) : '–') + '</b><span style="color:var(--text-dim);margin-left:8px;">· ' + (c.marketCount||'?') + ' panašių skelbimų</span></div>' +
+            '<div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">Skirtumas: <b style="color:' + savColor + ';font-weight:600;">' + (skirt != null ? (skirt < 0 ? '−' : '+') + formatEUR(Math.abs(skirt)) : '–') + '</b><span style="color:var(--text-dim);margin-left:8px;">· ' + (c.marketCount||'?') + ' panašių skelbimų</span>' +
+              (c.kainosPastaba ? '<span class="ct-kaina-past">ⓘ ' + esc(c.kainosPastaba) + '</span>' : '') + '</div>' +
+            (c.kainosIspejimas ? '<div class="ct-kaina-isp"><span>⚠</span><span>' + esc(c.kainosIspejimas.tekstas) + '</span></div>' : '') +
             // PASALINTA: "72 · VERTA ANALIZUOTI" zenkliukas. Ta pati informacija jau rodoma
             // dukart zemiau - bloke "CARTRIIGE GALIMYBE 72/100" ir verdikto mygtuke prie ivercio.
             '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">' + chipsHtml + '</div>' +
@@ -5775,7 +5821,9 @@ function ctNavTab(tab) {
       var panelHTML = hasDeep ? buildDetailPanelHTML({ analysis: a, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos || [], cached: false }, c.url, cardId) : '';
 
       var chipsHtml = [
-        c.metai ? '<span class="chip" style="height:22px;font-size:11px;padding:0 7px;">' + c.metai + '</span>' : '',
+        c.ikeltaTekstas ? '<span class="chip" style="height:22px;font-size:11px;padding:0 7px;" title="Kada įkeltas į portalą">🕒 ' + esc(c.ikeltaTekstas) + '</span>' : '',
+        c.iskeltas ? '<span class="chip" style="height:22px;font-size:11px;padding:0 7px;color:var(--text-dim)" title="Mokamas iškėlimas į viršų – ne kokybės ženklas">↑ ' + c.iskeltas + '</span>' : '',
+        c.metai ? '<span class="chip" style="height:22px;font-size:11px;padding:0 7px;">' + (c.pirmaRegistracija || c.metai) + '</span>' : '',
         c.rida ? '<span class="chip" style="height:22px;font-size:11px;padding:0 7px;">' + fmtKm(c.rida) + '</span>' : '',
         c.kuras ? '<span class="chip" style="height:22px;font-size:11px;padding:0 7px;">' + esc(c.kuras) + '</span>' : '',
         // PRIDETA: pavaru deze - kad eilutes kortelė turėtų ta pacia pagrindine info kaip TOP kortelė
@@ -5807,6 +5855,8 @@ function ctNavTab(tab) {
               (c.marketMedian ? '<span style="font-size:11px;color:var(--text-dim);">vs ' + formatEUR(c.marketMedian) + '</span>' : '') +
               /* PASALINTA: triage zenkliukas - verdiktas rodomas desineje prie ziedo */
             '</div>' +
+            (c.kainosPastaba ? '<span class="ct-kaina-past">ⓘ ' + esc(c.kainosPastaba) + '</span>' : '') +
+            (c.kainosIspejimas ? '<div class="ct-kaina-isp"><span>⚠</span><span>' + esc(c.kainosIspejimas.tekstas) + '</span></div>' : '') +
           '</div>' +
           '<div class="std-right" style="flex:none;display:flex;align-items:center;gap:10px;">' +
             (c.filteredOut ? '' :
@@ -5814,7 +5864,7 @@ function ctNavTab(tab) {
                 '<div class="ct-ring-inner"><b style="color:' + scoreColor + ';">' + s.total.toFixed(1) + '</b><small>/10</small></div>' +
               '</div>') +
             '<div style="padding:6px 10px;border-radius:7px;background:' + (c.filteredOut ? '#4a3b2d' : _toneDim(s.total)) + ';border:1px solid ' + (c.filteredOut ? 'rgba(240,198,116,.3)' : _toneBo(s.total)) + ';">' +
-              '<span style="font:600 11px/1.3 var(--font);color:' + (c.filteredOut ? '#f0c674' : scoreColor) + ';white-space:nowrap;">' + (c.filteredOut ? '⊘ Neatitinka filtro' : _verdictFor(c, s.total)) + '</span>' +
+              '<span style="font:600 11px/1.3 var(--font);color:' + (c.filteredOut ? '#f0c674' : scoreColor) + ';white-space:nowrap;">' + (c.kainosIspejimas ? '⚠ Patikrinkite kainą' : c.filteredOut ? '⊘ Neatitinka filtro' : _verdictFor(c, s.total)) + '</span>' +
             '</div>' +
             '<div class="std-ico-row">' +
             '<button class="fav-star ct-ico' + (isFavorited(c.url) ? ' active' : '') + '" title="Išsaugoti į mėgstamiausius" onclick="toggleFavorite(\'' + c.url + '\', ' + "{modelis:'" + escJs(c.modelis) + "', kaina:" + (c.kaina||'null') + ", metai:" + (c.metai||'null') + ", rida:" + (c.rida||'null') + ", photo:'" + escJs(c.photo||photos[0]||'') + "', source:'" + escJs(c.source||'') + "', kuras:'" + escJs(c.kuras||'') + "', pavarai:'" + escJs(c.pavarai||'') + "', diffPct:" + (c.diffPct!=null?c.diffPct:'null') + ", marketMedian:" + (c.marketMedian||'null') + "}" + ', this)">' + (isFavorited(c.url) ? '♥' : '♡') + '</button>' +

@@ -8,6 +8,18 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.20.0', data: '2026-09-17', pavadinimas: 'Tikslus autoplius nuskaitymas ir nauji filtrai',
+    pakeitimai: [
+      'Markė ir modelis siunčiami autoplius tikrais ID – nebegauname svetimų modelių ir aksesuarų, paieška pigesnė',
+      'Skaitome nuo naujausio skelbimo: mokamai iškelti skelbimai nebeužstoja šviežių pasiūlymų',
+      'Kortelėse matosi, prieš kiek laiko skelbimas įkeltas ir ar jis mokamai iškeltas į viršų',
+      'Kai rodoma mėnesinė lizingo įmoka – naudojama reali skelbimo kaina, apie tai parašoma',
+      'Įtartinai maža kaina (iki 4 000 €) pažymima „Patikrinkite kainą“ ir neiškreipia rinkos vidurkio',
+      'Nauji filtrai: varantieji ratai, išskyrus JAV, tik su VIN, tik su istorijos ataskaita, be defektų, be vairo dešinėje, tik Lietuvoje',
+      'Iš skelbimo sąrašo nuskaitomi ir kėbulas, miestas, pagaminimo mėnuo, garantijos tipas, pardavėjo reitingas',
+    ],
+  },
+  {
     versija: '1.19.0', data: '2026-09-17', pavadinimas: 'Paskyros meniu, nuotraukų didinimas, pelno skaičiuoklė',
     pakeitimai: [
       'Paskyros meniu po profilio mygtuku: mėgstamiausi, ataskaitos, palyginimai, paieškų istorija, planas, versija',

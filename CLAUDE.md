@@ -9,6 +9,14 @@
 2. Versijos numeris antraštėje (`#app-version`) ir langas „Versijų istorija“ generuojami automatiškai iš šio sąrašo – daugiau niekur versijos rankiniu būdu nekeisti.
 3. Commit žinutėje paminėti versiją, pvz. `v1.18.0: …`.
 
+## Portalų nuskaitymas
+
+- autoplius: markė/modelis per `backend/autoplius-ids.js` ID (`make_id[97]=1308`), ne `qt=` tekstą; rikiavimas `order_by=3&order_direction=DESC` (naujausi viršuje).
+- Sąrašo puslapis nuskaitomas struktūriškai (`extractAutopliusStructured`) iš `a.announcement-item` klasių, ne regexais iš teksto; tekstinis parseris paliktas kaip atsarginis.
+- `badge-rise` = MOKAMAS iškėlimas į viršų (ne kokybės ženklas), `badge-new` = kada įkeltas.
+- Kaina < `MIN_REALI_KAINA` (4000 €): jei yra lizingo `data-amount` – imama reali kaina; jei ne – skelbimas žymimas „Patikrinkite kainą“, neįtraukiamas į medianą ir keliauja į „Kiti skelbimai“.
+- ID lentelė atnaujinama fone kartą per 30 d. iš `/skelbimai/paieska?...type=make_combo` (1 ScraperAPI kreditas).
+
 ## Saugumas
 
 - `ANTHROPIC_API_KEY`, `SCRAPER_API_KEY`, `JWT_SECRET`, `ADMIN_EMAILS`, `INVITE_CODES` – tik Railway Variables, **niekada į kodą ar GitHub**.

@@ -11,6 +11,7 @@ const cheerio = require('cheerio');
 const puppeteer = require('puppeteer');
 const Anthropic = require('@anthropic-ai/sdk');
 const cache = require('./cache');
+const autopliusIds = require('./autoplius-ids');
 const { requireAuth, handleRegister, handleLogin, handleMe, planai, duomenys } = require('./auth');
 
 const app = express();
@@ -307,6 +308,139 @@ function extractRida(text) {
   return null;
 }
 
+// ── AUTOPLIUS: STRUKTURINIS SARASO NUSKAITYMAS ──────────────────────────────
+// Anksciau skelbimas buvo verciamas i viena teksto eilute ir laukai traukiami regexais -
+// modelis issikreipdavo ("10 Pries 18 val. BMW"), pasiskelbimo data ir mokamas iskelimas
+// dingdavo, o 5 500 € kaina ir 5 500 €/men lizingo imoka atrodydavo vienodai.
+// Dabar imame tiesiai is DOM: autoplius saraso kortele turi stabilias klases.
+
+// "Prieš 18 val." / "Prieš 1 d." / "Prieš 25 min." -> laiko zyme (ms)
+function autopliusAmzius(tekstas) {
+  if (!tekstas) return null;
+  const m = String(tekstas).match(/Prieš\s+(\d+)\s*(min|val|d)/i);
+  if (!m) return null;
+  const n = parseInt(m[1], 10), vnt = m[2].toLowerCase();
+  const ms = vnt === 'min' ? n * 60000 : vnt === 'val' ? n * 3600000 : n * 86400000;
+  return Date.now() - ms;
+}
+
+// Kaina, mazesne uz sia riba, realiai beveik niekada nera automobilio kaina:
+// dazniausiai tai menesine lizingo imoka arba klaidingai ivesta suma (5 500 vietoj 55 000).
+// Tokie skelbimai nedalyvauja rinkos medianos skaiciavime ir pazymimi vartotojui.
+const MIN_REALI_KAINA = parseInt(process.env.MIN_REALI_KAINA || '4000', 10);
+
+function kainosPatikra(kaina, tekstas, lizingoSuma) {
+  if (!kaina || kaina >= MIN_REALI_KAINA) return null;
+  if (lizingoSuma && lizingoSuma > kaina * 3) {
+    return { tipas: 'lizingo-imoka', tekstas: `Rodoma ${kaina} € greičiausiai yra mėnesinė įmoka – skelbime nurodyta ${lizingoSuma} € automobilio kaina.` };
+  }
+  if (/\/\s*mėn|per\s*mėn|mėnesiui/i.test(tekstas || '')) {
+    return { tipas: 'lizingo-imoka', tekstas: `Rodoma ${kaina} € yra mėnesinė lizingo įmoka, ne automobilio kaina.` };
+  }
+  return { tipas: 'itartinai-maza', tekstas: `Neįprastai maža kaina (${kaina} €) – tikėtina lizingo įmoka arba klaidingai įvesta suma. Patikrinkite skelbime.` };
+}
+
+function extractAutopliusStructured(html) {
+  const $ = cheerio.load(html);
+  const listings = [];
+  $('a.announcement-item').each(function () {
+    const el = $(this);
+    let url = el.attr('href') || '';
+    if (!url) return;
+    if (!url.startsWith('http')) url = 'https://autoplius.lt' + url;
+    if (!url.includes('/skelbimai/')) return;
+
+    const img = el.find('.announcement-photo img').first();
+    const photo = img.attr('src') || img.attr('data-src') || null;
+    const modelis = el.find('.announcement-title').first().text().trim() || null;
+
+    // Pirma parametru eilute: "2023-10", "Visureigis / Krosoveris"
+    const virsus = el.find('.announcement-title-parameters .announcement-parameters span').map(function () { return $(this).text().trim(); }).get();
+    const dataStr = virsus.find((t) => /^(19|20)\d{2}(-\d{2})?$/.test(t)) || null;
+    const metai = dataStr ? parseInt(dataStr.slice(0, 4), 10) : null;
+    const menuo = dataStr && dataStr.length > 4 ? parseInt(dataStr.slice(5, 7), 10) : null;
+    const kebulas = virsus.find((t) => t !== dataStr) || null;
+
+    // Antra eilute: kuras, deze, variklis, rida, miestas
+    const apacia = el.find('.announcement-parameters-block .announcement-parameters span').map(function () { return $(this).text().replace(/\s+/g, ' ').trim(); }).get();
+    let kuras = null, pavarai = null, variklioTuris = null, galia = null, rida = null, miestas = null;
+    apacia.forEach((t) => {
+      if (/^(Dyzelinas|Benzinas|Elektra|Bioetanolis|Vandenilis)/i.test(t)) kuras = t;
+      else if (/^(Automatinė|Mechaninė)$/i.test(t)) pavarai = t;
+      else if (/km$/i.test(t)) rida = parseInt(t.replace(/[^\d]/g, ''), 10) || null;
+      else if (/kW/i.test(t)) {
+        const tur = t.match(/(\d[.,]\d)\s*l/i); const kw = t.match(/(\d+)\s*kW/i);
+        if (tur) variklioTuris = parseFloat(tur[1].replace(',', '.'));
+        if (kw) galia = parseInt(kw[1], 10);
+      } else if (t && !/^\d/.test(t)) miestas = t;
+    });
+
+    // Kaina; "+ PVM" ir "be PVM / Eksportui" pastabos
+    const kainosBlokas = el.find('.pricing-container').text().replace(/\s+/g, ' ').trim();
+    const kainaTxt = el.find('.announcement-pricing-info strong').first().text();
+    let kaina = parseInt(String(kainaTxt).replace(/[^\d]/g, ''), 10) || null;
+    let kainaBaze = null, pvmPastaba = null;
+    if (/\+\s*PVM/i.test(kainosBlokas) && kaina) {
+      kainaBaze = kaina; kaina = Math.round(kaina * 1.21);
+      pvmPastaba = `Skelbime nurodyta ${kainaBaze}€ + PVM = ${kaina}€ su PVM (vertinama su PVM kaina)`;
+    }
+    const bePvmM = kainosBlokas.match(/(\d[\d\s]{2,7})\s?€\s*be\s*PVM/i);
+    const kainaBePvm = bePvmM ? parseInt(bePvmM[1].replace(/\s/g, ''), 10) : null;
+    const lizingoSuma = parseInt(el.find('.loan-information-container').attr('data-amount') || '', 10) || null;
+    const turiLizingoOpcija = !!lizingoSuma || /\/\s*\d+\s*mėn/i.test(kainosBlokas);
+
+    // Zenkleliai: badge-rise = MOKAMAS iskelimas i virsu, badge-new = kada ikeltas
+    const iskeltas = parseInt(el.find('.badge-rise').first().text().trim(), 10) || null;
+    const naujasTxt = el.find('.badge-new').first().text().trim() || null;
+    const atnaujintas = el.find('.badge-updated').length > 0;
+    const ikeltaLaikas = autopliusAmzius(naujasTxt);
+
+    // Zymos po pavadinimu
+    const tagai = el.find('.announcement-tags .tag').map(function () { return ($(this).attr('class') || '') + '|' + $(this).text().replace(/\s+/g, ' ').trim(); }).get();
+    const turiTaga = (k) => tagai.some((t) => t.toLowerCase().includes(k));
+    const turiIstorijosAtaskaita = turiTaga('tag-autoistorija') || el.find('.announcement-autoistorija-badge').length > 0;
+    const turiVin = turiTaga('tag-vin');
+    const garantijosTagas = tagai.find((t) => /garantij/i.test(t));
+    const turiGarantija = !!garantijosTagas;
+    const garantijosTipas = !garantijosTagas ? null
+      : /gamintojo/i.test(garantijosTagas) ? 'gamintojo'
+      : /pardavėjo/i.test(garantijosTagas) ? 'pardavėjo' : 'nenurodyta_kokia';
+
+    // Pardavejas
+    const savininkas = el.find('.announcement-owner-container').text().replace(/\s+/g, ' ').trim();
+    const yraVerslas = /Visi partnerio pasiūlymai/i.test(savininkas);
+    const reitM = savininkas.match(/(\d[.,]\d)\s*Atsiliepimai\s*\((\d+)\)/i);
+    const reitingas = reitM ? parseFloat(reitM[1].replace(',', '.')) : null;
+    const atsiliepimuSkaicius = reitM ? parseInt(reitM[2], 10) : null;
+
+    const visasTekstas = el.text().replace(/\s+/g, ' ').trim();
+    const defektuZodziai = ['daužtas', 'degęs', 'skendęs', 'defekt', 'krušos', 'po avarijos', 'remontuot', 'korozij', 'rūdž'];
+    const galimiDefektai = defektuZodziai.filter((z) => visasTekstas.toLowerCase().includes(z));
+
+    // Jei rodoma menesine imoka, o skelbime yra reali kaina (loan data-amount) - naudojam ja,
+    // o vartotojui paliekam pastaba. Tik kai realios kainos nera - skelbimas zymimas itartinu.
+    let ispejimas = kainosPatikra(kaina, kainosBlokas, lizingoSuma), kainosPastaba = null;
+    if (ispejimas && ispejimas.tipas === 'lizingo-imoka' && lizingoSuma) {
+      kainosPastaba = `Skelbime matoma ${kaina} € mėnesinė įmoka – naudojama reali kaina ${lizingoSuma} €`;
+      kaina = lizingoSuma; ispejimas = null;
+    }
+
+    listings.push({
+      url, photo, modelis: modelis || 'Nezinomas',
+      kaina, kainaBaze, pvmPastaba, kainaBePvm, turiLizingoOpcija, lizingoSuma, kainosPastaba,
+      kainosIspejimas: ispejimas,
+      metai, menuo, pirmaRegistracija: dataStr, kebulas, kuras, pavarai, variklioTuris, galia, rida, miestas,
+      iskeltas, ikeltaLaikas, ikeltaTekstas: naujasTxt, atnaujintas,
+      turiVin, turiIstorijosAtaskaita, turiGarantija, garantijosTipas, yraVerslas,
+      reitingas, atsiliepimuSkaicius, galimiDefektai,
+      galimasJavImportas: /\bJAV\b/.test(visasTekstas) || /aukcion/i.test(visasTekstas),
+      rawText: visasTekstas.slice(0, 200),
+    });
+  });
+  const seen = new Set();
+  return listings.filter((l) => (seen.has(l.url) ? false : (seen.add(l.url), true)));
+}
+
 function extractListingBlocksAutoplius(html) {
   const $ = cheerio.load(html);
   $('script, style, nav, footer, header, iframe, noscript').remove();
@@ -553,6 +687,7 @@ function extractAutogidasListings(html, originUrl) {
 }
 
 async function fetchAllPages(baseUrl, maxPages, onProgress) {
+  let autopliusStruktura = false;
   const allListings = [];
   const seenUrls = new Set();
   const isAutogidas = baseUrl.includes('autogidas.lt');
@@ -569,17 +704,23 @@ async function fetchAllPages(baseUrl, maxPages, onProgress) {
       if (resolveStep) resolveStep();
       break;
     }
-    const newItems = isAutogidas ? extractAutogidasListings(html, pageUrl)
-      : isAutoscout ? extractAutoscout24Listings(html)
-      : isOtomoto ? extractOtomotoListings(html)
-      : extractListingBlocksAutoplius(html);
+    let newItems;
+    if (isAutogidas) newItems = extractAutogidasListings(html, pageUrl);
+    else if (isAutoscout) newItems = extractAutoscout24Listings(html);
+    else if (isOtomoto) newItems = extractOtomotoListings(html);
+    else {
+      // Pirma bandom struktūrinį (tikslūs laukai); jei autoplius pakeistų išdėstymą - senas tekstinis
+      newItems = extractAutopliusStructured(html);
+      if (newItems.length) autopliusStruktura = true;
+      else { newItems = extractListingBlocksAutoplius(html); if (newItems.length) console.log('  [AUTOPLIUS] struktūrinis nuskaitymas nieko nerado - tekstinis atsarginis'); }
+    }
     const filtered = newItems.filter((b) => !seenUrls.has(b.url));
     if (resolveStep) resolveStep();
     if (filtered.length === 0) break;
     filtered.forEach((b) => seenUrls.add(b.url));
     allListings.push(...filtered);
   }
-  const format = (isAutogidas || isAutoscout || isOtomoto) ? 'parsed' : 'raw';
+  const format = (isAutogidas || isAutoscout || isOtomoto || autopliusStruktura) ? 'parsed' : 'raw';
   return { listings: allListings, format };
 }
 
@@ -622,7 +763,8 @@ function computeMarketMedians(parsedListings) {
   const byModel = {};
   const ridaByModel = {};
   parsedListings.forEach((l) => {
-    if (l.kaina) {
+    // Lizingo imokos ir klaidingai ivestos sumos (5 500 vietoj 55 000) griauna mediana - praleidziam
+    if (l.kaina && !l.kainosIspejimas) {
       if (!byModel[l.modelis]) byModel[l.modelis] = [];
       byModel[l.modelis].push(l.kaina);
     }
@@ -733,9 +875,16 @@ const AUTOPLIUS_FUEL_IDS = {
 };
 
 function buildAutopliusUrl(filters) {
-  const q = encodeURIComponent(`${filters.marke || ''} ${filters.modelis || ''}`.trim());
   let url = `https://autoplius.lt/skelbimai/naudoti-automobiliai?category_id=2`;
-  if (q) url += `&qt=${q}`;
+  // PAKEISTA: markė/modelis per tikrus autoplius ID (make_id[97]=1308) vietoj teksto paieškos.
+  // Teksto paieška „BMW X5“ grąžindavo ir X5 M, ir aksesuarus – mokėjome už jų nuskaitymą,
+  // o paskui patys išmesdavome. Jei ID nežinomas – grįžtam prie senos teksto paieškos.
+  const idDalis = autopliusIds.urlDalis(filters.marke, filters.modelis);
+  if (idDalis) url += `&${idDalis}`;
+  else {
+    const q = encodeURIComponent(`${filters.marke || ''} ${filters.modelis || ''}`.trim());
+    if (q) url += `&qt=${q}`;
+  }
   if (filters.metaiNuo) url += `&make_date_from=${filters.metaiNuo}`;
   if (filters.metaiIki) url += `&make_date_to=${filters.metaiIki}`;
   // DEMESIO: autoplius neturi price_from/price_to - teisingi laukai yra sell_price_*.
@@ -747,6 +896,21 @@ function buildAutopliusUrl(filters) {
   if (filters.pavaru_deze === 'Mechaninė') url += `&gearbox_id=37`;
   const fuelIds = AUTOPLIUS_FUEL_IDS[filters.kuras];
   if (fuelIds) fuelIds.forEach((id) => { url += `&fuel_id%5B${id}%5D=${id}`; });
+  // PRIDETA: papildomi autoplius filtrai - juos pritaiko PATS portalas, tad nuskaitom maziau siuksliu
+  const P = autopliusIds.PARAMETRAI.zymimieji;
+  if (filters.varantieji && autopliusIds.PARAMETRAI.varantieji[filters.varantieji]) {
+    const v = autopliusIds.PARAMETRAI.varantieji[filters.varantieji];
+    url += `&wheel_drive_id%5B${v}%5D=${v}`;
+  }
+  if (filters.beJav) url += `&${P.beJav}`;
+  if (filters.tikSuVin) url += `&${P.tikSuVin}`;
+  if (filters.tikSuIstorija) url += `&${P.tikSuIstorija}`;
+  if (filters.beDefektu) url += `&${P.beDefektu}`;
+  if (filters.beVairoDesineje) url += `&${P.beVairoDesineje}`;
+  if (filters.tikLietuvoje) url += `&${P.tikLietuvoje}`;
+  // PRIDETA: skaitom nuo NAUJAUSIO skelbimo. Numatytasis autoplius rikiavimas ("Aktualiausi")
+  // i virsu kelia MOKAMAI iskeltus skelbimus, todel svieziausi pasiulymai nukrenta i 3-4 puslapi.
+  url += `&${autopliusIds.PARAMETRAI.rikiavimas[filters.rikiavimas] || autopliusIds.PARAMETRAI.rikiavimas.naujausi}`;
   return url;
 }
 
@@ -1590,9 +1754,13 @@ async function runSearchJob(jobId, filters) {
         logJobStep(jobId, `📄 Verčiame ${site} ${p} puslapį...`).bind(null, `✅ ${site} ${p} puslapis nuskaitytas`)
       );
       let siteParsed = format === 'parsed' ? rawListings : rawListings.map((l) => ({ ...parseListingFields(l.text), url: l.url, photo: l.photo }));
-      if (format !== 'parsed' && modelQuery) {
+      // Modelio filtras reikalingas tik kai portale ieskota TEKSTU. Kai autoplius ieskota
+      // pagal tikrus ID, rezultatai jau tikslus - filtruoti tekstu butu klaidinga
+      // ("Mercedes-Benz C 220" nesutampa su uzklausa "c klase").
+      const tekstinePaieska = format !== 'parsed' || (site === 'autoplius.lt' && !autopliusIds.urlDalis(filters.marke, filters.modelis));
+      if (tekstinePaieska && modelQuery) {
         siteParsed = siteParsed.filter((l) =>
-          l.modelis.toLowerCase().includes(modelQuery) || l.rawText.toLowerCase().includes(modelQuery)
+          (l.modelis || '').toLowerCase().includes(modelQuery) || (l.rawText || '').toLowerCase().includes(modelQuery)
         );
       }
       siteParsed.forEach((l) => (l.source = site));
@@ -1611,6 +1779,9 @@ async function runSearchJob(jobId, filters) {
     const hardRejected = [];
     parsed = parsed.filter((l) => {
       const why = [];
+      // Lizingo imoka ar klaidingai ivesta suma neturi tapti "90% nuolaida" TOP sarase -
+      // atskiriam ja i "Kiti skelbimai" su aiskiu paaiskinimu vartotojui.
+      if (l.kainosIspejimas) why.push(l.kainosIspejimas.tekstas);
       if (metaiNuo && l.metai && l.metai < metaiNuo) why.push('Metai ' + l.metai + ' < ' + metaiNuo);
       if (metaiIki && l.metai && l.metai > metaiIki) why.push('Metai ' + l.metai + ' > ' + metaiIki);
       if (kainaNuo && l.kaina && l.kaina < kainaNuo) why.push('Kaina ' + l.kaina + '\u20ac < ' + kainaNuo + '\u20ac');
@@ -1622,12 +1793,14 @@ async function runSearchJob(jobId, filters) {
       return true;
     });
     logJob(jobId, `🧹 ${rawFoundCount} rasta pagal markę/modelį → ${parsed.length} atitinka jūsų kainos/metų/ridos filtrus`);
+    const itartinos = hardRejected.filter((l) => l.kainosIspejimas);
+    if (itartinos.length) logJob(jobId, `⚠️ ${itartinos.length} skelbimų kaina neatrodo tikra (lizingo įmoka ar klaida) – rasite juos „Kiti skelbimai“ su paaiškinimu`);
 
     // ---- DIAGNOSTIKA: kodel skelbimai atkrito ir ar kainos nuskaitytos teisingai ----
     if (hardRejected.length) {
       const pagalPriezasti = {};
       hardRejected.forEach((l) => {
-        const kategorija = l.hardRejectReasons[0].split(' ')[0];
+        const kategorija = (l.kainosIspejimas ? 'Kaina(įtartina)' : l.hardRejectReasons[0].split(' ')[0]);
         pagalPriezasti[kategorija] = (pagalPriezasti[kategorija] || 0) + 1;
       });
       logJob(jobId, '\u{1F50E} Atmesta filtrais: ' + hardRejected.length + ' \u2014 ' +
@@ -1925,6 +2098,10 @@ async function runSearchJob(jobId, filters) {
       rizikosBusena: l.rizikosBusena, istorijosBusena: l.istorijosBusena,
       irangosBusena: l.irangosBusena, neivertinta: l.neivertinta,
       diffPct: l.diffPct, marketMedian: l.marketMedian, marketCount: l.marketCount,
+      // PRIDETA: portalo ikelimo laikas, mokamas iskelimas, kainos pastaba/ispejimas, miestas, kebulas
+      ikeltaTekstas: l.ikeltaTekstas || null, ikeltaLaikas: l.ikeltaLaikas || null, iskeltas: l.iskeltas || null,
+      pirmaRegistracija: l.pirmaRegistracija || null, miestas: l.miestas || null, kebulas: l.kebulas || null,
+      kainosPastaba: l.kainosPastaba || null, kainosIspejimas: l.kainosIspejimas || null,
     }));
 
     // Skelbimai, kuriuos atmete kietasis filtras (kaina/metai/rida/deze/kuras).
@@ -1937,8 +2114,13 @@ async function runSearchJob(jobId, filters) {
       isCandidate: false, filteredOut: true, pardavejas: l.pardavejas || null,
       qualityScore: null, triageLevel: null, triageLabel: null,
       whyReasons: null, rizika: null, pasitikejimas: null,
-      rejectionReasons: ['Neatitinka j\u016bs\u0173 paie\u0161kos filtr\u0173: ' + l.hardRejectReasons.join('; ') + '.'],
+      rejectionReasons: [l.kainosIspejimas
+        ? l.kainosIspejimas.tekstas
+        : 'Neatitinka j\u016bs\u0173 paie\u0161kos filtr\u0173: ' + l.hardRejectReasons.join('; ') + '.'],
       diffPct: null, marketMedian: null, marketCount: 0,
+      ikeltaTekstas: l.ikeltaTekstas || null, ikeltaLaikas: l.ikeltaLaikas || null, iskeltas: l.iskeltas || null,
+      pirmaRegistracija: l.pirmaRegistracija || null, miestas: l.miestas || null, kebulas: l.kebulas || null,
+      kainosPastaba: l.kainosPastaba || null, kainosIspejimas: l.kainosIspejimas || null,
     }));
 
     const allListings = allListingsBase.concat(filtruAtmesti)
@@ -3126,6 +3308,9 @@ app.post('/api/check-favorite', requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Autoplius markiu/modeliu ID lentele: SEED veikia is karto, pilna parsisiunciama fone 1 k./men.
+autopliusIds.prijungti(cache.DATA_DIR, (u) => fetchSearchPage(u));
 
 const PORT = process.env.PORT || 3002;
 app.listen(PORT, () => console.log(`Car Triage App veikia: http://localhost:${PORT}`));
