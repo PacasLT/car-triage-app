@@ -92,14 +92,6 @@
     background-clip: text;
     letter-spacing: -0.3px;
   }
-  #app-version {
-    font-size: 10px;
-    color: var(--text-muted);
-    font-weight: 400;
-    margin-left: 2px;
-    letter-spacing: 0.5px;
-    -webkit-text-fill-color: var(--text-muted);
-  }
   .app-nav {
     display: flex;
     align-items: center;
@@ -2198,9 +2190,11 @@
       </svg>
       <div class="ct3-logo-text">
         <span>Car<b>Triige</b></span>
-        <small>AUTOMOTIVE MARKET INTELLIGENCE <span id="app-version"></span></small>
+        <small>AUTOMOTIVE MARKET INTELLIGENCE</small>
       </div>
     </a>
+    <!-- Versija: tekstas ir langas is versijos.js -->
+    <button class="ct-ver-btn" id="app-version" type="button" onclick="ctVersijuModalas()" title="Versijų istorija"></button>
     <nav class="ct3-nav">
       <a class="ct3-nav-link active" href="#">Paieška</a>
       <a class="ct3-nav-link" href="megstamiausi.html">Mėgstamiausi</a>
@@ -2574,6 +2568,7 @@
   </div>
 </div>
 
+<script src="versijos.js"></script>
 <script>
 
 // ── Bendra API uzklausa su prisijungimo zetonu ─────────────────────────────
@@ -2606,7 +2601,7 @@ window.ctApi = function (kelias, params) {
   });
 };
 
-const APP_VERSION = 'v1.12.0';
+const APP_VERSION = window.CT_APP_VERSION || 'v1.17.0';   // is versijos.js
 const BRAND_MODELS = {
   'BMW': ['1', '2', '3', '4', '5', '6', '7', '8', 'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'Z4', 'M'],
   'Audi': ['A1', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q2', 'Q3', 'Q5', 'Q7', 'Q8'],
@@ -3164,7 +3159,7 @@ function updateGenerationHint() {
 }
 updateGenerationHint();
 renderFavorites();
-document.getElementById('app-version').textContent = APP_VERSION;
+{ const _av = document.getElementById('app-version'); if (_av && !_av.textContent) _av.textContent = APP_VERSION; }
 
 let logExpanded = false;
 
