@@ -24,6 +24,10 @@ app.get('/auth/me', requireAuth, handleMe);
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const MODEL = 'claude-sonnet-4-5';
+// Pigus modelis paprastoms uzduotims (vieno sakinio santrauka is paruosto konteksto)
+const KOMENTARU_MODEL = process.env.KOMENTARU_MODEL || 'claude-haiku-4-5';
+// Kiek nuotrauku siusti vizualinei analizei. Kiekviena ~1500 tokenu.
+const DEEP_FOTO_KIEKIS = parseInt(process.env.DEEP_FOTO_KIEKIS || '6', 10);
 
 // ============ SCRAPING (ta pati logika kaip triage.js) ============
 
@@ -101,7 +105,9 @@ async function fetchSearchPage(url) {
 // Specialiai skelbimo puslapiui - naudoja render=true, kad gautume JS-renderinta HTML
 // (galeriją, lazy-loaded nuotraukų src). Brangiau ScraperAPI kreditais, bet tik TOP 5.
 async function fetchListingPage(url) {
-  const cached = cache.getCached('pages', url, cache.PAGE_TTL_MS);
+  // PATAISYTA: fetchSearchPage rase i ta pati rakta neatvaizduota HTML, todel
+  // giliai analizei kartais atitekdavo puslapis be galerijos ir nuotrauku nebudavo.
+  const cached = cache.getCached('pages', 'full:' + url, cache.PAGE_TTL_MS);
   if (cached) {
     console.log(`  (talpykla: ${url.slice(0, 60)}...)`);
     return cached;
@@ -110,18 +116,44 @@ async function fetchListingPage(url) {
   const SCRAPER_KEY = process.env.SCRAPER_API_KEY;
   let html;
 
-  // render=true galerijos JS ivykdymui
+  // PATAISYTA: anksciau VISADA render=true (~10 kreditu) - net LT portalams,
+  // kuriu nuotrauku sarasas guli JSON-LD / inline <script> masyve ir JS jam
+  // nereikalingas. Dabar: pirma bandom pigiai (1 kreditas), ir tik jei nuotrauku
+  // pedsaku HTML'e nerandam - kartojam su render=true. Blogiausiu atveju
+  // kaina ta pati kaip anksciau, geriausiu - 10 kartu mazesne.
+  const turiNuotrauku = (h) => !!h && (
+    /"contentUrl"|"image"\s*:|data-src=|og:image|thumbnail/i.test(h.slice(0, 400000))
+  );
+  const traukti = async (render) => {
+    const scraperUrl = `https://api.scraperapi.com?api_key=${SCRAPER_KEY}&url=${encodeURIComponent(url)}&render=${render}`;
+    console.log(`  ScraperAPI (render=${render}): ${url.slice(0, 60)}...`);
+    const response = await axios.get(scraperUrl, { timeout: render === 'true' ? 90000 : 45000 });
+    if (response.status === 200 && response.data && response.data.length > 500) return response.data;
+    return null;
+  };
+
   if (SCRAPER_KEY) {
-    try {
-      const scraperUrl = `http://api.scraperapi.com?api_key=${SCRAPER_KEY}&url=${encodeURIComponent(url)}&render=true`;
-      console.log(`  ScraperAPI (render=true): ${url.slice(0, 60)}...`);
-      const response = await axios.get(scraperUrl, { timeout: 90000 });
-      if (response.status === 200 && response.data && response.data.length > 500) {
-        html = response.data;
-        console.log(`  ScraperAPI OK (${html.length} simboliu)`);
+    const visadaRender = /otomoto\.pl|autoscout24\./i.test(url);
+    if (!visadaRender) {
+      try {
+        const pigus = await traukti('false');
+        if (turiNuotrauku(pigus)) {
+          html = pigus;
+          console.log(`  ScraperAPI OK pigiuoju budu (${html.length} simboliu)`);
+        } else if (pigus) {
+          console.log('  Pigiajame HTML nuotrauku nerasta - kartojam su render=true');
+        }
+      } catch (err) {
+        console.log(`  ScraperAPI render=false klaida: ${String(err.message).replace(SCRAPER_KEY, '***')}`);
       }
-    } catch (err) {
-      console.log(`  ScraperAPI render=true klaida: ${err.message}`);
+    }
+    if (!html) {
+      try {
+        html = await traukti('true');
+        if (html) console.log(`  ScraperAPI OK (${html.length} simboliu)`);
+      } catch (err) {
+        console.log(`  ScraperAPI render=true klaida: ${String(err.message).replace(SCRAPER_KEY, '***')}`);
+      }
     }
   }
 
@@ -130,7 +162,7 @@ async function fetchListingPage(url) {
   // Paskutinis atsarginis: paprasta uzklasa
   if (!html) html = await fetchSearchPage(url);
 
-  cache.setCached('pages', url, html);
+  cache.setCached('pages', 'full:' + url, html);
   return html;
 }
 
@@ -535,14 +567,17 @@ ${ridaKontekstas}
 ${kryzminisKontekstas}
 ${javKontekstas}
 
-Jei naudinga, GALI atlikti web paieska del zinomu gedimu sitam modeliui/metams, arba del tipiniu
-problemu, kylanciu tokiai ridai (pvz. kada tikimasi diržo/grandinės keitimo, pakabos susidevėjimo ir pan.).
+Remkis zinomais siam modeliui/metams budingais gedimais ir tipinemis problemomis,
+kylanciomis tokiai ridai (pvz. dirzo/grandines keitimas, pakabos susidevejimas).
 Parasyk VIENA trumpa (max 28 zodziu) pastaba lietuviskai, atsizvelgdamas i VISA turima informacija,
 iskaitant rida. Grazink TIK ta sakini.`;
   try {
+    // PATAISYTA: buvo Sonnet + web_search (max_uses 2) + max_tokens 800 VIENAM
+    // 28 zodziu sakiniui. Su iranki kontekstas persiunciamas is naujo kiekvienam
+    // raundui, todel vienas komentaras kainuodavo ~$0.10, o 60 komentaru ~$6.
+    // Modelio gedimu zinios yra bendros - paieskos tam nereikia.
     const response = await anthropic.messages.create({
-      model: MODEL, max_tokens: 800,
-      tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 2 }],
+      model: KOMENTARU_MODEL, max_tokens: 160,
       messages: [{ role: 'user', content: prompt }],
     });
     const result = response.content.filter((b) => b.type === 'text').map((b) => b.text).join('').trim();
@@ -770,15 +805,20 @@ function extractTotalCount(html, isAutogidas) {
 app.post('/api/quick-count', requireAuth, async (req, res) => {
   try {
     const filters = req.body;
+    // PATAISYTA: anksciau visada skenuoti visi 4 portalai (1+1+10+10 = 22 kreditai),
+    // net kai vartotojas pasirinkes viena. Dabar - tik pasirinktieji.
+    const leisti = (filters && filters.portals && filters.portals.length)
+      ? filters.portals : ['autoplius', 'autogidas', 'autoscout24', 'otomoto'];
+    const tuscias = Promise.resolve(null);
     const autopliusUrl = buildAutopliusUrl(filters);
     const autogidasUrl = buildAutogidasUrl(filters);
     const autoscoutUrl = buildAutoscout24Url(filters);
     const otomotoUrl = buildOtomotoUrl(filters);
     const [autopliusHtml, autogidasHtml, autoscoutHtml, otomotoHtml] = await Promise.all([
-      fetchSearchPage(autopliusUrl).catch(() => null),
-      fetchSearchPage(autogidasUrl).catch(() => null),
-      fetchSearchPage(autoscoutUrl).catch(() => null),
-      fetchSearchPage(otomotoUrl).catch(() => null),
+      leisti.includes('autoplius') ? fetchSearchPage(autopliusUrl).catch(() => null) : tuscias,
+      leisti.includes('autogidas') ? fetchSearchPage(autogidasUrl).catch(() => null) : tuscias,
+      leisti.includes('autoscout24') ? fetchSearchPage(autoscoutUrl).catch(() => null) : tuscias,
+      leisti.includes('otomoto') ? fetchSearchPage(otomotoUrl).catch(() => null) : tuscias,
     ]);
     res.json({
       autoplius: autopliusHtml ? extractTotalCount(autopliusHtml, false) : null,
@@ -801,8 +841,13 @@ app.post('/api/quick-count', requireAuth, async (req, res) => {
 const ISTORIJOS_SKAICIU_PODELIS = new Map(); // raktas -> { kiek, laikas }
 const ISTORIJOS_TTL_MS = 30 * 60 * 1000;
 
-async function paieskosKiekis(filters) {
-  const portalai = (filters && filters.portals && filters.portals.length)
+async function paieskosKiekis(filtraiIn) {
+  // runSearchJob skenuoja BE kainos filtro, todel URL su kaina niekada
+  // nepataikydavo i 'pages' podeli - salinam ta pati, kad podelis veiktu.
+  const filters = { ...(filtraiIn || {}) };
+  delete filters.kainaNuo;
+  delete filters.kainaIki;
+  const portalai = (filters.portals && filters.portals.length)
     ? filters.portals : ['autoplius'];
   const uzklausos = [];
   if (portalai.includes('autoplius')) {
@@ -822,7 +867,11 @@ async function paieskosKiekis(filters) {
       .then((h) => (h ? extractOtomotoTotalCount(h) : null)).catch(() => null));
   }
   if (!uzklausos.length) return null;
-  const reiksmes = (await Promise.all(uzklausos)).filter((v) => typeof v === 'number');
+  // extract*TotalCount grazina { count, exact }, ne skaiciu - anksciau filtras
+  // atmesdavo viska ir funkcija visada grazindavo null.
+  const reiksmes = (await Promise.all(uzklausos))
+    .map((v) => (v && typeof v.count === 'number' ? v.count : (typeof v === 'number' ? v : null)))
+    .filter((v) => v !== null);
   if (!reiksmes.length) return null;
   return reiksmes.reduce((a, b) => a + b, 0);
 }
@@ -864,9 +913,17 @@ app.post('/api/history-counts', requireAuth, async (req, res) => {
 
 const jobs = {}; // { jobId: { status, log: [], result, error } }
 
+function valytiSenusJobus() {
+  const riba = Date.now() - 60 * 60 * 1000;
+  for (const k of Object.keys(jobs)) {
+    if ((jobs[k].sukurta || 0) < riba) delete jobs[k];
+  }
+}
+
 function newJob() {
   const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-  jobs[id] = { status: 'running', log: [], result: null, error: null };
+  valytiSenusJobus();
+  jobs[id] = { sukurta: Date.now(), status: 'running', log: [], result: null, error: null };
   return id;
 }
 
@@ -1637,7 +1694,10 @@ async function runSearchJob(jobId, filters) {
     logJob(jobId, `🤖 Claude apmąsto ${candidates.length} geriausius pasiūlymus (lygiagrečiai)...`);
     await Promise.all(candidates.map(async (c, i) => {
       const pct = Math.round(((i + 1) / candidates.length) * 100);
-      const commentKey = `${c.url}::${c.kaina}::${c.diffPct}`;
+      // PATAISYTA: diffPct keisdavosi po kelis punktus kaskart, kai auga archyvas,
+      // todel raktas visada skirdavosi ir podelis niekada nepataikydavo.
+      const diffKibiras = (c.diffPct == null) ? 'x' : Math.round(c.diffPct / 5) * 5;
+      const commentKey = `${c.url}::${c.kaina}::${diffKibiras}`;
       const cachedComment = cache.getCached('shortComment', commentKey, cache.PAGE_TTL_MS);
       if (cachedComment) {
         logJob(jobId, `   ✅ ${c.source} ${c.modelis} ${c.kaina}€ (talpykla)`);
@@ -2056,7 +2116,7 @@ async function generateDeepAnalysis(title, fullText, photos, marketContext, skel
   // Siunčiame iki 12 nuotraukų AI - vizuali automobilio būklės analizė visada naudinga.
   let imageBlocks = [];
   if (photos && photos.length > 0) {
-    const downloaded = await Promise.all(photos.slice(0, 12).map(downloadImageAsBase64));
+    const downloaded = await Promise.all(photos.slice(0, DEEP_FOTO_KIEKIS).map(downloadImageAsBase64));
     imageBlocks = downloaded.filter(Boolean).map((img) => ({
       type: 'image',
       source: { type: 'base64', media_type: img.media_type, data: img.data },
@@ -2175,7 +2235,8 @@ JSON struktura ir sukelia klaida:
   const response = await anthropic.messages.create({
     model: MODEL,
     max_tokens: imageBlocks.length > 0 ? 4500 : 3800,
-    tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 2 }],
+    // PATAISYTA: web_search verte persiusti VISAS nuotraukas is naujo kiekvienam
+      // iranki raundui (23k -> 31k -> 39k tokenu). Atsisakius - ~70% pigiau.
     messages: [{ role: 'user', content: messageContent }],
   });
   const rawText = response.content.filter((b) => b.type === 'text').map((b) => b.text).join('');
@@ -2228,13 +2289,13 @@ app.post('/api/search-start', requireAuth, (req, res) => {
   res.json({ jobId });
 });
 
-app.get('/api/search-status/:jobId', (req, res) => {
+app.get('/api/search-status/:jobId', requireAuth, (req, res) => {
   const job = jobs[req.params.jobId];
   if (!job) return res.status(404).json({ error: 'Nerasta' });
   res.json(job);
 });
 
-app.post('/api/analyze-single', async (req, res) => {
+app.post('/api/analyze-single', requireAuth, async (req, res) => {
   try {
     const { url, force, kaina, marketMedian, marketCount, diffPct, modelis, pardavejas: knownPardavejas, galia, variklioTuris } = req.body;
     if (!url) return res.status(400).json({ error: 'Trūksta URL' });
@@ -2561,7 +2622,7 @@ function sudarytiIstorijosSantrauka(url) {
           pastabos.push({
             tipas: 'kita-kaina-kitur', svarba: vinPatvirtinta ? 'auksta' : 'vidutine',
             tekstas: `${kaipVadinti} tuo pačiu metu skelbiamas ir ${kitas.saltinis || 'kitame portale'} už ${senaKaina.toLocaleString('lt-LT')} € (${pagrindas}).`,
-            kodel: `Skirtumas ${Math.abs(senaKaina - naujaKaina).toLocaleString('lt-LT')} €. Derėkitės remdamiesi pigesniuoju skelbimu (${sisEntry}).`,
+            kodel: `Skirtumas ${Math.abs(senaKaina - naujaKaina).toLocaleString('lt-LT')} €. Derėkitės remdamiesi pigesniuoju skelbimu (${pagrindas}).`,
           });
         }
       }
@@ -2627,7 +2688,7 @@ function kryzminiuSkelbimuPastaba(kryzminiai, siKaina) {
 }
 
 // Vieno skelbimo istorija
-app.get('/api/listing-history', (req, res) => {
+app.get('/api/listing-history', requireAuth, (req, res) => {
   const url = req.query.url;
   if (!url) return res.status(400).json({ error: 'Trūksta url parametro' });
   const santrauka = sudarytiIstorijosSantrauka(url);
@@ -2636,7 +2697,7 @@ app.get('/api/listing-history', (req, res) => {
 });
 
 // Modelio tendencijos ir sezoniskumas
-app.get('/api/model-trends', (req, res) => {
+app.get('/api/model-trends', requireAuth, (req, res) => {
   const modelis = req.query.modelis;
   if (!modelis) return res.status(400).json({ error: 'Trūksta modelis parametro' });
   res.json({
@@ -2647,7 +2708,7 @@ app.get('/api/model-trends', (req, res) => {
 });
 
 // Frontend praneša, kuriuos skelbimus verta sekti (išsaugoti lieka naršyklėje)
-app.post('/api/watch', (req, res) => {
+app.post('/api/watch', requireAuth, (req, res) => {
   const { urls, meta } = req.body || {};
   if (!Array.isArray(urls)) return res.status(400).json({ error: 'urls turi būti masyvas' });
   const nauji = cache.pridetiSekimui(urls.slice(0, 200), meta || null);
@@ -2655,7 +2716,7 @@ app.post('/api/watch', (req, res) => {
 });
 
 // Kas pasikeitė nurodytiems skelbimams
-app.post('/api/listing-changes', (req, res) => {
+app.post('/api/listing-changes', requireAuth, (req, res) => {
   const { urls } = req.body || {};
   if (!Array.isArray(urls)) return res.status(400).json({ error: 'urls turi būti masyvas' });
   cache.pridetiSekimui(urls.slice(0, 200), null); // kartu itraukiam i sekima
@@ -2679,6 +2740,7 @@ let _tikrinimasVyksta = false;
 async function tikrintiSekamus() {
   if (_tikrinimasVyksta) return;
   _tikrinimasVyksta = true;
+  try {
   const pasalinta = cache.valytiSekimoSarasa();
   const urls = cache.sekamiUrlai();
   console.log(`[SEKIMAS] Pradedam kasdienį tikrinimą: ${urls.length} skelbimų (pašalinta pasenusių: ${pasalinta})`);
@@ -2710,12 +2772,30 @@ async function tikrintiSekamus() {
   }
   cache.saveLifecycle();
   console.log(`[SEKIMAS] Baigta. Kainos pokyčių: ${pokyciu}, dingo: ${dingusiu}, klaidų: ${klaidu}`);
-  _tikrinimasVyksta = false;
+  } finally {
+    // PATAISYTA: be finally viena klaida (pvz. pilnas diskas) palikdavo veliava
+    // true, ir kasdienis tikrinimas nebeveikdavo iki serverio perkrovimo.
+    _tikrinimasVyksta = false;
+  }
 }
 
 // Nuskaito viena skelbima ir istraukia kaina/rida. Grazina fullText=null, jei skelbimo nebera.
 async function patikrintiViena(url) {
   try {
+    // PATAISYTA: sekimui reikia TIK kainos ir ridos - dviem regex'ais is teksto.
+    // Anksciau buvo kvieciamas pilnas scrapeSingleListing su render=true
+    // (~10 kreditu). 200 sekamu skelbimu = 2000 kreditu KASDIEN. Dabar 200.
+    const pigusHtml = await fetchSearchPage(url).catch(() => null);
+    if (pigusHtml && pigusHtml.length > 500) {
+      const t = cheerio.load(pigusHtml)('body').text().replace(/\s+/g, ' ');
+      if (t.length > 200) {
+        const km = t.match(/(\d[\d\s]{3,8})\s*€/);
+        const kr = t.match(/(\d[\d\s]{2,8})\s*km/i);
+        const kaina = km ? parseInt(km[1].replace(/\s/g, ''), 10) : null;
+        const rida = kr ? parseInt(kr[1].replace(/\s/g, ''), 10) : null;
+        if (kaina && kaina > 300) return { fullText: t, kaina, rida };
+      }
+    }
     const { fullText } = await scrapeSingleListing(url);
     if (!fullText || fullText.length < 200) return { fullText: null, kaina: null, rida: null };
     const kainaMatch = fullText.match(/(\d[\d\s]{3,8})\s*€/);
@@ -2744,7 +2824,7 @@ app.post('/api/run-tracking', requireAuth, (req, res) => {
   res.json({ paleista: true, sekama: cache.sekamiUrlai().length });
 });
 
-app.post('/api/vin-lookup', async (req, res) => {
+app.post('/api/vin-lookup', requireAuth, async (req, res) => {
   try {
     const { vin, force } = req.body;
     if (!vin || vin.length !== 17) return res.status(400).json({ error: 'Neteisingas VIN kodas (turi būti 17 simbolių)' });
@@ -2766,7 +2846,7 @@ app.post('/api/vin-lookup', async (req, res) => {
   }
 });
 
-app.post('/api/seller-lookup', async (req, res) => {
+app.post('/api/seller-lookup', requireAuth, async (req, res) => {
   try {
     const { pardavejas, force, listingUrl } = req.body;
     if (!pardavejas) return res.status(400).json({ error: 'Trūksta pardavėjo pavadinimo' });
@@ -2810,11 +2890,12 @@ async function checkFavoriteStatus(url) {
     }
     return { status: isReserved ? 'reserved' : 'active', currentPrice };
   } catch (err) {
-    return { status: 'removed' };
+    // PATAISYTA: tinklo klaida nera irodymas, kad skelbimas pasalintas.
+    return { status: 'unknown', priezastis: 'Nepavyko patikrinti' };
   }
 }
 
-app.post('/api/check-favorite', async (req, res) => {
+app.post('/api/check-favorite', requireAuth, async (req, res) => {
   try {
     const { url } = req.body;
     if (!url) return res.status(400).json({ error: 'Trūksta URL' });

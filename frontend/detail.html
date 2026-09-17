@@ -668,7 +668,26 @@ button{font-family:inherit;cursor:pointer}
 
 </div>
 
+
+
+
 <script>
+// ── Bendra API uzklausa su prisijungimo zetonu ─────────────────────────────
+// Backend'e /api/* marsrutai, kurie kainuoja pinigus (ScraperAPI, Anthropic)
+// arba grazina kitu vartotoju duomenis, dabar reikalauja prisijungimo.
+window.ctToken = function () {
+  try { return localStorage.getItem('ct_token'); } catch (e) { return null; }
+};
+window.ctApi = function (kelias, params) {
+  const p = Object.assign({}, params || {});
+  const h = Object.assign({}, p.headers || {});
+  const t = window.ctToken();
+  if (t) h['Authorization'] = 'Bearer ' + t;
+  if (p.body && !h['Content-Type']) h['Content-Type'] = 'application/json';
+  p.headers = h;
+  return fetch(kelias, p);
+};
+
 (function() {
   function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
   function fmt(n) { return n != null ? Number(n).toLocaleString('lt-LT') : '—'; }
@@ -792,7 +811,7 @@ button{font-family:inherit;cursor:pointer}
     var photos = window.__dpPhotos || _photos || [];
     if (!c.url) { alert('Skelbimo URL nerastas.'); return; }
     if (btn) { btn.disabled = true; btn.textContent = '⏳ Analizuojama...'; }
-    fetch('/api/analyze-single', {
+    ctApi('/api/analyze-single', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
@@ -920,7 +939,7 @@ button{font-family:inherit;cursor:pointer}
 
   // Automatiškai užsako gilią analizę skelbimui, kuris jos dar neturi.
   function dpUzsakytiAnalize(c) {
-    fetch('/api/analyze-single', {
+    ctApi('/api/analyze-single', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         url: c.url, kaina: c.kaina, marketMedian: c.marketMedian, marketCount: c.marketCount,
@@ -1370,7 +1389,7 @@ button{font-family:inherit;cursor:pointer}
         }
         nextStep();
         var iv = setInterval(nextStep, 700);
-        fetch('/api/vin-lookup', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({vin:c.vin})})
+        ctApi('/api/vin-lookup', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({vin:c.vin})})
         .then(function(r){return r.json();})
         .then(function(d) {
           clearInterval(iv);
@@ -1541,7 +1560,7 @@ button{font-family:inherit;cursor:pointer}
         }
         nextSelStep();
         var iv2 = setInterval(nextSelStep, 750);
-        fetch('/api/seller-lookup', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({pardavejas:c.pardavejas, listingUrl:c.url})})
+        ctApi('/api/seller-lookup', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({pardavejas:c.pardavejas, listingUrl:c.url})})
         .then(function(r){return r.json();})
         .then(function(d) {
           clearInterval(iv2);
@@ -1588,7 +1607,7 @@ button{font-family:inherit;cursor:pointer}
       var pgrid = document.getElementById('dp-photos-grid');
       if (pgrid) pgrid.insertBefore(photoLoadMsg, pgrid.firstChild);
 
-      fetch('/api/analyze-single', {
+      ctApi('/api/analyze-single', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({

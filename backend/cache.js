@@ -33,10 +33,46 @@ let _cache = (() => {
   catch { return { pages: {}, analysis: {} }; }
 })();
 
-function saveCache() {
-  try { fs.writeFileSync(CACHE_FILE, JSON.stringify(_cache, null, 2)); }
-  catch (err) { console.error('Nepavyko issaugoti talpyklos:', err.message); }
+// PATAISYTA: anksciau kiekvienas setCached() sinchroniskai perrasydavo VISA
+// podeli su formatavimu. Per viena paieska tai ~86 rasymai po keliasdesimt MB -
+// serveris tuo metu neatsakydavo i jokias kitas uzklausas (progreso juosta
+// atrodydavo uzsalusi). Dabar: TTL valymas, be formatavimo, ne dazniau kaip
+// karta per 3 s, ir butinai isaugom procesui uzsidarant.
+let _cacheDirty = false;
+let _cacheTimer = null;
+
+function valytiPasenusius() {
+  const dabar = Date.now();
+  const ribos = { pages: PAGE_TTL_MS, analysis: ANALYSIS_TTL_MS, shortComment: ANALYSIS_TTL_MS };
+  for (const ns of Object.keys(_cache)) {
+    const ttl = ribos[ns];
+    if (!ttl || !_cache[ns]) continue;
+    for (const k of Object.keys(_cache[ns])) {
+      const e = _cache[ns][k];
+      if (!e || !e.time || (dabar - e.time) > ttl) delete _cache[ns][k];
+    }
+  }
 }
+
+function saveCacheNow() {
+  _cacheDirty = false;
+  if (_cacheTimer) { clearTimeout(_cacheTimer); _cacheTimer = null; }
+  try {
+    valytiPasenusius();
+    fs.writeFileSync(CACHE_FILE, JSON.stringify(_cache));
+  } catch (err) { console.error('Nepavyko issaugoti talpyklos:', err.message); }
+}
+
+function saveCache() {
+  _cacheDirty = true;
+  if (_cacheTimer) return;
+  _cacheTimer = setTimeout(() => { _cacheTimer = null; if (_cacheDirty) saveCacheNow(); }, 3000);
+}
+
+process.on('beforeExit', () => { if (_cacheDirty) saveCacheNow(); });
+process.on('SIGTERM', () => { if (_cacheDirty) saveCacheNow(); process.exit(0); });
+
+valytiPasenusius();
 
 function getCached(namespace, key, ttlMs) {
   const entry = _cache[namespace] && _cache[namespace][key];

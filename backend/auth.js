@@ -7,7 +7,20 @@ const Database = require('better-sqlite3');
 const path = require('path');
 const fs = require('fs');
 
-const SECRET_KEY = process.env.JWT_SECRET_KEY || 'PAKEISK_SITA_PRODUCTION!';
+// PATAISYTA: buvo skaitomas tik JWT_SECRET_KEY, todel Railway nustatytas
+// JWT_SECRET buvo tyliai ignoruojamas ir veikdavo kode irasyta atsargine
+// reiksme - o ji yra viesa, t.y. bet kas galejo pasigaminti galiojanti zetona.
+const SECRET_KEY = process.env.JWT_SECRET || process.env.JWT_SECRET_KEY || null;
+if (!SECRET_KEY || SECRET_KEY.length < 32) {
+  console.error('');
+  console.error('  ============================================================');
+  console.error('  [SAUGUMAS] JWT_SECRET nenustatytas arba trumpesnis nei 32 simboliai.');
+  console.error('  Kol taip yra, prisijungimo zetonus gali pasigaminti bet kas.');
+  console.error('  Nustatykite JWT_SECRET Railway Variables ir perkraukite.');
+  console.error('  ============================================================');
+  console.error('');
+}
+const VEIKIANTIS_SECRET = SECRET_KEY || require('crypto').randomBytes(48).toString('hex');
 const TOKEN_EXPIRE = '72h';
 // DB kelio parinkimas, atsparus praleistam kintamajam.
 // Prioritetas: DB_PATH env -> primountintas /data Volume -> konteinerio vidus.
@@ -79,12 +92,12 @@ function vartotojuSkaicius() {
 
 // ── JWT ────────────────────────────────────────────────────────────────────
 function createToken(email) {
-  return jwt.sign({ sub: email }, SECRET_KEY, { expiresIn: TOKEN_EXPIRE });
+  return jwt.sign({ sub: email }, VEIKIANTIS_SECRET, { expiresIn: TOKEN_EXPIRE });
 }
 
 function verifyToken(token) {
   try {
-    const payload = jwt.verify(token, SECRET_KEY);
+    const payload = jwt.verify(token, VEIKIANTIS_SECRET);
     return payload.sub;
   } catch {
     return null;

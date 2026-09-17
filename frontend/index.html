@@ -2543,6 +2543,23 @@
 </div>
 
 <script>
+
+// ── Bendra API uzklausa su prisijungimo zetonu ─────────────────────────────
+// Backend'e /api/* marsrutai, kurie kainuoja pinigus (ScraperAPI, Anthropic)
+// arba grazina kitu vartotoju duomenis, dabar reikalauja prisijungimo.
+window.ctToken = function () {
+  try { return localStorage.getItem('ct_token'); } catch (e) { return null; }
+};
+window.ctApi = function (kelias, params) {
+  const p = Object.assign({}, params || {});
+  const h = Object.assign({}, p.headers || {});
+  const t = window.ctToken();
+  if (t) h['Authorization'] = 'Bearer ' + t;
+  if (p.body && !h['Content-Type']) h['Content-Type'] = 'application/json';
+  p.headers = h;
+  return fetch(kelias, p);
+};
+
 const APP_VERSION = 'v1.12.0';
 const BRAND_MODELS = {
   'BMW': ['1', '2', '3', '4', '5', '6', '7', '8', 'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7', 'Z4', 'M'],
@@ -2689,7 +2706,7 @@ async function ctAtnaujintiIstorijosSkaicius() {
   if (!token) return;
   _istorijosSkaiciaiTikrinta = dabar;
   try {
-    const r = await fetch('/api/history-counts', {
+    const r = await ctApi('/api/history-counts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
       body: JSON.stringify({ paieskos: history.map((h) => ({ filters: h.filters, buvo: h.rezultatuSkaicius })) }),
@@ -2921,7 +2938,7 @@ async function checkSingleFavorite(idx) {
   const f = favs[idx];
   if (!f) return;
   try {
-    const resp = await fetch('/api/check-favorite', {
+    const resp = await ctApi('/api/check-favorite', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url: f.url }),
@@ -3158,7 +3175,7 @@ async function runQuickCount() {
   btn.textContent = '⏳ Tikrinama...';
   resultEl.textContent = '';
   try {
-    const resp = await fetch('/api/quick-count', {
+    const resp = await ctApi('/api/quick-count', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(filters),
@@ -3267,7 +3284,7 @@ async function runSearch() {
   }
 
   try {
-    const startResp = await fetch('/api/search-start', {
+    const startResp = await ctApi('/api/search-start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _srchTok },
       body: JSON.stringify(filters),
@@ -3297,7 +3314,7 @@ async function runSearch() {
       // visa paieska, nors darbas serveryje ramiai tesesi.
       let job = null;
       try {
-        const statusResp = await fetch(`/api/search-status/${jobId}`);
+        const statusResp = await ctApi(`/api/search-status/${jobId}`);
         if (statusResp.status === 404) {
           throw new Error('__JOB_DINGO__');
         }
@@ -3548,7 +3565,7 @@ async function toggleTinderDetail() {
 
   extra.innerHTML = '<span style="color:#9a9aa5;font-size:12px;">🔬 Kraunama detali apžvalga...</span>';
   try {
-    const resp = await fetch('/api/analyze-single', {
+    const resp = await ctApi('/api/analyze-single', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url: c.url }),
@@ -3635,7 +3652,7 @@ async function tinderGetAnalysis(url, btn) {
     btn.disabled = false; btn.textContent = '🔍 Analizė'; return;
   }
   try {
-    const resp = await fetch('/api/analyze-single', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ url }) });
+    const resp = await ctApi('/api/analyze-single', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ url }) });
     const data = await resp.json();
     if (data.error) { resultDiv.innerHTML = `<span style="color:#e88;">Klaida: ${data.error}</span>`; return; }
     setAnalysisCache(url, data);
@@ -3820,7 +3837,7 @@ async function ctIkeltiIstorijas(urls, skelbimai) {
         if (c.kaina) kainos[c.url] = c.kaina;
       }
     });
-    const r = await fetch('/api/listing-changes', {
+    const r = await ctApi('/api/listing-changes', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ urls: urls.slice(0, 200), kryzminiai: kryzminiai, kainos: kainos }),
     });
@@ -4421,7 +4438,7 @@ async function lookupVin(vin, resultId, btn) {
   ]);
 
   try {
-    const resp = await fetch('/api/vin-lookup', {
+    const resp = await ctApi('/api/vin-lookup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ vin }),
@@ -4468,7 +4485,7 @@ async function lookupSeller(pardavejas, resultId, btn, listingUrl) {
   ]);
 
   try {
-    const resp = await fetch('/api/seller-lookup', {
+    const resp = await ctApi('/api/seller-lookup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pardavejas, listingUrl }),
@@ -4607,7 +4624,7 @@ async function loadDetail(url, panelId, btn, force, marketContext) {
   }, 600);
 
   try {
-    const resp = await fetch('/api/analyze-single', {
+    const resp = await ctApi('/api/analyze-single', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url, force: !!force, ...(marketContext || {}) }),
@@ -4966,7 +4983,7 @@ window.ctGilusPalyginimasModale = async function () {
 
   try {
     const tok = (function () { try { return localStorage.getItem('ct_token'); } catch (e) { return null; } })();
-    const r = await fetch('/api/compare-deep', {
+    const r = await ctApi('/api/compare-deep', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
       body: JSON.stringify({ autos: compareList }),
