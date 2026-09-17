@@ -8,6 +8,17 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.18.0', data: '2026-09-17', pavadinimas: 'Mėgstamiausi – širdutė antraštėje',
+    pakeitimai: [
+      'Vietoj žvaigždutės ir žymeklio – širdutė ♥; detalioje apžvalgoje mygtukas pagaliau rodo, ar skelbimas išsaugotas',
+      'Antraštėje prie profilio – širdutė su skaičiumi; užvedus ar paspaudus atsidaro visų mėgstamiausių sąrašas',
+      'Prie kiekvieno išsaugoto skelbimo: kada išsaugojote, kada pastebėtas rinkoje, kada paskutinį kartą tikrintas',
+      'Kainos pokytis nuo išsaugojimo, kartotiniai mažinimai, ridos augimas, dingęs skelbimas – matosi sąraše',
+      'Išsaugoti iš detalios apžvalgos skelbimai dabar saugomi ir prie paskyros',
+      'Meniu punktas „Mėgstamiausi“ pašalintas – viską pakeičia širdutė',
+    ],
+  },
+  {
     versija: '1.17.0', data: '2026-09-17', pavadinimas: 'Progreso panelės, senos paieškos, versijų istorija',
     pakeitimai: [
       'Detali apžvalga rodo tą pačią progreso panelę kaip paieška – žingsniai, procentai, juosta',

@@ -65,6 +65,8 @@ button{font-family:inherit;cursor:pointer}
 .dp-bc-btn{display:flex;align-items:center;gap:6px;height:32px;padding:0 14px;border-radius:8px;border:1px solid var(--border-light);background:transparent;color:var(--text-secondary);font:500 13px var(--font)}
 .dp-bc-btn:hover{background:var(--bg-elevated);color:var(--text-primary)}
 .dp-bc-btn.save{color:var(--accent-light);border-color:var(--accent-border);background:var(--accent-dim)}
+.dp-save-toggle.saved{color:#ff5c8a!important;border-color:rgba(255,92,138,.5)!important;background:rgba(255,92,138,.12)!important}
+.dp-save-toggle:hover{color:#ff5c8a}
 
 /* ── MAIN 3-COL ── */
 .dp-main{display:grid;grid-template-columns:280px minmax(0,1fr) 200px;gap:18px;align-items:start}
@@ -280,7 +282,7 @@ button{font-family:inherit;cursor:pointer}
   -webkit-tap-highlight-color: transparent;
 }
 .dp-sbar-secondary:hover { background: var(--bg-elevated); }
-.dp-sbar-secondary.saved { color: var(--warning); border-color: var(--warning-border); background: var(--warning-dim); }
+.dp-sbar-secondary.saved { color: #ff5c8a; border-color: rgba(255,92,138,.5); background: rgba(255,92,138,.12); }
 
 @media (max-width: 900px) {
   #dp-sticky-bar { display: flex; }
@@ -382,7 +384,6 @@ button{font-family:inherit;cursor:pointer}
     <button class="ct-ver-btn" id="app-version" type="button" onclick="ctVersijuModalas()" title="Versijų istorija"></button>
     <nav class="ct3-nav">
       <a class="ct3-nav-link" href="index.html">Paieška</a>
-      <a class="ct3-nav-link" href="megstamiausi.html">Mėgstamiausi</a>
       <a class="ct3-nav-link" href="ataskaitos.html">Ataskaitos</a>
       <a class="ct3-nav-link" href="#" onclick="event.preventDefault();dpAddToCompare()">Palyginti</a>
     </nav>
@@ -424,9 +425,9 @@ button{font-family:inherit;cursor:pointer}
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
         Dalintis
       </button>
-      <button class="dp-bc-btn save" id="dp-save-btn" onclick="dpToggleSave()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-        Išsaugoti
+      <button class="dp-bc-btn save dp-save-toggle" id="dp-save-btn" onclick="dpToggleSave()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        <span>Išsaugoti</span>
       </button>
     </div>
   </div>
@@ -466,9 +467,9 @@ button{font-family:inherit;cursor:pointer}
       <div class="dp-specs" id="dp-specs"></div>
       <div class="dp-actions">
         <a class="dp-act dp-act-primary" id="dp-listing-link" href="#" target="_blank" rel="noopener">Žiūrėti skelbimą &#8599;</a>
-        <button class="dp-act" onclick="dpToggleSave()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-          Išsaugoti
+        <button class="dp-act dp-save-toggle" id="dp-save-btn-2" onclick="dpToggleSave()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+          <span>Išsaugoti</span>
         </button>
       </div>
     </div>
@@ -890,38 +891,66 @@ window.ctApi = function (kelias, params) {
     }
   };
 
+  // PATAISYTA: anksciau atsinaujindavo tik virsutinis mygtukas - dabar visi trys (virsus, kortele, lipni juosta)
   function updateSaveBtn(saved) {
-    var btn = document.getElementById('dp-save-btn');
-    if (!btn) return;
-    btn.innerHTML = (saved ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Išsaugota' : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Išsaugoti');
+    document.querySelectorAll('.dp-save-toggle').forEach(function (btn) {
+      btn.classList.toggle('saved', !!saved);
+      var svg = btn.querySelector('svg'); if (svg) svg.setAttribute('fill', saved ? 'currentColor' : 'none');
+      var t = btn.querySelector('span'); if (t) t.textContent = saved ? 'Išsaugota' : 'Išsaugoti';
+      btn.title = saved ? 'Išsaugota – spauskite, kad pašalintumėte' : 'Išsaugoti į mėgstamiausius';
+    });
   }
+  function dpArIssaugotas() {
+    var favs = []; try { favs = JSON.parse(localStorage.getItem('carTriageFavorites') || '[]'); } catch(e) {}
+    return !!window.__dpUrl && favs.some(function (f) { return (typeof f === 'object' ? f.url : f) === window.__dpUrl; });
+  }
+  document.addEventListener('ct:megstami', function () { updateSaveBtn(dpArIssaugotas()); });
 
   window.dpToggleSave = function() {
     if (!window.__dpUrl) return;
     var favs = [];
     try { favs = JSON.parse(localStorage.getItem('carTriageFavorites') || '[]'); } catch(e) {}
-    var idx = favs.findIndex(function(f) { return (typeof f === 'object' ? f.url : f) === window.__dpUrl; });
-    if (idx === -1) {
+    favs = favs.map(function (f) { return typeof f === 'string' ? { url: f } : f; }).filter(function (f) { return f && f.url; });
+    var idx = favs.findIndex(function(f) { return f.url === window.__dpUrl; });
+    var salinam = idx !== -1, iras = null;
+    if (!salinam) {
       var car = window.__dpCar || {};
       var ph = window.__dpPhotos || [];
-      favs.unshift({
+      iras = {
         url: window.__dpUrl,
         modelis: car.modelis || '?',
         kaina: car.kaina || 0,
         metai: car.metai || null,
         rida: car.rida || null,
+        kuras: car.kuras || null,
+        pavarai: car.pavarai || car.pavaru_deze || null,
+        diffPct: (car.diffPct != null ? car.diffPct : null),
+        marketMedian: car.marketMedian || null,
         photo: ph[0] || '',
         source: car.source || '',
         savedAt: Date.now(),
         lastKnownPrice: car.kaina || 0,
         lastCheckedAt: null,
         status: 'active',
-      });
+      };
+      favs.unshift(iras);
     } else {
       favs.splice(idx, 1);
     }
-    localStorage.setItem('carTriageFavorites', JSON.stringify(favs));
-    updateSaveBtn(favs.some(function(f) { return (typeof f === 'object' ? f.url : f) === window.__dpUrl; }));
+    try { localStorage.setItem('carTriageFavorites', JSON.stringify(favs)); } catch (e) {}
+    updateSaveBtn(!salinam);
+    if (window.ctMegstami) window.ctMegstami.atnaujinti(favs);
+    // PRIDETA: saugom ir prie paskyros (anksciau detali apzvalga rase tik i narsykle)
+    var tok = null; try { tok = localStorage.getItem('ct_token'); } catch (e) {}
+    if (tok) {
+      fetch('/api/megstamiausi', {
+        method: salinam ? 'DELETE' : 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
+        body: JSON.stringify(salinam ? { url: window.__dpUrl } : iras),
+      }).then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) { if (d && Array.isArray(d.sarasas) && window.ctMegstami) window.ctMegstami.atnaujinti(d.sarasas); })
+        .catch(function () {});
+    }
   };
 
   window.dpAddToCompare = function() {
@@ -1104,8 +1133,7 @@ window.ctApi = function (kelias, params) {
         + '<span style="color:var(--text-muted);font-size:12px">'+country+'</span></span>';
     }
 
-    var favs = []; try { favs = JSON.parse(localStorage.getItem('carTriageFavorites') || '[]'); } catch(e) {}
-    updateSaveBtn(c.url && favs.indexOf(c.url) !== -1);
+    updateSaveBtn(dpArIssaugotas());
 
     var sc = ctScore(c, a);
     var pct = Math.round(sc.total * 10);
@@ -1674,8 +1702,8 @@ window.ctApi = function (kelias, params) {
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
     Žiūrėti skelbimą
   </a>
-  <button class="dp-sbar-secondary" id="dp-sticky-save-btn" onclick="dpToggleSave();dpSyncStickyBar()" title="Išsaugoti">
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+  <button class="dp-sbar-secondary dp-save-toggle" id="dp-sticky-save-btn" onclick="dpToggleSave()" title="Išsaugoti">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
   </button>
 </div>
 <script>
@@ -1684,17 +1712,7 @@ window.ctApi = function (kelias, params) {
     var src = document.getElementById('dp-listing-link');
     var dst = document.getElementById('dp-sticky-listing-link');
     if(src && dst && src.href && src.href !== '#') dst.href = src.href;
-    setTimeout(function(){
-      var favs=[]; try{ favs=JSON.parse(localStorage.getItem('carTriageFavorites')||'[]'); }catch(e){}
-      var saved = window.__dpUrl && favs.some(function(f){ return (typeof f==='object'?f.url:f)===window.__dpUrl; });
-      var btn = document.getElementById('dp-sticky-save-btn');
-      if(!btn) return;
-      btn.classList.toggle('saved', !!saved);
-      btn.title = saved ? 'Išsaugota' : 'Išsaugoti';
-      btn.innerHTML = saved
-        ? '<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>'
-        : '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
-    }, 60);
+    // sirdutes busena tvarko updateSaveBtn (.dp-save-toggle)
   };
   document.addEventListener('DOMContentLoaded', function(){
     var el = document.getElementById('dp-listing-link');
@@ -1704,5 +1722,6 @@ window.ctApi = function (kelias, params) {
 })();
 </script>
 <script src="versijos.js"></script>
+<script src="megstami-meniu.js"></script>
 </body>
 </html>

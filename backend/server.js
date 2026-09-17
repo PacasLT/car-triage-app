@@ -45,19 +45,58 @@ app.get('/api/planas/zurnalas', requireAuth, (req, res) => {
 });
 
 // ── Mėgstamiausi (DB, prie paskyros) ────────────────────────────────────────
+// Prie kiekvieno išsaugoto skelbimo pridedam jo istoriją iš gyvavimo ciklo ir kainų
+// laiko juostos: kada pastebėtas rinkoje, kada paskutinį kartą tikrintas, ar dingo,
+// kaip pasikeitė kaina nuo pastebėjimo ir nuo išsaugojimo momento.
+function megstamiSuIstorija(sarasas) {
+  return (sarasas || []).map((f) => {
+    let c = null, tl = [];
+    try { c = cache.gautiGyvavimoCikla(f.url); tl = cache.getListingTimeline(f.url) || []; } catch (e) {}
+    if (!c && !tl.length) return f;
+    const pirmasTl = tl[0] || null, paskTl = tl.length ? tl[tl.length - 1] : null;
+    const pirmaKaina = (c && c.pirmaKaina) || (pirmasTl && pirmasTl.k) || null;
+    const dabartineKaina = (c && c.dabartineKaina) || (paskTl && paskTl.k) || null;
+    const mazinimuKartai = tl.filter((t, i) => i > 0 && t.k < tl[i - 1].k).length;
+    const pirmaRida = (c && c.pirmaRida) || (pirmasTl && pirmasTl.r) || null;
+    const dabartineRida = (c && c.dabartineRida) || (paskTl && paskTl.r) || null;
+    return {
+      ...f,
+      istorija: {
+        pastebetas: (c && c.pirmaMatytas) || (pirmasTl && pirmasTl.t) || null,
+        paskutinisPatikrinimas: (c && c.paskutinMatytas) || (paskTl && paskTl.t) || null,
+        dienosRinkoje: c ? c.dienosRinkoje : null,
+        kartuMatytas: c ? c.kartuMatytas : null,
+        dingo: (c && c.dingo) || null,
+        pirmaKaina, dabartineKaina,
+        kainosPokytis: (pirmaKaina && dabartineKaina) ? dabartineKaina - pirmaKaina : 0,
+        nuoIssaugojimo: (f.kaina && dabartineKaina) ? dabartineKaina - f.kaina : 0,
+        mazinimuKartai,
+        ridosPokytis: (pirmaRida && dabartineRida) ? dabartineRida - pirmaRida : 0,
+        laikoJuosta: tl.slice(-12),
+      },
+    };
+  });
+}
 app.get('/api/megstamiausi', requireAuth, (req, res) => {
-  try { res.json({ sarasas: duomenys.megstamiausi(req.user.id) }); }
-  catch (e) { res.status(500).json({ error: 'Nepavyko įkelti' }); }
+  try {
+    const sarasas = duomenys.megstamiausi(req.user.id);
+    // Mėgstamiausi lieka kasdieniame sekime (kad kaina, rida ir būsena būtų šviežios)
+    try { cache.pridetiSekimui(sarasas.map((f) => f.url), null); } catch (e) {}
+    res.json({ sarasas: megstamiSuIstorija(sarasas) });
+  } catch (e) { res.status(500).json({ error: 'Nepavyko įkelti' }); }
 });
 app.post('/api/megstamiausi', requireAuth, (req, res) => {
-  try { res.json({ sarasas: duomenys.pridetiMegstama(req.user.id, req.body || {}) }); }
-  catch (e) { res.status(400).json({ error: e.message }); }
+  try {
+    const sarasas = duomenys.pridetiMegstama(req.user.id, req.body || {});
+    try { if (req.body && req.body.url) cache.pridetiSekimui([String(req.body.url)], null); } catch (e) {}
+    res.json({ sarasas: megstamiSuIstorija(sarasas) });
+  } catch (e) { res.status(400).json({ error: e.message }); }
 });
 app.delete('/api/megstamiausi', requireAuth, (req, res) => {
   try {
     const url = (req.body && req.body.url) || req.query.url;
     if (!url) return res.status(400).json({ error: 'Trūksta url' });
-    res.json({ sarasas: duomenys.pasalintiMegstama(req.user.id, url) });
+    res.json({ sarasas: megstamiSuIstorija(duomenys.pasalintiMegstama(req.user.id, url)) });
   } catch (e) { res.status(500).json({ error: 'Nepavyko pašalinti' }); }
 });
 

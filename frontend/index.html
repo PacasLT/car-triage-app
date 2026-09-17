@@ -174,7 +174,7 @@
   #status { color: var(--text-muted); font-size: 14px; margin-bottom: 16px; min-height: 20px; }
   .card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 14px; display: flex; gap: 16px; border-left: 4px solid var(--accent); position: relative; box-shadow: var(--shadow-card); }
   .fav-star { position: absolute; top: 10px; right: 10px; background: rgba(10,12,16,0.75); border: none; color: var(--text-muted); font-size: 20px; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; z-index: 2; }
-  .fav-star.active { color: var(--warning); }
+  .fav-star.active { color: #ff5c8a; }
   .card img { width: 140px; height: 100px; object-fit: cover; border-radius: var(--radius-md); background: var(--bg-elevated); flex-shrink: 0; }
   .card-body { flex: 1; min-width: 0; }
   .card-title { font-weight: 600; font-size: 16px; color: var(--text-primary); }
@@ -978,7 +978,8 @@
 .card-body { padding: 14px 18px 14px; }
 .fav-star { top: 12px; right: 12px; width: 34px; height: 34px; border-radius: var(--radius-md); background: transparent; border: 1px solid var(--border-light); color: var(--text-muted); font-size: 14px; line-height: 1; display: grid; place-items: center; padding: 0; }
 .fav-star:hover { background: var(--bg-elevated); }
-.fav-star.active { color: var(--warning); background: var(--warning-dim); border-color: var(--warning-border); }
+.fav-star.active { color: #ff5c8a; background: rgba(255,92,138,.14); border-color: rgba(255,92,138,.45); }
+.fav-star:hover { color: #ff5c8a; }
 
 .card-title { font-size: 17px; font-weight: 600; letter-spacing: -.01em; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding-right: 44px; }
 .source-tag { font: 600 9px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; padding: 4px 6px; border-radius: 3px; background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border); margin-left: 0; }
@@ -1095,7 +1096,7 @@
 .ct-title-row h3 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -.01em; }
 .ct-card .source-tag { font: 600 9px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; padding: 4px 6px; border-radius: 4px; background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border); margin: 0; }
 .ct-card .fav-star.ct-fav { position: static; margin-left: auto; width: 32px; height: 32px; border-radius: 8px; background: transparent; border: 1px solid var(--border-light); color: var(--text-muted); font-size: 14px; display: grid; place-items: center; padding: 0; }
-.ct-card .fav-star.ct-fav.active { color: var(--warning); background: var(--warning-dim); border-color: var(--warning-border); }
+.ct-card .fav-star.ct-fav.active { color: #ff5c8a; background: rgba(255,92,138,.14); border-color: rgba(255,92,138,.45); }
 .ct-price-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
 .ct-price { font: 600 26px/1 var(--font-mono); letter-spacing: -.02em; color: var(--accent-light); }
 .ct-diff { font: 700 12px/1 var(--font-mono); padding: 6px 8px; border-radius: 6px; }
@@ -1316,9 +1317,21 @@
   /* Header — naujas (ct3) */
   .ct3-header { position: sticky; top: 0; z-index: 200;
     background: rgba(10,12,18,0.94); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,.07); }
-  .ct3-header-inner { padding: 12px 16px !important; }
-  .ct3-logo-icon { width: 34px !important; height: 34px !important; }
-  .ct3-logo-text > span { font-size: 20px !important; }
+  .ct3-header-inner { padding: 12px 12px !important; gap: 6px; }
+  .ct3-logo { gap: 8px !important; min-width: 0; }
+  .ct3-logo-icon { width: 32px !important; height: 32px !important; }
+  .ct3-logo-text > span { font-size: 19px !important; }
+  .ct3-header-right { gap: 6px !important; }
+  .ct3-premium-btn#ct-planas-btn { padding: 0 8px !important; height: 32px; font-size: 11px; gap: 5px !important; }
+  #ct-planas-btn .ct-pl-kr { padding: 2px 5px; font-size: 10px; }
+}
+@media (max-width: 400px) {
+  .ct3-header-inner { padding: 10px 10px !important; gap: 4px; }
+  .ct3-logo-text > span { font-size: 17px !important; }
+  .ct-ver-btn { margin-left: 4px !important; padding: 0 4px !important; font-size: 8px !important; }
+  .ct3-premium-btn#ct-planas-btn { padding: 0 6px !important; font-size: 10px; }
+  .ct3-header-right { gap: 4px !important; }
+  .ct-meg-btn, .ct3-avatar { width: 32px !important; height: 32px !important; }
   .ct3-logo-text small { display: none; }
   .ct3-nav { display: none !important; }
   .ct3-premium-btn { display: none !important; }
@@ -2197,7 +2210,6 @@
     <button class="ct-ver-btn" id="app-version" type="button" onclick="ctVersijuModalas()" title="Versijų istorija"></button>
     <nav class="ct3-nav">
       <a class="ct3-nav-link active" href="#">Paieška</a>
-      <a class="ct3-nav-link" href="megstamiausi.html">Mėgstamiausi</a>
       <a class="ct3-nav-link" href="ataskaitos.html">Ataskaitos</a>
       <a class="ct3-nav-link" href="#" onclick="event.preventDefault();ctNavTab('istorija')">Istorija</a>
       <a class="ct3-nav-link" href="#" onclick="event.preventDefault();ctNavTab('palyginti')">Palyginti</a>
@@ -2569,6 +2581,7 @@
 </div>
 
 <script src="versijos.js"></script>
+<script src="megstami-meniu.js"></script>
 <script>
 
 // ── Bendra API uzklausa su prisijungimo zetonu ─────────────────────────────
@@ -2927,7 +2940,7 @@ function toggleFavorite(url, snapshot, btn) {
   const salinam = idx >= 0;
   if (salinam) {
     favs.splice(idx, 1);
-    if (btn) { btn.textContent = '☆'; btn.classList.remove('active'); }
+    if (btn) { btn.textContent = '♡'; btn.classList.remove('active'); }
   } else {
     favs.unshift({
       url, modelis: snapshot.modelis, kaina: snapshot.kaina, metai: snapshot.metai,
@@ -2935,19 +2948,32 @@ function toggleFavorite(url, snapshot, btn) {
       kuras: snapshot.kuras, pavarai: snapshot.pavarai, diffPct: snapshot.diffPct, marketMedian: snapshot.marketMedian,
       savedAt: Date.now(), lastKnownPrice: snapshot.kaina, lastCheckedAt: null, status: 'active',
     });
-    if (btn) { btn.textContent = '★'; btn.classList.add('active'); }
+    if (btn) { btn.textContent = '♥'; btn.classList.add('active'); }
   }
   saveFavorites(favs);
   renderFavorites();
+  if (window.ctMegstami) ctMegstami.atnaujinti(favs);   // sirdute antrasteje
   // PRIDETA: megstamiausi saugomi ir prie paskyros (matomi is kitu irenginiu, megstamiausi.html)
   if (window.ctToken && window.ctToken()) {
     const iras = salinam ? null : favs[0];
     ctApi('/api/megstamiausi', salinam
       ? { method: 'DELETE', body: JSON.stringify({ url }) }
       : { method: 'POST', body: JSON.stringify(iras) }
-    ).catch(function () {});
+    ).then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) { if (d && Array.isArray(d.sarasas)) { saveFavorites(d.sarasas); if (window.ctMegstami) ctMegstami.atnaujinti(d.sarasas); } })
+      .catch(function () {});
   }
 }
+
+// Sirdutes ant korteliu atsinaujina, kai sarasas keiciasi kitur (antrastes meniu, kitas skirtukas)
+document.addEventListener('ct:megstami', function (e) {
+  const yra = new Set(((e.detail && e.detail.sarasas) || []).map((f) => f.url));
+  document.querySelectorAll('.fav-star').forEach(function (b) {
+    const m = /toggleFavorite\('([^']+)'/.exec(b.getAttribute('onclick') || ''); if (!m) return;
+    const ok = yra.has(m[1]);
+    b.classList.toggle('active', ok); b.textContent = ok ? '♥' : '♡';
+  });
+});
 
 // Paleidziant: serverio sarasas -> narsykle, kad zvaigzdutes sutaptu visuose irenginiuose
 async function ctSinchronizuotiMegstamus() {
@@ -2966,6 +2992,7 @@ async function ctSinchronizuotiMegstamus() {
       const sujungti = d.sarasas.concat(vietiniai.filter((v) => !serverioUrl.has(v.url)));
       saveFavorites(sujungti);
       if (typeof renderFavorites === 'function') renderFavorites();
+      if (window.ctMegstami) ctMegstami.atnaujinti(sujungti);
     }
   } catch (e) {}
 }
@@ -4386,7 +4413,7 @@ function renderBrowseListings(candidates, container) {
           '</div>' +
         '</div>' +
         '<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;align-items:flex-end;">' +
-          '<button class="fav-star' + (isFav ? ' active' : '') + '" onclick="toggleFavorite(\'' + c.url + '\', ' + favSnap + ', this)" style="width:28px;height:28px;border-radius:6px;background:transparent;border:1px solid var(--border-light);color:var(--text-muted);font-size:14px;display:grid;place-items:center;">' + (isFav ? '★' : '☆') + '</button>' +
+          '<button class="fav-star' + (isFav ? ' active' : '') + '" onclick="toggleFavorite(\'' + c.url + '\', ' + favSnap + ', this)" style="width:28px;height:28px;border-radius:6px;background:transparent;border:1px solid var(--border-light);color:var(--text-muted);font-size:14px;display:grid;place-items:center;">' + (isFav ? '♥' : '♡') + '</button>' +
           '<button class="detail-btn' + (hasDeep ? ' ready' : '') + '" id="' + panelId + '-btn" onclick="' + detailClick + '" style="font-size:12px;padding:6px 10px;white-space:nowrap;">' + detailBtnLabel + '</button>' +
         '</div>' +
       '</div>' +
@@ -4531,7 +4558,7 @@ function renderCandidateCards(candidates, results) {
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
-      <button class="fav-star${isFav ? ' active' : ''}" onclick="toggleFavorite('${c.url}', ${favSnapshot}, this)">${isFav ? '★' : '☆'}</button>
+      <button class="fav-star${isFav ? ' active' : ''}" onclick="toggleFavorite('${c.url}', ${favSnapshot}, this)">${isFav ? '♥' : '♡'}</button>
       <div class="card-photo-wrap">
         <img id="${cardId}-img" src="${c.photo || ''}" onclick="${hasMultiplePhotos ? `openLightbox(window.__galleryStore['${cardId}-strip'], window.__cardPhotoIndex['${cardId}']||0)` : ''}" onerror="this.style.display='none'">
         ${photoNavArrows}
@@ -5622,7 +5649,7 @@ function ctNavTab(tab) {
                 '</div>' +
                 '<div style="font:500 11.5px/1 var(--font-mono);color:var(--text-muted);">' + [c.metai, c.rida ? fmtKm(c.rida) : null, c.kuras, c.pavarai].filter(Boolean).join(' · ') + '</div>' +
               '</div>' +
-              '<button class="fav-star' + (isFav ? ' active' : '') + '" style="flex:none;width:32px;height:32px;border-radius:8px;background:transparent;border:1px solid var(--border-light);color:var(--text-muted);display:grid;place-items:center;font-size:16px;" title="Išsaugoti" onclick="toggleFavorite(\'' + c.url + '\', ' + favSnap + ', this)">' + (isFav ? '★' : '☆') + '</button>' +
+              '<button class="fav-star' + (isFav ? ' active' : '') + '" style="flex:none;width:32px;height:32px;border-radius:8px;background:transparent;border:1px solid var(--border-light);color:var(--text-muted);display:grid;place-items:center;font-size:16px;" title="Išsaugoti" onclick="toggleFavorite(\'' + c.url + '\', ' + favSnap + ', this)">' + (isFav ? '♥' : '♡') + '</button>' +
             '</div>' +
             '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:5px;">' +
               '<span style="font:600 26px/1 var(--font-mono);letter-spacing:-.02em;color:var(--text-primary);">' + formatEUR(c.kaina) + '</span>' +
