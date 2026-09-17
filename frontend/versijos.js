@@ -8,6 +8,18 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.21.0', data: '2026-09-17', pavadinimas: 'Pardavėjas, VIN, nuotraukos ir švaresnis įvertis',
+    pakeitimai: [
+      'Pardavėjas nuskaitomas tiksliai: pavadinimas, partnerio lygis, tapatybės patvirtinimas, miestas, reitingas ir atsiliepimų skaičius – nebeliko „Pardavėjas nenurodyta“',
+      'VIN: kai portalas rodo tik pradžią (reikia prisijungti), rodome „◐ VIN (dalinis)“ ir paaiškiname, kaip pamatyti visą',
+      'Istorijos ataskaita atidaroma tiesiogine Autoistorija.lt nuoroda iš skelbimo',
+      'Ištaisytos dingusios nuotraukos – 18 iš 20 skelbimų naudoja kitokį galerijos išdėstymą, dabar nuskaitomos visos (iki 6 vienoje kortelėje)',
+      'Pašalinta pasikartojanti signalų juosta; rizikos lygis ir duomenų patikimumas perkelti prie „CarTriige įvertis“',
+      'Įverčio juostos visada tos pačios penkios – ko neįvertinome, rodome brūkšnį, kad korteles būtų galima lyginti',
+      'Iš skelbimo puslapio nuskaitomi ir techniniai laukai (pirma registracija, variklis, varantieji ratai, spalva)',
+    ],
+  },
+  {
     versija: '1.20.1', data: '2026-09-17', pavadinimas: 'Tikslus autoplius nuskaitymas ir nauji filtrai',
     pakeitimai: [
       'Patikrinta gyvuose skelbimuose: sena pigi mašina (pvz. 1998 m. už 1 300 €) nebežymima klaidinga kaina – įspėjame tik kai maža kaina rodoma naujam automobiliui',

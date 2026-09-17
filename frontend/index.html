@@ -183,6 +183,7 @@
   .ct-rs-sub { margin-top: 4px; font: 400 12px/1.5 var(--font); color: var(--text-muted); display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
   .ct-rs-sub b { font-family: var(--font-mono); color: var(--text-secondary); }
   .ct-rs-sub i { font-style: normal; opacity: .5; }
+  .ct-subs b.ct-dim { color: var(--text-dim); }
   .ct-pfiltrai { display: flex; flex-wrap: wrap; gap: 8px 18px; }
   .ct-pfiltrai label { display: inline-flex; align-items: center; gap: 7px; font: 500 12.5px var(--font); color: var(--text-secondary); cursor: pointer; }
   .ct-pfiltrai input { width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer; }
@@ -4213,6 +4214,24 @@ const CT_TRIAGE_META = {
 // Trys ATSKIRI signalai. Galimybė = kiek įdomus automobilis.
 // Patikimumas = kiek apie jį žinome. Rizika = kokie neigiami signalai RASTI.
 // Jie niekada nesuliejami į vieną skaičių.
+// Rizikos ir duomenu patikimumo zenklas - rodomas PRIE ivercio antrastes (anksciau buvo
+// atskira juosta virsuje, kuri kartojo ta pacia informacija).
+function ctRizikosZenklas(c) {
+  const esc = (x) => String(x == null ? '' : x).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
+  const r = c.rizikosBusena || {};
+  const dalys = [];
+  if (r.label) {
+    const sp = /auksta|didel/i.test(r.label) ? 'var(--danger)' : /vidutin/i.test(r.label) ? 'var(--warning)' : 'var(--success)';
+    const fon = /auksta|didel/i.test(r.label) ? 'var(--danger-dim)' : /vidutin/i.test(r.label) ? 'var(--warning-dim)' : 'var(--success-dim)';
+    const rem = /auksta|didel/i.test(r.label) ? 'var(--danger-border)' : /vidutin/i.test(r.label) ? 'var(--warning-border)' : 'var(--success-border)';
+    dalys.push('<span title="Rizikos lygis" style="display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:6px;background:' + fon + ';border:1px solid ' + rem + ';color:' + sp + ';font:600 10.5px/1 var(--font);">Rizika: ' + esc(r.label.split('–')[0].trim()) + '</span>');
+  }
+  if (c.pasitikejimas != null) {
+    dalys.push('<span title="Kiek skelbimo duomenų pavyko patikrinti" style="display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:6px;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-muted);font:600 10.5px/1 var(--font-mono);">Duomenys ' + c.pasitikejimas + '%</span>');
+  }
+  return dalys.join('');
+}
+
 function ctSignalsBlock(c) {
   if (c.qualityScore == null) return '';
   const m = CT_TRIAGE_META[c.triageLevel] || {};
@@ -4674,6 +4693,7 @@ function renderAllListings(allListings, kandidatai) {
   // kandidatai po TOP jau nupiesti tiesiai i wrap; likusieji - i atskira vidini bloka, kad renderis ju neistrintu
   let container = document.getElementById('ct-kiti-likusieji');
   if (!container && wrapEl) { container = document.createElement('div'); container.id = 'ct-kiti-likusieji'; wrapEl.appendChild(container); }
+  if (!container) return;   // nera kur piesti (pvz. korteliu renderis nutruko) - tyliai praleidziam
   const jauYra = wrapEl ? wrapEl.querySelectorAll(':scope > .ct-std-card').length : 0;
   if (!allListings.length) { if (kiekEl) kiekEl.textContent = jauYra; return; }
 
@@ -5503,12 +5523,12 @@ function ctNavTab(tab) {
     if (c.qualityScore != null && c.baloKomponentai) {
       const k = c.baloKomponentai;
       const v = (x) => (x == null ? null : Math.round((x / 10) * 10) / 10);
+      // Juostos VISADA tos pacios penkios - kitaip vienoje kortelėje jų 4, kitoje 3
+      // ir korteliu nebeimanoma lyginti. Ko neivertinom - rodom bruksni.
       const parts = [
         ['Kaina', v(k.price)], ['Rida', v(k.mileage)], ['Įranga', v(k.equipment)],
         ['Istorija', v(k.history)], ['Potencialas', v(k.demand)],
-      ].filter((pr) => pr[1] != null);
-      // Jei visi komponentai iškrito (labai skurdus skelbimas), rodom bent bendrą balą
-      if (!parts.length) parts.push(['Bendras', Math.round(c.qualityScore / 10 * 10) / 10]);
+      ];
       return { total: c.qualityScore / 10, parts, triage: true };
     }
     const pr = a && a.perikupo_radaras;
@@ -5560,7 +5580,9 @@ function ctNavTab(tab) {
         <div class="ct-eyebrow">CarTriige įvertis</div>
         <div class="ct-score-row">
           <div class="ct-ring ct-${t}" style="--pct:${Math.round(s.total * 10)}"><div><b>${s.total.toFixed(1)}</b><small>/10</small></div></div>
-          <div class="ct-subs">${s.parts.map(([k, v]) => `<div><span>${k}</span><i><em style="width:${v * 10}%" class="ct-bg-${tone(v)}"></em></i><b class="ct-${tone(v)}">${v.toFixed(1)}</b></div>`).join('')}</div>
+          <div class="ct-subs">${s.parts.map(([k, v]) => v == null
+            ? `<div><span>${k}</span><i></i><b class="ct-dim" title="Trūksta duomenų skelbime">–</b></div>`
+            : `<div><span>${k}</span><i><em style="width:${v * 10}%" class="ct-bg-${tone(v)}"></em></i><b class="ct-${tone(v)}">${v.toFixed(1)}</b></div>`).join('')}</div>
         </div>
       </div>`;
   }
@@ -5710,6 +5732,7 @@ function ctNavTab(tab) {
 
       var subBarsHtml = s.parts.map(function(part) {
         var label = part[0]; var val = part[1];
+        if (val == null) return '<div style="display:flex;flex-direction:column;gap:5px;"><span style="font:500 9px/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + label + '</span><b style="font:700 12px/1 var(--font-mono);color:var(--text-dim);" title="Šio rodiklio įvertinti nepavyko – trūksta duomenų skelbime">–</b><div style="height:3px;border-radius:2px;background:var(--bg-raised);"></div></div>';
         var bc = _tone(val);
         return '<div style="display:flex;flex-direction:column;gap:5px;"><span style="font:500 9px/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + label + '</span><b style="font:700 12px/1 var(--font-mono);color:' + bc + ';">' + val.toFixed(1) + '</b><div style="height:3px;border-radius:2px;background:var(--bg-raised);overflow:hidden;"><div class="ct-bar-fill" style="--w:' + (val*10) + '%;background:' + bc + ';"></div></div></div>';
       }).join('');
@@ -5759,13 +5782,16 @@ function ctNavTab(tab) {
             // PASALINTA: "72 · VERTA ANALIZUOTI" zenkliukas. Ta pati informacija jau rodoma
             // dukart zemiau - bloke "CARTRIIGE GALIMYBE 72/100" ir verdikto mygtuke prie ivercio.
             '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">' + chipsHtml + '</div>' +
-            (typeof ctSignalsBlock === 'function' ? ctSignalsBlock(c) : '') +
+
             (typeof ctWhyBlock === 'function' ? ctWhyBlock(c) : '') +
             (typeof ctUnknownBlock === 'function' ? ctUnknownBlock(c) : '') +
             (typeof ctResaleBlock === 'function' ? ctResaleBlock(c) : '') +
             (c.comment ? '<div style="display:flex;gap:9px;padding:10px 12px;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:9px;margin-bottom:14px;align-items:flex-start;"><span style="flex:none;font:700 9px/1 var(--font-mono);padding:4px 5px;border-radius:4px;background:var(--accent);color:#fff;height:18px;display:grid;place-items:center;margin-top:1px;">AI</span><p style="margin:0;font-size:12.5px;line-height:1.5;color:var(--text-secondary);">' + esc(c.comment) + '</p></div>' : '') +
             '<div style="padding:12px 0 0;border-top:1px solid var(--border);margin-bottom:12px;">' +
-              '<div style="font:500 9px/1 var(--font-mono);letter-spacing:.13em;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;">CARTRIIGE ĮVERTIS</div>' +
+              '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">' +
+                '<span style="font:500 9px/1 var(--font-mono);letter-spacing:.13em;text-transform:uppercase;color:var(--text-dim);">CARTRIIGE ĮVERTIS</span>' +
+                (typeof ctRizikosZenklas === 'function' ? ctRizikosZenklas(c) : '') +
+              '</div>' +
               '<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">' +
                 '<div class="ct-ring ct-ring-lg" style="--pct:' + scorePct + ';color:' + scoreColor + ';">' +
                   '<div class="ct-ring-inner"><b style="color:' + scoreColor + ';">' + s.total.toFixed(1) + '</b><small>/10</small></div>' +

@@ -1113,6 +1113,13 @@ window.ctApi = function (kelias, params) {
         det.analysis = resp.analysis;
         if (resp.photos && resp.photos.length) det.photos = resp.photos;
         if (resp.pardavejoLogo) det.pardavejoLogo = resp.pardavejoLogo;
+        // PRIDETA: strukturiniai skelbimo laukai - pardavejas, VIN busena, istorijos nuoroda
+        if (resp.pardavejoInfo) det.pardavejoInfo = resp.pardavejoInfo;
+        if (resp.vinPaslėptas != null) det.vinPaslėptas = resp.vinPaslėptas;
+        if (resp.vinPrefiksas) det.vinPrefiksas = resp.vinPrefiksas;
+        if (resp.istorijosNuoroda) det.istorijosNuoroda = resp.istorijosNuoroda;
+        if (resp.skelbimoParametrai) det.skelbimoParametrai = resp.skelbimoParametrai;
+        if (resp.vin) { det.c = det.c || {}; det.c.vin = resp.vin; }
         localStorage.setItem('ct_detail', JSON.stringify(det));
       } catch (e) {}
       load();
@@ -1144,6 +1151,9 @@ window.ctApi = function (kelias, params) {
     window.__dpUrl = c.url || '';
     window.__dpCar = c;
     window.__dpPhotos = photos;
+    window.__dpVinPaslėptas = !!data.vinPaslėptas;
+    window.__dpVinPrefiksas = data.vinPrefiksas || null;
+    window.__dpIstorijosNuoroda = data.istorijosNuoroda || null;
     document.getElementById('dp-empty').style.display = 'none';
     document.getElementById('dp-content').style.display = '';
 
@@ -1198,6 +1208,11 @@ window.ctApi = function (kelias, params) {
     if (c.ridaDiffPct != null && c.ridaDiffPct < -20) addSpec(specsEl, '', '✓ Maža rida', true);
     if (c.turiVin) addSpec(specsEl, '', '✓ VIN', true);
     if (c.turiIstorijosAtaskaita) addSpec(specsEl, '', '✓ Istorija', true);
+    // PAKEISTA: autoplius pilna VIN rodo tik prisijungus - nebemeluojam "✓ VIN"
+    if (window.__dpVinPaslėptas) {
+      var vs = specsEl.querySelectorAll('.dp-spec');
+      vs.forEach(function (el) { if (/VIN/.test(el.textContent) && !/dalinis/i.test(el.textContent)) { el.textContent = '◐ VIN (dalinis)'; el.title = 'Skelbime VIN yra, bet portalas rodo tik pradžią – visą pamatysite paspaudę „Rodyti“ skelbime (reikia prisijungti prie autoplius)'; } });
+    }
 
     if (c.url) document.getElementById('dp-listing-link').href = c.url;
 
@@ -1213,10 +1228,20 @@ window.ctApi = function (kelias, params) {
       ? '<img src="' + String(data.pardavejoLogo).replace(/"/g, '&quot;') + '" alt="Pardavėjo logotipas" style="width:100%;height:100%;object-fit:cover;display:block;background:#fff">'
       : '<div style="width:100%;height:100%;background:'+pm.bg+';border-radius:12px;display:grid;place-items:center;color:#fff;font:700 13px/1 var(--font-mono);">'+pm.abbr+'</div>';
     // Seller name + verified badge (verslo = verified)
-    document.getElementById('dp-seller-name').textContent = c.pardavejas || c.source || '—';
-    document.getElementById('dp-seller-type').textContent = c.yraVerslas ? 'Verslo pardavėjas' : 'Privatus pardavėjas';
+    // PAKEISTA: pardavejo duomenys imami is skelbimo strukturiskai (vardas, partnerio lygis,
+    // tapatybe, miestas, reitingas). Anksciau buvo spejama regexu ir daznai likdavo "nenurodyta".
+    var pi = data.pardavejoInfo || (window.__dpAnalysisData && window.__dpAnalysisData.pardavejoInfo) || null;
+    var pVardas = (pi && pi.vardas) || c.pardavejas || null;
+    document.getElementById('dp-seller-name').textContent = pVardas || (c.yraVerslas ? 'Verslo pardavėjas' : 'Privatus pardavėjas');
+    var tipoDalys = [];
+    if (pi && pi.lygis) tipoDalys.push(pi.lygis);
+    else tipoDalys.push(c.yraVerslas ? 'Verslo pardavėjas' : 'Privatus pardavėjas');
+    if (pi && pi.vieta) tipoDalys.push(pi.vieta);
+    if (pi && pi.reitingas) tipoDalys.push('★ ' + pi.reitingas + (pi.atsiliepimu ? ' (' + pi.atsiliepimu + ')' : ''));
+    if (!pVardas && !pi) tipoDalys.push('duomenys bus po analizės');
+    document.getElementById('dp-seller-type').textContent = tipoDalys.join(' · ');
     var verBadge = document.getElementById('dp-seller-verified');
-    if (verBadge) verBadge.style.display = c.yraVerslas ? '' : 'none';
+    if (verBadge) { const patv = pi ? pi.patvirtinta : c.yraVerslas; verBadge.style.display = patv ? '' : 'none'; verBadge.title = patv ? 'Tapatybė patvirtinta portale' : ''; }
     // Nuoroda i skelbima (elementas pasalintas - mygtukas jau yra virsuje)
     var sellerLink = document.getElementById('dp-seller-link');
     if (sellerLink) sellerLink.href = c.url || '#';
@@ -1514,7 +1539,12 @@ window.ctApi = function (kelias, params) {
       html += '<button id="dp-vin-lookup-btn" onclick="dpVinLookup()" style="margin-top:12px;width:100%;padding:11px;border-radius:8px;border:none;background:var(--accent);color:#fff;font:600 13px var(--font-sans);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Tikrinti VIN istoriją</button>';
         html += '<div id="dp-vin-result" style="margin-top:12px"></div>';
       } else {
-        html += '<div style="font-size:13px;color:var(--text-muted);padding:8px">VIN kodas skelbime nenurodytas</div>';
+        html += window.__dpVinPaslėptas
+        ? '<div style="padding:10px 12px;border-radius:9px;background:var(--warning-dim);border:1px solid var(--warning-border);font:400 12.5px/1.55 var(--font);color:var(--warning)">'
+          + '<b>VIN skelbime yra, bet portalas jo nerodo</b><br><span style="color:var(--text-secondary)">autoplius pilną VIN atskleidžia tik paspaudus „Rodyti“ ir prisijungus. '
+          + (window.__dpVinPrefiksas ? 'Matoma pradžia: <b style="font-family:var(--font-mono);color:var(--text-primary)">' + window.__dpVinPrefiksas + '…</b> – ja galime patikrinti, ar nuotraukose rastas VIN tikras. ' : '')
+          + 'Atsidarykite skelbimą, paspauskite „Rodyti“ ir įklijuokite VIN čia.</span></div>'
+        : '<div style="font-size:13px;color:var(--text-muted);padding:8px">VIN kodas skelbime nenurodytas</div>';
       }
       html += '</div></div>';
       html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden">';
@@ -1525,7 +1555,8 @@ window.ctApi = function (kelias, params) {
       if (c.turiIstorijosAtaskaita) {
         html += '<span style="width:36px;height:36px;border-radius:50%;background:rgba(34,197,94,.12);display:grid;place-items:center;flex:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span>';
         html += '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px">Pardavėjas pridėjo istorijos ataskaitą</div><div style="font-size:12px;color:var(--text-muted);margin-top:3px;line-height:1.5">Skelbime ' + portalas + ' yra ženklelis „Patikrinta istorija“ – prie jo prisegta <b style="color:var(--text-secondary)">Autoistorija.lt</b> (arba analogiška) ataskaita: rida per apžiūras, žinomi įvykiai, savininkų skaičius. Ją atsidarysite pačiame skelbime, skiltyje „Istorija“ – tai nemokama.</div>'
-          + '<a href="' + (c.url || '#') + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin-top:9px;padding:7px 12px;border-radius:8px;border:1px solid var(--border-light);color:var(--text-primary);font:600 12px var(--font);text-decoration:none">Atidaryti ataskaitą skelbime ↗</a></div>';
+          + '<a href="' + (window.__dpIstorijosNuoroda || c.url || '#') + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin-top:9px;padding:7px 12px;border-radius:8px;border:1px solid var(--accent-border);background:var(--accent-dim);color:var(--accent-light);font:600 12px var(--font);text-decoration:none">'
+          + (window.__dpIstorijosNuoroda ? 'Atidaryti Autoistorija.lt ataskaitą ↗' : 'Atidaryti ataskaitą skelbime ↗') + '</a></div>';
       } else {
         html += '<span style="width:36px;height:36px;border-radius:50%;background:rgba(245,158,11,.12);display:grid;place-items:center;flex:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>';
         html += '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px">Pardavėjas istorijos ataskaitos nepridėjo</div><div style="font-size:12px;color:var(--text-muted);margin-top:3px;line-height:1.5">Skelbime nėra ženklelio „Patikrinta istorija“ (Autoistorija.lt ataskaitos). Ką daryti: ' + (c.turiVin ? 'užsakykite VIN istoriją aukščiau (1 kr) – gausite ridos, įvykių ir savininkų istoriją' : 'paprašykite pardavėjo VIN kodo ir ataskaitos – rimtas pardavėjas ją turi') + '.</div></div>';
