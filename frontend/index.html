@@ -1310,6 +1310,217 @@
   .std-card-inner{border-left:none !important;}
 }
 </style>
+
+<style id="ct-mobile-responsive">
+/* ── index.html mobile ── telefono ekranas 360–430 px, planšetė 768 px ── */
+
+/* PLANŠETĖ 768px */
+@media (max-width: 768px) {
+  /* Konteineris */
+  .container { padding: 0 14px 40px; }
+
+  /* Header — senas (app-header) */
+  .app-header-inner { height: 50px; }
+  .app-logo-name { font-size: 16px; }
+  .app-nav { gap: 6px; }
+  .nav-btn { padding: 5px 10px; font-size: 12px; gap: 4px; }
+
+  /* Header — naujas (ct3) */
+  .ct3-header { position: sticky; top: 0; z-index: 200;
+    background: rgba(10,12,18,0.94); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,.07); }
+  .ct3-header-inner { padding: 12px 16px !important; }
+  .ct3-logo-icon { width: 34px !important; height: 34px !important; }
+  .ct3-logo-text > span { font-size: 20px !important; }
+  .ct3-logo-text small { display: none; }
+  .ct3-nav { display: none !important; }
+  .ct3-premium-btn { display: none !important; }
+  .ct3-avatar { width: 36px; height: 36px; }
+
+  /* Hero */
+  .ct3-hero { min-height: 340px !important; margin-top: 0 !important; }
+  .ct3-hero-photo { height: 340px !important; }
+  .ct3-hero-content { min-height: 340px !important; padding: 60px 16px 24px !important; }
+  .ct3-hero-title { font-size: 26px !important; margin-bottom: 12px !important; }
+  .ct3-hero-sub { font-size: 13px !important; margin-bottom: 16px !important; max-width: 100% !important; }
+  .ct3-hero-feats { gap: 14px; }
+  .ct3-feat span { font-size: 12px; }
+  .ct3-hero-right-stats { display: none; }
+
+  /* Search panel */
+  .ct3-search-panel { margin: 0 10px !important; border-radius: 16px !important; }
+  .ct3-search-inner { padding: 0 10px !important; }
+  .ct3-search-top { padding: 0 4px; flex-wrap: wrap; gap: 0; }
+  .ct3-portals-row { display: none !important; }
+  .ct3-search-tabs { overflow-x: auto; scrollbar-width: none; }
+  .ct3-search-tabs::-webkit-scrollbar { display: none; }
+  .ct3-stab { height: 44px; padding: 0 14px; font-size: 13px; }
+  .ct3-fields { grid-template-columns: repeat(2, minmax(0,1fr)) !important; gap: 6px !important; padding: 8px !important; }
+  .ct3-field { padding: 8px 10px; gap: 5px; }
+  .ct3-field label { font-size: 7.5px; }
+  .ct3-select-wrap select, .ct3-range-wrap input { font-size: 16px; } /* prevens iOS zoom */
+  .ct3-search-bottom { flex-direction: column; align-items: stretch; padding: 8px 10px 10px; gap: 8px; }
+  .ct3-search-bottom-left { flex-wrap: wrap; gap: 6px; }
+  .ct3-search-bottom-right { flex-direction: row; gap: 6px; }
+  .ct3-save-btn { flex: 1; justify-content: center; }
+  .ct3-search-btn { flex: 1; justify-content: center; height: 46px; font-size: 15px; }
+  .ct3-more-btn, .ct3-marketplaces-btn { flex: 1; justify-content: center; font-size: 12px; height: 38px; }
+
+  /* Stats bar */
+  .ct3-stats-bar { margin: 6px 10px 0 !important; border-radius: 12px !important; }
+  .ct3-stats-inner { flex-wrap: wrap; gap: 10px; padding: 10px 14px; }
+  .ct3-stat-div { display: none; }
+  .ct3-stat-item { flex: 0 0 calc(50% - 5px); }
+  .ct3-stats-driven { margin-left: 0; border-left: none; padding-left: 0; }
+
+  /* Search hero — senasis */
+  .search-hero { padding: 18px 0 4px; }
+  .hero-title { font-size: 20px; }
+  .hero-subtitle { font-size: 13px; margin-bottom: 14px; }
+
+  /* Filters — sena forma */
+  .filters { grid-template-columns: 1fr 1fr !important; padding: 12px; gap: 8px; }
+  .filters input, .filters select { padding: 12px 10px; font-size: 16px; }
+  button#search-btn { padding: 14px; font-size: 15px; }
+
+  /* Režimų mygtukai */
+  .ct-mode-selector { gap: 6px; }
+  .ct-mode-btn { padding: 9px 10px; }
+  .ct-mode-btn b { font-size: 12px; }
+  .ct-mode-btn span { font-size: 9px; }
+
+  /* TOP kortelė */
+  .top-grid { grid-template-columns: 1fr !important; }
+  .top-photo-col {
+    border-right: none !important;
+    border-bottom: 1px solid var(--border) !important;
+    padding: 12px 12px 0 !important;
+    max-height: 260px;
+  }
+  .top-info-col { padding: 14px !important; }
+  .score-bars { grid-template-columns: repeat(3, minmax(0,1fr)) !important; gap: 10px !important; }
+
+  /* Eilutės kortelė */
+  .std-photo-col { width: 110px !important; flex-shrink: 0 !important; }
+  .std-right { flex-direction: column !important; align-items: flex-start !important; gap: 8px !important; padding: 12px !important; min-width: 0 !important; }
+
+  /* Senos kortelės */
+  .card { flex-direction: column; padding: 12px; gap: 10px; }
+  .card img { width: 100%; height: 180px; }
+  .card-title { font-size: 15px; }
+  .card-price { font-size: 16px; }
+  .card-actions { flex-direction: column; align-items: stretch; gap: 8px; }
+  .card-actions .card-link { padding: 10px; text-align: center; background: var(--bg-elevated); border-radius: var(--radius-sm); }
+  .detail-btn { padding: 11px 12px; font-size: 13px; width: 100%; }
+
+  /* Sort meniu — neiš ekrano */
+  .ct-sort { position: relative; }
+  .ct-sort-menu { right: 0 !important; left: auto !important; min-width: 200px !important; max-width: calc(100vw - 24px) !important; }
+
+  /* Palyginimas */
+  #compare-bar { padding: 10px 12px; }
+  .compare-bar-chip { max-width: 100px; font-size: 11px; }
+  #compare-btn { font-size: 13px; padding: 8px 14px; }
+  #compare-modal { padding: 10px; }
+  #compare-modal-inner { padding: 14px; border-radius: var(--radius-xl); }
+  .compare-col img { height: 110px; }
+  #compare-bar-items { gap: 4px; }
+  /* Horizontalus slinkimas palyginimo lentelei */
+  .compare-grid-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .compare-grid { display: flex !important; flex-direction: row !important; min-width: max-content; }
+  .compare-col { min-width: 220px !important; }
+  .deep-compare-result { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* Toast */
+  #toast-container { bottom: 16px !important; right: 12px !important; left: 12px !important; align-items: center !important; }
+  .toast { max-width: 100%; width: 100%; }
+
+  /* Auth modalas */
+  #ct-auth-overlay { align-items: flex-end !important; padding: 0 !important; }
+  .ct-auth-card {
+    border-radius: 22px 22px 0 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .ct-auth-body { padding: 22px 20px 20px !important; }
+
+  /* Sort baras */
+  #sort-bar { flex-wrap: wrap; gap: 8px; }
+  #sort-select { width: 100%; }
+  #sort-bar label { display: block; margin-bottom: 2px; }
+
+  /* Log */
+  #log-header { font-size: 12px; padding: 12px; }
+
+  /* All listings */
+  #all-listings > div > div:not(.detail-panel) { flex-direction: column !important; align-items: stretch !important; }
+  #all-listings img { width: 100% !important; height: 140px !important; }
+  #all-listings .detail-btn { width: 100%; margin-top: 6px; }
+}
+
+/* TELEFONAS 480px */
+@media (max-width: 480px) {
+  .container { padding: 0 12px 40px; }
+  .ct3-hero-title { font-size: 22px !important; }
+  .ct3-hero-sub { display: none; }
+  .ct3-hero-feats { gap: 10px; }
+  .ct3-fields { grid-template-columns: 1fr 1fr !important; }
+  .std-photo-col { display: none !important; }
+  .std-card-inner { border-left: none !important; }
+  .ct-mode-selector { flex-direction: column; }
+  .hero-title { font-size: 17px; }
+  .filters { grid-template-columns: 1fr 1fr !important; }
+  .ct3-stat-item { flex: 0 0 100%; }
+  /* chip tekstas */
+  .chip { font-size: 11px; height: 24px; padding: 0 8px; }
+}
+
+/* BŪTINA: .ct-std-card — nekeisti šio bloko */
+.ct-std-card { display: flex; flex-wrap: wrap; }
+.ct-std-card > .ct-istorija { flex: 0 0 100%; }
+
+/* ── PATAISYMAI PO DIZAINO PERDAVIMO (Claude Code) ───────────────────────────
+   1) .ct3-hero/.ct3-stats/.ct3-search-panel naudoja "full-bleed" triuką
+      width:100vw + margin-left:calc((100% - 100vw)/2). Mobiliajame dizaine
+      margin buvo perrašytas į "0 10px !important", todėl neigiama kraštinė
+      dingo, o 100vw plotis liko → horizontalus slinkimas.
+   2) <select> turi savo min-content plotį (pagal ilgiausią parinktį), todėl
+      "1fr 1fr" tinklelio takelis išsipučia. Reikia minmax(0,1fr) + min-width:0.
+   ─────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Full-bleed elementai: kai margin perrašomas, 100vw plotis nebeturi
+     kompensuojančios neigiamos kraštinės - grąžinam juos į normalų srautą. */
+  .ct3-hero, .ct3-stats-bar, .ct3-search-panel {
+    width: auto !important; max-width: none !important; margin-left: 0 !important; margin-right: 0 !important;
+  }
+  .ct3-stats-bar { margin: 6px 10px 0 !important; }
+  .ct3-search-panel { margin: 0 10px !important; }
+  .ct3-stat-item b, .ct3-stat-item span { white-space: normal !important; }
+  /* "TOP 5 Pasiūlymai" antraštės dešinysis prierašas telefone netelpa */
+  #results > div > span[style*="letter-spacing"] { display: none; }
+
+  /* Nuotraukų stulpelis: max-height 260px apkarpydavo stulpelį, bet turinys
+     (nuotrauka 230px + miniatiūros 115px + tarpai) aukštesnis, todėl
+     miniatiūros išlįsdavo ir užlipdavo ant modelio pavadinimo. Leidžiam
+     stulpeliui augti natūraliai, o nuotrauką padarom kompaktiškesnę. */
+  .top-photo-col { max-height: none !important; padding-bottom: 12px !important; }
+  .top-photo-col .photo-ph {
+    flex: none !important; min-height: 0 !important;
+    aspect-ratio: 16 / 10; max-height: 215px !important;
+  }
+  .ct3-fields { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .ct3-field, .ct3-select-wrap, .ct3-range-wrap { min-width: 0 !important; }
+  .ct3-field select,
+  .ct3-field input { min-width: 0 !important; width: 100% !important; max-width: 100% !important; }
+  .ct3-search-inner { padding: 0 12px !important; }
+  .ct3-stats-inner { padding: 14px 12px !important; }
+  .ct3-stats-inner { flex-wrap: wrap; }
+}
+@media (max-width: 480px) {
+  .ct3-fields { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .ct3-search-inner { padding: 0 10px !important; }
+}
+</style>
 </head>
 <body>
 

@@ -243,6 +243,132 @@ button{font-family:inherit;cursor:pointer}
 .dp-empty a{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 20px;border-radius:10px;background:var(--accent);color:#fff;font:600 14px var(--font);margin-top:8px}
 @keyframes dpspin { to { transform: rotate(360deg); } }
 </style>
+
+<style id="dp-mobile-responsive">
+/* ── detail.html mobile ── telefono ekranas 360–430 px, planšetė 768 px ── */
+
+/* Sticky apačios juosta */
+#dp-sticky-bar {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 500;
+  background: rgba(17,20,28,0.97);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255,255,255,.09);
+  padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+  gap: 10px;
+  flex-direction: row;
+  align-items: stretch;
+}
+.dp-sbar-primary {
+  flex: 1; height: 46px; border-radius: 10px;
+  background: var(--accent); color: #fff; border: none;
+  font: 600 14px var(--font);
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(124,92,255,.35);
+  -webkit-tap-highlight-color: transparent;
+}
+.dp-sbar-primary:hover { filter: brightness(1.1); color: #fff; }
+.dp-sbar-secondary {
+  width: 46px; height: 46px; border-radius: 10px;
+  border: 1px solid var(--border-light); background: transparent;
+  color: var(--text-primary);
+  display: grid; place-items: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.dp-sbar-secondary:hover { background: var(--bg-elevated); }
+.dp-sbar-secondary.saved { color: var(--warning); border-color: var(--warning-border); background: var(--warning-dim); }
+
+@media (max-width: 900px) {
+  #dp-sticky-bar { display: flex; }
+  .dp-wrap { padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important; }
+
+  /* Header */
+  .ct3-header-inner { padding: 12px 16px !important; }
+  .ct3-logo-icon { width: 34px !important; height: 34px !important; }
+  .ct3-logo-text > span { font-size: 18px !important; }
+  .ct3-logo-text small { display: none; }
+  .ct3-nav { display: none !important; }
+  .ct3-premium-btn { display: none !important; }
+
+  /* Breadcrumb — palikti tik "Atgal" */
+  .dp-bc { padding: 10px 0; margin-bottom: 14px; }
+  .dp-bc-left .sep { display: none; }
+  .dp-bc-left > a:not(.dp-bc-back) { display: none; }
+  .dp-bc-left > span:last-child { display: none; }
+  .dp-bc-id { display: none; }
+  .dp-bc-btn.save { display: none; } /* sticky bar paima šią funkciją */
+  .dp-bc-right { gap: 6px; }
+  .dp-bc-btn { height: 30px; padding: 0 10px; font-size: 12px; }
+
+  /* Nuotrauka */
+  .dp-photo-main { border-radius: 10px; }
+  .dp-thumbs { gap: 4px; }
+
+  /* Pavadinimas ir kaina */
+  .dp-title { font-size: 22px; }
+  .dp-price { font-size: 22px !important; }
+  .dp-subtitle { font-size: 13px; margin-bottom: 10px; }
+  .dp-market-row { font-size: 12px; margin-bottom: 12px; }
+
+  /* Specifikacijų ženkleliai */
+  .dp-specs { gap: 6px; margin-bottom: 14px; }
+  .dp-spec { font-size: 12px; height: 27px; padding: 0 8px; gap: 5px; }
+
+  /* Veiksmai — paslėpti (sticky bar juos pakeičia) */
+  .dp-actions { display: none; }
+
+  /* Score sekcija */
+  .dp-score-section { padding: 14px !important; gap: 12px !important; }
+  .dp-ring-lg { width: 72px !important; height: 72px !important; }
+  .dp-ring-lg b { font-size: 18px !important; }
+  .dp-ring-lg small { font-size: 9px !important; }
+  .dp-score-verdict { max-width: 100%; }
+  .dp-score-info { display: none; }
+  .dp-score-bars { grid-template-columns: repeat(3, minmax(0,1fr)) !important; gap: 10px !important; }
+
+  /* Pelnas / rizika */
+  .dp-pr-blocks { gap: 8px; }
+  .dp-pr-block { padding: 12px 14px; }
+  .dp-pr-btn { display: none !important; }
+
+  /* Skirtukai */
+  .dp-tabs { margin-top: 16px; }
+  .dp-tab { padding: 0 12px; font-size: 13px; height: 42px; }
+  .dp-tab svg { display: none; }
+
+  /* AI panelė */
+  .dp-ai-body { font-size: 13px; line-height: 1.6; }
+  .dp-3cols { gap: 10px; }
+
+  /* Nuotraukų tinklelis */
+  #dp-photos-grid { grid-template-columns: repeat(2, minmax(0,1fr)) !important; gap: 8px !important; }
+
+  /* Apačia */
+  .dp-footer { flex-direction: column; gap: 8px; padding: 14px 0; }
+  .dp-footer-right { text-align: left; }
+}
+
+@media (max-width: 600px) {
+  .dp-title { font-size: 20px; }
+  .dp-price { font-size: 20px !important; }
+  .dp-score-bars { grid-template-columns: repeat(3, minmax(0,1fr)) !important; }
+  .dp-score-left { gap: 10px; }
+}
+
+@media (max-width: 480px) {
+  .dp-title { font-size: 18px; }
+  .dp-price { font-size: 18px !important; }
+  .dp-diff-badge { height: 24px; font-size: 12px; }
+  .dp-score-bars { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+  .dp-tab { padding: 0 10px; font-size: 12px; height: 40px; }
+  .dp-bc-btn { padding: 0 8px; font-size: 11px; }
+  .dp-spec { font-size: 11px; height: 25px; padding: 0 7px; }
+}
+</style>
 </head>
 <body>
 
@@ -1497,6 +1623,42 @@ button{font-family:inherit;cursor:pointer}
   }
 
   load();
+})();
+</script>
+
+<!-- PAKEISTA: pridėta sticky apačios juosta mobiliems -->
+<div id="dp-sticky-bar">
+  <a class="dp-sbar-primary" id="dp-sticky-listing-link" href="#" target="_blank" rel="noopener">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    Žiūrėti skelbimą
+  </a>
+  <button class="dp-sbar-secondary" id="dp-sticky-save-btn" onclick="dpToggleSave();dpSyncStickyBar()" title="Išsaugoti">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+  </button>
+</div>
+<script>
+(function(){
+  window.dpSyncStickyBar = function(){
+    var src = document.getElementById('dp-listing-link');
+    var dst = document.getElementById('dp-sticky-listing-link');
+    if(src && dst && src.href && src.href !== '#') dst.href = src.href;
+    setTimeout(function(){
+      var favs=[]; try{ favs=JSON.parse(localStorage.getItem('carTriageFavorites')||'[]'); }catch(e){}
+      var saved = window.__dpUrl && favs.some(function(f){ return (typeof f==='object'?f.url:f)===window.__dpUrl; });
+      var btn = document.getElementById('dp-sticky-save-btn');
+      if(!btn) return;
+      btn.classList.toggle('saved', !!saved);
+      btn.title = saved ? 'Išsaugota' : 'Išsaugoti';
+      btn.innerHTML = saved
+        ? '<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>'
+        : '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+    }, 60);
+  };
+  document.addEventListener('DOMContentLoaded', function(){
+    var el = document.getElementById('dp-listing-link');
+    if(el){ var obs=new MutationObserver(dpSyncStickyBar); obs.observe(el,{attributes:true,attributeFilter:['href']}); }
+    var t=0; var iv=setInterval(function(){ dpSyncStickyBar(); if(++t>15) clearInterval(iv); }, 250);
+  });
 })();
 </script>
 </body>
