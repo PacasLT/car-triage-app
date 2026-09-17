@@ -1208,6 +1208,27 @@ function computeResaleMath(l) {
   };
 }
 
+// Anthropic API klaidos i loga turi patekti zmogiskai, o ne kaip zalias JSON,
+// ir kartotis ne 7 kartus is eiles, o viena karta per paieska.
+const _aiKlaiduZymos = new Set();
+
+function aiKlaidosZinute(err) {
+  const t = String((err && err.message) || err);
+  if (/credit balance is too low|insufficient.*credit|billing/i.test(t)) {
+    return { raktas: 'kreditai', tekstas: 'Anthropic API kreditai pasibaigę – detalios apžvalgos neveiks, kol nepapildysite balanso (console.anthropic.com → Plans & Billing). Paieška ir vertinimas veikia toliau.' };
+  }
+  if (/401|unauthorized|invalid x-api-key|authentication/i.test(t)) {
+    return { raktas: 'raktas', tekstas: 'Anthropic API raktas netinkamas arba atšauktas – patikrinkite ANTHROPIC_API_KEY Railway kintamuosiuose.' };
+  }
+  if (/429|rate.?limit/i.test(t)) {
+    return { raktas: 'limitas', tekstas: 'Pasiektas Anthropic API užklausų limitas – dalis detalių apžvalgų praleista. Pabandykite po kelių minučių.' };
+  }
+  if (/529|overloaded/i.test(t)) {
+    return { raktas: 'apkrova', tekstas: 'Anthropic API šiuo metu perkrauta – dalis detalių apžvalgų praleista.' };
+  }
+  return null;
+}
+
 function computeQualityScore(l, mode) {
   if (mode === 'reseller') {
     // Tikslas: perpardavinėti – svarbiausia kaina vs rinka ir greitai parduodami kriterijai
@@ -1561,7 +1582,17 @@ async function runSearchJob(jobId, filters) {
           logJob(jobId, `   ✅ ${label} - apžvalga paruošta`);
         }
       } catch (err) {
-        logJob(jobId, `   ⚠ Nepavyko atlikti detalios apžvalgos: ${err.message}`);
+        const aiKl = aiKlaidosZinute(err);
+        if (aiKl) {
+          // Ta pacia sistemine klaida rasom viena karta, o ne prie kiekvieno skelbimo.
+          const zyma = jobId + ':' + aiKl.raktas;
+          if (!_aiKlaiduZymos.has(zyma)) {
+            _aiKlaiduZymos.add(zyma);
+            logJob(jobId, `   ⚠ ${aiKl.tekstas}`);
+          }
+        } else {
+          logJob(jobId, `   ⚠ Nepavyko atlikti detalios apžvalgos: ${String(err.message).slice(0, 160)}`);
+        }
       }
     }));
 

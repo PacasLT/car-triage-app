@@ -2243,10 +2243,42 @@ async function runSearch() {
     const { jobId } = await startResp.json();
 
     let lastLogSnapshot = '';
+    let nesekmesIsEiles = 0;           // kiek kartu is eiles nepavyko gauti busenos
+    const MAX_NESEKMIU = 6;            // ~7 s tolerancija trumpiems trikdziams
+
     while (true) {
       await new Promise((r) => setTimeout(r, 1200));
-      const statusResp = await fetch(`/api/search-status/${jobId}`);
-      const job = await statusResp.json();
+
+      // Busenos apklausa turi atlaikyti laikinus trikdzius. Anksciau bet koks
+      // Railway proxy atsakymas ne JSON formatu ("upstream error") nutraukdavo
+      // visa paieska, nors darbas serveryje ramiai tesesi.
+      let job = null;
+      try {
+        const statusResp = await fetch(`/api/search-status/${jobId}`);
+        if (statusResp.status === 404) {
+          throw new Error('__JOB_DINGO__');
+        }
+        const tekstas = await statusResp.text();
+        try {
+          job = JSON.parse(tekstas);
+        } catch (e) {
+          throw new Error('Serveris grąžino ne JSON (' + statusResp.status + '): ' + tekstas.slice(0, 60));
+        }
+      } catch (e) {
+        if (e.message === '__JOB_DINGO__') {
+          status.textContent = 'Serveris persikrovė ir paieškos būsena dingo. Paleiskite paiešką iš naujo.';
+          showToast('Serveris persikrovė – paleiskite paiešką iš naujo.', 'error', 8000);
+          break;
+        }
+        nesekmesIsEiles++;
+        if (nesekmesIsEiles >= MAX_NESEKMIU) {
+          status.textContent = 'Nepavyko susisiekti su serveriu: ' + e.message;
+          showToast('Nepavyko susisiekti su serveriu po ' + MAX_NESEKMIU + ' bandymų. Paieška serveryje galbūt tebevyksta – pabandykite dar kartą po minutės.', 'error', 9000);
+          break;
+        }
+        continue; // laikinas trikdis - bandom dar karta
+      }
+      nesekmesIsEiles = 0;
 
       const currentSnapshot = JSON.stringify(job.log);
       if (currentSnapshot !== lastLogSnapshot) {
@@ -2905,7 +2937,8 @@ function renderResults(data, status, results) {
     : 'Įvertinta ' + data.candidates.length + ' skelbimų, iš jų ' + verti.length + ' verti dėmesio' + rawNote + ':';
   document.getElementById('sort-bar').style.display = data.candidates.length > 0 ? 'flex' : 'none';
   document.getElementById('sort-select').value = 'quality';
-  ctRenderGrouped(data.candidates, results, (window.renderCandidateCards || renderCandidateCards));
+  results.innerHTML = '';
+  (window.renderCandidateCards || renderCandidateCards)(data.candidates, results);
   renderAllListings(data.allListings || []);
 }
 
@@ -2992,12 +3025,14 @@ function applySorting() {
   else sorted.sort((a, b) => b.qualityScore - a.qualityScore);
   const resultsEl = document.getElementById('results');
   const rikiuotaPagalBala = (mode !== 'cheapest' && mode !== 'priciest' && mode !== 'biggest-discount');
-  const rendFn = currentData.searchMode === 'browse' ? renderBrowseListings : (window.renderCandidateCards || renderCandidateCards);
-  if (rikiuotaPagalBala) {
-    ctRenderGrouped(sorted, resultsEl, rendFn);   // pagal balą – laikom triage grupes
+  if (currentData.searchMode === 'browse') {
+    // Kompaktiskos eilutes - grupes pagal triage lygi cia atrodo gerai
+    if (rikiuotaPagalBala) ctRenderGrouped(sorted, resultsEl, renderBrowseListings);
+    else { resultsEl.innerHTML = ''; renderBrowseListings(sorted, resultsEl); }
   } else {
-    resultsEl.innerHTML = '';                      // pagal kainą/nuolaidą – vientisas sąrašas
-    rendFn(sorted, resultsEl);
+    // Korteliu dizainas turi savo rangus ir TOP-5 antraste - vienas kvietimas
+    resultsEl.innerHTML = '';
+    (window.renderCandidateCards || renderCandidateCards)(sorted, resultsEl);
   }
 }
 
@@ -3639,6 +3674,20 @@ function ctNavTab(tab) {
 
   // Išvestinis CarTriige įvertis (0–10) iš turimų duomenų — skaidrus, ne "AI magija".
   function ctScore(c, a) {
+    // Vienas variklis - vienas skaicius. Kai backend'as atsiuntė triage balą
+    // ir komponentus, ziedas ir juostos rodo BUTENT ji, o ne atskira senesne
+    // formule (anksciau kortele rodydavo du skirtingus "CarTriige" skaicius).
+    if (c.qualityScore != null && c.baloKomponentai) {
+      const k = c.baloKomponentai;
+      const v = (x) => (x == null ? null : Math.round((x / 10) * 10) / 10);
+      const parts = [
+        ['Kaina', v(k.price)], ['Rida', v(k.mileage)], ['Įranga', v(k.equipment)],
+        ['Istorija', v(k.history)], ['Potencialas', v(k.demand)],
+      ].filter((pr) => pr[1] != null);
+      // Jei visi komponentai iškrito (labai skurdus skelbimas), rodom bent bendrą balą
+      if (!parts.length) parts.push(['Bendras', Math.round(c.qualityScore / 10 * 10) / 10]);
+      return { total: c.qualityScore / 10, parts, triage: true };
+    }
     const pr = a && a.perikupo_radaras;
     const kaina = clamp(5 + (c.diffPct || 0) / 6, 0, 10);
     const rida = c.ridaDiffPct == null ? 6.5 : clamp(7 - c.ridaDiffPct / 10, 0, 10);
@@ -3753,7 +3802,9 @@ function ctNavTab(tab) {
     const _tone = (v) => v >= 7.5 ? 'var(--success)' : v >= 5.5 ? 'var(--warning)' : 'var(--danger)';
     const _toneDim = (v) => v >= 7.5 ? 'var(--success-dim)' : v >= 5.5 ? 'var(--warning-dim)' : 'var(--danger-dim)';
     const _toneBo = (v) => v >= 7.5 ? 'var(--success-border)' : v >= 5.5 ? 'var(--warning-border)' : 'var(--danger-border)';
-    const _verdict = (v) => v >= 7.5 ? 'Didelė galimybė' : v >= 5.5 ? 'Gera galimybė' : 'Verta apsvarstyti';
+    const _verdictBase = (v) => v >= 7.5 ? 'Didelė galimybė' : v >= 5.5 ? 'Gera galimybė' : 'Verta apsvarstyti';
+    // Verdiktas imamas is to paties triage lygio, kuri rodo zenklelis virsuje.
+    const _verdictFor = (c, v) => (c && c.triageLabel) ? c.triageLabel : _verdictBase(v);
     const _diffCls = (d) => (d||0) >= 39 ? 'diff-neg' : (d||0) >= 8 ? 'diff-pos' : 'diff-warn';
 
     const TOP_N = 5;
@@ -3877,7 +3928,7 @@ function ctNavTab(tab) {
                 '<div class="score-bars" style="flex:1;min-width:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;">' + subBarsHtml + '</div>' +
                 '<div style="flex:none;padding:8px 12px;border-radius:8px;background:' + _toneDim(s.total) + ';border:1px solid ' + _toneBo(s.total) + ';display:flex;align-items:center;gap:6px;">' +
                   '<span style="width:7px;height:7px;border-radius:50%;background:' + scoreColor + ';flex:none;box-shadow:0 0 5px ' + scoreColor + ';"></span>' +
-                  '<span style="font:600 12px/1.3 var(--font);color:' + scoreColor + ';white-space:nowrap;">' + _verdict(s.total) + '</span>' +
+                  '<span style="font:600 12px/1.3 var(--font);color:' + scoreColor + ';white-space:nowrap;">' + _verdictFor(c, s.total) + '</span>' +
                 '</div>' +
               '</div>' +
             '</div>' +
@@ -3953,7 +4004,7 @@ function ctNavTab(tab) {
               '<div class="ct-ring-inner"><b style="color:' + scoreColor + ';">' + s.total.toFixed(1) + '</b><small>/10</small></div>' +
             '</div>' +
             '<div style="padding:6px 10px;border-radius:7px;background:' + _toneDim(s.total) + ';border:1px solid ' + _toneBo(s.total) + ';">' +
-              '<span style="font:600 11px/1.3 var(--font);color:' + scoreColor + ';white-space:nowrap;">' + _verdict(s.total) + '</span>' +
+              '<span style="font:600 11px/1.3 var(--font);color:' + scoreColor + ';white-space:nowrap;">' + _verdictFor(c, s.total) + '</span>' +
             '</div>' +
             '<button class="detail-btn ct-btn' + (hasDeep ? ' ready' : '') + '" id="' + btnId + '" data-closed-label="' + detailBtnLabel + '" style="display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 13px;border-radius:8px;border:1px solid var(--border-light);color:var(--text-primary);font:600 12px var(--font);white-space:nowrap;background:transparent;cursor:pointer;" onclick="' + detailClick + '">Detales <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>' +
           '</div>' +
