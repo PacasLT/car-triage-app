@@ -80,6 +80,16 @@
 - `html, body { overflow-x: clip }` – ne `hidden`: `hidden` padaro `body` slinkimo konteineriu ir sulaužo `position: sticky` antraštę.
 - Negyvi selektoriai jo faile (`.dp-score-num`, `.dp-spec-v`, `.dp-tab-bar`) – tokių klasių pas mus nėra, nieko nedaro.
 
+## Rezultatu kortele (v1.30.0)
+
+- **Vienas generatorius** `ctKortele(c, x)` `index.html` viduje – jį naudoja ir TOP, ir eilutės, ir atmestos kortelės. Anksčiau buvo du atskiri ~60 eilučių `innerHTML` blokai su inline stiliais; jei reikia keisti kortelę, keičiama TIK šitoje funkcijoje.
+- Išvaizda – `ct-dizainas.css` 10 skyrius. Struktūra ir klasės pagal dizainerio `KORTELE-SABLONAS.md`.
+- **Ženklo taisyklė:** mūsų `diffPct` **teigiamas = pigiau** už rinką (dizainerio šablone buvo atvirkščiai). `CT_DIFF_ITARTINA = 30` → raudona „PIGIAU · ĮTARTINAI“; `> 0` → žalia; `<= 0` → geltona „BRANGIAU“. Backend'o `ZALOS_RIBA_PCT = 49` lieka atskiras – jis įjungia „GALIMAI DAUŽTAS“ bloką ir riboja balą iki 60. Du skaičiai, dvi skirtingos reikšmės – tyčia.
+- Ribojimai kode: `whyReasons` → 3, ženkliukai pirmame lygyje → 6, medalis → tik 1–3 vieta.
+- Trečias lygis atidaromas `window.ctToggleL3(cardId, btn)`, ne hover.
+- **Senos kortelės CSS taisyklės atribotos:** `.card img` → `.card:not(.ct-card) img` (5 vietose). Jos nustatydavo `height: 158px`/`180px` ir traiškydavo naujas miniatiūras. Netrinti – jas dar naudoja senesni blokai.
+- `.ct-card .fav-star.ct-fav` pakeista iš `position: static` į `absolute` (širdutė dabar nuotraukos kampe), `.ct-thumbs` gavo `align-items: start` (kitaip tinklelio eilutė išsitempia ir `aspect-ratio` nustoja galioti).
+
 ## Saugumas
 
 - `ANTHROPIC_API_KEY`, `SCRAPER_API_KEY`, `JWT_SECRET`, `ADMIN_EMAILS`, `INVITE_CODES` – tik Railway Variables, **niekada į kodą ar GitHub**.

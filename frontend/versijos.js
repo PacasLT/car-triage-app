@@ -8,6 +8,21 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.30.0', data: '2026-09-18', pavadinimas: 'Nauja rezultatų kortelė – trys skaitymo lygiai',
+    pakeitimai: [
+      'Kortelė dabar skaitoma trimis žingsniais: per sekundę matote nuotrauką, kainą ir skirtumą nuo rinkos; per penkias – įvertį, verdiktą ir kodėl; visa kita atsiveria mygtuku „Ženkliukai, įranga, vieta“',
+      'CarTriige įvertis pakilo į antrą vietą iškart po kainos ir turi savo bloką – anksčiau jis buvo kortelės apačioje',
+      'Trys geriausi paieškos rezultatai pažymėti medaliais (auksas, sidabras, bronza) – nuo ketvirtos vietos medalio nebėra, kad jie neprarastų reikšmės',
+      'Skirtumas nuo rinkos rodomas atskiru bloku su suma eurais, ne tik procentais',
+      'Kai kaina 30 % ar daugiau žemiau rinkos, skirtumas rodomas raudonai su prierašu „ĮTARTINAI“ – anksčiau −52 % atrodė lygiai taip pat kaip −12 %',
+      'Neįvertintas rodiklis rodo dryžuotą juostą ir paaiškinimą, ko trūksta („sąrašo nėra“, „ataskaitos nėra“), o ne tuščią vietą',
+      'Antraštė virš priežasčių pati persirašo pagal tai, ką žinome: „Kodėl šis auto?“, „Ką žinome ir ko ne“, „Ką būtina patikrinti“ arba „Kodėl atmesta“',
+      'Priežasčių ne daugiau kaip trys, ženkliukų pirmame lygyje – šeši, tad kortelė nebeauga nuo skelbimo gausos',
+      'Atmesti skelbimai naudoja tą pačią kortelę, tik prislopintą, su atmetimo priežastimi viršuje',
+      'Viskas matoma be užvedimo pele – trečias lygis atidaromas mygtuku, tad veikia ir telefone',
+    ],
+  },
+  {
     versija: '1.29.0', data: '2026-09-18', pavadinimas: 'Vieninga dizaino sistema – visi puslapiai atrodo kaip vienas produktas',
     pakeitimai: [
       'Visi penki puslapiai dabar naudoja tą pačią spalvų paletę, tipografiją ir tarpus – anksčiau kiekvienas turėjo savo',
