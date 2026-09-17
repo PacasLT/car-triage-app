@@ -9,7 +9,20 @@ const fs = require('fs');
 
 const SECRET_KEY = process.env.JWT_SECRET_KEY || 'PAKEISK_SITA_PRODUCTION!';
 const TOKEN_EXPIRE = '72h';
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'users.db');
+// DB kelio parinkimas, atsparus praleistam kintamajam.
+// Prioritetas: DB_PATH env -> primountintas /data Volume -> konteinerio vidus.
+// Be sio "kritimo i /data" uzmirsus nustatyti DB_PATH visi vartotojai dingsta
+// po kiekvieno deploy'aus, o priezastis is issores atrodo kaip "neteisingas slaptazodis".
+function parinktiDbKelia() {
+  if (process.env.DB_PATH) return { kelias: process.env.DB_PATH, saltinis: 'DB_PATH env' };
+  try {
+    fs.accessSync('/data', fs.constants.W_OK);
+    return { kelias: '/data/users.db', saltinis: 'aptiktas /data Volume (DB_PATH nenurodytas)' };
+  } catch (e) {}
+  return { kelias: path.join(__dirname, 'users.db'), saltinis: 'konteinerio vidus – NEPERSISTENTINIS' };
+}
+const _dbPasirinkimas = parinktiDbKelia();
+const DB_PATH = _dbPasirinkimas.kelias;
 
 // Invite kodai iš Railway env var: INVITE_CODES=CARTRIAGE2024,DRAUGAS01
 const INVITE_CODES = new Set(
@@ -31,13 +44,12 @@ fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
   try { const st = fs.statSync(DB_PATH); bylosDydis = st.size; buvoPries = true; } catch (e) {}
   let rasomas = true;
   try { fs.accessSync(kat, fs.constants.W_OK); } catch (e) { rasomas = false; }
-  const isEnv = !!process.env.DB_PATH;
-  console.log('[DB] kelias           :', DB_PATH, isEnv ? '(is DB_PATH env)' : '(numatytasis - env NENURODYTAS!)');
+  console.log('[DB] kelias           :', DB_PATH, '(' + _dbPasirinkimas.saltinis + ')');
   console.log('[DB] katalogas rasomas:', rasomas);
   console.log('[DB] byla egzistavo   :', buvoPries, buvoPries ? `(${bylosDydis} baitu)` : '(kuriama nauja - vartotojai bus prarasti!)');
-  if (!isEnv || !DB_PATH.startsWith('/data')) {
+  if (!DB_PATH.startsWith('/data')) {
     console.log('[DB] ⚠ DEMESIO: DB nera po /data - po kiekvieno deploy\'aus vartotojai DINGS.');
-    console.log('[DB] ⚠ Railway Variables nustatykite DB_PATH=/data/users.db ir Volume mount path /data');
+    console.log('[DB] ⚠ Railway: prijunkite Volume su mount path /data (ir, jei norite, DB_PATH=/data/users.db)');
   }
 })();
 
