@@ -4,3 +4,5 @@ backend/.env
 backend/cache.json
 backend/market-history.json
 .DS_Store
+
+dizainas/

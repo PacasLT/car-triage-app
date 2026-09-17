@@ -19,6 +19,14 @@
 - Sąrašo puslapyje ĮRANGOS NĖRA – TOP `GILINTI_TOP` (8) skelbimų puslapiai atidaromi paieškos metu (`scrapeSingleListing`, be AI) ir iš jų imama įranga, VIN, vieta, pardavėjas.
 - „Dingo iš portalo“ žymima TIK jei: skelbimas telpa į paieškos filtrus, jo nėra **antrą** kartą iš eilės (`cache.zymetiNerasta`) ir paieška nebuvo nukirsta puslapių limito. Nepavykęs nuskaitymas ≠ dingęs skelbimas.
 
+## autogidas.lt (v1.28.0, patikrinta gyvai)
+
+- Markė/modelis siunčiami **tekstu** (`f_1[0]=BMW&f_model_14[0]=X5`) – portalas juos priima, ID lentelės nereikia.
+- Filtrai: `f_41/f_42` metai · `f_215/f_216` kaina · `f_65/f_66` rida · `f_10` dėžė · `f_2[N]` kuras · `f_46=Be defektų` · `ac_3` su VIN · `ac_4` tik Lietuvoje · `ac_5` slėpti iš aukcionų · `f_50=naujausi_asc` rikiavimas · `page=N`.
+- Kortelė (`article.list-item-new`): `data-price` = kaina, `data-updated` = UNIX laikas (tikslesnis nei autoplius!), `.parameter-value` eilė (metai, kuras, rida, dėžė, „3.0 L, 190 kW“, „Plungė, Lietuva“), `.parameter-value.level .up` = **mokamo iškėlimo lygis 1–6**, `.vin-badge`, `.new-badge`/`.badge` su „Prieš N“, `.financing-price` = mėnesinė įmoka.
+- **Svarbu:** prieš kainos sveikatos patikrą iš teksto pašalinamas „NN €/mėn.“ – kitaip kiekvienas pigus skelbimas atrodytų kaip lizingo įmoka.
+- Testas: `node backend/testai/autogidas.test.js` (29 patikros su tikru puslapio HTML).
+
 ## AI sąnaudos (įeinantys tokenai – 96 % sąskaitos)
 
 - `DEEP_INSTRUKCIJOS` – statinė promptų dalis su `cache_control: ephemeral`. **Nekeisti be reikalo**: kiekvienas pakeitimas panaikina podėlį.

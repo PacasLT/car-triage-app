@@ -655,6 +655,13 @@ function extractAutoscout24TotalCount(html) {
   }
 }
 
+// v1.28.0: autogidas sarasas nuskaitomas taip pat kruopsciai kaip autoplius.
+// Portalo kortele (patikrinta gyvai 2026-09) duoda daugiau, nei imdavom anksciau:
+//   data-price    - kaina skaiciumi
+//   data-updated  - UNIX laikas, kada skelbimas atnaujintas (autoplius tokio net neturi)
+//   .is-highlighted - MOKAMAS iskelimas i virsu (ne kokybes zenklas)
+//   .parameter-value - metai, kuras, rida, deze, "3.0 L, 190 kW", "Plunge, Lietuva"
+//   .vin-badge, .new-badge ("Pries 6 min."), .financing-price
 function extractAutogidasListings(html, originUrl) {
   const $ = cheerio.load(html);
   const origin = new URL(originUrl).origin;
@@ -664,12 +671,15 @@ function extractAutogidasListings(html, originUrl) {
     const cardText = el.text().replace(/\s+/g, ' ').trim();
     const priceAttr = el.attr('data-price');
     let kaina = priceAttr ? Math.round(parseFloat(priceAttr)) : null;
+    if (!kaina) {
+      const kainaTekste = el.find('.item-price').first().text().replace(/[^0-9]/g, '');
+      kaina = kainaTekste ? parseInt(kainaTekste, 10) : null;
+    }
     if (!kaina) return;
 
-    // "+ PVM" - data-price gali buti BE PVM kaina, patikrinam ir perskaiciuojam su PVM.
+    // "+ PVM" - nurodyta kaina yra BE PVM, pirkejas moka +21%
     let kainaBaze = null, pvmPastaba = null;
-    const plusPvmMatch = cardText.match(new RegExp(`${kaina}\\s?€\\s*\\+\\s*PVM`, 'i'));
-    if (plusPvmMatch) {
+    if (new RegExp(`${kaina}\\s?€\\s*\\+\\s*PVM`, 'i').test(cardText) || /\+\s*PVM/i.test(el.find('.item-price').text())) {
       kainaBaze = kaina;
       kaina = Math.round(kainaBaze * 1.21);
       pvmPastaba = `Skelbime nurodyta ${kainaBaze}€ + PVM = ${kaina}€ su PVM (vertinama su PVM kaina)`;
@@ -680,40 +690,81 @@ function extractAutogidasListings(html, originUrl) {
     if (!href) return;
     const modelis = el.find('h2.item-title').first().text().replace(/\s+/g, ' ').trim()
       || el.find('a.item-link').first().attr('title') || 'Nezinomas';
+
+    // Parametrai eina tvarkinga eile, bet ne visi visada yra - todel atpazistam pagal turini
     const params = [];
     el.find('span.parameter-value').each(function () { params.push($(this).text().replace(/\s+/g, ' ').trim()); });
-    let metai = null, rida = null, kuras = null, pavarai = null, galia = null, variklioTuris = null;
-    const kuroTipuSarasas = ['Dyzelinas / elektra', 'Benzinas / elektra / dujos', 'Benzinas / elektra',
-      'Benzinas / dujos', 'Dyzelinas', 'Benzinas', 'Elektra', 'Bioetanolis'];
+    let metai = null, rida = null, kuras = null, pavarai = null, galia = null, variklioTuris = null,
+      miestas = null, vieta = null, menuo = null;
+    // autogidas rašo ir su tarpais, ir be jų: "Benzinas / dujos" ir "Benzinas/Dujos"
+    const kuroTipuSarasas = ['Dyzelinas / elektra', 'Dyzelinas/Elektra', 'Benzinas / elektra / dujos',
+      'Benzinas/Elektra/Dujos', 'Benzinas / elektra', 'Benzinas/Elektra', 'Benzinas / dujos', 'Benzinas/Dujos',
+      'Benzinas/Gamtinės dujos', 'Dyzelinas', 'Benzinas', 'Elektra', 'Bioetanolis', 'Dujos', 'Etanolis'];
     for (const p of params) {
-      const yearMatch = p.match(/\b(19|20)\d{2}\b/);
-      if (yearMatch && !metai) metai = parseInt(yearMatch[0], 10);
+      if (/^\d{1,2}$/.test(p)) continue;                       // portalo vidinis "level" skaicius
+      const dataMatch = p.match(/^(\d{4})\s*m\.?\s*(\d{1,2})?\s*m?e?n?/i);
+      if (dataMatch && !metai) { metai = parseInt(dataMatch[1], 10); if (dataMatch[2]) menuo = parseInt(dataMatch[2], 10); }
+      else if (!metai) { const y = p.match(/\b(19|20)\d{2}\b/); if (y) metai = parseInt(y[0], 10); }
       if (/km/i.test(p) && !/mėn/i.test(p) && !rida) rida = extractField(p, /(\d[\d\s]{2,7})\s?km/);
       if (!kuras && kuroTipuSarasas.includes(p)) kuras = p;
       if (!pavarai && (p === 'Automatinė' || p === 'Mechaninė')) pavarai = p;
       const ccMatch = p.match(/(\d[\d\s]{2,5})\s?cm³/i);
       if (ccMatch && !variklioTuris) variklioTuris = Math.round(parseInt(ccMatch[1].replace(/\s/g, ''), 10) / 100) / 10;
+      const lMatch = p.match(/(\d[.,]\d)\s*L/i);
+      if (lMatch && !variklioTuris) variklioTuris = parseFloat(lMatch[1].replace(',', '.'));
       const kwMatch = p.match(/(\d+)\s?kW/i);
       if (kwMatch && !galia) galia = parseInt(kwMatch[1], 10);
+      // "Plungė, Lietuva" arba "Vilnius"
+      if (!vieta && /^[A-ZĄČĘĖĮŠŲŪŽ][a-ząčęėįšųūž-]+(,\s*[A-ZĄČĘĖĮŠŲŪŽ][a-ząčęėįšųūž]+)?$/.test(p)
+        && !kuroTipuSarasas.includes(p) && p !== 'Automatinė' && p !== 'Mechaninė') {
+        vieta = p; miestas = p.split(',')[0].trim();
+      }
     }
+
+    // Kada skelbimas atnaujintas - tikslus laikas is data-updated (retas dalykas portaluose)
+    const updated = parseInt(el.attr('data-updated') || '', 10);
+    const ikeltaLaikas = updated ? updated * 1000 : null;
+    const laikoZenklas = el.find('.new-badge, .badge').filter(function () {
+      return /prieš/i.test($(this).attr('data-badge') || $(this).text() || '');
+    }).first();
+    const ikeltaTekstas = (laikoZenklas.attr('data-badge') || laikoZenklas.text() || '').replace(/\s+/g, ' ').trim() || null;
+
     const turiGarantija = el.find('.guarantee-badge, [data-badge="Garantija"]').length > 0;
     const galimasJavImportas = /\bJAV\b/.test(cardText);
     const turiVin = el.find('.vin-badge, .vin-code, [data-badge*="VIN"]').length > 0;
-    const yraVerslas = el.find('.business-logo, .company-name').length > 0;
+    const yraVerslas = el.find('.business-logo, .company-name, .dealer-logo').length > 0;
     const turiLizingoOpcija = el.find('.financing-price').length > 0;
+    // MOKAMAS iskelimas. autogidas rodo lygi skaiciumi (1-6) bloke .parameter-value.level
+    // su antraste "Skelbimo iskelimo paslauga" - tai tas pats, kas autoplius badge-rise:
+    // NE kokybes zenklas, o pozymis, kad skelbimas kabo ilgai ir yra keliamas uz pinigus.
+    const lygioTekstas = el.find('.parameter-value.level .up').first().text().trim();
+    const lygis = parseInt((lygioTekstas.match(/^\d{1,2}/) || [])[0], 10);
+    const iskeltas = lygis > 0 ? lygis : (el.hasClass('is-highlighted') ? 1 : null);
     const photo = el.find('img.js-image').first().attr('src')
       || el.find('.thumbs img').first().attr('data-src')
       || el.find('img').first().attr('src') || null;
+    const photos = [];
+    el.find('.slideshow-slide img, img.js-image').each(function () {
+      const u = $(this).attr('src') || $(this).attr('data-src');
+      if (u && !photos.includes(u) && photos.length < 6) photos.push(u);
+    });
+
+    // Ta pati kainos sveikatos patikra kaip autoplius. SVARBU: autogidas prie KIEKVIENOS
+    // kortelės rodo "NN €/mėn." finansavimo skaičiuoklę, todėl tą tekstą pašalinam - kitaip
+    // kiekvienas pigus skelbimas būtų palaikytas lizingo įmoka. Tikra kaina ateina data-price.
+    const svarusTekstas = cardText.replace(/\d[\d\s]*\s*€\s*\/\s*mėn\.?/gi, ' ');
+    const kainosIspejimas = kainosPatikra(kaina, svarusTekstas, null, { metai, rida });
 
     results.push({
-      kaina, kainaBaze, pvmPastaba, kainaBePvm: null, turiLizingoOpcija, rida, metai, modelis, galimiDefektai: [],
-      galimasJavImportas,
-      kuras, pavarai, turiVin, galia, variklioTuris,
+      kaina, kainaBaze, pvmPastaba, kainaBePvm: null, turiLizingoOpcija, rida, metai, menuo, modelis,
+      galimiDefektai: [], galimasJavImportas, kainosIspejimas: kainosIspejimas || null,
+      kuras, pavarai, turiVin, galia, variklioTuris, miestas, vieta,
       turiIstorijosAtaskaita: turiVin, turiGarantija,
       garantijosTipas: turiGarantija ? 'nenurodyta_kokia' : null, yraVerslas,
       reitingas: null, atsiliepimuSkaicius: null,
+      ikeltaLaikas, ikeltaTekstas, iskeltas,
       rawText: `${modelis} ${kaina}€ ${params.join(', ')}`.slice(0, 200),
-      url: href, photo,
+      url: href, photo, photos: photos.length ? photos : (photo ? [photo] : []),
     });
   });
   return results;
@@ -947,6 +998,28 @@ function buildAutopliusUrl(filters) {
   return url;
 }
 
+// v1.28.0: autogidas filtrai patikrinti gyvai (2026-09). Marke/modelis siunciami tekstu -
+// portalas juos priima (skirtingai nei autoplius, ID lenteles nereikia). Rikiavimas f_50.
+const AUTOGIDAS_PARAM = {
+  // Kuro tipai: f_2[N] - indeksai is portalo formos
+  kuras: {
+    'Dyzelinas': 1, 'Benzinas': 2, 'Benzinas/Dujos': 3, 'Benzinas / dujos': 3,
+    'Benzinas/Elektra': 4, 'Benzinas / elektra': 4, 'Hibridas': 4,
+    'Benzinas/Elektra (Plug-in)': 5, 'Elektra': 7, 'Elektrinis': 7,
+    'Dyzelinas/Elektra': 8, 'Dyzelinas / elektra': 8, 'Dujos': 10,
+  },
+  kebulas: {
+    'Sedanas': 1, 'Hečbekas': 2, 'Universalas': 3, 'Visureigis': 4, 'Visureigis / Krosoveris': 4,
+    'Vienatūris': 5, 'Coupe': 6, 'Kabrioletas': 7, 'Pikapas': 12,
+  },
+  rikiavimas: {
+    naujausi: 'f_50=naujausi_asc',          // naujausi virsuje
+    atnaujinti: 'f_50=atnaujinimo_laika_desc',
+    pigiausi: 'f_50=kaina_asc',
+    brangiausi: 'f_50=kaina_desc',
+  },
+};
+
 function buildAutogidasUrl(filters) {
   const params = [];
   if (filters.marke) params.push(`f_1[0]=${encodeURIComponent(filters.marke)}`);
@@ -957,6 +1030,14 @@ function buildAutogidasUrl(filters) {
   if (filters.kainaIki) params.push(`f_216=${filters.kainaIki}`);
   if (filters.ridaIki) params.push(`f_66=${filters.ridaIki}`);
   if (filters.pavaru_deze) params.push(`f_10=${encodeURIComponent(filters.pavaru_deze)}`);
+  // v1.28.0 NAUJI filtrai - anksciau autogidas gaudavo tik puse vartotojo pasirinkimu
+  const kuroId = filters.kuras ? AUTOGIDAS_PARAM.kuras[filters.kuras] : null;
+  if (kuroId) params.push(`f_2[${kuroId}]=${kuroId}`);
+  if (filters.beDefektu) params.push(`f_46=${encodeURIComponent('Be defektų')}`);
+  if (filters.tikSuVin) params.push('ac_3=1');
+  if (filters.tikLietuvoje) params.push('ac_4=1');
+  if (filters.beJav) params.push('ac_5=1');            // slepti is aukcionu (JAV importas)
+  params.push(AUTOGIDAS_PARAM.rikiavimas[filters.rikiavimas] || AUTOGIDAS_PARAM.rikiavimas.naujausi);
   return `https://autogidas.lt/skelbimai/automobiliai/?${params.join('&')}`;
 }
 

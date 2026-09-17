@@ -8,6 +8,18 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.28.0', data: '2026-09-17', pavadinimas: 'autogidas.lt nuskaitomas taip pat kruopščiai kaip autoplius',
+    pakeitimai: [
+      'autogidas skelbimuose dabar matote ir variklio galią (kW), ir tikslią vietą (miestas, šalis) – anksčiau šių duomenų iš šio portalo negaudavome',
+      'Kiekvienas autogidas skelbimas turi tikslų laiką, kada paskutinį kartą atnaujintas – tai matosi kortelėje',
+      'Rodome, kiek kartų skelbimas mokamai iškeltas į viršų (autogidas tam turi 1–6 lygius) – tai požymis, kad skelbimas kabo ilgai, o ne kokybės ženklas',
+      'Į autogidas paiešką dabar keliauja visi jūsų filtrai: kuras, be defektų, tik su VIN, tik Lietuvoje, be aukcionų automobilių',
+      'autogidas rezultatai rikiuojami nuo naujausių, kaip ir autoplius',
+      'Portalo finansavimo skaičiuoklė („58 €/mėn.“) nebepainiojama su automobilio kaina',
+      'Pigūs seni automobiliai iš autogidas nebežymimi klaidinga kaina',
+    ],
+  },
+  {
     versija: '1.27.0', data: '2026-09-17', pavadinimas: 'Du apžvalgos lygiai, „galimai daužtas“ ženklas, tvarkingesni veiksmai',
     pakeitimai: [
       'Dabar galite rinktis: „Greita apžvalga“ (1 kr) – skelbimo tekstas, kaina prieš rinką, rizikos ir derybos; arba „Pilna apžvalga“ (2 kr) – papildomai vizualinis nuotraukų patikrinimas, pardavėjas, VIN ir pilna įranga',
