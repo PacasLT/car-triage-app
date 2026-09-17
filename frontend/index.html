@@ -326,9 +326,6 @@
     #sort-bar label { display: block; margin-bottom: 2px; }
     .risk-banner { font-size: 11px; }
     #all-listings-wrap button { font-size: 13px; padding: 12px; }
-    #all-listings > div > div:not(.detail-panel) { flex-direction: column !important; align-items: stretch !important; }
-    #all-listings img { width: 100% !important; height: 140px !important; }
-    #all-listings .detail-btn { width: 100%; margin-top: 6px; }
   }
 
   /* ============ TINDER NARSYMAS (visi ekranai) ============ */
@@ -440,7 +437,8 @@
   #all-listings-wrap { margin-top: 30px; }
   #toggle-all-btn { background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-muted); padding: 10px 16px; border-radius: var(--radius-md); cursor: pointer; width: 100%; text-align: left; font-size: 13px; transition: all 0.15s; }
   #toggle-all-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
-  #all-listings { margin-top: 8px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+  /* PAKEISTA: jokio savo fono/remelio - korteles identiskos pagrindiniam sarasui */
+  #all-listings { margin-top: 8px; background: transparent; border: none; border-radius: 0; }
 
   /* ===== TOAST NOTIFICATIONS ===== */
   #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; pointer-events: none; }
@@ -1042,7 +1040,7 @@
 
 /* ===== ALL LISTINGS ===== */
 #toggle-all-btn { background: var(--bg-surface); border: 1px dashed var(--border-light); border-radius: var(--radius-lg); padding: 14px 18px; font-size: 13px; color: var(--text-muted); }
-#all-listings { border-radius: var(--radius-lg); }
+#all-listings { border-radius: 0; }
 
 /* ===== COMPARE ===== */
 #compare-bar { background: rgba(17,20,28,.95); backdrop-filter: blur(14px); border-top: 1px solid var(--border-light); box-shadow: none; padding: 12px 24px; }
@@ -1453,9 +1451,6 @@
   #log-header { font-size: 12px; padding: 12px; }
 
   /* All listings */
-  #all-listings > div > div:not(.detail-panel) { flex-direction: column !important; align-items: stretch !important; }
-  #all-listings img { width: 100% !important; height: 140px !important; }
-  #all-listings .detail-btn { width: 100%; margin-top: 6px; }
 }
 
 /* TELEFONAS 480px */
@@ -1670,6 +1665,122 @@
 }
 #deep-compare-btn:hover { background: var(--accent) !important; color: #fff !important; border-color: var(--accent) !important; }
 #deep-compare-btn:disabled { opacity: .6 !important; cursor: not-allowed !important; }
+
+/* ═══════════ PASKUTINES PAIESKOS — iskleidziamasis ═══════════ */
+/* PAKEISTA: buvo min-width:500px inline - telefone iskrisdavo uz ekrano */
+#ct-history-dropdown {
+  position: absolute; top: calc(100% + 6px); left: 0; z-index: 500;
+  width: 560px; max-width: calc(100vw - 32px);
+  background: var(--bg-elevated); border: 1px solid var(--border-light);
+  border-radius: 14px; padding: 14px 16px 16px;
+  box-shadow: 0 16px 56px rgba(0,0,0,.75);
+  max-height: 340px; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--bg-raised) transparent;
+}
+#ct-history-dropdown::-webkit-scrollbar { width: 8px; }
+#ct-history-dropdown::-webkit-scrollbar-thumb { background: var(--bg-raised); border-radius: 4px; border: 2px solid var(--bg-elevated); }
+@media (max-width: 640px) {
+  #ct-history-dropdown { position: fixed; left: 16px; right: 16px; top: auto; width: auto; max-width: none; }
+}
+
+/* ═══════════ PORTALU PASIRINKIMAS — naujas dizainas ═══════════ */
+.ct3-portal-wrap { position: relative; }
+#portal-toggle-btn.active {
+  background: var(--accent-dim) !important; color: var(--accent-light) !important;
+  border-color: var(--accent-border) !important;
+}
+
+/* fonas — tik telefone */
+#portal-backdrop { display: none; }
+
+#portal-selector {
+  display: none; position: absolute; z-index: 400;
+  /* prisegta prie mygtuko DESINIOJO krasto - taip niekada neiskrenta uz ekrano,
+     kad ir kurioje eilutes vietoje mygtukas atsidurtu (768 px jis nuslenka i desine) */
+  bottom: calc(100% + 8px); left: auto; right: 0;
+  width: 264px; max-width: calc(100vw - 32px);
+  background: var(--bg-elevated); border: 1px solid var(--border-light);
+  border-radius: 14px; padding: 6px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.4);
+}
+#portal-selector.open { display: block; animation: ctPortalIn .16s cubic-bezier(.2,.8,.3,1); }
+@keyframes ctPortalIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.ct3-portal-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 9px 10px 8px; margin-bottom: 2px; border-bottom: 1px solid var(--border);
+}
+.ct3-portal-head > span {
+  font: 700 9.5px/1 var(--font-mono); letter-spacing: .14em; color: var(--text-dim);
+}
+.ct3-portal-all {
+  background: none; border: none; padding: 2px 0; cursor: pointer;
+  font: 600 11.5px var(--font); color: var(--accent-light);
+}
+.ct3-portal-all:hover { color: var(--text-primary); text-decoration: underline; }
+
+/* eilutes */
+.ct3-portal-row {
+  display: flex !important; align-items: center !important; gap: 10px !important;
+  padding: 9px 10px !important; border-radius: 9px !important; cursor: pointer;
+  color: var(--text-secondary); transition: background .12s;
+}
+.ct3-portal-row:hover { background: rgba(255,255,255,.05) !important; }
+.ct3-portal-row:has(input:checked) { background: var(--accent-dim); color: var(--text-primary); }
+.ct3-portal-row input[type=checkbox] {
+  appearance: none; -webkit-appearance: none;
+  width: 17px !important; height: 17px !important; flex: none; cursor: pointer;
+  border: 1.5px solid var(--border-light); border-radius: 5px; background: var(--bg-raised);
+  display: grid; place-items: center; transition: background .12s, border-color .12s;
+}
+.ct3-portal-row input[type=checkbox]:checked { background: var(--accent); border-color: var(--accent); }
+.ct3-portal-row input[type=checkbox]:checked::after {
+  content: ''; width: 9px; height: 5px; border: 2px solid #fff; border-top: 0; border-right: 0;
+  transform: rotate(-45deg) translate(0, -1px);
+}
+.ct3-portal-name { flex: 1; font: 500 13px var(--font) !important; }
+.ct3-portal-flag { font-size: 15px; flex: none; opacity: .85; }
+
+.ct3-portal-done { display: none; }
+
+/* ── Telefone: apatinis lakštas ── */
+@media (max-width: 640px) {
+  #portal-backdrop {
+    display: block; position: fixed; inset: 0; z-index: 1490;
+    background: rgba(0,0,0,.6); opacity: 0; pointer-events: none; transition: opacity .2s;
+    -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+  }
+  #portal-backdrop.open { opacity: 1; pointer-events: auto; }
+
+  #portal-selector {
+    position: fixed; z-index: 1500;
+    left: 0; right: 0; bottom: 0; top: auto;
+    width: auto; max-width: none;
+    border-radius: 20px 20px 0 0; border: none; border-top: 1px solid var(--border-light);
+    padding: 6px 10px calc(10px + env(safe-area-inset-bottom, 0px));
+    max-height: 72vh; overflow-y: auto;
+    box-shadow: 0 -12px 44px rgba(0,0,0,.65);
+  }
+  #portal-selector.open { animation: ctPortalSheetIn .22s cubic-bezier(.2,.8,.3,1); }
+  @keyframes ctPortalSheetIn { from { transform: translateY(100%); } to { transform: none; } }
+
+  /* rankenele */
+  #portal-selector.open::before {
+    content: ''; display: block; width: 36px; height: 4px; border-radius: 2px;
+    background: var(--border-light); margin: 6px auto 4px;
+  }
+  .ct3-portal-head { padding: 6px 4px 10px; }
+  .ct3-portal-head > span { font-size: 10.5px; }
+  .ct3-portal-row { padding: 13px 8px !important; }
+  .ct3-portal-name { font-size: 14px !important; }
+
+  .ct3-portal-done {
+    display: block; width: 100%; margin: 8px 0 2px; height: 46px;
+    border: none; border-radius: 12px; cursor: pointer;
+    background: var(--accent); color: #fff; font: 600 14px var(--font);
+  }
+  .ct3-portal-done:active { opacity: .85; }
+}
 
 /* ═══════════ PAIESKOS PROGRESO PANELE — naujas dizainas ═══════════ */
 #log-container {
@@ -1901,7 +2012,7 @@
           <button class="ct3-stab active" onclick="ctSearchTabSwitch('search',this)">Ieškoti automobilių</button>
           <div style="position:relative">
             <button class="ct3-stab" id="ct-hist-tab-btn" onclick="ctSearchTabSwitch('history',this)">🕘 Paskutinės paieškos</button>
-            <div id="ct-history-dropdown" style="display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:500;min-width:500px;max-width:760px;background:#12151e;border:1px solid rgba(255,255,255,.13);border-radius:14px;padding:14px 16px 16px;box-shadow:0 16px 56px rgba(0,0,0,.75);max-height:340px;overflow-y:auto">
+            <div id="ct-history-dropdown" style="display:none;">
               <div style="font:700 9px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-dim);text-transform:uppercase;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.07)">🕘 Paskutinės paieškos</div>
               <div id="search-history-chips" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
             </div>
@@ -2024,37 +2135,26 @@
             Daugiau filtrų
             <span class="ct3-badge" id="more-filters-badge" style="display:none;">0</span>
           </button>
-          <div style="position:relative;">
+          <div class="ct3-portal-wrap">
             <button class="ct3-marketplaces-btn" id="portal-toggle-btn" onclick="ctTogglePortals()">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M2 12h20M12 2c-3 4-3 12 0 16M12 2c3 4 3 12 0 16"/></svg>
               <span id="portal-btn-label">Visi portalai</span>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transition:transform .2s" id="portal-chevron"><path d="M6 9l6 6 6-6"/></svg>
             </button>
-            <div id="portal-selector" style="display:none; position:absolute; z-index:300; bottom:calc(100% + 8px); left:0; min-width:230px; background:#12151e; border:1px solid rgba(255,255,255,.13); border-radius:12px; padding:6px; box-shadow:0 8px 36px rgba(0,0,0,.6);">
+            <div id="portal-backdrop" onclick="ctTogglePortals()"></div>
+            <div id="portal-selector">
+              <div class="ct3-portal-head"><span>PORTALAI</span><button type="button" class="ct3-portal-all" id="portal-all-btn" onclick="ctPortalVisi()">Žymėti visus</button></div>
               <label class="ct3-portal-row"><input type="checkbox" id="portal-autoplius" checked onchange="ctUpdatePortalBtn()"><svg viewBox="0 0 32 32" width="22" height="22" style="flex:none;border-radius:5px"><rect width="32" height="32" rx="7" fill="#19b86a"/><text x="16" y="22" font-family="system-ui,sans-serif" font-weight="900" font-size="15" fill="#fff" text-anchor="middle">AP</text></svg><span class="ct3-portal-name">autoplius.lt</span><span class="ct3-portal-flag">🇱🇹</span></label>
               <label class="ct3-portal-row"><input type="checkbox" id="portal-autogidas" checked onchange="ctUpdatePortalBtn()"><svg viewBox="0 0 32 32" width="22" height="22" style="flex:none;border-radius:5px"><rect width="32" height="32" rx="7" fill="#2D6FCA"/><text x="16" y="22" font-family="system-ui,sans-serif" font-weight="900" font-size="15" fill="#fff" text-anchor="middle">AG</text></svg><span class="ct3-portal-name">autogidas.lt</span><span class="ct3-portal-flag">🇱🇹</span></label>
               <label class="ct3-portal-row"><input type="checkbox" id="portal-autoscout24" onchange="ctUpdatePortalBtn()"><svg viewBox="0 0 32 32" width="22" height="22" style="flex:none;border-radius:5px"><rect width="32" height="32" rx="7" fill="#F06A00"/><text x="16" y="22" font-family="system-ui,sans-serif" font-weight="900" font-size="13" fill="#fff" text-anchor="middle">AS24</text></svg><span class="ct3-portal-name">autoscout24.com</span><span class="ct3-portal-flag">🇪🇺</span></label>
               <label class="ct3-portal-row"><input type="checkbox" id="portal-otomoto" onchange="ctUpdatePortalBtn()"><svg viewBox="0 0 32 32" width="22" height="22" style="flex:none;border-radius:5px"><rect width="32" height="32" rx="7" fill="#C0392B"/><text x="16" y="22" font-family="system-ui,sans-serif" font-weight="900" font-size="15" fill="#fff" text-anchor="middle">OT</text></svg><span class="ct3-portal-name">otomoto.pl</span><span class="ct3-portal-flag">🇵🇱</span></label>
+              <button type="button" class="ct3-portal-done" onclick="ctTogglePortals()">Gerai</button>
             </div>
           </div>
         </div>
-        <div class="ct-mode-selector">
-          <button class="ct-mode-btn active" id="mode-btn-default" onclick="ctSetMode('default',this)">
-            <span class="ct-mode-ic">🎯</span>
-            <b>CarTriige analizė</b>
-            <span>Kiekvienas skelbimas įvertinamas ir suskirstomas: galimybė, duomenų patikimumas, rizika.</span>
-          </button>
-          <button class="ct-mode-btn" id="mode-btn-browse" onclick="ctSetMode('browse',this)">
-            <span class="ct-mode-ic">📋</span>
-            <b>Naršyti viską</b>
-            <span>Visi rasti skelbimai be atrankos – naršyk pats.</span>
-          </button>
-        </div>
+        <!-- PASALINTA: "Naršyti viską" režimas. Liko tik CarTriige analizė, todėl režimų pasirinkiklio nebereikia. -->
         <div class="ct3-search-bottom-right">
-          <button class="ct3-save-btn">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
-            Išsaugoti paiešką
-          </button>
+          <!-- PASALINTA: "Išsaugoti paiešką" - mygtukas neturėjo jokio veiksmo. -->
           <button class="ct3-search-btn" id="search-btn" onclick="console.log('search-btn clicked, runSearch=', typeof runSearch); if(typeof runSearch==='function'){ runSearch(); } else { showToast('runSearch nerasta — perkraukite puslapį', 'error'); }">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
             Ieškoti ir analizuoti
@@ -2135,7 +2235,7 @@
 
   <div id="all-listings-wrap" style="display:none;">
     <button onclick="toggleAllListings()" id="toggle-all-btn">
-      📋 Rodyti visus nuskaitytus skelbimus (naršykite patys) ▾
+      📋 Rodyti likusius nuskaitytus skelbimus ▾
     </button>
     <div id="all-listings" style="display:none;"></div>
   </div>
@@ -3576,7 +3676,7 @@ function renderResults(data, status, results) {
     results.innerHTML = '';
     if (!browseCands.length) renderBrowseListings([], results);
     else (window.renderCandidateCards || renderCandidateCards)(browseCands, results);
-    renderAllListings(data.allListings || []);
+    renderAllListings(data.allListings || [], data.candidates || []);
     ctIkeltiIstorijas(browseCands.map(function (c) { return c.url; }), browseCands);
     return;
   }
@@ -3589,7 +3689,7 @@ function renderResults(data, status, results) {
   window.ctSortSetLabel('quality');
   results.innerHTML = '';
   (window.renderCandidateCards || renderCandidateCards)(data.candidates, results);
-  renderAllListings(data.allListings || []);
+  renderAllListings(data.allListings || [], data.candidates || []);
   ctIkeltiIstorijas(data.candidates.map(function (c) { return c.url; }), data.candidates);
 }
 
@@ -3829,10 +3929,35 @@ function renderCandidateCards(candidates, results) {
   });
 }
 
-function renderAllListings(allListings) {
+function renderAllListings(allListings, kandidatai) {
   const wrap = document.getElementById('all-listings-wrap');
   const container = document.getElementById('all-listings');
   if (!allListings.length) { wrap.style.display = 'none'; return; }
+
+  // PAKEISTA: 1) neberodom tu paciu automobiliu, kurie jau isvardyti virsuje,
+  //           2) papildom rinkos duomenimis - atmestiems skelbimams backend'as
+  //              ju neskaiciuoja, todel imam to paties paieskos rezultato mediana.
+  const virsuje = new Set((kandidatai || []).map(function (c) { return c && c.url; }).filter(Boolean));
+  let sarasas = allListings.filter(function (l) { return l && !virsuje.has(l.url); });
+
+  const visi = (kandidatai || []).concat(allListings);
+  const mediana = (function () {
+    const v = visi.map(function (l) { return l && l.marketMedian; }).filter(function (x) { return x; });
+    return v.length ? v.sort(function (a, b) { return a - b; })[Math.floor(v.length / 2)] : null;
+  })();
+  const imtis = Math.max.apply(null, [0].concat(visi.map(function (l) { return (l && l.marketCount) || 0; })));
+
+  sarasas = sarasas.map(function (l) {
+    if (!mediana || !l.kaina) return l;
+    const x = Object.assign({}, l);
+    if (x.marketMedian == null) x.marketMedian = mediana;
+    if (!x.marketCount && imtis) x.marketCount = imtis;
+    if (x.diffPct == null) x.diffPct = Math.round((x.marketMedian - x.kaina) / x.marketMedian * 100);
+    return x;
+  });
+
+  if (!sarasas.length) { wrap.style.display = 'none'; return; }
+  allListings = sarasas;
   wrap.style.display = 'block';
   container.innerHTML = '';
 
@@ -3861,8 +3986,8 @@ function toggleAllListings() {
   const isHidden = el.style.display === 'none';
   el.style.display = isHidden ? 'block' : 'none';
   btn.textContent = isHidden
-    ? `📋 Slėpti visus nuskaitytus skelbimus ▴`
-    : `📋 Rodyti visus nuskaitytus skelbimus (naršykite patys) ▾`;
+    ? `📋 Slėpti likusius nuskaitytus skelbimus ▴`
+    : `📋 Rodyti likusius nuskaitytus skelbimus ▾`;
 }
 
 // Besisukancios, konkrecios busenos zinutes - kad laukimas atrodytu "gyvas" ir aisku,
@@ -4282,18 +4407,58 @@ function ctSearchTabSwitch(tab, btn) {
 document.addEventListener('click', function(e) {
   var dd = document.getElementById('ct-history-dropdown');
   var btn = document.getElementById('ct-hist-tab-btn');
-  if (dd && dd.style.display !== 'none' && !dd.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+  if (!dd || dd.style.display === 'none') return;
+  // PATAISYTA: sitas klausytojas veike capture fazeje ir spejdavo uzdaryti
+  // iskleidziamaji PRIES nuspausto mygtuko onclick - todel virsutinis
+  // "Istorija" mygtukas atrodydavo neveikiantis.
+  var jungiklis = e.target.closest ? e.target.closest('#ct-hist-tab-btn, [onclick*="istorija"]') : null;
+  if (jungiklis) return;
+  if (!dd.contains(e.target) && e.target !== btn && !(btn && btn.contains(e.target))) {
     dd.style.display = 'none';
   }
-}, true);
+});
 
 // ── Portal dropdown toggle ──
 function ctTogglePortals() {
+  // PAKEISTA: valdoma klase .open, ne inline display - desktop'e popover'is,
+  // telefone apatinis lakštas. Anksciau telefone iškrisdavo uz ekrano desineje.
   var s = document.getElementById('portal-selector');
+  var bd = document.getElementById('portal-backdrop');
   var chev = document.getElementById('portal-chevron');
-  var open = s.style.display !== 'none';
-  s.style.display = open ? 'none' : 'block';
-  if (chev) chev.style.transform = open ? '' : 'rotate(180deg)';
+  var btn = document.getElementById('portal-toggle-btn');
+  var open = s.classList.toggle('open');
+  // PATAISYTA: .ct3-search-panel turi backdrop-filter, o tai sukuria nauja
+  // konteksta position:fixed elementams - apatinis lakstas nusileisdavo zemiau
+  // ekrano. Telefone ji perkeliame tiesiai i <body>.
+  ctPortalVieta(open);
+  if (bd) bd.classList.toggle('open', open);
+  if (btn) btn.classList.toggle('active', open);
+  if (chev) chev.style.transform = open ? 'rotate(180deg)' : '';
+  document.body.style.overflow = (open && window.innerWidth <= 640) ? 'hidden' : '';
+}
+
+function ctPortalVieta(open) {
+  var sel = document.getElementById('portal-selector');
+  var bd = document.getElementById('portal-backdrop');
+  var wrap = document.querySelector('.ct3-portal-wrap');
+  if (!sel || !wrap) return;
+  if (open && window.innerWidth <= 640) {
+    if (sel.parentElement !== document.body) {
+      if (bd) document.body.appendChild(bd);
+      document.body.appendChild(sel);
+    }
+  } else if (sel.parentElement === document.body) {
+    if (bd) wrap.appendChild(bd);
+    wrap.appendChild(sel);
+  }
+}
+
+function ctPortalVisi() {
+  var names = ['autoplius','autogidas','autoscout24','otomoto'];
+  var els = names.map(function (n) { return document.getElementById('portal-' + n); }).filter(Boolean);
+  var visiPazymeti = els.every(function (e) { return e.checked; });
+  els.forEach(function (e) { e.checked = !visiPazymeti; });
+  ctUpdatePortalBtn();
 }
 function ctUpdatePortalBtn() {
   var names = ['autoplius','autogidas','autoscout24','otomoto'];
@@ -4302,15 +4467,22 @@ function ctUpdatePortalBtn() {
   var lbl = document.getElementById('portal-btn-label');
   if (!lbl) return;
   if (checked.length === names.length || checked.length === 0) { lbl.textContent = 'Visi portalai'; }
-  else { lbl.textContent = checked.map(function(n){ return labels[n]; }).join(', '); }
+  else if (checked.length === 1) { lbl.textContent = labels[checked[0]]; }
+  else { lbl.textContent = checked.length + ' portalai'; }
+  var ab = document.getElementById('portal-all-btn');
+  if (ab) ab.textContent = (checked.length === names.length) ? 'Nužymėti visus' : 'Žymėti visus';
 }
 document.addEventListener('click', function(e) {
   var btn = document.getElementById('portal-toggle-btn');
   var sel = document.getElementById('portal-selector');
   if (!sel || !btn) return;
-  if (sel.style.display === 'none') return;
+  if (!sel.classList.contains('open')) return;
   if (!btn.contains(e.target) && !sel.contains(e.target)) {
-    sel.style.display = 'none';
+    sel.classList.remove('open');
+    var bd = document.getElementById('portal-backdrop'); if (bd) bd.classList.remove('open');
+    btn.classList.remove('active');
+    document.body.style.overflow = '';
+    if (typeof ctPortalVieta === 'function') ctPortalVieta(false);
     var chev = document.getElementById('portal-chevron');
     if (chev) chev.style.transform = '';
   }
@@ -4449,8 +4621,16 @@ function ctNavTab(tab) {
   }
   if (tab === 'istorija') {
     var hw = document.getElementById('ct-history-dropdown');
-    var isOpen = hw && hw.style.display !== 'none';
-    if (hw) { hw.style.display = isOpen ? 'none' : ''; if (!isOpen) renderSearchHistory(); }
+    if (!hw) return;
+    var isOpen = hw.style.display !== 'none';
+    hw.style.display = isOpen ? 'none' : '';
+    if (!isOpen) {
+      renderSearchHistory();
+      // iskleidziamasis yra paieskos kortelėje, o mygtukas - virsutinėje juostoje,
+      // todel be slinkimo atrodo, kad nieko neivyko
+      var tabs = document.querySelector('.ct3-search-tabs');
+      if (tabs) tabs.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
     return;
   }
   if (tab === 'palyginti') {
@@ -4830,6 +5010,8 @@ function ctNavTab(tab) {
         c.metai ? '<span class="chip" style="height:22px;font-size:11px;padding:0 7px;">' + c.metai + '</span>' : '',
         c.rida ? '<span class="chip" style="height:22px;font-size:11px;padding:0 7px;">' + fmtKm(c.rida) + '</span>' : '',
         c.kuras ? '<span class="chip" style="height:22px;font-size:11px;padding:0 7px;">' + esc(c.kuras) + '</span>' : '',
+        // PRIDETA: pavaru deze - kad eilutes kortelė turėtų ta pacia pagrindine info kaip TOP kortelė
+        c.pavarai ? '<span class="chip" style="height:22px;font-size:11px;padding:0 7px;">' + esc(c.pavarai) + '</span>' : '',
         c.turiVin ? '<span class="chip chip-pos" style="height:22px;font-size:11px;padding:0 7px;">✓ VIN</span>' : '',
       ].join('');
 
