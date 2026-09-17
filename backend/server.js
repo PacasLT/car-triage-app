@@ -13,6 +13,7 @@ const Anthropic = require('@anthropic-ai/sdk');
 const cache = require('./cache');
 const autopliusIds = require('./autoplius-ids');
 const vinTikrinimas = require('./vin-tikrinimas');
+const nuotrAnalize = require('./nuotrauku-analize');
 const { requireAuth, handleRegister, handleLogin, handleMe, planai, duomenys } = require('./auth');
 
 const app = express();
@@ -2650,6 +2651,12 @@ async function downloadImageAsBase64(url) {
 // nuotraukomis: grazina, kurios NERA sio automobilio nuotraukos, ir ar kuri nors is ju -
 // pardavejo logotipas (ji prisegam prie pardavejo kortelės).
 const NUOTRAUKU_FILTRAS = (process.env.NUOTRAUKU_FILTRAS || '1') !== '0';
+// v1.24.0 VIZUALINIS STANDARTAS: nuotraukas perziuri atskiras pigus "evidence" sluoksnis
+// (Haiku), kuris tik APRASO, kas matoma, su nuotrauku numeriais. Gili analize (Sonnet)
+// gauna to sluoksnio TEKSTA vietoj paveiksleliu - todel perziurim daugiau nuotrauku, o
+// brangaus modelio ieinanciu tokenu sumazeja.
+const VIZUALUS_SLUOKSNIS = (process.env.VIZUALUS_SLUOKSNIS || '1') !== '0';
+const VIZUALAUS_FOTO = parseInt(process.env.VIZUALAUS_FOTO || '10', 10);
 const FILTRO_MAX_FOTO = 15;
 
 async function klasifikuotiNuotraukas(photos) {
@@ -2750,10 +2757,12 @@ JSON struktura ir sukelia klaida:
   "vin_nuotraukos_vieta": "kur pamatytas, pvz. duru lipdukas, arba null"
 }`;
 
-async function generateDeepAnalysis(title, fullText, photos, marketContext, skelbimoUrl, preloaded) {
-  // Siunčiame iki 12 nuotraukų AI - vizuali automobilio būklės analizė visada naudinga.
+async function generateDeepAnalysis(title, fullText, photos, marketContext, skelbimoUrl, preloaded, vizualus) {
+  // v1.24.0: kai turim irodymu sluoksni, paveiksleliu cia NEBESIUNCIAM - vietoj ju eina
+  // strukturizuotas tekstas "ka matome". Taip brangus modelis nebemoka uz vaizdus.
+  const vizTekstas = vizualus ? nuotrAnalize.tekstasAnalizei(vizualus) : '';
   let imageBlocks = [];
-  if (photos && photos.length > 0) {
+  if (!vizualus && photos && photos.length > 0) {
     const downloaded = await Promise.all(photos.slice(0, DEEP_FOTO_KIEKIS).map((u) => (preloaded && preloaded[u]) ? Promise.resolve(preloaded[u]) : downloadImageAsBase64(u)));
     imageBlocks = downloaded.filter(Boolean).map((img) => ({
       type: 'image',
@@ -2777,7 +2786,13 @@ VIN yra 17 simboliu, sudarytas tik is skaiciu ir raidziu, kuriose NEBUNA raidziu
 Jei abejoji bent vienu simboliu arba kodas neiskaitomas - grazink null, o ne spek.
 Taip pat nurodyk, kurioje vietoje ji pamatei (pvz. 'duru lipdukas', 'po priekiniu stiklu',
 'registracijos dokumentas').`
-    : '';
+    : (vizTekstas
+      ? `\n\nNUOTRAUKOS NEPRISEGTOS. Vietoj ju gavai [VIZUALINIS PATIKRINIMAS] bloka - tai atskiro
+nuotrauku tikrintojo isvados su nuotrauku numeriais. Remkis TIK juo: "nuotrauku_pastebejimai"
+lauke perrasyk svarbiausius pastebejimus ir BUTINAI islaikyk ju lygi ("matoma" vs "galimas signalas").
+NEDARYK is ju isvadu apie avarijas, ridos tikruma ar gamykline komplektacija. Trukstantis rakursas
+nera automobilio truksmas - jis virsta klausimu pardavejui arba patikrinimo punktu.`
+      : '');
 
   const engineNote = marketContext && (marketContext.galia || marketContext.variklioTuris)
     ? ` Sio konkretaus automobilio variklis: ${marketContext.variklioTuris ? marketContext.variklioTuris + 'L' : ''}${marketContext.galia ? ' ' + marketContext.galia + 'kW' : ''} - SVARBU: rinkos vidurkis skaiciuotas VISIEMS to modelio variantams kartu, o galingesni/silpnesni varikliai realiai kainuoja skirtingai (galingesnis = brangesnis). Atsizvelk i tai vertindamas, ar si kaina tikrai zema/auksta KONKRECIAM variantui, ne tik modeliui bendrai.`
@@ -2813,7 +2828,7 @@ t.y. si kaina yra ${marketContext.diffPct}% ${marketContext.diffPct >= 0 ? 'ZEME
   const turinys = `Automobilio skelbimo puslapio turinys:
 Pavadinimas: ${title}
 Turinys: ${fullText}
-${marketContextText}${istorijosTekstas}${photoInstructions}`;
+${marketContextText}${istorijosTekstas}${vizTekstas ? '\n\n' + vizTekstas : ''}${photoInstructions}`;
 
   const prompt = `${DEEP_INSTRUKCIJOS}
 
@@ -2921,7 +2936,29 @@ app.post('/api/analyze-single', requireAuth, planai.reikalautiKreditu('analize',
     // Ne automobilio nuotraukos (reklamos, logotipai) - salin; pardavejo logotipas - prie pardavejo
     const foto = await klasifikuotiNuotraukas(photos0);
     const photos = foto.tinkamos, photo = photos[0] || photo0;
-    const analysis = await generateDeepAnalysis(title, fullText, photos, marketContext, url, foto.parsisiusta);
+    // v1.24.0: pirma - irodymu sluoksnis (ka matome), tik tada verdiktas (ka tai reiskia)
+    let vizualus = null;
+    if (VIZUALUS_SLUOKSNIS && photos.length >= 2) {
+      try {
+        vizualus = await nuotrAnalize.analizuoti({
+          anthropic, model: KOMENTARU_MODEL, nuotraukos: photos, parsisiusta: foto.parsisiusta,
+          maxFoto: VIZUALAUS_FOTO,
+          kontekstas: { modelis, metai: req.body.metai, rida: req.body.rida, irangosSarasas: iranga, aprasymas },
+        });
+      } catch (e) { console.warn('[VIZUALAS] nepavyko:', e.message); }
+    }
+    const analysis = await generateDeepAnalysis(title, fullText, photos, marketContext, url, foto.parsisiusta, vizualus);
+    // Nuotrauku pastebejimai ir VIN is nuotraukos dabar ateina is irodymu sluoksnio
+    if (vizualus) {
+      if (!analysis.nuotrauku_pastebejimai || !analysis.nuotrauku_pastebejimai.length) {
+        analysis.nuotrauku_pastebejimai = vizualus.pastebejimai.map((p) =>
+          (p.lygis === 'matoma' ? '' : 'Galimas signalas: ') + p.tekstas + (p.nuotrauka ? ' (nuotr. #' + p.nuotrauka + ')' : ''));
+      }
+      if (!analysis.vin_is_nuotraukos && vizualus.vinNuotraukoje) {
+        analysis.vin_is_nuotraukos = vizualus.vinNuotraukoje;
+        analysis.vin_nuotraukos_vieta = vizualus.vinVieta;
+      }
+    }
     const vinInfo = sujungtiVin(vin, analysis, vinPrefiksas);
     const result = {
       title, photo, photos, analysis,
@@ -2934,6 +2971,7 @@ app.post('/api/analyze-single', requireAuth, planai.reikalautiKreditu('analize',
       istorijosNuoroda: istorijosNuoroda || null, skelbimoParametrai: skelbimoParametrai || null,
       iranga: iranga || null, aprasymas: aprasymas || null, vieta: vieta || null,
       kaina: kaina || null, // v1.23.0: pagal ja tikrinam, ar podelio analize dar aktuali
+      vizualus: vizualus || null, // v1.24.0: irodymu sluoksnis (bukle, pasitikejimas, pastebejimai)
     };
     cache.setCached('analysis', url, result);
     issaugotiAnalizesAtaskaita(req, url, result);

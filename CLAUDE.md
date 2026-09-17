@@ -26,6 +26,18 @@
 - `ANALIZES_PODELIS_MS` (7 d.) – ta pati analizė negeneruojama iš naujo, nebent pasikeitė kaina (`analizesPodelis(url, kaina)`).
 - Nuotraukos brangiausios (~1 400 tokenų viena): `DEEP_FOTO_KIEKIS` = 6.
 
+## Vizualinis standartas (nuotraukų AI) – privaloma
+
+> **MATOME → APRAŠOME. ĮTARIAME → ĮSPĖJAME. NEŽINOME → NEIŠGALVOJAME.**
+
+- `backend/nuotrauku-analize.js` yra **įrodymų sluoksnis** (evidence layer), ne teisėjas: jis tik aprašo, kas matoma, su nuotraukos numeriu. Verdiktą daro gilioji analizė.
+- Lygiai: `matoma` (🟢, privalo turėti nuotraukos numerį) · `galimas` (🟡, su `kodel_neaisku`) · trūkstamas rakursas = neįvertinta sritis.
+- **Draudžiama** rašyti: „daužtas / nedaužtas“, „be avarijų“, „rida atsukta“, „variklis tvarkingas“, „originali / gamyklinė komplektacija“, „patvirtina / įrodo / garantuoja“. Tai tikrina `DRAUDZIAMA` sąrašas **kode**, ne tik promptas – radus, pastebėjimas nuleidžiamas į 🟡 ir teiginys iškerpamas.
+- Du atskiri rodikliai: **Visual Condition** (būklė tik iš to, kas įvertinta) ir **Visual Confidence** (kiek apskritai galima įvertinti; skaičiuojama kode iš rakursų ir nuotraukų kokybės, niekada neklausiama modelio).
+- Trūkstamas rakursas **nemažina** automobilio balo – jis virsta klausimu pardavėjui.
+- Įranga: du nepriklausomi šaltiniai (nuotrauka + skelbimo sąrašas) = 🟢; vienas = 🟡 su prierašu, kad gamyklinė komplektacija nepatvirtinta.
+- Gilioji analizė nuotraukų nebegauna – ji gauna `tekstasAnalizei()` rezultatą (`VIZUALUS_SLUOKSNIS=0` grąžina seną elgesį).
+
 ## VIN
 
 - `/api/vin-check` – **nemokamas**: `backend/vin-tikrinimas.js` (WMI, šalis, modelio metai, kontrolinis skaitmuo) + nemokama NHTSA vPIC + sutapimas su skelbimu + ar tą VIN jau matėme.

@@ -8,6 +8,21 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.24.0', data: '2026-09-17', pavadinimas: 'Naujas nuotraukų vertinimo standartas: matome – aprašome',
+    pakeitimai: [
+      'Nuotraukas peržiūri atskiras sluoksnis, kuris tik APRAŠO, kas matoma, ir niekada nedaro išvadų apie avarijas, ridos tikrumą ar gamyklinę komplektaciją',
+      'Kiekvienas pastebėjimas turi lygį: 🟢 matoma nuotraukoje · 🟡 galimas signalas (ir paaiškinimą, kodėl neaišku)',
+      'Prie pastebėjimo – mygtukas su nuotraukos numeriu: paspaudus atsidaro būtent ta nuotrauka',
+      'Nauji du rodikliai: „Vizualinė būklė“ (kokia būklė tiek, kiek pavyko įvertinti) ir „Kiek galima įvertinti“ (ar nuotraukų apskritai pakanka)',
+      'Trūkstamas rakursas nebemažina automobilio įvertinimo – jis virsta klausimu pardavėjui („paprašykite galo nuotraukos“)',
+      'Kiekvienas galimas signalas virsta konkrečiu klausimu pardavėjui arba patikrinimo punktu apžiūros metu',
+      'Įranga, matoma nuotraukoje IR nurodyta skelbimo sąraše, žymima žaliai; matoma tik nuotraukoje – geltonai, su prierašu, kad gamyklinė komplektacija nepatvirtinta',
+      'Rodome prieštaravimus tarp skelbimo ir nuotraukų (pvz. „be defektų“, o nuotraukoje matomas įbrėžimas; skydelio rida nesutampa su skelbimu)',
+      'Peržiūrima iki 10 nuotraukų vietoj 6, o brangiajam modeliui nuotraukos nebesiunčiamos – jis gauna tekstinę santrauką, todėl analizė kartu ir pigesnė',
+      'Viršutinėje juostoje nebeliko nuorodų ir kituose puslapiuose – viskas paskyros meniu',
+    ],
+  },
+  {
     versija: '1.23.1', data: '2026-09-17', pavadinimas: 'Tvarkingesnis meniu, palyginimo juosta ir mėgstamiausių atnaujinimas',
     pakeitimai: [
       'Nauja paslauga: „Atnaujinti visus" mėgstamiausiuose – vienu paspaudimu pertikriname kiekvieno išsaugoto skelbimo kainą ir būseną portale (1 kr už visą sąrašą, kartą per parą)',
