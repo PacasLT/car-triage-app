@@ -1670,6 +1670,131 @@
 }
 #deep-compare-btn:hover { background: var(--accent) !important; color: #fff !important; border-color: var(--accent) !important; }
 #deep-compare-btn:disabled { opacity: .6 !important; cursor: not-allowed !important; }
+
+/* ═══════════ PAIESKOS PROGRESO PANELE — naujas dizainas ═══════════ */
+#log-container {
+  margin-bottom: 18px !important; border: 1px solid var(--border) !important;
+  border-radius: 14px !important; background: var(--bg-surface) !important; overflow: hidden !important;
+}
+#log-container[data-state="running"] { border-color: var(--accent-border) !important; }
+#log-container[data-state="done"]    { border-color: var(--success-border) !important; }
+#log-container[data-state="error"]   { border-color: var(--danger-border) !important; }
+
+/* ── Antraste ── */
+#log-header {
+  display: flex !important; align-items: center !important; gap: 10px !important;
+  padding: 13px 16px !important; background: transparent !important; border: none !important;
+  border-radius: 0 !important; font: 500 13px var(--font) !important; color: var(--text-secondary) !important;
+  cursor: pointer !important; user-select: none !important;
+}
+#log-header:hover { background: rgba(255,255,255,.025) !important; }
+#log-header-text {
+  flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--text-primary); font-weight: 500;
+}
+#log-container[data-state="done"] #log-header-text { color: var(--success); }
+#log-container[data-state="error"] #log-header-text { color: var(--danger); }
+
+/* ── Zenkleliai ── */
+#search-progress-label {
+  flex: none; font: 700 11px/1 var(--font-mono) !important; letter-spacing: .04em;
+  color: var(--accent-light) !important; background: var(--accent-dim);
+  border: 1px solid var(--accent-border); border-radius: 7px; padding: 4px 7px;
+  font-variant-numeric: tabular-nums; min-width: 44px; text-align: center;
+}
+#log-container[data-state="done"] #search-progress-label {
+  color: var(--success) !important; background: var(--success-dim); border-color: var(--success-border);
+}
+#log-container[data-state="error"] #search-progress-label {
+  color: var(--danger) !important; background: var(--danger-dim); border-color: var(--danger-border);
+}
+#ct-log-steps {
+  flex: none; font: 500 10.5px/1 var(--font-mono); letter-spacing: .04em;
+  color: var(--text-dim); font-variant-numeric: tabular-nums;
+}
+@media (max-width: 560px) { #ct-log-steps { display: none; } }
+
+#log-header .chevron { margin-left: 0 !important; flex: none; color: var(--text-dim) !important; font-size: 11px; }
+
+/* ── Progreso juosta ── */
+#search-progress-wrap { display: block !important; margin: 0 !important; }
+#search-progress-track-main {
+  height: 3px !important; margin: 0 !important; border-radius: 0 !important;
+  background: var(--bg-raised) !important; overflow: hidden !important;
+}
+#search-progress-fill-main {
+  height: 100% !important; border-radius: 0 2px 2px 0 !important;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light)) !important;
+  transition: width .45s cubic-bezier(.4,0,.2,1) !important; position: relative;
+}
+#log-container[data-state="running"] #search-progress-fill-main::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent);
+  animation: ctProgShimmer 1.4s ease-in-out infinite;
+}
+#log-container[data-state="done"] #search-progress-fill-main {
+  background: linear-gradient(90deg, var(--success), oklch(.82 .16 158)) !important;
+}
+#log-container[data-state="error"] #search-progress-fill-main {
+  background: var(--danger) !important;
+}
+@keyframes ctProgShimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+/* ── Zingsniu sarasas ── */
+#log-box {
+  background: var(--bg-base) !important; border: none !important;
+  border-top: 1px solid var(--border) !important; border-radius: 0 !important;
+  padding: 6px 0 !important; max-height: 290px !important; overflow-y: auto !important;
+  scrollbar-width: thin; scrollbar-color: var(--bg-raised) transparent;
+}
+#log-box::-webkit-scrollbar { width: 8px; }
+#log-box::-webkit-scrollbar-track { background: transparent; }
+#log-box::-webkit-scrollbar-thumb { background: var(--bg-raised); border-radius: 4px; border: 2px solid var(--bg-base); }
+#log-box::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+.log-step {
+  display: grid !important; grid-template-columns: 16px 1fr !important; align-items: start !important;
+  gap: 10px !important; padding: 7px 16px !important; border: none !important;
+  font: 400 12.5px/1.45 var(--font) !important; color: var(--text-secondary) !important;
+  border-left: 2px solid transparent !important; position: relative;
+}
+.log-step > span:last-child { min-width: 0; overflow-wrap: anywhere; }
+.log-step .done-check, .log-step .spinner { margin-top: 2px; }
+.log-step .done-check {
+  width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center;
+  font: 700 9px/1 var(--font-mono) !important; flex: none;
+  background: var(--success-dim); color: var(--success) !important; border: 1px solid var(--success-border);
+}
+.log-step .done-check.st-warn { background: var(--warning-dim); color: var(--warning) !important; border-color: var(--warning-border); }
+.log-step .done-check.st-err  { background: var(--danger-dim);  color: var(--danger) !important;  border-color: var(--danger-border); }
+.log-step .done-check.st-win  { background: var(--accent-dim);  color: var(--accent-light) !important; border-color: var(--accent-border); }
+.log-step .spinner {
+  width: 14px !important; height: 14px !important; border: 2px solid var(--bg-raised) !important;
+  border-top-color: var(--accent) !important; border-radius: 50%; animation: spin .8s linear infinite; flex: none;
+}
+.log-step.st-warn > span:last-child { color: var(--warning); }
+.log-step.st-err  > span:last-child { color: var(--danger); }
+.log-step.current {
+  background: var(--accent-dim) !important; border-left-color: var(--accent) !important;
+  color: var(--text-primary) !important; font-weight: 500 !important;
+}
+.log-step:nth-child(even):not(.current) { background: rgba(255,255,255,.012) !important; }
+.log-step.sub { padding-left: 38px !important; }
+.log-step.sub > span:last-child { color: var(--text-muted); font-size: 11.5px; }
+.log-step.sub .done-check { opacity: .45; transform: scale(.82); }
+
+@media (max-width: 560px) {
+  #log-header { padding: 12px 13px !important; gap: 8px !important; font-size: 12px !important; }
+  .log-step { padding: 7px 13px !important; font-size: 12px !important; }
+  #log-box { max-height: 220px !important; }
+}
+
+/* PATAISYTA: senas #compare-close buvo position:absolute ir uzlipdavo
+   ant "Gilus palyginimas su AI" mygtuko. Naujoje antrastėje jis – flex vaikas. */
+#compare-close {
+  position: static !important; width: 32px !important; height: 32px !important;
+  border-radius: 8px !important; flex: none !important; margin: 0 !important;
+}
 </style>
 </head>
 <body>
@@ -1976,15 +2101,17 @@
 
 
   <div id="status"></div>
-  <div id="search-progress-wrap">
-    <div id="search-progress-track-main"><div id="search-progress-fill-main"></div></div>
-    <span id="search-progress-label">0%</span>
-  </div>
-  <div id="log-container">
+  <!-- PAKEISTA: progreso juosta ir žurnalas sujungti i viena panele -->
+  <div id="log-container" data-state="running">
     <div id="log-header" onclick="toggleLog()">
       <span class="spinner" id="log-header-icon"></span>
       <span id="log-header-text">Paleidžiama...</span>
+      <span id="search-progress-label">0%</span>
+      <span id="ct-log-steps"></span>
       <span class="chevron">▾</span>
+    </div>
+    <div id="search-progress-wrap">
+      <div id="search-progress-track-main"><div id="search-progress-fill-main"></div></div>
     </div>
     <div id="log-box"></div>
   </div>
@@ -2438,11 +2565,37 @@ function lineIsPending(line, jobStatus) {
   return PENDING_MARKERS.some((m) => trimmed.startsWith(m));
 }
 
+function ctLogTipas(line) {
+  const t = (line || '').trim();
+  if (t.startsWith('❌')) return 'err';
+  if (t.startsWith('⚠')) return 'warn';
+  if (t.startsWith('🎉')) return 'win';
+  return 'ok';
+}
+
+// PAKEISTA: nuimam pradzios emoji – busena dabar rodo apskritas zenkliukas kaireje,
+// kitaip kiekvienoje eiluteje dubliuojasi du indikatoriai.
+const CT_LOG_PREFIKSAI = ['✅', '⚠️', '⚠', '❌', '🎉', '🔎', '📄', '🔍', '🔧', '🌐', '🔑', '⚖️', '⏳', '🤖'];
+function ctLogTekstas(line) {
+  let t = (line || '').trim();
+  for (let i = 0; i < 2; i++) {
+    const pre = CT_LOG_PREFIKSAI.find((m) => t.startsWith(m));
+    if (!pre) break;
+    t = t.slice(pre.length).replace(/^[\s\u200d\ufe0f]+/, '');
+  }
+  return t || (line || '').trim();
+}
+
 function renderLogSteps(log, logBox, jobStatus) {
   logBox.innerHTML = log.map((line) => {
     const isRunning = lineIsPending(line, jobStatus);
-    const icon = isRunning ? '<span class="spinner"></span>' : '<span class="done-check">✓</span>';
-    return `<div class="log-step${isRunning ? ' current' : ''}">${icon}<span>${line}</span></div>`;
+    const tipas = ctLogTipas(line);
+    const icon = isRunning
+      ? '<span class="spinner"></span>'
+      : `<span class="done-check st-${tipas}">${tipas === 'err' ? '✕' : tipas === 'warn' ? '!' : '✓'}</span>`;
+    const tekstas = ctLogTekstas(line);
+    const sub = /^[•\-–]/.test(tekstas) ? ' sub' : '';
+    return `<div class="log-step st-${tipas}${sub}${isRunning ? ' current' : ''}">${icon}<span>${tekstas}</span></div>`;
   }).join('');
   if (logExpanded) logBox.scrollTop = logBox.scrollHeight;
 
@@ -2464,12 +2617,16 @@ function renderLogSteps(log, logBox, jobStatus) {
       pct = Math.min(94, Math.round((doneSteps / estimated) * 100));
     }
     progressFill.style.width = pct + '%';
-    progressLabel.textContent = pct + '%  (' + log.length + ' žingsniai)';
+    progressLabel.textContent = pct + '%';
+    const stepsEl = document.getElementById('ct-log-steps');
+    if (stepsEl) stepsEl.textContent = log.length + ' žingsn.';
   }
+  const cont = document.getElementById('log-container');
+  if (cont) cont.setAttribute('data-state', jobStatus === 'done' ? 'done' : jobStatus === 'running' ? 'running' : 'error');
 
   if (jobStatus === 'running') {
     headerIcon.outerHTML = '<span class="spinner" id="log-header-icon"></span>';
-    headerText.textContent = lastLine;
+    headerText.textContent = ctLogTekstas(lastLine);
   } else if (jobStatus === 'done') {
     headerIcon.outerHTML = '<span class="done-check" id="log-header-icon">✓</span>';
     headerText.textContent = `Baigta! (${log.length} žingsnių)`;
@@ -2592,6 +2749,8 @@ async function runSearch() {
   progressWrap.style.display = 'block';
   progressFill.style.width = '0%';
   progressLabel.textContent = '0%';
+  const _steps0 = document.getElementById('ct-log-steps'); if (_steps0) _steps0.textContent = '';
+  const _cont0 = document.getElementById('log-container'); if (_cont0) _cont0.setAttribute('data-state', 'running');
 
   // Auth guard: explicit token check before request
   const _srchTok = (function(){ try { return localStorage.getItem('ct_token'); } catch(e) { return null; } })();
@@ -2683,7 +2842,7 @@ async function runSearch() {
     clearTimeout(slowWarningTimer);
     btn.disabled = false;
     btn.textContent = '🔍 Ieškoti ir analizuoti';
-    document.getElementById('search-progress-wrap').style.display = 'none';
+    // PAKEISTA: juostos nebeslepiam - lieka 100% kaip uzbaigimo zenklas
   }
 }
 
@@ -4005,11 +4164,12 @@ function openCompareModal() {
   modal.classList.add('active');
   document.body.style.overflow = 'hidden';
 
-  const cols = compareList.length;
+  // PATAISYTA: wrap'e dabar viena <table>, o ne N stulpeliu.
+  // Senas grid paliko lentele 1/N plocio ir laužė overflow-x telefone.
   const grid = document.getElementById('compare-grid-wrap');
-  grid.style.display = 'grid';
-  grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-  grid.style.gap = '12px';
+  grid.style.display = '';
+  grid.style.gridTemplateColumns = '';
+  grid.style.gap = '';
 
   // Apskaičiuojame geriausias/blogiausias reikšmes
   const allKainos = compareList.map(c => c.kaina).filter(Boolean);
@@ -4026,7 +4186,7 @@ function openCompareModal() {
     { label: 'Kaina', icon: '💰', get: c => c.kaina, fmt: v => formatEUR(v), compare: 'min',
       diff: (w, l) => w != null && l != null ? '−' + formatEUR(l - w) : null },
     { label: 'Nuolaida', icon: '📊', get: c => c.diffPct, fmt: v => v != null ? v + '%' : '–', compare: 'max',
-      diff: (w, l) => w != null && l != null ? '+' + (w - l).toFixed(1) + '%' : null },
+      diff: (w, l) => w != null && l != null ? '+' + Math.round(w - l) + ' p.p.' : null },
     { label: 'Rinkos vidurkis', icon: '📈', get: c => c.marketMedian, fmt: v => v ? formatEUR(v) : '–', compare: null },
     { label: 'Metai', icon: '📅', get: c => c.metai, fmt: v => v || '–', compare: 'max',
       diff: (w, l) => w != null && l != null ? '+' + (w - l) + ' m.' : null },
@@ -4044,6 +4204,8 @@ function openCompareModal() {
     const nums = compareList.map(c => row.get(c)).filter(v => v != null);
     if (nums.length < 2) return -1;
     const best = row.compare === 'min' ? Math.min(...nums) : Math.max(...nums);
+    // PATAISYTA: lygiosios = neutrali busena, o ne pirmas pagal eile
+    if (compareList.filter(c => row.get(c) === best).length > 1) return -1;
     return compareList.findIndex(c => row.get(c) === best);
   }
 
@@ -4056,6 +4218,9 @@ function openCompareModal() {
       if (wi >= 0) scores[wi]++;
     });
     const max = Math.max(...scores);
+    // PATAISYTA: be pranasumo arba esant lygiosioms laimetojo nezymim
+    if (max === 0) return -1;
+    if (scores.filter(v => v === max).length > 1) return -1;
     return scores.indexOf(max);
   })();
 
@@ -4068,7 +4233,7 @@ function openCompareModal() {
       ${c.photo ? `<img class="ct-cmp-photo" src="${ctEsc(c.photo)}" onerror="this.style.display='none'">` : ''}
       <div class="ct-cmp-car-name">${ctEsc(c.modelis)}</div>
       <div class="ct-cmp-car-price">${formatEUR(c.kaina)}</div>
-      ${isWinner ? '<div style="font:600 10px/1 var(--font-mono);color:var(--success);margin-bottom:6px;letter-spacing:.08em">✓ GERIAUSIA PASIRINKIMAS</div>' : ''}
+      ${isWinner ? '<div style="font:600 10px/1 var(--font-mono);color:var(--success);margin-bottom:6px;letter-spacing:.08em">✓ GERIAUSIAS PASIRINKIMAS</div>' : ''}
       <a class="ct-cmp-car-link" href="${ctEsc(c.url)}" target="_blank">Skelbimas ↗</a>
     </th>`;
   });
