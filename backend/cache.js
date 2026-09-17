@@ -28,9 +28,33 @@ const ANALYSIS_TTL_MS = 24 * 60 * 60 * 1000; // 24 val - detali analize
 const SEARCH_TTL_MS = 20 * 60 * 1000;       // 20 min - tos pacios filtru paieskos talpykla
 
 // --- PAGRINDINĖ ATMINTINĖ (ikeliam VIENKARTI paleidus) ---
+// PATAISYTA (Railway OOM): 'pages' erdveje buvo saugomas PILNAS skelbimu HTML
+// (po 0,3-1 MB), jis niekada nebuvo trinamas ir kartu su visu podeliu rasomas
+// i cache.json. Failas augo iki simtu MB, o paleidziant jis visas parsinamas
+// i atminti (JSON.parse) ir paskui vel stringifinamas - to uztenka, kad
+// konteineris nukristu is atminties. Dabar HTML gyvena TIK atmintyje, su
+// griezta riba, ir i diska nepatenka niekada.
+const PAGES_MAX = parseInt(process.env.PAGES_MAX || '120', 10);
+// Riba baitais svarbesne uz iraso skaiciu: 120 puslapiu po 1 MB butu 120 MB,
+// o Railway konteineris turi vos kelis simtus.
+const PAGES_MAX_BYTES = parseInt(process.env.PAGES_MAX_MB || '40', 10) * 1024 * 1024;
+const _pages = new Map(); // url -> { time, data }
+let _pagesBytes = 0;
+let _reikiaPerrasyti = false;
+
 let _cache = (() => {
-  try { return JSON.parse(fs.readFileSync(CACHE_FILE, 'utf-8')); }
-  catch { return { pages: {}, analysis: {} }; }
+  try {
+    const is = JSON.parse(fs.readFileSync(CACHE_FILE, 'utf-8'));
+    if (is && is.pages) {
+      const kiek = Object.keys(is.pages).length;
+      if (kiek) {
+        console.log(`[KAUPYKLOS] issaugoti ${kiek} HTML puslapiai ismetami is failo (nebesaugomi diske)`);
+        _reikiaPerrasyti = true;
+      }
+      delete is.pages;
+    }
+    return is || { analysis: {} };
+  } catch { return { analysis: {} }; }
 })();
 
 // PATAISYTA: anksciau kiekvienas setCached() sinchroniskai perrasydavo VISA
@@ -43,7 +67,7 @@ let _cacheTimer = null;
 
 function valytiPasenusius() {
   const dabar = Date.now();
-  const ribos = { pages: PAGE_TTL_MS, analysis: ANALYSIS_TTL_MS, shortComment: ANALYSIS_TTL_MS };
+  const ribos = { analysis: ANALYSIS_TTL_MS, shortComment: ANALYSIS_TTL_MS };
   for (const ns of Object.keys(_cache)) {
     const ttl = ribos[ns];
     if (!ttl || !_cache[ns]) continue;
@@ -73,8 +97,25 @@ process.on('beforeExit', () => { if (_cacheDirty) saveCacheNow(); });
 process.on('SIGTERM', () => { if (_cacheDirty) saveCacheNow(); process.exit(0); });
 
 valytiPasenusius();
+// Jei is failo ismetem HTML puslapius, perrasom ji NEDELSIANT - kitaip senas
+// keliasdesimties MB failas liktu diske ir vel butu parsinamas kito paleidimo metu.
+if (_reikiaPerrasyti) {
+  try {
+    const priesTai = fs.existsSync(CACHE_FILE) ? fs.statSync(CACHE_FILE).size : 0;
+    saveCacheNow();
+    const poTo = fs.statSync(CACHE_FILE).size;
+    console.log(`[KAUPYKLOS] cache.json: ${(priesTai / 1048576).toFixed(1)} MB -> ${(poTo / 1048576).toFixed(2)} MB`);
+  } catch (e) { console.error('[KAUPYKLOS] nepavyko perrasyti:', e.message); }
+}
 
 function getCached(namespace, key, ttlMs) {
+  if (namespace === 'pages') {
+    const e = _pages.get(key);
+    if (!e) return null;
+    if (Date.now() - e.time > ttlMs) { _pagesBytes -= e.bytes; _pages.delete(key); return null; }
+    _pages.delete(key); _pages.set(key, e); // LRU: perkeliam i gala
+    return e.data;
+  }
   const entry = _cache[namespace] && _cache[namespace][key];
   if (!entry) return null;
   if (Date.now() - entry.time > ttlMs) return null;
@@ -82,13 +123,29 @@ function getCached(namespace, key, ttlMs) {
 }
 
 function setCached(namespace, key, data) {
+  if (namespace === 'pages') {
+    const senas = _pages.get(key);
+    if (senas) { _pagesBytes -= senas.bytes; _pages.delete(key); }
+    const bytes = typeof data === 'string' ? data.length : 0;
+    _pages.set(key, { time: Date.now(), data, bytes });
+    _pagesBytes += bytes;
+    while (_pages.size > PAGES_MAX || _pagesBytes > PAGES_MAX_BYTES) {
+      const seniausias = _pages.keys().next().value;
+      if (seniausias === undefined) break;
+      const e = _pages.get(seniausias);
+      _pagesBytes -= (e && e.bytes) || 0;
+      _pages.delete(seniausias);
+      if (_pages.size === 0) { _pagesBytes = 0; break; }
+    }
+    return; // i diska nerasom
+  }
   if (!_cache[namespace]) _cache[namespace] = {};
   _cache[namespace][key] = { time: Date.now(), data };
   saveCache();
 }
 
 function cacheAgeMinutes(namespace, key) {
-  const entry = _cache[namespace] && _cache[namespace][key];
+  const entry = (namespace === 'pages') ? _pages.get(key) : (_cache[namespace] && _cache[namespace][key]);
   if (!entry) return null;
   return Math.round((Date.now() - entry.time) / 60000);
 }
@@ -410,6 +467,7 @@ console.log('[KAUPYKLOS] rinkos istorija:', Object.keys(_history).length, 'model
   'sekama:', Object.keys(_watch).length);
 
 module.exports = {
+  puslapiuPodelis: () => ({ irasu: _pages.size, mb: +(_pagesBytes / 1048576).toFixed(1) }),
   getCached, setCached, cacheAgeMinutes, PAGE_TTL_MS, ANALYSIS_TTL_MS,
   getSearchCached, setSearchCached,
   addToHistory, getHistoryForModel,

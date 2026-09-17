@@ -3108,6 +3108,7 @@ function ctLogTekstas(line) {
 }
 
 function renderLogSteps(log, logBox, jobStatus) {
+  if (!Array.isArray(log)) log = [];   // PATAISYTA: apsauga nuo undefined
   logBox.innerHTML = log.map((line) => {
     const isRunning = lineIsPending(line, jobStatus);
     const tipas = ctLogTipas(line);
@@ -3318,13 +3319,31 @@ async function runSearch() {
         if (statusResp.status === 404) {
           throw new Error('__JOB_DINGO__');
         }
+        if (statusResp.status === 401 || statusResp.status === 403) {
+          throw new Error('__NEPRISIJUNGTA__');
+        }
         const tekstas = await statusResp.text();
         try {
           job = JSON.parse(tekstas);
         } catch (e) {
           throw new Error('Serveris grąžino ne JSON (' + statusResp.status + '): ' + tekstas.slice(0, 60));
         }
+        // PATAISYTA: serveris gali grazinti galiojanti JSON BE 'log' lauko
+        // (pvz. {"error":"..."} arba proxy klaida). Anksciau tokiu atveju
+        // renderLogSteps(undefined) meta "undefined is not an object
+        // (evaluating 'log.map')" ir visa paieska sustodavo.
+        if (!job || !Array.isArray(job.log)) {
+          const zinute = (job && (job.error || job.detail)) || ('busena ' + statusResp.status);
+          throw new Error('Serveris grąžino netikėtą atsakymą: ' + String(zinute).slice(0, 80));
+        }
       } catch (e) {
+        if (e.message === '__NEPRISIJUNGTA__') {
+          status.textContent = 'Prisijungimo sesija baigėsi. Prisijunkite iš naujo.';
+          showToast('Sesija baigėsi – prisijunkite iš naujo.', 'error', 8000);
+          try { localStorage.removeItem('ct_token'); localStorage.removeItem('ct_email'); } catch (er) {}
+          if (typeof window.showAuthModal === 'function') window.showAuthModal();
+          break;
+        }
         if (e.message === '__JOB_DINGO__') {
           status.textContent = 'Serveris persikrovė ir paieškos būsena dingo. Paleiskite paiešką iš naujo.';
           showToast('Serveris persikrovė – paleiskite paiešką iš naujo.', 'error', 8000);
