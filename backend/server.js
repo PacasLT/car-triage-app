@@ -2107,6 +2107,127 @@ app.post('/api/analyze-single', async (req, res) => {
   }
 });
 
+// ============ GILUS DVIEJU/TRIJU AUTO PALYGINIMAS ============
+// Kiekvienam automobiliui atliekamas PILNAS nuskaitymas (skelbimo tekstas, visos
+// nuotraukos, VIN, pardavejas) + gili analize, o tada Claude paraso savo verdikta
+// LYGINDAMAS juos tarpusavyje - ne kiekviena atskirai.
+
+async function paruostiPilnaProfili(url, kontekstas) {
+  const cached = cache.getCached('analysis', url, cache.ANALYSIS_TTL_MS);
+  if (cached && cached.analysis) {
+    return { url, ...cached, isPodelio: true };
+  }
+  const { title, fullText, photo, photos, vin, pardavejas } = await scrapeSingleListing(url);
+  const analysis = await generateDeepAnalysis(title, fullText, photos, kontekstas || null);
+  const result = { title, photo, photos, analysis, vin, pardavejas: pardavejas || null };
+  cache.setCached('analysis', url, result);
+  return { url, ...result, isPodelio: false };
+}
+
+// Suglaudintas profilis promptui - be nereikalingu lauku, kad tilptu i konteksta.
+function profilioSantrauka(p, meta, indeksas) {
+  const a = p.analysis || {};
+  const ts = a.technine_specifikacija || {};
+  const eil = [];
+  eil.push(`--- AUTOMOBILIS ${indeksas} ---`);
+  eil.push(`Pavadinimas: ${p.title || meta.modelis || 'nezinomas'}`);
+  if (meta.kaina) eil.push(`Kaina: ${meta.kaina} EUR`);
+  if (meta.marketMedian) eil.push(`Rinkos mediana: ${meta.marketMedian} EUR (imtis ${meta.marketCount || '?'}), skirtumas ${meta.diffPct != null ? meta.diffPct + '%' : 'nezinomas'}`);
+  if (meta.metai) eil.push(`Metai: ${meta.metai}`);
+  if (meta.rida) eil.push(`Rida: ${meta.rida} km`);
+  if (ts.kuras || meta.kuras) eil.push(`Kuras: ${ts.kuras || meta.kuras}`);
+  if (ts.galia || meta.galia) eil.push(`Galia: ${ts.galia || meta.galia}`);
+  if (ts.variklio_turis || meta.variklioTuris) eil.push(`Variklis: ${ts.variklio_turis || meta.variklioTuris}`);
+  if (ts.pavaru_deze || meta.pavarai) eil.push(`Pavaru deze: ${ts.pavaru_deze || meta.pavarai}`);
+  eil.push(`VIN: ${p.vin ? 'nurodytas' : 'nenurodytas'}`);
+  eil.push(`Pardavejas: ${p.pardavejas || 'nezinomas'}`);
+  eil.push(`Nuotrauku isanalizuota: ${(p.photos || []).length}`);
+  if (a.verdiktas) eil.push(`Analizes verdiktas: ${a.verdiktas}`);
+  if ((a.privalumai || []).length) eil.push(`Privalumai: ${a.privalumai.join('; ')}`);
+  if ((a.ka_patikrinti_gyvai || []).length) eil.push(`Ka patikrinti: ${a.ka_patikrinti_gyvai.join('; ')}`);
+  if ((a.irangos_akcentai || []).length) eil.push(`Iranga: ${a.irangos_akcentai.join('; ')}`);
+  if ((a.nuotrauku_pastebejimai || []).length) eil.push(`Pastebejimai nuotraukose: ${a.nuotrauku_pastebejimai.join('; ')}`);
+  if ((a.rizikos || []).length) eil.push(`Rizikos: ${a.rizikos.join('; ')}`);
+  if (a.derybu_argumentai) eil.push(`Derybu argumentai: ${Array.isArray(a.derybu_argumentai) ? a.derybu_argumentai.join('; ') : a.derybu_argumentai}`);
+  return eil.join('\n');
+}
+
+async function generuotiPalyginimoVerdikta(profiliai, metaSarasas) {
+  const santraukos = profiliai.map((p, i) => profilioSantrauka(p, metaSarasas[i] || {}, i + 1)).join('\n\n');
+  const prompt = `Esi patyres automobiliu vertintojas. Zemiau - ${profiliai.length} realiu skelbimu duomenys,
+surinkti nuskaitant pilnus skelbimus ir isanalizavus visas nuotraukas.
+
+${santraukos}
+
+Palygink SIUOS automobilius TARPUSAVYJE ir pateik savo nuomone. Remkis TIK aukstciau pateiktais duomenimis -
+nieko neprasimanyk. Jei kazko duomenyse nera, aiskiai pasakyk "duomenu nera", o ne spek.
+
+Grazink TIK JSON (be markdown, be paaiskinimu aplink), tokios strukturos:
+{
+  "laimetojas": <automobilio numeris 1..${profiliai.length}, arba null jei duomenu nepakanka>,
+  "laimetojo_pagrindimas": "<2-3 sakiniai, kodel butent sis. Konkretus skaiciai, ne bendros frazes>",
+  "trumpas_verdiktas": "<1 sakinys - esme vienu sakiniu>",
+  "palyginimas_pagal_kriterijus": [
+    { "kriterijus": "Kaina vs rinka", "auto1": "<vertinimas>", "auto2": "<vertinimas>"${profiliai.length > 2 ? ', "auto3": "<vertinimas>"' : ''}, "pranasesnis": <1..${profiliai.length} arba null> },
+    { "kriterijus": "Rida ir nusidevejimas", ... },
+    { "kriterijus": "Technine bukle ir rizikos", ... },
+    { "kriterijus": "Iranga ir komplektacija", ... },
+    { "kriterijus": "Istorija ir skaidrumas", ... }
+  ],
+  "kam_kuris_tinka": [
+    { "auto": 1, "kam": "<kokiam pirkejui butent sis tinka geriausiai>" },
+    { "auto": 2, "kam": "<...>" }
+  ],
+  "ka_butina_patikrinti": ["<konkretus veiksmas pries perkant>", "..."],
+  "issaugojimai": "<ka verta zinoti pries apsisprendziant - rizikos, kurios gali pakeisti sprendima>"
+}`;
+
+  const response = await anthropic.messages.create({
+    model: MODEL,
+    max_tokens: 2500,
+    messages: [{ role: 'user', content: prompt }],
+  });
+  const tekstas = response.content.filter((b) => b.type === 'text').map((b) => b.text).join('').trim();
+  const svarus = tekstas.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+  try {
+    return JSON.parse(svarus);
+  } catch (e) {
+    const m = svarus.match(/\{[\s\S]*\}/);
+    if (m) { try { return JSON.parse(m[0]); } catch (e2) {} }
+    return { trumpas_verdiktas: svarus.slice(0, 400), laimetojas: null, palyginimas_pagal_kriterijus: [] };
+  }
+}
+
+app.post('/api/compare-deep', requireAuth, async (req, res) => {
+  const { autos } = req.body; // [{url, kaina, marketMedian, marketCount, diffPct, modelis, metai, rida, ...}]
+  if (!Array.isArray(autos) || autos.length < 2) {
+    return res.status(400).json({ error: 'Palyginimui reikia bent dvieju automobiliu.' });
+  }
+  if (autos.length > 3) {
+    return res.status(400).json({ error: 'Vienu metu galima lyginti daugiausia tris automobilius.' });
+  }
+  try {
+    // Abu (ar visi trys) nuskaitomi LYGIAGRECIAI - tai ilgiausiai trunkantis zingsnis.
+    const profiliai = await Promise.all(autos.map((a) => paruostiPilnaProfili(a.url, {
+      kaina: a.kaina, marketMedian: a.marketMedian, marketCount: a.marketCount,
+      diffPct: a.diffPct, modelis: a.modelis, galia: a.galia, variklioTuris: a.variklioTuris,
+    })));
+    const verdiktas = await generuotiPalyginimoVerdikta(profiliai, autos);
+    res.json({
+      profiliai: profiliai.map((p, i) => ({
+        url: p.url, title: p.title, photos: p.photos || [], vin: p.vin || null,
+        pardavejas: p.pardavejas || null, analysis: p.analysis || null,
+        isPodelio: p.isPodelio, meta: autos[i],
+      })),
+      verdiktas,
+    });
+  } catch (err) {
+    console.error('compare-deep KLAIDA:', err);
+    const aiKl = typeof aiKlaidosZinute === 'function' ? aiKlaidosZinute(err) : null;
+    res.status(500).json({ error: aiKl ? aiKl.tekstas : String(err.message).slice(0, 200) });
+  }
+});
+
 app.post('/api/vin-lookup', async (req, res) => {
   try {
     const { vin, force } = req.body;

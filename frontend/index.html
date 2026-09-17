@@ -1684,7 +1684,17 @@
 <div id="compare-modal" onclick="if(event.target.id==='compare-modal') closeCompareModal()">
   <div id="compare-modal-inner">
     <button id="compare-close" onclick="closeCompareModal()">✕</button>
-    <h2 style="margin:0 0 16px; font-size:18px;">⚖️ Automobilių palyginimas</h2>
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 16px;">
+      <h2 style="margin:0; font-size:18px;">⚖️ Automobilių palyginimas</h2>
+      <div style="flex:1;"></div>
+      <button id="deep-compare-btn" onclick="ctGilusPalyginimas()"
+        style="display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 16px;border-radius:10px;border:none;
+               background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#fff;font:600 13px var(--font);cursor:pointer;">
+        🔬 Gilus palyginimas su AI
+      </button>
+    </div>
+    <div id="deep-compare-status" style="display:none;margin-bottom:16px;"></div>
+    <div id="deep-compare-result" style="display:none;margin-bottom:20px;"></div>
     <div id="compare-grid-wrap"></div>
   </div>
 </div>
@@ -2793,19 +2803,44 @@ function ctSignalsBlock(c) {
     + '</div>';
 }
 
-// Ko įvertinti negalėjome. "Nežinom" niekada nerodoma kaip minusas –
-// tik kaip tai, ką dar verta patikrinti.
+// Ko įvertinti negalėjome. "Nežinom" rodoma kaip būsenos ženklelis, ne kaip
+// minusas – vizualiai lygiavertis kitiems chip'ams, tik neutralios spalvos.
 function ctUnknownBlock(c) {
-  const eil = [];
-  if (c.istorijosBusena) eil.push(c.istorijosBusena.emoji + ' ' + c.istorijosBusena.label);
-  if (c.irangosBusena) eil.push('⚙ ' + c.irangosBusena.label);
-  if (c.neivertinta && c.neivertinta.length) {
-    eil.push('ℹ Nepakako duomenų įvertinti: ' + c.neivertinta.join(', ') + ' – šie veiksniai pašalinti iš balo, o ne nubausti.');
+  const chip = (emoji, tekstas, spalva, fonas, rėmelis) =>
+    '<span style="display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:7px;'
+    + 'background:' + fonas + ';border:1px solid ' + rėmelis + ';color:' + spalva + ';'
+    + 'font:600 11px/1 var(--font);white-space:nowrap;">' + (emoji ? emoji + ' ' : '') + tekstas + '</span>';
+
+  const SP = {
+    VERIFIED:           ['#7fd88f', 'rgba(127,216,143,.10)', 'rgba(127,216,143,.26)'],
+    PARTIALLY_VERIFIED: ['#f0c674', 'rgba(240,198,116,.10)', 'rgba(240,198,116,.26)'],
+    NOT_VERIFIED:       ['var(--text-muted)', 'var(--bg-raised)', 'var(--border)'],
+    ISSUE_FOUND:        ['#e07a6a', 'rgba(224,122,106,.10)', 'rgba(224,122,106,.28)'],
+    PARTIAL:            ['#f0c674', 'rgba(240,198,116,.10)', 'rgba(240,198,116,.26)'],
+    UNKNOWN:            ['var(--text-muted)', 'var(--bg-raised)', 'var(--border)'],
+  };
+  const chips = [];
+  if (c.istorijosBusena) {
+    const st = SP[c.istorijosBusena.key] || SP.UNKNOWN;
+    chips.push(chip(c.istorijosBusena.emoji, c.istorijosBusena.label, st[0], st[1], st[2]));
   }
-  if (!eil.length) return '';
-  return '<div style="margin:8px 0 2px;display:flex;flex-direction:column;gap:4px;">'
-    + eil.map(function(e){ return '<div style="font:400 11.5px/1.45 var(--font);color:var(--text-muted);">' + e + '</div>'; }).join('')
-    + '</div>';
+  if (c.irangosBusena) {
+    const st = SP[c.irangosBusena.key] || SP.UNKNOWN;
+    chips.push(chip('⚙', c.irangosBusena.label.replace('Įranga: ', 'Įranga – '), st[0], st[1], st[2]));
+  }
+  if (!chips.length && !(c.neivertinta && c.neivertinta.length)) return '';
+
+  let html = '<div style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0;">' + chips.join('') + '</div>';
+  if (c.neivertinta && c.neivertinta.length) {
+    html += '<div style="display:flex;align-items:flex-start;gap:7px;margin-top:8px;padding:8px 10px;'
+      + 'border-radius:8px;background:var(--bg-raised);border:1px solid var(--border);">'
+      + '<span style="flex:none;width:15px;height:15px;border-radius:50%;display:grid;place-items:center;'
+      + 'background:var(--bg-elevated);color:var(--text-dim);font:700 9px/1 var(--font-mono);margin-top:1px;">i</span>'
+      + '<span style="font:400 11.5px/1.5 var(--font);color:var(--text-muted);">Nepakako duomenų įvertinti: <b style="color:var(--text-secondary);font-weight:600;">'
+      + c.neivertinta.join(', ') + '</b>. Šie veiksniai pašalinti iš balo skaičiavimo, o ne nubausti.</span>'
+      + '</div>';
+  }
+  return html;
 }
 
 function ctTriageBadge(c, maza) {
@@ -3611,6 +3646,151 @@ document.addEventListener('click', function(e) {
     if (chev) chev.style.transform = '';
   }
 }, true);
+
+// Vietinis HTML kaitos pakaitalas: `esc` gyvena kito skripto bloko viduje.
+function ctEsc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// ---- GILUS PALYGINIMAS ----
+// Abu (ar trys) automobiliai pilnai nuskaitomi, isanalizuojamos visos nuotraukos
+// ir skelbimo tekstas, o tada AI paraso savo verdikta LYGINDAMAS juos tarpusavyje.
+window.ctGilusPalyginimas = async function () {
+  if (!compareList || compareList.length < 2) {
+    showToast('Palyginimui pridėkite bent du automobilius.', 'error');
+    return;
+  }
+  const btn = document.getElementById('deep-compare-btn');
+  const st = document.getElementById('deep-compare-status');
+  const rez = document.getElementById('deep-compare-result');
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Analizuojama…';
+  rez.style.display = 'none';
+  st.style.display = 'block';
+  st.innerHTML = '<div style="padding:14px 16px;border-radius:11px;background:var(--bg-raised);border:1px solid var(--border);">'
+    + '<div style="font:600 13px/1.4 var(--font);color:var(--text-primary);margin-bottom:6px;">Renkami duomenys apie ' + compareList.length + ' automobilius…</div>'
+    + '<div style="font:400 12px/1.6 var(--font);color:var(--text-muted);">Nuskaitomi pilni skelbimai · analizuojamos visos nuotraukos · tikrinami VIN ir pardavėjo duomenys · rengiamas palyginimas.<br>Tai gali užtrukti iki minutės.</div>'
+    + '</div>';
+
+  try {
+    const tok = (function () { try { return localStorage.getItem('ct_token'); } catch (e) { return null; } })();
+    const r = await fetch('/api/compare-deep', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
+      body: JSON.stringify({ autos: compareList }),
+    });
+    const tekstas = await r.text();
+    let d;
+    try { d = JSON.parse(tekstas); } catch (e) { throw new Error('Serveris grąžino ne JSON: ' + tekstas.slice(0, 120)); }
+    if (!r.ok) throw new Error(d.error || ('Serverio klaida ' + r.status));
+    st.style.display = 'none';
+    ctRenderGilųPalyginimą(d);
+  } catch (e) {
+    st.innerHTML = '<div style="padding:14px 16px;border-radius:11px;background:rgba(224,122,106,.08);border:1px solid rgba(224,122,106,.3);'
+      + 'font:400 12.5px/1.6 var(--font);color:#e9a08f;">Nepavyko atlikti gilaus palyginimo: ' + String(e.message).slice(0, 200) + '</div>';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🔬 Gilus palyginimas su AI';
+  }
+};
+
+function ctRenderGilųPalyginimą(d) {
+  const rez = document.getElementById('deep-compare-result');
+  const v = d.verdiktas || {};
+  const p = d.profiliai || [];
+  const vardas = (i) => (p[i] && (p[i].meta && p[i].meta.modelis || p[i].title)) || ('Automobilis ' + (i + 1));
+
+  let html = '';
+
+  // --- AI verdiktas ---
+  html += '<div style="padding:16px 18px;border-radius:13px;background:linear-gradient(135deg,rgba(124,111,247,.10),rgba(124,111,247,.03));border:1px solid rgba(124,111,247,.28);">'
+    + '<div style="display:flex;align-items:center;gap:9px;margin-bottom:10px;">'
+    + '<span style="width:22px;height:22px;border-radius:6px;background:var(--accent);display:grid;place-items:center;font:700 9px var(--font-mono);color:#fff;">AI</span>'
+    + '<span style="font:700 12px/1 var(--font-mono);letter-spacing:.09em;color:var(--accent-light);">CARTRIIGE VERDIKTAS</span></div>';
+  if (v.laimetojas) {
+    html += '<div style="font:700 17px/1.35 var(--font);color:var(--text-primary);margin-bottom:8px;">🏆 ' + ctEsc(vardas(v.laimetojas - 1)) + '</div>';
+  }
+  if (v.trumpas_verdiktas) html += '<div style="font:600 13.5px/1.6 var(--font);color:var(--text-primary);margin-bottom:8px;">' + ctEsc(v.trumpas_verdiktas) + '</div>';
+  if (v.laimetojo_pagrindimas) html += '<div style="font:400 13px/1.7 var(--font);color:var(--text-secondary);">' + ctEsc(v.laimetojo_pagrindimas) + '</div>';
+  html += '</div>';
+
+  // --- Palyginimas pagal kriterijus ---
+  const kr = v.palyginimas_pagal_kriterijus || [];
+  if (kr.length) {
+    html += '<div style="margin-top:16px;border-radius:13px;border:1px solid var(--border);overflow:hidden;">'
+      + '<div style="display:grid;grid-template-columns:minmax(120px,1fr) repeat(' + p.length + ',minmax(0,1.4fr));background:var(--bg-elevated);">'
+      + '<div style="padding:10px 12px;font:700 10px/1 var(--font-mono);letter-spacing:.09em;color:var(--text-dim);">KRITERIJUS</div>'
+      + p.map((_, i) => '<div style="padding:10px 12px;font:700 11px/1.3 var(--font);color:var(--text-primary);border-left:1px solid var(--border);">' + ctEsc(vardas(i)) + '</div>').join('')
+      + '</div>';
+    kr.forEach(function (row, idx) {
+      html += '<div style="display:grid;grid-template-columns:minmax(120px,1fr) repeat(' + p.length + ',minmax(0,1.4fr));border-top:1px solid var(--border);'
+        + (idx % 2 ? 'background:rgba(255,255,255,.015);' : '') + '">'
+        + '<div style="padding:11px 12px;font:600 12px/1.45 var(--font);color:var(--text-secondary);">' + ctEsc(row.kriterijus || '') + '</div>';
+      for (let i = 0; i < p.length; i++) {
+        const val = row['auto' + (i + 1)] || '–';
+        const geriausias = row.pranasesnis === (i + 1);
+        html += '<div style="padding:11px 12px;border-left:1px solid var(--border);font:400 12px/1.5 var(--font);'
+          + (geriausias ? 'background:rgba(127,216,143,.07);color:var(--text-primary);' : 'color:var(--text-muted);') + '">'
+          + (geriausias ? '<span style="color:#7fd88f;font-weight:700;">✓ </span>' : '') + ctEsc(val) + '</div>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  // --- Kam kuris tinka ---
+  if ((v.kam_kuris_tinka || []).length) {
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:16px;">'
+      + v.kam_kuris_tinka.map(function (k) {
+        return '<div style="padding:13px 15px;border-radius:11px;background:var(--bg-raised);border:1px solid var(--border);">'
+          + '<div style="font:700 11px/1 var(--font-mono);letter-spacing:.08em;color:var(--accent-light);margin-bottom:7px;">' + ctEsc(vardas((k.auto || 1) - 1)).toUpperCase() + '</div>'
+          + '<div style="font:400 12.5px/1.6 var(--font);color:var(--text-secondary);">' + ctEsc(k.kam || '') + '</div></div>';
+      }).join('') + '</div>';
+  }
+
+  // --- Ka butina patikrinti ---
+  if ((v.ka_butina_patikrinti || []).length) {
+    html += '<div style="margin-top:16px;padding:14px 16px;border-radius:11px;background:rgba(240,198,116,.06);border:1px solid rgba(240,198,116,.24);">'
+      + '<div style="font:700 11px/1 var(--font-mono);letter-spacing:.09em;color:#f0c674;margin-bottom:9px;">BŪTINA PATIKRINTI PRIEŠ PERKANT</div>'
+      + '<ul style="margin:0;padding-left:17px;display:flex;flex-direction:column;gap:5px;">'
+      + v.ka_butina_patikrinti.map(function (x) { return '<li style="font:400 12.5px/1.55 var(--font);color:var(--text-secondary);">' + ctEsc(x) + '</li>'; }).join('')
+      + '</ul></div>';
+  }
+  if (v.issaugojimai) {
+    html += '<div style="margin-top:12px;font:400 12px/1.6 var(--font);color:var(--text-muted);">' + ctEsc(v.issaugojimai) + '</div>';
+  }
+
+  // --- Surinkti duomenys lygiagreciai ---
+  html += '<div style="margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;">';
+  p.forEach(function (prof, i) {
+    const a = prof.analysis || {};
+    const sk = function (antraste, sarasas, spalva) {
+      if (!sarasas || !sarasas.length) return '';
+      return '<div style="margin-top:10px;"><div style="font:700 9.5px/1 var(--font-mono);letter-spacing:.09em;color:' + spalva + ';margin-bottom:5px;">' + antraste + '</div>'
+        + '<ul style="margin:0;padding-left:15px;display:flex;flex-direction:column;gap:3px;">'
+        + sarasas.slice(0, 5).map(function (x) { return '<li style="font:400 11.5px/1.5 var(--font);color:var(--text-secondary);">' + ctEsc(x) + '</li>'; }).join('')
+        + '</ul></div>';
+    };
+    html += '<div style="padding:14px 15px;border-radius:12px;background:var(--bg-raised);border:1px solid var(--border);">'
+      + '<div style="font:700 13px/1.3 var(--font);color:var(--text-primary);margin-bottom:4px;">' + ctEsc(vardas(i)) + '</div>'
+      + '<div style="font:500 10.5px/1.4 var(--font-mono);color:var(--text-dim);margin-bottom:8px;">'
+      + (prof.photos || []).length + ' nuotraukos išanalizuotos · VIN ' + (prof.vin ? 'yra' : 'nėra')
+      + (prof.pardavejas ? ' · ' + ctEsc(prof.pardavejas) : '') + (prof.isPodelio ? ' · iš podėlio' : '') + '</div>'
+      + (a.verdiktas ? '<div style="font:400 12px/1.6 var(--font);color:var(--text-secondary);">' + ctEsc(a.verdiktas) + '</div>' : '')
+      + sk('PRIVALUMAI', a.privalumai, '#7fd88f')
+      + sk('KĄ PATIKRINTI', a.ka_patikrinti_gyvai, '#f0c674')
+      + sk('PASTEBĖJIMAI NUOTRAUKOSE', a.nuotrauku_pastebejimai, '#e0a06a')
+      + sk('ĮRANGA', a.irangos_akcentai, 'var(--accent-light)')
+      + '</div>';
+  });
+  html += '</div>';
+
+  rez.innerHTML = html;
+  rez.style.display = 'block';
+  rez.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
 
 function closeCompareModal() {
   document.getElementById('compare-modal').classList.remove('active');

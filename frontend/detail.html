@@ -241,6 +241,7 @@ button{font-family:inherit;cursor:pointer}
 .dp-empty h2{font-size:20px;color:var(--text-secondary)}
 .dp-empty p{font-size:14px;color:var(--text-muted);max-width:360px}
 .dp-empty a{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 20px;border-radius:10px;background:var(--accent);color:#fff;font:600 14px var(--font);margin-top:8px}
+@keyframes dpspin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -811,6 +812,37 @@ button{font-family:inherit;cursor:pointer}
     specsEl.appendChild(s);
   }
 
+  // Automatiškai užsako gilią analizę skelbimui, kuris jos dar neturi.
+  function dpUzsakytiAnalize(c) {
+    fetch('/api/analyze-single', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: c.url, kaina: c.kaina, marketMedian: c.marketMedian, marketCount: c.marketCount,
+        diffPct: c.diffPct, modelis: c.modelis, pardavejas: c.pardavejas,
+        galia: c.galia, variklioTuris: c.variklioTuris,
+      }),
+    }).then(function (r) { return r.json(); }).then(function (resp) {
+      if (!resp || !resp.analysis) throw new Error((resp && resp.error) || 'Analizė negrąžinta');
+      // Įrašom į podėlį ir perpiešiam puslapį su gautais duomenimis
+      try {
+        var cache = JSON.parse(localStorage.getItem('carTriageAnalysisCache') || '{}');
+        cache[c.url] = resp.analysis;
+        localStorage.setItem('carTriageAnalysisCache', JSON.stringify(cache));
+        var det = JSON.parse(localStorage.getItem('ct_detail') || '{}');
+        det.analysis = resp.analysis;
+        if (resp.photos && resp.photos.length) det.photos = resp.photos;
+        localStorage.setItem('ct_detail', JSON.stringify(det));
+      } catch (e) {}
+      load();
+    }).catch(function (e) {
+      var el = document.getElementById('dp-ai-body');
+      if (el) el.innerHTML = '<span style="color:var(--text-muted);">Nepavyko paruošti analizės: ' + String(e.message).slice(0, 140)
+        + '</span> <button onclick="location.reload()" style="margin-left:8px;padding:4px 10px;border-radius:7px;border:1px solid var(--border-light);background:transparent;color:var(--text-primary);font-size:12px;cursor:pointer;">Bandyti dar kartą</button>';
+      ['dp-privalumai','dp-patikrinti'].forEach(function (id) { var x=document.getElementById(id); if(x) x.innerHTML=''; });
+      var ir=document.getElementById('dp-iranga'); if(ir) ir.innerHTML='';
+    });
+  }
+
   function load() {
     var raw;
     try { raw = localStorage.getItem('ct_detail'); } catch(e) {}
@@ -1015,11 +1047,16 @@ button{font-family:inherit;cursor:pointer}
       });
       if (!irangaEl.children.length) irangaEl.innerHTML = '<div style="color:var(--text-muted);font-size:12.5px">Duomenų nepakanka</div>';
     } else {
-      document.getElementById('dp-ai-body').textContent = c.comment || 'AI analizė šiam skelbimui neprieinama.';
-      document.getElementById('dp-privalumai').innerHTML = '<li><span class="bullet green">✓</span>AI analizė neprieinama</li>';
-      document.getElementById('dp-patikrinti').innerHTML = '<li><span class="bullet amber">!</span>AI analizė neprieinama</li>';
-      document.getElementById('dp-iranga').innerHTML = '<div style="color:var(--text-muted);font-size:12.5px">AI analizė neprieinama</div>';
-      document.getElementById('dp-spec-chips').style.display = 'none';
+      // Naršymo režime gili analizė nedaroma iš karto (taupomos užklausos),
+      // tad atidarius skelbimą ją užsakom automatiškai, o ne rodom tuščią langą.
+      document.getElementById('dp-ai-body').innerHTML =
+        '<span style="display:inline-flex;align-items:center;gap:8px;color:var(--text-secondary);">'
+        + '<span class="dp-spin" style="width:13px;height:13px;border:2px solid rgba(255,255,255,.18);border-top-color:var(--accent);border-radius:50%;display:inline-block;animation:dpspin .8s linear infinite;"></span>'
+        + 'Ruošiama išsami analizė – nuskaitomas skelbimas, nuotraukos ir pardavėjo duomenys…</span>';
+      document.getElementById('dp-privalumai').innerHTML = '<li><span class="bullet green">✓</span>Kraunama…</li>';
+      document.getElementById('dp-patikrinti').innerHTML = '<li><span class="bullet amber">!</span>Kraunama…</li>';
+      document.getElementById('dp-iranga').innerHTML = '<div style="color:var(--text-muted);font-size:12.5px">Kraunama…</div>';
+      if (c.url) dpUzsakytiAnalize(c);
     }
 
     // --- TECH TAB ---
