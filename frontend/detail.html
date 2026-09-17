@@ -1762,14 +1762,27 @@ window.ctApi = function (kelias, params) {
             if (prog) prog.style.display = 'none';
             var res = document.getElementById('dp-vin-result');
             if (!res) return;
-            if (!d.rasta) {
-              res.innerHTML = '<div style="font-size:13px;color:var(--text-muted)">Viešose duomenų bazėse įrašų nerasta.</div>';
+            if (d && d.nepavyko) {
+              // v1.23.1: paieska neivyko - kreditas grazinamas, pasakom aiskiai
+              res.innerHTML = '<div style="padding:11px 13px;border-radius:9px;background:var(--warning-dim);border:1px solid var(--warning-border);font:400 12.5px/1.55 var(--font);color:var(--warning)">'
+                + 'Šį kartą viešos paieškos įvykdyti nepavyko – kreditas grąžintas. Pabandykite dar kartą po kelių minučių.</div>';
+              var bx = document.getElementById('dp-vin-lookup-btn'); if (bx) bx.style.display = '';
+            } else if (!d.rasta) {
+              // v1.23.1: "nerasta" irgi yra rezultatas - pasakom, kur ieskota ir ka tai reiskia
+              var sal = (d.patikrinti_saltiniai || []).slice(0, 8);
+              res.innerHTML = '<div style="padding:11px 13px;border-radius:9px;background:var(--bg-elevated);border:1px solid var(--border)">'
+                + '<div style="font:600 12.5px var(--font);color:var(--text-primary)">Viešų įrašų apie šį VIN nerasta</div>'
+                + '<div style="margin-top:6px;font:400 12px/1.55 var(--font);color:var(--text-secondary)">'
+                + (d.isvada || 'Automobilis nebuvo parduotas JAV aukcione ir neturi viešai skelbtos žalos istorijos. Tai nepakeičia oficialios Autoistorija.lt ataskaitos.') + '</div>'
+                + (sal.length ? '<div style="margin-top:8px;font:400 11px/1.5 var(--font);color:var(--text-dim)">Patikrinta: ' + sal.join(' · ') + '</div>' : '')
+                + '</div>';
             } else {
               var h = '';
               if (d.saltinis) h += '<div style="font-size:12px;color:var(--text-muted);margin-bottom:6px">Šaltinis: '+d.saltinis+'</div>';
               if (d.zalos_aprasas) h += '<div style="font-size:13px;margin-bottom:6px;padding:10px;border-radius:6px;background:rgba(239,68,68,.1);border-left:3px solid #ef4444">⚠ '+d.zalos_aprasas+'</div>';
               if (d.aukciono_kaina) h += '<div style="font-size:13px;margin-bottom:6px"><span style="color:var(--text-muted)">Aukciono kaina:</span> <strong>'+d.aukciono_kaina+'</strong></div>';
               if (d.papildoma_info) h += '<div style="font-size:13px;margin-bottom:6px">'+d.papildoma_info+'</div>';
+              if (d.isvada) h += '<div style="font-size:12.5px;line-height:1.55;color:var(--text-secondary);margin-bottom:6px">' + d.isvada + '</div>';
               if (d.nuoroda) h += '<a href="'+d.nuoroda+'" target="_blank" style="font-size:12px;color:var(--accent)">Šaltinis →</a>';
               res.innerHTML = h;
             }

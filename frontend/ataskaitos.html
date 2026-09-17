@@ -161,11 +161,27 @@ async function atidaryti(id, btn) {
     let sen = card.querySelector('.at-inline');
     if (sen) { sen.remove(); card.classList.remove('open'); btn.textContent = 'Rodyti'; btn.disabled = false; return; }
     const r0 = a.tipas === 'pardavejas' ? (d.rezultatas || d) : d;
+    // v1.23.1: vietoj zaliu lauku ("rasta: false") - normalus sakiniai lietuviskai
     const eil = [];
+    const LAUKAI = {
+      saltinis: 'Šaltinis', zalos_aprasas: '⚠ Žala / būklė', aukciono_kaina: 'Aukciono kaina',
+      papildoma_info: 'Papildomai', isvada: 'Išvada',
+      imones_pavadinimas: 'Įmonė', veiklos_trukme: 'Veikia nuo', atsiliepimu_santrauka: 'Atsiliepimai',
+      ispejimai: '⚠ Įspėjimai', santrauka: 'Santrauka', reputacija: 'Reputacija',
+    };
+    if (r0 && r0.rasta === false) {
+      eil.push('<b>Rezultatas:</b> viešuose šaltiniuose įrašų apie ' + (a.tipas === 'vin' ? 'šį VIN' : 'šį pardavėją') + ' nerasta.');
+      if (Array.isArray(r0.patikrinti_saltiniai) && r0.patikrinti_saltiniai.length) {
+        eil.push('<b>Patikrinta:</b> ' + ctEsc(r0.patikrinti_saltiniai.join(', ')));
+      }
+    } else if (r0 && r0.rasta === true) {
+      eil.push('<b>Rezultatas:</b> rasta viešų įrašų.');
+    }
     Object.keys(r0 || {}).forEach(function (k) {
-      if (['cached', 'cacheAgeMinutes', 'nuoroda'].indexOf(k) !== -1) return;
+      if (['cached', 'cacheAgeMinutes', 'nuoroda', 'rasta', 'patikrinti_saltiniai', 'nepavyko'].indexOf(k) !== -1) return;
       const v = r0[k]; if (v == null || v === '' || (Array.isArray(v) && !v.length)) return;
-      eil.push('<b>' + ctEsc(k.replace(/_/g, ' ')) + ':</b> ' + ctEsc(Array.isArray(v) ? v.join('; ') : (typeof v === 'object' ? JSON.stringify(v) : v)));
+      const etikete = LAUKAI[k] || (k.charAt(0).toUpperCase() + k.slice(1).replace(/_/g, ' '));
+      eil.push('<b>' + ctEsc(etikete) + ':</b> ' + ctEsc(Array.isArray(v) ? v.join('; ') : (typeof v === 'object' ? JSON.stringify(v) : v)));
     });
     if (r0 && r0.nuoroda && /^https?:\/\//i.test(String(r0.nuoroda))) eil.push('<a href="' + ctEsc(r0.nuoroda) + '" target="_blank" rel="noopener" style="color:var(--accent-light)">Šaltinis ↗</a>');
     card.classList.add('open');

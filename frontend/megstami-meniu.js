@@ -10,6 +10,7 @@
 (function () {
   var KEY = 'carTriageFavorites';
   var _sarasas = [], _atidaryta = false, _hoverT = null, _isServerio = false;
+  var _busena = ''; // v1.23.1: paskutinio „Atnaujinti visus" rezultato tekstas (islieka perpiesus sarasa)
 
   function token() { try { return localStorage.getItem('ct_token'); } catch (e) { return null; } }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); }
@@ -46,6 +47,11 @@
     + '.ct-meg-head small{font:600 10px/1 var(--font-mono,monospace);color:#ff5c8a;background:rgba(255,92,138,.14);border:1px solid rgba(255,92,138,.35);padding:4px 7px;border-radius:6px}'
     + '.ct-meg-head a{margin-left:auto;font:500 12px var(--font,sans-serif);color:var(--accent-light,#a99cff);text-decoration:none}'
     + '.ct-meg-head a:hover{text-decoration:underline}'
+    + '.ct-meg-head button.ct-meg-atn{margin-left:auto;font:600 11px var(--font,sans-serif);color:var(--accent-light,#a99cff);background:var(--accent-dim,rgba(124,92,255,.12));border:1px solid var(--accent-border,rgba(124,92,255,.35));padding:5px 9px;border-radius:8px;cursor:pointer}'
+    + '.ct-meg-head button.ct-meg-atn:hover{background:var(--accent,#7c5cff);color:#fff}'
+    + '.ct-meg-head button.ct-meg-atn[disabled]{opacity:.55;cursor:default}'
+    + '.ct-meg-head a.ct-meg-visi{margin-left:0}'
+    + '.ct-meg-busena{padding:9px 13px;border-bottom:1px solid var(--border,rgba(255,255,255,.08));font:400 11.5px/1.5 var(--font,sans-serif);color:var(--text-muted,#aaa)}'
     + '.ct-meg-list{max-height:min(62vh,520px);overflow-y:auto}'
     + '.ct-meg-eil{display:grid;grid-template-columns:64px 1fr 26px;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border,rgba(255,255,255,.08));cursor:pointer;align-items:start}'
     + '.ct-meg-eil:last-child{border-bottom:none}'
@@ -130,7 +136,12 @@
   function piestiSarasa() {
     var dd = document.getElementById('ct-meg-dd'); if (!dd) return;
     var n = _sarasas.length;
-    var html = '<div class="ct-meg-head">' + ikonaSirdis(14) + ' Mėgstamiausi <small>' + n + '</small><a href="megstamiausi.html">Visi →</a></div>';
+    // v1.23.1: mygtukas, kuris vienu paspaudimu pertikrina VISU issaugotu skelbimu
+    // busena ir kaina portale (papildoma paslauga, 1 kreditas uz visa sarasa per para).
+    var html = '<div class="ct-meg-head">' + ikonaSirdis(14) + ' Mėgstamiausi <small>' + n + '</small>'
+      + (n ? '<button type="button" class="ct-meg-atn" id="ct-meg-atn" title="Iš naujo patikriname kiekvieno išsaugoto skelbimo kainą ir būseną portale. 1 kreditas už visą sąrašą (kartą per parą).">↻ Atnaujinti visus · 1 kr</button>' : '')
+      + '<a class="ct-meg-visi" href="megstamiausi.html" style="margin-left:' + (n ? '10px' : 'auto') + '">Visi →</a></div>'
+      + '<div class="ct-meg-busena" id="ct-meg-busena" style="display:' + (_busena ? '' : 'none') + '">' + (_busena || '') + '</div>';
     if (!n) {
       html += '<div class="ct-meg-tuscia"><b>Dar nieko neišsaugota</b>Paspauskite ♥ ant skelbimo kortelės arba detalioje apžvalgoje.</div>';
     } else {
@@ -156,6 +167,48 @@
     dd.querySelectorAll('.ct-meg-x').forEach(function (b) {
       b.addEventListener('click', function (e) { e.stopPropagation(); salinti(_sarasas[+b.dataset.x].url); });
     });
+    var atn = dd.querySelector('#ct-meg-atn');
+    if (atn) atn.addEventListener('click', function (e) { e.stopPropagation(); atnaujintiVisus(atn); });
+  }
+
+  // v1.23.1 PAPILDOMA PASLAUGA: pertikrinam visus issaugotus skelbimus portale -
+  // ar kaina pasikeite, ar rezervuota, ar dar skelbiama. 1 kreditas uz visa sarasa.
+  function atnaujintiVisus(btn) {
+    if (!token()) { if (typeof window.showAuthModal === 'function') window.showAuthModal(); return; }
+    var bus = document.getElementById('ct-meg-busena');
+    if (!confirm('Patikrinsime visų išsaugotų skelbimų kainą ir būseną portale.\n\nBus nuskaitytas 1 kreditas (kartą per parą – kitos patikros tą pačią dieną nemokamos). Tęsti?')) return;
+    btn.disabled = true; btn.textContent = '↻ Tikriname…';
+    if (bus) { bus.style.display = ''; bus.textContent = 'Tikriname skelbimus portale – tai gali užtrukti iki minutės…'; }
+    fetch('/api/megstamiausi/atnaujinti', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token(), 'Content-Type': 'application/json' }, body: '{}' })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, status: r.status, j: j }; }); })
+      .then(function (res) {
+        btn.disabled = false; btn.textContent = '↻ Atnaujinti visus · 1 kr';
+        if (!res.ok) {
+          if (bus) bus.textContent = res.status === 402
+            ? 'Nepakanka kreditų – papildykite skiltyje „Planas ir kreditai".'
+            : ((res.j && res.j.error) || 'Nepavyko atnaujinti.');
+          return;
+        }
+        var j = res.j || {};
+        var d = (j.pokyciai || []);
+        {
+          _busena = '<b style="color:var(--text-primary,#fff)">Patikrinta ' + (j.patikrinta || 0) + ' skelbim' + ((j.patikrinta === 1) ? 'as' : 'ai') + '</b>'
+            + (d.length
+              ? '<br>' + d.slice(0, 6).map(function (p) {
+                  var sp = p.tipas === 'kaina-mazeja' ? 'var(--success,#3ddc97)' : p.tipas === 'dingo' ? '#ff6b6b' : 'var(--text-secondary,#c9cbd3)';
+                  return '<span style="color:' + sp + '">• ' + esc(p.tekstas) + '</span>';
+                }).join('<br>')
+              : '<br>Pokyčių nerasta – kainos ir būsenos tokios pačios.')
+            + (j.nepavyko ? '<br><span style="color:var(--text-dim,#777)">' + j.nepavyko + ' skelbimo šį kartą nepavyko perskaityti</span>' : '')
+            + (j.ribojama ? '<br><span style="color:var(--text-dim,#777)">Tikrinama iki ' + j.ribojama + ' naujausių</span>' : '');
+          if (bus) { bus.style.display = ''; bus.innerHTML = _busena; }
+        }
+        if (typeof window.ctMegstami === 'object' && window.ctMegstami.perkrauti) window.ctMegstami.perkrauti();
+      })
+      .catch(function () {
+        btn.disabled = false; btn.textContent = '↻ Atnaujinti visus · 1 kr';
+        if (bus) bus.textContent = 'Nepavyko susisiekti su serveriu.';
+      });
   }
 
   function atidarytiSkelbima(f) {

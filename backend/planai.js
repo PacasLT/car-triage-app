@@ -34,6 +34,7 @@ const KAINOS = {
   vin: 1,          // VIN istorijos paieška
   pardavejas: 1,   // pardavėjo patikra
   palyginimas: 2,  // gilus 2–3 auto palyginimas
+  megstamiuAtnaujinimas: 1, // v1.23.1: visu megstamiausiu busenos/kainos pertikrinimas
 };
 
 const PAKETAI = [

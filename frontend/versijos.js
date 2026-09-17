@@ -8,6 +8,19 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.23.1', data: '2026-09-17', pavadinimas: 'Tvarkingesnis meniu, palyginimo juosta ir mėgstamiausių atnaujinimas',
+    pakeitimai: [
+      'Nauja paslauga: „Atnaujinti visus" mėgstamiausiuose – vienu paspaudimu pertikriname kiekvieno išsaugoto skelbimo kainą ir būseną portale (1 kr už visą sąrašą, kartą per parą)',
+      'Palyginimo juosta apačioje – dabar tvarkinga plaukiojanti kortelė su antrašte, išvalymo mygtuku ir aiškiu „pasirinkite dar 1"',
+      '„Palyginimai" ir „Tęsti dabartinį palyginimą" sujungti į vieną eilutę paskyros meniu',
+      'Paskyros meniu perpieštas pagal bendrą dizainą: atsidaro tiesiai po profilio mygtuku, suskirstytas į skiltis',
+      'Viršutinė juosta išvalyta – „Paieška" ir „Ataskaitos" perkelti į paskyros meniu, paieška pasiekiama ir per logotipą',
+      'VIN istorijos ataskaita rašoma žmogiškai: kas patikrinta ir ką tai reiškia, vietoj „rasta: false"',
+      'Jei VIN paieška neįvyksta (šaltiniai neatsako), kreditas grąžinamas ir apie tai parašoma',
+      'VIN paieška dabar tikrina ne tik JAV aukcionus, bet ir VIN agregatorius bei skelbimų archyvus',
+    ],
+  },
+  {
     versija: '1.23.0', data: '2026-09-17', pavadinimas: 'Įranga sąraše, nemokamas VIN iššifravimas, pigesnė analizė',
     pakeitimai: [
       'Geriausių skelbimų kortelėse dabar matosi tikras įrangos kiekis ir kur automobilis stovi – šiuos duomenis nuskaitome atidarę patį skelbimą',

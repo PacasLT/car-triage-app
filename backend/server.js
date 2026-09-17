@@ -2543,12 +2543,19 @@ Grazink TIK JSON (be markdown):
   }
 }
 
-async function searchVinHistory(vin) {
-  const prompt = `Atlik web paieska del sio automobilio VIN kodo: ${vin}
+async function searchVinHistory(vin, kontekstas) {
+  // v1.23.1: prompte dabar ir EUROPINIAI saltiniai (ne tik JAV aukcionai) + aiskiai
+  // prasom ivardyti, KUR ieskota. Anksciau europietiskam automobiliui atsakymas visada
+  // buvo "rasta: false" ir vartotojas nesuprasdavo, ar patikrinimas apskritai ivyko.
+  const kont = kontekstas && (kontekstas.modelis || kontekstas.metai)
+    ? `\nPapildomas kontekstas is skelbimo: ${[kontekstas.modelis, kontekstas.metai].filter(Boolean).join(', ')}.` : '';
+  const prompt = `Atlik web paieska del sio automobilio VIN kodo: ${vin}${kont}
 
-Ieskok viesai prieinamos informacijos apie sio konkretaus VIN automobili JAV aukcionu
-svetainese (Copart, IAAI, Bidmotors, Salvage Bid, ir panasiuose), automobiliu istorijos
-patikros puslapiuose - zalos apraso, aukciono pardavimo kainos, busenos, papildomu nuotrauku.
+Patikrink bent siuos saltinius (ieskok pagal VIN koda):
+1. JAV aukcionai ir ju archyvai: Copart, IAAI, Bidmotors, SalvageBid, AutoBidMaster, Bid.Cars, CarsFromWest.
+2. VIN istorijos agregatoriai: VINCheck.info, VinAudit, ClearVin, EpicVIN, Vindecoderz, Autoastat.
+3. Skelbimu archyvai ir pardavimo istorija bet kurioje salyje (mobile.de, autoscout24, otomoto, autoplius, marktplaats, cars.com) - ar tas pats VIN buvo skelbtas anksciau ir uz kiek.
+4. Gamintojo atsaukimai (recalls) pagal ta modeli ir metus.
 
 Grazink TIK JSON (be markdown):
 {
@@ -2556,22 +2563,54 @@ Grazink TIK JSON (be markdown):
   "saltinis": "svetaines pavadinimas jei rasta, arba null",
   "zalos_aprasas": "kas rasta apie zala/busena is saltinio, arba null",
   "aukciono_kaina": "kaina jei rasta (su valiuta), arba null",
-  "papildoma_info": "kita svarbi info - vieta, pardavejo tipas, data - arba null",
-  "nuoroda": "URL i konkretu puslapi jei radai, arba null"
+  "papildoma_info": "kita svarbi info - vieta, pardavejo tipas, data, ankstesni skelbimai - arba null",
+  "nuoroda": "URL i konkretu puslapi jei radai, arba null",
+  "patikrinti_saltiniai": ["saltiniai, kuriuose realiai ieskojai", "..."],
+  "isvada": "1-2 sakiniai lietuviskai, ka tai reiskia pirkejui (net jei nieko nerasta)"
 }`;
-  const response = await anthropic.messages.create({
-    model: MODEL,
-    max_tokens: 1500,
-    tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 4 }],
-    messages: [{ role: 'user', content: prompt }],
-  });
-  const rawText = response.content.filter((b) => b.type === 'text').map((b) => b.text).join('');
-  const cleaned = rawText.replace(/```json|```/g, '').trim();
+  async function kviesti(suIrankiais) {
+    const response = await anthropic.messages.create({
+      model: MODEL,
+      max_tokens: 1500,
+      ...(suIrankiais ? { tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 5 }] } : {}),
+      messages: [{ role: 'user', content: prompt }],
+    });
+    const rawText = response.content.filter((b) => b.type === 'text').map((b) => b.text).join('');
+    return { rawText, stop: response.stop_reason };
+  }
+  let tekstas = '', stop = null;
+  try {
+    ({ rawText: tekstas, stop } = await kviesti(true));
+  } catch (e) {
+    console.error('[VIN] web paieskos klaida:', e.message);
+  }
+  // Jei modelis grazino tik irankio kvietima ar tuscia teksta - pakartojam be irankiu,
+  // kad vartotojas bent gautu paaiskinima, o ne tylu "rasta: false".
+  if (!tekstas || !tekstas.trim()) {
+    try { ({ rawText: tekstas, stop } = await kviesti(false)); } catch (e) { console.error('[VIN] antras bandymas:', e.message); }
+  }
+  const cleaned = String(tekstas || '').replace(/```json|```/g, '').trim();
   const match = cleaned.match(/\{[\s\S]*\}/);
   try {
-    return JSON.parse(match ? match[0] : cleaned);
+    const j = JSON.parse(match ? match[0] : cleaned);
+    if (!Array.isArray(j.patikrinti_saltiniai) || !j.patikrinti_saltiniai.length) {
+      j.patikrinti_saltiniai = ['Copart', 'IAAI', 'VIN istorijos agregatoriai', 'skelbimų archyvai'];
+    }
+    if (!j.isvada) {
+      j.isvada = j.rasta
+        ? 'Rasta viešų įrašų apie šį VIN – žr. žemiau.'
+        : 'Viešuose šaltiniuose įrašų apie šį VIN nerasta. Tai reiškia, kad automobilis nebuvo parduotas JAV aukcione ir neturi viešai skelbtos žalos istorijos – bet tai nepakeičia oficialios Autoistorija.lt / CarVertical ataskaitos.';
+    }
+    return j;
   } catch {
-    return { rasta: false, saltinis: null, zalos_aprasas: null, aukciono_kaina: null, papildoma_info: null, nuoroda: null };
+    console.error('[VIN] nepavyko isparsinti atsakymo, stop_reason:', stop, 'ilgis:', cleaned.length);
+    return {
+      rasta: false, saltinis: null, zalos_aprasas: null, aukciono_kaina: null,
+      papildoma_info: null, nuoroda: null,
+      patikrinti_saltiniai: [],
+      nepavyko: true,
+      isvada: 'Šį kartą nepavyko įvykdyti viešos paieškos (šaltiniai neatsakė). Kreditas grąžinamas – bandykite dar kartą po kelių minučių.',
+    };
   }
 }
 
@@ -3477,7 +3516,12 @@ app.post('/api/vin-lookup', requireAuth, planai.reikalautiKreditu('vin', (r) => 
       }
     }
 
-    const result = await searchVinHistory(vin);
+    const result = await searchVinHistory(vin, { modelis: req.body.modelis, metai: req.body.metai });
+    if (result && result.nepavyko) {
+      // v1.23.1: neveikusi paieska neturi kainuoti kredito. 5xx atsakymas ijungia
+      // automatini kredito grazinima planai.reikalautiKreditu viduje.
+      return res.status(503).json({ ...result, error: result.isvada });
+    }
     cache.setCached('vin', vin, result);
     duomenys.issaugotiAtaskaita(req.user.id, 'vin', String(vin).toUpperCase(), 'VIN ' + String(vin).toUpperCase(), result.santrauka || result.zalos_aprasas || null, null, result);
     res.json({ ...result, cached: false });
@@ -3545,6 +3589,56 @@ async function checkFavoriteStatus(url) {
     return { status: 'unknown', priezastis: 'Nepavyko patikrinti' };
   }
 }
+
+// v1.23.1 PAPILDOMA PASLAUGA: vienu paspaudimu pertikrinam VISUS megstamiausius -
+// ar kaina pasikeite, ar rezervuota, ar dar skelbiama. 1 kreditas uz visa sarasa
+// (per para tas pats vartotojas moka viena karta - raktas yra diena).
+app.post('/api/megstamiausi/atnaujinti', requireAuth,
+  planai.reikalautiKreditu('megstamiuAtnaujinimas', (r) => 'visi-' + new Date().toISOString().slice(0, 10)),
+  async (req, res) => {
+    try {
+      const sarasas = duomenys.megstamiausi(req.user.id) || [];
+      if (!sarasas.length) return res.json({ patikrinta: 0, pokyciai: [] });
+      const RIBA = 25;
+      const imtis = sarasas.slice(0, RIBA);
+      const pokyciai = [];
+      let nepavyko = 0;
+      for (const f of imtis) {
+        try {
+          const b = await checkFavoriteStatus(f.url);
+          if (b.status === 'unknown') { nepavyko++; continue; }
+          if (b.status === 'removed') {
+            const praleista = cache.zymetiNerasta(f.url);
+            if (praleista >= 2) {
+              cache.zymetiDingusi(f.url);
+              pokyciai.push({ url: f.url, modelis: f.modelis || null, tipas: 'dingo', tekstas: 'Skelbimo nebematome portale' });
+            }
+            continue;
+          }
+          cache.zymetiMatyta({ url: f.url, kaina: b.currentPrice, modelis: f.modelis, metai: f.metai });
+          const eile = cache.getListingTimeline(f.url) || [];
+          const buvo = eile.length ? eile[eile.length - 1].k : (f.kaina || null);
+          if (b.currentPrice) cache.recordListingSnapshot(f.url, b.currentPrice, null);
+          if (buvo && b.currentPrice && buvo !== b.currentPrice) {
+            pokyciai.push({
+              url: f.url, modelis: f.modelis || null, tipas: b.currentPrice < buvo ? 'kaina-mazeja' : 'kaina-auga',
+              sena: buvo, nauja: b.currentPrice,
+              tekstas: `${f.modelis || 'Skelbimas'}: ${buvo} € → ${b.currentPrice} €`,
+            });
+          }
+          if (b.status === 'reserved') {
+            pokyciai.push({ url: f.url, modelis: f.modelis || null, tipas: 'rezervuota', tekstas: `${f.modelis || 'Skelbimas'}: pažymėtas kaip rezervuotas` });
+          }
+          cache.zymetiPatikrinta(f.url);
+        } catch (e) { nepavyko++; }
+      }
+      cache.saveLifecycle();
+      res.json({ patikrinta: imtis.length - nepavyko, nepavyko, viso: sarasas.length, ribojama: sarasas.length > RIBA ? RIBA : null, pokyciai });
+    } catch (err) {
+      console.error('[MEGSTAMIAUSI-ATNAUJINIMAS]', err.message);
+      res.status(500).json({ error: 'Nepavyko atnaujinti' });
+    }
+  });
 
 app.post('/api/check-favorite', requireAuth, async (req, res) => {
   try {

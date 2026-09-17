@@ -9,37 +9,51 @@
   function arIndex() { return /(^|\/)(index\.html)?$/.test(location.pathname); }
   function kelias(p) { return arIndex() ? p.replace(/^index\.html/, location.pathname.split('/').pop() || 'index.html') : p; }
 
+  // v1.23.1: meniu pritraukiamas prie paties avataro (ne prie ekrano kampo), gauna
+  // ta pati kortelės stilių kaip visas puslapis - rėmelis, blur, švelnus atsiradimas.
   var CSS = ''
-    + '#ct-pask{position:fixed;z-index:1700;top:64px;right:16px;width:300px;max-width:calc(100vw - 24px);background:var(--bg-surface,#12151e);border:1px solid var(--border-light,rgba(255,255,255,.12));border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.55);overflow:hidden;display:none}'
-    + '#ct-pask.open{display:block}'
-    + '.ct-pask-head{display:flex;align-items:center;gap:11px;padding:14px 14px 12px;border-bottom:1px solid var(--border,rgba(255,255,255,.08))}'
-    + '.ct-pask-av{width:38px;height:38px;border-radius:50%;background:var(--accent,#7c5cff);color:#fff;display:grid;place-items:center;font:700 15px var(--font,sans-serif);flex:none}'
+    + '#ct-pask{position:fixed;z-index:1700;top:64px;right:16px;width:318px;max-width:calc(100vw - 24px);'
+      + 'background:linear-gradient(180deg,rgba(23,27,38,.98),rgba(17,20,28,.98));'
+      + 'border:1px solid var(--border-light,rgba(255,255,255,.12));border-radius:16px;'
+      + 'box-shadow:0 24px 60px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.03) inset;'
+      + 'backdrop-filter:blur(18px);overflow:hidden;display:none;transform-origin:top right}'
+    + '#ct-pask.open{display:block;animation:ctPaskIn .14s ease-out}'
+    + '@keyframes ctPaskIn{from{opacity:0;transform:translateY(-6px) scale(.985)}to{opacity:1;transform:none}}'
+    + '.ct-pask-head{display:flex;align-items:center;gap:11px;padding:15px 15px 13px;'
+      + 'border-bottom:1px solid var(--border,rgba(255,255,255,.08));'
+      + 'background:radial-gradient(120% 140% at 0% 0%,rgba(124,92,255,.14),transparent 62%)}'
+    + '.ct-pask-av{width:38px;height:38px;border-radius:12px;background:var(--accent,#7c5cff);color:#fff;display:grid;place-items:center;font:700 15px var(--font,sans-serif);flex:none}'
     + '.ct-pask-el{min-width:0;flex:1}'
     + '.ct-pask-el b{display:block;font:600 13px/1.3 var(--font,sans-serif);color:var(--text-primary,#fff);word-break:break-all}'
-    + '.ct-pask-el small{display:flex;align-items:center;gap:6px;margin-top:3px;font:500 11px var(--font,sans-serif);color:var(--text-muted,#aaa)}'
+    + '.ct-pask-el small{display:flex;align-items:center;gap:6px;margin-top:4px;font:500 11px var(--font,sans-serif);color:var(--text-muted,#aaa)}'
     + '.ct-pask-pl{font:700 10px/1 var(--font-mono,monospace);color:var(--accent-light,#a99cff);background:var(--accent-dim,rgba(124,92,255,.12));border:1px solid var(--accent-border,rgba(124,92,255,.35));padding:3px 6px;border-radius:5px}'
     + '.ct-pask-pl.kr{color:var(--success,#3ddc97);background:var(--success-dim,rgba(61,220,151,.12));border-color:var(--success-border,rgba(61,220,151,.3))}'
     + '.ct-pask-pl.kr.nulis{color:var(--danger,#ff6b6b);background:var(--danger-dim,rgba(255,107,107,.12));border-color:var(--danger-border,rgba(255,107,107,.3))}'
-    + '.ct-pask-list{padding:6px}'
-    + '.ct-pask-it{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border-radius:9px;border:none;background:transparent;color:var(--text-secondary,#c9cbd3);font:500 13px var(--font,sans-serif);cursor:pointer;text-decoration:none;text-align:left}'
+    + '.ct-pask-list{padding:7px}'
+    + '.ct-pask-gr{font:600 9px/1 var(--font-mono,monospace);letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim,#777);padding:9px 11px 5px}'
+    + '.ct-pask-it{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border-radius:10px;border:none;background:transparent;color:var(--text-secondary,#c9cbd3);font:500 13px var(--font,sans-serif);cursor:pointer;text-decoration:none;text-align:left;transition:background .12s,color .12s}'
     + '.ct-pask-it:hover{background:var(--bg-elevated,#1a1e2a);color:var(--text-primary,#fff)}'
-    + '.ct-pask-it .ic{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;background:var(--bg-elevated,#1a1e2a);border:1px solid var(--border,rgba(255,255,255,.08));flex:none;font-size:13px}'
+    + '.ct-pask-it:hover .ic{border-color:var(--accent-border,rgba(124,92,255,.35));color:var(--accent-light,#a99cff)}'
+    + '.ct-pask-it .ic{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:var(--bg-elevated,#1a1e2a);border:1px solid var(--border,rgba(255,255,255,.08));flex:none;font-size:13px;transition:border-color .12s,color .12s}'
     + '.ct-pask-it .ic svg{width:14px;height:14px}'
     + '.ct-pask-it .t{flex:1;min-width:0}'
-    + '.ct-pask-it .t small{display:block;font:400 10.5px var(--font,sans-serif);color:var(--text-dim,#777);margin-top:1px}'
+    + '.ct-pask-it .t small{display:block;font:400 10.5px/1.35 var(--font,sans-serif);color:var(--text-dim,#777);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
     + '.ct-pask-it .n{font:700 10px/1 var(--font-mono,monospace);color:var(--text-muted,#aaa);background:var(--bg-elevated,#1a1e2a);border:1px solid var(--border,rgba(255,255,255,.08));padding:4px 7px;border-radius:6px;min-width:22px;text-align:center}'
     + '.ct-pask-it .n.ac{color:var(--accent-light,#a99cff);background:var(--accent-dim,rgba(124,92,255,.12));border-color:var(--accent-border,rgba(124,92,255,.35))}'
     + '.ct-pask-it .n.sirdis{color:#ff5c8a;background:rgba(255,92,138,.14);border-color:rgba(255,92,138,.4)}'
-    + '.ct-pask-sep{height:1px;background:var(--border,rgba(255,255,255,.08));margin:6px 4px}'
+    + '.ct-pask-tesk{font:600 10.5px var(--font,sans-serif);color:var(--accent-light,#a99cff);background:var(--accent-dim,rgba(124,92,255,.12));border:1px solid var(--accent-border,rgba(124,92,255,.35));padding:5px 9px;border-radius:8px;text-decoration:none;white-space:nowrap}'
+    + '.ct-pask-tesk:hover{background:var(--accent,#7c5cff);color:#fff}'
+    + '.ct-pask-sep{height:1px;background:var(--border,rgba(255,255,255,.08));margin:7px 4px}'
     + '.ct-pask-it.isjungti{color:var(--text-muted,#aaa)}'
     + '.ct-pask-it.isjungti:hover{color:var(--danger,#ff6b6b)}'
-    + '.ct-pask-it.isjungti:hover .ic{border-color:var(--danger-border,rgba(255,107,107,.3));background:var(--danger-dim,rgba(255,107,107,.12))}'
-    + '@media (max-width:640px){#ct-pask{top:58px;right:10px;left:10px;width:auto}}';
+    + '.ct-pask-it.isjungti:hover .ic{border-color:var(--danger-border,rgba(255,107,107,.3));background:var(--danger-dim,rgba(255,107,107,.12));color:var(--danger,#ff6b6b)}'
+    + '@media (max-width:640px){#ct-pask{top:58px !important;right:10px !important;left:10px;width:auto}}';
 
   var IK = {
     sirdis: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>',
     ataskaita: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></svg>',
     palyg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3v18M17 3v18M3 7h8M13 17h8"/></svg>',
+    paieska: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>',
     istorija: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
     planas: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V10l6-8 6 8v10"/></svg>',
     versija: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>',
@@ -62,9 +76,15 @@
   }
 
   function eil(o) {
-    var tag = o.href ? 'a' : 'button';
-    return '<' + tag + ' class="ct-pask-it' + (o.cls ? ' ' + o.cls : '') + '"' + (o.href ? ' href="' + esc(o.href) + '"' : ' type="button"') + (o.onclick ? ' data-veiksmas="' + o.onclick + '"' : '') + ' role="menuitem">'
+    // v1.23.1: papildomas veiksmas toje pacioje eiluteje (pvz. „Tęsti →" prie palyginimu).
+    // SVARBU: <a> negali buti kito <a> viduje - narsykle tokia eilute suskaldo, todel
+    // eilute su papildomu mygtuku pieziam kaip <div data-href> ir paspaudima tvarkom JS.
+    var tag = o.papildomas ? 'div' : (o.href ? 'a' : 'button');
+    var pap = o.papildomas ? '<a class="ct-pask-tesk" href="' + esc(o.papildomas.href) + '">' + esc(o.papildomas.t) + '</a>' : '';
+    var nuoroda = o.href ? (o.papildomas ? ' data-href="' + esc(o.href) + '" tabindex="0"' : ' href="' + esc(o.href) + '"') : (tag === 'button' ? ' type="button"' : '');
+    return '<' + tag + ' class="ct-pask-it' + (o.cls ? ' ' + o.cls : '') + '"' + nuoroda + (o.onclick ? ' data-veiksmas="' + o.onclick + '"' : '') + ' role="menuitem">'
       + '<span class="ic">' + (IK[o.ik] || '') + '</span><span class="t">' + esc(o.t) + (o.sub ? '<small>' + esc(o.sub) + '</small>' : '') + '</span>'
+      + pap
       + (o.n != null ? '<span class="n' + (o.ncls ? ' ' + o.ncls : '') + '">' + esc(o.n) + '</span>' : '') + '</' + tag + '>';
   }
 
@@ -75,10 +95,16 @@
     var dabartinis = d.palyginimoSarasas >= 2 ? ' · dabar lyginami ' + d.palyginimoSarasas : '';
     m.innerHTML = '<div class="ct-pask-head"><div class="ct-pask-av">' + esc(ini) + '</div><div class="ct-pask-el"><b>' + esc(el || 'Paskyra') + '</b><small>' + planoHtml + '</small></div></div>'
       + '<div class="ct-pask-list">'
+      + '<div class="ct-pask-gr">Automobiliai</div>'
+      + eil({ ik: 'paieska', t: 'Paieška', sub: 'nauja skelbimų paieška', href: 'index.html' })
       + eil({ ik: 'sirdis', t: 'Mėgstamiausi', sub: 'išsaugoti skelbimai, kainų pokyčiai', n: d.megstami, ncls: d.megstami ? 'sirdis' : '', href: 'megstamiausi.html' })
+      // v1.23.1: „Palyginimai" ir „Tęsti dabartinį palyginimą" sujungti i viena eilute
+      + eil({ ik: 'palyg', t: 'Palyginimai',
+              sub: d.palyginimoSarasas >= 2 ? d.palyginimoSarasas + ' automobiliai sąraše · ataskaitos' : 'palyginimų ataskaitos',
+              n: d.palyginimai, ncls: d.palyginimai ? 'ac' : '', href: 'ataskaitos.html?tipas=palyginimas',
+              papildomas: d.palyginimoSarasas >= 2 ? { t: 'Tęsti →', href: 'index.html?palyginimas=1' } : null })
+      + '<div class="ct-pask-gr">Mano darbas</div>'
       + eil({ ik: 'ataskaita', t: 'Ataskaitos', sub: 'analizės, VIN, pardavėjai', n: d.ataskaitos, ncls: d.ataskaitos ? 'ac' : '', href: 'ataskaitos.html' })
-      + eil({ ik: 'palyg', t: 'Palyginimai', sub: 'palyginimų ataskaitos' + dabartinis, n: d.palyginimai, ncls: d.palyginimai ? 'ac' : '', href: 'ataskaitos.html?tipas=palyginimas' })
-      + (d.palyginimoSarasas >= 2 ? eil({ ik: 'palyg', t: 'Tęsti dabartinį palyginimą', sub: d.palyginimoSarasas + ' automobiliai sąraše', href: 'index.html?palyginimas=1' }) : '')
       + eil({ ik: 'istorija', t: 'Paieškų istorija', sub: 'senos paieškos, +N naujų', n: d.paieskos, href: 'index.html?tab=istorija' })
       + '<div class="ct-pask-sep"></div>'
       + eil({ ik: 'planas', t: 'Planas ir kreditai', sub: pl ? (pl.paieskos && pl.paieskos.liko != null ? 'paieškų liko: ' + pl.paieskos.liko : 'paieškos neribotos') : 'planai, kreditų paketai', onclick: 'planas' })
@@ -97,6 +123,14 @@
           location.href = 'index.html';
         }
       });
+    });
+    // v1.23.1: eilutes su papildomu mygtuku (div data-href)
+    m.querySelectorAll('.ct-pask-it[data-href]').forEach(function (el) {
+      el.addEventListener('click', function (e) {
+        if (e.target.closest('.ct-pask-tesk')) return; // papildomas mygtukas turi savo nuoroda
+        uzdaryti(); location.href = el.getAttribute('data-href');
+      });
+      el.addEventListener('keydown', function (e) { if (e.key === 'Enter') { uzdaryti(); location.href = el.getAttribute('data-href'); } });
     });
     // Prisijungusio vartotojo nuorodos i index.html - be perkrovimo, jei jau esam ten
     m.querySelectorAll('a.ct-pask-it').forEach(function (a) {
@@ -121,6 +155,15 @@
     var d = duomenys();
     piesti(m, d);
     m.classList.add('open'); _atidaryta = true;
+    // v1.23.1: pritraukiam meniu tiesiai po avataro mygtuku
+    try {
+      var avEl = document.querySelector('.ct3-avatar');
+      if (avEl && window.innerWidth > 640) {
+        var r = avEl.getBoundingClientRect();
+        m.style.top = Math.round(r.bottom + 10) + 'px';
+        m.style.right = Math.max(10, Math.round(window.innerWidth - r.right)) + 'px';
+      } else { m.style.top = ''; m.style.right = ''; }
+    } catch (e) {}
     var av = document.querySelector('.ct3-avatar'); if (av) av.setAttribute('aria-expanded', 'true');
     var h = { 'Authorization': 'Bearer ' + token() };
     // Skaiciai is serverio (viena lengva uzklausa kiekvienam)
