@@ -1521,6 +1521,156 @@
   .ct3-search-inner { padding: 0 10px !important; }
 }
 </style>
+
+<style id="ct-compare-redesign">
+/* ── Compare modal header ── */
+#compare-modal-inner { padding: 0 !important; overflow: hidden; }
+.ct-cmp-header {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 18px 20px 16px; border-bottom: 1px solid var(--border);
+}
+.ct-cmp-title { font: 700 17px var(--font); letter-spacing: -.01em; display: flex; align-items: center; gap: 8px; flex: 1; }
+.ct-cmp-title-ic { width: 30px; height: 30px; border-radius: 8px; background: var(--accent-dim); border: 1px solid var(--accent-border); display: grid; place-items: center; flex: none; }
+#deep-compare-status { padding: 0 20px 16px; }
+#deep-compare-result { padding: 0 20px; }
+#compare-grid-wrap { padding: 0 20px 20px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* ── Compare table ── */
+.ct-cmp-tbl { width: 100%; border-collapse: collapse; min-width: 440px; }
+.ct-cmp-tbl thead tr { background: var(--bg-elevated); border-bottom: 2px solid var(--border); }
+.ct-cmp-tbl th.crit-h {
+  width: 140px; min-width: 120px; text-align: left;
+  padding: 10px 12px;
+  font: 700 9px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim);
+  background: var(--bg-elevated);
+}
+.ct-cmp-tbl th.car-h {
+  padding: 14px 16px; border-left: 1px solid var(--border);
+  text-align: left; min-width: 180px; vertical-align: top;
+}
+.ct-cmp-car-num { width: 22px; height: 22px; border-radius: 50%; background: var(--bg-raised); border: 1px solid var(--border-light); font: 600 10px/1 var(--font-mono); color: var(--text-muted); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+.ct-cmp-photo { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 8px; background: var(--bg-raised); display: block; margin-bottom: 8px; }
+.ct-cmp-car-name { font: 700 14px/1.2 var(--font); color: var(--text-primary); margin-bottom: 4px; }
+.ct-cmp-car-price { font: 700 18px/1 var(--font-mono); letter-spacing: -.02em; color: var(--text-primary); margin-bottom: 6px; }
+.ct-cmp-car-link { display: inline-flex; align-items: center; gap: 5px; font: 500 12px var(--font); color: var(--accent-light); }
+.ct-cmp-car-link:hover { color: var(--text-primary); }
+.ct-cmp-tbl th.car-h.winner { background: oklch(.75 .15 158/.06); border-top: 2px solid var(--success); }
+.ct-cmp-tbl th.car-h.winner .ct-cmp-car-num { background: var(--success-dim); border-color: var(--success-border); color: var(--success); }
+
+/* ── Table body ── */
+.ct-cmp-tbl td { padding: 10px 12px; border-top: 1px solid var(--border); vertical-align: middle; }
+.ct-cmp-tbl td.crit-c { font: 400 12px/1.4 var(--font); color: var(--text-muted); background: var(--bg-surface); display: flex; align-items: center; gap: 7px; }
+.ct-cmp-tbl td.crit-c span { font-size: 14px; flex: none; }
+.ct-cmp-tbl td.val-c { padding: 10px 14px; border-left: 1px solid var(--border); font: 500 12.5px/1.4 var(--font); color: var(--text-secondary); }
+.ct-cmp-tbl td.val-c.win { background: oklch(.75 .15 158/.07); color: var(--text-primary); }
+.ct-cmp-tbl td.val-c.lose { color: var(--text-dim); }
+.ct-cmp-win-badge { display: inline-flex; align-items: center; gap: 4px; font: 700 10px/1 var(--font-mono); color: var(--success); margin-bottom: 2px; }
+.ct-cmp-diff { display: inline-block; font: 600 10.5px/1 var(--font-mono); color: var(--success); background: var(--success-dim); border: 1px solid var(--success-border); border-radius: 4px; padding: 2px 5px; margin-left: 5px; vertical-align: middle; }
+.ct-cmp-diff.neg { color: var(--danger); background: var(--danger-dim); border-color: var(--danger-border); }
+.ct-cmp-val-main { font: 600 13px/1.3 var(--font); color: inherit; }
+.ct-cmp-tbl tbody tr:hover td { background: rgba(255,255,255,.018); }
+.ct-cmp-tbl tbody tr:hover td.crit-c { background: var(--bg-elevated); }
+
+/* Sticky left column on mobile */
+@media (max-width: 640px) {
+  .ct-cmp-tbl th.crit-h, .ct-cmp-tbl td.crit-c { position: sticky; left: 0; z-index: 2; box-shadow: 2px 0 8px rgba(0,0,0,.4); }
+  .ct-cmp-tbl th.crit-h { min-width: 100px; width: 100px; font-size: 8px; }
+  .ct-cmp-tbl td.crit-c { min-width: 100px; font-size: 11px; }
+  .ct-cmp-tbl th.car-h { min-width: 160px; }
+}
+
+/* ── Compare empty state ── */
+.ct-cmp-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; text-align: center; gap: 12px; }
+.ct-cmp-empty-ic { width: 52px; height: 52px; border-radius: 50%; background: var(--bg-elevated); border: 1px solid var(--border); display: grid; place-items: center; color: var(--text-dim); margin-bottom: 4px; }
+.ct-cmp-empty h3 { font: 600 16px var(--font); color: var(--text-secondary); }
+.ct-cmp-empty p { font: 400 13px/1.6 var(--font); color: var(--text-muted); max-width: 320px; }
+.ct-cmp-empty-hint { display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; font: 500 12px var(--font); color: var(--text-secondary); }
+
+/* ── Deep compare ── */
+.dc-section { margin-bottom: 16px; }
+
+/* Winner banner */
+.dc-winner { padding: 18px 20px; border-radius: 14px; background: linear-gradient(135deg, oklch(.75 .15 158/.12), oklch(.75 .15 158/.04)); border: 1px solid var(--success-border); }
+.dc-winner-label { font: 700 9px/1 var(--font-mono); letter-spacing: .15em; text-transform: uppercase; color: var(--success); margin-bottom: 10px; display: flex; align-items: center; gap: 7px; }
+.dc-winner-name { font: 700 20px/1.1 var(--font); letter-spacing: -.02em; color: var(--text-primary); margin-bottom: 8px; }
+.dc-winner-short { font: 600 13.5px/1.55 var(--font); color: var(--text-primary); margin-bottom: 6px; }
+.dc-winner-long { font: 400 13px/1.7 var(--font); color: var(--text-secondary); text-wrap: pretty; }
+.dc-no-winner { background: var(--bg-raised); border-color: var(--border); }
+.dc-no-winner .dc-winner-label { color: var(--text-muted); }
+
+/* Criteria table */
+.dc-crit-wrap { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; overflow-x: auto; }
+.dc-crit-head { display: grid; background: var(--bg-elevated); border-bottom: 1px solid var(--border); }
+.dc-crit-row { display: grid; border-top: 1px solid var(--border); }
+.dc-crit-row:hover { background: rgba(255,255,255,.018); }
+.dc-crit-cell { padding: 11px 13px; font: 400 12.5px/1.5 var(--font); color: var(--text-secondary); }
+.dc-crit-cell.label { font: 600 12px var(--font); color: var(--text-muted); display: flex; align-items: center; gap: 6px; background: var(--bg-surface); }
+.dc-crit-cell.label svg { flex: none; color: var(--text-dim); }
+.dc-crit-cell.head-car { font: 700 11px/1.3 var(--font); color: var(--text-primary); border-left: 1px solid var(--border); padding: 10px 13px; }
+.dc-crit-cell.win { background: oklch(.75 .15 158/.07); color: var(--text-primary); border-left: 1px solid var(--border); }
+.dc-crit-cell.other { border-left: 1px solid var(--border); color: var(--text-muted); }
+.dc-win-tick { color: var(--success); font-weight: 700; margin-right: 3px; }
+@media (max-width: 600px) {
+  .dc-crit-cell.label { position: sticky; left: 0; z-index: 2; box-shadow: 2px 0 6px rgba(0,0,0,.35); }
+}
+
+/* Kam kuris tinka */
+.dc-cards-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 10px; }
+.dc-card { padding: 14px 16px; border-radius: 12px; background: var(--bg-raised); border: 1px solid var(--border); }
+.dc-card-label { font: 700 9px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent-light); margin-bottom: 8px; }
+.dc-card-text { font: 400 12.5px/1.6 var(--font); color: var(--text-secondary); }
+
+/* Warning block */
+.dc-warn { padding: 14px 16px; border-radius: 12px; background: oklch(.81 .13 78/.07); border: 1px solid oklch(.81 .13 78/.25); }
+.dc-warn-label { font: 700 9px/1 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--warning); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.dc-warn-list { display: flex; flex-direction: column; gap: 5px; padding: 0; margin: 0; list-style: none; }
+.dc-warn-list li { display: flex; align-items: flex-start; gap: 7px; font: 400 12.5px/1.5 var(--font); color: var(--text-secondary); }
+.dc-warn-list li::before { content: '⚠'; font-size: 11px; flex: none; margin-top: 1px; }
+.dc-issaugojimai { margin-top: 10px; font: 400 12px/1.6 var(--font); color: var(--text-muted); padding: 10px 12px; background: var(--bg-raised); border-radius: 8px; border: 1px solid var(--border); }
+
+/* Profile cards */
+.dc-profile { padding: 14px 16px; border-radius: 12px; background: var(--bg-raised); border: 1px solid var(--border); }
+.dc-profile-name { font: 700 14px/1.2 var(--font); color: var(--text-primary); margin-bottom: 4px; }
+.dc-profile-meta { font: 500 10.5px/1.4 var(--font-mono); color: var(--text-dim); margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+.dc-profile-meta span { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 4px; padding: 2px 7px; }
+.dc-profile-verdict { font: 400 12px/1.6 var(--font); color: var(--text-secondary); margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.dc-sublist { margin-bottom: 10px; }
+.dc-sublist-label { font: 700 8.5px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
+.dc-sublist-label.ok { color: var(--success); }
+.dc-sublist-label.warn { color: var(--warning); }
+.dc-sublist-label.orange { color: oklch(.78 .12 55); }
+.dc-sublist-label.purple { color: var(--accent-light); }
+.dc-sublist ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.dc-sublist li { font: 400 11.5px/1.45 var(--font); color: var(--text-secondary); padding-left: 12px; position: relative; }
+.dc-sublist li::before { content: ''; position: absolute; left: 0; top: 6px; width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: .6; }
+
+/* Loading state */
+.dc-loading { padding: 16px 18px; border-radius: 13px; background: var(--bg-raised); border: 1px solid var(--border); }
+.dc-loading-title { font: 600 13px/1.3 var(--font); color: var(--text-primary); margin-bottom: 14px; }
+.dc-steps { display: flex; flex-direction: column; gap: 8px; }
+.dc-step { display: flex; align-items: center; gap: 10px; font: 400 12.5px var(--font); color: var(--text-muted); }
+.dc-step.active { color: var(--text-primary); }
+.dc-step.done { color: var(--success); }
+.dc-step-ic { width: 20px; height: 20px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 11px; }
+.dc-step-spin { border: 2px solid var(--border-light); border-top-color: var(--accent); border-radius: 50%; animation: dcspin .7s linear infinite; }
+.dc-step-done { background: var(--success-dim); border: 1px solid var(--success-border); color: var(--success); font-size: 9px; }
+.dc-step-wait { background: var(--bg-elevated); border: 1px solid var(--border); }
+@keyframes dcspin { to { transform: rotate(360deg); } }
+
+/* Error state */
+.dc-error { padding: 14px 16px; border-radius: 12px; background: var(--danger-dim); border: 1px solid var(--danger-border); font: 400 12.5px/1.6 var(--font); color: oklch(.8 .1 25); display: flex; align-items: flex-start; gap: 10px; }
+.dc-error svg { flex: none; color: var(--danger); margin-top: 2px; }
+
+/* Deep compare btn */
+#deep-compare-btn {
+  display: inline-flex !important; align-items: center !important; gap: 7px !important;
+  height: 36px !important; padding: 0 16px !important; border-radius: 18px !important; border: 1px solid var(--accent-border) !important;
+  background: var(--accent-dim) !important; color: var(--accent-light) !important;
+  font: 600 13px var(--font) !important; cursor: pointer !important; transition: background .15s !important;
+}
+#deep-compare-btn:hover { background: var(--accent) !important; color: #fff !important; border-color: var(--accent) !important; }
+#deep-compare-btn:disabled { opacity: .6 !important; cursor: not-allowed !important; }
+</style>
 </head>
 <body>
 
@@ -1899,15 +2049,16 @@
 <!-- Palyginimo modalas -->
 <div id="compare-modal" onclick="if(event.target.id==='compare-modal') closeCompareModal()">
   <div id="compare-modal-inner">
-    <button id="compare-close" onclick="closeCompareModal()">✕</button>
-    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 16px;">
-      <h2 style="margin:0; font-size:18px;">⚖️ Automobilių palyginimas</h2>
-      <div style="flex:1;"></div>
-      <button id="deep-compare-btn" onclick="ctGilusPalyginimas()"
-        style="display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 16px;border-radius:10px;border:none;
-               background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#fff;font:600 13px var(--font);cursor:pointer;">
-        🔬 Gilus palyginimas su AI
+    <div class="ct-cmp-header">
+      <div class="ct-cmp-title">
+        <div class="ct-cmp-title-ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent-light)" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+        Automobilių palyginimas
+      </div>
+      <button id="deep-compare-btn" onclick="ctGilusPalyginimas()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        Gilus palyginimas su AI
       </button>
+      <button id="compare-close" onclick="closeCompareModal()" style="width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--text-muted);font-size:16px;display:grid;place-items:center;cursor:pointer;flex:none">✕</button>
     </div>
     <div id="deep-compare-status" style="display:none;margin-bottom:16px;"></div>
     <div id="deep-compare-result" style="display:none;margin-bottom:20px;"></div>
@@ -2994,12 +3145,21 @@ document.addEventListener('DOMContentLoaded', function () { window.ctUpdateMoreB
 // Sistema kaupia istorija apie kiekviena kada nors matyta skelbima. Po rezultatu
 // atvaizdavimo vienu kvietimu pasiimam, kas pasikeite, ir prisegam prie korteliu.
 // Kartu tie URL patenka i serverio sekimo sarasa, tad jie bus tikrinami kasdien.
-async function ctIkeltiIstorijas(urls) {
+async function ctIkeltiIstorijas(urls, skelbimai) {
   if (!urls || !urls.length) return;
   try {
+    // Kartu siunciam kryzminius skelbimus (tas pats auto kituose portaluose) ir
+    // kainas - serveris is ju sudaro pastaba su nuorodomis ir kainu skirtumu.
+    const kryzminiai = {}, kainos = {};
+    (skelbimai || []).forEach(function (c) {
+      if (c && c.url) {
+        if (c.kryzminiaiSkelbimai && c.kryzminiaiSkelbimai.length) kryzminiai[c.url] = c.kryzminiaiSkelbimai;
+        if (c.kaina) kainos[c.url] = c.kaina;
+      }
+    });
     const r = await fetch('/api/listing-changes', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ urls: urls.slice(0, 200) }),
+      body: JSON.stringify({ urls: urls.slice(0, 200), kryzminiai: kryzminiai, kainos: kainos }),
     });
     if (!r.ok) return;
     const d = await r.json();
@@ -3038,11 +3198,26 @@ function ctIstorijosHTML(sk) {
     + '</div>'
     + sk.pastabos.map(function (pa) {
         const st = SP[pa.svarba] || SP.vidutine;
+        const IKONOS = { 'ridos-suktumas': '🔴', 'perparduodamas': '🔁', 'ikeltas-is-naujo': '♻️',
+                         'kituose-portaluose': '🌐', 'kita-kaina-kitur': '🌐', 'dingo': '📤' };
+        const ikona = IKONOS[pa.tipas] || (pa.svarba === 'auksta' ? '⚡' : '•');
+        const nuorodos = (pa.nuorodos && pa.nuorodos.length)
+          ? '<span style="display:block;margin-top:5px;display:flex;gap:6px;flex-wrap:wrap;">'
+            + pa.nuorodos.map(function (n) {
+                return '<a href="' + ctEsc(n.url) + '" target="_blank" rel="noopener" '
+                  + 'style="display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:6px;'
+                  + 'background:var(--bg-elevated);border:1px solid var(--border-light);text-decoration:none;'
+                  + 'font:600 10.5px/1 var(--font-mono);color:var(--text-secondary);">'
+                  + ctEsc(String(n.source || '').toUpperCase())
+                  + (n.kaina ? ' · ' + Number(n.kaina).toLocaleString('lt-LT') + ' €' : '') + ' ↗</a>';
+              }).join('') + '</span>'
+          : '';
         return '<div style="display:flex;gap:8px;padding:8px 10px;border-radius:8px;margin-bottom:5px;'
           + 'background:' + st[1] + ';border:1px solid ' + st[2] + ';">'
-          + '<span style="flex:none;color:' + st[0] + ';font-size:12px;line-height:1.5;">' + (pa.svarba === 'auksta' ? '⚡' : '•') + '</span>'
+          + '<span style="flex:none;color:' + st[0] + ';font-size:12px;line-height:1.5;">' + ikona + '</span>'
           + '<span style="min-width:0;"><b style="display:block;font:600 12px/1.45 var(--font);color:var(--text-primary);">' + ctEsc(pa.tekstas) + '</b>'
-          + '<span style="display:block;font:400 11.5px/1.5 var(--font);color:var(--text-muted);margin-top:2px;">' + ctEsc(pa.kodel) + '</span></span></div>';
+          + '<span style="display:block;font:400 11.5px/1.5 var(--font);color:var(--text-muted);margin-top:2px;">' + ctEsc(pa.kodel) + '</span>'
+          + nuorodos + '</span></div>';
       }).join('')
     + '</div>';
 }
@@ -3243,7 +3418,7 @@ function renderResults(data, status, results) {
     if (!browseCands.length) renderBrowseListings([], results);
     else (window.renderCandidateCards || renderCandidateCards)(browseCands, results);
     renderAllListings(data.allListings || []);
-    ctIkeltiIstorijas(browseCands.map(function (c) { return c.url; }));
+    ctIkeltiIstorijas(browseCands.map(function (c) { return c.url; }), browseCands);
     return;
   }
 
@@ -3256,7 +3431,7 @@ function renderResults(data, status, results) {
   results.innerHTML = '';
   (window.renderCandidateCards || renderCandidateCards)(data.candidates, results);
   renderAllListings(data.allListings || []);
-  ctIkeltiIstorijas(data.candidates.map(function (c) { return c.url; }));
+  ctIkeltiIstorijas(data.candidates.map(function (c) { return c.url; }), data.candidates);
 }
 
 function renderBrowseListings(candidates, container) {
@@ -3846,30 +4021,84 @@ function openCompareModal() {
   const maxRida = Math.max(...allRidos);
   const maxDiff = Math.max(...allDiff);
 
-  wrap.innerHTML = compareList.map((c) => {
-    const kainaClass = cols > 1 && c.kaina === minKaina ? 'better' : c.kaina === maxKaina ? 'worse' : '';
-    const ridaClass = cols > 1 && c.rida === minRida ? 'better' : c.rida === maxRida ? 'worse' : '';
-    const diffClass = cols > 1 && c.diffPct === maxDiff ? 'better' : '';
-    const rows = [
-      { label: 'Kaina', val: formatEUR(c.kaina), cls: kainaClass },
-      { label: 'Nuolaida', val: c.diffPct != null ? `-${c.diffPct}%` : '–', cls: diffClass },
-      { label: 'Rinkos vidurkis', val: c.marketMedian ? formatEUR(c.marketMedian) : '–', cls: '' },
-      { label: 'Metai', val: c.metai || '–', cls: '' },
-      { label: 'Rida', val: c.rida ? c.rida.toLocaleString('lt-LT').replace(/,/g,' ') + ' km' : '–', cls: ridaClass },
-      { label: 'Kuras', val: c.kuras || '–', cls: '' },
-      { label: 'Galia', val: c.galia ? `${c.galia} kW` : '–', cls: '' },
-      { label: 'Variklio tūris', val: c.variklioTuris ? `${c.variklioTuris} L` : '–', cls: '' },
-      { label: 'Pavarų dėžė', val: c.pavarai || '–', cls: '' },
-      { label: 'Šaltinis', val: c.source || '–', cls: '' },
-    ];
-    return `<div class="compare-col">
-      <img src="${c.photo || ''}" onerror="this.style.display='none'">
-      <div class="compare-col-title">${c.modelis}</div>
-      <div class="compare-col-price">${formatEUR(c.kaina)}</div>
-      ${rows.map(r => `<div class="compare-row"><span class="compare-row-label">${r.label}</span><span class="compare-row-val ${r.cls}">${r.val}</span></div>`).join('')}
-      <a href="${c.url}" target="_blank" style="display:block; margin-top:10px; color:#6c5ce7; font-size:12px; text-decoration:none;">Žiūrėti skelbimą →</a>
-    </div>`;
-  }).join('');
+  // PAKEISTA: nauja lentelės struktūra su winner highlight ir diff skaičiais
+  const cmpRows = [
+    { label: 'Kaina', icon: '💰', get: c => c.kaina, fmt: v => formatEUR(v), compare: 'min',
+      diff: (w, l) => w != null && l != null ? '−' + formatEUR(l - w) : null },
+    { label: 'Nuolaida', icon: '📊', get: c => c.diffPct, fmt: v => v != null ? v + '%' : '–', compare: 'max',
+      diff: (w, l) => w != null && l != null ? '+' + (w - l).toFixed(1) + '%' : null },
+    { label: 'Rinkos vidurkis', icon: '📈', get: c => c.marketMedian, fmt: v => v ? formatEUR(v) : '–', compare: null },
+    { label: 'Metai', icon: '📅', get: c => c.metai, fmt: v => v || '–', compare: 'max',
+      diff: (w, l) => w != null && l != null ? '+' + (w - l) + ' m.' : null },
+    { label: 'Rida', icon: '🛣', get: c => c.rida, fmt: v => v ? v.toLocaleString('lt-LT') + ' km' : '–', compare: 'min',
+      diff: (w, l) => w != null && l != null ? '−' + (l - w).toLocaleString('lt-LT') + ' km' : null },
+    { label: 'Kuras', icon: '⛽', get: c => c.kuras, fmt: v => v || '–', compare: null },
+    { label: 'Galia', icon: '⚡', get: c => c.galia, fmt: v => v ? v + ' kW' : '–', compare: 'max' },
+    { label: 'Variklio tūris', icon: '🔧', get: c => c.variklioTuris, fmt: v => v ? v + ' L' : '–', compare: null },
+    { label: 'Pavarų dėžė', icon: '⚙', get: c => c.pavarai, fmt: v => v || '–', compare: null },
+    { label: 'Šaltinis', icon: '🌐', get: c => c.source, fmt: v => v || '–', compare: null },
+  ];
+
+  function findWinnerIdx(row) {
+    if (!row.compare) return -1;
+    const nums = compareList.map(c => row.get(c)).filter(v => v != null);
+    if (nums.length < 2) return -1;
+    const best = row.compare === 'min' ? Math.min(...nums) : Math.max(...nums);
+    return compareList.findIndex(c => row.get(c) === best);
+  }
+
+  // Nustatome bendrą laimėtoją (mažiausia kaina ir rida kartu)
+  const overallWinner = (() => {
+    if (compareList.length < 2) return -1;
+    let scores = compareList.map(() => 0);
+    cmpRows.forEach(row => {
+      const wi = findWinnerIdx(row);
+      if (wi >= 0) scores[wi]++;
+    });
+    const max = Math.max(...scores);
+    return scores.indexOf(max);
+  })();
+
+  let tbl = '<table class="ct-cmp-tbl"><thead><tr>';
+  tbl += '<th class="crit-h">KRITERIJUS</th>';
+  compareList.forEach((c, i) => {
+    const isWinner = i === overallWinner;
+    tbl += `<th class="car-h ${isWinner ? 'winner' : ''}">
+      <div class="ct-cmp-car-num">${i + 1}</div>
+      ${c.photo ? `<img class="ct-cmp-photo" src="${ctEsc(c.photo)}" onerror="this.style.display='none'">` : ''}
+      <div class="ct-cmp-car-name">${ctEsc(c.modelis)}</div>
+      <div class="ct-cmp-car-price">${formatEUR(c.kaina)}</div>
+      ${isWinner ? '<div style="font:600 10px/1 var(--font-mono);color:var(--success);margin-bottom:6px;letter-spacing:.08em">✓ GERIAUSIA PASIRINKIMAS</div>' : ''}
+      <a class="ct-cmp-car-link" href="${ctEsc(c.url)}" target="_blank">Skelbimas ↗</a>
+    </th>`;
+  });
+  tbl += '</tr></thead><tbody>';
+
+  cmpRows.forEach(row => {
+    const wi = findWinnerIdx(row);
+    tbl += '<tr>';
+    tbl += `<td class="crit-c"><span>${row.icon}</span>${row.label}</td>`;
+    compareList.forEach((c, i) => {
+      const val = row.get(c);
+      const isWin = wi === i;
+      const isLose = wi >= 0 && !isWin;
+      const fmtVal = row.fmt(val);
+      let diff = '';
+      if (isWin && row.diff && compareList.length === 2) {
+        const other = row.get(compareList[i === 0 ? 1 : 0]);
+        const d = row.diff(val, other);
+        if (d) diff = `<span class="ct-cmp-diff">${d}</span>`;
+      }
+      tbl += `<td class="val-c ${isWin ? 'win' : ''} ${isLose ? 'lose' : ''}">
+        ${isWin ? '<div class="ct-cmp-win-badge">✓ Geriau</div>' : ''}
+        <div class="ct-cmp-val-main">${fmtVal}${diff}</div>
+      </td>`;
+    });
+    tbl += '</tr>';
+  });
+
+  tbl += '</tbody></table>';
+  grid.innerHTML = tbl;
 }
 
 // ── Search tab switcher ──
@@ -3932,7 +4161,22 @@ function ctEsc(v) {
 // ---- GILUS PALYGINIMAS ----
 // Abu (ar trys) automobiliai pilnai nuskaitomi, isanalizuojamos visos nuotraukos
 // ir skelbimo tekstas, o tada AI paraso savo verdikta LYGINDAMAS juos tarpusavyje.
-window.ctGilusPalyginimas = async function () {
+// Ataskaita atidaroma atskirame puslapyje (compare.html), o iš jo galima
+// grįžti atgal į palyginimo lentelę. Duomenys perduodami per localStorage.
+window.ctGilusPalyginimas = function () {
+  if (!compareList || compareList.length < 2) {
+    showToast('Palyginimui pridėkite bent du automobilius.', 'error');
+    return;
+  }
+  try {
+    localStorage.setItem('ct_compare_list', JSON.stringify(compareList));
+    localStorage.removeItem('ct_compare_result'); // naujas palyginimas – senas rezultatas negalioja
+  } catch (e) {}
+  window.location.href = 'compare.html';
+};
+
+// Senoji versija, piešusi ataskaitą tiesiai modale – paliekama kaip atsarginė.
+window.ctGilusPalyginimasModale = async function () {
   if (!compareList || compareList.length < 2) {
     showToast('Palyginimui pridėkite bent du automobilius.', 'error');
     return;
@@ -3944,10 +4188,39 @@ window.ctGilusPalyginimas = async function () {
   btn.innerHTML = '⏳ Analizuojama…';
   rez.style.display = 'none';
   st.style.display = 'block';
-  st.innerHTML = '<div style="padding:14px 16px;border-radius:11px;background:var(--bg-raised);border:1px solid var(--border);">'
-    + '<div style="font:600 13px/1.4 var(--font);color:var(--text-primary);margin-bottom:6px;">Renkami duomenys apie ' + compareList.length + ' automobilius…</div>'
-    + '<div style="font:400 12px/1.6 var(--font);color:var(--text-muted);">Nuskaitomi pilni skelbimai · analizuojamos visos nuotraukos · tikrinami VIN ir pardavėjo duomenys · rengiamas palyginimas.<br>Tai gali užtrukti iki minutės.</div>'
-    + '</div>';
+  // PAKEISTA: animuoti laukimo žingsniai
+  const dcSteps = [
+    'Nuskaitomi pilni skelbimai',
+    'Analizuojamos nuotraukos su AI',
+    'Tikrinami VIN ir pardavėjo duomenys',
+    'Lyginami automobiliai tarpusavyje',
+    'Rengiamas galutinis verdiktas',
+  ];
+  let stHtml = '<div class="dc-loading"><div class="dc-loading-title">Analizuojami ' + compareList.length + ' automobiliai… <span style="color:var(--text-muted);font-weight:400">(iki minutės)</span></div><div class="dc-steps">';
+  dcSteps.forEach((s, i) => {
+    stHtml += '<div class="dc-step ' + (i === 0 ? 'active' : '') + '" id="dc-step-' + i + '">'
+      + '<div class="dc-step-ic ' + (i === 0 ? 'dc-step-spin' : 'dc-step-wait') + '" id="dc-step-ic-' + i + '">'
+      + (i === 0 ? '' : '') + '</div>'
+      + s + '</div>';
+  });
+  stHtml += '</div></div>';
+  st.innerHTML = stHtml;
+  // Animuoti žingsnius
+  let dcStepIdx = 0;
+  const dcStepIv = setInterval(function() {
+    if (dcStepIdx < dcSteps.length - 1) {
+      const cur = document.getElementById('dc-step-ic-' + dcStepIdx);
+      const curRow = document.getElementById('dc-step-' + dcStepIdx);
+      if (cur) { cur.className = 'dc-step-ic dc-step-done'; cur.textContent = '✓'; }
+      if (curRow) curRow.className = 'dc-step done';
+      dcStepIdx++;
+      const nxt = document.getElementById('dc-step-ic-' + dcStepIdx);
+      const nxtRow = document.getElementById('dc-step-' + dcStepIdx);
+      if (nxt) nxt.className = 'dc-step-ic dc-step-spin';
+      if (nxtRow) nxtRow.className = 'dc-step active';
+    }
+  }, 9000);
+  window._dcStepIv = dcStepIv;
 
   try {
     const tok = (function () { try { return localStorage.getItem('ct_token'); } catch (e) { return null; } })();
@@ -3960,112 +4233,35 @@ window.ctGilusPalyginimas = async function () {
     let d;
     try { d = JSON.parse(tekstas); } catch (e) { throw new Error('Serveris grąžino ne JSON: ' + tekstas.slice(0, 120)); }
     if (!r.ok) throw new Error(d.error || ('Serverio klaida ' + r.status));
+    if (window._dcStepIv) clearInterval(window._dcStepIv);
     st.style.display = 'none';
     ctRenderGilųPalyginimą(d);
   } catch (e) {
-    st.innerHTML = '<div style="padding:14px 16px;border-radius:11px;background:rgba(224,122,106,.08);border:1px solid rgba(224,122,106,.3);'
-      + 'font:400 12.5px/1.6 var(--font);color:#e9a08f;">Nepavyko atlikti gilaus palyginimo: ' + String(e.message).slice(0, 200) + '</div>';
+    if (window._dcStepIv) clearInterval(window._dcStepIv);
+    st.innerHTML = '<div class="dc-error"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Nepavyko atlikti gilaus palyginimo: ' + ctEsc(String(e.message).slice(0, 200)) + '</div>';
   } finally {
     btn.disabled = false;
     btn.innerHTML = '🔬 Gilus palyginimas su AI';
   }
 };
 
-function ctRenderGilųPalyginimą(d) {
-  const rez = document.getElementById('deep-compare-result');
-  const v = d.verdiktas || {};
-  const p = d.profiliai || [];
-  const vardas = (i) => (p[i] && (p[i].meta && p[i].meta.modelis || p[i].title)) || ('Automobilis ' + (i + 1));
+// PAKEISTA: pilnas ctRenderGilųPalyginimą redesign
+/* ctRenderGilųPalyginimą perkeltas į compare-report.js (bendras su compare.html) */
 
-  let html = '';
-
-  // --- AI verdiktas ---
-  html += '<div style="padding:16px 18px;border-radius:13px;background:linear-gradient(135deg,rgba(124,111,247,.10),rgba(124,111,247,.03));border:1px solid rgba(124,111,247,.28);">'
-    + '<div style="display:flex;align-items:center;gap:9px;margin-bottom:10px;">'
-    + '<span style="width:22px;height:22px;border-radius:6px;background:var(--accent);display:grid;place-items:center;font:700 9px var(--font-mono);color:#fff;">AI</span>'
-    + '<span style="font:700 12px/1 var(--font-mono);letter-spacing:.09em;color:var(--accent-light);">CARTRIIGE VERDIKTAS</span></div>';
-  if (v.laimetojas) {
-    html += '<div style="font:700 17px/1.35 var(--font);color:var(--text-primary);margin-bottom:8px;">🏆 ' + ctEsc(vardas(v.laimetojas - 1)) + '</div>';
-  }
-  if (v.trumpas_verdiktas) html += '<div style="font:600 13.5px/1.6 var(--font);color:var(--text-primary);margin-bottom:8px;">' + ctEsc(v.trumpas_verdiktas) + '</div>';
-  if (v.laimetojo_pagrindimas) html += '<div style="font:400 13px/1.7 var(--font);color:var(--text-secondary);">' + ctEsc(v.laimetojo_pagrindimas) + '</div>';
-  html += '</div>';
-
-  // --- Palyginimas pagal kriterijus ---
-  const kr = v.palyginimas_pagal_kriterijus || [];
-  if (kr.length) {
-    html += '<div style="margin-top:16px;border-radius:13px;border:1px solid var(--border);overflow:hidden;">'
-      + '<div style="display:grid;grid-template-columns:minmax(120px,1fr) repeat(' + p.length + ',minmax(0,1.4fr));background:var(--bg-elevated);">'
-      + '<div style="padding:10px 12px;font:700 10px/1 var(--font-mono);letter-spacing:.09em;color:var(--text-dim);">KRITERIJUS</div>'
-      + p.map((_, i) => '<div style="padding:10px 12px;font:700 11px/1.3 var(--font);color:var(--text-primary);border-left:1px solid var(--border);">' + ctEsc(vardas(i)) + '</div>').join('')
-      + '</div>';
-    kr.forEach(function (row, idx) {
-      html += '<div style="display:grid;grid-template-columns:minmax(120px,1fr) repeat(' + p.length + ',minmax(0,1.4fr));border-top:1px solid var(--border);'
-        + (idx % 2 ? 'background:rgba(255,255,255,.015);' : '') + '">'
-        + '<div style="padding:11px 12px;font:600 12px/1.45 var(--font);color:var(--text-secondary);">' + ctEsc(row.kriterijus || '') + '</div>';
-      for (let i = 0; i < p.length; i++) {
-        const val = row['auto' + (i + 1)] || '–';
-        const geriausias = row.pranasesnis === (i + 1);
-        html += '<div style="padding:11px 12px;border-left:1px solid var(--border);font:400 12px/1.5 var(--font);'
-          + (geriausias ? 'background:rgba(127,216,143,.07);color:var(--text-primary);' : 'color:var(--text-muted);') + '">'
-          + (geriausias ? '<span style="color:#7fd88f;font-weight:700;">✓ </span>' : '') + ctEsc(val) + '</div>';
+// Grįžus iš ataskaitos puslapio (compare.html) iškart atidarom palyginimo lentelę.
+document.addEventListener('DOMContentLoaded', function () {
+  try {
+    if (new URLSearchParams(location.search).get('palyginimas') === '1') {
+      const saved = JSON.parse(localStorage.getItem('ct_compare_list') || '[]');
+      if (saved.length) {
+        compareList = saved;
+        renderCompareBar();
+        setTimeout(openCompareModal, 120);
       }
-      html += '</div>';
-    });
-    html += '</div>';
-  }
-
-  // --- Kam kuris tinka ---
-  if ((v.kam_kuris_tinka || []).length) {
-    html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:16px;">'
-      + v.kam_kuris_tinka.map(function (k) {
-        return '<div style="padding:13px 15px;border-radius:11px;background:var(--bg-raised);border:1px solid var(--border);">'
-          + '<div style="font:700 11px/1 var(--font-mono);letter-spacing:.08em;color:var(--accent-light);margin-bottom:7px;">' + ctEsc(vardas((k.auto || 1) - 1)).toUpperCase() + '</div>'
-          + '<div style="font:400 12.5px/1.6 var(--font);color:var(--text-secondary);">' + ctEsc(k.kam || '') + '</div></div>';
-      }).join('') + '</div>';
-  }
-
-  // --- Ka butina patikrinti ---
-  if ((v.ka_butina_patikrinti || []).length) {
-    html += '<div style="margin-top:16px;padding:14px 16px;border-radius:11px;background:rgba(240,198,116,.06);border:1px solid rgba(240,198,116,.24);">'
-      + '<div style="font:700 11px/1 var(--font-mono);letter-spacing:.09em;color:#f0c674;margin-bottom:9px;">BŪTINA PATIKRINTI PRIEŠ PERKANT</div>'
-      + '<ul style="margin:0;padding-left:17px;display:flex;flex-direction:column;gap:5px;">'
-      + v.ka_butina_patikrinti.map(function (x) { return '<li style="font:400 12.5px/1.55 var(--font);color:var(--text-secondary);">' + ctEsc(x) + '</li>'; }).join('')
-      + '</ul></div>';
-  }
-  if (v.issaugojimai) {
-    html += '<div style="margin-top:12px;font:400 12px/1.6 var(--font);color:var(--text-muted);">' + ctEsc(v.issaugojimai) + '</div>';
-  }
-
-  // --- Surinkti duomenys lygiagreciai ---
-  html += '<div style="margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;">';
-  p.forEach(function (prof, i) {
-    const a = prof.analysis || {};
-    const sk = function (antraste, sarasas, spalva) {
-      if (!sarasas || !sarasas.length) return '';
-      return '<div style="margin-top:10px;"><div style="font:700 9.5px/1 var(--font-mono);letter-spacing:.09em;color:' + spalva + ';margin-bottom:5px;">' + antraste + '</div>'
-        + '<ul style="margin:0;padding-left:15px;display:flex;flex-direction:column;gap:3px;">'
-        + sarasas.slice(0, 5).map(function (x) { return '<li style="font:400 11.5px/1.5 var(--font);color:var(--text-secondary);">' + ctEsc(x) + '</li>'; }).join('')
-        + '</ul></div>';
-    };
-    html += '<div style="padding:14px 15px;border-radius:12px;background:var(--bg-raised);border:1px solid var(--border);">'
-      + '<div style="font:700 13px/1.3 var(--font);color:var(--text-primary);margin-bottom:4px;">' + ctEsc(vardas(i)) + '</div>'
-      + '<div style="font:500 10.5px/1.4 var(--font-mono);color:var(--text-dim);margin-bottom:8px;">'
-      + (prof.photos || []).length + ' nuotraukos išanalizuotos · VIN ' + (prof.vin ? 'yra' : 'nėra')
-      + (prof.pardavejas ? ' · ' + ctEsc(prof.pardavejas) : '') + (prof.isPodelio ? ' · iš podėlio' : '') + '</div>'
-      + (a.verdiktas ? '<div style="font:400 12px/1.6 var(--font);color:var(--text-secondary);">' + ctEsc(a.verdiktas) + '</div>' : '')
-      + sk('PRIVALUMAI', a.privalumai, '#7fd88f')
-      + sk('KĄ PATIKRINTI', a.ka_patikrinti_gyvai, '#f0c674')
-      + sk('PASTEBĖJIMAI NUOTRAUKOSE', a.nuotrauku_pastebejimai, '#e0a06a')
-      + sk('ĮRANGA', a.irangos_akcentai, 'var(--accent-light)')
-      + '</div>';
-  });
-  html += '</div>';
-
-  rez.innerHTML = html;
-  rez.style.display = 'block';
-  rez.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
+      history.replaceState(null, '', location.pathname);
+    }
+  } catch (e) {}
+});
 
 function closeCompareModal() {
   document.getElementById('compare-modal').classList.remove('active');

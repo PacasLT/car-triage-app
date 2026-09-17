@@ -174,16 +174,39 @@ function saveLifecycle() {
   catch (err) { console.error('Nepavyko issaugoti gyvavimo ciklo:', err.message); }
 }
 
+// ---- AUTOMOBILIO TAPATYBE ----
+// Kas NESIKEICIA, kai tas pats automobilis parduodamas is naujo: modelis, metai,
+// variklis, kuras, deze. Kaina, rida ir pardavejas keiciasi - todel i rakta neieina.
+// VIN, kai ji turim, yra absoliutus raktas.
+function tapatybesRaktas(l, vin) {
+  if (vin) return 'vin:' + String(vin).toUpperCase();
+  if (!l || !l.modelis || !l.metai) return null;
+  return 'fp:' + [
+    String(l.modelis).toLowerCase().trim(),
+    l.metai,
+    l.kuras || '?',
+    l.pavarai || '?',
+    l.galia || '?',
+    l.variklioTuris || '?',
+  ].join('|');
+}
+
 // Pazymim, kad skelbimas MATYTAS. Kvieciama kiekvienos paieskos metu.
-function zymetiMatyta(l) {
+function zymetiMatyta(l, papildoma) {
   if (!l || !l.url) return;
   const now = Date.now();
+  const vin = (papildoma && papildoma.vin) || (l.vin || null);
+  const pardavejas = (papildoma && papildoma.pardavejas) || l.pardavejas || null;
+  const raktas = tapatybesRaktas(l, vin);
   const e = _lifecycle[l.url];
   if (!e) {
     _lifecycle[l.url] = {
       pirmaMatytas: now, paskutinMatytas: now, kartuMatytas: 1,
       modelis: l.modelis || null, metai: l.metai || null,
-      pirmaKaina: l.kaina || null, saltinis: l.source || null, dingo: null,
+      pirmaKaina: l.kaina || null, dabartineKaina: l.kaina || null,
+      pirmaRida: l.rida || null, dabartineRida: l.rida || null,
+      saltinis: l.source || null, dingo: null,
+      vin: vin || null, pardavejas: pardavejas || null, raktas: raktas || null,
     };
   } else {
     e.paskutinMatytas = now;
@@ -191,8 +214,37 @@ function zymetiMatyta(l) {
     if (e.dingo) e.dingo = null; // vel atsirado - matyt buvo laikinai nuimtas
     if (!e.modelis && l.modelis) e.modelis = l.modelis;
     if (!e.pirmaKaina && l.kaina) e.pirmaKaina = l.kaina;
+    if (!e.pirmaRida && l.rida) e.pirmaRida = l.rida;
+    if (l.kaina) e.dabartineKaina = l.kaina;
+    if (l.rida) e.dabartineRida = l.rida;
+    if (vin && !e.vin) e.vin = vin;
+    if (pardavejas && !e.pardavejas) e.pardavejas = pardavejas;
+    // VIN gali atsirasti veliau (pvz. nuskaicius is nuotraukos) - tada raktas tikslinamas
+    if (raktas && e.raktas !== raktas) e.raktas = raktas;
   }
   _lifecycleDirty = true;
+}
+
+// Randa KITUS skelbimus, kurie greiciausiai yra tas pats automobilis.
+// Grazina tik tuos, kurie turi ta pati tapatybes rakta ir kita URL.
+function rastiTaPatiAuto(url) {
+  const sis = _lifecycle[url];
+  if (!sis || !sis.raktas) return [];
+  const kiti = [];
+  Object.keys(_lifecycle).forEach((u) => {
+    if (u === url) return;
+    const e = _lifecycle[u];
+    if (!e || e.raktas !== sis.raktas) return;
+    kiti.push({
+      url: u,
+      modelis: e.modelis, pardavejas: e.pardavejas || null, saltinis: e.saltinis || null,
+      pirmaKaina: e.pirmaKaina, dabartineKaina: e.dabartineKaina,
+      pirmaRida: e.pirmaRida, dabartineRida: e.dabartineRida,
+      pirmaMatytas: e.pirmaMatytas, paskutinMatytas: e.paskutinMatytas, dingo: e.dingo,
+      patikimas: sis.raktas.startsWith('vin:'), // VIN sutapimas = garantija
+    });
+  });
+  return kiti.sort((a, b) => a.pirmaMatytas - b.pirmaMatytas);
 }
 
 // Pazymim, kad skelbimo nebera (404 arba dingo is rezultatu) - tikriausiai parduotas.
@@ -217,6 +269,12 @@ function gautiGyvavimoCikla(url) {
     kartuMatytas: e.kartuMatytas || 1,
     dingo: e.dingo || null,
     pirmaKaina: e.pirmaKaina || null,
+    dabartineKaina: e.dabartineKaina || null,
+    pirmaRida: e.pirmaRida || null,
+    dabartineRida: e.dabartineRida || null,
+    pardavejas: e.pardavejas || null,
+    vin: e.vin || null,
+    raktas: e.raktas || null,
   };
 }
 
@@ -321,6 +379,7 @@ module.exports = {
   addToHistory, getHistoryForModel,
   recordListingSnapshot, getListingTimeline, buildListingTimelineText,
   zymetiMatyta, zymetiDingusi, gautiGyvavimoCikla, modelioPardavimoGreitis, saveLifecycle,
+  tapatybesRaktas, rastiTaPatiAuto,
   modelioTendencijos,
   pridetiSekimui, sekamiUrlai, zymetiPatikrinta, valytiSekimoSarasa,
   DATA_DIR,

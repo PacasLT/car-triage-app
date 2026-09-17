@@ -1445,7 +1445,7 @@ async function runSearchJob(jobId, filters) {
     // "dingo - tikriausiai parduotas" ir modelio pardavimo greiti.
     const visiMatyti = [...parsed, ...hardRejected];
     visiMatyti.forEach((l) => {
-      cache.zymetiMatyta(l);
+      cache.zymetiMatyta(l, { vin: l.vin || null, pardavejas: l.pardavejas || null });
       if (l.kaina) cache.recordListingSnapshot(l.url, l.kaina, l.rida || null);
     });
     cache.saveLifecycle();
@@ -2417,6 +2417,75 @@ function sudarytiIstorijosSantrauka(url) {
     }
   }
 
+  // ---- TAS PATS AUTOMOBILIS KITUOSE SKELBIMUOSE ----
+  // Sukaupta istorija leidzia atpazinti, kad tas pats auto jau buvo parduodamas:
+  // to paties pardavejo is naujo, kito pardavejo kita kaina, arba - svarbiausia -
+  // su DIDESNE rida nei nurodoma dabar.
+  const taPatsAuto = cache.rastiTaPatiAuto(url) || [];
+  const dabartinis = cache.gautiGyvavimoCikla(url);
+  if (taPatsAuto.length) {
+    const sisEntry = taPatsAuto[0].patikimas ? 'VIN sutapimas' : 'sutampa modelis, metai, variklis, kuras ir dėžė';
+
+    taPatsAuto.forEach((kitas) => {
+      const dienos = Math.round((Date.now() - (kitas.dingo || kitas.paskutinMatytas)) / 86400000);
+      const tasPatsPardavejas = (kitas.pardavejas && dabartinis && dabartinis.pardavejas)
+        ? kitas.pardavejas === dabartinis.pardavejas : null;
+
+      // 1) RIDOS SUKTUMAS - stipriausias signalas, koki apskritai galima rasti
+      const senaRida = kitas.dabartineRida || kitas.pirmaRida;
+      const naujaRida = dabartinis && (dabartinis.dabartineRida || dabartinis.pirmaRida || null);
+      if (senaRida && naujaRida && naujaRida < senaRida - 1000) {
+        pastabos.push({
+          tipas: 'ridos-suktumas', svarba: 'auksta',
+          tekstas: `Tas pats automobilis anksčiau buvo skelbiamas su ${senaRida.toLocaleString('lt-LT')} km, dabar nurodyta ${naujaRida.toLocaleString('lt-LT')} km.`,
+          kodel: 'Rida negali mažėti. Tai suktos ridos požymis – būtina VIN istorijos ataskaita ir serviso įrašų patikra prieš bet kokias derybas.',
+        });
+        return;
+      }
+
+      // 2) PERPARDUODAMAS - kitas pardavejas
+      if (kitas.dingo && kitas.pardavejas && tasPatsPardavejas === false) {
+        const senaKaina = kitas.dabartineKaina || kitas.pirmaKaina;
+        const naujaKaina = dabartinis && dabartinis.pirmaKaina;
+        const skirt = (senaKaina && naujaKaina) ? naujaKaina - senaKaina : null;
+        pastabos.push({
+          tipas: 'perparduodamas', svarba: 'auksta',
+          tekstas: `Tą patį automobilį prieš ${dienos} d. pardavė ${kitas.pardavejas}` +
+            (senaKaina ? ` už ${senaKaina.toLocaleString('lt-LT')} €` : '') + '.' +
+            (skirt !== null ? ` Dabartinė kaina ${skirt >= 0 ? '+' : ''}${skirt.toLocaleString('lt-LT')} €.` : ''),
+          kodel: skirt !== null && skirt > 0
+            ? 'Automobilis perparduodamas su antkainiu. Paklauskite, kas buvo padaryta nuo tada – jei nieko, antkainis yra grynas perpardavėjo pelnas ir yra vietos deryboms.'
+            : 'Automobilis jau keitė savininką neseniai. Verta išsiaiškinti, kodėl ankstesnis pirkėjas jo atsisakė.',
+        });
+        return;
+      }
+
+      // 3) TAS PATS PARDAVEJAS IKELE IS NAUJO - skelbimo amzius "atstatytas"
+      if (kitas.dingo && tasPatsPardavejas === true) {
+        const visoDienu = Math.round((Date.now() - kitas.pirmaMatytas) / 86400000);
+        pastabos.push({
+          tipas: 'ikeltas-is-naujo', svarba: 'auksta',
+          tekstas: `Tas pats pardavėjas šį automobilį jau skelbė anksčiau – iš tikrųjų jis rinkoje apie ${visoDienu} d., ne ${dabartinis ? dabartinis.dienosRinkoje : '?'} d.`,
+          kodel: 'Skelbimas nuimtas ir įkeltas iš naujo, todėl portale atrodo šviežias. Realiai už šią kainą niekas neperka jau ilgai – stipri pozicija deryboms.',
+        });
+        return;
+      }
+
+      // 4) TUO PAT METU SKELBIAMAS KITUR kita kaina
+      if (!kitas.dingo) {
+        const senaKaina = kitas.dabartineKaina || kitas.pirmaKaina;
+        const naujaKaina = dabartinis && dabartinis.pirmaKaina;
+        if (senaKaina && naujaKaina && Math.abs(senaKaina - naujaKaina) > 200) {
+          pastabos.push({
+            tipas: 'kita-kaina-kitur', svarba: 'vidutine',
+            tekstas: `Tas pats automobilis tuo pačiu metu skelbiamas ir ${kitas.saltinis || 'kitame portale'} už ${senaKaina.toLocaleString('lt-LT')} €.`,
+            kodel: `Skirtumas ${Math.abs(senaKaina - naujaKaina).toLocaleString('lt-LT')} €. Derėkitės remdamiesi pigesniuoju skelbimu (${sisEntry}).`,
+          });
+        }
+      }
+    });
+  }
+
   if (ciklas) {
     if (ciklas.dingo) {
       pastabos.push({
@@ -2430,22 +2499,49 @@ function sudarytiIstorijosSantrauka(url) {
         tekstas: `Skelbimas rinkoje jau ${ciklas.dienosRinkoje} d.`,
         kodel: 'Ilgiau nei pusantro mėnesio be pirkėjo. Arba kaina per didelė, arba yra priežastis, kurios skelbime nematyti – verta klausti tiesiai.',
       });
-    } else if (ciklas.dienosRinkoje >= 21) {
+    } else if (ciklas.dienosRinkoje >= 21 && !pastabos.some((p) => p.tipas === 'ikeltas-is-naujo')) {
       pastabos.push({
         tipas: 'kabo', svarba: 'vidutine',
         tekstas: `Skelbimas rinkoje ${ciklas.dienosRinkoje} d.`,
         kodel: 'Trys savaitės be pirkėjo – yra vietos deryboms.',
       });
     } else if (ciklas.dienosRinkoje <= 2) {
-      pastabos.push({
-        tipas: 'sviezias', svarba: 'vidutine',
-        tekstas: 'Skelbimas visai šviežias.',
-        kodel: 'Geri pasiūlymai išgraibstomi per kelias dienas – jei tinka, nedelskite.',
-      });
+      // "Šviežias" sakom TIK tada, kai tai tikrai naujas skelbimas. Jei aptikom,
+      // kad tas pats auto jau buvo skelbiamas anksčiau, šviežumas yra apgaulingas
+      // ir prieštarautų ką tik pridėtai pastabai.
+      const jauBuvoSkelbiamas = pastabos.some((p) =>
+        p.tipas === 'ikeltas-is-naujo' || p.tipas === 'perparduodamas' || p.tipas === 'ridos-suktumas');
+      if (!jauBuvoSkelbiamas) {
+        pastabos.push({
+          tipas: 'sviezias', svarba: 'vidutine',
+          tekstas: 'Skelbimas visai šviežias.',
+          kodel: 'Geri pasiūlymai išgraibstomi per kelias dienas – jei tinka, nedelskite.',
+        });
+      }
     }
   }
 
   return { url, ciklas, laikoJuosta: laikoJuosta || [], kainuPokytis, pastabos };
+}
+
+// Tas pats automobilis, rastas KELIUOSE portaluose tos pacios paieskos metu.
+// mergeDuplicatesAcrossPortals juos sulieja i viena, o likusius sudeda i
+// kryzminiaiSkelbimai - iki siol jie niekur nebuvo rodomi.
+function kryzminiuSkelbimuPastaba(kryzminiai, siKaina) {
+  if (!kryzminiai || !kryzminiai.length) return null;
+  const pigiausias = kryzminiai.slice().sort((a, b) => (a.kaina || Infinity) - (b.kaina || Infinity))[0];
+  const skirt = (siKaina && pigiausias.kaina) ? pigiausias.kaina - siKaina : null;
+  return {
+    tipas: 'kituose-portaluose',
+    svarba: (skirt !== null && skirt < -200) ? 'auksta' : 'vidutine',
+    tekstas: kryzminiai.length === 1
+      ? `Tas pats automobilis skelbiamas ir ${pigiausias.source}` + (pigiausias.kaina ? ` už ${pigiausias.kaina.toLocaleString('lt-LT')} €` : '') + '.'
+      : `Tas pats automobilis skelbiamas dar ${kryzminiai.length} portaluose (pigiausiai ${pigiausias.source}` + (pigiausias.kaina ? ` už ${pigiausias.kaina.toLocaleString('lt-LT')} €` : '') + ').',
+    kodel: (skirt !== null && skirt < -200)
+      ? `Kitame portale ${Math.abs(skirt).toLocaleString('lt-LT')} € pigiau – pirkite ten arba naudokite tai kaip derybų argumentą.`
+      : 'Tas pats pardavėjas skelbia keliose vietose. Kainos gali skirtis – patikrinkite abi.',
+    nuorodos: kryzminiai.map((k) => ({ source: k.source, url: k.url, kaina: k.kaina })),
+  };
 }
 
 // Vieno skelbimo istorija
@@ -2481,7 +2577,15 @@ app.post('/api/listing-changes', (req, res) => {
   const { urls } = req.body || {};
   if (!Array.isArray(urls)) return res.status(400).json({ error: 'urls turi būti masyvas' });
   cache.pridetiSekimui(urls.slice(0, 200), null); // kartu itraukiam i sekima
-  const rezultatai = urls.slice(0, 200).map((u) => sudarytiIstorijosSantrauka(u)).filter(Boolean);
+  const kryzminiai = (req.body && req.body.kryzminiai) || {}; // { url: [ {source,url,kaina} ] }
+  const rezultatai = urls.slice(0, 200).map((u) => {
+    const r = sudarytiIstorijosSantrauka(u);
+    if (!r) return null;
+    const kaina = (req.body.kainos && req.body.kainos[u]) || null;
+    const kp = kryzminiuSkelbimuPastaba(kryzminiai[u], kaina);
+    if (kp) r.pastabos.unshift(kp);
+    return r;
+  }).filter(Boolean);
   const suPokyciais = rezultatai.filter((r) => r.pastabos.some((p) => p.svarba === 'auksta'));
   res.json({ skelbimai: rezultatai, pokyciuSkaicius: suPokyciais.length });
 });
