@@ -43,7 +43,7 @@
     margin: 0;
     padding: 0;
   }
-  .container { max-width: 920px; margin: 0 auto; padding: 0 20px 40px; }
+  .container { max-width: 1240px; margin: 0 auto; padding: 0 20px 40px; }
 
   /* ===== APP HEADER ===== */
   .app-header {
@@ -1283,7 +1283,12 @@
 .diff-neg{background:var(--danger-dim);border:1px solid var(--danger-border);color:var(--danger);}
 .ct-top-card{background:var(--bg-surface);border-radius:16px;overflow:hidden;margin-bottom:12px;transition:box-shadow .2s,border-color .2s;}
 .ct-top-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.45);}
-.ct-std-card{display:flex;align-items:stretch;background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:8px;transition:border-color .15s;}
+.ct-std-card{display:flex;flex-wrap:wrap;align-items:stretch;background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:8px;transition:border-color .15s;}
+/* Auto istorijos blokas visada eina PER VISA PLOTI po kortelės turiniu, o ne
+   įsiterpia į flex eilutę šalia teksto ir jo nespaudžia. */
+.ct-std-card > .ct-istorija{flex:0 0 100%;padding:0 14px 12px;}
+.ct-std-card > .ct-istorija > div{margin-top:0 !important;}
+.ct-top-card .ct-istorija{padding:0 18px 14px;}
 .ct-std-card:hover{border-color:var(--border-light);}
 .photo-ph{background:repeating-linear-gradient(115deg,rgba(255,255,255,.035) 0 1px,transparent 1px 8px),#141822;display:flex;align-items:center;justify-content:center;}
 @keyframes ctin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -2794,7 +2799,11 @@ async function ctIkeltiIstorijas(urls) {
       const blokas = document.createElement('div');
       blokas.className = 'ct-istorija';
       blokas.innerHTML = ctIstorijosHTML(sk);
-      const vieta = kortele.querySelector('.std-card-inner, .top-info-col') || kortele;
+      // Std-kortelė yra flex eilutė – blokas segamas prie pačios kortelės,
+      // kad gautų atskirą eilutę per visą plotį (CSS: .ct-std-card > .ct-istorija).
+      const vieta = kortele.classList.contains('ct-std-card')
+        ? kortele
+        : (kortele.querySelector('.top-info-col') || kortele);
       vieta.appendChild(blokas);
     });
   } catch (e) { /* istorija yra papildoma nauda - jos nebuvimas neturi laužyti rezultatų */ }
@@ -4161,9 +4170,9 @@ function ctNavTab(tab) {
       var imgClick = multi ? 'openLightbox(window.__galleryStore[\'' + cardId + '-strip\'], window.__cardPhotoIndex[\'' + cardId + '\']||0)' : '';
 
       card.innerHTML = accentLine +
-        '<div class="top-grid" style="display:grid;grid-template-columns:280px minmax(0,1fr);gap:0;">' +
-          '<div class="top-photo-col" style="padding:14px 0 0 14px;display:flex;flex-direction:column;gap:8px;border-right:1px solid var(--border);">' +
-            '<div class="photo-ph" style="aspect-ratio:4/3;border-radius:12px;overflow:hidden;position:relative;">' +
+        '<div class="top-grid" style="display:grid;grid-template-columns:340px minmax(0,1fr);gap:0;">' +
+          '<div class="top-photo-col" style="padding:14px 0 0 14px;display:flex;flex-direction:column;gap:8px;border-right:1px solid var(--border);align-content:flex-start;">' +
+            '<div class="photo-ph" style="flex:1 1 auto;min-height:230px;max-height:420px;border-radius:12px;overflow:hidden;position:relative;">' +
               '<div style="position:absolute;top:10px;left:10px;z-index:2;background:' + rs.bg + ';color:' + rs.tc + ';font:700 10px/1 var(--font-mono);letter-spacing:.08em;padding:6px 9px;border-radius:7px;border:' + rs.bs + ';white-space:nowrap;">' + rankLabel + '</div>' +
               bestBadge +
               '<img id="' + cardId + '-img" src="' + (photos[0]||'') + '" style="width:100%;height:100%;object-fit:cover;" onclick="' + imgClick + '" onerror="this.style.visibility=\'hidden\'">' +
