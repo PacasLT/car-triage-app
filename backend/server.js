@@ -2013,7 +2013,8 @@ async function scrapeSingleListing(url) {
     `[PILNAS PUSLAPIO TEKSTAS]: ${bodyText}`,
   ].filter(Boolean).join('\n\n');
 
-  const NON_CAR_IMAGE_KEYWORDS = ['logo', 'avatar', 'icon', 'placeholder', 'map', 'pin', 'default', 'staticmap', 'sprite', 'banner', 'ad-', '/ads/'];
+  const NON_CAR_IMAGE_KEYWORDS = ['logo', 'avatar', 'icon', 'placeholder', 'map', 'pin', 'default', 'staticmap', 'sprite', 'banner', 'ad-', '/ads/',
+    'watermark', 'reklam', 'promo', 'baner', 'noimage', 'no-photo', 'nophoto', 'no_photo', '/static/', 'badge', 'label', '.svg', '.gif'];
   const CAR_CDN_PATTERNS = ['img.autogidas.lt', 'autogidas.lt', 'autoplius-img', 'autoplius.lt', 'pictures.autoscout24.net', 'ireland.apollo.olxcdn', 'otomoto', 'img-sc24', 'static.autogidas', 'cf.autogidas', 'carsdata', 'img.gumtree', 'cars.img'];
   const SELLER_INFO_SELECTOR = '[class*="seller" i], [class*="dealer" i], [class*="partner" i], [class*="advertiser" i], [class*="agent" i], [class*="contact" i], [class*="profile" i]';
 
@@ -2241,11 +2242,63 @@ async function downloadImageAsBase64(url) {
   }
 }
 
-async function generateDeepAnalysis(title, fullText, photos, marketContext, skelbimoUrl) {
+// ---- NUOTRAUKU FILTRAS ----
+// Pardavejai i galerija ideda reklamas, savo logotipus, "ius.lt" tipo grafikas. Tokiu
+// nuotrauku nerodom ir neanalizuojam. Pigus Haiku vaizdo kvietimas su VISOMIS skelbimo
+// nuotraukomis: grazina, kurios NERA sio automobilio nuotraukos, ir ar kuri nors is ju -
+// pardavejo logotipas (ji prisegam prie pardavejo kortelės).
+const NUOTRAUKU_FILTRAS = (process.env.NUOTRAUKU_FILTRAS || '1') !== '0';
+const FILTRO_MAX_FOTO = 15;
+
+async function klasifikuotiNuotraukas(photos) {
+  const rez = { tinkamos: photos || [], atmestos: [], pardavejoLogo: null, parsisiusta: {} };
+  if (!NUOTRAUKU_FILTRAS || !photos || photos.length < 2) return rez;
+  try {
+    const sarasas = photos.slice(0, FILTRO_MAX_FOTO);
+    const parsisiusta = await Promise.all(sarasas.map(downloadImageAsBase64));
+    sarasas.forEach((u, i) => { if (parsisiusta[i]) rez.parsisiusta[u] = parsisiusta[i]; });
+    const turim = sarasas.map((u, i) => ({ u, i, img: parsisiusta[i] })).filter((x) => x.img);
+    if (turim.length < 2) return rez;
+    const content = [];
+    turim.forEach((x, k) => {
+      content.push({ type: 'text', text: `Nuotrauka #${k + 1}:` });
+      content.push({ type: 'image', source: { type: 'base64', media_type: x.img.media_type, data: x.img.data } });
+    });
+    content.push({ type: 'text', text: `Tai automobilio pardavimo skelbimo galerija (${turim.length} nuotraukos, sunumeruotos #1..#${turim.length}).
+Nustatyk, kurios nuotraukos NERA sio parduodamo automobilio nuotraukos: reklamos, logotipai, tekstiniai plakatai,
+kainu lenteles, zemelapiai, kito automobilio ar salono reklamines nuotraukos, tuscios/klaidos nuotraukos.
+Automobilio interjero, variklio, ratu, dokumentu, VIN lipduku, prietaisu skydelio nuotraukos YRA tinkamos.
+Jei kuri nors nuotrauka yra PARDAVEJO (autosalono, imones) LOGOTIPAS - nurodyk jos numeri.
+Atsakyk TIK JSON: {"netinkamos":[numeriai],"logotipas":numeris arba null}`});
+    const response = await anthropic.messages.create({
+      model: KOMENTARU_MODEL, max_tokens: 120,
+      messages: [{ role: 'user', content }],
+    });
+    const raw = (response.content && response.content[0] && response.content[0].text) || '';
+    const m = raw.match(/\{[\s\S]*\}/);
+    const j = m ? JSON.parse(m[0]) : null;
+    if (!j) return rez;
+    const netinkamos = new Set((Array.isArray(j.netinkamos) ? j.netinkamos : []).map((n) => parseInt(n, 10)).filter((n) => n >= 1 && n <= turim.length));
+    const logoNr = j.logotipas != null ? parseInt(j.logotipas, 10) : null;
+    if (logoNr >= 1 && logoNr <= turim.length) { rez.pardavejoLogo = turim[logoNr - 1].u; netinkamos.add(logoNr); }
+    // Saugiklis: jei "netinkamos" beveik visos - modelis suklydo, nefiltruojam
+    if (netinkamos.size >= turim.length - 1 && turim.length > 2) return rez;
+    const atmestiUrl = new Set([...netinkamos].map((n) => turim[n - 1].u));
+    rez.atmestos = photos.filter((u) => atmestiUrl.has(u));
+    rez.tinkamos = photos.filter((u) => !atmestiUrl.has(u));
+    if (rez.atmestos.length) console.log(`[NUOTRAUKOS] atmesta ${rez.atmestos.length} ne automobilio nuotr.${rez.pardavejoLogo ? ' (viena - pardavejo logotipas)' : ''}`);
+    return rez;
+  } catch (e) {
+    console.warn('[NUOTRAUKOS] filtras nepavyko:', e.message);
+    return rez;
+  }
+}
+
+async function generateDeepAnalysis(title, fullText, photos, marketContext, skelbimoUrl, preloaded) {
   // Siunčiame iki 12 nuotraukų AI - vizuali automobilio būklės analizė visada naudinga.
   let imageBlocks = [];
   if (photos && photos.length > 0) {
-    const downloaded = await Promise.all(photos.slice(0, DEEP_FOTO_KIEKIS).map(downloadImageAsBase64));
+    const downloaded = await Promise.all(photos.slice(0, DEEP_FOTO_KIEKIS).map((u) => (preloaded && preloaded[u]) ? Promise.resolve(preloaded[u]) : downloadImageAsBase64(u)));
     imageBlocks = downloaded.filter(Boolean).map((img) => ({
       type: 'image',
       source: { type: 'base64', media_type: img.media_type, data: img.data },
@@ -2438,12 +2491,16 @@ app.post('/api/analyze-single', requireAuth, planai.reikalautiKreditu('analize',
       }
     }
 
-    const { title, fullText, photo, photos, vin, vinPrefiksas, pardavejas } = await scrapeSingleListing(url);
+    const { title, fullText, photo: photo0, photos: photos0, vin, vinPrefiksas, pardavejas } = await scrapeSingleListing(url);
     const marketContext = marketMedian ? { kaina, marketMedian, marketCount, diffPct, modelis, galia, variklioTuris } : null;
-    const analysis = await generateDeepAnalysis(title, fullText, photos, marketContext, url);
+    // Ne automobilio nuotraukos (reklamos, logotipai) - salin; pardavejo logotipas - prie pardavejo
+    const foto = await klasifikuotiNuotraukas(photos0);
+    const photos = foto.tinkamos, photo = photos[0] || photo0;
+    const analysis = await generateDeepAnalysis(title, fullText, photos, marketContext, url, foto.parsisiusta);
     const vinInfo = sujungtiVin(vin, analysis, vinPrefiksas);
     const result = {
       title, photo, photos, analysis,
+      pardavejoLogo: foto.pardavejoLogo || null, atmestuNuotrauku: foto.atmestos.length,
       vin: vinInfo.vin, vinSaltinis: vinInfo.vinSaltinis, vinIsNuotraukos: vinInfo.vinIsNuotraukos,
       vinPrefiksas: vinInfo.vinPrefiksas, vinPatvirtintasPrefiksu: vinInfo.vinPatvirtintasPrefiksu,
       vinNesutapimas: vinInfo.vinNesutapimas,

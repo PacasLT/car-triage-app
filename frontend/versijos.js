@@ -8,6 +8,20 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.19.0', data: '2026-09-17', pavadinimas: 'Paskyros meniu, nuotraukų didinimas, pelno skaičiuoklė',
+    pakeitimai: [
+      'Paskyros meniu po profilio mygtuku: mėgstamiausi, ataskaitos, palyginimai, paieškų istorija, planas, versija',
+      'Detalioje apžvalgoje nuotraukos didinamos – paspaudus atsidaro per visą ekraną, naršoma rodyklėmis ar braukiant',
+      'Reklaminės nuotraukos ir logotipai (ne automobilio) nebeanalizuojami ir nerodomi; pardavėjo logotipas – prie pardavėjo',
+      'Pelno skaičiuoklė: pirkimo kaina, remontas, išlaidos, pardavimo kaina → pelnas, marža, ROI (užpildyta iš AI vertinimo)',
+      'Paaiškinta „Istorijos ataskaita“: tai pardavėjo prie skelbimo pridėta Autoistorija.lt ataskaita, su nuoroda į ją',
+      'Išsami analizė detalės puslapyje nebeužsakoma automatiškai – tik paspaudus mygtuką (kreditas nenuskaitomas netikėtai)',
+      'Rezultatų santrauka virš skelbimų – ryški juosta su skaičiais; „Pagrindinis“ ženklelis pašalintas, Tinder – tik telefone',
+      'Portalų mygtukas rodo, kurie portalai pasirinkti; kai netelpa – trumpiniais',
+      '„Kiti skelbimai“ – vienas išskleidžiamas blokas su visais likusiais skelbimais; kiekvienas su ♥ ir nuoroda į skelbimą',
+    ],
+  },
+  {
     versija: '1.18.0', data: '2026-09-17', pavadinimas: 'Mėgstamiausi – širdutė antraštėje',
     pakeitimai: [
       'Vietoj žvaigždutės ir žymeklio – širdutė ♥; detalioje apžvalgoje mygtukas pagaliau rodo, ar skelbimas išsaugotas',

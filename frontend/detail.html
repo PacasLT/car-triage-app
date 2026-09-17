@@ -244,6 +244,44 @@ button{font-family:inherit;cursor:pointer}
 .dp-empty p{font-size:14px;color:var(--text-muted);max-width:360px}
 .dp-empty a{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 20px;border-radius:10px;background:var(--accent);color:#fff;font:600 14px var(--font);margin-top:8px}
 @keyframes dpspin { to { transform: rotate(360deg); } }
+/* Nuotrauku didinimas (lightbox) */
+.dp-photo-main img, #dp-photos-grid img { cursor: zoom-in; }
+#dp-lb { position: fixed; inset: 0; z-index: 2000; background: rgba(4,5,9,.94); display: none; align-items: center; justify-content: center; user-select: none; }
+#dp-lb.open { display: flex; }
+#dp-lb img { max-width: 96vw; max-height: 88vh; object-fit: contain; border-radius: 8px; box-shadow: 0 20px 60px rgba(0,0,0,.6); cursor: zoom-out; }
+.dp-lb-btn { position: absolute; width: 46px; height: 46px; border-radius: 50%; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.08); color: #fff; font-size: 26px; display: grid; place-items: center; cursor: pointer; backdrop-filter: blur(6px); }
+.dp-lb-btn:hover { background: rgba(255,255,255,.18); }
+.dp-lb-l { left: 18px; top: 50%; transform: translateY(-50%); }
+.dp-lb-r { right: 18px; top: 50%; transform: translateY(-50%); }
+.dp-lb-x { top: 16px; right: 16px; font-size: 20px; }
+.dp-lb-n { position: absolute; top: 22px; left: 50%; transform: translateX(-50%); font: 600 12px var(--font-mono); color: rgba(255,255,255,.8); background: rgba(0,0,0,.45); padding: 6px 12px; border-radius: 20px; letter-spacing: .06em; }
+.dp-lb-hint { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); font: 400 11px var(--font); color: rgba(255,255,255,.45); }
+@media (max-width: 640px) { .dp-lb-btn { width: 38px; height: 38px; font-size: 20px; } .dp-lb-l { left: 8px; } .dp-lb-r { right: 8px; } .dp-lb-hint { display: none; } }
+/* Pelno skaiciuokle */
+#dp-pelno { display: none; margin-top: 12px; border: 1px solid var(--success-border); border-radius: 12px; background: var(--bg-surface); overflow: hidden; }
+#dp-pelno.open { display: block; }
+.dp-pel-head { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-bottom: 1px solid var(--border); font: 700 12px var(--font-mono); letter-spacing: .08em; color: var(--text-muted); text-transform: uppercase; }
+.dp-pel-head small { margin-left: auto; font: 400 11px var(--font); color: var(--text-dim); text-transform: none; letter-spacing: 0; }
+.dp-pel-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; padding: 16px 18px; }
+.dp-pel-f label { display: block; font: 600 9px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 7px; }
+.dp-pel-f .in { display: flex; align-items: center; gap: 6px; height: 38px; padding: 0 10px; border-radius: 9px; border: 1px solid var(--border-light); background: var(--bg-elevated); }
+.dp-pel-f input { width: 100%; min-width: 0; background: transparent; border: none; color: var(--text-primary); font: 700 15px var(--font-mono); outline: none; }
+.dp-pel-f .in span { color: var(--text-dim); font: 500 12px var(--font-mono); }
+.dp-pel-f small { display: block; margin-top: 5px; font: 400 10.5px/1.4 var(--font); color: var(--text-dim); }
+.dp-pel-rez { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; padding: 0 18px 16px; }
+.dp-pel-k { border-radius: 10px; padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); }
+.dp-pel-k small { display: block; font: 600 9px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 7px; }
+.dp-pel-k b { font: 700 22px/1 var(--font-mono); letter-spacing: -.02em; }
+.dp-pel-k.gerai b { color: var(--success); } .dp-pel-k.blogai b { color: var(--danger); } .dp-pel-k.vid b { color: var(--warning); }
+.dp-pel-ai { margin: 0 18px 16px; padding: 12px 14px; border-radius: 10px; background: var(--accent-dim); border: 1px solid var(--accent-border); font: 400 12.5px/1.55 var(--font); color: var(--text-secondary); }
+.dp-pel-ai b { color: var(--text-primary); }
+@media (max-width: 720px) { .dp-pel-grid { grid-template-columns: 1fr 1fr; } .dp-pel-rez { grid-template-columns: 1fr; } }
+/* Analizes uzsakymo mygtukas */
+.dp-cta { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; background: var(--accent-dim); border: 1px solid var(--accent-border); }
+.dp-cta p { margin: 0; font: 400 13px/1.55 var(--font); color: var(--text-secondary); }
+.dp-cta button { height: 38px; padding: 0 16px; border-radius: 9px; border: none; background: var(--accent); color: #fff; font: 600 13px var(--font); cursor: pointer; }
+.dp-cta button:disabled { opacity: .6; cursor: default; }
+.dp-cta small { font: 400 11px var(--font); color: var(--text-dim); }
 </style>
 
 <style id="dp-mobile-responsive">
@@ -438,7 +476,7 @@ button{font-family:inherit;cursor:pointer}
     <!-- PHOTO COL -->
     <div class="dp-photo">
       <div class="dp-photo-main" id="dp-photo-main">
-        <img id="dp-main-img" src="" alt="" style="display:none">
+        <img id="dp-main-img" src="" alt="" style="display:none" onclick="dpLightbox(window.__dpPhotoIdx||0)" title="Padidinti">
         <div id="dp-no-photo" style="width:100%;height:100%;background:linear-gradient(135deg,#1a1f2e,#0d1020);display:flex;align-items:center;justify-content:center;color:var(--text-dim);font:500 11px var(--font-mono);letter-spacing:.1em">BEZ NUOTRAUKOS</div>
         <span class="dp-photo-count" id="dp-photo-count" style="display:none"></span>
         <button class="dp-nav dp-nav-l" id="dp-nav-l" onclick="dpPhotoNav(-1)" style="display:none">&#8249;</button>
@@ -531,7 +569,7 @@ button{font-family:inherit;cursor:pointer}
         <h4>Pelno potencialas</h4>
         <p id="dp-profit-text">Kraunama...</p>
       </div>
-      <button class="dp-pr-btn" onclick="dpTab('ai',document.querySelector('.dp-tab'))" style="margin-left:auto;flex:none;padding:7px 14px;border-radius:8px;border:1px solid var(--success-border);background:transparent;color:var(--success);font:600 12px var(--font-sans);cursor:pointer;white-space:nowrap">Analizuoti →</button>
+      <button class="dp-pr-btn" id="dp-pelno-btn" onclick="dpPelnoToggle()" style="margin-left:auto;flex:none;padding:7px 14px;border-radius:8px;border:1px solid var(--success-border);background:transparent;color:var(--success);font:600 12px var(--font-sans);cursor:pointer;white-space:nowrap">Skaičiuoti →</button>
     </div>
     <div class="dp-pr-block risk">
       <div class="dp-pr-icon">
@@ -541,8 +579,24 @@ button{font-family:inherit;cursor:pointer}
         <h4>Rizikos</h4>
         <p id="dp-risk-text">Kraunama...</p>
       </div>
-      <button class="dp-pr-btn" onclick="dpTab('risk',document.querySelectorAll('.dp-tab')[2])" style="margin-left:auto;flex:none;padding:7px 14px;border-radius:8px;border:1px solid var(--warning-border);background:transparent;color:var(--warning);font:600 12px var(--font-sans);cursor:pointer;white-space:nowrap">Peržiūrėti →</button>
+      <button class="dp-pr-btn" onclick="dpTab('risk',document.querySelectorAll('.dp-tab')[2]);document.getElementById('dp-pane-risk').scrollIntoView({behavior:'smooth',block:'start'})" style="margin-left:auto;flex:none;padding:7px 14px;border-radius:8px;border:1px solid var(--warning-border);background:transparent;color:var(--warning);font:600 12px var(--font-sans);cursor:pointer;white-space:nowrap">Peržiūrėti →</button>
     </div>
+  </div>
+  <!-- PELNO SKAICIUOKLE: pirkimo kaina, remontas, islaidos, pardavimo kaina -> pelnas, marza, ROI -->
+  <div id="dp-pelno">
+    <div class="dp-pel-head">Pelno skaičiuoklė<small>keiskite skaičius – rezultatas atsinaujina iš karto</small></div>
+    <div class="dp-pel-grid">
+      <div class="dp-pel-f"><label>Pirkimo kaina</label><div class="in"><input type="number" id="pel-pirkimas" inputmode="numeric"><span>€</span></div><small>skelbimo kaina; įrašykite, už kiek realiai nusiderėtumėte</small></div>
+      <div class="dp-pel-f"><label>Remontas / tvarkymas</label><div class="in"><input type="number" id="pel-remontas" inputmode="numeric"><span>€</span></div><small id="pel-remontas-h">AI įvertis pagal aprašymą ir nuotraukas</small></div>
+      <div class="dp-pel-f"><label>Kitos išlaidos</label><div class="in"><input type="number" id="pel-kitos" inputmode="numeric"><span>€</span></div><small>transportas, registracija, TA, skelbimai, komisiniai</small></div>
+      <div class="dp-pel-f"><label>Pardavimo kaina</label><div class="in"><input type="number" id="pel-pardavimas" inputmode="numeric"><span>€</span></div><small id="pel-pardavimas-h">rinkos vidurkis šiam modeliui</small></div>
+    </div>
+    <div class="dp-pel-rez">
+      <div class="dp-pel-k" id="pel-k-pelnas"><small>Grynas pelnas</small><b id="pel-pelnas">–</b></div>
+      <div class="dp-pel-k" id="pel-k-marza"><small>Marža nuo pardavimo</small><b id="pel-marza">–</b></div>
+      <div class="dp-pel-k" id="pel-k-roi"><small>Grąža nuo investicijos (ROI)</small><b id="pel-roi">–</b></div>
+    </div>
+    <div class="dp-pel-ai" id="pel-ai" style="display:none"></div>
   </div>
 
   <!-- TABS -->
@@ -752,8 +806,61 @@ window.ctApi = function (kelias, params) {
     dpShowPhoto(_photoIdx);
   };
 
+  // ---- LIGHTBOX: nuotrauku didinimas (klavisai ←/→/Esc, braukimas telefone)
+  var _lbIdx = 0, _lbTouchX = null;
+  function dpLbEl() {
+    var lb = document.getElementById('dp-lb');
+    if (lb) return lb;
+    lb = document.createElement('div'); lb.id = 'dp-lb';
+    lb.innerHTML = '<span class="dp-lb-n" id="dp-lb-n"></span><button class="dp-lb-btn dp-lb-x" onclick="dpLbClose()" title="Uždaryti (Esc)">✕</button>'
+      + '<button class="dp-lb-btn dp-lb-l" onclick="event.stopPropagation();dpLbNav(-1)" title="Ankstesnė (←)">‹</button>'
+      + '<img id="dp-lb-img" alt="">'
+      + '<button class="dp-lb-btn dp-lb-r" onclick="event.stopPropagation();dpLbNav(1)" title="Kita (→)">›</button>'
+      + '<span class="dp-lb-hint">← → naršyti · Esc uždaryti · paspauskite nuotrauką, kad uždarytumėte</span>';
+    lb.addEventListener('click', function (e) { if (e.target === lb || e.target.id === 'dp-lb-img') dpLbClose(); });
+    lb.addEventListener('touchstart', function (e) { _lbTouchX = e.touches[0].clientX; }, { passive: true });
+    lb.addEventListener('touchend', function (e) { if (_lbTouchX == null) return; var dx = e.changedTouches[0].clientX - _lbTouchX; _lbTouchX = null; if (Math.abs(dx) > 40) dpLbNav(dx < 0 ? 1 : -1); }, { passive: true });
+    document.body.appendChild(lb);
+    return lb;
+  }
+  window.dpLightbox = function (idx) {
+    if (!_photos.length) return;
+    var lb = dpLbEl(); _lbIdx = Math.max(0, Math.min(idx || 0, _photos.length - 1));
+    dpLbPiesti(); lb.classList.add('open'); document.body.style.overflow = 'hidden';
+  };
+  function dpLbPiesti() {
+    var img = document.getElementById('dp-lb-img'); if (!img) return;
+    img.src = _photos[_lbIdx];
+    document.getElementById('dp-lb-n').textContent = (_lbIdx + 1) + ' / ' + _photos.length;
+    var l = document.querySelector('.dp-lb-l'), r = document.querySelector('.dp-lb-r');
+    if (l) l.style.display = _photos.length > 1 ? '' : 'none'; if (r) r.style.display = _photos.length > 1 ? '' : 'none';
+    [_lbIdx + 1, _lbIdx - 1].forEach(function (i) { if (_photos[i]) { var pre = new Image(); pre.src = _photos[i]; } });
+  }
+  window.dpLbNav = function (d) { if (!_photos.length) return; _lbIdx = (_lbIdx + d + _photos.length) % _photos.length; dpLbPiesti(); dpShowPhoto(_lbIdx); };
+  window.dpLbClose = function () { var lb = document.getElementById('dp-lb'); if (!lb) return; lb.classList.remove('open'); document.body.style.overflow = ''; };
+  document.addEventListener('keydown', function (e) {
+    var lb = document.getElementById('dp-lb'); if (!lb || !lb.classList.contains('open')) return;
+    if (e.key === 'Escape') dpLbClose(); else if (e.key === 'ArrowRight') dpLbNav(1); else if (e.key === 'ArrowLeft') dpLbNav(-1);
+  });
+
+  // Serverio atfiltruotos nuotraukos (be reklamu/logotipu) ir pardavejo logotipas
+  function dpTaikytiNuotraukas(resp) {
+    if (!resp) return;
+    var naujos = Array.isArray(resp.photos) ? resp.photos : null;
+    if (naujos && naujos.length && naujos.join('|') !== _photos.join('|')) {
+      _photos = naujos; window.__dpPhotos = naujos;
+      buildThumbs(naujos); dpShowPhoto(0); buildPhotosGrid(naujos);
+      var cnt = document.getElementById('dp-photo-count-label'); if (cnt) cnt.textContent = naujos.length + ' nuotraukų' + (resp.atmestuNuotrauku ? ' · ' + resp.atmestuNuotrauku + ' reklaminė(s) paslėpta(os)' : '');
+      try { var det = JSON.parse(localStorage.getItem('ct_detail') || '{}'); det.photos = naujos; localStorage.setItem('ct_detail', JSON.stringify(det)); } catch (e) {}
+    }
+    if (resp.pardavejoLogo) {
+      var ic = document.getElementById('dp-seller-icon');
+      if (ic) ic.innerHTML = '<img src="' + resp.pardavejoLogo.replace(/"/g, '&quot;') + '" alt="Pardavėjo logotipas" style="width:100%;height:100%;object-fit:cover;display:block;background:#fff">';
+    }
+  }
+
   function dpShowPhoto(idx) {
-    _photoIdx = idx;
+    _photoIdx = idx; window.__dpPhotoIdx = idx;
     var img = document.getElementById('dp-main-img');
     var noPhoto = document.getElementById('dp-no-photo');
     var count = document.getElementById('dp-photo-count');
@@ -789,13 +896,14 @@ window.ctApi = function (kelias, params) {
           ov.style.cssText = 'position:absolute;inset:0;background:rgba(10,12,18,.6);display:flex;align-items:center;justify-content:center;font:600 12px var(--font-mono);color:var(--text-secondary)';
           ov.textContent = '+' + (photos.length - 4);
           d.appendChild(ov);
+          d.title = 'Visos nuotraukos';
         } else {
           var img = document.createElement('img');
           img.src = photos[i];
           img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
           d.appendChild(img);
         }
-        d.onclick = function() { dpShowPhoto(i); };
+        d.onclick = function() { if (i === 4 && photos.length > 5) { dpShowPhoto(i); dpLightbox(i); } else dpShowPhoto(i); };
         el.appendChild(d);
       })(i);
     }
@@ -821,7 +929,8 @@ window.ctApi = function (kelias, params) {
       var img = document.createElement('img');
       img.src = url;
       img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
-      img.onclick = (function(i2) { return function() { dpShowPhoto(i2); dpTab('ai', document.querySelectorAll('.dp-tab')[0]); }; })(i);
+      img.onclick = (function(i2) { return function() { dpShowPhoto(i2); dpLightbox(i2); }; })(i);
+      img.title = 'Padidinti';
       div.appendChild(img);
       grid.appendChild(div);
     });
@@ -865,14 +974,9 @@ window.ctApi = function (kelias, params) {
         });
       }
       if (resultBox) resultBox.style.display = 'block';
-      // Also update new photos if fetched more
-      var newPhotos = resp.photos || [];
-      if (newPhotos.length > (window.__dpPhotos || []).length) {
-        _photos = newPhotos;
-        window.__dpPhotos = newPhotos;
-        buildThumbs(newPhotos);
-        dpShowPhoto(0);
-        buildPhotosGrid(newPhotos);
+      // Also update photos (serveris grazina jau atfiltruotas - be reklamu/logotipu)
+      dpTaikytiNuotraukas(resp);
+      if (false) {
         var lbl = document.getElementById('dp-photo-count-label');
         if (lbl) lbl.textContent = newPhotos.length + ' nuotrauk' + (newPhotos.length === 1 ? 'a' : newPhotos.length < 10 ? 'os' : 'ų');
       }
@@ -1008,6 +1112,7 @@ window.ctApi = function (kelias, params) {
         var det = JSON.parse(localStorage.getItem('ct_detail') || '{}');
         det.analysis = resp.analysis;
         if (resp.photos && resp.photos.length) det.photos = resp.photos;
+        if (resp.pardavejoLogo) det.pardavejoLogo = resp.pardavejoLogo;
         localStorage.setItem('ct_detail', JSON.stringify(det));
       } catch (e) {}
       load();
@@ -1103,9 +1208,10 @@ window.ctApi = function (kelias, params) {
       'otomoto.pl':      { abbr:'OT', bg:'#C0392B', country:'🇵🇱 Lenkija' },
     };
     var pm = portalMeta[c.source] || { abbr:'?', bg:'#6b7280', country:'🌐' };
-    // Seller icon
-    document.getElementById('dp-seller-icon').innerHTML =
-      '<div style="width:100%;height:100%;background:'+pm.bg+';border-radius:12px;display:grid;place-items:center;color:#fff;font:700 13px/1 var(--font-mono);">'+pm.abbr+'</div>';
+    // Seller icon (pardavejo logotipas is analizes, jei rastas; kitaip portalo zenklas)
+    document.getElementById('dp-seller-icon').innerHTML = data.pardavejoLogo
+      ? '<img src="' + String(data.pardavejoLogo).replace(/"/g, '&quot;') + '" alt="Pardavėjo logotipas" style="width:100%;height:100%;object-fit:cover;display:block;background:#fff">'
+      : '<div style="width:100%;height:100%;background:'+pm.bg+';border-radius:12px;display:grid;place-items:center;color:#fff;font:700 13px/1 var(--font-mono);">'+pm.abbr+'</div>';
     // Seller name + verified badge (verslo = verified)
     document.getElementById('dp-seller-name').textContent = c.pardavejas || c.source || '—';
     document.getElementById('dp-seller-type').textContent = c.yraVerslas ? 'Verslo pardavėjas' : 'Privatus pardavėjas';
@@ -1160,19 +1266,24 @@ window.ctApi = function (kelias, params) {
       barsEl.appendChild(div);
     });
 
+    window.__dpAnalysis = a || null;
     var pr = a && a.perikupo_radaras;
+    var prZodis = { aukstas: 'aukštas', vidutinis: 'vidutinis', zemas: 'žemas', neverta: 'neverta' };
     if (pr && pr.pelno_potencialas) {
-      document.getElementById('dp-profit-text').textContent = pr.pelno_potencialas;
+      document.getElementById('dp-profit-text').textContent = (prZodis[pr.pelno_potencialas] || pr.pelno_potencialas) + (pr.procentas != null ? ' · ~' + pr.procentas + '%' : '') + (pr.numatomas_pardavimo_diapazonas ? ' · parduoti už ' + pr.numatomas_pardavimo_diapazonas : '');
     } else if (pr && pr.procentas != null) {
       document.getElementById('dp-profit-text').textContent = 'Apytiksliai ' + pr.procentas + '% grąža';
     } else {
-      document.getElementById('dp-profit-text').textContent = 'Reikia analizės duomenų';
+      document.getElementById('dp-profit-text').textContent = 'Įveskite savo skaičius – skaičiuoklė veikia ir be AI analizės';
     }
     var riskTexts = [];
     if (!c.turiVin) riskTexts.push('VIN skelbime nenurodytas');
-    if (!c.turiIstorijosAtaskaita) riskTexts.push('Istorijos ataskaita nerasta');
-    if (a && a.rizikos && a.rizikos.length) riskTexts = [a.rizikos[0]];
-    document.getElementById('dp-risk-text').textContent = riskTexts.join('; ') || 'Nėra nustatytų rizikų';
+    if (!c.turiIstorijosAtaskaita) riskTexts.push('istorijos ataskaita nepridėta');
+    var rizikuKiekis = (a && a.rizikos && a.rizikos.length) || 0;
+    if (rizikuKiekis) riskTexts = a.rizikos.slice(0, 2).concat(rizikuKiekis > 2 ? ['+' + (rizikuKiekis - 2) + ' daugiau'] : []);
+    document.getElementById('dp-risk-text').textContent = riskTexts.join(' · ') || 'Nėra nustatytų rizikų';
+    var rizH = document.querySelector('.dp-pr-block.risk h4'); if (rizH) rizH.textContent = 'Rizikos' + (rizikuKiekis ? ' (' + rizikuKiekis + ')' : '');
+    dpPelnoPildyti(c, a);
 
     _photos = photos;
     if (photos.length) { buildThumbs(photos); dpShowPhoto(0); }
@@ -1216,6 +1327,7 @@ window.ctApi = function (kelias, params) {
       if (!patEl.children.length) patEl.innerHTML = '<li><span class="bullet amber">!</span>Duomenų nepakanka</li>';
 
       var irangaEl = document.getElementById('dp-iranga');
+      irangaEl.innerHTML = '';
       (a.irangos_akcentai || []).forEach(function(item) {
         var d = document.createElement('div');
         d.className = 'dp-equip-item';
@@ -1226,14 +1338,18 @@ window.ctApi = function (kelias, params) {
     } else {
       // Naršymo režime gili analizė nedaroma iš karto (taupomos užklausos),
       // tad atidarius skelbimą ją užsakom automatiškai, o ne rodom tuščią langą.
+      // PAKEISTA: analize kainuoja kredita, todel nebeuzsakom automatiskai - rodom aiskų mygtuką
       document.getElementById('dp-ai-body').innerHTML =
-        '<span style="display:inline-flex;align-items:center;gap:8px;color:var(--text-secondary);">'
-        + '<span class="dp-spin" style="width:13px;height:13px;border:2px solid rgba(255,255,255,.18);border-top-color:var(--accent);border-radius:50%;display:inline-block;animation:dpspin .8s linear infinite;"></span>'
-        + 'Ruošiama išsami analizė – nuskaitomas skelbimas, nuotraukos ir pardavėjo duomenys…</span>';
-      document.getElementById('dp-privalumai').innerHTML = '<li><span class="bullet green">✓</span>Kraunama…</li>';
-      document.getElementById('dp-patikrinti').innerHTML = '<li><span class="bullet amber">!</span>Kraunama…</li>';
-      document.getElementById('dp-iranga').innerHTML = '<div style="color:var(--text-muted);font-size:12.5px">Kraunama…</div>';
-      if (c.url) dpUzsakytiAnalize(c);
+        '<div class="dp-cta"><p>Išsami AI analizė šiam skelbimui dar neparuošta: pilnas aprašymas, visos nuotraukos (be reklamų), VIN, pardavėjas, rizikos ir derybų patarimai.</p>'
+        + '<button id="dp-analize-cta" onclick="dpPradetiAnalize()">Paruošti išsamią analizę · 1 kr</button>'
+        + '<small>Jei šis skelbimas buvo analizuotas per paskutines 24 val., kreditas nenuskaitomas.</small></div>';
+      document.getElementById('dp-privalumai').innerHTML = '';
+      document.getElementById('dp-patikrinti').innerHTML = '';
+      document.getElementById('dp-iranga').innerHTML = '<div style="color:var(--text-muted);font-size:12.5px">Įranga bus išskirta po analizės</div>';
+      window.dpPradetiAnalize = function () {
+        var b = document.getElementById('dp-analize-cta'); if (b) { b.disabled = true; b.innerHTML = '<span class="dp-spin" style="width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;display:inline-block;vertical-align:-2px;margin-right:8px;animation:dpspin .8s linear infinite"></span>Ruošiama – nuskaitomas skelbimas, nuotraukos, pardavėjas…'; }
+        if (c.url) dpUzsakytiAnalize(c);
+      };
     }
 
     // --- TECH TAB ---
@@ -1404,12 +1520,15 @@ window.ctApi = function (kelias, params) {
       html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden">';
       html += '<div style="padding:12px 16px;border-bottom:1px solid var(--border);font-weight:700;font-size:12px;letter-spacing:.06em;color:var(--text-muted)">ISTORIJOS ATASKAITA</div>';
       html += '<div style="padding:14px 16px;display:flex;gap:12px;align-items:center">';
+      // PAKEISTA: paaiskinam, KAS tai per ataskaita ir KUR ja rasti (portalo "Patikrinta istorija" / Autoistorija.lt)
+      var portalas = c.source || 'portale';
       if (c.turiIstorijosAtaskaita) {
         html += '<span style="width:36px;height:36px;border-radius:50%;background:rgba(34,197,94,.12);display:grid;place-items:center;flex:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></span>';
-        html += '<div><div style="font-weight:700;font-size:13px">Ataskaita prieinama</div><div style="font-size:12px;color:var(--text-muted);margin-top:2px">Istorijos ataskaita šiam automobiliui yra</div></div>';
+        html += '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px">Pardavėjas pridėjo istorijos ataskaitą</div><div style="font-size:12px;color:var(--text-muted);margin-top:3px;line-height:1.5">Skelbime ' + portalas + ' yra ženklelis „Patikrinta istorija“ – prie jo prisegta <b style="color:var(--text-secondary)">Autoistorija.lt</b> (arba analogiška) ataskaita: rida per apžiūras, žinomi įvykiai, savininkų skaičius. Ją atsidarysite pačiame skelbime, skiltyje „Istorija“ – tai nemokama.</div>'
+          + '<a href="' + (c.url || '#') + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin-top:9px;padding:7px 12px;border-radius:8px;border:1px solid var(--border-light);color:var(--text-primary);font:600 12px var(--font);text-decoration:none">Atidaryti ataskaitą skelbime ↗</a></div>';
       } else {
         html += '<span style="width:36px;height:36px;border-radius:50%;background:rgba(245,158,11,.12);display:grid;place-items:center;flex:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>';
-        html += '<div><div style="font-weight:700;font-size:13px">Ataskaita nerasta</div><div style="font-size:12px;color:var(--text-muted);margin-top:2px">Istorijos ataskaita neprieinama</div></div>';
+        html += '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px">Pardavėjas istorijos ataskaitos nepridėjo</div><div style="font-size:12px;color:var(--text-muted);margin-top:3px;line-height:1.5">Skelbime nėra ženklelio „Patikrinta istorija“ (Autoistorija.lt ataskaitos). Ką daryti: ' + (c.turiVin ? 'užsakykite VIN istoriją aukščiau (1 kr) – gausite ridos, įvykių ir savininkų istoriją' : 'paprašykite pardavėjo VIN kodo ir ataskaitos – rimtas pardavėjas ją turi') + '.</div></div>';
       }
       html += '</div></div></div>';
       document.getElementById('dp-pane-vin').innerHTML = html;
@@ -1649,15 +1768,17 @@ window.ctApi = function (kelias, params) {
       renderSellerBase(null);
     })();
 
-    // Auto-fetch nuotraukos jei neturime (ne-TOP5 skelbimai turi tik 1 thumbnail)
-    if (c.url && photos.length < 2) {
+    // PAKEISTA: visos nuotraukos ateina kartu su analize (1 kr) - automatiskai nebekvieciam,
+    // kad kreditas nebutu nuskaitytas be vartotojo zinios.
+    if (c.url && photos.length < 2 && !a) {
       var photoLoadMsg = document.createElement('div');
       photoLoadMsg.id = 'dp-photo-load-msg';
       photoLoadMsg.style.cssText = 'text-align:center;padding:16px;color:var(--text-muted);font-size:13px';
-      photoLoadMsg.textContent = '⏳ Kraunamos visos nuotraukos iš skelbimo...';
+      photoLoadMsg.innerHTML = 'Rodoma tik skelbimo miniatiūra. Visos nuotraukos (be reklamų ir logotipų) įkeliamos kartu su išsamia analize – <a href="#" onclick="event.preventDefault();dpTab(\'ai\',document.querySelector(\'.dp-tab\'));if(window.dpPradetiAnalize)dpPradetiAnalize();" style="color:var(--accent-light)">paruošti analizę · 1 kr</a>.';
       var pgrid = document.getElementById('dp-photos-grid');
       if (pgrid) pgrid.insertBefore(photoLoadMsg, pgrid.firstChild);
-
+    }
+    if (false) {
       ctApi('/api/analyze-single', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -1669,16 +1790,7 @@ window.ctApi = function (kelias, params) {
       }).then(function(r) { return r.json(); }).then(function(resp) {
         var msg = document.getElementById('dp-photo-load-msg');
         if (msg) msg.remove();
-        var newPhotos = resp.photos || [];
-        if (newPhotos.length > photos.length) {
-          _photos = newPhotos;
-          window.__dpPhotos = newPhotos;
-          buildThumbs(newPhotos);
-          dpShowPhoto(0);
-          buildPhotosGrid(newPhotos);
-          // Atnaujinti AI tab photo strip
-
-        }
+        dpTaikytiNuotraukas(resp);
       }).catch(function() {
         var msg = document.getElementById('dp-photo-load-msg');
         if (msg) msg.remove();
@@ -1686,6 +1798,46 @@ window.ctApi = function (kelias, params) {
     }
 
   }
+
+  // ---- PELNO SKAICIUOKLE
+  function dpSkaicius(t) { if (t == null) return null; if (typeof t === 'number') return t; var m = String(t).replace(/\s/g, '').match(/(\d{3,6})/g); if (!m) return null; if (m.length >= 2) return Math.round((parseInt(m[0], 10) + parseInt(m[1], 10)) / 2); return parseInt(m[0], 10); }
+  function dpPelnoPildyti(c, a) {
+    var pr = (a && a.perikupo_radaras) || {};
+    var key = 'ct_pelnas_' + (c.url || '');
+    var issaugota = null; try { issaugota = JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) {}
+    var remontas = dpSkaicius(pr.numatoma_investicija), pardavimas = dpSkaicius(pr.numatomas_pardavimo_diapazonas) || c.marketMedian || null;
+    var v = issaugota || { pirkimas: c.kaina || '', remontas: remontas != null ? remontas : '', kitos: 300, pardavimas: pardavimas || '' };
+    // AI iverciai turi pirmenybe, kol vartotojas pats nekeite lauku
+    if (issaugota && !issaugota.keista) { if (remontas != null) v.remontas = remontas; if (pardavimas) v.pardavimas = pardavimas; }
+    ['pirkimas', 'remontas', 'kitos', 'pardavimas'].forEach(function (k) { var el = document.getElementById('pel-' + k); if (el) { el.value = v[k] === null ? '' : v[k]; el.oninput = function () { dpPelnoSkaiciuoti(key, true); }; } });
+    var rh = document.getElementById('pel-remontas-h'); if (rh) rh.textContent = remontas != null ? 'AI įvertis: ' + pr.numatoma_investicija : (a ? 'AI remonto poreikio neįvertino – įrašykite patys' : 'įrašykite numatomas remonto išlaidas');
+    var ph = document.getElementById('pel-pardavimas-h'); if (ph) ph.textContent = pr.numatomas_pardavimo_diapazonas ? 'AI po sutvarkymo: ' + pr.numatomas_pardavimo_diapazonas : (c.marketMedian ? 'rinkos vidurkis: ' + Number(c.marketMedian).toLocaleString('lt-LT') + ' €' : 'įrašykite realią pardavimo kainą');
+    var ai = document.getElementById('pel-ai');
+    if (ai) { if (pr.paaiskinimas || pr.pelno_potencialas) { ai.style.display = ''; ai.innerHTML = '<b>AI vertinimas: ' + (({ aukstas: 'aukštas', vidutinis: 'vidutinis', zemas: 'žemas', neverta: 'neverta' })[pr.pelno_potencialas] || pr.pelno_potencialas || '–') + (pr.procentas != null ? ' (' + pr.procentas + '/100)' : '') + '.</b> ' + (pr.paaiskinimas || ''); } else ai.style.display = 'none'; }
+    dpPelnoSkaiciuoti(null);
+  }
+  window.dpPelnoSkaiciuoti = function (key, keista) {
+    var g = function (id) { var el = document.getElementById(id); var n = parseFloat(el && el.value); return isNaN(n) ? 0 : n; };
+    var pirk = g('pel-pirkimas'), rem = g('pel-remontas'), kit = g('pel-kitos'), pard = g('pel-pardavimas');
+    var invest = pirk + rem + kit, pelnas = pard - invest;
+    var marza = pard > 0 ? pelnas / pard * 100 : null, roi = invest > 0 ? pelnas / invest * 100 : null;
+    var f = function (n) { return (n < 0 ? '−' : '') + Math.abs(Math.round(n)).toLocaleString('lt-LT').replace(/,/g, ' ') + ' €'; };
+    var kl = function (n) { return n == null ? '' : (n >= 10 ? 'gerai' : (n >= 0 ? 'vid' : 'blogai')); };
+    var set = function (id, kid, txt, cls) { var el = document.getElementById(id); if (el) el.textContent = txt; var k = document.getElementById(kid); if (k) k.className = 'dp-pel-k ' + cls; };
+    if (!pard || !pirk) { set('pel-pelnas', 'pel-k-pelnas', '–', ''); set('pel-marza', 'pel-k-marza', '–', ''); set('pel-roi', 'pel-k-roi', '–', ''); return; }
+    set('pel-pelnas', 'pel-k-pelnas', f(pelnas), pelnas >= 1000 ? 'gerai' : (pelnas >= 0 ? 'vid' : 'blogai'));
+    set('pel-marza', 'pel-k-marza', marza == null ? '–' : Math.round(marza) + ' %', kl(marza));
+    set('pel-roi', 'pel-k-roi', roi == null ? '–' : Math.round(roi) + ' %', kl(roi));
+    if (key && keista) { try { localStorage.setItem(key, JSON.stringify({ pirkimas: pirk, remontas: rem, kitos: kit, pardavimas: pard, keista: true })); } catch (e) {} }
+  };
+  window.dpPelnoToggle = function () {
+    var p = document.getElementById('dp-pelno'), b = document.getElementById('dp-pelno-btn');
+    if (!p) return;
+    var open = !p.classList.contains('open');
+    p.classList.toggle('open', open);
+    if (b) b.textContent = open ? 'Slėpti ▴' : 'Skaičiuoti →';
+    if (open) { p.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); var i = document.getElementById('pel-pirkimas'); if (i) i.focus(); }
+  };
 
   function showEmpty() {
     document.getElementById('dp-empty').style.display = '';
@@ -1723,5 +1875,6 @@ window.ctApi = function (kelias, params) {
 </script>
 <script src="versijos.js"></script>
 <script src="megstami-meniu.js"></script>
+<script src="paskyra-meniu.js"></script>
 </body>
 </html>

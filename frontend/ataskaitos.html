@@ -87,10 +87,11 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 
 <script src="versijos.js"></script>
 <script src="megstami-meniu.js"></script>
+<script src="paskyra-meniu.js"></script>
 <script src="ct-bendras.js"></script>
 <script>
 const TIPAI = { analize: ['Gili analizė', '🔬'], palyginimas: ['Palyginimas', '⚖️'], vin: ['VIN istorija', '🔑'], pardavejas: ['Pardavėjas', '🏢'] };
-let visos = [], filtras = '';
+let visos = [], filtras = (function () { try { return new URLSearchParams(location.search).get('tipas') || ''; } catch (e) { return ''; } })();
 
 (async function () {
   const el = document.getElementById('sarasas');
