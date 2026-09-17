@@ -1607,22 +1607,26 @@ async function runSearchJob(jobId, filters) {
             `   ⚖️ ${label} - sudarau privalumų/rizikų sąrašą...`,
           ]);
           try {
-            const { title, fullText, photo: detailPhoto, photos: detailPhotos, vin, pardavejas } = await scrapeSingleListing(c.url);
+            const { title, fullText, photo: detailPhoto, photos: detailPhotos, vin, vinPrefiksas, pardavejas } = await scrapeSingleListing(c.url);
             const marketContext = { kaina: c.kaina, marketMedian: c.marketMedian, marketCount: c.marketCount, diffPct: c.diffPct, modelis: c.modelis, galia: c.galia, variklioTuris: c.variklioTuris };
             const analysis = await generateDeepAnalysis(title, fullText, detailPhotos, marketContext, c.url);
             c.deepAnalysis = analysis;
             c.vin = vin;
             c.pardavejas = pardavejas || c.pardavejas;
             c.photos = detailPhotos;
-            const vinInfo = sujungtiVin(vin, analysis);
+            const vinInfo = sujungtiVin(vin, analysis, vinPrefiksas);
             c.vin = vinInfo.vin;
             c.vinSaltinis = vinInfo.vinSaltinis;
             c.vinIsNuotraukos = vinInfo.vinIsNuotraukos;
+            c.vinPrefiksas = vinInfo.vinPrefiksas;
+            c.vinPatvirtintasPrefiksu = vinInfo.vinPatvirtintasPrefiksu;
+            c.vinNesutapimas = vinInfo.vinNesutapimas;
             if (vinInfo.vin && !c.turiVin) c.turiVin = true; // VIN rastas - istorijos komponentas pagerėja
             cache.setCached('analysis', c.url, {
               title, photo: detailPhoto, photos: detailPhotos, analysis,
               vin: vinInfo.vin, vinSaltinis: vinInfo.vinSaltinis, vinIsNuotraukos: vinInfo.vinIsNuotraukos,
-              pardavejas,
+              vinPrefiksas: vinInfo.vinPrefiksas, vinPatvirtintasPrefiksu: vinInfo.vinPatvirtintasPrefiksu,
+              vinNesutapimas: vinInfo.vinNesutapimas, pardavejas,
             });
           } finally {
             stopFake();
@@ -1843,12 +1847,21 @@ async function scrapeSingleListing(url) {
   const vinMatch = fullText.match(/\b[A-HJ-NPR-Z0-9]{17}\b/);
   const vin = vinMatch ? vinMatch[0] : null;
 
+  // Autoplius pilna VIN rodo TIK prisijungusiems - neprisijungusiam matoma tik pradzia,
+  // pvz "WBATA610... Rodyti". Ta pradzia issaugom: ja galima panaudoti VIN'ui,
+  // nuskaitytam is nuotraukos, patikrinti (jei pradzios sutampa - beveik garantija,
+  // kad AI nuskaite teisingai).
+  let vinPrefiksas = null;
+  const prefMatch = fullText.match(/\b([A-HJ-NPR-Z0-9]{6,12})\.{3}\s*Rodyti/i)
+    || fullText.match(/K\u0117bulo numeris \(VIN\)\s*([A-HJ-NPR-Z0-9]{6,12})\.{3}/i);
+  if (prefMatch) vinPrefiksas = prefMatch[1].toUpperCase();
+
   // Pardavejo/dilerio pavadinimas - dazniausiai eina tiesiai pries "Tapatybe patvirtinta"
   // zyma (verslo pardavejams), pvz "AK AUTO Tapatybe patvirtinta" arba "MOLLER AUTO... Tapatybe patvirtinta".
   const sellerMatch = fullText.match(/([A-ZŠČŽĄĘĖĮŲŪ][A-Za-zŠčČžŽąĄęĘėĖįĮųŲūŪ0-9\s,.\-]{2,60}?)\s*Tapatybė patvirtinta/);
   const pardavejas = sellerMatch ? sellerMatch[1].trim() : null;
 
-  return { title, fullText, photo, photos, vin, pardavejas };
+  return { title, fullText, photo, photos, vin, vinPrefiksas, pardavejas };
 }
 
 // ============ VIN ISTORIJOS PAIESKA INTERNETE ============
@@ -2166,13 +2179,15 @@ app.post('/api/analyze-single', async (req, res) => {
       }
     }
 
-    const { title, fullText, photo, photos, vin, pardavejas } = await scrapeSingleListing(url);
+    const { title, fullText, photo, photos, vin, vinPrefiksas, pardavejas } = await scrapeSingleListing(url);
     const marketContext = marketMedian ? { kaina, marketMedian, marketCount, diffPct, modelis, galia, variklioTuris } : null;
     const analysis = await generateDeepAnalysis(title, fullText, photos, marketContext, url);
-    const vinInfo = sujungtiVin(vin, analysis);
+    const vinInfo = sujungtiVin(vin, analysis, vinPrefiksas);
     const result = {
       title, photo, photos, analysis,
       vin: vinInfo.vin, vinSaltinis: vinInfo.vinSaltinis, vinIsNuotraukos: vinInfo.vinIsNuotraukos,
+      vinPrefiksas: vinInfo.vinPrefiksas, vinPatvirtintasPrefiksu: vinInfo.vinPatvirtintasPrefiksu,
+      vinNesutapimas: vinInfo.vinNesutapimas,
       pardavejas: pardavejas || knownPardavejas || null,
     };
     cache.setCached('analysis', url, result);
@@ -2193,12 +2208,13 @@ async function paruostiPilnaProfili(url, kontekstas) {
   if (cached && cached.analysis) {
     return { url, ...cached, isPodelio: true };
   }
-  const { title, fullText, photo, photos, vin, pardavejas } = await scrapeSingleListing(url);
+  const { title, fullText, photo, photos, vin, vinPrefiksas, pardavejas } = await scrapeSingleListing(url);
   const analysis = await generateDeepAnalysis(title, fullText, photos, kontekstas || null, url);
-  const vinInfo = sujungtiVin(vin, analysis);
+  const vinInfo = sujungtiVin(vin, analysis, vinPrefiksas);
   const result = {
     title, photo, photos, analysis,
     vin: vinInfo.vin, vinSaltinis: vinInfo.vinSaltinis, vinIsNuotraukos: vinInfo.vinIsNuotraukos,
+    vinPrefiksas: vinInfo.vinPrefiksas, vinPatvirtintasPrefiksu: vinInfo.vinPatvirtintasPrefiksu,
     pardavejas: pardavejas || null,
   };
   cache.setCached('analysis', url, result);
@@ -2314,19 +2330,31 @@ app.post('/api/compare-deep', requireAuth, async (req, res) => {
 // Sujungia VIN is skelbimo teksto ir is nuotraukos. Tekstas turi pirmenybe,
 // bet kai jo nera, VIN is nuotraukos yra pilnavertis radinys - tik aiskiai
 // pazymim saltini, kad vartotojas zinotu, is kur jis atsirado.
-function sujungtiVin(vinIsTeksto, analysis) {
+function sujungtiVin(vinIsTeksto, analysis, vinPrefiksas) {
   if (vinIsTeksto) {
-    return { vin: normalizuotiVin(vinIsTeksto), vinSaltinis: 'skelbimo tekstas', vinIsNuotraukos: false };
+    return { vin: normalizuotiVin(vinIsTeksto), vinSaltinis: 'skelbimo tekstas', vinIsNuotraukos: false, vinPrefiksas: vinPrefiksas || null };
   }
   const isNuotr = analysis && analysis.vin_is_nuotraukos;
   if (arGaliojantisVin(isNuotr)) {
+    const vin = normalizuotiVin(isNuotr);
+    // Kryzmine patikra: jei portalas rodo VIN pradzia, ji turi sutapti su tuo,
+    // ka AI nuskaite is nuotraukos. Nesutapimas reiskia, kad arba nuotraukoje
+    // kito automobilio lipdukas, arba AI suklydo - tokio VIN geriau nerodyti.
+    if (vinPrefiksas && !vin.startsWith(vinPrefiksas)) {
+      return {
+        vin: null, vinSaltinis: null, vinIsNuotraukos: false, vinPrefiksas,
+        vinNesutapimas: `Nuotraukoje nuskaitytas ${vin} nesutampa su skelbime rodoma pradžia ${vinPrefiksas}…`,
+      };
+    }
     return {
-      vin: normalizuotiVin(isNuotr),
+      vin,
       vinSaltinis: (analysis.vin_nuotraukos_vieta || 'skelbimo nuotrauka'),
       vinIsNuotraukos: true,
+      vinPatvirtintasPrefiksu: !!vinPrefiksas,
+      vinPrefiksas: vinPrefiksas || null,
     };
   }
-  return { vin: null, vinSaltinis: null, vinIsNuotraukos: false };
+  return { vin: null, vinSaltinis: null, vinIsNuotraukos: false, vinPrefiksas: vinPrefiksas || null };
 }
 
 function arGaliojantisVin(v) {

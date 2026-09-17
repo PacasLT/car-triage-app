@@ -1152,6 +1152,26 @@ button{font-family:inherit;cursor:pointer}
       html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden">';
       html += '<div style="padding:12px 16px;border-bottom:1px solid var(--border);font-weight:700;font-size:12px;letter-spacing:.06em;color:var(--text-muted)">VIN KODAS</div>';
       html += '<div style="padding:16px">';
+      // Autoplius pilna VIN rodo tik prisijungusiems - mums lieka tik pradzia.
+      // Parodom ja saziningai ir pasakom, kaip gauti pilna koda.
+      if (!c.vin && c.vinPrefiksas) {
+        html += '<div style="font-family:monospace;font-size:17px;font-weight:700;letter-spacing:.1em;padding:12px 16px;background:var(--bg);border-radius:8px;border:1px dashed var(--border-light);color:var(--text-muted);word-break:break-all">'
+          + c.vinPrefiksas + '<span style="opacity:.45">…………</span></div>';
+        html += '<div style="display:flex;align-items:flex-start;gap:8px;margin-top:8px;padding:9px 11px;border-radius:8px;'
+          + 'background:rgba(240,198,116,.07);border:1px solid rgba(240,198,116,.26);">'
+          + '<span style="color:#f0c674;font-size:13px;line-height:1.3;flex:none;">🔒</span>'
+          + '<span style="font:400 11.5px/1.5 var(--font-sans);color:var(--text-secondary);">'
+          + 'Portalas rodo tik VIN pradžią – pilnas kodas atskleidžiamas <b style="color:#f0c674;font-weight:600;">tik prisijungusiems prie portalo</b>. '
+          + 'Atsidarykite skelbimą, prisijunkite ir spauskite „Rodyti“, arba paprašykite pardavėjo VIN žinute.'
+          + '</span></div>';
+      }
+      if (c.vinNesutapimas) {
+        html += '<div style="display:flex;align-items:flex-start;gap:8px;margin-top:8px;padding:9px 11px;border-radius:8px;'
+          + 'background:rgba(224,122,106,.08);border:1px solid rgba(224,122,106,.3);">'
+          + '<span style="color:#e07a6a;font-size:13px;line-height:1.3;flex:none;">⚠</span>'
+          + '<span style="font:400 11.5px/1.5 var(--font-sans);color:var(--text-secondary);">' + c.vinNesutapimas
+          + ' Kodas nerodomas, kad neklaidintume – gali būti, kad nuotraukoje kito automobilio lipdukas.</span></div>';
+      }
       if (c.vin) {
         html += '<div style="font-family:monospace;font-size:17px;font-weight:700;letter-spacing:.1em;padding:12px 16px;background:var(--bg);border-radius:8px;border:1px solid var(--border);color:var(--accent);word-break:break-all">'+c.vin+'</div>';
         // VIN gali buti nuskaitytas is nuotraukos (duru lipdukas, plokstele po stiklu).
@@ -1168,6 +1188,15 @@ button{font-family:inherit;cursor:pointer}
             + '</span></div>';
         } else if (c.vinSaltinis) {
           html += '<div style="margin-top:7px;font:400 11px/1.4 var(--font-sans);color:var(--text-muted);">Šaltinis: ' + c.vinSaltinis + '</div>';
+        }
+        // Kryzmine patikra: portalas rodo VIN pradzia, nuotrauka dave pilna koda.
+        if (c.vinPatvirtintasPrefiksu) {
+          html += '<div style="display:flex;align-items:center;gap:7px;margin-top:7px;padding:8px 11px;border-radius:8px;'
+            + 'background:rgba(127,216,143,.07);border:1px solid rgba(127,216,143,.26);">'
+            + '<span style="color:#7fd88f;font-size:12px;">✓</span>'
+            + '<span style="font:400 11.5px/1.5 var(--font-sans);color:var(--text-secondary);">'
+            + 'Pradžia sutampa su skelbime rodoma <b style="font-family:monospace;color:#7fd88f;">' + c.vinPrefiksas + '…</b> – kodas nuskaitytas teisingai.'
+            + '</span></div>';
         }
         html += '<div id="dp-vin-prog" style="display:none;padding:18px 0 6px"><div style="display:flex;justify-content:space-between;margin-bottom:7px"><span id="dp-vin-prog-txt" style="font-size:12px;color:var(--text-muted)">Inicijuojama...</span><span id="dp-vin-prog-pct" style="font-size:12px;font-weight:700;color:var(--accent)">0%</span></div><div style="height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden"><div id="dp-vin-prog-bar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#6ee7b7);border-radius:3px;transition:width .4s ease"></div></div></div>';
       html += '<button id="dp-vin-lookup-btn" onclick="dpVinLookup()" style="margin-top:12px;width:100%;padding:11px;border-radius:8px;border:none;background:var(--accent);color:#fff;font:600 13px var(--font-sans);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Tikrinti VIN istoriją</button>';
