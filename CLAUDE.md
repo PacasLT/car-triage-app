@@ -95,6 +95,13 @@
 - Dizainerio 12 skyriuje yra `.ct-photo > :not(img):not(.ct-medal):not(.fav-star) { display: none !important }`. Ji paslepdavo **nuotrauku perjungimo rodykles `.ct-nav`** ir uzrasa `.ct-photo-empty`. Pridetos dvi isimtys – jei gausim nauja failo versija is dizainerio, **si pataisa turi buti pritaikyta is naujo** (ieskoti `ct-nav):not(.ct-photo-empty`).
 - Likusios 12 skyriaus taisykles musu build'e nieko nekeicia (patikrinta: nuotrauka 250 px, balas 32 px, miniatiuros 58x44 buvo teisingi ir be ju) – jos paliktos kaip apsauga.
 
+## Paieskos zurnalas (v1.31.0)
+
+- `#log-container` antrasteje yra `#ct-log-nums` – ji uzpildo `window.ctLogSkaiciai(rasta, atitiko, perkope)`, kviečiama is `renderCards` kartu su `ctRezultatuSantrauka`. `.is-key` tik ant `perkope`; `.is-zero` kai jis 0 (nulis zaliai atrodo kaip pasiekimas).
+- Baigus paieska (`jobStatus === 'done'`) zurnalas suskleidziamas automatiskai. Vykdant lieka atviras – tai pagrindinis ekranas 30–90 s.
+- `#log-container[data-state="done"]` remelis pakeistas is `--success-border` i `--border`. Zalias remelis reiske pasiekima, nors ten – neatitike skelbimai.
+- Stiliai: `ct-dizainas.css` 13 skyrius (`.ct-log*`). Irasu lygiai `.is-pass` / `.is-skip` / `.is-fail` CSS'e paruosti, bet `#log-box` eiluciu dar nezymim – tai kitas zingsnis.
+
 ## Saugumas
 
 - `ANTHROPIC_API_KEY`, `SCRAPER_API_KEY`, `JWT_SECRET`, `ADMIN_EMAILS`, `INVITE_CODES` – tik Railway Variables, **niekada į kodą ar GitHub**.

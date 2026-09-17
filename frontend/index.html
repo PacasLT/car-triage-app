@@ -1894,7 +1894,9 @@
   border-radius: 14px !important; background: var(--bg-surface) !important; overflow: hidden !important;
 }
 #log-container[data-state="running"] { border-color: var(--accent-border) !important; }
-#log-container[data-state="done"]    { border-color: var(--success-border) !important; }
+/* v1.31.0: zalio remelio nebera. 35 neatitike skelbimai nera pasiekimas –
+   busena skaitoma is taskelio ir antrastes, o remelis lieka kortelems. */
+#log-container[data-state="done"]    { border-color: var(--border) !important; }
 #log-container[data-state="error"]   { border-color: var(--danger-border) !important; }
 
 /* ── Antraste ── */
@@ -2584,6 +2586,7 @@
       <span id="log-header-text">Paleidžiama...</span>
       <span id="search-progress-label">0%</span>
       <span id="ct-log-steps"></span>
+      <span id="ct-log-nums" class="ct-log-nums"></span>
       <span class="chevron">▾</span>
     </div>
     <div id="search-progress-wrap">
@@ -3276,6 +3279,20 @@ renderFavorites();
 
 let logExpanded = false;
 
+// v1.31.0: trys skaiciai zurnalo antrasteje. Tik „perkope" gauna .is-key –
+// tik jis atsako i vartotojo klausima. Kai jis 0, .is-zero nuima zalia spalva,
+// nes nulis zaliai atrodo kaip pasiekimas.
+window.ctLogSkaiciai = function (rasta, atitiko, perkope) {
+  var el = document.getElementById('ct-log-nums');
+  if (!el) return;
+  var n = function (v, lbl, key) {
+    if (v == null) return '';
+    return '<span class="ct-log-num' + (key ? ' is-key' + (v === 0 ? ' is-zero' : '') : '') + '">'
+      + '<b>' + v + '</b><span>' + lbl + '</span></span>';
+  };
+  el.innerHTML = n(rasta, 'RASTA') + n(atitiko, 'ATITIKO') + n(perkope, 'PERKOPĖ', true);
+};
+
 function toggleLog() {
   logExpanded = !logExpanded;
   const box = document.getElementById('log-box');
@@ -3360,6 +3377,11 @@ function renderLogSteps(log, logBox, jobStatus) {
   } else if (jobStatus === 'done') {
     headerIcon.outerHTML = '<span class="done-check" id="log-header-icon">✓</span>';
     headerText.textContent = `Baigta! (${log.length} žingsnių)`;
+    // Zurnalas suskleidziamas automatiskai: vykdant jis yra pagrindinis ekranas,
+    // baigus – 35 neatitike skelbimai tik stumia rezultatus zemyn.
+    if (logExpanded) { logExpanded = false;
+      var _b = document.getElementById('log-box'); if (_b) _b.style.display = 'none';
+      var _h = document.getElementById('log-header'); if (_h) _h.classList.remove('expanded'); }
   } else {
     headerIcon.outerHTML = '<span id="log-header-icon">⚠️</span>';
     headerText.textContent = 'Klaida';
@@ -4481,6 +4503,8 @@ function renderResults(data, status, results) {
     atmesta: Math.max(0, ((data.allListings || []).length) - data.candidates.length) || null,
     tuscia: data.candidates.length === 0,
   });
+  // v1.31.0: tie patys trys skaiciai keliauja ir i zurnalo antraste
+  if (window.ctLogSkaiciai) window.ctLogSkaiciai(data.rawFoundCount || 0, data.totalScanned || 0, data.candidates.length);
   document.getElementById('sort-bar').style.display = data.candidates.length > 0 ? 'flex' : 'none';
   window.ctSortSetLabel('quality');
   results.innerHTML = '';

@@ -8,6 +8,16 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.31.0', data: '2026-09-18', pavadinimas: 'Paieškos žurnalas nebeužstoja rezultatų',
+    pakeitimai: [
+      'Baigus paiešką žurnalas susiskleidžia pats – anksčiau dešimtys neatitikusių skelbimų nustumdavo rezultatus žemyn',
+      'Žurnalo antraštėje dabar trys skaičiai: kiek rasta, kiek atitiko filtrus ir kiek perkopė įverčio slenkstį',
+      'Išryškintas tik paskutinis skaičius – jis vienintelis atsako į klausimą „ar verta žiūrėti“; kai jis nulis, spalva neutrali, nes nulis nėra pasiekimas',
+      'Nuimtas žalias rėmelis aplink žurnalą – rėmelio spalva dabar reiškia tik medalį arba riziką kortelėse',
+      'Vykdant paiešką žurnalas lieka atviras, kaip ir anksčiau',
+    ],
+  },
+  {
     versija: '1.30.1', data: '2026-09-18', pavadinimas: 'Kortelės apsauginis sluoksnis ir filtrų stiliai',
     pakeitimai: [
       'Kortelės išdėstymas apsaugotas nuo senų taisyklių – nuotrauka visada išlaiko proporcijas, balas lieka didelis, dedamųjų juostos matomos',

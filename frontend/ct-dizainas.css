@@ -1004,10 +1004,9 @@ img, svg, video, canvas { max-width: 100%; }
 .ct-media > .ct-thumbs { position: static !important; display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; width: 100% !important; }
 .ct-media > .ct-thumbs > img { width: 100% !important; height: auto !important; aspect-ratio: 4/3; }
 
-/* Salutinis tekstas (portalo vandenzymis) nuotraukos konteineryje */
-/* CarTriige v1.30.1: pridetos isimtys .ct-nav ir .ct-photo-empty.
-   Be ju si taisykle paslepdavo nuotrauku perjungimo rodykles (< >) ir
-   uzrasa BE NUOTRAUKOS. Patikrinta: navKaire/navDesine buvo display:none. */
+/* Salutinis tekstas (portalo vandenzymis) nuotraukos konteineryje.
+   v1.30.0 PATAISA: be :not(.ct-nav) si taisykle paslepe nuotrauku perjungimo
+   rodykles. :not(.ct-photo-empty) — kad neuzgestu ir „BE NUOTRAUKOS". */
 .ct-photo > :not(img):not(.ct-medal):not(.fav-star):not(.ct-nav):not(.ct-photo-empty) { display: none !important; }
 
 /* Balas: 32px ir savo blokas, ne eiles elementas */
@@ -1040,3 +1039,65 @@ img, svg, video, canvas { max-width: 100%; }
 
 .ct-photo-empty { position: absolute; inset: 0; display: grid; place-items: center; font: var(--fw-semi) 10px/1 var(--font-mono); letter-spacing: .12em; color: var(--text-dim); }
 .ct-price-was { font: var(--fw-medium) var(--fs-200)/1 var(--font-mono); color: var(--text-muted); text-decoration: line-through; }
+
+
+/* ============================================================================
+   13. PAIESKOS ZURNALAS · suskleistas pagal nutylejima
+   ----------------------------------------------------------------------------
+   Buvo: zalias remelis + 35 isvardyti neatitike skelbimai, daugiau vietos nei
+   dvi korteles. Dabar: viena eile su trimis skaiciais, sarasas po paspaudimo.
+   Zalia nuimta — 35 filtruoti skelbimai nera pasiekimas.
+   ========================================================================== */
+
+.ct-log { display: flex; flex-direction: column; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+
+.ct-log-h {
+  display: flex; align-items: center; gap: var(--s-3); flex-wrap: wrap;
+  width: 100%; min-height: 46px; padding: 9px 13px;
+  border: none; background: transparent; color: inherit;
+  font: inherit; text-align: left; cursor: pointer;
+}
+.ct-log-h:hover { background: var(--bg-elevated); }
+
+/* Busenos taskas: baigta = neutralus, ne zalias */
+.ct-log-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); }
+.ct-log.is-running .ct-log-dot { background: var(--accent); animation: ct-pulse 1.4s ease-in-out infinite; }
+.ct-log.is-error .ct-log-dot { background: var(--danger); }
+@keyframes ct-pulse { 0%, 100% { opacity: 1 } 50% { opacity: .35 } }
+
+.ct-log-t { flex: none; font-size: var(--fs-300); font-weight: var(--fw-medium); }
+
+/* Trys skaiciai — pagrindine sio bloko informacija */
+.ct-log-nums { display: flex; gap: var(--s-2) 18px; flex-wrap: wrap; }
+.ct-log-num { display: inline-flex; align-items: baseline; gap: 5px; }
+.ct-log-num > b { font: var(--fw-bold) var(--fs-300)/1 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--text-primary); }
+.ct-log-num > span { font: var(--fw-semi) 9.5px/1 var(--font-mono); letter-spacing: .1em; color: var(--text-muted); }
+.ct-log-num.is-key > b { color: var(--success); }
+.ct-log-num.is-key.is-zero > b { color: var(--text-muted); }
+
+.ct-log-time { margin-left: auto; font: var(--fw-medium) var(--fs-200)/1 var(--font-mono); color: var(--text-dim); }
+.ct-log-x { flex: none; width: 18px; text-align: center; color: var(--text-muted); font-size: var(--fs-200); transition: transform .16s ease; }
+.ct-log.is-open .ct-log-x { transform: rotate(180deg); }
+
+/* Sarasas — tik po paspaudimo */
+.ct-log-b { display: none; max-height: 260px; overflow-y: auto; border-top: 1px solid var(--border); background: var(--bg-sunken); }
+.ct-log.is-open .ct-log-b { display: block; }
+
+.ct-log-row { display: flex; align-items: flex-start; gap: 10px; padding: 7px 13px; border-bottom: 1px solid var(--border); font-size: var(--fs-200); line-height: var(--lh-snug); }
+.ct-log-row:last-child { border-bottom: none; }
+.ct-log-row > i { flex: none; width: 13px; height: 13px; margin-top: 2px; border-radius: 50%; display: grid; place-items: center; font: var(--fw-bold) 8px/1 var(--font-mono); font-style: normal; }
+
+/* Trys zinojimo lygiai ir zurnale: perkope / neperkope / neivertinta */
+.ct-log-row.is-pass > i { background: var(--k-confirmed-dim); box-shadow: inset 0 0 0 1px var(--k-confirmed-border); color: var(--k-confirmed); }
+.ct-log-row.is-pass { color: var(--text-secondary); }
+.ct-log-row.is-skip > i { background: transparent; box-shadow: inset 0 0 0 1px var(--border-light); color: var(--text-dim); }
+.ct-log-row.is-skip { color: var(--text-muted); }
+.ct-log-row.is-fail > i { background: var(--danger-dim); box-shadow: inset 0 0 0 1px var(--danger-border); color: var(--danger); }
+
+.ct-log-row > span:nth-of-type(1) { flex: 1 1 0; min-width: 0; }
+.ct-log-row > span:last-child { flex: none; font: var(--fw-medium) 11px/1.4 var(--font-mono); color: var(--text-dim); }
+
+@media (max-width: 640px) {
+  .ct-log-h { min-height: var(--tap-min); }
+  .ct-log-time { margin-left: 0; width: 100%; }
+}
