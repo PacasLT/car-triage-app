@@ -8,6 +8,17 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.27.0', data: '2026-09-17', pavadinimas: 'Du apžvalgos lygiai, „galimai daužtas“ ženklas, tvarkingesni veiksmai',
+    pakeitimai: [
+      'Dabar galite rinktis: „Greita apžvalga“ (1 kr) – skelbimo tekstas, kaina prieš rinką, rizikos ir derybos; arba „Pilna apžvalga“ (2 kr) – papildomai vizualinis nuotraukų patikrinimas, pardavėjas, VIN ir pilna įranga',
+      'Visur vienodas pavadinimas „Pilna apžvalga“ – nebeliko „Detalės“',
+      'Skelbimas, kurio kaina 49 % ar daugiau žemiau rinkos vidurkio, žymimas „GALIMAI DAUŽTAS“ su paaiškinimu ir nebegali užimti pirmos vietos rekomendacijose',
+      'Skelbimo puslapyje „Žiūrėti skelbimą“ ir „Palyginti“ perkelti į viršų, prie širdutės',
+      'Pašalintas atsijungimo mygtukas apatiniame kairiajame kampe – atsijungiama per paskyros meniu',
+      'Ištaisyti pasikartojantys portalo ir techninių duomenų ženkliukai skelbimo puslapyje',
+    ],
+  },
+  {
     versija: '1.26.0', data: '2026-09-17', pavadinimas: 'Gamyklinė komplektacija pagal VIN',
     pakeitimai: [
       'VIN kortelėje – nuoroda į jūsų markės gamyklinės komplektacijos dekoderį (BMW/MINI – ///M Decoder, Mercedes – MBDecoder, VW/Audi/Škoda/SEAT – PR kodai, Porsche/Land Rover/Jaguar – VIN Analytics, kitoms markėms – universalus 7zap)',

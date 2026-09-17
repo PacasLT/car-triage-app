@@ -26,6 +26,11 @@
 - `ANALIZES_PODELIS_MS` (7 d.) – ta pati analizė negeneruojama iš naujo, nebent pasikeitė kaina (`analizesPodelis(url, kaina)`).
 - Nuotraukos brangiausios (~1 400 tokenų viena): `DEEP_FOTO_KIEKIS` = 6.
 
+## Apžvalgos lygiai ir kainos signalai
+
+- Du lygiai: `lygis: 'greita'` (KAINOS.analize = 1 kr, be nuotraukų AI ir be vizualinio sluoksnio) ir `lygis: 'pilna'` (KAINOS.analizePilna = 2 kr, viskas). Podėlio raktas: `url` (pilna) ir `url#greita`. Turint pilną, greita grąžinama iš jos nemokamai.
+- `ZALOS_RIBA_PCT` (49 %): kaina tiek žemiau medianos (kai `marketCount >= 5`) → `itariamaZala`, kortelėje „GALIMAI DAUŽTAS“, o balas ribojamas iki 60, kad toks skelbimas netaptų TOP rekomendacija. Formuluotė – įspėjimas su priežastimis, ne teiginys.
+
 ## Kaina ir PVM
 
 - Vertinama ir lyginama **tik galutinė kaina su PVM**. Jei skelbime „50 000 € + PVM“ – `kaina` = 60 500 €, `kainaBaze` = 50 000 €, o vartotojui rodoma „50 000 € + PVM = 60 500 € (galutinė)“.

@@ -107,6 +107,8 @@ button{font-family:inherit;cursor:pointer}
 .dp-spec{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:7px;background:var(--bg-elevated);border:1px solid var(--border);font-size:12.5px;color:var(--text-secondary)}
 .dp-spec-pos{color:var(--success);border-color:var(--success-border);background:var(--success-dim)}
 .dp-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.dp-bc-btn.dp-bc-primary{background:var(--accent);border-color:var(--accent);color:#fff;text-decoration:none}
+.dp-bc-btn.dp-bc-primary:hover{filter:brightness(1.08)}
 .dp-act{display:flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--border-light);background:transparent;color:var(--text-primary);font:500 12.5px var(--font);white-space:nowrap}
 .dp-act:hover{background:var(--bg-elevated)}
 .dp-act-primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
@@ -465,6 +467,9 @@ button{font-family:inherit;cursor:pointer}
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
         <span>Išsaugoti</span>
       </button>
+      <!-- v1.27.0: „Palyginti" ir „Žiūrėti skelbimą" perkelti čia, prie širdutės -->
+      <button class="dp-bc-btn" id="dp-compare-btn" onclick="dpAddToCompare()" title="Pridėti prie palyginimo">⇄ Palyginti</button>
+      <a class="dp-bc-btn dp-bc-primary" id="dp-listing-link" href="#" target="_blank" rel="noopener">Žiūrėti skelbimą ↗</a>
     </div>
   </div>
 
@@ -501,14 +506,7 @@ button{font-family:inherit;cursor:pointer}
       </div>
       <div class="dp-market-row" id="dp-market-row"></div>
       <div class="dp-specs" id="dp-specs"></div>
-      <div class="dp-actions">
-        <a class="dp-act dp-act-primary" id="dp-listing-link" href="#" target="_blank" rel="noopener">Žiūrėti skelbimą &#8599;</a>
-        <button class="dp-act dp-save-toggle" id="dp-save-btn-2" onclick="dpToggleSave()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-          <span>Išsaugoti</span>
-        </button>
-        <button class="dp-act" id="dp-compare-btn" onclick="dpAddToCompare()" title="Pridėti prie palyginimo">⇄ Palyginti</button>
-      </div>
+      <!-- v1.27.0: veiksmai perkelti į viršutinę juostą prie širdutės -->
     </div>
 
     <!-- SELLER COL -->
@@ -1170,13 +1168,14 @@ window.ctApi = function (kelias, params) {
   // Automatiškai užsako gilią analizę skelbimui, kuris jos dar neturi.
   // v1.23.0: force=true apeina serverio podeli (7 d.) ir generuoja analize is naujo.
   // Tokiu atveju kreditas nuskaitomas visada - todel kviecia tik vartotojas mygtuku.
-  function dpUzsakytiAnalize(c, force) {
+  function dpUzsakytiAnalize(c, force, lygis) {
     ctApi('/api/analyze-single', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         url: c.url, kaina: c.kaina, marketMedian: c.marketMedian, marketCount: c.marketCount,
         diffPct: c.diffPct, modelis: c.modelis, pardavejas: c.pardavejas,
         galia: c.galia, variklioTuris: c.variklioTuris, force: !!force,
+        lygis: lygis === 'greita' ? 'greita' : 'pilna',
       }),
     }).then(function (r) { return r.json(); }).then(function (resp) {
       if (!resp || !resp.analysis) throw new Error((resp && resp.error) || 'Analizė negrąžinta');
@@ -1203,6 +1202,7 @@ window.ctApi = function (kelias, params) {
         // v1.23.0: kada analize paruosta ir ar ji buvo is podelio
         det.analizesLaikas = Date.now() - (resp.cacheAgeMinutes ? resp.cacheAgeMinutes * 60000 : 0);
         det.analizeIsPodelio = !!resp.cached;
+        det.lygis = resp.lygis || 'pilna';
         localStorage.setItem('ct_detail', JSON.stringify(det));
       } catch (e) {}
       load();
@@ -1246,6 +1246,7 @@ window.ctApi = function (kelias, params) {
     document.title = title + ' — CarTriige';
 
     var tagsEl = document.getElementById('dp-tags');
+    if (tagsEl) tagsEl.innerHTML = ''; // v1.27.0: be isvalymo portalo zenkleliai dubliuodavosi
     if (c.source) { var t = document.createElement('span'); t.className = 'dp-tag dp-tag-source'; t.textContent = c.source.toUpperCase(); tagsEl.appendChild(t); }
     if (c.yraVerslas) { var t2 = document.createElement('span'); t2.className = 'dp-tag'; t2.textContent = 'VERSLAS'; tagsEl.appendChild(t2); }
 
@@ -1282,6 +1283,8 @@ window.ctApi = function (kelias, params) {
     }
 
     var specsEl = document.getElementById('dp-specs');
+    // v1.27.0: load() gali suktis kelis kartus (po analizes) - be isvalymo zenkliukai dubliuodavosi
+    if (specsEl) specsEl.innerHTML = '';
     var calIcon = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
     var odoIcon = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg>';
     var fuelIcon = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 15V9a4 4 0 0 1 8 0v6"/><circle cx="8" cy="17" r="2"/><path d="M14 7h6M17 4v6"/></svg>';
@@ -1434,18 +1437,18 @@ window.ctApi = function (kelias, params) {
             : min < 1440 ? ('prieš ' + Math.round(min / 60) + ' val.')
             : ('prieš ' + Math.round(min / 1440) + ' d.');
         }
-        meta.innerHTML = 'CarTriige AI' + (amz ? ' · paruošta ' + amz : '')
+        meta.innerHTML = 'CarTriige AI' + (det.lygis === 'greita' ? ' · greita apžvalga' : '') + (amz ? ' · paruošta ' + amz : '')
           + ' <button id="dp-perdaryti" onclick="dpPerdarytiAnalize()" title="Nuskaitysime skelbimą iš naujo (kaina, nuotraukos, aprašymas) ir sugeneruosime naują analizę. Nuskaitomas 1 kreditas."'
-          + ' style="margin-left:8px;padding:3px 9px;border-radius:7px;border:1px solid var(--border-light);background:transparent;color:var(--text-secondary);font:600 10.5px var(--font);cursor:pointer">↻ Analizuoti iš naujo · 1 kr</button>';
+          + ' style="margin-left:8px;padding:3px 9px;border-radius:7px;border:1px solid var(--border-light);background:transparent;color:var(--text-secondary);font:600 10.5px var(--font);cursor:pointer">↻ Analizuoti iš naujo · 2 kr</button>';
       })();
       window.dpPerdarytiAnalize = function () {
         if (!c.url) return;
-        if (!confirm('Analizuosime šį skelbimą iš naujo: nuskaitysime dabartinę kainą, nuotraukas ir aprašymą.\n\nBus nuskaitytas 1 kreditas. Tęsti?')) return;
+        if (!confirm('Analizuosime šį skelbimą iš naujo pilnu lygiu: nuskaitysime dabartinę kainą, nuotraukas, pardavėją ir aprašymą.\n\nBus nuskaityti 2 kreditai. Tęsti?')) return;
         var b = document.getElementById('dp-perdaryti');
         if (b) { b.disabled = true; b.textContent = '↻ Analizuojama…'; }
         var body = document.getElementById('dp-ai-body');
         if (body) body.textContent = 'Nuskaitome skelbimą iš naujo…';
-        dpUzsakytiAnalize(c, true);
+        dpUzsakytiAnalize(c, true, 'pilna');
       };
       var insight = document.getElementById('dp-ai-insight');
       if (a.verdiktas) {
@@ -1498,16 +1501,27 @@ window.ctApi = function (kelias, params) {
       // Naršymo režime gili analizė nedaroma iš karto (taupomos užklausos),
       // tad atidarius skelbimą ją užsakom automatiškai, o ne rodom tuščią langą.
       // PAKEISTA: analize kainuoja kredita, todel nebeuzsakom automatiskai - rodom aiskų mygtuką
+      // v1.27.0: du lygiai - greita (pigiau) ir pilna (su nuotraukų patikrinimu)
       document.getElementById('dp-ai-body').innerHTML =
-        '<div class="dp-cta"><p>Išsami AI analizė šiam skelbimui dar neparuošta: pilnas aprašymas, visos nuotraukos (be reklamų), VIN, pardavėjas, rizikos ir derybų patarimai.</p>'
-        + '<button id="dp-analize-cta" onclick="dpPradetiAnalize()">Paruošti išsamią analizę · 1 kr</button>'
-        + '<small>Jei šis skelbimas buvo analizuotas per paskutines 24 val., kreditas nenuskaitomas.</small></div>';
+        '<div class="dp-cta"><p>Pasirinkite, kiek giliai tikriname šį skelbimą:</p>'
+        + '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:4px 0 8px">'
+        + '<button id="dp-analize-greita" onclick="dpPradetiAnalize(\'greita\')" style="background:transparent;border:1px solid var(--border-light);color:var(--text-primary)">Greita apžvalga · 1 kr</button>'
+        + '<button id="dp-analize-cta" onclick="dpPradetiAnalize(\'pilna\')">Pilna apžvalga · 2 kr</button>'
+        + '</div>'
+        + '<small style="display:block;line-height:1.6">'
+        + '<b>Greita</b> – skelbimo tekstas, kaina prieš rinką, rizikos, derybų patarimai.<br>'
+        + '<b>Pilna</b> – papildomai: vizualinis nuotraukų patikrinimas su nuotraukų numeriais, pardavėjas, VIN, pilna įranga.<br>'
+        + 'Tą patį skelbimą per 24 val. peržiūrite nemokamai.</small></div>';
       document.getElementById('dp-privalumai').innerHTML = '';
       document.getElementById('dp-patikrinti').innerHTML = '';
       document.getElementById('dp-iranga').innerHTML = '<div style="color:var(--text-muted);font-size:12.5px">Įranga bus išskirta po analizės</div>';
-      window.dpPradetiAnalize = function () {
-        var b = document.getElementById('dp-analize-cta'); if (b) { b.disabled = true; b.innerHTML = '<span class="dp-spin" style="width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;display:inline-block;vertical-align:-2px;margin-right:8px;animation:dpspin .8s linear infinite"></span>Ruošiama – nuskaitomas skelbimas, nuotraukos, pardavėjas…'; }
-        if (c.url) dpUzsakytiAnalize(c);
+      window.dpPradetiAnalize = function (lygis) {
+        var pilna = lygis !== 'greita';
+        var b = document.getElementById(pilna ? 'dp-analize-cta' : 'dp-analize-greita');
+        var kitas = document.getElementById(pilna ? 'dp-analize-greita' : 'dp-analize-cta');
+        if (kitas) kitas.disabled = true;
+        if (b) { b.disabled = true; b.innerHTML = '<span class="dp-spin" style="width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;display:inline-block;vertical-align:-2px;margin-right:8px;animation:dpspin .8s linear infinite"></span>' + (pilna ? 'Ruošiama – skelbimas, nuotraukos, pardavėjas…' : 'Ruošiama – skelbimo apžvalga…'); }
+        if (c.url) dpUzsakytiAnalize(c, false, pilna ? 'pilna' : 'greita');
       };
     }
 

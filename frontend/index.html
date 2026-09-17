@@ -269,6 +269,13 @@
     padding: 5px 10px; border-radius: var(--radius-sm); font-size: 11px; cursor: pointer;
     transition: all 0.15s; white-space: nowrap;
   }
+  /* v1.27.0: itariamai zema kaina - beveik visada rimta priezastis */
+  .ct-zala {
+    display: flex; align-items: flex-start; gap: 7px; margin: 8px 0 0; padding: 8px 11px;
+    border-radius: 8px; background: rgba(224,122,106,.12); border: 1px solid rgba(224,122,106,.38);
+    font: 400 11.5px/1.5 var(--font); color: #e07a6a;
+  }
+  .ct-zala b { font-weight: 700; letter-spacing: .04em; }
   .compare-toggle.active { background: rgba(74,144,217,0.15); color: #74c0fc; border-color: rgba(74,144,217,0.4); }
   /* v1.23.1: plaukiojanti kortele ekrano apacioje vietoj per visa plotį nusidriekusio baro */
   #compare-bar {
@@ -4508,7 +4515,7 @@ function renderBrowseListings(candidates, container) {
     var diffBo = (c.diffPct != null && c.diffPct >= 0) ? 'var(--success-border)' : 'var(--danger-border)';
     var scoreVal = c.qualityScore || 0;
     var scoreColor = scoreVal >= 80 ? 'var(--success)' : '#f0c674';
-    var detailBtnLabel = hasDeep ? '✨ Pilna apžvalga' : '🔬 Detali apžvalga · 1 kr';
+    var detailBtnLabel = hasDeep ? '✨ Pilna apžvalga' : '🔬 Pilna apžvalga · 2 kr';
     var dArgs = "'" + c.url + "', '" + panelId + "', this, false, {kaina:" + (c.kaina||'null') + ", marketMedian:" + (c.marketMedian||'null') + ", marketCount:" + (c.marketCount||'null') + ", diffPct:" + (c.diffPct!=null?c.diffPct:'null') + ", modelis:'" + escJs(c.modelis) + "', pardavejas:" + (c.pardavejas ? ("'" + escJs(c.pardavejas) + "'") : 'null') + ", galia:" + (c.galia||'null') + ", variklioTuris:" + (c.variklioTuris||'null') + ", metai:" + (c.metai||'null') + ", rida:" + (c.rida||'null') + ", kuras:'" + escJs(c.kuras||'') + "', pavarai:'" + escJs(c.pavarai||'') + "', source:'" + escJs(c.source||'') + "', photo:'" + escJs(c.photo||'') + "'}";
     var detailClick = hasDeep ? ("ctOpenDetail('" + escJs(c.url) + "')") : ("loadDetail(" + dArgs + ")");
     window.__ctCardData = window.__ctCardData || {};
@@ -4665,7 +4672,7 @@ function renderCandidateCards(candidates, results) {
     // TOP 5 kandidatai jau ateina su pilna analize is backend - rodome is karto,
     // be poreikio spausti mygtuka. Likusiems - iprastas mygtukas su leftiniu uzkrovimu.
     const hasPreloadedDeep = !!c.deepAnalysis;
-    const detailBtnLabel = hasPreloadedDeep ? '✨ Rodyti gilią analizę' : '🔬 Detali apžvalga · 1 kr';
+    const detailBtnLabel = hasPreloadedDeep ? '✨ Rodyti gilią analizę' : '🔬 Pilna apžvalga · 2 kr';
     const preloadedPanelHTML = hasPreloadedDeep
       ? buildDetailPanelHTML({ analysis: c.deepAnalysis, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos || [], cached: false }, c.url, cardId)
       : '';
@@ -4973,7 +4980,7 @@ async function loadDetail(url, panelId, btn, force, marketContext) {
   if (panel.dataset.loaded === 'true' && !force) {
     const isHidden = panel.style.display === 'none';
     panel.style.display = isHidden ? 'block' : 'none';
-    btn.textContent = isHidden ? '🔼 Slėpti apžvalgą' : (btn.dataset.closedLabel || '🔬 Detali apžvalga');
+    btn.textContent = isHidden ? '🔼 Slėpti apžvalgą' : (btn.dataset.closedLabel || '🔬 Pilna apžvalga');
     return;
   }
 
@@ -5029,7 +5036,7 @@ async function loadDetail(url, panelId, btn, force, marketContext) {
     btn.textContent = pradinisTekstas;
   } finally {
     btn.disabled = false;
-    if (btn.textContent.includes('⏳')) btn.textContent = pradinisTekstas || '🔬 Detali apžvalga · 1 kr';
+    if (btn.textContent.includes('⏳')) btn.textContent = pradinisTekstas || '🔬 Pilna apžvalga · 2 kr';
   }
 }
 
@@ -5748,7 +5755,7 @@ function ctNavTab(tab) {
       var scorePct = Math.round(s.total * 10);
       var isFav = isFavorited(c.url);
       var favSnap = "{modelis:'" + escJs(c.modelis) + "', kaina:" + (c.kaina||'null') + ", metai:" + (c.metai||'null') + ", rida:" + (c.rida||'null') + ", photo:'" + escJs(c.photo||'') + "', source:'" + escJs(c.source) + "', kuras:'" + escJs(c.kuras||'') + "', pavarai:'" + escJs(c.pavarai||'') + "', diffPct:" + (c.diffPct!=null?c.diffPct:'null') + ", marketMedian:" + (c.marketMedian||'null') + "}";
-      var detailBtnLabel = hasDeep ? 'Pilna apžvalga →' : 'Detali apžvalga · 1 kr';
+      var detailBtnLabel = hasDeep ? 'Pilna apžvalga →' : 'Pilna apžvalga · 2 kr';
       var dArgs = "'" + c.url + "', '" + cardId + "', this, false, {kaina:" + (c.kaina||'null') + ", marketMedian:" + (c.marketMedian||'null') + ", marketCount:" + (c.marketCount||'null') + ", diffPct:" + (c.diffPct!=null?c.diffPct:'null') + ", modelis:'" + escJs(c.modelis) + "', pardavejas:" + (c.pardavejas ? ("'" + escJs(c.pardavejas) + "'") : 'null') + ", galia:" + (c.galia||'null') + ", variklioTuris:" + (c.variklioTuris||'null') + ", metai:" + (c.metai||'null') + ", rida:" + (c.rida||'null') + ", kuras:'" + escJs(c.kuras||'') + "', pavarai:'" + escJs(c.pavarai||'') + "', source:'" + escJs(c.source||'') + "', photo:'" + escJs(c.photo||'') + "'}";
       var detailClick = hasDeep ? ("ctOpenDetail('" + escJs(c.url) + "')") : ("loadDetail(" + dArgs + ")");
       var cmpArgs = "'" + c.url + "', '" + escJs(c.modelis) + "', " + (c.kaina||'null') + ", '" + escJs(c.photo||'') + "', " + (c.metai||'null') + ", " + (c.rida||'null') + ", '" + escJs(c.kuras||'') + "', " + (c.galia||'null') + ", " + (c.variklioTuris||'null') + ", '" + escJs(c.pavarai||'') + "', " + (c.diffPct!=null?c.diffPct:'null') + ", " + (c.marketMedian||'null') + ", '" + escJs(c.source||'') + "', 'cmp-" + cardId + "'";
@@ -5837,6 +5844,7 @@ function ctNavTab(tab) {
             '<div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">Skirtumas: <b style="color:' + savColor + ';font-weight:600;">' + (skirt != null ? (skirt < 0 ? '−' : '+') + formatEUR(Math.abs(skirt)) : '–') + '</b><span style="color:var(--text-dim);margin-left:8px;">· ' + (c.marketCount||'?') + ' panašių skelbimų</span>' +
               (c.kainosPastaba ? '<span class="ct-kaina-past">ⓘ ' + esc(c.kainosPastaba) + '</span>' : '') +
               (c.kainaBaze ? '<span class="ct-kaina-past" title="Skelbime kaina nurodyta be PVM. Vertiname ir lyginame tik galutinę sumą su PVM.">🧾 ' + formatEUR(c.kainaBaze) + ' + PVM = <b>' + formatEUR(c.kaina) + '</b> (galutinė)</span>' : '') + '</div>' +
+            (c.itariamaZala ? '<div class="ct-zala"><span>⚠</span><span><b>GALIMAI DAUŽTAS</b> · ' + esc(c.itariamaZala.tekstas) + '</span></div>' : '') +
             (c.kainosIspejimas ? '<div class="ct-kaina-isp"><span>⚠</span><span>' + esc(c.kainosIspejimas.tekstas) + '</span></div>' : '') +
             // PASALINTA: "72 · VERTA ANALIZUOTI" zenkliukas. Ta pati informacija jau rodoma
             // dukart zemiau - bloke "CARTRIIGE GALIMYBE 72/100" ir verdikto mygtuke prie ivercio.
@@ -5900,7 +5908,8 @@ function ctNavTab(tab) {
       var scorePct = Math.round(s.total * 10);
       var accentLine = scoreColor;
       var diffCls = _diffCls(c.diffPct);
-      var detailBtnLabel = hasDeep ? 'Pilna apžvalga →' : 'Detalės · 1 kr →';
+      // v1.27.0: visur vienodai - „Pilna apžvalga"
+      var detailBtnLabel = hasDeep ? 'Pilna apžvalga →' : 'Pilna apžvalga · 2 kr →';
       var dArgs = "'" + c.url + "', '" + cardId + "', this, false, {kaina:" + (c.kaina||'null') + ", marketMedian:" + (c.marketMedian||'null') + ", marketCount:" + (c.marketCount||'null') + ", diffPct:" + (c.diffPct!=null?c.diffPct:'null') + ", modelis:'" + escJs(c.modelis) + "', pardavejas:" + (c.pardavejas ? ("'" + escJs(c.pardavejas) + "'") : 'null') + ", galia:" + (c.galia||'null') + ", variklioTuris:" + (c.variklioTuris||'null') + ", metai:" + (c.metai||'null') + ", rida:" + (c.rida||'null') + ", kuras:'" + escJs(c.kuras||'') + "', pavarai:'" + escJs(c.pavarai||'') + "', source:'" + escJs(c.source||'') + "', photo:'" + escJs(c.photo||'') + "'}";
       var detailClick = hasDeep ? ("ctOpenDetail('" + escJs(c.url) + "')") : ("loadDetail(" + dArgs + ")");
       var panelHTML = hasDeep ? buildDetailPanelHTML({ analysis: a, vin: c.vin, pardavejas: c.pardavejas, photos: c.photos || [], cached: false }, c.url, cardId) : '';
@@ -5942,6 +5951,7 @@ function ctNavTab(tab) {
             '</div>' +
             (c.kainosPastaba ? '<span class="ct-kaina-past">ⓘ ' + esc(c.kainosPastaba) + '</span>' : '') +
             (c.kainaBaze ? '<span class="ct-kaina-past" title="Skelbime kaina nurodyta be PVM – rodome galutinę sumą su PVM">🧾 ' + formatEUR(c.kainaBaze) + ' + PVM = <b>' + formatEUR(c.kaina) + '</b></span>' : '') +
+            (c.itariamaZala ? '<div class="ct-zala" title="' + esc(c.itariamaZala.tekstas) + '"><span>⚠</span><span><b>GALIMAI DAUŽTAS</b> · kaina ' + c.itariamaZala.procentas + '% žemiau rinkos</span></div>' : '') +
             (c.kainosIspejimas ? '<div class="ct-kaina-isp"><span>⚠</span><span>' + esc(c.kainosIspejimas.tekstas) + '</span></div>' : '') +
           '</div>' +
           '<div class="std-right" style="flex:none;display:flex;align-items:center;gap:10px;">' +
@@ -5957,7 +5967,7 @@ function ctNavTab(tab) {
             '<a class="ct-ico" href="' + c.url + '" target="_blank" rel="noopener" title="Eiti į skelbimą" onclick="event.stopPropagation()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14L21 3"/></svg></a>' +
             '<button class="compare-toggle ct-btn" id="cmp-' + cardId + '" title="Pridėti palyginimui" style="flex:none;height:32px;padding:0 11px;border-radius:8px;border:1px solid var(--border-light);background:transparent;color:var(--text-muted);font:600 12px var(--font);cursor:pointer;white-space:nowrap;" onclick="' + _cmpArgs(c, cardId) + '">⚖️</button>' +
             '</div>' +
-            '<button class="detail-btn ct-btn' + (hasDeep ? ' ready' : '') + '" id="' + btnId + '" data-closed-label="' + detailBtnLabel + '" style="display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 13px;border-radius:8px;border:1px solid var(--border-light);color:var(--text-primary);font:600 12px var(--font);white-space:nowrap;background:transparent;cursor:pointer;" onclick="' + detailClick + '">Detales <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>' +
+            '<button class="detail-btn ct-btn' + (hasDeep ? ' ready' : '') + '" id="' + btnId + '" data-closed-label="' + detailBtnLabel + '" style="display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 13px;border-radius:8px;border:1px solid var(--border-light);color:var(--text-primary);font:600 12px var(--font);white-space:nowrap;background:transparent;cursor:pointer;" onclick="' + detailClick + '">' + detailBtnLabel + ' <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>' +
           '</div>' +
         '</div>' +
         '<div class="detail-panel ct-panel" id="' + cardId + '" data-loaded="' + hasDeep + '" style="display:none">' + panelHTML + '</div>';
@@ -6181,10 +6191,7 @@ function ctNavTab(tab) {
     </div>
   </div>
 </div>
-<button id="ct-logout-btn" onclick="window.ctLogout()">
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-  Atsijungti
-</button>
+<!-- v1.27.0: atsijungimo mygtukas apačioje pašalintas - atsijungiama per paskyros meniu -->
 
 <script>
 (function () {
@@ -6482,7 +6489,9 @@ async function ctPlanuModalas(zinute) {
     + '<div><small>Paieškos liko</small><b>' + paieskos + '</b><span>' + paieskuPast + '</span></div>'
     + '</div>';
   html += '<p class="ct-pl-h">Kiek kainuoja veiksmai</p><div class="ct-pl-kainos">'
-    + '<span>Gili analizė <b>' + k.analize + ' kr</b></span><span>VIN istorija <b>' + k.vin + ' kr</b></span>'
+    + '<span>Greita apžvalga <b>' + k.analize + ' kr</b></span>'
+    + (k.analizePilna != null ? '<span>Pilna apžvalga <b>' + k.analizePilna + ' kr</b></span>' : '')
+    + '<span>VIN istorija <b>' + k.vin + ' kr</b></span>'
     + '<span>Pardavėjo patikra <b>' + k.pardavejas + ' kr</b></span><span>Palyginimas <b>' + k.palyginimas + ' kr</b></span>'
     + (k.megstamiuAtnaujinimas != null ? '<span>Mėgstamiausių atnaujinimas <b>' + k.megstamiuAtnaujinimas + ' kr</b></span>' : '')
     + '<span>VIN iššifravimas <b>nemokamai</b></span>'

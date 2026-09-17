@@ -30,7 +30,8 @@ const PLANAI = {
 };
 
 const KAINOS = {
-  analize: 1,      // gili skelbimo analizė su nuotraukomis
+  analize: 1,      // GREITA apžvalga: skelbimo tekstas, kaina, rizikos (be nuotraukų AI)
+  analizePilna: 2, // PILNA apžvalga: + vizualinis nuotraukų patikrinimas, pardavėjas, VIN, įranga
   vin: 1,          // VIN istorijos paieška
   pardavejas: 1,   // pardavėjo patikra
   palyginimas: 2,  // gilus 2–3 auto palyginimas

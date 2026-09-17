@@ -1977,6 +1977,21 @@ async function runSearchJob(jobId, filters) {
       };
     });
 
+    // v1.27.0: kaina pusiau mazesne uz rinkos vidurki beveik visada reiskia rimta
+    // problema (dauztas, JAV aukcionas, techninis gedimas). Zymim atskirai ir
+    // neleidziam tokiam skelbimui uzimti pirmos vietos rekomendacijose.
+    const ZALOS_RIBA = parseInt(process.env.ZALOS_RIBA_PCT || '49', 10);
+    enriched.forEach((l) => {
+      if (l.diffPct != null && l.diffPct >= ZALOS_RIBA && l.marketCount >= 5 && !l.kainosIspejimas) {
+        l.itariamaZala = {
+          procentas: l.diffPct,
+          tekstas: `Kaina ${l.diffPct}% žemiau rinkos vidurkio. Tokį skirtumą beveik visada lemia rimta priežastis – `
+            + 'daužtas ar remontuotas kėbulas, JAV aukciono automobilis, techninis gedimas arba klaidinga kaina. '
+            + 'Būtina istorijos ataskaita ir apžiūra vietoje.',
+        };
+      }
+    });
+
     // v1.23.0: sarasO puslapyje irangos NERA - todel TOP skelbimams atidarom ju
     // puslapius (tik nuskaitymas, jokio AI) ir uzpildom iranga, VIN, vieta, pardaveja.
     // Puslapiai kesuojami, todel kartotinei paieskai jie nieko nebekainuoja.
@@ -2035,6 +2050,11 @@ async function runSearchJob(jobId, filters) {
       l.neivertinta = t.neivertinta;
       l.baloKomponentai = t.breakdown;
       l.hardRejections = t.rejections;
+      // Itariamai zema kaina neleidzia skelbimui tapti TOP rekomendacija
+      if (l.itariamaZala) {
+        l.qualityScore = Math.min(l.qualityScore, 60);
+        l.whyReasons = ['⚠ ' + l.itariamaZala.tekstas].concat(l.whyReasons || []).slice(0, 5);
+      }
       if (searchMode === 'reseller') l.resaleMath = computeResaleMath(l);
     });
 
@@ -2183,6 +2203,7 @@ async function runSearchJob(jobId, filters) {
       modelis: l.modelis, kaina: l.kaina, metai: l.metai, rida: l.rida,
       kuras: l.kuras, pavarai: l.pavarai, turiVin: l.turiVin, galia: l.galia, variklioTuris: l.variklioTuris,
       pvmPastaba: l.pvmPastaba || null, kainaBaze: l.kainaBaze || null, varantieji: l.varantieji || null,
+      itariamaZala: l.itariamaZala || null,
       photo: l.photo, url: l.url, source: l.source, kryzminiaiSkelbimai: l.kryzminiaiSkelbimai || null,
       isCandidate: candidateUrls.has(l.url), pardavejas: l.pardavejas || null,
       rejectionReasons: (l.hardRejections && l.hardRejections.length)
@@ -2197,7 +2218,7 @@ async function runSearchJob(jobId, filters) {
       diffPct: l.diffPct, marketMedian: l.marketMedian, marketCount: l.marketCount,
       // v1.25.0: PVM skaidymas - rodom, kad kaina yra galutine (su PVM)
       pvmPastaba: l.pvmPastaba || null, kainaBaze: l.kainaBaze || null, kainaBePvm: l.kainaBePvm || null,
-      varantieji: l.varantieji || null,
+      varantieji: l.varantieji || null, itariamaZala: l.itariamaZala || null,
       // v1.23.0: is atidaryto skelbimo puslapio - iranga, vieta ir pardavejas,
       // kad skelbimo puslapyje matytusi dar PRIES mokama analize
       irangosKiekis: (l.komplektacija || []).length || null, vieta: l.vieta || null,
@@ -2931,13 +2952,27 @@ function analizesPodelis(url, kaina) {
   return c;
 }
 
-app.post('/api/analyze-single', requireAuth, planai.reikalautiKreditu('analize', (r) => (r.body && r.body.url) ? String(r.body.url) + (r.body.force ? '#force' + Date.now() : '') : null), async (req, res) => {
+// v1.27.0: DU LYGIAI. „greita" (1 kr) - tik skelbimo tekstas, kaina, rizikos, be nuotraukų AI.
+// „pilna" (2 kr) - viskas: vizualinis nuotraukų patikrinimas, pardavėjas, VIN, įranga.
+// Kreditų kaina parenkama pagal uzklausos lygi, todel middleware sukuriamas dinamiskai.
+function kreditaiPagalLygi(req, res, next) {
+  const pilna = !(req.body && req.body.lygis === 'greita');
+  const veiksmas = pilna ? 'analizePilna' : 'analize';
+  return planai.reikalautiKreditu(veiksmas, (r) => (r.body && r.body.url)
+    ? String(r.body.url) + (pilna ? '#pilna' : '#greita') + (r.body.force ? '#force' + Date.now() : '')
+    : null)(req, res, next);
+}
+
+app.post('/api/analyze-single', requireAuth, kreditaiPagalLygi, async (req, res) => {
   try {
     const { url, force, kaina, marketMedian, marketCount, diffPct, modelis, pardavejas: knownPardavejas, galia, variklioTuris } = req.body;
     if (!url) return res.status(400).json({ error: 'Trūksta URL' });
+    const pilna = req.body.lygis !== 'greita';
+    const podelioRaktas = pilna ? url : url + '#greita';
 
     if (!force) {
-      const cached = analizesPodelis(url, kaina);
+      // Pilna analize tinka ir ten, kur uzsakyta greita - grazinam geresne nemokamai
+      const cached = analizesPodelis(url, kaina) || (pilna ? null : analizesPodelis(podelioRaktas, kaina));
       if (cached) {
         const ageMin = cache.cacheAgeMinutes('analysis', url);
         issaugotiAnalizesAtaskaita(req, url, cached);
@@ -2949,11 +2984,14 @@ app.post('/api/analyze-single', requireAuth, planai.reikalautiKreditu('analize',
       pardavejoInfo, vinPaslėptas, istorijosNuoroda, skelbimoParametrai, iranga, aprasymas, vieta } = await scrapeSingleListing(url);
     const marketContext = marketMedian ? { kaina, marketMedian, marketCount, diffPct, modelis, galia, variklioTuris } : null;
     // Ne automobilio nuotraukos (reklamos, logotipai) - salin; pardavejo logotipas - prie pardavejo
-    const foto = await klasifikuotiNuotraukas(photos0);
+    // Greitam lygiui nuotrauku AI nekvieciam - todel jis ir pigesnis
+    const foto = pilna
+      ? await klasifikuotiNuotraukas(photos0)
+      : { tinkamos: photos0 || [], atmestos: [], pardavejoLogo: null, parsisiusta: {} };
     const photos = foto.tinkamos, photo = photos[0] || photo0;
     // v1.24.0: pirma - irodymu sluoksnis (ka matome), tik tada verdiktas (ka tai reiskia)
     let vizualus = null;
-    if (VIZUALUS_SLUOKSNIS && photos.length >= 2) {
+    if (pilna && VIZUALUS_SLUOKSNIS && photos.length >= 2) {
       try {
         vizualus = await nuotrAnalize.analizuoti({
           anthropic, model: KOMENTARU_MODEL, nuotraukos: photos, parsisiusta: foto.parsisiusta,
@@ -2962,7 +3000,7 @@ app.post('/api/analyze-single', requireAuth, planai.reikalautiKreditu('analize',
         });
       } catch (e) { console.warn('[VIZUALAS] nepavyko:', e.message); }
     }
-    const analysis = await generateDeepAnalysis(title, fullText, photos, marketContext, url, foto.parsisiusta, vizualus);
+    const analysis = await generateDeepAnalysis(title, fullText, pilna ? photos : [], marketContext, url, foto.parsisiusta, vizualus);
     // Nuotrauku pastebejimai ir VIN is nuotraukos dabar ateina is irodymu sluoksnio
     if (vizualus) {
       if (!analysis.nuotrauku_pastebejimai || !analysis.nuotrauku_pastebejimai.length) {
@@ -2987,8 +3025,9 @@ app.post('/api/analyze-single', requireAuth, planai.reikalautiKreditu('analize',
       iranga: iranga || null, aprasymas: aprasymas || null, vieta: vieta || null,
       kaina: kaina || null, // v1.23.0: pagal ja tikrinam, ar podelio analize dar aktuali
       vizualus: vizualus || null, // v1.24.0: irodymu sluoksnis (bukle, pasitikejimas, pastebejimai)
+      lygis: pilna ? 'pilna' : 'greita',
     };
-    cache.setCached('analysis', url, result);
+    cache.setCached('analysis', podelioRaktas, result);
     issaugotiAnalizesAtaskaita(req, url, result);
     res.json({ ...result, cached: false });
   } catch (err) {
