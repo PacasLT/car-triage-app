@@ -8,6 +8,18 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.23.0', data: '2026-09-17', pavadinimas: 'Įranga sąraše, nemokamas VIN iššifravimas, pigesnė analizė',
+    pakeitimai: [
+      'Geriausių skelbimų kortelėse dabar matosi tikras įrangos kiekis ir kur automobilis stovi – šiuos duomenis nuskaitome atidarę patį skelbimą',
+      'Naujas nemokamas VIN iššifravimas: gamintojas, surinkimo šalis, modelio metai pagal kodą, kontrolinis skaitmuo ir NHTSA duomenys – be kreditų',
+      'Įspėjame, jei VIN užkoduoti metai ar gamintojas nesutampa su skelbimu, ir parodome, jei tą patį VIN jau matėme kitame skelbime',
+      'Ištaisyta „Dingo iš portalo“ klaida – skelbimas nebežymimas parduotu vien todėl, kad nepateko į šios paieškos rezultatus ar nepavyko jo nuskaityti',
+      'Pardavėjo kortelėje nebeteigiame „privatus pardavėjas“, kol to nežinome – parašome tik tai, ką iš tikrųjų matome',
+      '„Istorija“ ir „Palyginti“ iš viršutinės juostos perkelti į paskyros meniu; skelbimo puslapyje palyginimo mygtukas dabar prie automobilio veiksmų',
+      'Analizė pigesnė: pastovi užduoties dalis siunčiama tik kartą (podėlis), skelbimo tekstas trumpesnis, o ta pati analizė galioja 7 d., jei kaina nepasikeitė',
+    ],
+  },
+  {
     versija: '1.22.0', data: '2026-09-17', pavadinimas: 'Privatus pardavėjas, VIN įvedimas, pilna įranga ir vieta',
     pakeitimai: [
       'Privatus pardavėjas atpažįstamas teisingai – vietoje atsitiktinio teksto rodome „Privatus pardavėjas“ su miestu, telefonu ir patarimais, į ką atkreipti dėmesį',

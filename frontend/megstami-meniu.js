@@ -112,7 +112,7 @@
   // Pokyciu zenkleliai is serverio istorijos (istorija: pastebetas, paskutinisPatikrinimas, dingo, kainosPokytis, nuoIssaugojimo)
   function pokyciai(f) {
     var h = f.istorija || {}, chips = [];
-    if (h.dingo) chips.push('<span class="ct-meg-chip blogai">Dingo iš portalo ' + esc(pries(h.dingo)) + '</span>');
+    if (h.dingo) chips.push('<span class="ct-meg-chip blogai" title="Šio skelbimo nebematome portale jau kelis patikrinimus iš eilės – tikėtina, parduotas. Verta atidaryti skelbimą ir įsitikinti.">Nebematome portale ' + esc(pries(h.dingo)) + '</span>');
     var nuo = h.nuoIssaugojimo != null ? h.nuoIssaugojimo : 0;
     if (nuo && Math.abs(nuo) >= 50) chips.push('<span class="ct-meg-chip ' + (nuo < 0 ? 'gerai' : 'demesio') + '" title="Kainos pokytis nuo tada, kai išsaugojote">' + skirt(nuo) + ' nuo išsaugojimo</span>');
     else if (h.kainosPokytis && Math.abs(h.kainosPokytis) >= 50) chips.push('<span class="ct-meg-chip ' + (h.kainosPokytis < 0 ? 'gerai' : 'demesio') + '" title="Kainos pokytis nuo tada, kai skelbimas pastebėtas rinkoje">' + skirt(h.kainosPokytis) + (h.mazinimuKartai > 1 ? ' · ' + h.mazinimuKartai + '× mažinta' : '') + '</span>');

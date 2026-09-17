@@ -12,6 +12,7 @@ const puppeteer = require('puppeteer');
 const Anthropic = require('@anthropic-ai/sdk');
 const cache = require('./cache');
 const autopliusIds = require('./autoplius-ids');
+const vinTikrinimas = require('./vin-tikrinimas');
 const { requireAuth, handleRegister, handleLogin, handleMe, planai, duomenys } = require('./auth');
 
 const app = express();
@@ -149,6 +150,14 @@ const MODEL = 'claude-sonnet-4-5';
 const KOMENTARU_MODEL = process.env.KOMENTARU_MODEL || 'claude-haiku-4-5';
 // Kiek nuotrauku siusti vizualinei analizei. Kiekviena ~1500 tokenu.
 const DEEP_FOTO_KIEKIS = parseInt(process.env.DEEP_FOTO_KIEKIS || '6', 10);
+// v1.23.0 SANAUDOS: struktūriniai skelbimo laukai (lentele, iranga, pardavejas, aprasymas)
+// dabar eina PIRMI, todel zalio puslapio teksto nebereikia 12 000 simboliu - 4 000 uztenka
+// kontekstui, o AI iejimo tokenu sumazeja maždaug per puse.
+const TEKSTO_RIBA = parseInt(process.env.SKELBIMO_TEKSTO_RIBA || '4000', 10);
+// Ta pati skelbima analizuojam is naujo tik jei praejo 7 d. arba pasikeite kaina.
+const ANALIZES_PODELIS_MS = parseInt(process.env.ANALIZES_PODELIS_D || '7', 10) * 24 * 60 * 60 * 1000;
+// Kiek geriausiu skelbimu papildomai atidarom paieskos metu (iranga, VIN, vieta).
+const GILINTI_TOP = parseInt(process.env.GILINTI_TOP || '8', 10);
 
 // ============ SCRAPING (ta pati logika kaip triage.js) ============
 
@@ -1790,6 +1799,9 @@ async function runSearchJob(jobId, filters) {
       return siteParsed;
     }));
     parsed = siteResults.flat();
+    // v1.23.0: jei bent vienas portalas atidave pilna puslapiu limita, matem tik dali
+    // rezultatu - tada negalima teigti, kad anksciau matyti skelbimai "dingo".
+    const pasiektasPuslapiuLimitas = siteResults.some((r) => r.length >= maxPages * 18);
 
     const metaiNuo = parseInt(filters.metaiNuo, 10) || null;
     const metaiIki = parseInt(filters.metaiIki, 10) || null;
@@ -1894,14 +1906,31 @@ async function runSearchJob(jobId, filters) {
     // greiciausiai parduoti arba nuimti.
     const dabartiniai = new Set(visiMatyti.map((l) => l.url));
     const dingusieji = [];
-    visiMatyti.forEach(() => {});
+    // v1.23.0 PATAISYTA: anksciau skelbimas buvo zymimas "dingo" vien todel, kad jo nebuvo
+    // SIOJE paieskoje. Bet kiekviena paieska turi savo filtrus, kainu rezius ir puslapiu
+    // gyli - skelbimas galejo tiesiog nepatekti i sia imti. Dabar reikia TRIJU salygu:
+    //  1) skelbimas telpa i sios paieskos filtrus (kaina, metai, rida, modelis),
+    //  2) jo nera rezultatuose jau ANTRA karta is eiles,
+    //  3) paieska nebuvo nutraukta puslapiu limito (kitaip visa uodega atrodo "dingusi").
     (function aptiktiDingusius() {
+      if (pasiektasPuslapiuLimitas) return;
       const modeliai = new Set(visiMatyti.map((l) => l.modelis).filter(Boolean));
+      const f = filters || {};
+      const telpa = (h) => {
+        if (f.kainaNuo && h.kaina && h.kaina < f.kainaNuo) return false;
+        if (f.kainaIki && h.kaina && h.kaina > f.kainaIki) return false;
+        if (f.metaiNuo && h.metai && h.metai < f.metaiNuo) return false;
+        if (f.metaiIki && h.metai && h.metai > f.metaiIki) return false;
+        if (f.ridaIki && h.rida && h.rida > f.ridaIki) return false;
+        return true;
+      };
       modeliai.forEach((m) => {
         cache.getHistoryForModel(m).forEach((h) => {
-          // Tikrinam tik tuos, kuriuos mateme per pastarasias 14 dienu
           if (!h.url || dabartiniai.has(h.url)) return;
           if (Date.now() - h.time > 14 * 86400000) return;
+          if (!telpa(h)) return;
+          const praleista = cache.zymetiNerasta(h.url);
+          if (praleista < 2) return; // pirmas praleidimas - dar ne irodymas
           const d = cache.zymetiDingusi(h.url);
           if (d) dingusieji.push(d);
         });
@@ -1940,6 +1969,39 @@ async function runSearchJob(jobId, filters) {
         ridaMedian: marketData ? marketData.ridaMedian : null,
       };
     });
+
+    // v1.23.0: sarasO puslapyje irangos NERA - todel TOP skelbimams atidarom ju
+    // puslapius (tik nuskaitymas, jokio AI) ir uzpildom iranga, VIN, vieta, pardaveja.
+    // Puslapiai kesuojami, todel kartotinei paieskai jie nieko nebekainuoja.
+    const gilinti = enriched
+      .filter((l) => l.url && !l.komplektacija && !l.kainosIspejimas)
+      .sort((a, b) => (b.diffPct == null ? -999 : b.diffPct) - (a.diffPct == null ? -999 : a.diffPct))
+      .slice(0, GILINTI_TOP);
+    if (gilinti.length) {
+      logJob(jobId, `\u{1F50E} Atidarome ${gilinti.length} geriausi\u0173 skelbim\u0173 \u2013 renkame \u012frang\u0105, VIN ir viet\u0105...`);
+      let papildyti = 0;
+      await Promise.all(gilinti.map(async (l) => {
+        try {
+          const d = await scrapeSingleListing(l.url);
+          const items = [];
+          (d.iranga || []).forEach((g) => (g.items || []).forEach((it) => { if (items.length < 80 && it) items.push(it); }));
+          if (items.length) l.komplektacija = items;
+          if (d.vieta) l.vieta = d.vieta;
+          if (d.aprasymas) l.aprasymas = d.aprasymas;
+          if (d.vin) { l.vin = d.vin; l.turiVin = true; }
+          else if (d.vinPaslėptas) l.vinPaslėptas = true;
+          if (d.pardavejoInfo) {
+            l.pardavejoInfo = d.pardavejoInfo;
+            if (d.pardavejoInfo.vardas) { l.pardavejas = d.pardavejoInfo.vardas; l.yraVerslas = true; }
+            else if (d.pardavejoInfo.privatus) l.yraVerslas = false;
+          }
+          if (d.photos && d.photos.length > ((l.photos || []).length)) l.photos = d.photos;
+          if (d.skelbimoParametrai) l.skelbimoParametrai = d.skelbimoParametrai;
+          papildyti++;
+        } catch (e) { /* vienas nepavykes skelbimas nestabdo paieskos */ }
+      }));
+      logJob(jobId, `   \u2705 Papildyta ${papildyti} skelbim\u0173: \u012franga, VIN, vieta, pardav\u0117jas`);
+    }
 
     // TRIAGE: kiekvienas skelbimas ivertinamas ir suklasifikuojamas. Nebraukiam
     // agresyviai - net silpni pasiulymai lieka matomi su savo lygiu ir priezastimis,
@@ -2037,7 +2099,7 @@ async function runSearchJob(jobId, filters) {
     const topSlice = candidates.slice(0, Math.max(TOP_N_DEEP, 20));
     let isPodelio = 0;
     topSlice.forEach((c) => {
-      const cachedDeep = cache.getCached('analysis', c.url, cache.ANALYSIS_TTL_MS);
+      const cachedDeep = analizesPodelis(c.url, c.kaina);
       if (cachedDeep && !c.deepAnalysis) {
         c.deepAnalysis = cachedDeep.analysis; c.vin = cachedDeep.vin;
         c.pardavejas = cachedDeep.pardavejas; c.photos = cachedDeep.photos;
@@ -2120,6 +2182,8 @@ async function runSearchJob(jobId, filters) {
       rizikosBusena: l.rizikosBusena, istorijosBusena: l.istorijosBusena,
       irangosBusena: l.irangosBusena, neivertinta: l.neivertinta,
       diffPct: l.diffPct, marketMedian: l.marketMedian, marketCount: l.marketCount,
+      // v1.23.0: is atidaryto skelbimo puslapio - iranga ir tiksli vieta
+      irangosKiekis: (l.komplektacija || []).length || null, vieta: l.vieta || null,
       // PRIDETA: portalo ikelimo laikas, mokamas iskelimas, kainos pastaba/ispejimas, miestas, kebulas
       ikeltaTekstas: l.ikeltaTekstas || null, ikeltaLaikas: l.ikeltaLaikas || null, iskeltas: l.iskeltas || null,
       pirmaRegistracija: l.pirmaRegistracija || null, miestas: l.miestas || null, kebulas: l.kebulas || null,
@@ -2282,10 +2346,10 @@ async function scrapeSingleListing(url) {
   $('script, style, nav, footer, header, iframe, noscript').remove();
   const title = $('h1').first().text().replace(/\s+/g, ' ').trim();
   let bodyText = $('body').text().replace(/\s+/g, ' ').trim();
-  bodyText = cleanFinancingNoise(bodyText).slice(0, 12000);
+  bodyText = cleanFinancingNoise(bodyText).slice(0, TEKSTO_RIBA);
 
   // Strukturiniai laukai eina PIRMI - anksciau iranga ir techniniai parametrai likdavo
-  // uz 12 000 simboliu teksto ribos, todel AI rasydavo "nepakankamai duomenu".
+  // uz teksto ribos, todel AI rasydavo "nepakankamai duomenu".
   const parametruTekstas = Object.keys(struk.parametrai || {}).length
     ? Object.entries(struk.parametrai).map(([k, v]) => `${k}: ${v}`).join('; ') : '';
   const irangosTekstas = (struk.iranga || []).length
@@ -2591,6 +2655,60 @@ Atsakyk TIK JSON: {"netinkamos":[numeriai],"logotipas":numeris arba null}`});
   }
 }
 
+// v1.23.0: statine dalis - kesuojama (cache_control), todel nekeisti be reikalo.
+const DEEP_INSTRUKCIJOS = `Tu esi automobiliu pirkimo ekspertas, dirbantis flipping/perpardavimo verslui. Isanalizuok
+si skelbima ISSAMIAI remdamasis TIK sitame tekste esancia informacija - NEISGALVOK faktu,
+kuriu tekste nera. Jei tekste yra "[STRUKTŪRIZUOTI FAKTAI IŠ SKELBIMO]" blokas - tai
+PATIKIMIAUSIAS saltinis technine specifikacijai (variklis, kW, rida, defektai ir t.t.),
+naudok ji pirmiausia. "[PILNAS PUSLAPIO TEKSTAS]" duoda papildoma konteksta (aprasyma,
+irangos sarasa, pardavejo info) - PANAUDOK VISA sia informacija, ne tik pirmus sakinius.
+Jei skelbime nurodyta konkreti verta irangos (oda, navigacija, kamera, sildomos
+sedynes ir pan.), TAI paminek kaip privaluma su konkreciais pavadinimais, ne bendrai.
+SVARBU - FINANSINIAI ASPEKTAI: jei tekste yra paminetas GALIMAS PVM SUSIGRAZINIMAS
+(pvz. "PVM susigrazinimas", "galima susigrazinti PVM", "pirkti ant imones" ir panasios
+fraze) - TAI BUTINAI paminek "privalumai" sarase KAIP ATSKIRA PUNKTA, net jei del to
+reiketu praleisti kita, maziau svarbu punkta - tai reali finansine nauda verslo pirkejui
+(gali reiksti apie 21% efektyvia nuolaida), ir niekada neturi buti praleista.
+
+PAPILDOMA UZDUOTIS - PELNO POTENCIALO VERTINIMAS ("perikupo_radaras" lauke):
+Ivertink, AR VERTA si automobili PIRKTI SIA KAINA IR PERPARDUOTI SU PELNU - galimai
+po smulkaus remonto/tvarkymo, valymo, ar tiesiog gerensniu nuotrauku ir teisingesnio
+pateikimo. Atsizvelk i: kainos skirtuma nuo rinkos vidurkio, aprasytus/matomus defektus
+ir jų tikėtiną tvarkymo kaina, papildomas islaidas (PVM, muitas, transportavimas, jei
+JAV/aukciono kilmes), ir REALU galima pardavimo kainos intervala PO sutvarkymo (remkis
+rinkos vidurkiu tam modeliui). Buk ATSARGUS ir REALISTISKAS - jei rizika (nezinoma zala,
+JAV kilme be VIN, trukstama istorija) yra didele, tai MAZINA pelno potenciala, nesvarbu
+koks kainos skirtumas nuo vidurkio.
+
+Jei manai, kad naudinga, GALI atlikti web paieska del zinomu sio modelio/metu/varianto
+gedimu ar tipiniu problemu.
+
+Grazink TIK JSON (be markdown), sia struktura. "privalumai"/"rizikos" ir kt. sarasuose
+MAKSIMUM 4 punktai, kiekvienas punktas trumpas (max 15 zodziu). SVARBU DEL JSON FORMATO:
+jei tekste reikia cituoti kokia fraze ar terminą, naudok VIENGUBAS kabutes (') arba
+lietuviskas kabutes („ ") vietoj dvigubu ("), nes dvigubos kabutes teksto viduje sugadina
+JSON struktura ir sukelia klaida:
+{
+  "verdiktas": "1-2 sakiniai bendra isvada",
+  "technine_specifikacija": "trumpai: variklis (l/kW), pavaru deze, kebulas - is teksto, arba null jei nera",
+  "irangos_akcentai": ["konkretus vertingas irangos punktas is teksto, pvz. 'Oda salonas'", "..."],
+  "privalumai": ["konkretus privalumas is teksto", "..."],
+  "rizikos": ["konkreti rizika/nezinomas dalykas", "..."],
+  "ka_patikrinti_gyvai": ["konkretus patikrinimo punktas", "..."],
+  "klausimai_pardavejui": ["konkretus klausimas", "..."],
+  "derybu_patarimas": "1-2 sakiniai, kaip derėtis del kainos remiantis rastais trukumais",
+  "perikupo_radaras": {
+    "pelno_potencialas": "aukstas" arba "vidutinis" arba "zemas" arba "neverta",
+    "procentas": skaicius 0-100 (grubus bendras pelno potencialo ivertinimas),
+    "paaiskinimas": "1-2 sakiniai kodel toks vertinimas",
+    "numatoma_investicija": "apytiksle suma remontui/tvarkymui, arba null jei nera pagrindo vertinti",
+    "numatomas_pardavimo_diapazonas": "apytikslis € intervalas PO sutvarkymo, arba null"
+  },
+  "nuotrauku_pastebejimai": ["konkretus matomas pazeidimas nuotraukoje", "..."] (arba ["Nuotraukose akivaizdzios zalos nepastebeta"]; jei nuotraukos NEPRISEGTOS - null),
+  "vin_is_nuotraukos": "17 simboliu VIN kodas, jei ISKAITOMAS prisegtoje nuotraukoje, kitu atveju null",
+  "vin_nuotraukos_vieta": "kur pamatytas, pvz. duru lipdukas, arba null"
+}`;
+
 async function generateDeepAnalysis(title, fullText, photos, marketContext, skelbimoUrl, preloaded) {
   // Siunčiame iki 12 nuotraukų AI - vizuali automobilio būklės analizė visada naudinga.
   let imageBlocks = [];
@@ -2648,68 +2766,24 @@ t.y. si kaina yra ${marketContext.diffPct}% ${marketContext.diffPct >= 0 ? 'ZEME
     }
   }
 
-  const prompt = `Automobilio skelbimo puslapio turinys:
+  // v1.23.0 SANAUDOS: instrukcijos ir JSON schema yra VISADA tokios pacios, todel jos
+  // siunciamos atskiru bloku su cache_control - Anthropic jas isikesuoja ir pakartotinis
+  // ju skaitymas kainuoja ~10% iprastos kainos. Kintama dalis (skelbimo tekstas) - atskirai.
+  const turinys = `Automobilio skelbimo puslapio turinys:
 Pavadinimas: ${title}
 Turinys: ${fullText}
-${marketContextText}${istorijosTekstas}
+${marketContextText}${istorijosTekstas}${photoInstructions}`;
 
-Tu esi automobiliu pirkimo ekspertas, dirbantis flipping/perpardavimo verslui. Isanalizuok
-si skelbima ISSAMIAI remdamasis TIK sitame tekste esancia informacija - NEISGALVOK faktu,
-kuriu tekste nera. Jei tekste yra "[STRUKTŪRIZUOTI FAKTAI IŠ SKELBIMO]" blokas - tai
-PATIKIMIAUSIAS saltinis technine specifikacijai (variklis, kW, rida, defektai ir t.t.),
-naudok ji pirmiausia. "[PILNAS PUSLAPIO TEKSTAS]" duoda papildoma konteksta (aprasyma,
-irangos sarasa, pardavejo info) - PANAUDOK VISA sia informacija, ne tik pirmus sakinius.
-Jei skelbime nurodyta konkreti verta irangos (oda, navigacija, kamera, sildomos
-sedynes ir pan.), TAI paminek kaip privaluma su konkreciais pavadinimais, ne bendrai.
-SVARBU - FINANSINIAI ASPEKTAI: jei tekste yra paminetas GALIMAS PVM SUSIGRAZINIMAS
-(pvz. "PVM susigrazinimas", "galima susigrazinti PVM", "pirkti ant imones" ir panasios
-fraze) - TAI BUTINAI paminek "privalumai" sarase KAIP ATSKIRA PUNKTA, net jei del to
-reiketu praleisti kita, maziau svarbu punkta - tai reali finansine nauda verslo pirkejui
-(gali reiksti apie 21% efektyvia nuolaida), ir niekada neturi buti praleista.
-${photoInstructions}
+  const prompt = `${DEEP_INSTRUKCIJOS}
 
-PAPILDOMA UZDUOTIS - PELNO POTENCIALO VERTINIMAS ("perikupo_radaras" lauke):
-Ivertink, AR VERTA si automobili PIRKTI SIA KAINA IR PERPARDUOTI SU PELNU - galimai
-po smulkaus remonto/tvarkymo, valymo, ar tiesiog gerensniu nuotrauku ir teisingesnio
-pateikimo. Atsizvelk i: kainos skirtuma nuo rinkos vidurkio, aprasytus/matomus defektus
-ir jų tikėtiną tvarkymo kaina, papildomas islaidas (PVM, muitas, transportavimas, jei
-JAV/aukciono kilmes), ir REALU galima pardavimo kainos intervala PO sutvarkymo (remkis
-rinkos vidurkiu tam modeliui). Buk ATSARGUS ir REALISTISKAS - jei rizika (nezinoma zala,
-JAV kilme be VIN, trukstama istorija) yra didele, tai MAZINA pelno potenciala, nesvarbu
-koks kainos skirtumas nuo vidurkio.
+${turinys}`;
 
-Jei manai, kad naudinga, GALI atlikti web paieska del zinomu sio modelio/metu/varianto
-gedimu ar tipiniu problemu.
 
-Grazink TIK JSON (be markdown), sia struktura. "privalumai"/"rizikos" ir kt. sarasuose
-MAKSIMUM 4 punktai, kiekvienas punktas trumpas (max 15 zodziu). SVARBU DEL JSON FORMATO:
-jei tekste reikia cituoti kokia fraze ar terminą, naudok VIENGUBAS kabutes (') arba
-lietuviskas kabutes („ ") vietoj dvigubu ("), nes dvigubos kabutes teksto viduje sugadina
-JSON struktura ir sukelia klaida:
-{
-  "verdiktas": "1-2 sakiniai bendra isvada",
-  "technine_specifikacija": "trumpai: variklis (l/kW), pavaru deze, kebulas - is teksto, arba null jei nera",
-  "irangos_akcentai": ["konkretus vertingas irangos punktas is teksto, pvz. 'Oda salonas'", "..."],
-  "privalumai": ["konkretus privalumas is teksto", "..."],
-  "rizikos": ["konkreti rizika/nezinomas dalykas", "..."],
-  "ka_patikrinti_gyvai": ["konkretus patikrinimo punktas", "..."],
-  "klausimai_pardavejui": ["konkretus klausimas", "..."],
-  "derybu_patarimas": "1-2 sakiniai, kaip derėtis del kainos remiantis rastais trukumais",
-  "perikupo_radaras": {
-    "pelno_potencialas": "aukstas" arba "vidutinis" arba "zemas" arba "neverta",
-    "procentas": skaicius 0-100 (grubus bendras pelno potencialo ivertinimas),
-    "paaiskinimas": "1-2 sakiniai kodel toks vertinimas",
-    "numatoma_investicija": "apytiksle suma remontui/tvarkymui, arba null jei nera pagrindo vertinti",
-    "numatomas_pardavimo_diapazonas": "apytikslis € intervalas PO sutvarkymo, arba null"
-  },
-  "nuotrauku_pastebejimai": ${imageBlocks.length > 0 ? '["konkretus matomas pazeidimas nuotraukoje", "..."] (arba ["Nuotraukose akivaizdzios zalos nepastebeta"] jei nieko nerandi)' : 'null'},
-  "vin_is_nuotraukos": ${imageBlocks.length > 0 ? '"17 simboliu VIN kodas, jei ISKAITOMAS nuotraukoje, kitu atveju null"' : 'null'},
-  "vin_nuotraukos_vieta": ${imageBlocks.length > 0 ? '"kur pamatytas, pvz. duru lipdukas, arba null"' : 'null'}
-}`;
-
-  const messageContent = imageBlocks.length > 0
-    ? [{ type: 'text', text: prompt }, ...imageBlocks]
-    : prompt;
+  const messageContent = [
+    { type: 'text', text: DEEP_INSTRUKCIJOS, cache_control: { type: 'ephemeral' } },
+    { type: 'text', text: turinys },
+    ...imageBlocks,
+  ];
 
   const response = await anthropic.messages.create({
     model: MODEL,
@@ -2728,13 +2802,14 @@ JSON struktura ir sukelia klaida:
     // Atsarginis planas - be web paieskos, be nuotrauku instrukciju (jos butu klaidinancios,
     // nes siame bandyme nuotraukos NEsiuciamos), trumpesnis atsakymas, mazesne tikimybe nutrukti
     try {
-      const retryPrompt = prompt
-        .replace(photoInstructions, '')
-        .replace(/,\s*\n\s*"nuotrauku_pastebejimai":[^\n]*\n?/, '\n');
+      const retryTurinys = turinys.replace(photoInstructions, '');
       const retryResponse = await anthropic.messages.create({
         model: MODEL,
         max_tokens: 2600,
-        messages: [{ role: 'user', content: retryPrompt }],
+        messages: [{ role: 'user', content: [
+          { type: 'text', text: DEEP_INSTRUKCIJOS, cache_control: { type: 'ephemeral' } },
+          { type: 'text', text: retryTurinys },
+        ] }],
       });
       const retryText = retryResponse.content.filter((b) => b.type === 'text').map((b) => b.text).join('');
       const retryCleaned = retryText.replace(/```json|```/g, '').trim();
@@ -2774,13 +2849,24 @@ app.get('/api/search-status/:jobId', requireAuth, (req, res) => {
   res.json(job);
 });
 
+// v1.23.0: podelis galioja 7 d., bet TIK jei skelbimo kaina nepasikeitusi - kitaip
+// derybu patarimai ir kainos vertinimas butu pasene. Podelis bendras visiems vartotojams,
+// todel to paties skelbimo AI analize antram vartotojui nieko nebekainuoja.
+function analizesPodelis(url, kaina) {
+  const c = cache.getCached('analysis', url, ANALIZES_PODELIS_MS);
+  if (!c) return null;
+  const sena = c.kaina || (c.marketContext && c.marketContext.kaina) || null;
+  if (kaina && sena && Math.abs(sena - kaina) > Math.max(100, kaina * 0.01)) return null;
+  return c;
+}
+
 app.post('/api/analyze-single', requireAuth, planai.reikalautiKreditu('analize', (r) => (r.body && r.body.url) ? String(r.body.url) + (r.body.force ? '#force' + Date.now() : '') : null), async (req, res) => {
   try {
     const { url, force, kaina, marketMedian, marketCount, diffPct, modelis, pardavejas: knownPardavejas, galia, variklioTuris } = req.body;
     if (!url) return res.status(400).json({ error: 'Trūksta URL' });
 
     if (!force) {
-      const cached = cache.getCached('analysis', url, cache.ANALYSIS_TTL_MS);
+      const cached = analizesPodelis(url, kaina);
       if (cached) {
         const ageMin = cache.cacheAgeMinutes('analysis', url);
         issaugotiAnalizesAtaskaita(req, url, cached);
@@ -2806,6 +2892,7 @@ app.post('/api/analyze-single', requireAuth, planai.reikalautiKreditu('analize',
       pardavejoInfo: pardavejoInfo || null, vinPaslėptas: !!vinPaslėptas,
       istorijosNuoroda: istorijosNuoroda || null, skelbimoParametrai: skelbimoParametrai || null,
       iranga: iranga || null, aprasymas: aprasymas || null, vieta: vieta || null,
+      kaina: kaina || null, // v1.23.0: pagal ja tikrinam, ar podelio analize dar aktuali
     };
     cache.setCached('analysis', url, result);
     issaugotiAnalizesAtaskaita(req, url, result);
@@ -2841,7 +2928,7 @@ function issaugotiAnalizesAtaskaita(req, url, rezultatas) {
 // LYGINDAMAS juos tarpusavyje - ne kiekviena atskirai.
 
 async function paruostiPilnaProfili(url, kontekstas) {
-  const cached = cache.getCached('analysis', url, cache.ANALYSIS_TTL_MS);
+  const cached = analizesPodelis(url, kontekstas && kontekstas.kaina);
   if (cached && cached.analysis) {
     return { url, ...cached, isPodelio: true };
   }
@@ -2853,6 +2940,7 @@ async function paruostiPilnaProfili(url, kontekstas) {
     vin: vinInfo.vin, vinSaltinis: vinInfo.vinSaltinis, vinIsNuotraukos: vinInfo.vinIsNuotraukos,
     vinPrefiksas: vinInfo.vinPrefiksas, vinPatvirtintasPrefiksu: vinInfo.vinPatvirtintasPrefiksu,
     pardavejas: pardavejas || null,
+    kaina: (kontekstas && kontekstas.kaina) || null,
   };
   cache.setCached('analysis', url, result);
   return { url, ...result, isPodelio: false };
@@ -3267,8 +3355,16 @@ async function tikrintiSekamus() {
     try {
       const { fullText, kaina, rida } = await patikrintiViena(url);
       if (fullText === null) {
-        const d = cache.zymetiDingusi(url);
-        if (d) { dingusiu++; console.log(`[SEKIMAS] Dingo: ${url} (kabojo ${d.dienosRinkoje} d.)`); }
+        // v1.23.0 PATAISYTA: vienas nepavykes nuskaitymas (captcha, timeout, kitoks sablonas)
+        // NERA irodymas, kad skelbimas pasalintas. Zymim tik po antro kartos is eiles.
+        const praleista = cache.zymetiNerasta(url);
+        if (praleista >= 2) {
+          const d = cache.zymetiDingusi(url);
+          if (d) { dingusiu++; console.log(`[SEKIMAS] Dingo: ${url} (kabojo ${d.dienosRinkoje} d.)`); }
+        } else {
+          klaidu++;
+          console.log(`[SEKIMAS] Nepavyko perskaityti (${praleista} k.): ${url}`);
+        }
       } else {
         cache.zymetiMatyta({ url, kaina, rida });
         if (kaina) {
@@ -3341,6 +3437,30 @@ app.post('/api/run-tracking', requireAuth, (req, res) => {
   res.json({ paleista: true, sekama: cache.sekamiUrlai().length });
 });
 
+// v1.23.0 NEMOKAMAS pirminis VIN patikrinimas. Atsako i tai, kas uzkoduota paciame VIN
+// (gamintojas, salis, modelio metai, kontrolinis skaitmuo), pasitikrina nemokamoje NHTSA
+// bazeje ir palygina su skelbimo duomenimis. Kreditas nuskaitomas tik uz gilu
+// /api/vin-lookup (aukcionu ir zalu istorija).
+app.post('/api/vin-check', requireAuth, async (req, res) => {
+  try {
+    const { vin, metai, modelis, url } = req.body || {};
+    const r = await vinTikrinimas.pilnasPatikrinimas(vin, { metai, modelis });
+    if (!r.ok) return res.status(400).json(r);
+    let matyta = [];
+    try { matyta = cache.rastiPagalVin(r.vin).filter((m) => !url || m.url !== url); } catch (e) {}
+    if (matyta.length) {
+      r.pastabos.push({
+        svarba: 'vidutine',
+        tekstas: `Šį VIN mūsų sistema jau matė ${matyta.length} kitame skelbime – žemiau matote, kada ir už kiek jis buvo siūlomas.`,
+      });
+    }
+    res.json({ ...r, matytaAnksciau: matyta });
+  } catch (err) {
+    console.error('[VIN-CHECK]', err.message);
+    res.status(500).json({ error: 'Nepavyko patikrinti VIN' });
+  }
+});
+
 app.post('/api/vin-lookup', requireAuth, planai.reikalautiKreditu('vin', (r) => (r.body && r.body.vin) ? String(r.body.vin).toUpperCase() : null), async (req, res) => {
   try {
     const { vin, force } = req.body;
@@ -3400,14 +3520,22 @@ async function checkFavoriteStatus(url) {
     const bodyText = $('body').text().replace(/\s+/g, ' ').trim();
     const topText = bodyText.slice(0, 1500);
 
-    if (/skelbimas (nerastas|nebeaktyvus)|puslapis nerastas|straipsnis nerastas|404/i.test(topText)) {
+    if (/skelbimas (nerastas|nebeaktyvus|neaktyvus|pasibaig)|skelbimo nebera|puslapis nerastas|straipsnis nerastas|404 not found/i.test(topText)) {
       return { status: 'removed' };
     }
     const isReserved = /rezervuota/i.test(topText);
-    const priceMatch = bodyText.match(/(\d[\d\s]{2,7})\s?€/);
-    const currentPrice = priceMatch ? parseInt(priceMatch[1].replace(/\s/g, ''), 10) : null;
+    // v1.23.0 PATAISYTA: kaina imama strukturiskai; jei jos nerandam (portalas grazino
+    // captcha, kitoki sablona ar nuskaitymas nepavyko) - tai NEREISKIA, kad skelbimas
+    // pasalintas. Tokiu atveju grazinam 'unknown' ir vartotojui nieko neteigiam.
+    let currentPrice = null;
+    const strukKaina = $('.announcement-pricing-info strong').first().text().replace(/[^0-9]/g, '');
+    if (strukKaina) currentPrice = parseInt(strukKaina, 10);
     if (!currentPrice) {
-      return { status: 'removed' };
+      const priceMatch = bodyText.match(/(\d[\d\s\u00a0]{2,7})\s?€/);
+      currentPrice = priceMatch ? parseInt(priceMatch[1].replace(/[\s\u00a0]/g, ''), 10) : null;
+    }
+    if (!currentPrice || currentPrice < 300) {
+      return { status: 'unknown', priezastis: 'Nepavyko perskaityti kainos – skelbimo būsena nepatvirtinta' };
     }
     return { status: isReserved ? 'reserved' : 'active', currentPrice };
   } catch (err) {
@@ -3429,6 +3557,10 @@ app.post('/api/check-favorite', requireAuth, async (req, res) => {
 });
 
 // Autoplius markiu/modeliu ID lentele: SEED veikia is karto, pilna parsisiunciama fone 1 k./men.
+try {
+  const isvalyta = cache.valytiSenusDingo();
+  if (isvalyta) console.log(`[SEKIMAS] Isvalyta ${isvalyta} klaidingu "dingo" zymu (sena logika).`);
+} catch (e) { console.error('[SEKIMAS] valymo klaida:', e.message); }
 autopliusIds.prijungti(cache.DATA_DIR, (u) => fetchSearchPage(u));
 
 const PORT = process.env.PORT || 3002;

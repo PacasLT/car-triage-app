@@ -305,6 +305,7 @@ function zymetiMatyta(l, papildoma) {
     e.paskutinMatytas = now;
     e.kartuMatytas = (e.kartuMatytas || 0) + 1;
     if (e.dingo) e.dingo = null; // vel atsirado - matyt buvo laikinai nuimtas
+    e.praleista = 0;               // v1.23.0: skelbimas vel matomas - skaitliukas is naujo
     if (!e.modelis && l.modelis) e.modelis = l.modelis;
     if (!e.pirmaKaina && l.kaina) e.pirmaKaina = l.kaina;
     if (!e.pirmaRida && l.rida) e.pirmaRida = l.rida;
@@ -338,6 +339,49 @@ function rastiTaPatiAuto(url) {
     });
   });
   return kiti.sort((a, b) => a.pirmaMatytas - b.pirmaMatytas);
+}
+
+// v1.23.0: ar musu sistema jau mate si VIN? Jei tas pats VIN buvo kitame skelbime,
+// tai vertinga informacija pirkejui (pvz. automobilis grazintas i rinka, keitesi pardavejas).
+function rastiPagalVin(vin) {
+  const v = String(vin || '').toUpperCase();
+  if (v.length !== 17) return [];
+  return Object.entries(_lifecycle)
+    .filter(([, e]) => e && e.vin && String(e.vin).toUpperCase() === v)
+    .map(([url, e]) => ({
+      url,
+      modelis: e.modelis || null,
+      pardavejas: e.pardavejas || null,
+      pirmaMatytas: e.pirmaMatytas || null,
+      paskutinMatytas: e.paskutinMatytas || null,
+      pirmaKaina: e.pirmaKaina || null,
+      dabartineKaina: e.dabartineKaina || null,
+      dingo: e.dingo || null,
+    }))
+    .sort((a, b) => (a.pirmaMatytas || 0) - (b.pirmaMatytas || 0));
+}
+
+// v1.23.0 vienkartinis valymas: senoji logika zymejo "dingo" jau po pirmo praleidimo,
+// todel dalis dar gyvu skelbimu pazymeti klaidingai. Isvalom tuos, kurie neturi
+// praleidimu skaitliuko - jei skelbimas is tikruju dingo, tai paaiskes per kita tikrinima.
+function valytiSenusDingo() {
+  let isvalyta = 0;
+  Object.values(_lifecycle).forEach((e) => {
+    if (e && e.dingo && e.praleista == null) { e.dingo = null; isvalyta++; }
+  });
+  if (isvalyta) { _lifecycleDirty = true; saveLifecycle(); }
+  return isvalyta;
+}
+
+// v1.23.0: skelbimas nerastas siuo kartu. Grazina, kiek kartu is eiles jo nebuvo.
+// "Dingo" zymim tik po antro praleidimo - vienas praleidimas daznai reiskia tik tai,
+// kad skelbimas nepateko i sios paieskos imti.
+function zymetiNerasta(url) {
+  const e = _lifecycle[url];
+  if (!e) return 0;
+  e.praleista = (e.praleista || 0) + 1;
+  _lifecycleDirty = true;
+  return e.praleista;
 }
 
 // Pazymim, kad skelbimo nebera (404 arba dingo is rezultatu) - tikriausiai parduotas.
@@ -469,6 +513,7 @@ console.log('[KAUPYKLOS] rinkos istorija:', Object.keys(_history).length, 'model
 module.exports = {
   puslapiuPodelis: () => ({ irasu: _pages.size, mb: +(_pagesBytes / 1048576).toFixed(1) }),
   getCached, setCached, cacheAgeMinutes, PAGE_TTL_MS, ANALYSIS_TTL_MS,
+  zymetiNerasta, valytiSenusDingo, rastiPagalVin,
   getSearchCached, setSearchCached,
   addToHistory, getHistoryForModel,
   recordListingSnapshot, getListingTimeline, buildListingTimelineText,

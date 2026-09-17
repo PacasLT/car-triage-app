@@ -116,7 +116,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
       const h = f.istorija || {};
       const dabartine = (h.dabartineKaina && f.kaina && h.dabartineKaina !== f.kaina) ? h.dabartineKaina : f.kaina;
       const pok = [];
-      if (h.dingo) pok.push('<span class="chip blogai">Dingo iš portalo ' + ctEsc(ctLaikas(h.dingo)) + '</span>');
+      if (h.dingo) pok.push('<span class="chip blogai" title="Skelbimo nebematome portale jau kelis patikrinimus iš eilės – tikėtina, parduotas">Nebematome portale ' + ctEsc(ctLaikas(h.dingo)) + '</span>');
       if (h.nuoIssaugojimo && Math.abs(h.nuoIssaugojimo) >= 50) pok.push('<span class="chip ' + (h.nuoIssaugojimo < 0 ? 'gerai' : 'demesio') + '" title="Kainos pokytis nuo tada, kai išsaugojote">' + skirt(h.nuoIssaugojimo) + ' nuo išsaugojimo</span>');
       else if (h.kainosPokytis && Math.abs(h.kainosPokytis) >= 50) pok.push('<span class="chip ' + (h.kainosPokytis < 0 ? 'gerai' : 'demesio') + '" title="Kainos pokytis nuo pastebėjimo rinkoje">' + skirt(h.kainosPokytis) + (h.mazinimuKartai > 1 ? ' · ' + h.mazinimuKartai + '× mažinta' : '') + '</span>');
       if (h.ridosPokytis > 500) pok.push('<span class="chip demesio">rida +' + Number(h.ridosPokytis).toLocaleString('lt-LT').replace(/,/g, ' ') + ' km</span>');

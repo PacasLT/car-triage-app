@@ -16,6 +16,20 @@
 - `badge-rise` = MOKAMAS iškėlimas į viršų (ne kokybės ženklas), `badge-new` = kada įkeltas.
 - Kaina < `MIN_REALI_KAINA` (4000 €): jei yra lizingo `data-amount` – imama reali kaina; jei ne – skelbimas žymimas „Patikrinkite kainą“, neįtraukiamas į medianą ir keliauja į „Kiti skelbimai“.
 - ID lentelė atnaujinama fone kartą per 30 d. iš `/skelbimai/paieska?...type=make_combo` (1 ScraperAPI kreditas).
+- Sąrašo puslapyje ĮRANGOS NĖRA – TOP `GILINTI_TOP` (8) skelbimų puslapiai atidaromi paieškos metu (`scrapeSingleListing`, be AI) ir iš jų imama įranga, VIN, vieta, pardavėjas.
+- „Dingo iš portalo“ žymima TIK jei: skelbimas telpa į paieškos filtrus, jo nėra **antrą** kartą iš eilės (`cache.zymetiNerasta`) ir paieška nebuvo nukirsta puslapių limito. Nepavykęs nuskaitymas ≠ dingęs skelbimas.
+
+## AI sąnaudos (įeinantys tokenai – 96 % sąskaitos)
+
+- `DEEP_INSTRUKCIJOS` – statinė promptų dalis su `cache_control: ephemeral`. **Nekeisti be reikalo**: kiekvienas pakeitimas panaikina podėlį.
+- `TEKSTO_RIBA` (4 000 simb.) – žalio puslapio teksto riba; struktūriniai laukai eina pirmi, todėl daugiau nereikia.
+- `ANALIZES_PODELIS_MS` (7 d.) – ta pati analizė negeneruojama iš naujo, nebent pasikeitė kaina (`analizesPodelis(url, kaina)`).
+- Nuotraukos brangiausios (~1 400 tokenų viena): `DEEP_FOTO_KIEKIS` = 6.
+
+## VIN
+
+- `/api/vin-check` – **nemokamas**: `backend/vin-tikrinimas.js` (WMI, šalis, modelio metai, kontrolinis skaitmuo) + nemokama NHTSA vPIC + sutapimas su skelbimu + ar tą VIN jau matėme.
+- `/api/vin-lookup` – mokamas (1 kr): AI web paieška aukcionų/žalų istorijai.
 
 ## Saugumas
 

@@ -2245,8 +2245,8 @@
     <nav class="ct3-nav">
       <a class="ct3-nav-link active" href="#">Paieška</a>
       <a class="ct3-nav-link" href="ataskaitos.html">Ataskaitos</a>
-      <a class="ct3-nav-link" href="#" onclick="event.preventDefault();ctNavTab('istorija')">Istorija</a>
-      <a class="ct3-nav-link" href="#" onclick="event.preventDefault();ctNavTab('palyginti')">Palyginti</a>
+      <!-- v1.23.0: „Istorija" ir „Palyginti" perkelti i paskyros meniu (po profilio mygtuku) -->
+
     </nav>
     <div class="ct3-header-right">
       <button class="ct3-premium-btn" id="ct-planas-btn" onclick="ctPlanuModalas()" title="Planas ir kreditai">
@@ -4270,7 +4270,11 @@ function ctUnknownBlock(c) {
   }
   if (c.irangosBusena) {
     const st = SP[c.irangosBusena.key] || SP.UNKNOWN;
-    chips.push(chip('⚙', c.irangosBusena.label.replace('Įranga: ', 'Įranga – '), st[0], st[1], st[2]));
+    // v1.23.0: TOP skelbimams iranga nuskaitoma is skelbimo puslapio - rodom tiksliai, kiek pozicijų
+    var irTekstas = c.irangosKiekis
+      ? 'Įranga – ' + c.irangosKiekis + ' poz.'
+      : c.irangosBusena.label.replace('Įranga: ', 'Įranga – ');
+    chips.push(chip('⚙', irTekstas, st[0], st[1], st[2]));
   }
   if (!chips.length && !(c.neivertinta && c.neivertinta.length)) return '';
 
@@ -5728,6 +5732,8 @@ function ctNavTab(tab) {
         c.turiIstorijosAtaskaita ? '<span class="chip chip-pos">✓ Istorija</span>' : '',
         c.garantijosTipas ? '<span class="chip chip-pos">✓ Garantija</span>' : '',
         c.yraVerslas ? '<span class="chip chip-ac">🏢 Verslas</span>' : '',
+        // v1.23.0: kur automobilis stovi (jei skelbime nurodyta)
+        (c.vieta || c.miestas) ? '<span class="chip" title="Kur automobilis stovi">📍 ' + esc(c.vieta || c.miestas) + '</span>' : '',
       ].join('');
 
       var subBarsHtml = s.parts.map(function(part) {
