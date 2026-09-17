@@ -1698,6 +1698,37 @@
   #ct-history-dropdown { position: fixed; left: 16px; right: 16px; top: auto; width: auto; max-width: none; }
 }
 
+/* ═══════════ MAZA PROGRESO PANELE (detali apzvalga, kt.) — kaip #log-container ═══════════ */
+.ct-prog { border: 1px solid var(--accent-border); border-radius: 14px; background: var(--bg-surface); overflow: hidden; margin: 4px 0 8px; }
+.ct-prog[data-state="done"] { border-color: var(--success-border); }
+.ct-prog[data-state="error"] { border-color: var(--danger-border); }
+.ct-prog[data-state="warn"] { border-color: var(--warning-border); }
+.ct-prog-head { display: flex; align-items: center; gap: 10px; padding: 13px 16px; font: 500 13px var(--font); color: var(--text-primary); }
+.ct-prog-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ct-prog[data-state="done"] .ct-prog-text { color: var(--success); }
+.ct-prog[data-state="error"] .ct-prog-text { color: var(--danger); }
+.ct-prog[data-state="warn"] .ct-prog-text { color: var(--warning); white-space: normal; }
+.ct-prog-ic.spinner { width: 14px; height: 14px; border: 2px solid var(--bg-raised); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; flex: none; }
+.ct-prog-ic.done-check { width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center; font: 700 9px/1 var(--font-mono); flex: none;
+  background: var(--success-dim); color: var(--success); border: 1px solid var(--success-border); }
+.ct-prog-ic.done-check.st-warn { background: var(--warning-dim); color: var(--warning); border-color: var(--warning-border); }
+.ct-prog-ic.done-check.st-err { background: var(--danger-dim); color: var(--danger); border-color: var(--danger-border); }
+.ct-prog-pct { flex: none; font: 700 11px/1 var(--font-mono); letter-spacing: .04em; color: var(--accent-light); background: var(--accent-dim);
+  border: 1px solid var(--accent-border); border-radius: 7px; padding: 4px 7px; font-variant-numeric: tabular-nums; min-width: 44px; text-align: center; }
+.ct-prog[data-state="done"] .ct-prog-pct { color: var(--success); background: var(--success-dim); border-color: var(--success-border); }
+.ct-prog[data-state="error"] .ct-prog-pct, .ct-prog[data-state="warn"] .ct-prog-pct { display: none; }
+.ct-prog-track { height: 3px; background: var(--bg-raised); overflow: hidden; }
+.ct-prog-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-light)); transition: width .45s cubic-bezier(.4,0,.2,1); position: relative; }
+.ct-prog[data-state="running"] .ct-prog-fill::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent); animation: ctProgShimmer 1.4s ease-in-out infinite; }
+.ct-prog[data-state="done"] .ct-prog-fill { background: linear-gradient(90deg, var(--success), oklch(.82 .16 158)); }
+.ct-prog-steps { background: var(--bg-base); border-top: 1px solid var(--border); padding: 4px 0; }
+.ct-prog-step { display: grid; grid-template-columns: 16px 1fr; align-items: center; gap: 10px; padding: 6px 14px; font: 400 12.5px/1.4 var(--font); color: var(--text-dim); border-left: 2px solid transparent; }
+.ct-prog-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bg-raised); border: 1px solid var(--border-light); justify-self: center; }
+.ct-prog-step.current { color: var(--text-primary); font-weight: 500; background: var(--accent-dim); border-left-color: var(--accent); }
+.ct-prog-step.current .ct-prog-dot { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 6px var(--accent); }
+.ct-prog-step.done { color: var(--text-secondary); }
+.ct-prog-step.done .ct-prog-dot { background: var(--success); border-color: var(--success); }
+
 /* ═══════════ PORTALU PASIRINKIMAS — naujas dizainas ═══════════ */
 .ct3-portal-wrap { position: relative; }
 #portal-toggle-btn.active {
@@ -2850,8 +2881,26 @@ function applyHistoryFilters(idx) {
   document.getElementById('portal-autogidas').checked = !f.portals || f.portals.includes('autogidas');
   document.getElementById('portal-autoscout24').checked = !!(f.portals && f.portals.includes('autoscout24'));
   document.getElementById('portal-otomoto').checked = !!(f.portals && f.portals.includes('otomoto'));
+  // PATAISYTA: kuras buvo praleistas; portalu etikete ir "Daugiau filtru" zenklelis neatsinaujindavo;
+  // iskleidziamasis likdavo atidarytas.
+  const fuelEl = document.getElementById('fuel'); if (fuelEl) fuelEl.value = f.kuras || '';
+  if (typeof ctUpdatePortalBtn === 'function') ctUpdatePortalBtn();
+  if (typeof ctUpdateMoreBadge === 'function') ctUpdateMoreBadge();
   updateGenerationHint();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  const dd = document.getElementById('ct-history-dropdown');
+  if (dd) dd.style.display = 'none';
+  // trumpas pabrezimas, kad matytusi, jog filtrai pasikeite
+  ['marke', 'modelis', 'metaiNuo', 'kainaNuo', 'kainaIki', 'fuel', 'pavaru_deze'].forEach(function (id) {
+    const el = document.getElementById(id); if (!el) return;
+    const w = el.closest('.ct3-field') || el.parentElement;
+    if (!w) return;
+    w.style.transition = 'box-shadow .25s'; w.style.boxShadow = '0 0 0 2px var(--accent)';
+    setTimeout(function () { w.style.boxShadow = ''; }, 900);
+  });
+  if (typeof showToast === 'function') showToast('Filtrai atstatyti: ' + (typeof historyLabel === 'function' ? historyLabel(f) : ''), 'success', 3000);
+  const forma = document.querySelector('.ct3-search-panel') || document.getElementById('marke');
+  if (forma && forma.scrollIntoView) forma.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  else window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ============ FAVORITAI (localStorage) - issaugoti skelbimai su busenos sekimu ============
@@ -2859,7 +2908,10 @@ const FAVORITES_KEY = 'carTriageFavorites';
 
 function loadFavorites() {
   try {
-    return JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
+    const raw = JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
+    // Senesnes versijos saugojo vien URL eilutes - normalizuojam i objektus,
+    // kitaip sinchronizacija siusdavo serveriui plika eilute ("https://...").
+    return raw.map((f) => (typeof f === 'string' ? { url: f } : f)).filter((f) => f && typeof f === 'object' && f.url);
   } catch {
     return [];
   }
@@ -2913,7 +2965,7 @@ async function ctSinchronizuotiMegstamus() {
       const vietiniai = loadFavorites();
       // vietiniai, kuriu serveris dar neturi (pvz. issaugoti prisijungus kitame irenginyje seniau) - nusiunciam
       const serverioUrl = new Set(d.sarasas.map((x) => x.url));
-      vietiniai.filter((v) => !serverioUrl.has(v.url)).slice(0, 50).forEach((v) => {
+      vietiniai.filter((v) => v && typeof v === 'object' && v.url && !serverioUrl.has(v.url)).slice(0, 50).forEach((v) => {
         ctApi('/api/megstamiausi', { method: 'POST', body: JSON.stringify(v) }).catch(function () {});
       });
       const sujungti = d.sarasas.concat(vietiniai.filter((v) => !serverioUrl.has(v.url)));
@@ -3348,8 +3400,13 @@ async function runSearch() {
         return;
       }
       if (startResp.status === 402) {
-        // Paieskos riba - planu langas jau atidarytas per ctApi, raudonos klaidos nereikia
-        status.textContent = '';
+        // Paieskos riba - planu langas jau atidarytas per ctApi. Progreso panele
+        // slepiam (kitaip lieka kabeti "Paleidziama... 0%"), o priezasti rasom vietoje.
+        let d = null; try { d = await startResp.clone().json(); } catch (e) {}
+        logContainer.style.display = 'none';
+        const zin = (d && d.error) || 'Paieška negalima pagal jūsų planą.';
+        status.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;background:var(--warning-dim);border:1px solid var(--warning-border);color:var(--warning);font:500 13px var(--font);">'
+          + '<span style="font-size:15px">⚠</span> ' + ctEsc(zin) + ' <a href="#" onclick="event.preventDefault();ctPlanuModalas()" style="color:var(--warning);text-decoration:underline;margin-left:4px">Planai ir kreditai</a></span>';
         return;
       }
       const errText = await startResp.text().catch(() => startResp.statusText);
@@ -4758,25 +4815,22 @@ async function loadDetail(url, panelId, btn, force, marketContext) {
 
   btn.disabled = true;
   panel.style.display = 'block';
+  const pradinisTekstas = btn.textContent;
+  btn.textContent = '⏳ Analizuojama…';
 
-  const detailMessages = [
-    '📖 Skaitau pilną skelbimo aprašymą...',
-    '🔧 Renku techninę specifikaciją (variklis, komplektacija)...',
-    '🔑 Ieškau VIN kodo ir pardavėjo duomenų...',
-    '🌐 Tikrinu, ar šis modelis/metai turi žinomų gedimų...',
-    '⚖️ Lyginu privalumus ir rizikas...',
-    '✍️ Ruošiu derybų patarimą...',
+  // PAKEISTA: vietoj "⏳ 61%" ant mygtuko ir pilko teksto - ta pati progreso
+  // panele kaip paieskoje (suktukas, zingsniai, procentai, juosta).
+  const zingsniai = [
+    'Skaitau pilną skelbimo aprašymą',
+    'Renku techninę specifikaciją (variklis, komplektacija)',
+    'Ieškau VIN kodo ir pardavėjo duomenų',
+    'Analizuoju nuotraukas',
+    'Tikrinu žinomus šio modelio gedimus',
+    'Lyginu privalumus ir rizikas',
+    'Ruošiu derybų patarimą',
   ];
-  let pct = 0;
-  let msgIdx = 0;
-  panel.innerHTML = `<span style="color:#9a9aa5">${detailMessages[0]} (0%)</span>`;
-  const ticker = setInterval(() => {
-    pct = Math.min(pct + Math.random() * 8, 92);
-    msgIdx = Math.min(Math.floor((pct / 100) * detailMessages.length), detailMessages.length - 1);
-    btn.textContent = `⏳ ${Math.round(pct)}%`;
-    const span = panel.querySelector('span');
-    if (span) span.textContent = `${detailMessages[msgIdx]} (${Math.round(pct)}%)`;
-  }, 600);
+  const prog = ctMiniProgresas(panel, zingsniai);
+  const ticker = setInterval(() => prog.tik(Math.random() * 7), 650);
 
   try {
     const resp = await ctApi('/api/analyze-single', {
@@ -4786,10 +4840,18 @@ async function loadDetail(url, panelId, btn, force, marketContext) {
     });
     const data = await resp.json();
     clearInterval(ticker);
-    if (data.error) {
-      panel.innerHTML = `<span style="color:#e88">Klaida: ${data.error}</span>`;
+    if (resp.status === 402) {
+      // planu langas jau atidarytas per ctApi - cia tik neutrali pastaba
+      prog.klaida(data.error || 'Nepakanka kreditų.', true);
+      btn.textContent = pradinisTekstas;
       return;
     }
+    if (data.error) {
+      prog.klaida(data.error);
+      btn.textContent = pradinisTekstas;
+      return;
+    }
+    prog.baigta('Analizė paruošta – atidaroma…');
     // Store data and navigate to detail.html
     const _card = (window.currentData && [...(currentData.candidates||[]), ...(currentData.allListings||[])].find(x=>x.url===url)) || {};
     const _photos = data.photos && data.photos.length ? data.photos : (_card.photos && _card.photos.length ? _card.photos : (_card.photo ? [_card.photo] : []));
@@ -4799,11 +4861,52 @@ async function loadDetail(url, panelId, btn, force, marketContext) {
     return;
   } catch (err) {
     clearInterval(ticker);
-    panel.innerHTML = `<span style="color:#e88">Klaida: ${err.message}</span>`;
+    prog.klaida(err.message);
+    btn.textContent = pradinisTekstas;
   } finally {
     btn.disabled = false;
-    if (btn.textContent.includes('%') || btn.textContent.includes('⏳')) btn.textContent = '🔬 Detali apžvalga';
+    if (btn.textContent.includes('⏳')) btn.textContent = pradinisTekstas || '🔬 Detali apžvalga · 1 kr';
   }
+}
+
+// Maza progreso panele - ta pati kalba kaip #log-container (paieskos progresas).
+function ctMiniProgresas(container, zingsniai) {
+  let pct = 0, idx = 0;
+  const id = 'mp-' + Math.random().toString(36).slice(2, 8);
+  container.innerHTML = '<div class="ct-prog" id="' + id + '" data-state="running">'
+    + '<div class="ct-prog-head"><span class="spinner ct-prog-ic"></span><span class="ct-prog-text">' + ctEsc(zingsniai[0]) + '…</span>'
+    + '<span class="ct-prog-pct">0%</span></div>'
+    + '<div class="ct-prog-track"><div class="ct-prog-fill" style="width:0%"></div></div>'
+    + '<div class="ct-prog-steps">' + zingsniai.map((z, i) => '<div class="ct-prog-step' + (i === 0 ? ' current' : '') + '" data-i="' + i + '">'
+      + '<span class="ct-prog-dot"></span><span>' + ctEsc(z) + '</span></div>').join('') + '</div></div>';
+  const root = () => document.getElementById(id);
+  const piesti = () => {
+    const r = root(); if (!r) return;
+    r.querySelector('.ct-prog-pct').textContent = Math.round(pct) + '%';
+    r.querySelector('.ct-prog-fill').style.width = pct + '%';
+    r.querySelector('.ct-prog-text').textContent = zingsniai[idx] + '…';
+    r.querySelectorAll('.ct-prog-step').forEach((el, i) => {
+      el.classList.toggle('done', i < idx); el.classList.toggle('current', i === idx);
+    });
+  };
+  return {
+    tik(d) { pct = Math.min(pct + d, 94); idx = Math.min(Math.floor(pct / 100 * zingsniai.length), zingsniai.length - 1); piesti(); },
+    baigta(tekstas) {
+      pct = 100; idx = zingsniai.length; piesti();
+      const r = root(); if (!r) return;
+      r.setAttribute('data-state', 'done');
+      r.querySelector('.ct-prog-ic').outerHTML = '<span class="ct-prog-ic done-check">✓</span>';
+      r.querySelector('.ct-prog-text').textContent = tekstas || 'Baigta';
+      r.querySelectorAll('.ct-prog-step').forEach((el) => { el.classList.add('done'); el.classList.remove('current'); });
+    },
+    klaida(tekstas, svelniai) {
+      const r = root(); if (!r) return;
+      r.setAttribute('data-state', svelniai ? 'warn' : 'error');
+      r.querySelector('.ct-prog-ic').outerHTML = '<span class="ct-prog-ic done-check st-' + (svelniai ? 'warn' : 'err') + '">' + (svelniai ? '!' : '✕') + '</span>';
+      r.querySelector('.ct-prog-text').textContent = tekstas;
+      r.querySelector('.ct-prog-steps').style.display = 'none';
+    },
+  };
 }
 
 // ============ PALYGINIMAS ============

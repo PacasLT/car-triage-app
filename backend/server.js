@@ -17,6 +17,18 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../frontend')));
 
+// Netinkamas JSON kune (pvz. plika eilute vietoj objekto) - tvarkingas 400,
+// o ne stack trace loge ir HTML klaidos puslapis klientui.
+app.use((err, req, res, next) => {
+  if (err && (err.type === 'entity.parse.failed' || err instanceof SyntaxError)) {
+    return res.status(400).json({ error: 'Netinkamas užklausos formatas (laukiamas JSON objektas)' });
+  }
+  if (err && err.type === 'entity.too.large') {
+    return res.status(413).json({ error: 'Užklausa per didelė' });
+  }
+  next(err);
+});
+
 // ── Auth endpoints ────────────────────────────────────────────────────────
 app.post('/auth/register', handleRegister);
 app.post('/auth/login', handleLogin);
