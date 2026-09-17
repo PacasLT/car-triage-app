@@ -1095,13 +1095,15 @@ window.ctApi = function (kelias, params) {
   }
 
   // Automatiškai užsako gilią analizę skelbimui, kuris jos dar neturi.
-  function dpUzsakytiAnalize(c) {
+  // v1.23.0: force=true apeina serverio podeli (7 d.) ir generuoja analize is naujo.
+  // Tokiu atveju kreditas nuskaitomas visada - todel kviecia tik vartotojas mygtuku.
+  function dpUzsakytiAnalize(c, force) {
     ctApi('/api/analyze-single', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         url: c.url, kaina: c.kaina, marketMedian: c.marketMedian, marketCount: c.marketCount,
         diffPct: c.diffPct, modelis: c.modelis, pardavejas: c.pardavejas,
-        galia: c.galia, variklioTuris: c.variklioTuris,
+        galia: c.galia, variklioTuris: c.variklioTuris, force: !!force,
       }),
     }).then(function (r) { return r.json(); }).then(function (resp) {
       if (!resp || !resp.analysis) throw new Error((resp && resp.error) || 'Analizė negrąžinta');
@@ -1124,6 +1126,9 @@ window.ctApi = function (kelias, params) {
         if (resp.aprasymas) det.aprasymas = resp.aprasymas;
         if (resp.vieta) det.vieta = resp.vieta;
         if (resp.vin) { det.c = det.c || {}; det.c.vin = resp.vin; }
+        // v1.23.0: kada analize paruosta ir ar ji buvo is podelio
+        det.analizesLaikas = Date.now() - (resp.cacheAgeMinutes ? resp.cacheAgeMinutes * 60000 : 0);
+        det.analizeIsPodelio = !!resp.cached;
         localStorage.setItem('ct_detail', JSON.stringify(det));
       } catch (e) {}
       load();
@@ -1155,8 +1160,8 @@ window.ctApi = function (kelias, params) {
     window.__dpUrl = c.url || '';
     window.__dpCar = c;
     window.__dpPhotos = photos;
-    window.__dpVinPaslėptas = !!data.vinPaslėptas;
-    window.__dpVinPrefiksas = data.vinPrefiksas || null;
+    window.__dpVinPaslėptas = !!(data.vinPaslėptas || c.vinPaslėptas);
+    window.__dpVinPrefiksas = data.vinPrefiksas || c.vinPrefiksas || null;
     window.__dpIstorijosNuoroda = data.istorijosNuoroda || null;
     document.getElementById('dp-empty').style.display = 'none';
     document.getElementById('dp-content').style.display = '';
@@ -1236,7 +1241,9 @@ window.ctApi = function (kelias, params) {
     // Seller name + verified badge (verslo = verified)
     // PAKEISTA: pardavejo duomenys imami is skelbimo strukturiskai (vardas, partnerio lygis,
     // tapatybe, miestas, reitingas). Anksciau buvo spejama regexu ir daznai likdavo "nenurodyta".
-    var pi = data.pardavejoInfo || (window.__dpAnalysisData && window.__dpAnalysisData.pardavejoInfo) || null;
+    // v1.23.0: pardavejas gali ateiti ir is paieskos (TOP skelbimams atidarom puslapi),
+    // todel ji rodom dar PRIES mokama analize.
+    var pi = data.pardavejoInfo || (window.__dpAnalysisData && window.__dpAnalysisData.pardavejoInfo) || c.pardavejoInfo || null;
     // Privatus pardavejas imones pavadinimo neturi - rodom ji kaip privatu, o ne atsitiktini teksta
     var pVardas = (pi && !pi.privatus && pi.vardas) || (!pi && c.pardavejas) || null;
     // v1.23.0: be pardavejo duomenu NESAKOM "Privatus pardavejas" - to nezinom, kol neatidaryta
@@ -1337,6 +1344,33 @@ window.ctApi = function (kelias, params) {
 
 
     if (a) {
+      // v1.23.0: parodom, kada analize paruosta, ir leidziam ja atnaujinti uz 1 kredita
+      (function () {
+        var meta = document.getElementById('dp-ai-meta');
+        if (!meta) return;
+        var det = {};
+        try { det = JSON.parse(localStorage.getItem('ct_detail') || '{}'); } catch (e) {}
+        var kada = det.analizesLaikas || null;
+        var amz = '';
+        if (kada) {
+          var min = Math.max(0, Math.round((Date.now() - kada) / 60000));
+          amz = min < 60 ? ('prieš ' + min + ' min.')
+            : min < 1440 ? ('prieš ' + Math.round(min / 60) + ' val.')
+            : ('prieš ' + Math.round(min / 1440) + ' d.');
+        }
+        meta.innerHTML = 'CarTriige AI' + (amz ? ' · paruošta ' + amz : '')
+          + ' <button id="dp-perdaryti" onclick="dpPerdarytiAnalize()" title="Nuskaitysime skelbimą iš naujo (kaina, nuotraukos, aprašymas) ir sugeneruosime naują analizę. Nuskaitomas 1 kreditas."'
+          + ' style="margin-left:8px;padding:3px 9px;border-radius:7px;border:1px solid var(--border-light);background:transparent;color:var(--text-secondary);font:600 10.5px var(--font);cursor:pointer">↻ Analizuoti iš naujo · 1 kr</button>';
+      })();
+      window.dpPerdarytiAnalize = function () {
+        if (!c.url) return;
+        if (!confirm('Analizuosime šį skelbimą iš naujo: nuskaitysime dabartinę kainą, nuotraukas ir aprašymą.\n\nBus nuskaitytas 1 kreditas. Tęsti?')) return;
+        var b = document.getElementById('dp-perdaryti');
+        if (b) { b.disabled = true; b.textContent = '↻ Analizuojama…'; }
+        var body = document.getElementById('dp-ai-body');
+        if (body) body.textContent = 'Nuskaitome skelbimą iš naujo…';
+        dpUzsakytiAnalize(c, true);
+      };
       var insight = document.getElementById('dp-ai-insight');
       if (a.verdiktas) {
         var short = a.verdiktas.length > 140 ? a.verdiktas.substring(0, 137) + '...' : a.verdiktas;

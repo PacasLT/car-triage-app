@@ -2182,8 +2182,10 @@ async function runSearchJob(jobId, filters) {
       rizikosBusena: l.rizikosBusena, istorijosBusena: l.istorijosBusena,
       irangosBusena: l.irangosBusena, neivertinta: l.neivertinta,
       diffPct: l.diffPct, marketMedian: l.marketMedian, marketCount: l.marketCount,
-      // v1.23.0: is atidaryto skelbimo puslapio - iranga ir tiksli vieta
+      // v1.23.0: is atidaryto skelbimo puslapio - iranga, vieta ir pardavejas,
+      // kad skelbimo puslapyje matytusi dar PRIES mokama analize
       irangosKiekis: (l.komplektacija || []).length || null, vieta: l.vieta || null,
+      pardavejoInfo: l.pardavejoInfo || null, vinPaslėptas: !!l.vinPaslėptas, vin: l.vin || null,
       // PRIDETA: portalo ikelimo laikas, mokamas iskelimas, kainos pastaba/ispejimas, miestas, kebulas
       ikeltaTekstas: l.ikeltaTekstas || null, ikeltaLaikas: l.ikeltaLaikas || null, iskeltas: l.iskeltas || null,
       pirmaRegistracija: l.pirmaRegistracija || null, miestas: l.miestas || null, kebulas: l.kebulas || null,

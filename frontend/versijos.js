@@ -17,6 +17,8 @@ window.CT_VERSIJOS = [
       'Pardavėjo kortelėje nebeteigiame „privatus pardavėjas“, kol to nežinome – parašome tik tai, ką iš tikrųjų matome',
       '„Istorija“ ir „Palyginti“ iš viršutinės juostos perkelti į paskyros meniu; skelbimo puslapyje palyginimo mygtukas dabar prie automobilio veiksmų',
       'Analizė pigesnė: pastovi užduoties dalis siunčiama tik kartą (podėlis), skelbimo tekstas trumpesnis, o ta pati analizė galioja 7 d., jei kaina nepasikeitė',
+      'Prie AI analizės matosi, kada ji paruošta, ir yra mygtukas „Analizuoti iš naujo“ – nuskaitome skelbimą šviežiai (1 kr)',
+      'Pardavėją, VIN būseną ir vietą matote skelbimo puslapyje jau prieš mokamą analizę – jei skelbimas pateko tarp geriausių paieškoje',
     ],
   },
   {
