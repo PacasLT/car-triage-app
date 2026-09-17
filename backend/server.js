@@ -792,6 +792,74 @@ app.post('/api/quick-count', requireAuth, async (req, res) => {
   }
 });
 
+// ---- ISTORIJOS "+N NAUJU" SKAICIAI ----
+// Kiekvienai issaugotai paieskai pasakom, kiek skelbimu joje yra DABAR ir
+// kiek daugiau nei tada, kai ji buvo vykdyta. Skaiciuojam TIK tuos portalus,
+// kuriuos ta paieska naudojo (dazniausiai viena) - kitaip vienas iskleidimas
+// sudegintu po 4 kreditus kiekvienai eilutei. Puslapiai imami is to paties
+// podelio kaip ir paieska, todel pakartotinis atidarymas nieko nekainuoja.
+const ISTORIJOS_SKAICIU_PODELIS = new Map(); // raktas -> { kiek, laikas }
+const ISTORIJOS_TTL_MS = 30 * 60 * 1000;
+
+async function paieskosKiekis(filters) {
+  const portalai = (filters && filters.portals && filters.portals.length)
+    ? filters.portals : ['autoplius'];
+  const uzklausos = [];
+  if (portalai.includes('autoplius')) {
+    uzklausos.push(fetchSearchPage(buildAutopliusUrl(filters))
+      .then((h) => (h ? extractTotalCount(h, false) : null)).catch(() => null));
+  }
+  if (portalai.includes('autogidas')) {
+    uzklausos.push(fetchSearchPage(buildAutogidasUrl(filters))
+      .then((h) => (h ? extractTotalCount(h, true) : null)).catch(() => null));
+  }
+  if (portalai.includes('autoscout24')) {
+    uzklausos.push(fetchSearchPage(buildAutoscout24Url(filters))
+      .then((h) => (h ? extractAutoscout24TotalCount(h) : null)).catch(() => null));
+  }
+  if (portalai.includes('otomoto')) {
+    uzklausos.push(fetchSearchPage(buildOtomotoUrl(filters))
+      .then((h) => (h ? extractOtomotoTotalCount(h) : null)).catch(() => null));
+  }
+  if (!uzklausos.length) return null;
+  const reiksmes = (await Promise.all(uzklausos)).filter((v) => typeof v === 'number');
+  if (!reiksmes.length) return null;
+  return reiksmes.reduce((a, b) => a + b, 0);
+}
+
+app.post('/api/history-counts', requireAuth, async (req, res) => {
+  try {
+    const paieskos = (req.body && req.body.paieskos) || [];
+    if (!Array.isArray(paieskos) || !paieskos.length) return res.json({ rezultatai: [] });
+    // Ribojam, kad vienas iskleidimas negaletu paleisti begalo uzklausu
+    const dirbsim = paieskos.slice(0, 10);
+    const dabar = Date.now();
+
+    const rezultatai = await Promise.all(dirbsim.map(async (p, i) => {
+      const filtrai = p && p.filters;
+      if (!filtrai) return { i, kiek: null, nauju: null };
+      const raktas = JSON.stringify(filtrai);
+      const isPodelio = ISTORIJOS_SKAICIU_PODELIS.get(raktas);
+      let kiek;
+      if (isPodelio && (dabar - isPodelio.laikas) < ISTORIJOS_TTL_MS) {
+        kiek = isPodelio.kiek;
+      } else {
+        kiek = await paieskosKiekis(filtrai);
+        if (kiek != null) ISTORIJOS_SKAICIU_PODELIS.set(raktas, { kiek, laikas: dabar });
+      }
+      // Buvo nezinoma -> naujuju skaiciaus pasakyti negalime (nezinoma != nulis)
+      const buvo = (typeof p.buvo === 'number') ? p.buvo : null;
+      const nauju = (kiek != null && buvo != null) ? Math.max(0, kiek - buvo) : null;
+      return { i, kiek, nauju };
+    }));
+
+    res.json({ rezultatai });
+  } catch (err) {
+    console.error('history-counts KLAIDA:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ============ FONO DARBO (JOB) SISTEMA - kad frontend galetu rodyti progresa ============
 
 const jobs = {}; // { jobId: { status, log: [], result, error } }
@@ -2424,7 +2492,15 @@ function sudarytiIstorijosSantrauka(url) {
   const taPatsAuto = cache.rastiTaPatiAuto(url) || [];
   const dabartinis = cache.gautiGyvavimoCikla(url);
   if (taPatsAuto.length) {
-    const sisEntry = taPatsAuto[0].patikimas ? 'VIN sutapimas' : 'sutampa modelis, metai, variklis, kuras ir dėžė';
+    const vinPatvirtinta = taPatsAuto[0].patikimas;
+    // Be VIN tapatybes raktas yra tik modelis+metai+variklis+kuras+deze - pagal ji
+    // sutampa VISI tos pacios komplektacijos automobiliai. Todel be VIN reikalaujam
+    // papildomu irodymu: to paties pardavejo arba bent to paties skelbimo perkelimo.
+    // Kitaip trys skirtingi 2023 m. X5 tampa "tuo paciu automobiliu".
+    const pagrindas = vinPatvirtinta
+      ? 'VIN sutapimas'
+      : 'sutampa modelis, metai, variklis, kuras ir dėžė';
+    const kaipVadinti = vinPatvirtinta ? 'Tas pats automobilis' : 'Labai panašus automobilis';
 
     taPatsAuto.forEach((kitas) => {
       const dienos = Math.round((Date.now() - (kitas.dingo || kitas.paskutinMatytas)) / 86400000);
@@ -2434,17 +2510,18 @@ function sudarytiIstorijosSantrauka(url) {
       // 1) RIDOS SUKTUMAS - stipriausias signalas, koki apskritai galima rasti
       const senaRida = kitas.dabartineRida || kitas.pirmaRida;
       const naujaRida = dabartinis && (dabartinis.dabartineRida || dabartinis.pirmaRida || null);
-      if (senaRida && naujaRida && naujaRida < senaRida - 1000) {
+      // Kaltinimas ridos suktumu yra sunkus - keliam ji tik kai tapatybe tikrai zinoma
+      if (senaRida && naujaRida && naujaRida < senaRida - 1000 && (vinPatvirtinta || tasPatsPardavejas === true)) {
         pastabos.push({
           tipas: 'ridos-suktumas', svarba: 'auksta',
-          tekstas: `Tas pats automobilis anksčiau buvo skelbiamas su ${senaRida.toLocaleString('lt-LT')} km, dabar nurodyta ${naujaRida.toLocaleString('lt-LT')} km.`,
+          tekstas: `${kaipVadinti} anksčiau buvo skelbiamas su ${senaRida.toLocaleString('lt-LT')} km, dabar nurodyta ${naujaRida.toLocaleString('lt-LT')} km (${pagrindas}).`,
           kodel: 'Rida negali mažėti. Tai suktos ridos požymis – būtina VIN istorijos ataskaita ir serviso įrašų patikra prieš bet kokias derybas.',
         });
         return;
       }
 
       // 2) PERPARDUODAMAS - kitas pardavejas
-      if (kitas.dingo && kitas.pardavejas && tasPatsPardavejas === false) {
+      if (kitas.dingo && kitas.pardavejas && tasPatsPardavejas === false && vinPatvirtinta) {
         const senaKaina = kitas.dabartineKaina || kitas.pirmaKaina;
         const naujaKaina = dabartinis && dabartinis.pirmaKaina;
         const skirt = (senaKaina && naujaKaina) ? naujaKaina - senaKaina : null;
@@ -2472,13 +2549,18 @@ function sudarytiIstorijosSantrauka(url) {
       }
 
       // 4) TUO PAT METU SKELBIAMAS KITUR kita kaina
-      if (!kitas.dingo) {
+      // Reikalaujam arba VIN, arba to paties pardavejo, arba KITO portalo -
+      // du skelbimai tame paciame portale su skirtingais pardavejais yra
+      // tiesiog du skirtingi tos pacios komplektacijos automobiliai.
+      const kitasPortalas = kitas.saltinis && dabartinis && dabartinis.saltinis
+        && kitas.saltinis !== dabartinis.saltinis;
+      if (!kitas.dingo && (vinPatvirtinta || tasPatsPardavejas === true || kitasPortalas)) {
         const senaKaina = kitas.dabartineKaina || kitas.pirmaKaina;
         const naujaKaina = dabartinis && dabartinis.pirmaKaina;
         if (senaKaina && naujaKaina && Math.abs(senaKaina - naujaKaina) > 200) {
           pastabos.push({
-            tipas: 'kita-kaina-kitur', svarba: 'vidutine',
-            tekstas: `Tas pats automobilis tuo pačiu metu skelbiamas ir ${kitas.saltinis || 'kitame portale'} už ${senaKaina.toLocaleString('lt-LT')} €.`,
+            tipas: 'kita-kaina-kitur', svarba: vinPatvirtinta ? 'auksta' : 'vidutine',
+            tekstas: `${kaipVadinti} tuo pačiu metu skelbiamas ir ${kitas.saltinis || 'kitame portale'} už ${senaKaina.toLocaleString('lt-LT')} € (${pagrindas}).`,
             kodel: `Skirtumas ${Math.abs(senaKaina - naujaKaina).toLocaleString('lt-LT')} €. Derėkitės remdamiesi pigesniuoju skelbimu (${sisEntry}).`,
           });
         }

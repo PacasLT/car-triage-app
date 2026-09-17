@@ -1296,10 +1296,8 @@
 .ctin:nth-child(4){animation-delay:.15s}
 .ctin:nth-child(5){animation-delay:.2s}
 @media(max-width:720px){
-  .top-grid{grid-template-columns:1fr !important;}
   .top-photo-col{border-right:none !important;border-bottom:1px solid var(--border);padding:12px 12px 0 !important;}
   .top-info-col{padding:14px 14px 12px !important;}
-  .score-bars{grid-template-columns:repeat(3,minmax(0,1fr)) !important;}
   .std-photo-col{width:120px !important;}
   .std-right{flex-direction:column !important;align-items:flex-start !important;gap:8px !important;}
 }
@@ -1387,7 +1385,6 @@
   .ct-mode-btn span { font-size: 9px; }
 
   /* TOP kortelė */
-  .top-grid { grid-template-columns: 1fr !important; }
   .top-photo-col {
     border-right: none !important;
     border-bottom: 1px solid var(--border) !important;
@@ -1395,7 +1392,6 @@
     max-height: 260px;
   }
   .top-info-col { padding: 14px !important; }
-  .score-bars { grid-template-columns: repeat(3, minmax(0,1fr)) !important; gap: 10px !important; }
 
   /* Eilutės kortelė */
   .std-photo-col { width: 110px !important; flex-shrink: 0 !important; }
@@ -1665,6 +1661,25 @@
 }
 #deep-compare-btn:hover { background: var(--accent) !important; color: #fff !important; border-color: var(--accent) !important; }
 #deep-compare-btn:disabled { opacity: .6 !important; cursor: not-allowed !important; }
+
+/* ═══════════ TOP KORTELES PERSILAUZIMO RIBOS ═══════════ */
+/* PATAISYTA: nuotrauka nusileisdavo i virsu jau ties 768 px, nors iki ~560 px
+   dar puikiai telpa siauresnis stulpelis salia informacijos - taip, kaip
+   dizaino pavyzdyje. Tas pats ir su ivercio juostomis: jos be reikalo
+   virsdavo 3 stulpeliais ten, kur laisvai telpa 5. */
+@media (max-width: 900px) {
+  .top-grid { grid-template-columns: 216px minmax(0, 1fr) !important; gap: 14px !important; }
+  .top-photo-col .photo-ph { max-height: 150px !important; }
+  /* juostos i savo eilute jau nuo planšetės - kitaip ziedas ir verdikto dezute
+     palieka joms 70 px, o "POTENCIALAS" netelpa */
+  .score-bars { flex: 1 0 100% !important; width: 100% !important; }
+  .score-bars > div > span:first-child { font-size: 8px !important; letter-spacing: .06em !important; }
+}
+@media (max-width: 560px) {
+  .top-grid { grid-template-columns: 1fr !important; }
+  .top-photo-col .photo-ph { max-height: 215px !important; }
+  .score-bars { grid-template-columns: repeat(3, minmax(0,1fr)) !important; }
+}
 
 /* ═══════════ PASKUTINES PAIESKOS — iskleidziamasis ═══════════ */
 /* PAKEISTA: buvo min-width:500px inline - telefone iskrisdavo uz ekrano */
@@ -2045,6 +2060,99 @@
 .ct-std-card { display: flex !important; flex-wrap: wrap !important; }
 .ct-std-card > .ct-istorija { flex: 0 0 100% !important; }
 </style>
+
+<style id="ct-hist-redesign">
+/* ── Paieškų istorija: sąrašas vietoj pilulių ── */
+
+/* Konteinerio stilius */
+#ct-history-dropdown {
+  background: rgba(14,17,26,.98) !important;
+  border: 1px solid rgba(255,255,255,.13) !important;
+  border-radius: 14px !important;
+  padding: 0 !important;
+  box-shadow: 0 16px 56px rgba(0,0,0,.75) !important;
+  overflow: hidden !important;
+}
+
+/* Antraštė */
+.ct-hist-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.ct-hist-head-title {
+  font: 700 9px/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--text-dim);
+  display: flex; align-items: center; gap: 7px; flex: 1;
+}
+.ct-hist-head-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex: none; }
+.ct-hist-head-count { font: 600 10px/1 var(--font-mono); color: var(--accent-light); background: var(--accent-dim); border: 1px solid var(--accent-border); padding: 3px 7px; border-radius: 5px; }
+.ct-hist-clear-all { font: 500 11px var(--font); color: var(--text-dim); background: transparent; border: none; cursor: pointer; padding: 0; }
+.ct-hist-clear-all:hover { color: var(--danger); }
+
+/* Sąrašas */
+.ct-hist-list { display: flex; flex-direction: column; max-height: 320px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--bg-raised) transparent; }
+.ct-hist-list::-webkit-scrollbar { width: 4px; }
+.ct-hist-list::-webkit-scrollbar-thumb { background: var(--bg-raised); border-radius: 2px; }
+
+/* Eilutė */
+/* PAKEISTA: ct3-hist-chip - buvo pilulė, dabar eilutė */
+.ct3-hist-chip {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 10px 16px !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(255,255,255,.05) !important;
+  cursor: pointer !important;
+  text-align: left !important;
+  width: 100% !important;
+  transition: background .12s !important;
+  color: inherit !important;
+  font-size: inherit !important;
+}
+.ct3-hist-chip:hover { background: rgba(255,255,255,.04) !important; }
+.ct3-hist-chip:last-child { border-bottom: none !important; }
+
+/* ✕ mygtukas */
+.ct-hist-del {
+  flex: none; width: 18px; height: 18px; border-radius: 50%;
+  background: transparent; border: 1px solid var(--border); color: var(--text-dim);
+  font-size: 10px; display: grid; place-items: center; cursor: pointer;
+  transition: all .12s; line-height: 1;
+  opacity: .5;
+}
+.ct3-hist-chip:hover .ct-hist-del { opacity: 1; }
+.ct-hist-del:hover { background: var(--danger-dim) !important; border-color: var(--danger) !important; color: var(--danger) !important; }
+
+/* Turinys */
+.ct-hist-body { flex: 1; min-width: 0; }
+.ct-hist-name { font: 600 13px/1.2 var(--font); color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+.ct-hist-meta { font: 400 11px/1 var(--font-mono); color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ct-hist-time { font: 400 10.5px/1 var(--font); color: var(--text-dim); margin-top: 3px; }
+
+/* +N ženklelis */
+.ct-hist-badge { flex: none; font: 700 10px/1 var(--font-mono); height: 20px; padding: 0 7px; border-radius: 10px; display: inline-flex; align-items: center; white-space: nowrap; }
+.ct-hist-badge-new { background: var(--success-dim); border: 1px solid var(--success-border); color: var(--success); }
+.ct-hist-badge-zero { background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-dim); }
+
+/* Footer: Rodyti visas */
+.ct-hist-footer {
+  padding: 10px 16px;
+  border-top: 1px solid rgba(255,255,255,.07);
+  display: flex; align-items: center; justify-content: center;
+}
+.ct-hist-show-all { display: inline-flex; align-items: center; gap: 6px; font: 500 12px var(--font); color: var(--accent-light); background: transparent; border: none; cursor: pointer; }
+.ct-hist-show-all:hover { color: var(--text-primary); }
+.ct-hist-show-all-badge { font: 700 10px/1 var(--font-mono); background: var(--accent-dim); border: 1px solid var(--accent-border); color: var(--accent-light); padding: 2px 6px; border-radius: 5px; }
+
+/* Tuščia būsena */
+.ct-hist-empty { padding: 28px 20px; text-align: center; }
+.ct-hist-empty-ic { width: 36px; height: 36px; border-radius: 50%; background: var(--bg-elevated); border: 1px solid var(--border); display: grid; place-items: center; color: var(--text-dim); margin: 0 auto 10px; }
+.ct-hist-empty p { font: 400 13px/1.6 var(--font); color: var(--text-muted); }
+.ct-hist-empty small { font: 400 11.5px var(--font); color: var(--text-dim); display: block; margin-top: 4px; }
+</style>
 </head>
 <body>
 
@@ -2151,8 +2259,11 @@
           <div style="position:relative">
             <button class="ct3-stab" id="ct-hist-tab-btn" onclick="ctSearchTabSwitch('history',this)">🕘 Paskutinės paieškos</button>
             <div id="ct-history-dropdown" style="display:none;">
-              <div style="font:700 9px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-dim);text-transform:uppercase;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.07)">🕘 Paskutinės paieškos</div>
-              <div id="search-history-chips" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+              <div class="ct-hist-head">
+                <div class="ct-hist-head-title"><div class="ct-hist-head-dot"></div>Paskutinės paieškos<span class="ct-hist-head-count" id="ct-hist-count" style="display:none"></span></div>
+                <button class="ct-hist-clear-all" onclick="event.stopPropagation();clearSearchHistory()">Valyti</button>
+              </div>
+              <div class="ct-hist-list" id="search-history-chips"></div>
             </div>
           </div>
         </div>
@@ -2503,7 +2614,12 @@ function saveSearchToHistory(filters) {
   let history = loadSearchHistory();
   const key = JSON.stringify(filters);
   history = history.filter((h) => JSON.stringify(h.filters) !== key);
-  history.unshift({ filters, savedAt: Date.now() });
+  // PRIDETA: issaugom, kiek skelbimu buvo rasta - tai atskaitos taskas "+N" zenkleliui
+  const rasta = (window.currentData && typeof window.currentData.rawFoundCount === 'number')
+    ? window.currentData.rawFoundCount
+    : (window.currentData && typeof window.currentData.totalScanned === 'number'
+        ? window.currentData.totalScanned : null);
+  history.unshift({ filters, savedAt: Date.now(), rezultatuSkaicius: rasta });
   history = history.slice(0, MAX_HISTORY);
   localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history));
   renderSearchHistory();
@@ -2511,7 +2627,9 @@ function saveSearchToHistory(filters) {
 
 function historyLabel(f) {
   const parts = [f.marke, f.modelis].filter(Boolean).join(' ');
-  const years = (f.metaiNuo || f.metaiIki) ? [f.metaiNuo||'...', f.metaiIki||'...'].join('–') : '';
+  const years = f.metaiNuo && f.metaiIki ? f.metaiNuo+'–'+f.metaiIki
+              : f.metaiNuo ? 'nuo '+f.metaiNuo
+              : f.metaiIki ? 'iki '+f.metaiIki : '';
   const priceFrom = f.kainaNuo ? Number(f.kainaNuo).toLocaleString('lt-LT')+'€' : '';
   const priceTo   = f.kainaIki ? Number(f.kainaIki).toLocaleString('lt-LT')+'€' : '';
   const priceRange = priceFrom && priceTo ? priceFrom+'–'+priceTo : (priceTo ? '≤'+priceTo : (priceFrom ? priceFrom+'+' : ''));
@@ -2524,14 +2642,162 @@ function historyLabel(f) {
   return chips.join(' · ') || 'Paieška';
 }
 
+// Grąžina {pavadinimas, meta} atskirai renderui
+function historyLabelParts(f) {
+  const pavadinimas = [f.marke, f.modelis].filter(Boolean).join(' ') || 'Visi automobiliai';
+  const years = f.metaiNuo && f.metaiIki ? f.metaiNuo+'–'+f.metaiIki
+              : f.metaiNuo ? 'nuo '+f.metaiNuo
+              : f.metaiIki ? 'iki '+f.metaiIki : '';
+  const priceFrom = f.kainaNuo ? Number(f.kainaNuo).toLocaleString('lt-LT')+'€' : '';
+  const priceTo   = f.kainaIki ? Number(f.kainaIki).toLocaleString('lt-LT')+'€' : '';
+  const priceRange = priceFrom && priceTo ? priceFrom+'–'+priceTo : (priceTo ? '≤'+priceTo : (priceFrom ? 'nuo '+priceFrom : ''));
+  const km = f.ridaIki ? '≤'+Number(f.ridaIki).toLocaleString('lt-LT')+' km' : '';
+  const gearMap = {manual:'Mechaninė', automatic:'Automatinė', '':''};
+  const gear = gearMap[f.pavaru_deze||''] || '';
+  const portalNames = {autoplius:'autoplius.lt', autogidas:'autogidas.lt', autoscout24:'autoscout24', otomoto:'otomoto.pl'};
+  const portals = (f.portals && f.portals.length && f.portals.length < 4) ? f.portals.map(p=>portalNames[p]||p).join(', ') : (f.portals && f.portals.length >= 4 ? 'visi portalai' : '');
+  const meta = [years, priceRange, km, gear, portals].filter(Boolean).join(' · ');
+  return { pavadinimas, meta };
+}
+
+function timeAgo(ts) {
+  if (!ts) return '';
+  const diff = Date.now() - ts;
+  const min = Math.floor(diff / 60000);
+  const hr = Math.floor(diff / 3600000);
+  const d = Math.floor(diff / 86400000);
+  if (min < 2) return 'ką tik';
+  if (min < 60) return 'prieš '+min+' min';
+  if (hr < 24) return 'prieš '+hr+' val';
+  if (d === 1) return 'vakar';
+  if (d < 7) return 'prieš '+d+' d.';
+  return 'prieš '+Math.floor(d/7)+' sav.';
+}
+
+// PAKEISTA: buvo pilulės (ct3-hist-chip), dabar eilutės su pavadinimu, meta, laiku, badge
+// PRIDETA: "+N nauju" zenkleliai. Kvieciam tik atidarius sarasa ir ne dazniau
+// kaip kas 5 min - serveris dar turi savo 30 min podeli, tad kartotinis
+// atidarymas nekainuoja nei vienos uzklausos i portala.
+let _istorijosSkaiciaiTikrinta = 0;
+async function ctAtnaujintiIstorijosSkaicius() {
+  const dabar = Date.now();
+  if (dabar - _istorijosSkaiciaiTikrinta < 5 * 60 * 1000) return;
+  const history = loadSearchHistory();
+  if (!history.length) return;
+  let token = null;
+  try { token = localStorage.getItem('ct_token'); } catch (e) {}
+  if (!token) return;
+  _istorijosSkaiciaiTikrinta = dabar;
+  try {
+    const r = await fetch('/api/history-counts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      body: JSON.stringify({ paieskos: history.map((h) => ({ filters: h.filters, buvo: h.rezultatuSkaicius })) }),
+    });
+    if (!r.ok) return;
+    const data = await r.json();
+    (data.rezultatai || []).forEach((x) => {
+      if (!history[x.i]) return;
+      history[x.i].naujuSkaicius = x.nauju;
+      if (x.kiek != null) history[x.i].dabartinisSkaicius = x.kiek;
+    });
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history));
+    renderSearchHistory();
+  } catch (e) { /* tylus - zenkleliu tiesiog nebus */ }
+}
+
 function renderSearchHistory() {
   const history = loadSearchHistory();
   const chips = document.getElementById('search-history-chips');
   if (!chips) return;
-  if (history.length === 0) { chips.innerHTML = '<span style="color:var(--text-muted);font-size:12.5px">Paieškų istorija tuščia.</span>'; return; }
-  chips.innerHTML = history.map((h, i) => `
-    <button class="ct3-hist-chip" onclick="applyHistoryFilters(${i})">${historyLabel(h.filters)}</button>
-  `).join('');
+
+  // Atnaujinti skaičiuką antraštėje
+  const countEl = document.getElementById('ct-hist-count');
+  if (countEl) { countEl.textContent = history.length; countEl.style.display = history.length ? '' : 'none'; }
+
+  if (history.length === 0) {
+    chips.innerHTML = '<div class="ct-hist-empty">'
+      + '<div class="ct-hist-empty-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><path d="m21 21-4-4"/></svg></div>'
+      + '<p>Paieškų istorija tuščia.</p>'
+      + '<small>Atlikite paiešką — ji išsaugos filtrus automatiškai.</small>'
+      + '</div>';
+    // Slėpti "Valyti" kai tuščia
+    const ddEl = document.getElementById('ct-history-dropdown');
+    if (ddEl) { const valyti = ddEl.querySelector('.ct-hist-clear-all'); if (valyti) valyti.style.display = 'none'; }
+    return;
+  }
+
+  const RODYTI = 6; // pirmiausia rodomi
+  const shown = history.slice(0, RODYTI);
+  const rest = history.length - RODYTI;
+
+  chips.innerHTML = shown.map((h, i) => {
+    const p = historyLabelParts(h.filters);
+    const ago = timeAgo(h.savedAt);
+    // naujuSkaicius — laukas bus pridėtas vėliau; kol jo nėra, nerodyti badge
+    const n = h.naujuSkaicius;
+    const badge = n == null ? ''
+      : n === 0 ? '<span class="ct-hist-badge ct-hist-badge-zero">0</span>'
+      : '<span class="ct-hist-badge ct-hist-badge-new">+'+n+'</span>';
+    return '<div class="ct3-hist-chip" role="button" tabindex="0" onclick="applyHistoryFilters('+i+')">'
+      + '<button class="ct-hist-del" onclick="event.stopPropagation();deleteHistoryItem('+i+')" title="Ištrinti">✕</button>'
+      + '<div class="ct-hist-body">'
+        + '<div class="ct-hist-name">'+ctEsc(p.pavadinimas)+'</div>'
+        + (p.meta ? '<div class="ct-hist-meta">'+ctEsc(p.meta)+'</div>' : '')
+        + (ago ? '<div class="ct-hist-time">'+ago+'</div>' : '')
+      + '</div>'
+      + badge
+    + '</div>';
+  }).join('');
+
+  if (rest > 0) {
+    chips.insertAdjacentHTML('afterend',
+      '<div class="ct-hist-footer">'
+      + '<button class="ct-hist-show-all" onclick="showAllHistory()">'
+      + 'Rodyti visas <span class="ct-hist-show-all-badge">+'+rest+'</span>'
+      + '</button></div>'
+    );
+  }
+}
+
+function deleteHistoryItem(idx) {
+  let h = loadSearchHistory();
+  h.splice(idx, 1);
+  try { localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(h)); } catch(e) {}
+  renderSearchHistory();
+}
+
+function clearSearchHistory() {
+  try { localStorage.removeItem(SEARCH_HISTORY_KEY); } catch(e) {}
+  renderSearchHistory();
+}
+
+function showAllHistory() {
+  // Rodyti visus įrašus (pašalinti "Rodyti visas" mygtuką ir atnaujinti)
+  const history = loadSearchHistory();
+  const chips = document.getElementById('search-history-chips');
+  if (!chips) return;
+  // Pašalinti footer
+  const footer = chips.parentElement && chips.parentElement.querySelector('.ct-hist-footer');
+  if (footer) footer.remove();
+  // Pridėti likusius
+  const RODYTI = 6;
+  const extra = history.slice(RODYTI);
+  extra.forEach((h, j) => {
+    const i = RODYTI + j;
+    const p = historyLabelParts(h.filters);
+    const ago = timeAgo(h.savedAt);
+    const n = h.naujuSkaicius;
+    const badge = n == null ? '' : n === 0 ? '<span class="ct-hist-badge ct-hist-badge-zero">0</span>' : '<span class="ct-hist-badge ct-hist-badge-new">+'+n+'</span>';
+    chips.insertAdjacentHTML('beforeend',
+      '<div class="ct3-hist-chip" role="button" tabindex="0" onclick="applyHistoryFilters('+i+')">'
+      + '<button class="ct-hist-del" onclick="event.stopPropagation();deleteHistoryItem('+i+')" title="Ištrinti">✕</button>'
+      + '<div class="ct-hist-body"><div class="ct-hist-name">'+ctEsc(p.pavadinimas)+'</div>'
+      + (p.meta ? '<div class="ct-hist-meta">'+ctEsc(p.meta)+'</div>' : '')
+      + (ago ? '<div class="ct-hist-time">'+ago+'</div>' : '')
+      + '</div>'+badge+'</div>'
+    );
+  });
 }
 
 function applyHistoryFilters(idx) {
@@ -4535,7 +4801,7 @@ function ctSearchTabSwitch(tab, btn) {
   var dd = document.getElementById('ct-history-dropdown');
   if (tab === 'history') {
     var isOpen = dd && dd.style.display !== 'none';
-    if (dd) { dd.style.display = isOpen ? 'none' : ''; if (!isOpen) renderSearchHistory(); }
+    if (dd) { dd.style.display = isOpen ? 'none' : ''; if (!isOpen) renderSearchHistory(); ctAtnaujintiIstorijosSkaicius(); }
     // keep "Ieškoti" tab visually active always, just toggle the dropdown
     return;
   }
@@ -4764,7 +5030,7 @@ function ctNavTab(tab) {
     var isOpen = hw.style.display !== 'none';
     hw.style.display = isOpen ? 'none' : '';
     if (!isOpen) {
-      renderSearchHistory();
+      renderSearchHistory(); ctAtnaujintiIstorijosSkaicius();
       // iskleidziamasis yra paieskos kortelėje, o mygtukas - virsutinėje juostoje,
       // todel be slinkimo atrodo, kad nieko neivyko
       var tabs = document.querySelector('.ct3-search-tabs');
