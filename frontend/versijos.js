@@ -8,6 +8,18 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.25.0', data: '2026-09-17', pavadinimas: 'Galios ir varančiųjų filtrai, PVM kainoje, tvarkingi mėgstamiausi',
+    pakeitimai: [
+      'Nauji pagrindiniai filtrai: varančiųjų ratų tipas ir variklio galia (kW) – jie dabar šalia markės ir kuro, o ne paslėpti „Daugiau filtrų“',
+      'Kortelėse matosi galia kW ir varantieji ratai – tai vieni svarbiausių vertinimo kriterijų',
+      'Virš rezultatų aiškiai rašoma: kiek rasta portale, kiek atitiko visus jūsų filtrus, kiek rekomenduojama ir kiek atmesta',
+      'PVM: jei skelbime kaina nurodyta be PVM, rodome „50 000 € + PVM = 60 500 € (galutinė)“ ir vertiname tik galutinę sumą',
+      'Mėgstamiausių langas užvedus atsidaro iš karto su visais išsaugotais skelbimais – nebereikia paspausti antrą kartą',
+      'Patvirtinimas prieš mėgstamiausių atnaujinimą rodomas pačiame lange, o ne pilku naršyklės langu',
+      'Atidarius „Palyginimai“ pirmiausia matote, kuriuos automobilius šiuo metu lyginate, su mygtuku „Tęsti palyginimą“',
+    ],
+  },
+  {
     versija: '1.24.0', data: '2026-09-17', pavadinimas: 'Naujas nuotraukų vertinimo standartas: matome – aprašome',
     pakeitimai: [
       'Nuotraukas peržiūri atskiras sluoksnis, kuris tik APRAŠO, kas matoma, ir niekada nedaro išvadų apie avarijas, ridos tikrumą ar gamyklinę komplektaciją',

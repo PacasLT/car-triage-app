@@ -1824,6 +1824,11 @@ async function runSearchJob(jobId, filters) {
       if (ridaIki && l.rida && l.rida > ridaIki) why.push('Rida ' + l.rida + ' km > ' + ridaIki + ' km');
       if (filters.pavaru_deze && l.pavarai && l.pavarai !== filters.pavaru_deze) why.push('Pavaru deze: ' + l.pavarai + ', reikia ' + filters.pavaru_deze);
       if (filters.kuras && !kurasAtitinka(l.kuras, filters.kuras)) why.push('Kuras: ' + (l.kuras || 'nenurodytas') + ', reikia ' + filters.kuras);
+      // v1.25.0: galia (kW) - svarbus vertinimo kriterijus, filtruojam vietoje,
+      // nes portalu URL parametrai nevienodi. Skelbimai be nurodytos galios nemetami.
+      const galiaNuo = parseInt(filters.galiaNuo, 10), galiaIki = parseInt(filters.galiaIki, 10);
+      if (galiaNuo && l.galia && l.galia < galiaNuo) why.push('Galia ' + l.galia + ' kW < ' + galiaNuo + ' kW');
+      if (galiaIki && l.galia && l.galia > galiaIki) why.push('Galia ' + l.galia + ' kW > ' + galiaIki + ' kW');
       if (why.length) { l.hardRejectReasons = why; hardRejected.push(l); return false; }
       return true;
     });
@@ -1997,7 +2002,12 @@ async function runSearchJob(jobId, filters) {
             else if (d.pardavejoInfo.privatus) l.yraVerslas = false;
           }
           if (d.photos && d.photos.length > ((l.photos || []).length)) l.photos = d.photos;
-          if (d.skelbimoParametrai) l.skelbimoParametrai = d.skelbimoParametrai;
+          if (d.skelbimoParametrai) {
+            l.skelbimoParametrai = d.skelbimoParametrai;
+            // v1.25.0: varantieji ratai matomi tik skelbimo lenteleje
+            const vr = Object.keys(d.skelbimoParametrai).find((k) => /varant/i.test(k));
+            if (vr) l.varantieji = d.skelbimoParametrai[vr];
+          }
           papildyti++;
         } catch (e) { /* vienas nepavykes skelbimas nestabdo paieskos */ }
       }));
@@ -2171,6 +2181,7 @@ async function runSearchJob(jobId, filters) {
     const allListingsBase = enriched.map((l) => ({
       modelis: l.modelis, kaina: l.kaina, metai: l.metai, rida: l.rida,
       kuras: l.kuras, pavarai: l.pavarai, turiVin: l.turiVin, galia: l.galia, variklioTuris: l.variklioTuris,
+      pvmPastaba: l.pvmPastaba || null, kainaBaze: l.kainaBaze || null, varantieji: l.varantieji || null,
       photo: l.photo, url: l.url, source: l.source, kryzminiaiSkelbimai: l.kryzminiaiSkelbimai || null,
       isCandidate: candidateUrls.has(l.url), pardavejas: l.pardavejas || null,
       rejectionReasons: (l.hardRejections && l.hardRejections.length)
@@ -2183,6 +2194,9 @@ async function runSearchJob(jobId, filters) {
       rizikosBusena: l.rizikosBusena, istorijosBusena: l.istorijosBusena,
       irangosBusena: l.irangosBusena, neivertinta: l.neivertinta,
       diffPct: l.diffPct, marketMedian: l.marketMedian, marketCount: l.marketCount,
+      // v1.25.0: PVM skaidymas - rodom, kad kaina yra galutine (su PVM)
+      pvmPastaba: l.pvmPastaba || null, kainaBaze: l.kainaBaze || null, kainaBePvm: l.kainaBePvm || null,
+      varantieji: l.varantieji || null,
       // v1.23.0: is atidaryto skelbimo puslapio - iranga, vieta ir pardavejas,
       // kad skelbimo puslapyje matytusi dar PRIES mokama analize
       irangosKiekis: (l.komplektacija || []).length || null, vieta: l.vieta || null,

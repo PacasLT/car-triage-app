@@ -111,8 +111,40 @@ function piesti() {
       return '<button class="' + (filtras === t ? 'on' : '') + '" onclick="filtruoti(\'' + t + '\')">' + TIPAI[t][0] + '<b>' + kiekTipo[t] + '</b></button>';
     }).join('');
   const list = filtras ? visos.filter(function (a) { return a.tipas === filtras; }) : visos;
-  if (!list.length) { el.innerHTML = '<div class="pg-tuscia"><b>Ataskaitų dar nėra</b>Paieškoje paspauskite „Detali apžvalga" – ataskaita atsiras čia.<br><br><a href="index.html">Į paiešką →</a></div>'; return; }
-  el.innerHTML = list.map(function (a) {
+  // v1.25.0: atidarius „Palyginimai" pirmiausia rodom, KURIUOS automobilius šiuo metu lygini -
+  // anksciau matydavosi tik tuscias ataskaitu sarasas ir atrodydavo, kad palyginimas dingo.
+  let virsus = '';
+  if (filtras === 'palyginimas') {
+    let dabar = [];
+    try { dabar = JSON.parse(localStorage.getItem('ct_compare_list') || '[]') || []; } catch (e) {}
+    if (dabar.length) {
+      virsus = '<div style="background:var(--bg-surface);border:1px solid var(--accent-border);border-radius:16px;padding:16px;margin-bottom:16px">'
+        + '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">'
+        + '<b style="font:700 13px var(--font)">Dabartinis palyginimas</b>'
+        + '<span style="font:600 10px var(--font-mono);color:var(--text-dim)">' + dabar.length + ' automobiliai</span>'
+        + '<a href="compare.html" style="margin-left:auto;padding:7px 13px;border-radius:9px;background:var(--accent);color:#fff;font:600 12px var(--font);text-decoration:none">Tęsti palyginimą →</a>'
+        + '</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">'
+        + dabar.map(function (c) {
+            return '<a href="' + ctEsc(c.url || '#') + '" target="_blank" rel="noopener" style="text-decoration:none;display:block;background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;overflow:hidden">'
+              + (c.photo ? '<img src="' + ctEsc(c.photo) + '" alt="" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block">' : '')
+              + '<div style="padding:9px 11px">'
+              + '<div style="font:600 12.5px var(--font);color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + ctEsc(c.modelis || 'Automobilis') + '</div>'
+              + '<div style="font:700 12px var(--font-mono);color:var(--text-secondary);margin-top:3px">' + (c.kaina ? Number(c.kaina).toLocaleString('lt-LT') + ' €' : '–') + '</div>'
+              + (c.metai || c.rida ? '<div style="font:400 11px var(--font);color:var(--text-dim);margin-top:2px">' + [c.metai, c.rida ? Number(c.rida).toLocaleString('lt-LT') + ' km' : null].filter(Boolean).join(' · ') + '</div>' : '')
+              + '</div></a>';
+          }).join('')
+        + '</div></div>';
+    }
+  }
+  if (!list.length) {
+    el.innerHTML = virsus + '<div class="pg-tuscia"><b>' + (filtras === 'palyginimas' ? 'Palyginimų ataskaitų dar nėra' : 'Ataskaitų dar nėra') + '</b>'
+      + (filtras === 'palyginimas'
+        ? 'Palyginkite bent du automobilius ir paspauskite „Gilus palyginimas“ – ataskaita atsiras čia.'
+        : 'Paieškoje paspauskite „Detali apžvalga" – ataskaita atsiras čia.')
+      + '<br><br><a href="index.html">Į paiešką →</a></div>';
+    return;
+  }
+  el.innerHTML = virsus + list.map(function (a) {
     const t = TIPAI[a.tipas] || [a.tipas, '📄'];
     const inline = (a.tipas === 'vin' || a.tipas === 'pardavejas');
     return '<div class="at-card" id="at-' + a.id + '">'

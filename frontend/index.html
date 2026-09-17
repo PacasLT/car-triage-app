@@ -2433,6 +2433,29 @@
             <svg class="ct3-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
           </div>
         </div>
+        <!-- v1.25.0: varantieji ratai ir galia - pagrindiniai vertinimo kriterijai, todel cia, ne "Daugiau filtru" -->
+        <div class="ct3-field">
+          <label>VARANTIEJI RATAI</label>
+          <div class="ct3-select-wrap">
+            <select id="varantieji">
+              <option value="" selected>Visi</option>
+              <option value="visi">Visi varantys (4x4)</option>
+              <option value="priekiniai">Priekiniai</option>
+              <option value="galiniai">Galiniai</option>
+            </select>
+            <svg class="ct3-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+        <div class="ct3-field">
+          <label>GALIA (KW)</label>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <input id="galiaNuo" type="number" min="0" step="10" placeholder="nuo"
+                   style="width:100%; min-width:0; padding:10px 12px; background:var(--bg-base); border:1px solid var(--border-light); border-radius:8px; color:var(--text-primary); font:500 13px/1 var(--font);">
+            <span style="color:var(--text-dim)">–</span>
+            <input id="galiaIki" type="number" min="0" step="10" placeholder="iki"
+                   style="width:100%; min-width:0; padding:10px 12px; background:var(--bg-base); border:1px solid var(--border-light); border-radius:8px; color:var(--text-primary); font:500 13px/1 var(--font);">
+          </div>
+        </div>
       </div>
 
 
@@ -2454,16 +2477,7 @@
               <option value="5">5 (lėčiausia)</option>
             </select>
           </div>
-          <div style="display:flex; flex-direction:column; gap:6px;">
-            <label style="font:600 10px/1 var(--font-mono); letter-spacing:.08em; color:var(--text-dim);">VARANTIEJI RATAI</label>
-            <select id="varantieji" onchange="ctUpdateMoreBadge()"
-                    style="width:150px; padding:8px 10px; background:var(--bg-base); border:1px solid var(--border-light); border-radius:8px; color:var(--text-primary); font:500 13px/1 var(--font);">
-              <option value="">Visi</option>
-              <option value="visi">Visi varantys (4x4)</option>
-              <option value="priekiniai">Priekiniai</option>
-              <option value="galiniai">Galiniai</option>
-            </select>
-          </div>
+          <!-- VARANTIEJI RATAI perkelta i pagrindine filtru eilute (v1.25.0) -->
           <button type="button" onclick="ctResetMoreFilters()"
                   style="padding:8px 14px; background:transparent; border:1px solid var(--border-light); border-radius:8px; color:var(--text-muted); font:500 12px/1 var(--font); cursor:pointer;">Išvalyti</button>
         </div>
@@ -3423,6 +3437,8 @@ async function runSearch() {
     kainaIki: document.getElementById('kainaIki').value,
     maxPages: document.getElementById('maxPages').value,
     varantieji: (document.getElementById('varantieji') || {}).value || '',
+    galiaNuo: (document.getElementById('galiaNuo') || {}).value || '',
+    galiaIki: (document.getElementById('galiaIki') || {}).value || '',
     beJav: !!(document.getElementById('pf-beJav') || {}).checked,
     tikSuVin: !!(document.getElementById('pf-tikSuVin') || {}).checked,
     tikSuIstorija: !!(document.getElementById('pf-tikSuIstorija') || {}).checked,
@@ -4412,15 +4428,15 @@ function ctRenderGrouped(candidates, container, renderFn) {
 function ctRezultatuSantrauka(o) {
   var sk = function (n) { return '<b>' + (n == null ? '–' : n) + '</b>'; };
   var dalys = [];
-  if (o.rasta && o.atitiko != null && o.rasta !== o.atitiko) {
-    dalys.push('<span>' + sk(o.rasta) + ' rasta pagal markę / modelį</span>');
-    dalys.push('<span>' + sk(o.atitiko) + ' atitiko kainos, ridos ir metų filtrus</span>');
-  }
+  if (o.rasta) dalys.push('<span>' + sk(o.rasta) + ' rasta portale pagal markę / modelį</span>');
+  // v1.25.0: visada matosi, KIEK rasta su siuo filtru ir KIEK is ju rekomenduojama
+  if (o.atitiko != null) dalys.push('<span>' + sk(o.atitiko) + ' atitiko visus jūsų filtrus</span>');
+  if (o.atmesta) dalys.push('<span>' + sk(o.atmesta) + ' atmesta – „Kiti skelbimai“</span>');
   var pagr = o.tuscia
     ? '<span class="ct-rs-pagr ct-rs-bad">Nė vienas skelbimas neatitiko filtrų</span>'
     : (o.verti == null
       ? '<span class="ct-rs-pagr">' + sk(o.ivertinta) + ' skelbimai</span>'
-      : '<span class="ct-rs-pagr">' + sk(o.verti) + ' verti dėmesio</span><span class="ct-rs-is">iš ' + sk(o.ivertinta) + ' įvertintų</span>');
+      : '<span class="ct-rs-pagr">' + sk(o.verti) + ' rekomenduojami</span><span class="ct-rs-is">iš ' + sk(o.ivertinta) + ' įvertintų</span>');
   return '<div class="ct-rs"><span class="ct-rs-ic">' + (o.tuscia ? '⊘' : '✓') + '</span><div class="ct-rs-t">' + pagr + (dalys.length ? '<div class="ct-rs-sub">' + dalys.join('<i>·</i>') + '</div>' : '') + '</div></div>';
 }
 
@@ -4454,6 +4470,8 @@ function renderResults(data, status, results) {
   status.innerHTML = ctRezultatuSantrauka({
     ivertinta: data.candidates.length, verti: verti.length,
     rasta: data.rawFoundCount || null, atitiko: data.totalScanned || null,
+    // v1.25.0: kiek skelbimu iskrito pro filtrus - jie visi matomi „Kiti skelbimai"
+    atmesta: Math.max(0, ((data.allListings || []).length) - data.candidates.length) || null,
     tuscia: data.candidates.length === 0,
   });
   document.getElementById('sort-bar').style.display = data.candidates.length > 0 ? 'flex' : 'none';
@@ -5759,6 +5777,9 @@ function ctNavTab(tab) {
         c.rida ? '<span class="chip">🛣 ' + fmtKm(c.rida) + '</span>' : '',
         c.kuras ? '<span class="chip">⛽ ' + esc(c.kuras) + '</span>' : '',
         c.pavarai ? '<span class="chip">⚙ ' + esc(c.pavarai) + '</span>' : '',
+        // v1.25.0: galia ir varantieji ratai - pagrindiniai vertinimo kriterijai
+        c.galia ? '<span class="chip" title="Variklio galia">⚡ ' + c.galia + ' kW</span>' : '',
+        c.varantieji ? '<span class="chip" title="Varantieji ratai">🛞 ' + esc(c.varantieji) + '</span>' : '',
         c.turiVin ? '<span class="chip chip-pos">✓ VIN</span>' : '',
         c.turiIstorijosAtaskaita ? '<span class="chip chip-pos">✓ Istorija</span>' : '',
         c.garantijosTipas ? '<span class="chip chip-pos">✓ Garantija</span>' : '',
@@ -5814,7 +5835,8 @@ function ctNavTab(tab) {
               '<span style="font-size:12.5px;color:var(--text-muted);">Rinkos vidurkis: <b style="color:var(--text-primary);font-weight:600;">' + formatEUR(c.marketMedian) + '</b></span>' +
             '</div>' +
             '<div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">Skirtumas: <b style="color:' + savColor + ';font-weight:600;">' + (skirt != null ? (skirt < 0 ? '−' : '+') + formatEUR(Math.abs(skirt)) : '–') + '</b><span style="color:var(--text-dim);margin-left:8px;">· ' + (c.marketCount||'?') + ' panašių skelbimų</span>' +
-              (c.kainosPastaba ? '<span class="ct-kaina-past">ⓘ ' + esc(c.kainosPastaba) + '</span>' : '') + '</div>' +
+              (c.kainosPastaba ? '<span class="ct-kaina-past">ⓘ ' + esc(c.kainosPastaba) + '</span>' : '') +
+              (c.kainaBaze ? '<span class="ct-kaina-past" title="Skelbime kaina nurodyta be PVM. Vertiname ir lyginame tik galutinę sumą su PVM.">🧾 ' + formatEUR(c.kainaBaze) + ' + PVM = <b>' + formatEUR(c.kaina) + '</b> (galutinė)</span>' : '') + '</div>' +
             (c.kainosIspejimas ? '<div class="ct-kaina-isp"><span>⚠</span><span>' + esc(c.kainosIspejimas.tekstas) + '</span></div>' : '') +
             // PASALINTA: "72 · VERTA ANALIZUOTI" zenkliukas. Ta pati informacija jau rodoma
             // dukart zemiau - bloke "CARTRIIGE GALIMYBE 72/100" ir verdikto mygtuke prie ivercio.
@@ -5919,6 +5941,7 @@ function ctNavTab(tab) {
               /* PASALINTA: triage zenkliukas - verdiktas rodomas desineje prie ziedo */
             '</div>' +
             (c.kainosPastaba ? '<span class="ct-kaina-past">ⓘ ' + esc(c.kainosPastaba) + '</span>' : '') +
+            (c.kainaBaze ? '<span class="ct-kaina-past" title="Skelbime kaina nurodyta be PVM – rodome galutinę sumą su PVM">🧾 ' + formatEUR(c.kainaBaze) + ' + PVM = <b>' + formatEUR(c.kaina) + '</b></span>' : '') +
             (c.kainosIspejimas ? '<div class="ct-kaina-isp"><span>⚠</span><span>' + esc(c.kainosIspejimas.tekstas) + '</span></div>' : '') +
           '</div>' +
           '<div class="std-right" style="flex:none;display:flex;align-items:center;gap:10px;">' +

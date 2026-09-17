@@ -26,6 +26,12 @@
 - `ANALIZES_PODELIS_MS` (7 d.) – ta pati analizė negeneruojama iš naujo, nebent pasikeitė kaina (`analizesPodelis(url, kaina)`).
 - Nuotraukos brangiausios (~1 400 tokenų viena): `DEEP_FOTO_KIEKIS` = 6.
 
+## Kaina ir PVM
+
+- Vertinama ir lyginama **tik galutinė kaina su PVM**. Jei skelbime „50 000 € + PVM“ – `kaina` = 60 500 €, `kainaBaze` = 50 000 €, o vartotojui rodoma „50 000 € + PVM = 60 500 € (galutinė)“.
+- Jei skelbime PVM neišskirtas – rodoma tiesiog suma, jokių prierašų.
+- „Be PVM / Eksportui“ kaina (`kainaBePvm`) nėra ta, kurią mokėtų privatus pirkėjas – į medianą ir balus neįtraukiama.
+
 ## Vizualinis standartas (nuotraukų AI) – privaloma
 
 > **MATOME → APRAŠOME. ĮTARIAME → ĮSPĖJAME. NEŽINOME → NEIŠGALVOJAME.**

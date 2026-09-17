@@ -101,6 +101,11 @@
   function atidaryti() {
     var dd = document.getElementById('ct-meg-dd'), btn = document.getElementById('ct-meg-btn'); if (!dd) return;
     piestiSarasa(); dd.classList.add('open'); btn.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); _atidaryta = true;
+    // v1.25.0 PATAISYTA: pirmas uzvedimas rodydavo tik vietinius (arba tuscia) sarasa,
+    // nes serverio duomenys ateidavo veliau. Dabar uzsakom juos is karto ir perpiesiam.
+    if (!_isServerio && token()) {
+      perkrauti().then(function () { if (_atidaryta) piestiSarasa(); });
+    }
   }
   function uzdaryti() {
     var dd = document.getElementById('ct-meg-dd'), btn = document.getElementById('ct-meg-btn'); if (!dd) return;
@@ -168,15 +173,29 @@
       b.addEventListener('click', function (e) { e.stopPropagation(); salinti(_sarasas[+b.dataset.x].url); });
     });
     var atn = dd.querySelector('#ct-meg-atn');
-    if (atn) atn.addEventListener('click', function (e) { e.stopPropagation(); atnaujintiVisus(atn); });
+    if (atn) atn.addEventListener('click', function (e) { e.stopPropagation(); atnaujintiVisus(atn, false); });
   }
 
   // v1.23.1 PAPILDOMA PASLAUGA: pertikrinam visus issaugotus skelbimus portale -
   // ar kaina pasikeite, ar rezervuota, ar dar skelbiama. 1 kreditas uz visa sarasa.
-  function atnaujintiVisus(btn) {
+  // v1.25.0: patvirtinimas rodomas PACIAME lange (narsykles „says" langas atrode svetimas)
+  function atnaujintiVisus(btn, patvirtinta) {
     if (!token()) { if (typeof window.showAuthModal === 'function') window.showAuthModal(); return; }
     var bus = document.getElementById('ct-meg-busena');
-    if (!confirm('Patikrinsime visų išsaugotų skelbimų kainą ir būseną portale.\n\nBus nuskaitytas 1 kreditas (kartą per parą – kitos patikros tą pačią dieną nemokamos). Tęsti?')) return;
+    if (!patvirtinta) {
+      if (!bus) return;
+      bus.style.display = '';
+      bus.innerHTML = '<div style="color:var(--text-secondary,#c9cbd3)">Patikrinsime visų išsaugotų skelbimų kainą ir būseną portale.</div>'
+        + '<div style="margin-top:4px;color:var(--text-dim,#777)">1 kreditas už visą sąrašą · kartą per parą, kitos patikros tą pačią dieną nemokamos.</div>'
+        + '<div style="display:flex;gap:7px;margin-top:9px">'
+        + '<button type="button" id="ct-meg-taip" style="padding:6px 12px;border-radius:8px;border:none;background:var(--accent,#7c5cff);color:#fff;font:600 11.5px var(--font,sans-serif);cursor:pointer">Taip, tikrinti</button>'
+        + '<button type="button" id="ct-meg-ne" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border,rgba(255,255,255,.12));background:transparent;color:var(--text-secondary,#c9cbd3);font:600 11.5px var(--font,sans-serif);cursor:pointer">Atšaukti</button>'
+        + '</div>';
+      var taip = document.getElementById('ct-meg-taip'), ne = document.getElementById('ct-meg-ne');
+      if (taip) taip.addEventListener('click', function (e) { e.stopPropagation(); atnaujintiVisus(btn, true); });
+      if (ne) ne.addEventListener('click', function (e) { e.stopPropagation(); _busena = ''; bus.style.display = 'none'; bus.innerHTML = ''; });
+      return;
+    }
     btn.disabled = true; btn.textContent = '↻ Tikriname…';
     if (bus) { bus.style.display = ''; bus.textContent = 'Tikriname skelbimus portale – tai gali užtrukti iki minutės…'; }
     fetch('/api/megstamiausi/atnaujinti', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token(), 'Content-Type': 'application/json' }, body: '{}' })
