@@ -1439,6 +1439,38 @@ async function runSearchJob(jobId, filters) {
     // Kaupiam VISUS nuskaitytus skelbimus - kuo daugiau istorijos, tuo tikslesnes
     // busimos medianos ir balai jau matytiems modeliams.
     cache.addToHistory([...parsed, ...hardRejected]);
+
+    // Kiekvienam matytam skelbimui fiksuojam kainos/ridos momentini vaizda ir
+    // gyvavimo cikla. Is to veliau gaunam "kaina mazinta", "kabo 3 savaites",
+    // "dingo - tikriausiai parduotas" ir modelio pardavimo greiti.
+    const visiMatyti = [...parsed, ...hardRejected];
+    visiMatyti.forEach((l) => {
+      cache.zymetiMatyta(l);
+      if (l.kaina) cache.recordListingSnapshot(l.url, l.kaina, l.rida || null);
+    });
+    cache.saveLifecycle();
+
+    // Skelbimai, kuriuos anksciau mateme sioje paieskoje, bet dabar ju nebera -
+    // greiciausiai parduoti arba nuimti.
+    const dabartiniai = new Set(visiMatyti.map((l) => l.url));
+    const dingusieji = [];
+    visiMatyti.forEach(() => {});
+    (function aptiktiDingusius() {
+      const modeliai = new Set(visiMatyti.map((l) => l.modelis).filter(Boolean));
+      modeliai.forEach((m) => {
+        cache.getHistoryForModel(m).forEach((h) => {
+          // Tikrinam tik tuos, kuriuos mateme per pastarasias 14 dienu
+          if (!h.url || dabartiniai.has(h.url)) return;
+          if (Date.now() - h.time > 14 * 86400000) return;
+          const d = cache.zymetiDingusi(h.url);
+          if (d) dingusieji.push(d);
+        });
+      });
+      cache.saveLifecycle();
+    })();
+    if (dingusieji.length) {
+      logJob(jobId, `📤 ${dingusieji.length} anksčiau matyti skelbimai dingo iš rezultatų – tikėtina, parduoti.`);
+    }
     // Palikti tik du rezimai: 'default' (CarTriige analize) ir 'browse' (visi skelbimai).
     const searchMode = filters.searchMode === 'browse' ? 'browse' : 'default';
 
@@ -1577,12 +1609,21 @@ async function runSearchJob(jobId, filters) {
           try {
             const { title, fullText, photo: detailPhoto, photos: detailPhotos, vin, pardavejas } = await scrapeSingleListing(c.url);
             const marketContext = { kaina: c.kaina, marketMedian: c.marketMedian, marketCount: c.marketCount, diffPct: c.diffPct, modelis: c.modelis, galia: c.galia, variklioTuris: c.variklioTuris };
-            const analysis = await generateDeepAnalysis(title, fullText, detailPhotos, marketContext);
+            const analysis = await generateDeepAnalysis(title, fullText, detailPhotos, marketContext, c.url);
             c.deepAnalysis = analysis;
             c.vin = vin;
             c.pardavejas = pardavejas || c.pardavejas;
             c.photos = detailPhotos;
-            cache.setCached('analysis', c.url, { title, photo: detailPhoto, photos: detailPhotos, analysis, vin, pardavejas });
+            const vinInfo = sujungtiVin(vin, analysis);
+            c.vin = vinInfo.vin;
+            c.vinSaltinis = vinInfo.vinSaltinis;
+            c.vinIsNuotraukos = vinInfo.vinIsNuotraukos;
+            if (vinInfo.vin && !c.turiVin) c.turiVin = true; // VIN rastas - istorijos komponentas pagerėja
+            cache.setCached('analysis', c.url, {
+              title, photo: detailPhoto, photos: detailPhotos, analysis,
+              vin: vinInfo.vin, vinSaltinis: vinInfo.vinSaltinis, vinIsNuotraukos: vinInfo.vinIsNuotraukos,
+              pardavejas,
+            });
           } finally {
             stopFake();
           }
@@ -1930,7 +1971,7 @@ async function downloadImageAsBase64(url) {
   }
 }
 
-async function generateDeepAnalysis(title, fullText, photos, marketContext) {
+async function generateDeepAnalysis(title, fullText, photos, marketContext, skelbimoUrl) {
   // Siunčiame iki 12 nuotraukų AI - vizuali automobilio būklės analizė visada naudinga.
   let imageBlocks = [];
   if (photos && photos.length > 0) {
@@ -1947,7 +1988,16 @@ PERZIUREK visas nuotraukas ir "nuotrauku_pastebejimai" lauke apraszyk: bendra au
 bukle (puiki/gera/vidutine/prasta), spalva, matomas detales ir SVARBIAUSIA - ar matomos
 kokios zalos (subraizymai, iprovimai, korozija, nelygu lakaviams, neatitinkancios tarpes tarp
 detaliu, sulauzyta plastika, sudauzyta bamperiai/zibintai ir pan.). Remkis TIK tuo, ka tikrai
-matai nuotraukose. Jei zalos nepastebi, aprasyk bendra gera bukle.`
+matai nuotraukose. Jei zalos nepastebi, aprasyk bendra gera bukle.
+
+ATSKIRA SVARBI UZDUOTIS - VIN KODAS NUOTRAUKOSE: pardavejai daznai idea nuotrauka
+gamyklinio lipduko (dazniausiai ant vairuotojo duru stakto), VIN plokstele po priekiniu
+stiklu, registracijos liudijimo ar serviso knygeles. Atidziai perziuk VISAS nuotraukas ir
+jei kur nors ISKAITOMAS 17 simboliu VIN kodas - nuskaityk ji TIKSLIAI, simbolis po simbolio.
+VIN yra 17 simboliu, sudarytas tik is skaiciu ir raidziu, kuriose NEBUNA raidziu I, O ir Q.
+Jei abejoji bent vienu simboliu arba kodas neiskaitomas - grazink null, o ne spek.
+Taip pat nurodyk, kurioje vietoje ji pamatei (pvz. 'duru lipdukas', 'po priekiniu stiklu',
+'registracijos dokumentas').`
     : '';
 
   const engineNote = marketContext && (marketContext.galia || marketContext.variklioTuris)
@@ -1959,10 +2009,29 @@ ${marketContext.modelis || 'sio modelio'} rinkos vidurkis ${marketContext.market
 t.y. si kaina yra ${marketContext.diffPct}% ${marketContext.diffPct >= 0 ? 'ZEMESNE' : 'AUKSTESNE'} nei vidurkis.${engineNote}`
     : '\n\nRinkos vidurkio duomenu sitam skelbimui neturime - jei reikia, remkis bendromis ziniomis/web paieska apie tipine sio modelio/metu kaina.';
 
+  // Sukaupta SIO skelbimo istorija: kainos mazinimai, ridos pokyciai, kiek kabo.
+  // Tai stipriausias derybu argumentas, kokis apskritai imanomas.
+  let istorijosTekstas = '';
+  if (skelbimoUrl) {
+    const kaita = cache.buildListingTimelineText(skelbimoUrl);
+    const ciklas = cache.gautiGyvavimoCikla(skelbimoUrl);
+    const dalys = [];
+    if (ciklas) {
+      dalys.push(`Si skelbima musu sistema pirma karta pastebejo pries ${ciklas.dienosRinkoje} d. ir mate ji ${ciklas.kartuMatytas} k.`);
+      if (ciklas.dienosRinkoje >= 30) dalys.push('SKELBIMAS KABO ILGIAU NEI MENESI - tai reiskia, kad uz sia kaina niekas neperka. Yra vietos deryboms arba yra priezastis, kodel neperka.');
+      else if (ciklas.dienosRinkoje >= 14) dalys.push('Skelbimas kabo jau dvi savaites.');
+    }
+    if (kaita) dalys.push(kaita);
+    if (dalys.length) {
+      istorijosTekstas = `\n\nSIO SKELBIMO ISTORIJA (musu sistemos sukaupta, PATIKIMA):\n${dalys.join('\n')}\n` +
+        `Butinai atsizvelk i sia istorija vertindamas ir ypac formuluodamas derybu argumentus.`;
+    }
+  }
+
   const prompt = `Automobilio skelbimo puslapio turinys:
 Pavadinimas: ${title}
 Turinys: ${fullText}
-${marketContextText}
+${marketContextText}${istorijosTekstas}
 
 Tu esi automobiliu pirkimo ekspertas, dirbantis flipping/perpardavimo verslui. Isanalizuok
 si skelbima ISSAMIAI remdamasis TIK sitame tekste esancia informacija - NEISGALVOK faktu,
@@ -2013,7 +2082,9 @@ JSON struktura ir sukelia klaida:
     "numatoma_investicija": "apytiksle suma remontui/tvarkymui, arba null jei nera pagrindo vertinti",
     "numatomas_pardavimo_diapazonas": "apytikslis € intervalas PO sutvarkymo, arba null"
   },
-  "nuotrauku_pastebejimai": ${imageBlocks.length > 0 ? '["konkretus matomas pazeidimas nuotraukoje", "..."] (arba ["Nuotraukose akivaizdzios zalos nepastebeta"] jei nieko nerandi)' : 'null'}
+  "nuotrauku_pastebejimai": ${imageBlocks.length > 0 ? '["konkretus matomas pazeidimas nuotraukoje", "..."] (arba ["Nuotraukose akivaizdzios zalos nepastebeta"] jei nieko nerandi)' : 'null'},
+  "vin_is_nuotraukos": ${imageBlocks.length > 0 ? '"17 simboliu VIN kodas, jei ISKAITOMAS nuotraukoje, kitu atveju null"' : 'null'},
+  "vin_nuotraukos_vieta": ${imageBlocks.length > 0 ? '"kur pamatytas, pvz. duru lipdukas, arba null"' : 'null'}
 }`;
 
   const messageContent = imageBlocks.length > 0
@@ -2097,8 +2168,13 @@ app.post('/api/analyze-single', async (req, res) => {
 
     const { title, fullText, photo, photos, vin, pardavejas } = await scrapeSingleListing(url);
     const marketContext = marketMedian ? { kaina, marketMedian, marketCount, diffPct, modelis, galia, variklioTuris } : null;
-    const analysis = await generateDeepAnalysis(title, fullText, photos, marketContext);
-    const result = { title, photo, photos, analysis, vin, pardavejas: pardavejas || knownPardavejas || null };
+    const analysis = await generateDeepAnalysis(title, fullText, photos, marketContext, url);
+    const vinInfo = sujungtiVin(vin, analysis);
+    const result = {
+      title, photo, photos, analysis,
+      vin: vinInfo.vin, vinSaltinis: vinInfo.vinSaltinis, vinIsNuotraukos: vinInfo.vinIsNuotraukos,
+      pardavejas: pardavejas || knownPardavejas || null,
+    };
     cache.setCached('analysis', url, result);
     res.json({ ...result, cached: false });
   } catch (err) {
@@ -2118,8 +2194,13 @@ async function paruostiPilnaProfili(url, kontekstas) {
     return { url, ...cached, isPodelio: true };
   }
   const { title, fullText, photo, photos, vin, pardavejas } = await scrapeSingleListing(url);
-  const analysis = await generateDeepAnalysis(title, fullText, photos, kontekstas || null);
-  const result = { title, photo, photos, analysis, vin, pardavejas: pardavejas || null };
+  const analysis = await generateDeepAnalysis(title, fullText, photos, kontekstas || null, url);
+  const vinInfo = sujungtiVin(vin, analysis);
+  const result = {
+    title, photo, photos, analysis,
+    vin: vinInfo.vin, vinSaltinis: vinInfo.vinSaltinis, vinIsNuotraukos: vinInfo.vinIsNuotraukos,
+    pardavejas: pardavejas || null,
+  };
   cache.setCached('analysis', url, result);
   return { url, ...result, isPodelio: false };
 }
@@ -2226,6 +2307,227 @@ app.post('/api/compare-deep', requireAuth, async (req, res) => {
     const aiKl = typeof aiKlaidosZinute === 'function' ? aiKlaidosZinute(err) : null;
     res.status(500).json({ error: aiKl ? aiKl.tekstas : String(err.message).slice(0, 200) });
   }
+});
+
+// VIN formato patikra: 17 simboliu, be I, O, Q. Neleidziam i sistema patekti
+// blogai nuskaitytam kodui - geriau nerodyti nieko, nei rodyti klaidinga VIN.
+// Sujungia VIN is skelbimo teksto ir is nuotraukos. Tekstas turi pirmenybe,
+// bet kai jo nera, VIN is nuotraukos yra pilnavertis radinys - tik aiskiai
+// pazymim saltini, kad vartotojas zinotu, is kur jis atsirado.
+function sujungtiVin(vinIsTeksto, analysis) {
+  if (vinIsTeksto) {
+    return { vin: normalizuotiVin(vinIsTeksto), vinSaltinis: 'skelbimo tekstas', vinIsNuotraukos: false };
+  }
+  const isNuotr = analysis && analysis.vin_is_nuotraukos;
+  if (arGaliojantisVin(isNuotr)) {
+    return {
+      vin: normalizuotiVin(isNuotr),
+      vinSaltinis: (analysis.vin_nuotraukos_vieta || 'skelbimo nuotrauka'),
+      vinIsNuotraukos: true,
+    };
+  }
+  return { vin: null, vinSaltinis: null, vinIsNuotraukos: false };
+}
+
+function arGaliojantisVin(v) {
+  if (!v || typeof v !== 'string') return false;
+  const svarus = v.trim().toUpperCase().replace(/\s/g, '');
+  return /^[A-HJ-NPR-Z0-9]{17}$/.test(svarus);
+}
+
+function normalizuotiVin(v) {
+  return String(v || '').trim().toUpperCase().replace(/\s/g, '');
+}
+
+// ============ AUTO ISTORIJOS SEKIMAS ============
+// Atskira funkcija, nesusieta su megstamiausiais: sistema kaupia istorija apie
+// KIEKVIENA kada nors matyta skelbima, o vartotojas gali paprasyti ja parodyti
+// arba itraukti skelbima i kasdien tikrinamu sarasa.
+
+// Suformuoja zmogui skaitoma istorijos santrauka + pastabas, kodel verta ziureti.
+function sudarytiIstorijosSantrauka(url) {
+  const ciklas = cache.gautiGyvavimoCikla(url);
+  const laikoJuosta = cache.getListingTimeline(url);
+  if (!ciklas && (!laikoJuosta || !laikoJuosta.length)) return null;
+
+  const pastabos = [];
+  let kainuPokytis = null;
+
+  if (laikoJuosta && laikoJuosta.length >= 2) {
+    const pirmas = laikoJuosta[0];
+    const paskutinis = laikoJuosta[laikoJuosta.length - 1];
+    const skirtumas = paskutinis.k - pirmas.k;
+    const mazinimai = laikoJuosta.filter((t, i) => i > 0 && t.k < laikoJuosta[i - 1].k).length;
+    kainuPokytis = {
+      pradine: pirmas.k, dabartine: paskutinis.k, skirtumas,
+      procentai: Math.round((skirtumas / pirmas.k) * 100),
+      mazinimuKartai: mazinimai,
+    };
+    if (skirtumas < 0) {
+      pastabos.push({
+        tipas: 'kaina-mazinta', svarba: 'auksta',
+        tekstas: `Kaina sumažinta ${Math.abs(skirtumas)}€ (nuo ${pirmas.k}€ iki ${paskutinis.k}€)` +
+          (mazinimai > 1 ? `, jau ${mazinimai} kartus` : '') + '.',
+        kodel: mazinimai > 1
+          ? 'Kartotinis mažinimas rodo, kad pardavėjas skuba arba už šią kainą niekas neperka – stipri pozicija deryboms.'
+          : 'Pardavėjas jau nusileido – tikėtina, kad nusileis dar.',
+      });
+    } else if (skirtumas > 0) {
+      pastabos.push({
+        tipas: 'kaina-didinta', svarba: 'vidutine',
+        tekstas: `Kaina pakelta +${skirtumas}€.`,
+        kodel: 'Neįprasta. Gali būti, kad skelbimas atnaujintas arba anksčiau buvo klaida.',
+      });
+    }
+    const ridosPokytis = (paskutinis.r && pirmas.r) ? paskutinis.r - pirmas.r : 0;
+    if (ridosPokytis > 500) {
+      pastabos.push({
+        tipas: 'rida-auga', svarba: 'vidutine',
+        tekstas: `Rida padidėjo ${ridosPokytis} km (nuo ${pirmas.r} iki ${paskutinis.r} km).`,
+        kodel: 'Automobilis vis dar naudojamas kasdien – tikrinkite, ar skelbime nurodyta rida atnaujinta.',
+      });
+    }
+  }
+
+  if (ciklas) {
+    if (ciklas.dingo) {
+      pastabos.push({
+        tipas: 'dingo', svarba: 'auksta',
+        tekstas: `Skelbimas dingo iš portalo po ${ciklas.dienosRinkoje} d.`,
+        kodel: 'Tikėtina, kad automobilis parduotas arba nuimtas. Jei domino – jo greičiausiai nebėra.',
+      });
+    } else if (ciklas.dienosRinkoje >= 45) {
+      pastabos.push({
+        tipas: 'ilgai-kabo', svarba: 'auksta',
+        tekstas: `Skelbimas rinkoje jau ${ciklas.dienosRinkoje} d.`,
+        kodel: 'Ilgiau nei pusantro mėnesio be pirkėjo. Arba kaina per didelė, arba yra priežastis, kurios skelbime nematyti – verta klausti tiesiai.',
+      });
+    } else if (ciklas.dienosRinkoje >= 21) {
+      pastabos.push({
+        tipas: 'kabo', svarba: 'vidutine',
+        tekstas: `Skelbimas rinkoje ${ciklas.dienosRinkoje} d.`,
+        kodel: 'Trys savaitės be pirkėjo – yra vietos deryboms.',
+      });
+    } else if (ciklas.dienosRinkoje <= 2) {
+      pastabos.push({
+        tipas: 'sviezias', svarba: 'vidutine',
+        tekstas: 'Skelbimas visai šviežias.',
+        kodel: 'Geri pasiūlymai išgraibstomi per kelias dienas – jei tinka, nedelskite.',
+      });
+    }
+  }
+
+  return { url, ciklas, laikoJuosta: laikoJuosta || [], kainuPokytis, pastabos };
+}
+
+// Vieno skelbimo istorija
+app.get('/api/listing-history', (req, res) => {
+  const url = req.query.url;
+  if (!url) return res.status(400).json({ error: 'Trūksta url parametro' });
+  const santrauka = sudarytiIstorijosSantrauka(url);
+  if (!santrauka) return res.json({ turimeDuomenu: false });
+  res.json({ turimeDuomenu: true, ...santrauka });
+});
+
+// Modelio tendencijos ir sezoniskumas
+app.get('/api/model-trends', (req, res) => {
+  const modelis = req.query.modelis;
+  if (!modelis) return res.status(400).json({ error: 'Trūksta modelis parametro' });
+  res.json({
+    modelis,
+    tendencijos: cache.modelioTendencijos(modelis),
+    pardavimoGreitis: cache.modelioPardavimoGreitis(modelis),
+  });
+});
+
+// Frontend praneša, kuriuos skelbimus verta sekti (išsaugoti lieka naršyklėje)
+app.post('/api/watch', (req, res) => {
+  const { urls, meta } = req.body || {};
+  if (!Array.isArray(urls)) return res.status(400).json({ error: 'urls turi būti masyvas' });
+  const nauji = cache.pridetiSekimui(urls.slice(0, 200), meta || null);
+  res.json({ sekama: cache.sekamiUrlai().length, nauji });
+});
+
+// Kas pasikeitė nurodytiems skelbimams
+app.post('/api/listing-changes', (req, res) => {
+  const { urls } = req.body || {};
+  if (!Array.isArray(urls)) return res.status(400).json({ error: 'urls turi būti masyvas' });
+  cache.pridetiSekimui(urls.slice(0, 200), null); // kartu itraukiam i sekima
+  const rezultatai = urls.slice(0, 200).map((u) => sudarytiIstorijosSantrauka(u)).filter(Boolean);
+  const suPokyciais = rezultatai.filter((r) => r.pastabos.some((p) => p.svarba === 'auksta'));
+  res.json({ skelbimai: rezultatai, pokyciuSkaicius: suPokyciais.length });
+});
+
+// ---- KASDIENIS SEKAMU SKELBIMU TIKRINIMAS ----
+// Kartą per parą pertikrinam sekamus skelbimus: ar kaina/rida pasikeitė, ar dar gyvas.
+let _tikrinimasVyksta = false;
+
+async function tikrintiSekamus() {
+  if (_tikrinimasVyksta) return;
+  _tikrinimasVyksta = true;
+  const pasalinta = cache.valytiSekimoSarasa();
+  const urls = cache.sekamiUrlai();
+  console.log(`[SEKIMAS] Pradedam kasdienį tikrinimą: ${urls.length} skelbimų (pašalinta pasenusių: ${pasalinta})`);
+  let pokyciu = 0, dingusiu = 0, klaidu = 0;
+
+  for (const url of urls) {
+    try {
+      const { fullText, kaina, rida } = await patikrintiViena(url);
+      if (fullText === null) {
+        const d = cache.zymetiDingusi(url);
+        if (d) { dingusiu++; console.log(`[SEKIMAS] Dingo: ${url} (kabojo ${d.dienosRinkoje} d.)`); }
+      } else {
+        cache.zymetiMatyta({ url, kaina, rida });
+        if (kaina) {
+          const priesTai = cache.getListingTimeline(url);
+          const paskutine = priesTai.length ? priesTai[priesTai.length - 1].k : null;
+          cache.recordListingSnapshot(url, kaina, rida);
+          if (paskutine && paskutine !== kaina) {
+            pokyciu++;
+            console.log(`[SEKIMAS] Kainos pokytis: ${url} ${paskutine}€ -> ${kaina}€`);
+          }
+        }
+      }
+      cache.zymetiPatikrinta(url);
+    } catch (e) {
+      klaidu++;
+    }
+    await new Promise((r) => setTimeout(r, 1500)); // svelnus tempas portalams
+  }
+  cache.saveLifecycle();
+  console.log(`[SEKIMAS] Baigta. Kainos pokyčių: ${pokyciu}, dingo: ${dingusiu}, klaidų: ${klaidu}`);
+  _tikrinimasVyksta = false;
+}
+
+// Nuskaito viena skelbima ir istraukia kaina/rida. Grazina fullText=null, jei skelbimo nebera.
+async function patikrintiViena(url) {
+  try {
+    const { fullText } = await scrapeSingleListing(url);
+    if (!fullText || fullText.length < 200) return { fullText: null, kaina: null, rida: null };
+    const kainaMatch = fullText.match(/(\d[\d\s]{3,8})\s*€/);
+    const ridaMatch = fullText.match(/(\d[\d\s]{2,8})\s*km/i);
+    const kaina = kainaMatch ? parseInt(kainaMatch[1].replace(/\s/g, ''), 10) : null;
+    const rida = ridaMatch ? parseInt(ridaMatch[1].replace(/\s/g, ''), 10) : null;
+    return { fullText, kaina: kaina && kaina > 300 ? kaina : null, rida };
+  } catch (e) {
+    if (/404|not found|nerast/i.test(String(e.message))) return { fullText: null, kaina: null, rida: null };
+    throw e;
+  }
+}
+
+// Paleidziam kas 24 val. Pirmas tikrinimas - po 10 min nuo starto, kad netrukdytu paleidimui.
+const SEKIMO_INTERVALAS_MS = 24 * 60 * 60 * 1000;
+setTimeout(() => {
+  tikrintiSekamus().catch((e) => console.error('[SEKIMAS] klaida:', e.message));
+  setInterval(() => {
+    tikrintiSekamus().catch((e) => console.error('[SEKIMAS] klaida:', e.message));
+  }, SEKIMO_INTERVALAS_MS);
+}, 10 * 60 * 1000);
+
+// Rankinis paleidimas (naudinga testuojant)
+app.post('/api/run-tracking', requireAuth, (req, res) => {
+  tikrintiSekamus().catch((e) => console.error('[SEKIMAS] klaida:', e.message));
+  res.json({ paleista: true, sekama: cache.sekamiUrlai().length });
 });
 
 app.post('/api/vin-lookup', async (req, res) => {

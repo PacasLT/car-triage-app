@@ -6,7 +6,22 @@
 const fs = require('fs');
 const path = require('path');
 
-const CACHE_FILE = path.join(__dirname, 'cache.json');
+// Kaupyklos turi guleti ant persistentinio disko, kitaip kiekvienas deploy'us
+// istrina visa sukaupta rinkos archyva ir kaupimas netenka prasmes.
+// Ta pati logika kaip auth.js: DATA_DIR env -> primountintas /data -> konteineris.
+function parinktiDuomenuKatalogą() {
+  if (process.env.DATA_DIR) return { kelias: process.env.DATA_DIR, saltinis: 'DATA_DIR env' };
+  try {
+    fs.accessSync('/data', fs.constants.W_OK);
+    return { kelias: '/data', saltinis: 'aptiktas /data Volume' };
+  } catch (e) {}
+  return { kelias: __dirname, saltinis: 'konteinerio vidus – NEPERSISTENTINIS' };
+}
+const _dk = parinktiDuomenuKatalogą();
+const DATA_DIR = _dk.kelias;
+try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) {}
+
+const CACHE_FILE = path.join(DATA_DIR, 'cache.json');
 
 const PAGE_TTL_MS = 120 * 60 * 1000;       // 2 val - puslapiu nuskaitymas
 const ANALYSIS_TTL_MS = 24 * 60 * 60 * 1000; // 24 val - detali analize
@@ -58,7 +73,7 @@ function setSearchCached(filterHash, data) {
 }
 
 // ============ ISTORINIS RINKOS DUOMENU KAUPIMAS ============
-const HISTORY_FILE = path.join(__dirname, 'market-history.json');
+const HISTORY_FILE = path.join(DATA_DIR, 'market-history.json');
 const MAX_HISTORY_PER_MODEL = 1000;
 
 let _history = (() => {
@@ -90,7 +105,7 @@ function getHistoryForModel(modelis) {
 }
 
 // ============ SKELBIMŲ KAINOS/RIDOS ISTORIJA (per URL) ============
-const LISTING_TIMELINE_FILE = path.join(__dirname, 'listing-timeline.json');
+const LISTING_TIMELINE_FILE = path.join(DATA_DIR, 'listing-timeline.json');
 
 let _listingTimeline = (() => {
   try { return JSON.parse(fs.readFileSync(LISTING_TIMELINE_FILE, 'utf-8')); }
@@ -142,9 +157,171 @@ function buildListingTimelineText(url) {
   return lines.join('\n');
 }
 
+// ============ SKELBIMO GYVAVIMO CIKLAS ============
+// Kada skelbimas pirma karta pastebetas, kada matytas paskutini karta ir kada dingo.
+// Is to gaunam: kiek dienu kabo, per kiek laiko modelis parduodamas, ar jau parduotas.
+const LIFECYCLE_FILE = path.join(DATA_DIR, 'listing-lifecycle.json');
+
+let _lifecycle = (() => {
+  try { return JSON.parse(fs.readFileSync(LIFECYCLE_FILE, 'utf-8')); }
+  catch { return {}; }
+})();
+let _lifecycleDirty = false;
+
+function saveLifecycle() {
+  if (!_lifecycleDirty) return;
+  try { fs.writeFileSync(LIFECYCLE_FILE, JSON.stringify(_lifecycle)); _lifecycleDirty = false; }
+  catch (err) { console.error('Nepavyko issaugoti gyvavimo ciklo:', err.message); }
+}
+
+// Pazymim, kad skelbimas MATYTAS. Kvieciama kiekvienos paieskos metu.
+function zymetiMatyta(l) {
+  if (!l || !l.url) return;
+  const now = Date.now();
+  const e = _lifecycle[l.url];
+  if (!e) {
+    _lifecycle[l.url] = {
+      pirmaMatytas: now, paskutinMatytas: now, kartuMatytas: 1,
+      modelis: l.modelis || null, metai: l.metai || null,
+      pirmaKaina: l.kaina || null, saltinis: l.source || null, dingo: null,
+    };
+  } else {
+    e.paskutinMatytas = now;
+    e.kartuMatytas = (e.kartuMatytas || 0) + 1;
+    if (e.dingo) e.dingo = null; // vel atsirado - matyt buvo laikinai nuimtas
+    if (!e.modelis && l.modelis) e.modelis = l.modelis;
+    if (!e.pirmaKaina && l.kaina) e.pirmaKaina = l.kaina;
+  }
+  _lifecycleDirty = true;
+}
+
+// Pazymim, kad skelbimo nebera (404 arba dingo is rezultatu) - tikriausiai parduotas.
+function zymetiDingusi(url) {
+  const e = _lifecycle[url];
+  if (!e || e.dingo) return null;
+  e.dingo = Date.now();
+  _lifecycleDirty = true;
+  const dienos = Math.round((e.dingo - e.pirmaMatytas) / 86400000);
+  return { url, dienosRinkoje: dienos, modelis: e.modelis };
+}
+
+function gautiGyvavimoCikla(url) {
+  const e = _lifecycle[url];
+  if (!e) return null;
+  const now = Date.now();
+  return {
+    pirmaMatytas: e.pirmaMatytas,
+    paskutinMatytas: e.paskutinMatytas,
+    dienosRinkoje: Math.round(((e.dingo || now) - e.pirmaMatytas) / 86400000),
+    dienosNuoPaskutinio: Math.round((now - e.paskutinMatytas) / 86400000),
+    kartuMatytas: e.kartuMatytas || 1,
+    dingo: e.dingo || null,
+    pirmaKaina: e.pirmaKaina || null,
+  };
+}
+
+// Vidutinis modelio pardavimo greitis - is skelbimu, kurie jau dingo.
+function modelioPardavimoGreitis(modelis) {
+  const parduoti = Object.values(_lifecycle).filter((e) => e.modelis === modelis && e.dingo);
+  if (parduoti.length < 3) return null;
+  const dienos = parduoti.map((e) => Math.round((e.dingo - e.pirmaMatytas) / 86400000)).sort((a, b) => a - b);
+  return {
+    imtis: dienos.length,
+    medianaDienu: dienos[Math.floor(dienos.length / 2)],
+    greiciausias: dienos[0],
+    leciausias: dienos[dienos.length - 1],
+  };
+}
+
+// ============ SEZONISKUMAS IR KAINU TENDENCIJA ============
+// Skaiciuojama is sukauptos rinkos istorijos: kainu mediana pagal menesi
+// ir kryptis (brangsta / pinga) lyginant seniausius ir naujausius irasus.
+function modelioTendencijos(modelis) {
+  const irasai = (_history[modelis] || []).filter((e) => e.kaina && e.time);
+  if (irasai.length < 8) return null;
+
+  const pagalMenesi = {};
+  irasai.forEach((e) => {
+    const d = new Date(e.time);
+    const raktas = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+    (pagalMenesi[raktas] = pagalMenesi[raktas] || []).push(e.kaina);
+  });
+  const menesiai = Object.keys(pagalMenesi).sort().map((m) => {
+    const arr = pagalMenesi[m].slice().sort((a, b) => a - b);
+    return { menuo: m, mediana: arr[Math.floor(arr.length / 2)], imtis: arr.length };
+  }).filter((m) => m.imtis >= 3);
+
+  let kryptis = null;
+  if (menesiai.length >= 2) {
+    const pirmas = menesiai[0], paskutinis = menesiai[menesiai.length - 1];
+    const pokytis = Math.round(((paskutinis.mediana - pirmas.mediana) / pirmas.mediana) * 100);
+    kryptis = {
+      procentai: pokytis,
+      nuo: pirmas.menuo, iki: paskutinis.menuo,
+      nuoKainos: pirmas.mediana, ikiKainos: paskutinis.mediana,
+      kryptis: pokytis > 2 ? 'brangsta' : pokytis < -2 ? 'pinga' : 'stabili',
+    };
+  }
+  return { menesiai, kryptis, visoIrasu: irasai.length };
+}
+
+// ============ SEKAMI SKELBIMAI ============
+// Isaugoti skelbimai lieka narsykleje, bet frontend praneša serveriui, kuriuos URL
+// verta sekti. Serveris juos kartą per parą pertikrina ir kaupia istorija.
+const WATCH_FILE = path.join(DATA_DIR, 'watchlist.json');
+
+let _watch = (() => {
+  try { return JSON.parse(fs.readFileSync(WATCH_FILE, 'utf-8')); }
+  catch { return {}; }
+})();
+
+function saveWatch() {
+  try { fs.writeFileSync(WATCH_FILE, JSON.stringify(_watch)); }
+  catch (err) { console.error('Nepavyko issaugoti sekimo saraso:', err.message); }
+}
+
+function pridetiSekimui(urls, meta) {
+  let nauji = 0;
+  (urls || []).forEach((u) => {
+    if (!u) return;
+    if (!_watch[u]) { _watch[u] = { pridetas: Date.now(), tikrinta: null, meta: meta && meta[u] ? meta[u] : null }; nauji++; }
+    else _watch[u].paskutinisPrasymas = Date.now();
+  });
+  if (nauji) saveWatch();
+  return nauji;
+}
+
+function sekamiUrlai() { return Object.keys(_watch); }
+
+function zymetiPatikrinta(url) {
+  if (_watch[url]) { _watch[url].tikrinta = Date.now(); saveWatch(); }
+}
+
+// Sekimo saraso valymas: jei skelbimo niekas neprase 30 dienu - metam lauk.
+function valytiSekimoSarasa() {
+  const riba = Date.now() - 30 * 86400000;
+  let pasalinta = 0;
+  Object.keys(_watch).forEach((u) => {
+    const w = _watch[u];
+    const paskutinis = w.paskutinisPrasymas || w.pridetas;
+    if (paskutinis < riba) { delete _watch[u]; pasalinta++; }
+  });
+  if (pasalinta) saveWatch();
+  return pasalinta;
+}
+
+console.log('[KAUPYKLOS] katalogas:', DATA_DIR, '(' + _dk.saltinis + ')');
+console.log('[KAUPYKLOS] rinkos istorija:', Object.keys(_history).length, 'modeliu ·',
+  'gyvavimo ciklas:', Object.keys(_lifecycle).length, 'skelbimu ·',
+  'sekama:', Object.keys(_watch).length);
+
 module.exports = {
   getCached, setCached, cacheAgeMinutes, PAGE_TTL_MS, ANALYSIS_TTL_MS,
   getSearchCached, setSearchCached,
   addToHistory, getHistoryForModel,
   recordListingSnapshot, getListingTimeline, buildListingTimelineText,
+  zymetiMatyta, zymetiDingusi, gautiGyvavimoCikla, modelioPardavimoGreitis, saveLifecycle,
+  modelioTendencijos,
+  pridetiSekimui, sekamiUrlai, zymetiPatikrinta, valytiSekimoSarasa,
+  DATA_DIR,
 };

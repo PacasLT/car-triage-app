@@ -2774,6 +2774,59 @@ window.ctResetMoreFilters = function () {
 
 document.addEventListener('DOMContentLoaded', function () { window.ctUpdateMoreBadge(); });
 
+// ---- AUTO ISTORIJOS SEKIMAS ----
+// Sistema kaupia istorija apie kiekviena kada nors matyta skelbima. Po rezultatu
+// atvaizdavimo vienu kvietimu pasiimam, kas pasikeite, ir prisegam prie korteliu.
+// Kartu tie URL patenka i serverio sekimo sarasa, tad jie bus tikrinami kasdien.
+async function ctIkeltiIstorijas(urls) {
+  if (!urls || !urls.length) return;
+  try {
+    const r = await fetch('/api/listing-changes', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ urls: urls.slice(0, 200) }),
+    });
+    if (!r.ok) return;
+    const d = await r.json();
+    (d.skelbimai || []).forEach(function (sk) {
+      if (!sk.pastabos || !sk.pastabos.length) return;
+      const kortele = document.querySelector('[data-url="' + (window.CSS && CSS.escape ? CSS.escape(sk.url) : sk.url) + '"]');
+      if (!kortele || kortele.querySelector('.ct-istorija')) return;
+      const blokas = document.createElement('div');
+      blokas.className = 'ct-istorija';
+      blokas.innerHTML = ctIstorijosHTML(sk);
+      const vieta = kortele.querySelector('.std-card-inner, .top-info-col') || kortele;
+      vieta.appendChild(blokas);
+    });
+  } catch (e) { /* istorija yra papildoma nauda - jos nebuvimas neturi laužyti rezultatų */ }
+}
+
+function ctIstorijosHTML(sk) {
+  const SP = { auksta: ['#f0c674', 'rgba(240,198,116,.08)', 'rgba(240,198,116,.26)'],
+               vidutine: ['var(--text-muted)', 'var(--bg-raised)', 'var(--border)'] };
+  const c = sk.ciklas || {};
+  const virsus = [];
+  if (c.dienosRinkoje != null) virsus.push('rinkoje ' + c.dienosRinkoje + ' d.');
+  if (sk.kainuPokytis && sk.kainuPokytis.skirtumas < 0) {
+    virsus.push('kaina ↓ ' + Math.abs(sk.kainuPokytis.skirtumas) + '€');
+  }
+  if (c.dingo) virsus.push('nebeskelbiama');
+
+  return '<div style="margin-top:10px;padding:11px 13px;border-radius:10px;background:var(--bg-raised);border:1px solid var(--border);">'
+    + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">'
+    + '<span style="font:700 9.5px/1 var(--font-mono);letter-spacing:.1em;color:var(--accent-light);">AUTO ISTORIJA</span>'
+    + (virsus.length ? '<span style="font:500 10.5px/1 var(--font-mono);color:var(--text-dim);">' + virsus.join(' · ') + '</span>' : '')
+    + '</div>'
+    + sk.pastabos.map(function (pa) {
+        const st = SP[pa.svarba] || SP.vidutine;
+        return '<div style="display:flex;gap:8px;padding:8px 10px;border-radius:8px;margin-bottom:5px;'
+          + 'background:' + st[1] + ';border:1px solid ' + st[2] + ';">'
+          + '<span style="flex:none;color:' + st[0] + ';font-size:12px;line-height:1.5;">' + (pa.svarba === 'auksta' ? '⚡' : '•') + '</span>'
+          + '<span style="min-width:0;"><b style="display:block;font:600 12px/1.45 var(--font);color:var(--text-primary);">' + ctEsc(pa.tekstas) + '</b>'
+          + '<span style="display:block;font:400 11.5px/1.5 var(--font);color:var(--text-muted);margin-top:2px;">' + ctEsc(pa.kodel) + '</span></span></div>';
+      }).join('')
+    + '</div>';
+}
+
 // ---- Triage atvaizdavimo pagalbininkai ----
 const CT_TRIAGE_ORDER = ['top','strong','good','check','weak','rejected'];
 const CT_TRIAGE_META = {
@@ -2970,6 +3023,7 @@ function renderResults(data, status, results) {
     if (!browseCands.length) renderBrowseListings([], results);
     else (window.renderCandidateCards || renderCandidateCards)(browseCands, results);
     renderAllListings(data.allListings || []);
+    ctIkeltiIstorijas(browseCands.map(function (c) { return c.url; }));
     return;
   }
 
@@ -2982,6 +3036,7 @@ function renderResults(data, status, results) {
   results.innerHTML = '';
   (window.renderCandidateCards || renderCandidateCards)(data.candidates, results);
   renderAllListings(data.allListings || []);
+  ctIkeltiIstorijas(data.candidates.map(function (c) { return c.url; }));
 }
 
 function renderBrowseListings(candidates, container) {
@@ -4096,6 +4151,7 @@ function ctNavTab(tab) {
       window.__ctCardData[c.url] = { c: c, analysis: a, photos: photos };
 
       var card = document.createElement('div');
+      card.dataset.url = c.url;
       card.className = 'ct-top-card ctin';
       card.style.border = '1px solid ' + cardBorder;
 
@@ -4199,6 +4255,7 @@ function ctNavTab(tab) {
       window.__ctCardData[c.url] = { c: c, analysis: a, photos: photos };
 
       var card = document.createElement('div');
+      card.dataset.url = c.url;
       card.className = 'ct-std-card';
       card.innerHTML =
         '<div class="std-photo-col photo-ph" style="width:192px;flex:none;border-right:1px solid var(--border);position:relative;min-height:90px;overflow:hidden;">' +
