@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.30.1', data: '2026-09-18', pavadinimas: 'Kortelės apsauginis sluoksnis ir filtrų stiliai',
+    pakeitimai: [
+      'Kortelės išdėstymas apsaugotas nuo senų taisyklių – nuotrauka visada išlaiko proporcijas, balas lieka didelis, dedamųjų juostos matomos',
+      'Pridėtas užrašas „Be nuotraukos“ skelbimams be foto ir perbraukta kaina be PVM',
+      'Paruošti filtrų stiliai artimiausiam atnaujinimui',
+    ],
+  },
+  {
     versija: '1.30.0', data: '2026-09-18', pavadinimas: 'Nauja rezultatų kortelė – trys skaitymo lygiai',
     pakeitimai: [
       'Kortelė dabar skaitoma trimis žingsniais: per sekundę matote nuotrauką, kainą ir skirtumą nuo rinkos; per penkias – įvertį, verdiktą ir kodėl; visa kita atsiveria mygtuku „Ženkliukai, įranga, vieta“',

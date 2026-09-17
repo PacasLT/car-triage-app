@@ -90,6 +90,11 @@
 - **Senos kortelės CSS taisyklės atribotos:** `.card img` → `.card:not(.ct-card) img` (5 vietose). Jos nustatydavo `height: 158px`/`180px` ir traiškydavo naujas miniatiūras. Netrinti – jas dar naudoja senesni blokai.
 - `.ct-card .fav-star.ct-fav` pakeista iš `position: static` į `absolute` (širdutė dabar nuotraukos kampe), `.ct-thumbs` gavo `align-items: start` (kitaip tinklelio eilutė išsitempia ir `aspect-ratio` nustoja galioti).
 
+## ct-dizainas.css 12 skyrius (gynybinis) – VIENA PAKEISTA EILUTE
+
+- Dizainerio 12 skyriuje yra `.ct-photo > :not(img):not(.ct-medal):not(.fav-star) { display: none !important }`. Ji paslepdavo **nuotrauku perjungimo rodykles `.ct-nav`** ir uzrasa `.ct-photo-empty`. Pridetos dvi isimtys – jei gausim nauja failo versija is dizainerio, **si pataisa turi buti pritaikyta is naujo** (ieskoti `ct-nav):not(.ct-photo-empty`).
+- Likusios 12 skyriaus taisykles musu build'e nieko nekeicia (patikrinta: nuotrauka 250 px, balas 32 px, miniatiuros 58x44 buvo teisingi ir be ju) – jos paliktos kaip apsauga.
+
 ## Saugumas
 
 - `ANTHROPIC_API_KEY`, `SCRAPER_API_KEY`, `JWT_SECRET`, `ADMIN_EMAILS`, `INVITE_CODES` – tik Railway Variables, **niekada į kodą ar GitHub**.
