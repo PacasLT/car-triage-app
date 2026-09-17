@@ -1119,6 +1119,9 @@ window.ctApi = function (kelias, params) {
         if (resp.vinPrefiksas) det.vinPrefiksas = resp.vinPrefiksas;
         if (resp.istorijosNuoroda) det.istorijosNuoroda = resp.istorijosNuoroda;
         if (resp.skelbimoParametrai) det.skelbimoParametrai = resp.skelbimoParametrai;
+        if (resp.iranga) det.iranga = resp.iranga;
+        if (resp.aprasymas) det.aprasymas = resp.aprasymas;
+        if (resp.vieta) det.vieta = resp.vieta;
         if (resp.vin) { det.c = det.c || {}; det.c.vin = resp.vin; }
         localStorage.setItem('ct_detail', JSON.stringify(det));
       } catch (e) {}
@@ -1173,6 +1176,8 @@ window.ctApi = function (kelias, params) {
     if (c.galia) sub.push(c.galia + ' AG');
     if (c.kuras) sub.push(c.kuras);
     if (c.pavarai) sub.push(c.pavarai);
+    var vietaVirs = data.vieta || (data.pardavejoInfo && data.pardavejoInfo.vieta) || c.miestas || null;
+    if (vietaVirs) sub.push('📍 ' + vietaVirs);
     document.getElementById('dp-subtitle').textContent = sub.join(' · ');
 
     document.getElementById('dp-price').textContent = c.kaina ? fmt(c.kaina) + ' €' : '—';
@@ -1231,14 +1236,17 @@ window.ctApi = function (kelias, params) {
     // PAKEISTA: pardavejo duomenys imami is skelbimo strukturiskai (vardas, partnerio lygis,
     // tapatybe, miestas, reitingas). Anksciau buvo spejama regexu ir daznai likdavo "nenurodyta".
     var pi = data.pardavejoInfo || (window.__dpAnalysisData && window.__dpAnalysisData.pardavejoInfo) || null;
-    var pVardas = (pi && pi.vardas) || c.pardavejas || null;
-    document.getElementById('dp-seller-name').textContent = pVardas || (c.yraVerslas ? 'Verslo pardavėjas' : 'Privatus pardavėjas');
+    // Privatus pardavejas imones pavadinimo neturi - rodom ji kaip privatu, o ne atsitiktini teksta
+    var pVardas = (pi && !pi.privatus && pi.vardas) || (!pi && c.pardavejas) || null;
+    document.getElementById('dp-seller-name').textContent = pVardas || ((pi && pi.privatus) || !c.yraVerslas ? 'Privatus pardavėjas' : 'Verslo pardavėjas');
     var tipoDalys = [];
     if (pi && pi.lygis) tipoDalys.push(pi.lygis);
-    else tipoDalys.push(c.yraVerslas ? 'Verslo pardavėjas' : 'Privatus pardavėjas');
-    if (pi && pi.vieta) tipoDalys.push(pi.vieta);
+    else if (pVardas) tipoDalys.push(c.yraVerslas ? 'Verslo pardavėjas' : 'Privatus pardavėjas');
+    else if (pi && pi.privatus) tipoDalys.push('Fizinis asmuo');
+    var vieta = (pi && pi.vieta) || data.vieta || c.miestas || null;
+    if (vieta) tipoDalys.push('📍 ' + vieta);
     if (pi && pi.reitingas) tipoDalys.push('★ ' + pi.reitingas + (pi.atsiliepimu ? ' (' + pi.atsiliepimu + ')' : ''));
-    if (!pVardas && !pi) tipoDalys.push('duomenys bus po analizės');
+    if (!pi && !c.pardavejas) tipoDalys.push('duomenys bus po analizės');
     document.getElementById('dp-seller-type').textContent = tipoDalys.join(' · ');
     var verBadge = document.getElementById('dp-seller-verified');
     if (verBadge) { const patv = pi ? pi.patvirtinta : c.yraVerslas; verBadge.style.display = patv ? '' : 'none'; verBadge.title = patv ? 'Tapatybė patvirtinta portale' : ''; }
@@ -1359,6 +1367,16 @@ window.ctApi = function (kelias, params) {
         d.innerHTML = '<span style="flex:none;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font:700 9px sans-serif;background:var(--accent);color:#fff;margin-top:2px">★</span><div class="dp-equip-name">' + item + '</div>';
         irangaEl.appendChild(d);
       });
+      // Jei AI akcentu neisskyre, rodom pirmas pozicijas TIESIAI IS SKELBIMO
+      if (!irangaEl.children.length && (data.iranga || []).length) {
+        var visi = data.iranga.reduce(function (a2, g) { return a2.concat(g.items); }, []);
+        visi.slice(0, 8).forEach(function (item) {
+          var d2 = document.createElement('div'); d2.className = 'dp-equip-item';
+          d2.innerHTML = '<span style="flex:none;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font:700 9px sans-serif;background:var(--accent);color:#fff;margin-top:2px">✓</span><div class="dp-equip-name">' + item + '</div>';
+          irangaEl.appendChild(d2);
+        });
+        if (visi.length > 8) { var m2 = document.createElement('div'); m2.style.cssText = 'font:400 12px var(--font);color:var(--text-dim);margin-top:6px'; m2.textContent = '+ dar ' + (visi.length - 8) + ' pozicijos skiltyje „Techninė įranga“'; irangaEl.appendChild(m2); }
+      }
       if (!irangaEl.children.length) irangaEl.innerHTML = '<div style="color:var(--text-muted);font-size:12.5px">Duomenų nepakanka</div>';
     } else {
       // Naršymo režime gili analizė nedaroma iš karto (taupomos užklausos),
@@ -1434,6 +1452,26 @@ window.ctApi = function (kelias, params) {
             +'</div>';
         });
         html += '</div></div>';
+      }
+      // PRIDETA: pilnas irangos sarasas TIESIAI IS SKELBIMO (be AI) - anksciau rodydavom
+      // "nepakankamai duomenu", nors skelbime isvardyta 60+ pozicijų.
+      var irangaSar = data.iranga || [];
+      if (irangaSar.length) {
+        var kiek = irangaSar.reduce(function (n, g) { return n + g.items.length; }, 0);
+        html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:12px">';
+        html += '<div style="padding:12px 16px;border-bottom:1px solid var(--border);font-weight:700;font-size:12px;letter-spacing:.06em;color:var(--text-muted)">ĮRANGA IŠ SKELBIMO · ' + kiek + '</div><div style="padding:12px 16px">';
+        irangaSar.forEach(function (g) {
+          if (g.skiltis) html += '<div style="font:600 10px/1 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin:12px 0 8px">' + String(g.skiltis).replace(/[<>]/g, '') + '</div>';
+          html += '<div style="display:flex;flex-wrap:wrap;gap:6px">' + g.items.map(function (it) {
+            return '<span style="display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 10px;border-radius:7px;background:var(--bg-elevated);border:1px solid var(--border);font:500 12px var(--font);color:var(--text-secondary)">✓ ' + String(it).replace(/[<>]/g, '') + '</span>';
+          }).join('') + '</div>';
+        });
+        html += '</div></div>';
+      }
+      if (data.aprasymas) {
+        html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:12px">'
+          + '<div style="padding:12px 16px;border-bottom:1px solid var(--border);font-weight:700;font-size:12px;letter-spacing:.06em;color:var(--text-muted)">PARDAVĖJO APRAŠYMAS</div>'
+          + '<div style="padding:14px 16px;font:400 13px/1.6 var(--font);color:var(--text-secondary);white-space:pre-wrap">' + String(data.aprasymas).replace(/[<>]/g, '') + '</div></div>';
       }
       html += '</div>';
       document.getElementById('dp-pane-tech').innerHTML = html || '<div style="color:var(--text-muted);font-size:13px;padding:20px">Techninių duomenų nerasta.</div>';
@@ -1539,12 +1577,21 @@ window.ctApi = function (kelias, params) {
       html += '<button id="dp-vin-lookup-btn" onclick="dpVinLookup()" style="margin-top:12px;width:100%;padding:11px;border-radius:8px;border:none;background:var(--accent);color:#fff;font:600 13px var(--font-sans);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Tikrinti VIN istoriją</button>';
         html += '<div id="dp-vin-result" style="margin-top:12px"></div>';
       } else {
-        html += window.__dpVinPaslėptas
-        ? '<div style="padding:10px 12px;border-radius:9px;background:var(--warning-dim);border:1px solid var(--warning-border);font:400 12.5px/1.55 var(--font);color:var(--warning)">'
-          + '<b>VIN skelbime yra, bet portalas jo nerodo</b><br><span style="color:var(--text-secondary)">autoplius pilną VIN atskleidžia tik paspaudus „Rodyti“ ir prisijungus. '
-          + (window.__dpVinPrefiksas ? 'Matoma pradžia: <b style="font-family:var(--font-mono);color:var(--text-primary)">' + window.__dpVinPrefiksas + '…</b> – ja galime patikrinti, ar nuotraukose rastas VIN tikras. ' : '')
-          + 'Atsidarykite skelbimą, paspauskite „Rodyti“ ir įklijuokite VIN čia.</span></div>'
-        : '<div style="font-size:13px;color:var(--text-muted);padding:8px">VIN kodas skelbime nenurodytas</div>';
+        // VIN nėra arba portalas jį slepia - abiem atvejais leidžiam vartotojui jį įklijuoti
+      var vinAntraste = window.__dpVinPaslėptas
+        ? '<b>VIN skelbime yra, bet portalas jo nerodo</b><br><span style="color:var(--text-secondary)">autoplius pilną VIN atskleidžia tik paspaudus „Rodyti“ (reikia prisijungti). '
+          + (window.__dpVinPrefiksas ? 'Matoma pradžia: <b style="font-family:var(--font-mono);color:var(--text-primary)">' + window.__dpVinPrefiksas + '…</b> – pagal ją patikrinsime, ar įvestas VIN tikrai šio automobilio. ' : '')
+          + '</span>'
+        : '<b>VIN kodas skelbime nenurodytas</b><br><span style="color:var(--text-secondary)">Paprašykite pardavėjo VIN – rimtas pardavėjas jį pateikia be svarstymų.</span>';
+      html += '<div style="padding:10px 12px;border-radius:9px;background:var(--warning-dim);border:1px solid var(--warning-border);font:400 12.5px/1.55 var(--font);color:var(--warning)">' + vinAntraste + '</div>'
+        + '<div style="margin-top:12px">'
+        + '<label style="display:block;font:600 9px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-dim);margin-bottom:7px">GAVOTE VIN IŠ PARDAVĖJO? ĮKLIJUOKITE ČIA</label>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap">'
+        + '<input id="dp-vin-input" maxlength="17" placeholder="pvz. 5UXJU4C08P9R12345" oninput="dpVinInputCheck()" style="flex:1;min-width:190px;height:40px;padding:0 12px;border-radius:9px;border:1px solid var(--border-light);background:var(--bg-elevated);color:var(--text-primary);font:600 14px var(--font-mono);letter-spacing:.06em;text-transform:uppercase">'
+        + '<button id="dp-vin-input-btn" onclick="dpVinLookup(document.getElementById(\'dp-vin-input\').value)" disabled style="height:40px;padding:0 16px;border-radius:9px;border:none;background:var(--accent);color:#fff;font:600 13px var(--font);cursor:pointer;opacity:.5">Tikrinti VIN · 1 kr</button>'
+        + '</div><div id="dp-vin-input-msg" style="margin-top:6px;font:400 11.5px var(--font);color:var(--text-dim)">17 simbolių, be raidžių I, O ir Q.</div>'
+        + '<div id="dp-vin-prog" style="display:none;padding:18px 0 6px"><div style="display:flex;justify-content:space-between;margin-bottom:7px"><span id="dp-vin-prog-txt" style="font-size:12px;color:var(--text-muted)">Inicijuojama...</span><span id="dp-vin-prog-pct" style="font-size:12px;font-weight:700;color:var(--accent)">0%</span></div><div style="height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden"><div id="dp-vin-prog-bar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#6ee7b7);border-radius:3px;transition:width .4s ease"></div></div></div>'
+        + '<div id="dp-vin-result" style="margin-top:12px"></div></div>';
       }
       html += '</div></div>';
       html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden">';
@@ -1563,7 +1610,25 @@ window.ctApi = function (kelias, params) {
       }
       html += '</div></div></div>';
       document.getElementById('dp-pane-vin').innerHTML = html;
-      window.dpVinLookup = function() {
+      // VIN ivesties tikrinimas: 17 simboliu, be I/O/Q, ir sutapimas su skelbimo pradzia
+      window.dpVinInputCheck = function () {
+        var inp = document.getElementById('dp-vin-input'), b = document.getElementById('dp-vin-input-btn'), m = document.getElementById('dp-vin-input-msg');
+        if (!inp || !b) return;
+        var v = (inp.value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (inp.value !== v) inp.value = v;
+        var ok = /^[A-HJ-NPR-Z0-9]{17}$/.test(v);
+        var pref = window.__dpVinPrefiksas || null;
+        var nesutampa = ok && pref && !v.startsWith(pref);
+        b.disabled = !ok || nesutampa; b.style.opacity = (!ok || nesutampa) ? '.5' : '1';
+        if (!v) { m.textContent = '17 simbolių, be raidžių I, O ir Q.'; m.style.color = 'var(--text-dim)'; }
+        else if (!ok) { m.textContent = 'Įvesta ' + v.length + '/17 simbolių' + (/[IOQ]/.test(v) ? ' · VIN neturi raidžių I, O ir Q' : ''); m.style.color = 'var(--text-dim)'; }
+        else if (nesutampa) { m.textContent = '⚠ Neatitinka skelbime matomos pradžios (' + pref + '…) – patikrinkite, ar tai to paties automobilio VIN.'; m.style.color = 'var(--warning)'; }
+        else { m.textContent = pref ? '✓ Sutampa su skelbimo pradžia (' + pref + '…)' : '✓ Formatas teisingas'; m.style.color = 'var(--success)'; }
+      };
+      window.dpVinLookup = function(vinIvestas) {
+        var vinas = (typeof vinIvestas === 'string' && vinIvestas.trim()) ? vinIvestas.trim().toUpperCase() : (c.vin || null);
+        if (!vinas) return;
+        var ib = document.getElementById('dp-vin-input-btn'); if (ib) ib.disabled = true;
         var btn = document.getElementById('dp-vin-lookup-btn');
         var prog = document.getElementById('dp-vin-prog');
         var bar  = document.getElementById('dp-vin-prog-bar');
@@ -1590,7 +1655,7 @@ window.ctApi = function (kelias, params) {
         }
         nextStep();
         var iv = setInterval(nextStep, 700);
-        ctApi('/api/vin-lookup', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({vin:c.vin})})
+        ctApi('/api/vin-lookup', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({vin:vinas})})
         .then(function(r){return r.json();})
         .then(function(d) {
           clearInterval(iv);

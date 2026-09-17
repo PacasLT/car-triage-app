@@ -8,6 +8,18 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.22.0', data: '2026-09-17', pavadinimas: 'Privatus pardavėjas, VIN įvedimas, pilna įranga ir vieta',
+    pakeitimai: [
+      'Privatus pardavėjas atpažįstamas teisingai – vietoje atsitiktinio teksto rodome „Privatus pardavėjas“ su miestu, telefonu ir patarimais, į ką atkreipti dėmesį',
+      'VIN: kai skelbime jis paslėptas už mygtuko „Rodyti“, apie tai parašome ir siūlome įklijuoti VIN, gautą iš pardavėjo – patikrinsime iš karto',
+      'Įvestas VIN tikrinamas vietoje: 17 simbolių, be I/O/Q, ir sulyginamas su skelbime matoma pradžia, kad nepatikrintumėte svetimo automobilio',
+      'Įranga nebesako „nepakankamai duomenų“ – rodome pilną komplektacijos sąrašą tiesiai iš skelbimo, sugrupuotą pagal kategorijas',
+      'Techninių duomenų kortelėje atsirado ir pardavėjo aprašymas iš skelbimo',
+      'Matosi, kur automobilis stovi – vieta rodoma po pavadinimu ir pardavėjo kortelėje',
+      'Visa skelbimo lentelė ir įranga perduodama AI analizei – vertinimas remiasi visais skelbimo duomenimis, ne tik aprašymu',
+    ],
+  },
+  {
     versija: '1.21.0', data: '2026-09-17', pavadinimas: 'Pardavėjas, VIN, nuotraukos ir švaresnis įvertis',
     pakeitimai: [
       'Pardavėjas nuskaitomas tiksliai: pavadinimas, partnerio lygis, tapatybės patvirtinimas, miestas, reitingas ir atsiliepimų skaičius – nebeliko „Pardavėjas nenurodyta“',

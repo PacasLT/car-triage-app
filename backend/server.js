@@ -1492,7 +1492,7 @@ function istorijosBusena(l) {
 // ---- EQUIPMENT STATUS ----
 function irangosBusena(l) {
   const eq = l.komplektacija || (l.deepAnalysis && l.deepAnalysis.komplektacija);
-  if (!eq || !eq.length) return { key: 'UNKNOWN', label: 'Įranga: Nepakankamai duomenų' };
+  if (!eq || !eq.length) return { key: 'UNKNOWN', label: 'Įranga: Įvertinsime po analizės' };
   if (eq.length < 6) return { key: 'PARTIAL', label: 'Įranga: Dalinai nustatyta' };
   return { key: 'VERIFIED', label: 'Įranga: Patikrinta' };
 }
@@ -2203,22 +2203,49 @@ function cleanFinancingNoise(text) {
 function autopliusSkelbimoLaukai($) {
   const t = (sel) => { const e = $(sel).first(); return e.length ? e.text().replace(/\s+/g, ' ').trim() : null; };
   const ci = $('.contact-info-container').first();
-  let vardas = null;
+  let vardas = null, privatus = false;
   if (ci.length) {
-    vardas = ci.find('a').filter(function () { const x = $(this).text().trim(); return x && x.length > 1 && !/Teirautis|Atsiliepimai|Rodyti/i.test(x); }).first().text().replace(/\s+/g, ' ').trim() || null;
+    // Verslo pardavejo pavadinimas yra nuoroda i jo puslapi. PRIVATUS pardavejas nuorodos
+    // neturi - anksciau tada buvo griebiamas bet koks tekstas is puslapio ("EUR gali buti
+    // atliekami tik pavedimu..."), todel rodydavom nesamone vietoj "Privatus pardavėjas".
+    vardas = ci.find('a[href*="/pardavejas"], a[href*="/salonas"], a[href*="/partner"]').first().text().replace(/\s+/g, ' ').trim() || null;
+    if (!vardas) {
+      vardas = ci.find('a').filter(function () {
+        const x = $(this).text().replace(/\s+/g, ' ').trim();
+        return x && x.length > 1 && x.length < 60 && !/Teirautis|Atsiliepimai|Rodyti|Dalintis|Spausdinti|Pranešti|€/i.test(x);
+      }).first().text().replace(/\s+/g, ' ').trim() || null;
+    }
     if (!vardas) vardas = ci.find('.seller-title, .contact-name, h2, h3').first().text().replace(/\s+/g, ' ').trim() || null;
+    privatus = !vardas;
   }
   const reitTxt = t('.seller-rating-score');
   const atsTxt = t('.seller-rating-count');
+  const vieta = t('.seller-contact-location') || t('.owner-location-content') || t('.sticky-announcement-location') || null;
   const pardavejoInfo = ci.length || vardas ? {
     vardas: vardas || null,
+    privatus,                                               // true = fizinis asmuo, be imones pavadinimo
     lygis: t('.partner-award-level'),                       // pvz. "Platininis partneris"
     patvirtinta: $('.identity-badge.verified').length > 0,  // "Tapatybė patvirtinta"
-    vieta: t('.seller-contact-location'),                   // "Kaunas, Lietuva"
+    vieta,                                                  // "Kaunas, Lietuva" / "Rīga, Latvija"
     telefonas: t('.seller-phone-number'),
     reitingas: reitTxt ? parseFloat(reitTxt.replace(',', '.')) : null,
     atsiliepimu: atsTxt ? (parseInt((atsTxt.match(/\((\d+)\)/) || [])[1], 10) || null) : null,
   } : null;
+
+  // IRANGA: .features-container > .feature-row (skiltis) > .feature-list > span.feature-item
+  // Anksciau ju visai neimdavom - AI matydavo tik teksta, kuris daznai nukirstas, ir rasydavo
+  // "Iranga - nepakankamai duomenu", nors skelbime isvardyta 60+ pozicijų.
+  const iranga = [];
+  $('.features-container .feature-row').each(function () {
+    const skiltis = $(this).find('.feature-title, .feature-row-title, h3, h4').first().text().replace(/\s+/g, ' ').trim() || null;
+    const items = $(this).find('.feature-item').map(function () { return $(this).text().replace(/\s+/g, ' ').trim(); }).get().filter(Boolean);
+    if (items.length) iranga.push({ skiltis, items });
+  });
+  if (!iranga.length) {
+    const visi = $('.feature-item').map(function () { return $(this).text().replace(/\s+/g, ' ').trim(); }).get().filter(Boolean);
+    if (visi.length) iranga.push({ skiltis: null, items: visi });
+  }
+  const aprasymas = $('.announcement-description').first().text().replace(/\s+/g, ' ').trim().slice(0, 2500) || null;
 
   // VIN: autoplius neprisijungusiam rodo tik pradzia ir mygtuka "Rodyti"
   const vinEl = $('.vin-parameter').first();
@@ -2238,7 +2265,7 @@ function autopliusSkelbimoLaukai($) {
     if (lbl && val) parametrai[lbl] = val.slice(0, 120);
   });
 
-  return { pardavejoInfo, vinPilnas, vinPref, vinPaslėptas, istNuoroda, parametrai };
+  return { pardavejoInfo, vinPilnas, vinPref, vinPaslėptas, istNuoroda, parametrai, iranga, aprasymas, vieta };
 }
 
 async function scrapeSingleListing(url) {
@@ -2257,7 +2284,18 @@ async function scrapeSingleListing(url) {
   let bodyText = $('body').text().replace(/\s+/g, ' ').trim();
   bodyText = cleanFinancingNoise(bodyText).slice(0, 12000);
 
+  // Strukturiniai laukai eina PIRMI - anksciau iranga ir techniniai parametrai likdavo
+  // uz 12 000 simboliu teksto ribos, todel AI rasydavo "nepakankamai duomenu".
+  const parametruTekstas = Object.keys(struk.parametrai || {}).length
+    ? Object.entries(struk.parametrai).map(([k, v]) => `${k}: ${v}`).join('; ') : '';
+  const irangosTekstas = (struk.iranga || []).length
+    ? struk.iranga.map((g) => (g.skiltis ? g.skiltis + ': ' : '') + g.items.join(', ')).join(' | ').slice(0, 3000) : '';
   const fullText = [
+    parametruTekstas ? `[TECHNINIAI DUOMENYS IŠ SKELBIMO LENTELĖS]: ${parametruTekstas}` : '',
+    irangosTekstas ? `[ĮRANGA IR KOMPLEKTACIJA (pilnas sąrašas iš skelbimo)]: ${irangosTekstas}` : '',
+    struk.vieta ? `[AUTOMOBILIO VIETA]: ${struk.vieta}` : '',
+    struk.pardavejoInfo ? `[PARDAVĖJAS]: ${struk.pardavejoInfo.privatus ? 'privatus asmuo' : (struk.pardavejoInfo.vardas || 'nenurodytas')}${struk.pardavejoInfo.lygis ? ' (' + struk.pardavejoInfo.lygis + ')' : ''}${struk.pardavejoInfo.vieta ? ', ' + struk.pardavejoInfo.vieta : ''}` : '',
+    struk.aprasymas ? `[PARDAVĖJO APRAŠYMAS]: ${struk.aprasymas}` : '',
     metaKeywords ? `[STRUKTŪRIZUOTI FAKTAI IŠ SKELBIMO]: ${metaKeywords}` : '',
     metaDescription ? `[SKELBIMO SANTRAUKA]: ${metaDescription}` : '',
     `[PILNAS PUSLAPIO TEKSTAS]: ${bodyText}`,
@@ -2369,11 +2407,16 @@ async function scrapeSingleListing(url) {
   // Pardavejo/dilerio pavadinimas - dazniausiai eina tiesiai pries "Tapatybe patvirtinta"
   // zyma (verslo pardavejams), pvz "AK AUTO Tapatybe patvirtinta" arba "MOLLER AUTO... Tapatybe patvirtinta".
   const sellerMatch = fullText.match(/([A-ZŠČŽĄĘĖĮŲŪ][A-Za-zŠčČžŽąĄęĘėĖįĮųŲūŪ0-9\s,.\-]{2,60}?)\s*Tapatybė patvirtinta/);
-  const pardavejas = (struk.pardavejoInfo && struk.pardavejoInfo.vardas) || (sellerMatch ? sellerMatch[1].trim() : null);
+  // Jei skelbime yra strukturinis pardavejo blokas, juo ir pasitikim: privatus pardavejas
+  // neturi imones pavadinimo, ir tai NE priezastis rodyti atsitiktini teksto gabala.
+  const pardavejas = struk.pardavejoInfo
+    ? (struk.pardavejoInfo.vardas || null)
+    : (sellerMatch ? sellerMatch[1].trim() : null);
 
   return { title, fullText, photo, photos, vin: struk.vinPilnas || vin, vinPrefiksas, pardavejas,
     pardavejoInfo: struk.pardavejoInfo, vinPaslėptas: struk.vinPaslėptas,
-    istorijosNuoroda: struk.istNuoroda, skelbimoParametrai: struk.parametrai };
+    istorijosNuoroda: struk.istNuoroda, skelbimoParametrai: struk.parametrai,
+    iranga: struk.iranga, aprasymas: struk.aprasymas, vieta: struk.vieta };
 }
 
 // ============ VIN ISTORIJOS PAIESKA INTERNETE ============
@@ -2746,7 +2789,7 @@ app.post('/api/analyze-single', requireAuth, planai.reikalautiKreditu('analize',
     }
 
     const { title, fullText, photo: photo0, photos: photos0, vin, vinPrefiksas, pardavejas,
-      pardavejoInfo, vinPaslėptas, istorijosNuoroda, skelbimoParametrai } = await scrapeSingleListing(url);
+      pardavejoInfo, vinPaslėptas, istorijosNuoroda, skelbimoParametrai, iranga, aprasymas, vieta } = await scrapeSingleListing(url);
     const marketContext = marketMedian ? { kaina, marketMedian, marketCount, diffPct, modelis, galia, variklioTuris } : null;
     // Ne automobilio nuotraukos (reklamos, logotipai) - salin; pardavejo logotipas - prie pardavejo
     const foto = await klasifikuotiNuotraukas(photos0);
@@ -2762,6 +2805,7 @@ app.post('/api/analyze-single', requireAuth, planai.reikalautiKreditu('analize',
       pardavejas: pardavejas || knownPardavejas || null,
       pardavejoInfo: pardavejoInfo || null, vinPaslėptas: !!vinPaslėptas,
       istorijosNuoroda: istorijosNuoroda || null, skelbimoParametrai: skelbimoParametrai || null,
+      iranga: iranga || null, aprasymas: aprasymas || null, vieta: vieta || null,
     };
     cache.setCached('analysis', url, result);
     issaugotiAnalizesAtaskaita(req, url, result);
