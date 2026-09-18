@@ -13,14 +13,27 @@ const { chromium } = require('playwright');
 const PSL = ['index.html', 'detail.html', 'compare.html', 'ataskaitos.html', 'megstamiausi.html'];
 // Dizainerio spec: 38/46/32 (+56 tik mobiliajame), radiusai 10px ir 50%,
 // sriftai 14 / 15 (lg) / 12.5 (sm). Skirtukai (.ct-tab) skaiciuojami atskirai.
-const NORMA = { h: [38, 46, 32, 56, 64], r: ['10px', '50%'], f: ['14px', '15px', '12.5px'] };
+// Darbalaukis ir telefonas turi SKIRTINGAS normas: <=640px visi mygtukai
+// kyla iki 44px (--tap-min), isskyrus .ct-btn-sm (antraste) ir .ct-btn-over
+// (rodykles ant nuotraukos) - tie lieka 32/38, nes uzstotu turini.
+const NORMA_WEB = { h: [38, 46, 32], r: ['10px', '50%'], f: ['14px', '15px', '12.5px'] };
+// Telefone `.ct-btn` turi `min-height: 44px; height: auto` – tad turinys gali
+// pastumti iki 45–48 px. Tai sąmoninga, todėl tikrinam ribą, ne tikslų skaičių.
+const NORMA_TEL = { hMin: 44, hIsimtys: [32, 38], r: ['10px', '50%'], f: ['14px', '15px', '12.5px'] };
+const PLOCIAI = [
+  { n: 'web', w: 1400, h: 1000, norma: NORMA_WEB },
+  { n: 'tel', w: 390, h: 844, norma: NORMA_TEL },
+];
 (async () => {
   const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' }).catch(() => chromium.launch());
   const nukrypimai = new Map();
   let viso = 0;
-  for (const p of PSL) {
-    const pg = await (await b.newContext({ viewport: { width: 1400, height: 1000 } })).newPage();
-    await pg.goto('http://localhost:8910/' + p + '?demo=1', { waitUntil: 'networkidle' }).catch(() => {});
+  for (const { n: vardas, w, h, norma } of PLOCIAI) {
+  const NORMA = norma;
+  for (const p0 of PSL) {
+    const p = vardas + ' ' + p0;
+    const pg = await (await b.newContext({ viewport: { width: w, height: h } })).newPage();
+    await pg.goto('http://localhost:8910/' + p0 + '?demo=1', { waitUntil: 'networkidle' }).catch(() => {});
     await pg.waitForTimeout(2200);
     const r = await pg.evaluate(() => {
       const out = [];
@@ -38,7 +51,9 @@ const NORMA = { h: [38, 46, 32, 56, 64], r: ['10px', '50%'], f: ['14px', '15px',
     viso += r.length;
     for (const x of r) {
       const blogai = [];
-      if (!NORMA.h.includes(x.h)) blogai.push('h=' + x.h);
+      const hOk = NORMA.h ? NORMA.h.includes(x.h)
+        : (NORMA.hIsimtys.includes(x.h) || (x.h >= NORMA.hMin && x.h <= 64));
+      if (!hOk) blogai.push('h=' + x.h);
       if (!NORMA.r.includes(x.r)) blogai.push('r=' + x.r);
       if (!NORMA.f.includes(x.f)) blogai.push('f=' + x.f);
       if (blogai.length) {
@@ -47,6 +62,7 @@ const NORMA = { h: [38, 46, 32, 56, 64], r: ['10px', '50%'], f: ['14px', '15px',
       }
     }
     await pg.close();
+  }
   }
   const eil = [...nukrypimai.entries()].sort((a, b) => b[1] - a[1]);
   console.log('Mygtukų iš viso: ' + viso + ' · nukrypstančių: ' + eil.reduce((s, x) => s + x[1], 0) + '\n');
