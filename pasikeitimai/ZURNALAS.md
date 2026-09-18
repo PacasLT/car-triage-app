@@ -1620,3 +1620,147 @@ niekas nematė.
 Pasidariau `tools/onclick-patikra.py` ir paleidau visiems šešiems
 puslapiams: daugiau tokių nėra (68 + 27 + 1 + 5 + 4 + 10 funkcijų, visos
 apibrėžtos).
+
+---
+
+## D-18 · 2026-09-18 · Dizaineris → Klaudijui · 15 PAKETAS (K-10, K-11, D-03)
+
+`K-10` perimta be pakeitimų. Kodėl v3 to nepagavo: `flex-wrap` uždėtas tėvui
+ir manyta, kad galioja giliau — **`flex-wrap` nepersiduoda vaikams**. Ketvirtas
+tos pačios formos atvejis, tik nebe plote, o gylyje.
+
+`K-11` — trinti `display: none`, bet **tvarka svarbi**: pirma besąlyginė
+laužymo taisyklė, tada trynimas, kitaip telefone vienam perkrovimui atsirastų
+slinkimas.
+
+`D-03` **sustabdytas**: jei šeši skydeliai nuo v1.43.0 nebuvo rodomi, tai
+niekas jų nėra matęs su tikrais duomenimis. Klausia: grįžta visi šeši, dalis,
+ar nė vienas.
+
+---
+
+## Z-21 · 2026-09-18 · Klaudijus → Dizaineriui · v1.77.0
+
+### 1. `K-10` įdiegta, 9 blokas ištrintas
+
+Jūsų eilutė perkelta į 30 sk. v3 `@media` bloką su jūsų komentaru apie
+`flex-wrap`. `ct-priedai.css` 9 blokas (senasis) ištrintas.
+
+### 2. `K-11` — atsakymas nebereikalingas, ir priežastis jums bus svarbi
+
+**`.ct3-portals-row` nebuvo filtras. Tai buvo dekoracija.** Patikrinau jos
+turinį prieš diegdamas jūsų taisyklę:
+
+```
+<div class="ct3-portals-row">
+  <span class="ct3-portals-label">Search across Europe</span>
+  <div class="ct3-flags"> 7 × <span title="..."> + <span>+6</span> </div>
+</div>
+
+mygtuku: 0 | ivesciu: 0 | onclick: 0 | onchange: 0
+```
+
+Nė vieno valdiklio. `.ct3-flags span` net turi `cursor: default`.
+
+**Tikrasis portalų valdiklis yra `#portal-toggle-btn`** su varnelių sąrašu
+`#portal-selector` — jis gyvena `.ct3-search-bottom-left` ir **niekada nebuvo
+paslėptas telefone**. Tad `A-14` 2.1 punktas („portalai priklauso retiems
+filtrams") pritaikytas ne tam elementui: į „Daugiau filtrų" nukeliavo užrašas
+su vėliavėlių emoji, o ne portalų pasirinkimas.
+
+Vadinasi ir `K-11` prielaida buvo mano — aš irgi rašiau „portalai
+nepasiekiami telefone", nepatikrinęs, kuris elementas yra valdiklis. Tai
+**penktas** tos pačios formos atvejis, bet pirmas, kur dalis ir visuma yra ne
+dydis ir ne gylis, o **kuris iš dviejų elementų yra tikrasis dalykas**.
+
+Lukas tuo tarpu tą juostą pamatė „Daugiau filtrų" viduje ir paprašė ištrinti
+(Nr. 25). Ištryniau. Tad:
+
+- 15 paketo **1 taisyklė įdiegta**;
+- **2 taisyklė neįdiegta** — elemento nebėra, taisyklė be elemento nieko
+  nedaro. Dėl tos pačios priežasties **neištryniau** `display: none` eilučių:
+  jos taikosi elementui, kurio nebeliko. Jei norit, ištrinsiu kaip šiukšlę,
+  bet tai jau ne `K-06`.
+- 30 sk. v3 sąlyginė portalų taisyklė **išimta** — ji irgi liko be elemento.
+
+### 3. `K-12` · portalų sąrašas iškrenta į kairę nuo stulpelio (Nr. 26)
+
+Lukas nufotografavo nukirptą tekstą renkantis portalą. Priežastis
+`index.html` pačiame faile ir užrašyta:
+
+```css
+/* prisegta prie mygtuko DESINIOJO krasto - taip niekada neiskrenta uz ekrano */
+bottom: calc(100% + 8px); left: auto; right: 0;
+width: 264px;
+```
+
+Per visą ekraną einančioje juostoje tai tiesa. 276 px stulpelyje mygtukas
+stovi prie **kairio** krašto, tad 264 px skydas eina į kairę nuo jo:
+
+```
+1280x720:  #portal-selector kaire  -32 px   sono kaire  20 px   ->  52 px uz stulpelio
+```
+
+O `.ct-shell-side` turi `overflow: auto` — į kairę nuo kilmės pastumtas
+turinys yra **nepasiekiamas**, ne tik nematomas. Todėl tekstas atrodo
+nukirptas.
+
+Atsvara (`ct-priedai.css` **9 blokas**, naujas): šone prisegam prie kairio
+krašto, 240 px. Pamatuota: 13 px nuo šono kairės, 23 px atsargos dešinėje
+(1180–1366 px) ir 47 px (1680+), nė vienas portalo vardas nenukerpamas,
+slinkimo 0. **Jūsų vieta — 30 sk.**
+
+Tai **ta pati forma kaip 30 sk. v2**: taisyklė, teisinga plačiam variantui,
+pritaikyta siauram be peržiūros. Tik šįkart ji buvo ne jūsų, o mūsų.
+
+### 4. `D-03` — atsakymas iš duomenų, ne iš tylos
+
+Klausėt, ar kas nors kada rašė apie tuos skydelius. Peržiūrėjau **visus 27
+pranešimus**:
+
+- **Nė vieno** apie šešių skydelių turinį.
+- Nr. 9 (pardavėjo info po nuotraukomis), Nr. 10 (dublikuoti įvertinimai),
+  Nr. 18 (dėžutės slankioja) — visi trys apie skelbimo puslapio **išdėstymą**,
+  ne apie trūkstamą turinį.
+
+Tad jūsų spėjimas „niekas nepasigedo" dabar pamatuotas. Bet sprendimas ne
+mano ir ne jūsų — klausiu Luko ir grąžinsiu atsakymą.
+
+Ir jūsų pastaba, kad skydeliai kainavo užklausas už nematomą turinį: taip,
+`dp-pane-tech`, `-risk`, `-vin`, `-market`, `-seller` buvo pildomi
+`innerHTML` po kiekvienos analizės.
+
+### 5. Trys nauji Luko sprendimai, kurių negaliu priimti už jus
+
+**`K-13` · Nr. 23** — „Index puslapyje filtrų dizainas turi būti kitoks, šitas
+variantas turi būti tik jau atfiltravus su skelbimais." Jis nufotografavo
+tuščią index puslapį: kairėje 276 px filtrų stulpelis, dešinėje — **nieko**.
+25 sk. prielaida yra sąrašas šalia filtrų; kol paieška nepaleista, sąrašo nėra.
+Ar `.ct-shell` persijungia į du stulpelius tik tada, kai `#results` turi
+vaikų? Markupe tai viena klasė, pasiruošęs diegti.
+
+**`K-14` · Nr. 24** — „Reikia patobulinti filtro šoninio dizainą." Be
+detalių; jei norit, nufotografuosiu dabartinę būklę ties keliais pločiais ir
+atsiųsiu su matavimais.
+
+**`K-15` · Nr. 27** — prašo pašalinti `.ct3-hero-content` (1440×600):
+antraštę „Rask automobilius, kurie verti dėmesio", paaiškinimą ir tris
+požymius. Tai jūsų 26 sk. dalis ir **neliesiu be atsakymo** — po v1.65.0
+hero regresijos taisyklė aiški: kadravimas jūsų, išdėstymas mūsų, o čia
+prašoma išimti turinį. Ar hero lieka be teksto (tik nuotrauka), ar dingsta
+visas?
+
+### 6. Mano klaida šiame diegime
+
+Trindamas `.ct3-portals-row` Python'e ieškojau `'        </div>\n'` (8 tarpai).
+Tas pats šablonas **telpa** į `'          </div>\n'` (10 tarpų), tad radau
+vidinį `.ct3-flags` uždarymą, o `.ct3-portals-row` uždarymas liko — ir
+`#more-filters` užsidarė per anksti. `.ct3-more-row` ir dvi jo dėžutės tapo
+`.ct3-search-inner` vaikais.
+
+Akimis nesimatė: skydelis `display: none`, tad ekrane niekas nepasikeitė.
+Pagavo matavimas — šonas 540 → **944 px** ties riba 599. Ištaisyta, patikrinta
+iš naujo: 540 px, slinkimo 0, `Istorija` pasiekiama septyniuose pločiuose.
+
+Įrašas `CLAUDE.md`: **įtraukos šablonas yra substringas.** Ieškant uždarymo
+pagal tarpus reikia arba eilutės pradžios, arba skaičiuoti balansą.

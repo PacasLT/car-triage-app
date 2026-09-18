@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.77.0', data: '2026-09-18', pavadinimas: 'Portalu sarasas nebenukerpamas, dekoracija is filtru pasalinta',
+    pakeitimai: [
+      'Renkantis portala sarasas nebeiskrenta uz filtru stulpelio - tekstas matomas visas',
+      'Is „Daugiau filtru" pasalinta „Search across Europe" juosta su veleveliu emoji - ji buvo tik dekoracija',
+      'Apatines eiles mygtukai sone laužosi i dvi eilutes, o ne islenda uz krasto',
+    ],
+  },
+  {
     versija: '1.76.0', data: '2026-09-18', pavadinimas: 'Skelbimo skirtukai vel veikia, filtru stulpelis susitvarke',
     pakeitimai: [
       'Skelbimo puslapyje skirtukai (Technine iranga, Rizikos, Istorija, Rinka, Pardavejas) vel persijungia - funkcija buvo dingusi ir kiekvienas paspaudimas metė klaida',

@@ -1981,6 +1981,12 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
     justify-content: flex-start;
   }
 
+  /* 15 paketas (K-10): kaires VIDUS irgi turi lauztis. v3 dave flex-wrap
+     paciai .ct3-search-bottom, tad kaire ir desine krenta i atskiras eiles,
+     bet kaireje liko du mygtukai vienoje eiluteje (283 px prie 252 px).
+     flex-wrap NEPERSIDUODA vaikams - ji reikia kiekvienam lygiui. */
+  .ct-shell-side .ct3-search-bottom-left { flex-wrap: wrap; }
+
   /* ── Laukai: du tankio zingsniai (nepakito nuo v2) ───────────────────────
      Zingsnis 1 — kortele nuo lauko. Zingsnis 2 — semantiniai broliai poromis. */
   .ct-shell-side .ct3-fields {
@@ -2009,14 +2015,9 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
   .ct-shell-side .ct3-more-row { flex-direction: column; gap: var(--s-3); align-items: stretch; }
   .ct-shell-side .ct3-more-row > div { width: 100%; }
 
-  /* Portalai sone gyvena TIK „Daugiau filtru" viduje (zr. PASTABOS 2.2).
-     Ten jiems reikia laužymo — keturios veleveles i viena eile netelpa. */
-  .ct-shell-side .ct3-more-panel .ct3-portals-row,
-  .ct-shell-side .ct3-more-panel .ct3-flags {
-    flex-wrap: wrap;
-    gap: var(--s-2);
-    min-width: 0;
-  }
+  /* v1.77.0: .ct3-portals-row istrinta (Nr. 25) - ji buvo dekoracija be nė
+     vieno valdiklio, ne filtras. Taisykle palikta be elemento nieko nedaro,
+     tad isimta. Zr. Z-21. */
 
   .ct-shell-side .ct3-search-btn { width: 100%; justify-content: center; }
 }

@@ -145,25 +145,33 @@
 
 
 /* ----------------------------------------------------------------------------
-   9 BLOKAS · apatines eiles kaire dalis laužiasi · v1.76.0
+   9 BLOKAS · portalu sarasas iskrenta i kaire nuo stulpelio · v1.77.0 (Nr. 26)
 
-   30 sk. v3 uzdare beveik viska: po idiegimo liko 58 px horizontalaus slinkimo
-   ties 1180-1366 px ir 34 px ties 1680+. Kaltininkas vienas:
+   `#portal-selector` prisegtas prie mygtuko DESINIOJO krasto (`right: 0`), o
+   pats komentaras faile sako kodel: „taip niekada neiskrenta uz ekrano".
+   Per visa ekrana einancioje juostoje tai tiesa. 276 px stulpelyje - ne:
 
-     .ct3-search-bottom-left  laiko DU mygtukus vienoje eiluteje -
-     „Daugiau filtru" (~110 px) ir portalu mygtuka su
-     `white-space: nowrap` („autoplius.lt · autogidas.lt", 173 px).
-     Kartu 283 px + tarpas, o stulpelio vidus 252 px.
+     juosta:    mygtukas desineje, 264 px skydas telpa i kaire nuo jo
+     stulpelis: mygtukas prie kairio krasto, 264 px skydas eina i -32 px
 
-   v3 davė paciai `.ct3-search-bottom` `flex-wrap: wrap` ir vaikams
-   `flex: 1 1 100%` - tad KAIRE ir DESINE dalys jau krenta i atskiras eilutes.
-   Bet kaires VIDUS liko viena eile.
+   Pamatuota, 1280x720: `#portal-selector` kaire -32, sono kaire 20 - skydas
+   52 px uz stulpelio. `.ct-shell-side` turi `overflow: auto`, tad i kaire nuo
+   kilmes pastumtas turinys yra nepasiekiamas: tekstas tiesiog nukerpamas.
+   Butent tai Lukas ir nufotografavo (Nr. 26).
 
-   Pamatuota su siuo bloku: horizontalus slinkimas 58 -> 0 px visuose
-   plociuose (1180 / 1280 / 1680 / 2364), sonas 540 px prie 599 px ribos.
+   Sone prisegam prie KAIRIO krasto ir susiaurinam iki 240 px.
+   Pamatuota po pataisos: skydas 13 px nuo sono kairės, 23 px atsargos desineje
+   (1180-1366 px) ir 47 px (1680+), nė vienas portalo vardas nenukerpamas,
+   horizontalaus slinkimo 0.
 
-   LAIKINA: klausimas `K-10`. Viena eilute, jo failo vieta.  */
+   LAIKINA: klausimas `K-12`. Tai ta pati forma kaip 30 sk. v2 - taisykle,
+   teisinga placiam variantui, pritaikyta siauram be perziuros.  */
 
 @media (min-width: 1180px) {
-  .ct-shell-side .ct3-search-bottom-left { flex-wrap: wrap; }
+  .ct-shell-side #portal-selector {
+    left: 0;
+    right: auto;
+    width: 240px;
+    max-width: none;
+  }
 }
