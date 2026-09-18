@@ -1007,7 +1007,7 @@ img, svg, video, canvas { max-width: 100%; }
 /* Salutinis tekstas (portalo vandenzymis) nuotraukos konteineryje.
    v1.30.0 PATAISA: be :not(.ct-nav) si taisykle paslepe nuotrauku perjungimo
    rodykles. :not(.ct-photo-empty) — kad neuzgestu ir „BE NUOTRAUKOS". */
-.ct-photo > :not(img):not(.ct-medal):not(.fav-star):not(.ct-nav):not(.ct-photo-empty) { display: none !important; }
+.ct-photo > :not(img):not(.ct-medal):not(.fav-star):not(.ct-nav):not(.ct-photo-empty):not(.ct-photo-n) { display: none !important; }
 
 /* Balas: 32px ir savo blokas, ne eiles elementas */
 .ct-l2 > .ct-score { flex: none !important; width: auto !important; }
@@ -1037,6 +1037,10 @@ img, svg, video, canvas { max-width: 100%; }
 
 /* ── 10b. Korteles elementai, kuriu 10 skyriuje dar nebuvo ───────────────── */
 
+/* CarTriige v1.31.1: nuotrauku skaitiklis „1 / 28" desiniajame apacios kampe.
+   Elementas jau egzistavo (cyclePhoto ji atnaujina pagal id), tik neturejo
+   stiliaus naujoje strukturoje. Perkelti i savo faila, jei tinka. */
+.ct-photo-n { position: absolute; right: 9px; bottom: 9px; padding: 3px 8px; border-radius: var(--radius-pill); background: rgba(5, 6, 10, .78); border: 1px solid var(--border); font: var(--fw-semi) 10px/1.4 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--text-secondary); }
 .ct-photo-empty { position: absolute; inset: 0; display: grid; place-items: center; font: var(--fw-semi) 10px/1 var(--font-mono); letter-spacing: .12em; color: var(--text-dim); }
 .ct-price-was { font: var(--fw-medium) var(--fs-200)/1 var(--font-mono); color: var(--text-muted); text-decoration: line-through; }
 

@@ -102,6 +102,12 @@
 - `#log-container[data-state="done"]` remelis pakeistas is `--success-border` i `--border`. Zalias remelis reiske pasiekima, nors ten – neatitike skelbimai.
 - Stiliai: `ct-dizainas.css` 13 skyrius (`.ct-log*`). Irasu lygiai `.is-pass` / `.is-skip` / `.is-fail` CSS'e paruosti, bet `#log-box` eiluciu dar nezymim – tai kitas zingsnis.
 
+## Kortelės smulkmenos (v1.31.1)
+
+- `.ct-photo-n` – nuotrauku skaitiklis; elementas turi id `<cardId>-photocount`, ji atnaujina `cyclePhoto()`. Stilius pridetas i `ct-dizainas.css` **musu** (dizainerio faile jo dar nera) ir `.ct-photo-n` iraytas i `.ct-photo > :not(...)` isimtis – gavus nauja jo failo versija abi vietas reikia pritaikyti is naujo.
+- `ctPirmasSakinys()` – kortelėje rodom tik pirma `analysis.verdiktas` sakini (visas lieka `title` atribute). Su trim sakiniais kortele nustodavo buti skaitoma per 5 s.
+- Eilutės kortelėse (`restCands`) dabar irgi nustatoma `window.__galleryStore[cardId + '-strip']` – be jo rodykles nieko nedarydavo.
+
 ## Saugumas
 
 - `ANTHROPIC_API_KEY`, `SCRAPER_API_KEY`, `JWT_SECRET`, `ADMIN_EMAILS`, `INVITE_CODES` – tik Railway Variables, **niekada į kodą ar GitHub**.

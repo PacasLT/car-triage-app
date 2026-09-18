@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.31.1', data: '2026-09-18', pavadinimas: 'Kortelės smulkmenos: skaitiklis, trumpesnis verdiktas',
+    pakeitimai: [
+      'Ant nuotraukos vėl matomas skaitiklis „1 / 28“ – žinote, kiek nuotraukų yra',
+      'Nuotraukų rodyklės dabar veikia ir žemiau TOP penketo esančiose kortelėse',
+      'Kortelėje rodomas tik pirmas verdikto sakinys – visą tekstą matote užvedę pelę arba skelbimo puslapyje',
+    ],
+  },
+  {
     versija: '1.31.0', data: '2026-09-18', pavadinimas: 'Paieškos žurnalas nebeužstoja rezultatų',
     pakeitimai: [
       'Baigus paiešką žurnalas susiskleidžia pats – anksčiau dešimtys neatitikusių skelbimų nustumdavo rezultatus žemyn',

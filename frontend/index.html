@@ -4098,7 +4098,7 @@ function cyclePhoto(cardId, dir) {
   const img = document.getElementById(cardId + '-img');
   if (img) img.src = photos[idx];
   const counter = document.getElementById(cardId + '-photocount');
-  if (counter) counter.textContent = `${idx + 1}/${photos.length}`;
+  if (counter) counter.textContent = `${idx + 1} / ${photos.length}`;
 }
 
 function escJs(s) {
@@ -5758,6 +5758,15 @@ function ctNavTab(tab) {
     // ji įjungia atskirą „GALIMAI DAUŽTAS" bloką ir riboja balą.
     var CT_DIFF_ITARTINA = 30;
 
+    // Kortelėje rodom tik pirmą verdikto sakinį – visas tekstas lieka title'e ir
+    // skelbimo puslapyje. Su trim sakiniais kortelė nustoja būti skaitoma per 5 s.
+    function ctPirmasSakinys(t) {
+      if (!t) return '';
+      var m = String(t).match(/^[\s\S]*?[.!?](\s|$)/);
+      var r = (m ? m[0] : String(t)).trim();
+      return r.length > 150 ? r.slice(0, 147).replace(/[\s,;]+\S*$/, '') + '…' : r;
+    }
+
     function ctKortele(c, x) {
       var s = x.s, cardId = x.cardId, photos = x.photos || [];
       var multi = photos.length > 1;
@@ -5780,6 +5789,8 @@ function ctNavTab(tab) {
       var fotoHtml = photos.length
         ? '<img id="' + cardId + '-img" src="' + photos[0] + '" alt="" onclick="' + imgClick + '" onerror="this.style.visibility=\'hidden\'">'
         : '<span class="ct-photo-empty">BE NUOTRAUKOS</span>';
+      // Skaitiklis: cyclePhoto() ji jau moka atnaujinti pagal id <cardId>-photocount
+      var skaitiklis = multi ? '<span class="ct-photo-n" id="' + cardId + '-photocount">1 / ' + photos.length + '</span>' : '';
 
       var thumbsHtml = '';
       if (photos.length > 1) {
@@ -5858,7 +5869,7 @@ function ctNavTab(tab) {
           + esc((c.rejectionReasons || [])[0] || 'Neatitinka paieškos kriterijų') + '</span></div>' : '')
         + '<div class="ct-l1">'
         +   '<div class="ct-media">'
-        +     '<div class="ct-photo">' + fotoHtml + navHtml
+        +     '<div class="ct-photo">' + fotoHtml + navHtml + skaitiklis
         +       (medalis ? '<span class="ct-medal ct-medal-' + medalis + '"><i>' + medalis + '</i><span>' + medalioTekstas + '</span></span>' : '')
         +       '<button class="fav-star ct-fav' + (x.isFav ? ' active' : '') + '" title="Išsaugoti" onclick="event.stopPropagation(); toggleFavorite(\'' + c.url + '\', ' + x.favSnap + ', this)">' + (x.isFav ? '♥' : '♡') + '</button>'
         +     '</div>' + thumbsHtml
@@ -5892,7 +5903,7 @@ function ctNavTab(tab) {
         +         '<div class="ct-score-v"><span class="ct-score-n">' + s.total.toFixed(1) + '</span><span class="ct-score-max">/10</span></div></div>'
         +       '<div class="ct-l2-r">'
         +         '<div class="ct-l2-h"><div class="ct-verdict-w"><span class="ct-verdict ' + balaTonas + '">' + esc(_verdictFor(c, s.total)) + '</span>'
-        +           (x.a && x.a.verdiktas ? '<span class="ct-summary">' + esc(x.a.verdiktas) + '</span>' : '') + '</div>'
+        +           (x.a && x.a.verdiktas ? '<span class="ct-summary" title="' + esc(x.a.verdiktas) + '">' + esc(ctPirmasSakinys(x.a.verdiktas)) + '</span>' : '') + '</div>'
         +           '<div class="ct-l2-tags">'
         +             (c.rizikosBusena ? '<span class="ct-k ' + rizK + '"><i></i>Rizika: ' + esc((c.rizikosBusena.label || '').split('–')[0].trim()) + '</span>' : '')
         +             (c.pasitikejimas != null ? '<span class="ct-k ct-k-unknown"><i></i>Duomenys ' + c.pasitikejimas + ' %</span>' : '')
@@ -6070,6 +6081,8 @@ function ctNavTab(tab) {
 
       window.__ctCardData[c.url] = { c: c, analysis: a, photos: photos };
 
+      // v1.31.1: ir eilutės kortelėse rodyklės turi veikti
+      if (photos.length > 1) { window.__galleryStore[cardId + '-strip'] = photos; window.__cardPhotoIndex[cardId] = 0; }
       var isFav = isFavorited(c.url);
       var favSnap = "{modelis:'" + escJs(c.modelis) + "', kaina:" + (c.kaina||'null') + ", metai:" + (c.metai||'null') + ", rida:" + (c.rida||'null') + ", photo:'" + escJs(c.photo||'') + "', source:'" + escJs(c.source) + "', kuras:'" + escJs(c.kuras||'') + "', pavarai:'" + escJs(c.pavarai||'') + "', diffPct:" + (c.diffPct!=null?c.diffPct:'null') + ", marketMedian:" + (c.marketMedian||'null') + "}";
       var card = document.createElement('div');
