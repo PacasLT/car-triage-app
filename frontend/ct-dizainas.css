@@ -2260,3 +2260,109 @@ textarea.ct-field {
   .ct-table.is-dense tbody tr.is-urgent { box-shadow: inset 3px 0 0 var(--danger); }
   .ct-table.is-dense tbody tr.is-urgent > td:first-child { box-shadow: none; }
 }
+
+
+/* ============================================================================
+   20 paketas · 26 sk. TRECIA redakcija + 30 sk. KETVIRTA redakcija
+   ----------------------------------------------------------------------------
+   Abu pakeitimai is Luko prasymo: 12 filtru dviem eilemis po 6, ir panele
+   LYGIAI ant juostos, be perklojimo.
+
+   Visi skaiciai pamatuoti — metodas PASTABOS.md 1.
+   ========================================================================== */
+
+
+/* ============================================================================
+   26. HERO JUOSTA · panele LYGIAI ant jos   (trecia redakcija)
+   ----------------------------------------------------------------------------
+   Pakeitimas nuo v2: NEBERA perklojimo.
+
+   v2 daviau margin-top: -24px, nes maniau, kad „panele stovi ant juostos"
+   reiskia uzlipti ant jos krasto. Lukas pasakė tiksliau: „turi graziai buti
+   lygiai ant, niekur nelipti". Tad panele prasideda BUTENT ten, kur juosta
+   baigiasi — nei anksciau, nei veliau.
+
+   Ir tai geriau ne tik pagal prasyma: perklojimas uzdengdavo 24 px nuotraukos
+   apacios, t. y. ta pati kadro dali, kuria 26 sk. taip kruopsciai renkam
+   background-position tasku. Perklojimas atimdavo iš kadro ir nieko neduodavo.
+
+   PAMATUOTA 1280 px, panele lygiai (12 langeliu, 2 eiles):
+     juosta 600  panele 697-997  „Ieskoti" 982  kyso 262
+     juosta 260  panele 357-657  „Ieskoti" 642  atsarga  78
+     juosta 220  panele 317-617  „Ieskoti" 602  atsarga 118   <- lieka
+     juosta 180  panele 277-577  „Ieskoti" 562  atsarga 158
+
+   RIBA: aukstis ir kadravimas mano; position, inset, z-index — jusu. */
+
+.ct3-hero { height: 220px; }
+.ct3-hero-photo {
+  height: 100%;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: 40% 55%;
+}
+
+@media (max-width: 640px) {
+  .ct3-hero { height: 180px; }
+  .ct3-hero-photo { background-position: 50% 62%; }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .ct3-hero { height: 120px; }
+}
+
+/* ── 26b. Panele LYGIAI ant juostos ─────────────────────────────────────────
+   Nulis. Rasau atvirai, o ne tiesiog nerasau nieko, nes index.html telefone
+   turi savo margin: -16px (1286 eil. sritis) — ji reikia ATSAUKTI, kitaip
+   telefone perklojimas liks. */
+
+.ct3-search-panel { margin-top: 0; }
+
+@media (max-width: 640px) {
+  .ct3-search-panel { margin-top: 0; }
+}
+
+
+/* ============================================================================
+   30. FILTRAI SONE · 12 langeliu   (ketvirta redakcija)
+   ----------------------------------------------------------------------------
+   Pakeitimas nuo v3: TIK DU platus langeliai, ne keturi.
+
+   Priezastis pamatuota. 12 langeliu sone:
+     4 platus (v3 sarasas)  ->  8 eiles  ->  laukai 539, panele 701  NETELPA
+     2 platus (MARKE, MODELIS) -> 7 eiles -> laukai 423, panele 585  TELPA
+
+   Riba ties 1280x720 yra 599, tad 585 telpa su 14 px. Tai plona, ir sakau
+   atvirai: jei panelėje kas nors dar pridės eilute, 30 sk. teks matuoti is
+   naujo. Alternatyva — leisti sonui slinkti (701 px) — irgi veikia, tik
+   prarandamas argumentas, del kurio 25 sk. ir buvo daromas.
+
+   VARANTIEJI RATAI ir GALIA tampa siauri. GALIA telpa, VARANTIEJI — NE:
+   „Visi varantys (4x4)" reikia 112 px, o vietos 99. Reikia trumpesnio uzraso,
+   zr. PASTABOS.md 3. CSS to neispres.
+
+   PRIRISTA prie: .ct-shell.is-split — sonas egzistuoja tik po paieskos. */
+
+@media (min-width: 1180px) {
+  .ct-shell.is-split > .ct-shell-side .ct3-fields {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px var(--s-3);
+    padding: var(--s-3);
+  }
+  .ct-shell.is-split > .ct-shell-side .ct3-field {
+    gap: 5px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    min-width: 0;
+  }
+  /* TIK du platus — MARKE ir MODELIS. Ju pasirinkimo tekstas ilgiausias
+     („Mercedes-Benz", „Visi modeliai"), ir jie keiciami dazniausiai. */
+  .ct-shell.is-split > .ct-shell-side .ct3-field.is-wide { grid-column: 1 / -1; }
+
+  .ct-shell.is-split > .ct-shell-side .ct3-select-wrap { padding-right: 20px; }
+  .ct-shell.is-split > .ct-shell-side .ct3-select-wrap select,
+  .ct-shell.is-split > .ct-shell-side .ct3-range-wrap input { font-size: 13.5px; }
+  .ct-shell.is-split > .ct-shell-side .ct3-range-wrap { display: flex; align-items: center; gap: 6px; }
+  .ct-shell.is-split > .ct-shell-side .ct3-range-wrap > input { flex: 1 1 0; min-width: 0; max-width: none; }
+}

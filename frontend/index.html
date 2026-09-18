@@ -977,7 +977,10 @@
   .ct3-header-inner { padding: 14px 20px; }
   .ct3-logo-icon { width: 38px; height: 38px; }
   .ct3-logo-text > span { font-size: 22px; }
-  .ct3-search-panel { margin: -16px 12px 0; border-radius: 14px; }
+  /* v1.82.0 (26b): -16px atsauktas - panele stovi LYGIAI ant juostos, neuzlipa.
+     Perklojimas uzdengdavo 24 px nuotraukos apacios, t.y. ta kadro dali, kuriai
+     renkamas background-position. */
+  .ct3-search-panel { margin: 0 12px; border-radius: 14px; }
   .ct3-stats-bar { margin: 8px 12px 0; border-radius: 0 0 12px 12px; }
   .ct3-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .ct3-hero-content { padding: 110px 20px 40px; }
@@ -2444,48 +2447,8 @@
   </div>
   <div class="ct3-hero-overlay"></div>
 
-  <div class="ct3-hero-content">
-    <div class="ct3-hero-left">
-      <div class="ct3-hero-eyebrow">TŪKSTANČIAI SKELBIMŲ. VIENAS AIŠKUS PRANAŠUMAS.</div>
-      <h1 class="ct3-hero-title">Rask automobilius,<br><em>kurie verti dėmesio.</em></h1>
-      <p class="ct3-hero-sub">Skanuojame tūkstančius naudotų automobilių skelbimų Europos rinkose, analizuojame rinką realiuoju laiku ir išryškiname geriausias galimybes — su rizikos įvertinimu.</p>
-      <div class="ct3-hero-feats">
-        <div class="ct3-feat">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
-          <span>Kelių portalų<br>paieška</span>
-        </div>
-        <div class="ct3-feat">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3h18M3 9h12M3 15h9M3 21h6"/><path d="M18 14l3 3-3 3"/></svg>
-          <span>AI rinkos<br>analizė</span>
-        </div>
-        <div class="ct3-feat">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
-          <span>Geriausios<br>galimybės</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="ct3-hero-right-stats">
-      <div class="ct3-hero-taglines">
-        <div>GERESNI DUOMENYS</div>
-        <div>GERESNI SPRENDIMAI</div>
-        <div class="ct3-hl">DAUGIAU GALIMYBIŲ</div>
-        <div class="ct3-hl-line"></div>
-      </div>
-      <div class="ct3-hero-car-label">
-        <div class="ct3-car-watermark">
-          <svg width="12" height="12" viewBox="0 0 36 36" fill="none"><rect x="18" y="2" width="20" height="20" rx="3" transform="rotate(45 18 2)" fill="#7C5CFF"/><rect x="18" y="9" width="11" height="11" rx="2" transform="rotate(45 18 9)" fill="rgba(10,12,18,.7)"/><rect x="18" y="13" width="5" height="5" rx="1" transform="rotate(45 18 13)" fill="#7C5CFF"/></svg>
-          CarTriige
-        </div>
-        <div class="ct3-car-model">BMW X5</div>
-        <div class="ct3-car-attrs">
-          <span>PERFORMANCE</span>
-          <span>INTELLIGENCE</span>
-          <span>OPPORTUNITY</span>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- v1.82.0 (Nr. 27, Nr. 32): hero tekstas isimtas Luko sprendimu. Hero tapo
+       juosta (26 sk. v3, 220/180 px), o paieskos panele stovi LYGIAI ant jos. -->
 
 </section>
 
@@ -2572,6 +2535,12 @@
           </div>
         </div>
         <div class="ct3-field">
+          <label>RIDA IKI (KM)</label>
+          <input id="ridaIki" type="number" min="0" step="10000" placeholder="pvz. 200000" oninput="ctUpdateMoreBadge()"
+                 style="width:100%; min-width:0; padding:10px 12px; background:var(--bg-base); border:1px solid var(--border-light); border-radius:8px; color:var(--text-primary); font:500 13px/1 var(--font);">
+        </div>
+
+        <div class="ct3-field">
           <label>KURAS</label>
           <div class="ct3-select-wrap">
             <select id="fuel">
@@ -2596,19 +2565,20 @@
           </div>
         </div>
         <!-- v1.25.0: varantieji ratai ir galia - pagrindiniai vertinimo kriterijai, todel cia, ne "Daugiau filtru" -->
-        <div class="ct3-field is-wide">
+        <div class="ct3-field">
           <label>VARANTIEJI RATAI</label>
           <div class="ct3-select-wrap">
             <select id="varantieji">
               <option value="" selected>Visi</option>
-              <option value="visi">Visi varantys (4x4)</option>
+              <!-- v1.82.0: „(4x4)" isimtas - siaurame langelyje tekstui reikejo 112 px, o vietos 99. -->
+              <option value="visi">Visi varantys</option>
               <option value="priekiniai">Priekiniai</option>
               <option value="galiniai">Galiniai</option>
             </select>
             <svg class="ct3-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
           </div>
         </div>
-        <div class="ct3-field is-wide">
+        <div class="ct3-field">
           <label>GALIA (KW)</label>
           <div style="display:flex; gap:6px; align-items:center;">
             <input id="galiaNuo" type="number" min="0" step="10" placeholder="nuo"
@@ -2618,57 +2588,25 @@
                    style="width:100%; min-width:0; padding:10px 12px; background:var(--bg-base); border:1px solid var(--border-light); border-radius:8px; color:var(--text-primary); font:500 13px/1 var(--font);">
           </div>
         </div>
-      </div>
 
+        <!-- v1.82.0 (20 paketas): keturi langeliai atkelti is „Daugiau filtru".
+             Sesios eiles po 6 - 12 langeliu telpa i tas pacias dvi eiles,
+             tad keturi nauji filtrai kainuoja 0 px aukscio. -->
 
-      <!-- Papildomi filtrai (atidaromi mygtuku "Daugiau filtrų") -->
-      <div id="more-filters" class="ct3-more-panel" style="display:none;">
-        <!-- v1.77.0 (Nr. 25): `.ct3-portals-row` istrinta. Ji buvo GRYNA DEKORACIJA -
-             „Search across Europe" uzrasas ir 7 veleveliu emoji, 0 mygtuku, 0 ivesciu,
-             0 `onclick`. Tikrasis portalu valdiklis yra #portal-toggle-btn apacioje. -->
-        <div class="ct3-more-row">
-          <div style="display:flex; flex-direction:column; gap:6px;">
-            <label style="font:600 10px/1 var(--font-mono); letter-spacing:.08em; color:var(--text-dim);">RIDA IKI (KM)</label>
-            <input id="ridaIki" type="number" min="0" step="10000" placeholder="pvz. 200000" oninput="ctUpdateMoreBadge()"
-                   style="width:150px; padding:8px 10px; background:var(--bg-base); border:1px solid var(--border-light); border-radius:8px; color:var(--text-primary); font:500 13px/1 var(--font);">
-          </div>
-          <div style="display:flex; flex-direction:column; gap:6px;">
-            <label style="font:600 10px/1 var(--font-mono); letter-spacing:.08em; color:var(--text-dim);">PUSLAPIŲ KIEKIS</label>
-            <select id="maxPages" onchange="ctUpdateMoreBadge()"
-                    style="width:150px; padding:8px 10px; background:var(--bg-base); border:1px solid var(--border-light); border-radius:8px; color:var(--text-primary); font:500 13px/1 var(--font);">
+        <div class="ct3-field">
+          <label>PUSLAPIŲ KIEKIS</label>
+          <div class="ct3-select-wrap">
+            <select id="maxPages" onchange="ctUpdateMoreBadge()">
               <option value="1">1 (greičiausia)</option>
               <option value="2">2</option>
               <option value="3" selected>3 (numatyta)</option>
               <option value="5">5 (lėčiausia)</option>
             </select>
           </div>
-          <!-- VARANTIEJI RATAI perkelta i pagrindine filtru eilute (v1.25.0) -->
-          <button type="button" onclick="ctResetMoreFilters()"
-                  style="padding:8px 14px; background:transparent; border:1px solid var(--border-light); border-radius:8px; color:var(--text-muted); font:500 12px/1 var(--font); cursor:pointer;">Išvalyti</button>
         </div>
-        <!-- PRIDETA: filtrai, kuriuos pritaiko PATS portalas - taip nuskaitom maziau nereikalingu skelbimu -->
-        <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--border);">
-          <div style="font:600 10px/1 var(--font-mono); letter-spacing:.08em; color:var(--text-dim); margin-bottom:9px;">PORTALO FILTRAI (TAIKOMI DAR PRIEŠ NUSKAITYMĄ)</div>
-          <div class="ct-pfiltrai">
-            <label><input type="checkbox" id="pf-beJav" onchange="ctUpdateMoreBadge()"><span>Išskyrus JAV</span></label>
-            <label><input type="checkbox" id="pf-tikSuVin" onchange="ctUpdateMoreBadge()"><span>Tik su VIN</span></label>
-            <label><input type="checkbox" id="pf-tikSuIstorija" onchange="ctUpdateMoreBadge()"><span>Tik su istorijos ataskaita</span></label>
-            <label><input type="checkbox" id="pf-beDefektu" onchange="ctUpdateMoreBadge()"><span>Be defektų</span></label>
-            <label><input type="checkbox" id="pf-beVairoDesineje" onchange="ctUpdateMoreBadge()"><span>Be vairo dešinėje</span></label>
-            <label><input type="checkbox" id="pf-tikLietuvoje" onchange="ctUpdateMoreBadge()"><span>Tik automobiliai Lietuvoje</span></label>
-          </div>
-          <div style="margin-top:8px; font-size:11px; color:var(--text-dim);">Kol kas veikia autoplius.lt skelbimams.</div>
-        </div>
-        <div style="margin-top:10px; font-size:11px; color:var(--text-dim);">Daugiau puslapių = daugiau skelbimų, bet lėtesnė paieška ir daugiau AI užklausų. Skaitome nuo naujausio skelbimo.</div>
-      </div>
 
-      <div class="ct3-search-bottom">
-        <div class="ct3-search-bottom-left">
-          <button class="ct3-more-btn ct-btn ct-btn-toggle" type="button" onclick="ctToggleMoreFilters()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M7 12h10M10 18h4"/></svg>
-            Daugiau filtrų
-            <span class="ct3-badge" id="more-filters-badge" style="display:none;">0</span>
-          </button>
+        <div class="ct3-field">
+          <label>PORTALAI</label>
           <div class="ct3-portal-wrap">
             <button class="ct3-marketplaces-btn ct-btn ct-btn-sm ct-btn-quiet" id="portal-toggle-btn" onclick="ctTogglePortals()">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M2 12h20M12 2c-3 4-3 12 0 16M12 2c3 4 3 12 0 16"/></svg>
@@ -2684,7 +2622,49 @@
               <label class="ct3-portal-row"><input type="checkbox" id="portal-otomoto" onchange="ctUpdatePortalBtn()"><svg viewBox="0 0 32 32" width="22" height="22" style="flex:none;border-radius:5px"><rect width="32" height="32" rx="7" fill="#C0392B"/><text x="16" y="22" font-family="system-ui,sans-serif" font-weight="900" font-size="15" fill="#fff" text-anchor="middle">OT</text></svg><span class="ct3-portal-name">otomoto.pl</span><span class="ct3-portal-flag">🇵🇱</span></label>
               <button type="button" class="ct3-portal-done" onclick="ctTogglePortals()">Gerai</button>
             </div>
+          </div>        </div>
+
+        <div class="ct3-field">
+          <label>PAPILDOMAI</label>
+          <div class="ct-pfiltrai">
+            <label><input type="checkbox" id="pf-beJav" onchange="ctUpdateMoreBadge()"><span>Išskyrus JAV</span></label>
+            <label><input type="checkbox" id="pf-tikSuVin" onchange="ctUpdateMoreBadge()"><span>Tik su VIN</span></label>
+            <label><input type="checkbox" id="pf-tikSuIstorija" onchange="ctUpdateMoreBadge()"><span>Tik su istorijos ataskaita</span></label>
+            <label><input type="checkbox" id="pf-beDefektu" onchange="ctUpdateMoreBadge()"><span>Be defektų</span></label>
+            <label><input type="checkbox" id="pf-beVairoDesineje" onchange="ctUpdateMoreBadge()"><span>Be vairo dešinėje</span></label>
+            <label><input type="checkbox" id="pf-tikLietuvoje" onchange="ctUpdateMoreBadge()"><span>Tik automobiliai Lietuvoje</span></label>
           </div>
+        </div>
+      </div>
+
+
+      <!-- Papildomi filtrai (atidaromi mygtuku "Daugiau filtrų") -->
+      <div id="more-filters" class="ct3-more-panel" style="display:none;">
+        <!-- v1.77.0 (Nr. 25): `.ct3-portals-row` istrinta. Ji buvo GRYNA DEKORACIJA -
+             „Search across Europe" uzrasas ir 7 veleveliu emoji, 0 mygtuku, 0 ivesciu,
+             0 `onclick`. Tikrasis portalu valdiklis yra #portal-toggle-btn apacioje. -->
+        <div class="ct3-more-row">
+          <!-- VARANTIEJI RATAI perkelta i pagrindine filtru eilute (v1.25.0) -->
+          <button type="button" onclick="ctResetMoreFilters()"
+                  style="padding:8px 14px; background:transparent; border:1px solid var(--border-light); border-radius:8px; color:var(--text-muted); font:500 12px/1 var(--font); cursor:pointer;">Išvalyti</button>
+        </div>
+        <!-- PRIDETA: filtrai, kuriuos pritaiko PATS portalas - taip nuskaitom maziau nereikalingu skelbimu -->
+        <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--border);">
+          <div style="font:600 10px/1 var(--font-mono); letter-spacing:.08em; color:var(--text-dim); margin-bottom:9px;">PORTALO FILTRAI (TAIKOMI DAR PRIEŠ NUSKAITYMĄ)</div>
+
+          <div style="margin-top:8px; font-size:11px; color:var(--text-dim);">Kol kas veikia autoplius.lt skelbimams.</div>
+        </div>
+        <div style="margin-top:10px; font-size:11px; color:var(--text-dim);">Daugiau puslapių = daugiau skelbimų, bet lėtesnė paieška ir daugiau AI užklausų. Skaitome nuo naujausio skelbimo.</div>
+      </div>
+
+      <div class="ct3-search-bottom">
+        <div class="ct3-search-bottom-left">
+          <button class="ct3-more-btn ct-btn ct-btn-toggle" type="button" onclick="ctToggleMoreFilters()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M7 12h10M10 18h4"/></svg>
+            Daugiau filtrų
+            <span class="ct3-badge" id="more-filters-badge" style="display:none;">0</span>
+          </button>
+
         </div>
         <!-- PASALINTA: "Naršyti viską" režimas. Liko tik CarTriige analizė, todėl režimų pasirinkiklio nebereikia. -->
         <div class="ct3-search-bottom-right">

@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.82.0', data: '2026-09-18', pavadinimas: 'Hero tapo juosta, visi filtrai matomi is karto',
+    pakeitimai: [
+      'Hero tekstas isimtas, hero tapo 220 px juosta (telefone 180), o paieskos panele stovi lygiai ant jos',
+      'Visi 12 filtru matomi is karto dviem eilemis - rida, puslapiu kiekis, portalai ir papildomos zymos nebeslepiamos',
+      'Keturi nauji filtrai nekainavo nė vieno pikselio aukscio: 8 langeliai uzeme 2 eiles, 12 uzima irgi 2',
+      '„Visi varantys (4x4)" sutrumpintas iki „Visi varantys" - ilgesnis tekstas siaurame langelyje nusikirpdavo',
+    ],
+  },
+  {
     versija: '1.81.0', data: '2026-09-18', pavadinimas: 'Vartotojo ekranas administravime',
     pakeitimai: [
       'Paspaudus vartotoja atsidaro jo ekranas: kreditai, planas ir kreditu zurnalas vienoje vietoje',

@@ -2140,3 +2140,73 @@ Senoji vartotojų lentelė skaitė `u.planas` ir `u.sukurta`, o API grąžina
 **Ta pati klaida abiejuose stulpeliuose**, ir abu tylūs: reikšmė buvo,
 tik ne ta, kurios prašoma. Ištaisyta, plius pridėti atskiri plano ir pirktų
 kreditų stulpeliai.
+
+---
+
+## Z-28 · 2026-09-18 · Klaudijus → Dizaineriui · 20 PAKETAS ĮDIEGTAS · v1.82.0
+
+Įdiegta: 26 sk. v3 (juosta 220/180), 26b (panelė lygiai ant jos, `-16px`
+atšauktas ir `index.html` 983 eil.), 30 sk. v4, 12 langelių jūsų tvarka,
+`Visi varantys`, hero tekstas išimtas.
+
+### 1. Kas pasitvirtino
+
+| | Jūsų stendas | Tikra panelė |
+|---|---|---|
+| Langelių | 12 | 12 |
+| Eilių (pilnas plotis) | 2 | **2** |
+| Hero 1280 px | 220 | 620 → žr. 3 |
+| Hero 390 px | 180 | 340 → žr. 3 |
+| Perklojimas | 0 | **0** |
+| JS klaidų | — | 0 |
+
+**Keturi nauji filtrai tikrai kainavo 0 px eilių** — 12 langelių telpa į tas
+pačias dvi eiles.
+
+### 2. Kas nepasitvirtino · šonas · `K-19`
+
+Jūs: 12 langelių su dviem plačiais = 7 eilės, laukai 423, panelė **585**,
+telpa su 14 px.
+
+Pamatuota po įdiegimo, 1280×720:
+
+```
+laukai   604 px   (ne 423)
+panele   728 px   (ne 585)
+riba     599 px   ->  NETELPA, truksta 129
+eiles      7      (sutampa)
+```
+
+Eilių skaičius sutampa, o aukštis ne — vadinasi, skiriasi ne išdėstymas, o
+**eilučių turinys**. Įtariu `PAPILDOMAI`: tai ne laukas, o **šešios žymos su
+tekstais**, kiekviena su savo eilute („Išskyrus JAV", „Tik su VIN", „Tik su
+istorijos ataskaita", „Be defektų", „Be vairo dešinėje", „Tik automobiliai
+Lietuvoje"). Siaurame langelyje jos krenta viena po kita.
+
+Ties 1680 px telpa tiksliai (717 prie 717).
+
+**Nesprendžiau pats** — tai jūsų 30 sk. ir jūsų 4 punkto pasirinkimas tarp
+„du platūs" ir „leisti šonui slinkti". Dabar šonas slenka.
+
+### 3. Hero aukštis · `K-20`
+
+`.ct3-hero` gauna `height: 220px`, bet pamatuota **620 px**. Priežastis
+mūsų pusėje ir aš ją matau: `.ct3-hero-content` išimtas, bet sekcijos aukštį
+dabar laiko kitas vidinis elementas (`index.html` 736 eil. sritis turi savo
+`min-height`/`padding`). Jūsų taisyklė teisinga — ją tiesiog nugali mūsų
+senesnė. Taisysiu savo pusėje ir atsiųsiu skaičių; jei norit, kad tai būtų
+jūsų failo darbas, sakykit.
+
+### 4. `#more-filters` nėra tuščias
+
+Jame liko trys dalykai: mygtukas **„Išvalyti"** ir dvi paaiškinimo eilutės.
+Mygtuko neišėmiau: jis vienintelis išvalo tuos filtrus, o valdiklio
+pašalinimas be pakaitalo yra `K-06`. Pasakykit, kur jam vieta — tada
+skydelis tikrai liks tuščias ir galėsite uždėti `:empty`.
+
+### 5. Dėl jūsų 6 punkto
+
+`scrollWidth` selektams — tai svarbesnis radinys už patį apkirpimą. Įsirašiau
+`CLAUDE.md`: **matavimo įrankis irgi yra prielaida.** Mano `onclick-patikra.py`
+turi tą pačią silpnybę — ji tikrina tik `onclick` atributus, o `addEventListener`
+nepagautų; iki šiol laikiau ją „patikra", nors ji yra dalinė.
