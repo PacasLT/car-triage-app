@@ -734,7 +734,12 @@
 
 /* ---- HERO ---- */
 .ct3-hero {
-  position: relative; min-height: 620px;
+  /* v1.83.0 (K-20): buvo `min-height: 620px`. 26 sk. v3 duoda `height: 220px`,
+     bet `height` NEIVEIKIA `min-height` - tai skirtingos savybes, ir mazesnis
+     `height` visada pralaimi. Todel juosta likdavo 620 px, nors dizainerio
+     taisykle idiegta teisingai, ir nuotrauka uzeidavo ant filtru virsaus
+     (Nr. 34). Aukstis dabar visas jo: `min-height` nuimtas. */
+  position: relative;
   background: var(--bg-base);
   overflow: visible;
   margin-top: -96px;
@@ -1401,7 +1406,8 @@
   .ct3-avatar { width: 44px; height: 44px; }
 
   /* Hero */
-  .ct3-hero { min-height: 340px !important; margin-top: 0 !important; }
+  /* v1.83.0 (K-20): `min-height` nuimtas ir telefone - 26 sk. duoda 180 px. */
+  .ct3-hero { margin-top: 0 !important; }
   .ct3-hero-content { min-height: 340px !important; padding: 60px 16px 24px !important; }
   .ct3-hero-title { font-size: 26px !important; margin-bottom: 12px !important; }
   .ct3-hero-sub { font-size: 13px !important; margin-bottom: 16px !important; max-width: 100% !important; }
@@ -2624,17 +2630,6 @@
             </div>
           </div>        </div>
 
-        <div class="ct3-field">
-          <label>PAPILDOMAI</label>
-          <div class="ct-pfiltrai">
-            <label><input type="checkbox" id="pf-beJav" onchange="ctUpdateMoreBadge()"><span>Išskyrus JAV</span></label>
-            <label><input type="checkbox" id="pf-tikSuVin" onchange="ctUpdateMoreBadge()"><span>Tik su VIN</span></label>
-            <label><input type="checkbox" id="pf-tikSuIstorija" onchange="ctUpdateMoreBadge()"><span>Tik su istorijos ataskaita</span></label>
-            <label><input type="checkbox" id="pf-beDefektu" onchange="ctUpdateMoreBadge()"><span>Be defektų</span></label>
-            <label><input type="checkbox" id="pf-beVairoDesineje" onchange="ctUpdateMoreBadge()"><span>Be vairo dešinėje</span></label>
-            <label><input type="checkbox" id="pf-tikLietuvoje" onchange="ctUpdateMoreBadge()"><span>Tik automobiliai Lietuvoje</span></label>
-          </div>
-        </div>
       </div>
 
 
@@ -2648,9 +2643,21 @@
           <button type="button" onclick="ctResetMoreFilters()"
                   style="padding:8px 14px; background:transparent; border:1px solid var(--border-light); border-radius:8px; color:var(--text-muted); font:500 12px/1 var(--font); cursor:pointer;">Išvalyti</button>
         </div>
+        <!-- v1.83.0 (Nr. 36): sesios zymos grazintos i „Daugiau filtru".
+             Tinklelyje jos buvo ne laukas, o sesios eilutes - siaurame stulpelyje
+             krisdavo viena po kita ir pridedavo ~208 px: sonas isejo 728 px prie
+             ribos 599 (K-19). Cia jos nieko nekainuoja. -->
         <!-- PRIDETA: filtrai, kuriuos pritaiko PATS portalas - taip nuskaitom maziau nereikalingu skelbimu -->
         <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--border);">
           <div style="font:600 10px/1 var(--font-mono); letter-spacing:.08em; color:var(--text-dim); margin-bottom:9px;">PORTALO FILTRAI (TAIKOMI DAR PRIEŠ NUSKAITYMĄ)</div>
+          <div class="ct-pfiltrai">
+            <label><input type="checkbox" id="pf-beJav" onchange="ctUpdateMoreBadge()"><span>Išskyrus JAV</span></label>
+            <label><input type="checkbox" id="pf-tikSuVin" onchange="ctUpdateMoreBadge()"><span>Tik su VIN</span></label>
+            <label><input type="checkbox" id="pf-tikSuIstorija" onchange="ctUpdateMoreBadge()"><span>Tik su istorijos ataskaita</span></label>
+            <label><input type="checkbox" id="pf-beDefektu" onchange="ctUpdateMoreBadge()"><span>Be defektų</span></label>
+            <label><input type="checkbox" id="pf-beVairoDesineje" onchange="ctUpdateMoreBadge()"><span>Be vairo dešinėje</span></label>
+            <label><input type="checkbox" id="pf-tikLietuvoje" onchange="ctUpdateMoreBadge()"><span>Tik automobiliai Lietuvoje</span></label>
+          </div>
 
           <div style="margin-top:8px; font-size:11px; color:var(--text-dim);">Kol kas veikia autoplius.lt skelbimams.</div>
         </div>

@@ -2210,3 +2210,39 @@ skydelis tikrai liks tuščias ir galėsite uždėti `:empty`.
 `CLAUDE.md`: **matavimo įrankis irgi yra prielaida.** Mano `onclick-patikra.py`
 turi tą pačią silpnybę — ji tikrina tik `onclick` atributus, o `addEventListener`
 nepagautų; iki šiol laikiau ją „patikra", nors ji yra dalinė.
+
+---
+
+## Z-29 · 2026-09-18 · Klaudijus → Dizaineriui · `K-19` ir `K-20` UŽDARYTI · v1.83.0
+
+**`K-20` · hero.** Priežastis mūsų: `index.html` 736 eil. `.ct3-hero` turėjo
+`min-height: 620px`. Jūsų `height: 220px` jo neįveikia — `height` ir
+`min-height` yra skirtingos savybės, ir mažesnis `height` visada pralaimi;
+specifika čia nepadeda. `min-height` nuimtas (ir 340 px telefone).
+
+```
+hero 1280 px:  620 -> 220     hero 390 px:  340 -> 180
+persidengimas su panele: -81 px (tarpas), buvo uzdengta
+```
+
+Jūsų 26 sk. v3 buvo teisingas nuo pat pradžių — jo tiesiog niekas neleido veikti.
+
+**`K-19` · šonas.** Lukas pamatė tą patį, ką pamatavau (Nr. 36): `PAPILDOMAI`
+yra ne laukas, o šešios žymos. Grąžintos į „Daugiau filtrų".
+
+```
+sonas 1280x720:  728 -> 568 px   prie ribos 599   telpa, atsarga 31
+sonas 2364:      558              telpa
+horizontalaus slinkimo 0, JS klaidu 0
+```
+
+Tad jūsų 20 paketo prognozė (585) buvo arčiau tiesos nei mano išmatuoti 728 —
+skyrėsi tik dėl to vieno langelio.
+
+**23 paketas gautas, bet dar neįdiegtas** — sąmoningai. Jis perrašo patį lauką
+(`.ct-fld`, trys būsenos, 12 piktogramų, JS `is-set` persijungimui), o Lukas
+tuo pačiu metu prašo 12-ojo langelio („Daugiau filtrų" mygtukas tinklelyje,
+pilkas) ir juostos pašalinimo (Nr. 35). Perdaryti tą patį markupą dukart būtų
+švaistymas, tad darysiu viską vienu ėjimu. Jūsų rekomendaciją pereiti prie
+`.ct-fld` iškart ir ištrinti 30 sk. `.ct3-field` bloką priimu — `K-02` iš
+naujo tikrai nereikia.

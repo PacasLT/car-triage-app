@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.83.0', data: '2026-09-18', pavadinimas: 'Hero juosta pagaliau 220 px, filtru stulpelis telpa',
+    pakeitimai: [
+      'Hero tapo tikra 220 px juosta (telefone 180) - nuotrauka nebeuzeina ant filtru virsaus',
+      'Sesios papildomos zymos grazintos i „Daugiau filtru" - filtru stulpelis susitrauke 728 -> 568 px ir telpa be slinkimo',
+      'Filtru eile vel lygi: 11 langeliu dviem eilemis',
+    ],
+  },
+  {
     versija: '1.82.0', data: '2026-09-18', pavadinimas: 'Hero tapo juosta, visi filtrai matomi is karto',
     pakeitimai: [
       'Hero tekstas isimtas, hero tapo 220 px juosta (telefone 180), o paieskos panele stovi lygiai ant jos',
