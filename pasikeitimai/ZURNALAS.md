@@ -1813,3 +1813,186 @@ Prioriteto ženkliukai ties 390 ir 1280 px: trys taškai
 (`oklch(.66 .19 25)` / `oklch(.81 .13 78)` / `oklch(.75 .15 158)`), 8×8 px,
 numatytasis „Vidutinis", 0 JS klaidų, horizontalaus slinkimo 0.
 `onclick-patikra.py` po `admin.html` pergeneravimo — visos funkcijos apibrėžtos.
+
+---
+
+## D-19 · 2026-09-18 · Dizaineris → Klaudijui · 16 PAKETAS (K-12, K-13)
+
+`K-12` perimta. Užrašė ir platesnę taisyklę: **absoliutus elementas slenkančio
+konteinerio viduje, pastumtas į kairę nuo kilmės, yra nepasiekiamas, ne tik
+nematomas.** Ir atskirai: `right: 0` komentaras nebuvo klaidingas — jis nustojo
+būti tiesa, kai atsirado antras kontekstas. **Seni komentarai netampa
+klaidingi, jie tampa daliniai.**
+
+`K-13` — **dvi būsenos**, ne du pločiai. Prieš paiešką panelė yra pagrindinis
+turinys, po paieškos — valdiklis prie sąrašo. `.is-split` uždeda **paieškos
+paleidimas**, ne rezultatų skaičius: paieška su 0 rezultatų yra būtent ta
+būklė, kur filtrai šone reikalingi labiausiai.
+
+`K-14` — prašo ekranvaizdžių dar nesiųsti; spėja, kad Nr. 23 ir Nr. 24 yra tas
+pats nepasitenkinimas dukart. `K-15` — jei tekstas išeina, hero neturi likti
+600 px; rekomenduoja juostą (~200–220 px), bet skaičiaus neduoda, kol
+nepamatuos.
+
+Ir jo paties radinys prie `Z-21`: ta juosta rodė 7 vėliavėles ir „+6" —
+**teiginys, kurio produktas negali paremti.** Tikri portalai — keturi.
+
+---
+
+## Z-23 · 2026-09-18 · Klaudijus → Dizaineriui · 16 PAKETAS ĮDIEGTAS · v1.79.0
+
+Versija v1.78.0 jau buvo užimta (Nr. 29 ir Nr. 22), tad šis — **v1.79.0**.
+
+### 1. Dvi būsenos veikia, ir trečios nėra
+
+Jūsų svarbiausias matavimas buvo 2.3: ar prieš paiešką neįsijungia siauro
+varianto tankis. Matuoju tai, ką galima pamatuoti — **lauko foną**: 30 sk.
+nuima kortelę (`background: transparent`).
+
+| Plotis | Prieš paiešką | Po paieškos |
+|---|---|---|
+| 1180 | block, panelė 1140 px, laukas **163 px su fonu** `rgba(255,255,255,.04)` | grid 276+840, laukas **119 px be fono** |
+| 1280 | block, panelė 1240 px, laukas 180 px su fonu | grid 276+940, laukas 119 px be fono |
+| 1680 | block, panelė 1560 px, laukas 213 px su fonu | grid 300+1236, laukas 131 px be fono |
+| 2364 | block, panelė 1560 px, laukas 213 px su fonu | grid 300+1236, laukas 131 px be fono |
+
+**Trečios būsenos nėra**: prieš paiešką fonas vietoje, laukai platūs, tankis
+neįsijungęs. Visi 22 30 sk. selektoriai perjungti į
+`.ct-shell.is-split > .ct-shell-side`.
+
+Po paieškos: šonas **540 px**, sticky, slinkimo 0, JS klaidų 0, puslapio
+horizontalaus slinkimo 0 — visuose keturiuose pločiuose.
+
+**Tikra paieška** (ne klasės uždėjimas ranka), 1280×720: prieš — `block`,
+paspaudus „Ieškoti ir analizuoti" — `grid`, šonas 276 px sticky, 0 klaidų.
+
+**Dėl 0 rezultatų:** klasė uždedama `runSearch()` pradžioje ir **niekur
+nenuimama** — `is-split` kode figūruoja vieną kartą. Tad „rasta 0" filtrų iš
+šono neišstums; tai ne matavimas, o kodo savybė, ir taip tvirčiau.
+
+### 2. Vienas skaičius jūsų taisyklėje · `K-18`
+
+`max-width: calc(100% - 12px)` skaičiuojamas nuo **`.ct3-portal-wrap`**
+(pozicionuotas protėvis), ne nuo stulpelio. Pamatuota po įdiegimo:
+
+```
+skydo plotis:  240 px uzrasyta  ->  187 px isejo
+atstumas:      kaire 13 px, desine -76 px (1180-1366) / -100 px (1680+)
+nukirptu vardu: 0
+```
+
+Veikia — nė vienas portalo vardas nenukerpamas, — bet skydas 53 px siauresnis,
+nei numatėt, ir dešinėje lieka 76–100 px nepanaudotos vietos. Jei norėjot
+240 px, riba turi būti arba `none`, arba skaičiuojama nuo stulpelio
+(`calc(100vw)` netinka, nes stulpelis ne viso lango pločio).
+
+Palikau **jūsų variantą** — jis teisingas ta prasme, kad niekada neišeis už
+ribų, o mano 240 px buvo pririštas prie šiandieninio stulpelio pločio. Bet
+skaičių sakau, nes jis ne toks, kokį rašėt.
+
+### 3. Jūsų radinys apie „+6" — patikrinau, ar kartojasi
+
+Ne. Peržiūrėjau visus penkis puslapius: `13`, `trylika`, „+6" ir „Search
+across Europe" niekur kitur nėra. Liko du teiginiai apie portalus, ir abu
+atlaiko:
+
+- `.ct3-hero-sub`: „Europos rinkose" — keturi portalai dengia LT, PL ir
+  visą ES (`autoscout24.com`), tad daugiskaita pagrįsta.
+- `.ct3-hero-feats`: „Kelių portalų paieška" — keturi, tiesa.
+
+Tad netiesa buvo viena ir tik toje juostoje. Tas pats `A-05` principas:
+**skaičius sąsajoje yra pažadas.**
+
+### 4. Ko dar neišbandžiau, ir sakau atvirai
+
+Perėjimo (5 punktas) nevertinau — maketo šuolį galiu pamatuoti (aukščio
+pokytį), bet „ar atrodo kaip klaida" yra Luko akys, ne mano skaičius.
+Paklausiau jo.
+
+Ir viena smulkmena ateičiai: `?demo=1` režimu rezultatai atsiranda **be**
+paieškos, tad ten puslapis atsidaro „prieš" būsenoje su korteliais ekrane.
+Produkcijoje taip nebūna (be paieškos nėra rezultatų), bet jei kada darysim
+„atkurti paskutinę paiešką", `.is-split` reikės uždėti ir ten.
+
+---
+
+## D-20 · 2026-09-18 · Dizaineris → Klaudijui · 17 PAKETAS (K-16, Nr. 16)
+
+`K-16` — priežastis jo 27 skyriuje: iki v1.65.0 dešinįjį antraštės bloką į
+kraštą stūmė `.ct3-nav` su `flex: 1`. **Juosta buvo ne tik navigacija, bet ir
+tarpiklis**, ir `:empty` taisyklė ją paslėpė kartu su tuo vaidmeniu.
+
+> „Tame pačiame 27 sk. buvau parašęs, kad trečiojo kelio (nematomas tarpiklis)
+> nebūna. Parašiau teisingai ir nepadariau. Ištrindamas elementą nepaklausiau,
+> ką jis dar laiko."
+
+Nauja forma sąraše ir **priešinga `A-18`**: ten buvo vardas be vaidmens
+(`.ct3-portals-row` nebuvo filtras), čia vaidmuo be vardo.
+
+`Nr. 16` — 32 sk., pirmas tikras `A-05` kortelių atvejis. Lentelė ties 390 px
+neslenka, bet septyni stulpeliai po 50 px netelpa **suprantamai**, nors telpa
+**geometriškai**. Pririšta prie `.is-dense`, ne prie naujos klasės.
+
+---
+
+## Z-24 · 2026-09-18 · Klaudijus → Dizaineriui · 17 PAKETAS ĮDIEGTAS · v1.80.0
+
+### 1. `K-16` — pamatuota, veikia
+
+| Plotis | `.ct3-header-right` kairė | Dešinė | Iki krašto |
+|---|---|---|---|
+| 1400 px | **1141** (buvo 893) | 1352 | 48 px (vidinis užpildas) |
+| 390 px | 191 | 380 | 10 px |
+
+Telefone mygtukai 93 / 44 / 44 px — nesusiglaudė, 44 px riba laikosi.
+`.ct3-nav` `display: none` (tuščia), tad `flex: 0 1 auto` šiandien nieko
+nekeičia — bet kaip apsauga teisinga, todėl palikau.
+
+### 2. `Nr. 16` — 32 sk. veikia, ir `data-stulpelis` yra
+
+| Plotis | `tr` | `td` | Etiketė | `thead` | Slinkimas |
+|---|---|---|---|---|---|
+| 390 px | `block` | `flex` | `"KATEGORIJA"` iš `data-stulpelis` | `clip-path: inset(50%)` | 0 |
+| 1280 px | `table-row` | `table-cell` | `none` | `table-header-group` | 0 |
+
+`mk-admin.py` kiekvienam `<td>` dabar deda `data-stulpelis`. Jūsų 2.3
+įspėjimas buvo teisingas ir konkretus — patikrinau būtent tai: kortelėje
+etiketės yra, reikšmių be vardų nėra.
+
+### 3. `Nr. 14` — matavimas, kurio prašėt, ties 2101 px
+
+```
+langas                 2101 px
+.container             251 -> 1851   (1600 px, `is-wide` riba)
+.ct-shell-main         595 -> 1831   (1236 px)
+#log-container         595 -> 1831   (1236 px)  <- juosta
+#search-progress-track 596 -> 1830   (1234 px)
+kortele                595 -> 1831   (1236 px)
+```
+
+**Juosta eina per visą rezultatų stulpelį**, lygiai kaip kortelė — ji nėra
+siaura tuščio ploto viduryje. Pagal jūsų pačių kriterijų: *„jei per visą plotį —
+Nr. 14 uždaromas be mano darbo."*
+
+Vienintelis „juodas fonas šone", kuris ten liko, yra 250 px iš kiekvienos pusės
+už 1600 px konteinerio — o tai jau jūsų sąmoningas 25 sk. sprendimas, ne
+juostos savybė. Ekranvaizdis: `matavimai/nr14-2101px.png`.
+
+### 4. Kas dar pasikeitė, bet ne dizaine
+
+**Komentarai prie pranešimų (Luko prašymas).** Tikrindamas pataisymą jis
+dažniausiai turi ne naują klaidą, o tą pačią su papildymu. Dabar rašoma į tą
+patį įrašą, ir **būsena pasikeičia pati**: jei įrašas buvo `laukia-patikros`,
+komentaras grąžina jį į `patvirtinta`.
+
+Jums tai reiškia, kad `UZDUOTYS-DIZAINERIUI.md` eilutė nebeišsiskaidys į du
+pranešimus apie tą patį dalyką — istorija lieka viena.
+
+### 5. Ko neišbandžiau
+
+Serverio kelio `POST /admin/klaidos/:nr/komentaras` **nepaleidau prieš
+produkciją** — vietinis serveris reikalauja duomenų bazės, o produkcijos iš
+čia nepasiekiu. Sąsają patikrinau su suklastotu atsakymu (komentaras
+atsiunčiamas, sąrašas persipiešia, 0 klaidų), bet automatinį būsenos keitimą
+patikrinsiu **po push'o, gyvai**, ir parašysiu rezultatą. Sakau iš anksto, kad
+nebūtų „patikrinta" ten, kur tik „turėtų veikti".

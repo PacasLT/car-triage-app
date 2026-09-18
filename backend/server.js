@@ -341,7 +341,8 @@ app.get('/admin/klaidos', klaiduPrieiga, (req, res) => {
     riba: KLAIDU_RIBA,
     irasai: sar.slice(0, kiek).map((k) => (beDiag
       ? { nr: k.nr, laikas: k.laikas, kas: k.kas, kategorija: k.kategorija, svarba: k.svarba,
-          kartojasi: k.kartojasi, tekstas: k.tekstas, foto: !!k.foto, busena: k.busena }
+          kartojasi: k.kartojasi, tekstas: k.tekstas, foto: !!k.foto, busena: k.busena,
+          komentaru: (k.komentarai || []).length }
       : k)),
   });
 });
@@ -367,6 +368,48 @@ app.post('/admin/klaidos/:nr/busena', klaiduPrieiga, (req, res) => {
   issaugotiKlaidas();
   res.json({
     ok: true, nr: k.nr, busena: k.busena, kelias: k.istorija.map((x) => x.busena).join(' \u2192 '),
+    atviru: _klaidos.filter((x) => !(KLAIDU_BUSENOS[x.busena] || {}).uzdaryta).length,
+  });
+});
+
+// KOMENTARAI (v1.80.0). Lukas, tikrindamas pataisyma, dazniausiai turi ne
+// nauja klaida, o TA PACIA su papildoma pastaba: „beveik, bet apacioje dar".
+// Iki siol jam likdavo du blogi pasirinkimai - kurti antra pranesima (ir
+// isskaidyti istorija) arba nerasyti nieko. Dabar rasoma i ta pati irasa.
+//
+// BUSENA KEICIASI PATI: jei irasas buvo `laukia-patikros` (t.y. mano ejimas
+// jau buvo padarytas ir laukiau Luko), jo komentaras reiskia „neuzdaryta" -
+// grazinam i `patvirtinta`, kad vel butu mano ejimas. Kitose busenose
+// komentaras busenos nekeicia: ten ejimas ir taip ne Luko.
+app.post('/admin/klaidos/:nr/komentaras', klaiduPrieiga, (req, res) => {
+  const k = _klaidos.find((x) => x.nr === parseInt(req.params.nr, 10));
+  if (!k) return res.status(404).json({ error: 'Nera' });
+  const tekstas = String((req.body && req.body.tekstas) || '').trim();
+  if (!tekstas) return res.status(400).json({ error: 'Tuscias komentaras' });
+
+  const busenaPries = k.busena;
+  (k.komentarai = k.komentarai || []).push({
+    laikas: Date.now(),
+    kas: req.user.email,
+    tekstas: tekstas.slice(0, 2000),
+    busena: busenaPries,
+  });
+  if (k.komentarai.length > 50) k.komentarai.splice(0, k.komentarai.length - 50);
+
+  let pakeista = null;
+  if (busenaPries === 'laukia-patikros') {
+    k.busena = 'patvirtinta';
+    pakeista = 'patvirtinta';
+    (k.istorija = k.istorija || []).push({
+      laikas: Date.now(), busena: 'patvirtinta', kas: req.user.email,
+      pastaba: 'Komentaras tikrinant: ' + tekstas.slice(0, 200), versija: null,
+    });
+    if (k.istorija.length > 20) k.istorija.splice(0, k.istorija.length - 20);
+  }
+  issaugotiKlaidas();
+  res.json({
+    ok: true, nr: k.nr, busena: k.busena, busenaPakeista: pakeista,
+    komentaru: k.komentarai.length,
     atviru: _klaidos.filter((x) => !(KLAIDU_BUSENOS[x.busena] || {}).uzdaryta).length,
   });
 });

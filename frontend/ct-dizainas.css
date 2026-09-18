@@ -1786,35 +1786,53 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
 
 .container.is-wide { max-width: 1600px; }
 
+/* ── DVI BUSENOS (16 paketas, K-13) ──────────────────────────────────────────
+   Filtrai sone ir filtrai virsuje nera tas pats dizainas dviejuose plociuose.
+   Tai dvi busenos. Pries paieska panele yra PAGRINDINIS turinys - forma, kuria
+   zmogus atejo uzpildyti; sone nera ko filtruoti. Po paieskos ji tampa
+   VALDIKLIU prie saraso, ir tada sonas teisingas, nes prie jos grizinama.
+
+   `.is-split` uzdedama, kai PAIESKA PALEISTA - ne kai #results turi vaiku.
+   Paieska be rezultatu („rasta 0") yra butent ta bukle, kur filtrai sone
+   reikalingi labiausiai; pririsus prie vaiku skaiciaus, tuscias rezultatas
+   isstumtu juos atgal kaip tik tada, kai jie turi buti po ranka. */
+
 .ct-shell { display: block; }
 
+.ct-shell:not(.is-split) > .ct-shell-side {
+  position: static;
+  max-height: none;
+  overflow: visible;
+}
+
 @media (min-width: 1180px) {
-  .ct-shell {
+  .ct-shell.is-split {
     display: grid;
     grid-template-columns: 276px minmax(0, 1fr);
     align-items: start;
     gap: var(--s-5);
   }
   /* Filtrai lieka matomi slenkant. top = antrastes aukstis + tarpas. */
-  .ct-shell > .ct-shell-side {
-    position: sticky; top: var(--header-h);
+  .ct-shell.is-split > .ct-shell-side {
+    position: sticky;
+    top: calc(var(--header-h) + var(--s-3));
     max-height: calc(100vh - var(--header-h) - var(--s-5));
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-width: thin;
     scrollbar-color: var(--border-light) transparent;
   }
-  .ct-shell > .ct-shell-side::-webkit-scrollbar { width: 6px; }
-  .ct-shell > .ct-shell-side::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+  .ct-shell.is-split > .ct-shell-side::-webkit-scrollbar { width: 6px; }
+  .ct-shell.is-split > .ct-shell-side::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
 }
 
 @media (min-width: 1680px) {
-  .ct-shell { grid-template-columns: 300px minmax(0, 1fr); }
+  .ct-shell.is-split { grid-template-columns: 300px minmax(0, 1fr); }
 }
 
 /* Zemiau slenkscio sonas grizta virsun ir atsisako sticky */
 @media (max-width: 1179px) {
-  .ct-shell > .ct-shell-side { position: static; max-height: none; overflow: visible; }
+  .ct-shell.is-split > .ct-shell-side { position: static; max-height: none; overflow: visible; }
 }
 
 
@@ -1955,7 +1973,7 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
   /* ── Panele: uzpildas pagal stulpeli, ne pagal ekrana ────────────────────
      48 px per visa ekrana yra teisinga. 276 px stulpelyje tai 23 % plocio ir
      laukai lieka po 71 px. Sone uzpildas ateina is tokenų. */
-  .ct-shell-side .ct3-search-inner {
+  .ct-shell.is-split > .ct-shell-side .ct3-search-inner {
     max-width: none;
     padding: 0;
   }
@@ -1963,20 +1981,20 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
   /* ── Viskas, kas lanksti, turi leisti sau susitraukti ────────────────────
      Be min-width: 0 flex vaikas nesitraukia zemiau savo turinio — ta pati
      savybe, del kurios <select> ispute grida v2 matavime. */
-  .ct-shell-side .ct3-search-panel,
-  .ct-shell-side .ct3-search-inner,
-  .ct-shell-side .ct3-search-bottom,
-  .ct-shell-side .ct3-search-bottom-left,
-  .ct-shell-side .ct3-search-bottom-right { min-width: 0; }
+  .ct-shell.is-split > .ct-shell-side .ct3-search-panel,
+  .ct-shell.is-split > .ct-shell-side .ct3-search-inner,
+  .ct-shell.is-split > .ct-shell-side .ct3-search-bottom,
+  .ct-shell.is-split > .ct-shell-side .ct3-search-bottom-left,
+  .ct-shell.is-split > .ct-shell-side .ct3-search-bottom-right { min-width: 0; }
 
   /* Apatine eile: sone ji ne eile, o stulpelis */
-  .ct-shell-side .ct3-search-bottom {
+  .ct-shell.is-split > .ct-shell-side .ct3-search-bottom {
     flex-wrap: wrap;
     gap: var(--s-2);
     padding: var(--s-3);
   }
-  .ct-shell-side .ct3-search-bottom-left,
-  .ct-shell-side .ct3-search-bottom-right {
+  .ct-shell.is-split > .ct-shell-side .ct3-search-bottom-left,
+  .ct-shell.is-split > .ct-shell-side .ct3-search-bottom-right {
     flex: 1 1 100%;
     justify-content: flex-start;
   }
@@ -1985,41 +2003,54 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
      paciai .ct3-search-bottom, tad kaire ir desine krenta i atskiras eiles,
      bet kaireje liko du mygtukai vienoje eiluteje (283 px prie 252 px).
      flex-wrap NEPERSIDUODA vaikams - ji reikia kiekvienam lygiui. */
-  .ct-shell-side .ct3-search-bottom-left { flex-wrap: wrap; }
+  .ct-shell.is-split > .ct-shell-side .ct3-search-bottom-left { flex-wrap: wrap; }
 
   /* ── Laukai: du tankio zingsniai (nepakito nuo v2) ───────────────────────
      Zingsnis 1 — kortele nuo lauko. Zingsnis 2 — semantiniai broliai poromis. */
-  .ct-shell-side .ct3-fields {
+  .ct-shell.is-split > .ct-shell-side .ct3-fields {
     grid-template-columns: 1fr 1fr;
     gap: var(--s-2) var(--s-3);
     padding: var(--s-3);
   }
-  .ct-shell-side .ct3-field {
+  .ct-shell.is-split > .ct-shell-side .ct3-field {
     gap: 5px;
     padding: 0;
     background: transparent;
     border: none;
     min-width: 0;
   }
-  .ct-shell-side .ct3-field.is-wide { grid-column: 1 / -1; }
+  .ct-shell.is-split > .ct-shell-side .ct3-field.is-wide { grid-column: 1 / -1; }
 
-  .ct-shell-side .ct3-select-wrap { padding-right: 20px; }
-  .ct-shell-side .ct3-select-wrap select,
-  .ct-shell-side .ct3-range-wrap input { font-size: 13.5px; }
-  .ct-shell-side .ct3-range-wrap { display: flex; align-items: center; gap: 6px; }
-  .ct-shell-side .ct3-range-wrap > input { flex: 1 1 0; min-width: 0; max-width: none; }
+  .ct-shell.is-split > .ct-shell-side .ct3-select-wrap { padding-right: 20px; }
+  .ct-shell.is-split > .ct-shell-side .ct3-select-wrap select,
+  .ct-shell.is-split > .ct-shell-side .ct3-range-wrap input { font-size: 13.5px; }
+  .ct-shell.is-split > .ct-shell-side .ct3-range-wrap { display: flex; align-items: center; gap: 6px; }
+  .ct-shell.is-split > .ct-shell-side .ct3-range-wrap > input { flex: 1 1 0; min-width: 0; max-width: none; }
 
   /* ── „Daugiau filtru" skydas ─────────────────────────────────────────────
      .ct3-more-panel yra jusu klase (8 blokas) — cia tik jos uzpildas sone. */
-  .ct-shell-side .ct3-more-panel { padding: var(--s-3); }
-  .ct-shell-side .ct3-more-row { flex-direction: column; gap: var(--s-3); align-items: stretch; }
-  .ct-shell-side .ct3-more-row > div { width: 100%; }
+  .ct-shell.is-split > .ct-shell-side .ct3-more-panel { padding: var(--s-3); }
+  .ct-shell.is-split > .ct-shell-side .ct3-more-row { flex-direction: column; gap: var(--s-3); align-items: stretch; }
+  .ct-shell.is-split > .ct-shell-side .ct3-more-row > div { width: 100%; }
 
   /* v1.77.0: .ct3-portals-row istrinta (Nr. 25) - ji buvo dekoracija be nė
      vieno valdiklio, ne filtras. Taisykle palikta be elemento nieko nedaro,
      tad isimta. Zr. Z-21. */
 
-  .ct-shell-side .ct3-search-btn { width: 100%; justify-content: center; }
+  .ct-shell.is-split > .ct-shell-side .ct3-search-btn { width: 100%; justify-content: center; }
+
+  /* 16 paketas (K-12): portalu skydas prisegamas prie to krasto, kur yra
+     vietos. `right: 0` buvo teisinga placioje juostoje, kur mygtukas stovi
+     desineje; 276 px stulpelyje mygtukas prie kairio krasto, tad 264 px skydas
+     nueina i -32 px. Absoliutus elementas SLENKANCIO konteinerio viduje,
+     pastumtas i kaire nuo kilmes, yra NEPASIEKIAMAS, ne tik nematomas -
+     `overflow: auto` neduoda slinkimo i negatyvia puse. */
+  .ct-shell.is-split > .ct-shell-side #portal-selector {
+    left: 0;
+    right: auto;
+    width: 240px;
+    max-width: calc(100% - 12px);
+  }
 }
 
 
@@ -2094,4 +2125,138 @@ textarea.ct-field {
 @media (pointer: coarse) {
   .ct-field { min-height: var(--tap-min); }
   select.ct-field { min-height: var(--tap-min); }
+}
+
+
+/* ============================================================================
+   17 paketas · 27 sk. pataisymas + 32 sk. naujas
+   ----------------------------------------------------------------------------
+   1) 27 sk. — antrastes desinys blokas (K-16). Priezastis MANO 27 skyriuje.
+   2) 32 sk. — lentele kortelėmis telefone (Nr. 16). Pirmas tikras atvejis
+      A-05 taisyklei.
+   ========================================================================== */
+
+
+/* ── 1) K-16 · .ct3-header-right prie desinio krasto ─────────────────────────
+   PRIEZASTIS MANO, IR JI 27 SKYRIUJE.
+
+   .ct3-header-inner yra flex. Iki v1.65.0 desinyji bloka i krasta stumdavo
+   .ct3-nav su flex: 1 — juosta buvo ne tik navigacija, bet ir TARPIKLIS.
+   27 sk. ideiau .ct3-nav:empty { display: none }, juosta istustinta, ir
+   tarpiklis dingo kartu su ja. Desinys blokas atsisedо prie logotipo.
+
+   Ironija: tame paciame 27 sk. rasiau „treciojo kelio (nematomas tarpiklis)
+   nebuna, nes tarpikliui yra margin". Teisingai rasiau — ir nepadariau.
+   Istrindamas elementa nepaklausiau, KA JIS DAR LAIKO.
+
+   Tad tarpiklio vaidmuo atiduodamas tam, kuriam jis ir priklauso: pats
+   desinys blokas pasiima margin-left: auto. Elementu jam nebereikia. */
+
+.ct3-header-right { margin-left: auto; }
+
+/* Juosta, jei kada gris, tarpiklio vaidinio nebeprisiims — flex: 1 nuimamas,
+   kad du dalykai nesikovotu del tos pacios vietos. */
+.ct3-nav { flex: 0 1 auto; }
+
+
+/* ============================================================================
+   32. LENTELE KORTELĖMIS TELEFONE · .ct-table.is-dense
+   ----------------------------------------------------------------------------
+   Vienas principas: lentele yra tinklelis, kurio VERTE yra stulpeliu
+   sugretinimas — akis skaito vertikaliai. 390 px ekrane septyni stulpeliai
+   sugretinti nebegali: kiekvienas gauna po 50 px, ir sugretinimas, del kurio
+   lentele buvo pasirinkta, isnyksta. Tada lentele nebera lentele — ji tik
+   atrodo kaip lentele.
+
+   A-05 taisykle: kortelės, kai eilute turi daugiau kaip 5 stulpelius ARBA
+   ties 390 px atsiranda horizontalus slinkimas. Nr. 16 (7 stulpeliai) yra
+   PIRMAS atvejis, kai ta taisykle ka nors nusprendzia.
+
+   ── KODEL PRIRISTA PRIE .is-dense, O NE PRIE NAUJOS KLASES ────────────────
+   Nauja klase reiketu uzdeti rankomis, o taisykle, kuria reikia atskirai
+   uzdeti, kas nors kada nors pamirs — tai A-08 pamoka („Daugiau" mygtukas).
+   .is-dense reiskia „administravimas, 50+ eiluciu", o administravimo lenteles
+   ir yra tos placios. Tad salyga jau egzistuoja ir nieko nereikia atsiminti.
+
+   Jei kada atsiras tanki lentele su trimis stulpeliais, kuriai kortelės
+   nereikalingos — sakykit, ir tada bus .is-dense.is-table-always. Bet
+   nekuriu jos pries laika.
+
+   ── KO REIKIA MARKUPE ─────────────────────────────────────────────────────
+   Kiekvienas <td> gauna data-stulpelis="ANTRASTE" — kortelėje etikete ateina
+   is jo. Be to reiksmes lieka be vardu, ir kortele tampa nesuprantamesne uz
+   suspausta lentele. admin.html generuojamas (tools/mk-admin.py), tad tai
+   viena eilute generatoriuje.
+
+   NEPERIMA: eilutes turinio, busenu zenkleliu (.ct-k), .is-urgent linijos ar
+   .is-done prigesinimo — visi jie veikia ir kortelėje.
+   NEPERIMA: lenteles placiame variante — nuo 641 px viskas kaip buvo.
+   PRIRISTA prie: max-width 640px — to paties slenkscio, kuriuo 26 sk. keicia
+   hero ir kuriuo mygtukai tampa ikoniniai. Telefonas yra viena salyga visur. */
+
+@media (max-width: 640px) {
+
+  .ct-table.is-dense,
+  .ct-table.is-dense thead,
+  .ct-table.is-dense tbody,
+  .ct-table.is-dense tr,
+  .ct-table.is-dense td { display: block; }
+
+  /* Antraste kortelėse nebereikalinga — vardai persikelia i kiekviena langeli */
+  .ct-table.is-dense thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+
+  .ct-table-w { overflow-x: visible; }
+
+  /* Eilute -> kortele. Tarpas tarp korteliu yra fonas, ne margin: taip
+     .is-urgent linija lieka kortelės krasste, o ne tarp ju. */
+  .ct-table.is-dense tbody tr {
+    position: relative;
+    padding: var(--s-3);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-surface);
+  }
+  .ct-table.is-dense tbody tr:last-child { border-bottom: none; }
+  .ct-table.is-dense tbody tr:hover { background: var(--bg-surface); }
+
+  /* Langelis -> etikete + reiksme vienoje eileje */
+  .ct-table.is-dense tbody td {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-3);
+    padding: 4px 0;
+    border-bottom: none;
+    min-width: 0;
+  }
+  .ct-table.is-dense tbody td::before {
+    content: attr(data-stulpelis);
+    flex: 0 0 96px;
+    font: var(--fw-semi) 9.5px/1.5 var(--font-mono);
+    letter-spacing: .1em;
+    color: var(--text-dim);
+  }
+  /* Langelis be etiketes (arba tuscias) nerodomas — kortelėje tusti langeliai
+     yra triuksmas, o lenteleje jie laike stulpelio vieta. */
+  .ct-table.is-dense tbody td:empty { display: none; }
+
+  /* Skaiciai kortelėje nebeturi i ka lygintis, tad i kaire kaip tekstas */
+  .ct-table.is-dense tbody td.is-num { text-align: left; }
+
+  /* Ilgas tekstas kortelėje gali buti pilnas — vietos yra */
+  .ct-table.is-dense tbody td.is-text { max-width: none; }
+  .ct-table.is-dense tbody td.is-text > .ct-clamp { --clamp: 3; }
+
+  /* Veiksmai — atskira eile kortelės apacioje, pilno plocio */
+  .ct-table.is-dense tbody td.is-act {
+    width: auto;
+    padding-top: var(--s-3);
+    margin-top: 4px;
+    border-top: 1px solid var(--border);
+    white-space: normal;
+  }
+  .ct-table.is-dense tbody td.is-act::before { display: none; }
+
+  /* Skubi eilute: linija kortelės kaireje, ne pirmame langelyje.
+     Langelis nebeturi savo vietos eileje, tad inset persikelia i kortele. */
+  .ct-table.is-dense tbody tr.is-urgent { box-shadow: inset 3px 0 0 var(--danger); }
+  .ct-table.is-dense tbody tr.is-urgent > td:first-child { box-shadow: none; }
 }

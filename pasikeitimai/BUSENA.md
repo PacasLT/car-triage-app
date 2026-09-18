@@ -1,4 +1,4 @@
-# Būsena · atnaujinta 2026-09-18, v1.78.0
+# Būsena · atnaujinta 2026-09-18, v1.80.0
 
 Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
@@ -6,7 +6,7 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
 | Nr. | Kas | Kieno ėjimas | Trumpai |
 |---|---|---|---|
-| K-13 | Nr. 23 · siauri filtrai tuščiame index | **Dizaineris** | Luko sprendimas: šoninis variantas turi atsirasti tik SU rezultatais. `.ct-shell` persijungia kai `#results` turi vaikų? |
+| K-18 | Portalu skydas 187 px vietoj 240 | **Dizaineris** | `max-width: calc(100% - 12px)` skaičiuojamas nuo `.ct3-portal-wrap`, ne nuo stulpelio. Veikia, bet siauriau nei rašėte. |
 | K-14 | Nr. 24 · šoninės panelės dizainas | **Dizaineris** | Be detalių; galiu atsiųsti matavimus ir ekranvaizdžius. |
 | K-15 | Nr. 27 · hero tekstas | **Dizaineris** | Lukas prašo pašalinti `.ct3-hero-content`. 26 sk. dalis — neliečiu be atsakymo. |
 | K-12 | Nr. 26 · portalų sąrašas šone | **Dizaineris** | `right: 0` siaurame stulpelyje duoda −32 px. Atsvara `ct-priedai.css` 9 bloke, pamatuota. |
@@ -21,6 +21,8 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
 ## Kas uždaryta paskutiniu metu
 
+- v1.80.0 — komentarai prie pranešimų (būsena keičiasi pati); `K-16` antraštės tarpiklis (Nr. 28, 30); 32 sk. kortelės telefone (Nr. 16); Nr. 14 pamatuota
+- v1.79.0 — `K-13` dvi būsenos: filtrai į šoną tik po paieškos; `K-12` perėjo į 30 sk.; `ct-priedai.css` 9 blokas ištrintas
 - v1.78.0 — Nr. 29 (prioritetas su spalvomis), Nr. 22 (admin sąrašas atsinaujina grįžus į skirtuką); nauja taisyklė: klaidų sąrašas → užduotys
 - v1.77.0 — Nr. 25 (dekoracinė „Search across Europe" juosta ištrinta), Nr. 26 (portalų sąrašas nebeiškrenta už stulpelio); `K-10` perimta į 30 sk.
 - v1.76.0 — Nr. 20 (`dpTab` grąžinta), Nr. 21 (FAB virš širdelės); 30 sk. v3, šonas 746 → 540 px
@@ -31,7 +33,7 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
 - Dizainerio failai: `frontend/ct-dizainas.css`, `frontend/ct-mygtukai.css`
 - `frontend/ct-priedai.css` — **1, 2** (seni), **7, 8** (mūsų, NETRINTI),
-  **9** (`K-12`) ir **10** (`K-17`) – dvi laikinos atsvaros
+  **10** (`K-17`) – vienintelė laikina atsvara
 - Patikros: `tools/onclick-patikra.py`, `tools/klaidos.js`
 - Užduotys dizaineriui: `pasikeitimai/UZDUOTYS-DIZAINERIUI.md` (perrašoma iš gyvo sąrašo)
 - Versija: `frontend/versijos.js` — **vienintelė vieta**

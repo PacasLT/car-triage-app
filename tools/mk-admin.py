@@ -38,6 +38,15 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 .ad-irankiu-zinia { font: var(--fw-regular) 11.5px/1.5 var(--font-mono); color: var(--text-muted); }
 .ad-pre { margin: 0; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-surface); font: var(--fw-regular) 11.5px/1.6 var(--font-mono); color: var(--text-secondary); white-space: pre-wrap; word-break: break-word; }
 .ad-detales > td { padding: 14px 13px !important; }
+.ad-kom { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; }
+.ad-kom-h { font: 600 10px/1 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
+.ad-kom-tuscia { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+.ad-kom-e { border-left: 2px solid var(--border-light); padding: 2px 0 2px 10px; margin-bottom: 8px; }
+.ad-kom-kas { font: 600 11px/1.4 var(--font-mono); color: var(--text-secondary); margin-right: 8px; }
+.ad-kom-l { font: 400 10px/1.4 var(--font-mono); color: var(--text-dim); }
+.ad-kom-t { font-size: 13px; color: var(--text-primary); margin-top: 3px; white-space: pre-wrap; }
+.ad-kom-f { display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap; }
+.ad-kom-f textarea { flex: 1 1 260px; min-width: 0; resize: vertical; }
 .ad-pre { max-height: 260px; overflow: auto; padding: 10px 12px; border-radius: 8px; background: var(--bg-base); font: 400 11px/1.55 var(--font-mono); color: var(--text-secondary); white-space: pre-wrap; word-break: break-word; margin: 8px 0 0; }
 .ad-foto { max-width: 100%; max-height: 240px; border-radius: 8px; border: 1px solid var(--border); display: block; margin-top: 10px; }
 .ad-kelias { font: 500 10.5px/1.6 var(--font-mono); color: var(--text-muted); }
@@ -273,14 +282,17 @@ BODY = u'''
     var uzdaryta = k.busena === 'sutvarkyta' || k.busena === 'nepasitvirtino';
     var dg = k.diagnostika || {};
     var eil = '<tr class="ad-tr' + (skubu ? ' is-urgent' : '') + (uzdaryta ? ' is-done' : '') + '" onclick="adIsskleisti(' + k.nr + ')">'
-      + '<td class="is-num">' + k.nr + '</td>'
-      + '<td>' + esc(KAT[k.kategorija] || k.kategorija || '\u2014')
+      // v1.80.0 (32 sk.): kiekvienam <td> - data-stulpelis. Telefone eilute
+      // tampa kortele, ir etikete ateina is sio atributo. Be jo kortelėje butu
+      // reiksme be vardo - blogiau uz suspausta lentele (17 paketas, 2.3).
+      + '<td class="is-num" data-stulpelis="NR.">' + k.nr + '</td>'
+      + '<td data-stulpelis="KATEGORIJA">' + esc(KAT[k.kategorija] || k.kategorija || '\u2014')
       +   (k.kartojasi ? ' <span class="chip">kartojasi</span>' : '') + '</td>'
-      + '<td class="is-text"><span class="ct-clamp">' + esc(k.tekstas) + '</span></td>'
-      + '<td class="is-time">' + laikas(k.laikas) + '</td>'
-      + '<td class="is-time">' + versijosZyme(k) + '</td>'
-      + '<td>' + busenosZenklas(k.busena) + '</td>'
-      + '<td class="is-act">'
+      + '<td class="is-text" data-stulpelis="KLAIDA"><span class="ct-clamp">' + esc(k.tekstas) + '</span></td>'
+      + '<td class="is-time" data-stulpelis="KADA">' + laikas(k.laikas) + '</td>'
+      + '<td class="is-time" data-stulpelis="VERSIJA">' + versijosZyme(k) + '</td>'
+      + '<td data-stulpelis="B\u016aSENA">' + busenosZenklas(k.busena) + '</td>'
+      + '<td class="is-act" data-stulpelis="">'
       +   '<button class="ct-btn ct-btn-quiet ct-btn-icon ct-btn-sm is-destructive" title="I\u0161trinti visi\u0161kai"'
       +     ' aria-label="I\u0161trinti prane\u0161im\u0105" onclick="event.stopPropagation();adTrinti(' + k.nr + ')">' + ikona('i-pasalinti') + '</button>'
       + '</td></tr>';
@@ -315,12 +327,38 @@ BODY = u'''
       +     '<span>Kopijuoti</span></button>'
       +   '<span class="ad-irankiu-zinia" id="ad-iz-' + k.nr + '"></span>'
       + '</div>'
+      + komentaruSritis(k)
       + '<div class="ad-veiksmai">'
       +   BUSENOS.map(function (b) {
             return '<button type="button" class="ct-flag" role="radio" aria-checked="' + (b.k === k.busena)
               + '" onclick="event.stopPropagation();adBusena(' + k.nr + ', &quot;' + b.k + '&quot;)">' + b.t + '</button>';
           }).join('')
       + '</div></td></tr>';
+  }
+
+  // v1.80.0: komentarai. Tikrinant pataisyma daznai paaiskeja, kad ne viskas -
+  // tada reikia ne naujo pranesimo, o eilutes prie to paties. Visa istorija
+  // vienoje vietoje, ir busena pasikeicia pati (laukia-patikros -> patvirtinta).
+  function komentaruSritis(k) {
+    var sar = k.komentarai || [];
+    var h = '<div class="ad-kom">';
+    h += '<div class="ad-kom-h">Komentarai' + (sar.length ? ' (' + sar.length + ')' : '') + '</div>';
+    if (!sar.length) {
+      h += '<div class="ad-kom-tuscia">Dar n\u0117ra. Ra\u0161ykit \u010Dia, jei tikrinant kas nors neveikia \u2013 nereikia naujo prane\u0161imo.</div>';
+    } else {
+      h += sar.map(function (x) {
+        return '<div class="ad-kom-e"><span class="ad-kom-kas">' + esc(x.kas || '?')
+          + '</span><span class="ad-kom-l">' + laikas(x.laikas)
+          + (x.busena ? ' \u00B7 ' + esc(x.busena) : '') + '</span>'
+          + '<div class="ad-kom-t">' + esc(x.tekstas || '') + '</div></div>';
+      }).join('');
+    }
+    h += '<div class="ad-kom-f">'
+      + '<textarea class="ct-field" id="ad-kom-i-' + k.nr + '" rows="2" placeholder="Kas dar ne taip?" onclick="event.stopPropagation()"></textarea>'
+      + '<button type="button" class="ct-btn ct-btn-sm" onclick="event.stopPropagation();adKomentuoti(' + k.nr + ')"><span>Prid\u0117ti</span></button>'
+      + '<span class="ad-irankiu-zinia" id="ad-kz-' + k.nr + '"></span>'
+      + '</div></div>';
+    return h;
   }
 
   // v1.65.0: prie kiekvieno pranesimo - versija, KURIOJE jis parasytas, ir ar ji
@@ -457,6 +495,22 @@ BODY = u'''
 
   window.adIsskleisti = function (nr) { _isskleista = (_isskleista === nr ? null : nr); piestiKlaidas(); };
   window.adVisi = function (v) { _visi = v; _isskleista = null; piestiKlaidas(); };
+  window.adKomentuoti = function (nr) {
+    var el = document.getElementById('ad-kom-i-' + nr);
+    var z = document.getElementById('ad-kz-' + nr);
+    var t = el ? el.value.trim() : '';
+    if (!t) { if (z) z.textContent = 'Tu\u0161\u010Dia.'; return; }
+    if (z) z.textContent = 'Siun\u010Diama...';
+    siusti('/admin/klaidos/' + nr + '/komentaras', { tekstas: t }).then(function (r) {
+      if (el) el.value = '';
+      // Perpiesim PIRMA, tada rasom zinia: piestiKlaidas() atkuria ta pacia
+      // eilute is naujo, tad anksciau irasyta zinia dingtu kartu su senu span'u.
+      piestiKlaidas();
+      var z2 = document.getElementById('ad-kz-' + nr);
+      if (z2) z2.textContent = (r && r.busenaPakeista) ? 'Prid\u0117ta, b\u016Bsena \u2192 ' + r.busenaPakeista : 'Prid\u0117ta.';
+    }).catch(function (e) { if (z) z.textContent = 'Nepavyko: ' + e.message; });
+  };
+
   window.adBusena = function (nr, b) {
     var v = null;
     try { v = (window.CT_VERSIJOS && window.CT_VERSIJOS[0] && window.CT_VERSIJOS[0].versija) || null; } catch (e) {}

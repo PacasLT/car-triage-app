@@ -3583,6 +3583,13 @@ async function runQuickCount() {
 }
 
 async function runSearch() {
+  // v1.79.0 (16 paketas, K-13): filtrai i sona tik PO paieskos paleidimo.
+  // Salyga yra paleidimas, ne rezultatu skaicius: paieska su 0 rezultatu yra
+  // butent ta bukle, kur filtrai sone reikalingi labiausiai - juos reikia
+  // atlaisvinti. Klase nenuimama, kol negrizta i pradini vaizda.
+  var _shell = document.querySelector('.ct-shell');
+  if (_shell) _shell.classList.add('is-split');
+
   const btn = document.getElementById('search-btn');
   const status = document.getElementById('status');
   const logContainer = document.getElementById('log-container');

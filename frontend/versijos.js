@@ -8,6 +8,23 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.80.0', data: '2026-09-18', pavadinimas: 'Komentarai prie klaidu, antraste susitvarke, admin lentele telefone',
+    pakeitimai: [
+      'Tikrinant pataisyma galima prirasyti komentara prie to paties pranesimo - nebereikia kurti naujo',
+      'Parasius komentara „laukia patikros" pranesimas pats grizta i „patvirtinta", t.y. atgal i darba',
+      'Antrastes desinys blokas vel stovi prie desinio krasto, ne prie logotipo',
+      'Administravimo lentele telefone virsta kortelėmis: kiekviena reiksme su savo vardu',
+    ],
+  },
+  {
+    versija: '1.79.0', data: '2026-09-18', pavadinimas: 'Filtrai i sona keliauja tik po paieskos',
+    pakeitimai: [
+      'Tusciame puslapyje paieskos forma vel per visa ploti - siauras stulpelis atsiranda tik paleidus paieska',
+      'Paieska be rezultatu filtru is sono nebeismeta: salyga yra paieska, ne rezultatu skaicius',
+      'Portalu sarasas sone atsidaro i desine nuo mygtuko ir telpa stulpelyje',
+    ],
+  },
+  {
     versija: '1.78.0', data: '2026-09-18', pavadinimas: 'Prioritetas su spalvomis, administravimo sarasas atsinaujina pats',
     pakeitimai: [
       'Pranesime apie klaida „kiek trukdo" pakeista i prioriteta: Svarbu raudonas, Vidutinis geltonas, Maziausiai svarbu zalias',
