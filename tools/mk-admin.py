@@ -76,7 +76,8 @@ BODY = u'''
     dizainas: 'Atrodo ne taip', negyvas: 'Nieko neįvyko', duomenys: 'Neteisingas skaičius',
     kreditai: 'Nusirašė kreditas', greitis: 'Užstringa', prisijungimas: 'Prisijungimas', kita: 'Kita'
   };
-  var SVARBA = { blokuoja: 'Negaliu tęsti', trukdo: 'Trukdo', smulkme: 'Smulkmena' };
+  // v1.78.0 (Nr. 29): prioritetas vietoj „kiek trukdo". Raktai nekeiciami.
+  var SVARBA = { blokuoja: 'Svarbu', trukdo: 'Vidutinis', smulkme: 'Mažiausiai svarbu' };
 
   var el = document.getElementById('ad-turinys');
   var sub = document.getElementById('ad-sub');
@@ -532,6 +533,17 @@ BODY = u'''
   } else {
     piestiKlaidas();
   }
+
+  // v1.78.0 (Nr. 22): busena, pakeista telefone, web'e likdavo sena, nes puslapis
+  // duomenis pasiima tik atsidarydamas. Sarasas nera realaus laiko srautas, tad
+  // nedarom apklausos kas N sekundziu - uztenka atsinaujinti tada, kai zmogus
+  // GRIZTA i si skirtuka. Butent tas atvejis ir buvo aprasytas.
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState !== 'visible') return;
+    if (!zetonas()) return;
+    if (_rodyti !== 'klaidos') return;
+    piestiKlaidas();
+  });
 })();
 </script>
 '''

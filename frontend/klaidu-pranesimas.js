@@ -193,10 +193,13 @@
     { k: 'pasiulymas',    t: 'Turiu pasiūlymą / patobulinimą' },
     { k: 'kita',          t: 'Kita' },
   ];
+  // v1.78.0 (Nr. 29): „kiek trukdo" -> prioritetas. RAKTAI NEKEICIAMI - juos
+  // turi 29 jau irasyti pranesimai ir serverio rusiavimas (server.js 325).
+  // Keiciasi tik tai, ka mato zmogus: uzrasas ir spalva.
   var SVARBOS = [
-    { k: 'blokuoja', t: 'Negaliu tęsti' },
-    { k: 'trukdo',   t: 'Trukdo' },
-    { k: 'smulkme',  t: 'Smulkmena' },
+    { k: 'blokuoja', t: 'Svarbu' },
+    { k: 'trukdo',   t: 'Vidutinis' },
+    { k: 'smulkme',  t: 'Mažiausiai svarbu' },
   ];
 
   function zenkliukai(id, sarasas, pasirinktas) {
@@ -229,7 +232,7 @@
       +     '<span class="ct-field-err" id="kp-kat-err" hidden>Pasirinkite, kokia tai problema.</span>'
       +   '</div>'
       +   '<div class="ct-flag-group">'
-      +     '<span class="ct-field-k">KIEK TRUKDO</span>'
+      +     '<span class="ct-field-k">PRIORITETAS</span>'
       +     zenkliukai('kp-svarba', SVARBOS, 'trukdo')
       +   '</div>'
       +   '<div class="ct-flag-group">'

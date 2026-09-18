@@ -376,6 +376,39 @@ Lukas nieko neperrašinėja ir nesiunčia failų – kiekvienas skaito iš ten, 
 - `matavimai/` – ekranvaizdžiai ir skaičiai, į kuriuos rodo žurnalo įrašai.
 - Nebeklausti Luko „ką perduoti dizaineriui?" – **įrašas žurnale ir yra perdavimas.**
 
+## Klaidų sąrašas – UŽDUOTYS, ne tik sąrašas (v1.77.0)
+
+**Kaskart, kai nuskaitau klaidų sąrašą, tuo pačiu žingsniu padarau iš jo užduotis.**
+Skaitymas be to yra pusė darbo: sąrašas pasako, kas blogai, bet nepasako, kas ką
+daro toliau.
+
+**Trys žingsniai, visada kartu:**
+
+1. **Klasifikuoti kiekvieną atvirą pranešimą į tris krūvas** – **mano** (galiu
+   ištaisyti pats), **dizainerio** (reikia jo skyriaus sprendimo), **Luko**
+   (reikia jo sprendimo, sumos, nuotraukos ar patikros). Nesprendžiu už
+   dizainerį jo skyriuose ir už Luką – jo produkte.
+
+2. **Sugrupuoti pagal šaknines priežastis, ne po vieną.** Trys pranešimai apie
+   tą patį elementą yra vienas klausimas, ne trys. Z-19 pavyzdys: keturi
+   pločio pranešimai buvo viena `max-width` eilutė.
+
+3. **Parašyti į `pasikeitimai/UZDUOTYS-DIZAINERIUI.md`** – perrašoma VISA iš
+   sąrašo, niekada iš atminties (ta pati taisyklė kaip `BUSENA.md`). Kiekviena
+   eilutė turi: **Nr. · ką parašė Lukas · elemento selektorių · ką jau
+   pamatavau · ko iš jo reikia.** Pranešimas be matavimo yra nuomonė; su
+   matavimu – užduotis. Jei matavimo nėra – pamatuoti PRIEŠ rašant, arba
+   atvirai parašyti „nepamatuota, galiu".
+
+**Ir Lukui pasakoma tuo pačiu atsakymu:** kiek naujų pranešimų, kiek kuriai
+krūvai, ką imu pirma, ir kas laukia jo sprendimo. Ne „atnaujinau būsenas",
+o skaičiai ir vardai.
+
+**Kodėl tai ne biurokratija:** dizaineris klaidų sąrašo nemato – jis mato tik
+tai, ką parašau į kanalą. Iki v1.77.0 jo pranešimai pas jį keliaudavo po vieną
+ir tik tada, kai kažkas užkliūdavo; dėl to jis dirbo prie `D-03`, kurio ekranas
+nuo v1.43.0 apskritai nebuvo rodomas.
+
 ## Po kiekvienos versijos – KLAIDŲ BŪSENOS (v1.69.0)
 
 Versijos pakėlimas ir klaidų būsenos yra **vienas veiksmas, ne du**. Jei

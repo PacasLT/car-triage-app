@@ -1764,3 +1764,52 @@ iš naujo: 540 px, slinkimo 0, `Istorija` pasiekiama septyniuose pločiuose.
 
 Įrašas `CLAUDE.md`: **įtraukos šablonas yra substringas.** Ieškant uždarymo
 pagal tarpus reikia arba eilutės pradžios, arba skaičiuoti balansą.
+
+---
+
+## Z-22 · 2026-09-18 · Klaudijus · v1.78.0 + NAUJA TAISYKLĖ
+
+### 1. Nauja taisyklė: klaidų sąrašas → užduotys
+
+Luko sprendimas: kiekvieną kartą, kai nuskaitau klaidų sąrašą, iš jo tuo pačiu
+žingsniu padaromos **užduotys**, o ne tik būsenos. Įrašyta `CLAUDE.md`
+(„Klaidų sąrašas – UŽDUOTYS, ne tik sąrašas").
+
+Trys žingsniai: klasifikuoti kiekvieną atvirą pranešimą (mano / dizainerio /
+Luko) → sugrupuoti pagal **šaknines priežastis**, ne po vieną → surašyti į
+**`pasikeitimai/UZDUOTYS-DIZAINERIUI.md`** su selektoriumi ir matavimu.
+Perrašoma visa iš gyvo sąrašo, niekada iš atminties — ta pati taisyklė kaip
+`BUSENA.md` po `D-14`.
+
+**Jums tai reiškia vieną dalyką:** nebereikia laukti, kol kas nors užklius.
+`UZDUOTYS-DIZAINERIUI.md` visada rodo visus jūsų laukiančius pranešimus,
+sugrupuotus. Pirmas leidimas jau ten: A grupė (šoninė panelė — Nr. 23, 24, 26),
+B grupė (skelbimo puslapis — 9, 10, 18, užblokuota `D-03`), C grupė (antraštė
+ir hero — 27, 28), D grupė (plotis — 2, 19), E (16, 14).
+
+### 2. Du ištaisyti be jūsų (v1.78.0)
+
+**Nr. 29** — „kiek trukdo" pakeista į prioritetą: Svarbu / Vidutinis /
+Mažiausiai svarbu. **Raktai `blokuoja` / `trukdo` / `smulkme` nepakeisti** —
+juos turi 29 jau įrašyti pranešimai ir serverio rūšiavimas. Pasikeitė tik tai,
+ką mato žmogus.
+
+Spalvos — `ct-priedai.css` **10 blokas**, ir tai **`K-17`**: `.ct-flag`
+(21 sk.) sąmoningai neturi spalvų, ir tai teisinga — jei kiekvienas ženkliukų
+rinkinys dažytųsi savaip, aktyvumo ženklas nustotų būti ženklu. Todėl uždėjau
+spalvą **ne ant ženkliuko, o tašku prieš užrašą**, ir tik viename rinkinyje
+(`#kp-svarba`). Tokenai esami (`--danger` / `--warning` / `--success`), naujų
+nekūriau. Jei 21 sk. nori savo modifikatoriaus — blokas dings.
+
+**Nr. 22** — administravimo sąrašas neatsinaujindavo: būseną Lukas keitė
+telefone, o kompiuteryje atidarytas puslapis rodė seną, nes duomenis paima tik
+atsidarydamas. Nedariau apklausos kas N sekundžių — sąrašas nėra realaus laiko
+srautas. Atsinaujina tada, kai žmogus **grįžta į skirtuką** (`visibilitychange`).
+Patikrinta: prieš — 0 užklausų, grįžus — 1.
+
+### 3. Pamatuota
+
+Prioriteto ženkliukai ties 390 ir 1280 px: trys taškai
+(`oklch(.66 .19 25)` / `oklch(.81 .13 78)` / `oklch(.75 .15 158)`), 8×8 px,
+numatytasis „Vidutinis", 0 JS klaidų, horizontalaus slinkimo 0.
+`onclick-patikra.py` po `admin.html` pergeneravimo — visos funkcijos apibrėžtos.

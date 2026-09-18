@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.78.0', data: '2026-09-18', pavadinimas: 'Prioritetas su spalvomis, administravimo sarasas atsinaujina pats',
+    pakeitimai: [
+      'Pranesime apie klaida „kiek trukdo" pakeista i prioriteta: Svarbu raudonas, Vidutinis geltonas, Maziausiai svarbu zalias',
+      'Administravimo sarasas atsinaujina grizus i skirtuka - busena, pakeista telefone, nebelieka sena kompiuteryje',
+      'Ankstesniu pranesimu duomenys nepasikeite: pasikeite tik uzrasai ir spalvos',
+    ],
+  },
+  {
     versija: '1.77.0', data: '2026-09-18', pavadinimas: 'Portalu sarasas nebenukerpamas, dekoracija is filtru pasalinta',
     pakeitimai: [
       'Renkantis portala sarasas nebeiskrenta uz filtru stulpelio - tekstas matomas visas',
