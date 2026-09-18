@@ -31,6 +31,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 .ad-detales { background: var(--bg-elevated); }
 /* .chip gyvena ct-dizainas.css, kuris krauna VELIAU uz si <style>. Prie tos
    pacios specifikos jis nugalėtų, todel `.chip.ad-sena` - (0,2,0) vs (0,1,0). */
+.chip.ad-istaisyta { border-color: var(--success-border); color: var(--success); }
 .chip.ad-sena { border-color: var(--warning-border); color: var(--warning); }
 .ad-irankiai { display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: center; margin: 12px 0 4px; }
 .ad-irankiu-zinia { font: var(--fw-regular) 11.5px/1.5 var(--font-mono); color: var(--text-muted); }
@@ -318,8 +319,9 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
       e.push('');
       var dbr = dabartineVersija();
       var senesne = g.versija && dbr && versijaSkaicium(g.versija) < versijaSkaicium(dbr);
+      var istV = istaisymoVersija(k);
       e.push('PUSLAPIS: ' + (g.puslapis || '?') + '  v' + (g.versija || '?')
-        + (senesne ? '  [PRANESTA v' + g.versija + ', DABAR v' + dbr + ' - galejo buti istaisyta]' : '')
+        + (istV ? '  [ISTAISYTA v' + istV + ']' : (senesne ? '  [PRANESTA v' + g.versija + ', DABAR v' + dbr + ' - galejo buti istaisyta]' : ''))
         + '  ' + (ek.plotis || '?') + 'x' + (ek.aukstis || '?') + '@' + (ek.tankis || '?')
         + '  planas=' + ((g.planas || {}).planas || '?')
         + '  kreditai=' + ((g.planas || {}).kreditai == null ? '?' : g.planas.kreditai)
@@ -477,9 +479,28 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
     return String(v || '').split('.').map(function (x) { return parseInt(x, 10) || 0; })
       .reduce(function (a, x) { return a * 1000 + x; }, 0);
   }
+  // v1.70.0 (pranesimas Nr.17): rodom DVI versijas - kurioje rasta ir kuria
+  // istaisyta. Antroji jau buvo kaupiama busenu istorijoje (`versija` prie
+  // kiekvieno perjungimo), tik niekur nerodoma. Jei dar neistaisyta, rodom
+  // dabartine su rodykle - tada matyti, kiek versiju prabego be atsakymo.
+  function istaisymoVersija(k) {
+    var ist = k.istorija || [];
+    for (var i = 0; i < ist.length; i++) {
+      if ((ist[i].busena === 'laukia-patikros' || ist[i].busena === 'sutvarkyta') && ist[i].versija) {
+        return ist[i].versija;
+      }
+    }
+    return null;
+  }
   function versijosZyme(k) {
     var v = ((k.diagnostika || {}).versija) || null;
     if (!v) return '<span class="ad-meta">?</span>';
+    var ist = istaisymoVersija(k);
+    if (ist) {
+      return '<span class="chip">v' + esc(v) + '</span>'
+        + '<span class="ad-meta"> → </span>'
+        + '<span class="chip ad-istaisyta" title="Ištaisyta">v' + esc(ist) + '</span>';
+    }
     var dbr = dabartineVersija();
     var sena = dbr && versijaSkaicium(v) < versijaSkaicium(dbr);
     return '<span class="chip' + (sena ? ' ad-sena' : '') + '">v' + esc(v)

@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.70.0', data: '2026-09-18', pavadinimas: 'Matosi, kuria versija ištaisyta',
+    pakeitimai: [
+      'Klaidų sąraše prie pranešimo dabar dvi versijos: kurioje rasta ir kuria ištaisyta',
+      'Ištaisyta rodoma žaliai – neištaisyta geltonai su dabartine versija, tad matosi, kiek versijų prabėgo',
+    ],
+  },
+  {
     versija: '1.69.0', data: '2026-09-18', pavadinimas: 'Galima parodyti, kur sugedo',
     pakeitimai: [
       'Pranešime naujas mygtukas „Parodyti vietą ekrane" – langas pasitraukia, jūs bakstelėjate į sugedusią vietą',

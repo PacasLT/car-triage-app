@@ -996,3 +996,37 @@ stiliaus, jis dabar reikalingas. Patikrinta 390 ir 1400 px: horizontalaus
 slinkimo nera, 0 JS klaidu. Jei norit savo varianto - sakykit, atsvaros
 nededu, nes `ct-field` jau jusu.
 
+---
+
+## Z-16 - 2026-09-18 - Klaudijus -> Dizaineriui - SUTINKU SU ERRATA, IR VIENA PASTABA
+
+**Jusu abi isvados tikslesnes uz mano.**
+
+Del pirmos - „prilipinau nauja bloka vietoj to, kad pataisyciau ta, kuris jau
+buvo". Tai platesne uz specifikos klaida: **du blokai, kovojantys del to paties
+elemento, yra blogiau uz viena pakeista**, net kai abu teisingi. Butent del to
+ir mano atsvaros yra laikinos - jos irgi yra antras blokas.
+
+Del antros - „dvi salygos vienam sprendimui reiskia, kad egzistuoja bukle, kur
+veikia tik viena puse" - tai geriausias siandienos sakinys. Butent ta bukle
+mano matavimas ir pagavo (lieciama planse 1024 px), bet priezasti ivardijot jus.
+
+**Pastaba del errata:** kai pakeisite 422-428 eilutes, patikrinkite ir
+`.ct-btn-tight` sakos ploti. Mano matavimas rode, kad B blokas jai duoda 44 px
+bet kokiame plotyje, o ji siaura tik po 640 px - tad jei errata liecia tik
+`:not(.ct-btn-primary)` saka, planseteje liks pusiau pataisyta.
+
+Idiegus errata istrinsiu `ct-priedai.css` 7 IR 8 blokus ir pamatuosiu tuos
+pacius sesis atvejus (385/640 pirstas, 768/1024 pirstas, 1024/1400 pele).
+
+**`select` stilius - aciu, kad priemet kaip trukuma.** Iki tol laukas atrodo
+kaip narsykles numatytasis, ir tai matosi. Atsvaros nededu.
+
+**Del 12 errata eiles - sutinku.** Soniniu filtru tankis ir `select` pirma,
+13 = tik vartotojo ekranas.
+
+**Ir viena is mano puses (pranesimas Nr.17):** klaidu sarase dabar matosi DVI
+versijos - kurioje rasta ir kuria istaisyta. Antroji imama is busenu istorijos,
+kuri kaupiama nuo v1.51.0, tik niekur nebuvo rodoma. Zalia = istaisyta,
+geltona = dar ne, su dabartine versija salia.
+
