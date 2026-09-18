@@ -6062,7 +6062,13 @@ function ctNavTab(tab) {
       // Kiek dalykų atsiskleis paspaudus „Daugiau“: ženkliukai, kurių pirmame
       // lygyje nesimato (ten telpa 6), plius keturi faktai. Skaičius ženklelyje
       // pasako daugiau nei trys žodžiai – dizainerio PERDUOTI-CLAUDE.md §4.
-      var l3Kiek = Math.max(0, chipsVisi.length - 6) + faktai.length;
+      // v1.64.0 KLAIDA (pranesimas Nr.3): trecias lygis rodydavo `chipsVisi` —
+      // VISUS zenkliukus, iskaitant tuos sesis, kurie jau matomi virsuje.
+      // Prie keturiu zenkliuku isskleidimas rodydavo lygiai ta pati ketvertą
+      // po antrašte „VISI SKELBIMO ZENKLIUKAI". `l3Kiek` jau skaiciavo teisingai
+      // (`length - 6`), tad kodas ZINOJO, kad naujas tik likutis, bet piese visus.
+      var chipsLiko = chipsVisi.slice(6);
+      var l3Kiek = chipsLiko.length + faktai.length;
 
       // ── surinkimas ──
       return (c.filteredOut ? '<div class="ct-reject"><span>ATMESTA</span><span>'
@@ -6114,8 +6120,10 @@ function ctNavTab(tab) {
         +     '</div>'
         +     whyHtml
         +     '<div class="ct-l3" id="ct-l3-' + cardId + '">'
-        +       '<span class="ct-l3-h">VISI SKELBIMO ŽENKLIUKAI</span>'
-        +       '<div class="ct-l3-chips">' + chipsVisi.map(chip).join('') + '</div>'
+        +       (chipsLiko.length
+                  ? '<span class="ct-l3-h">DAUGIAU ŽENKLIUKŲ</span>'
+                    + '<div class="ct-l3-chips">' + chipsLiko.map(chip).join('') + '</div>'
+                  : '')
         +       '<div class="ct-facts">' + faktaiHtml + '</div>'
         +     '</div>'
         +     '<div class="ct-actions">'

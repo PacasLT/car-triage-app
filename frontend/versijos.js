@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.64.0', data: '2026-09-18', pavadinimas: 'Išplėtus nebesikartoja tas pats',
+    pakeitimai: [
+      'ISTAISYTA: paspaudus „Daugiau" apačioje pasirodydavo tie patys ženkliukai, kurie jau matomi viršuje',
+      'Dabar rodomi tik tie, kurių viršuje nesimatė – o jei tokių nėra, skiltis visai neatsiranda',
+      'Antraštė „VISI SKELBIMO ŽENKLIUKAI" pakeista į „DAUGIAU ŽENKLIUKŲ" – dabar ji sako tiesą',
+    ],
+  },
+  {
     versija: '1.63.0', data: '2026-09-18', pavadinimas: 'Meniu juosta pagaliau turi nuorodas',
     pakeitimai: [
       'Antraštės juosta užpildyta: Paieška · Palyginimas · Ataskaitos – visuose puslapiuose',

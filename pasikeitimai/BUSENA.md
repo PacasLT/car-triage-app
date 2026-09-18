@@ -7,12 +7,16 @@
 | K-03 | `.ct-kv` vardas irgi užimtas | **Dizaineris** | Senasis `.ct-kv` = eilutė, naujas = konteineris. Pamatuota: trys eilutės sugultų į vieną (y 27/27/27). 24 sk. sustabdytas. |
 | K-05 | Administravimo panelės maketas | **Dizaineris** | Karkasas geras; keturi klausimai: tikri skaičiai, moderavimo eilė, atskira antraštė, 880 px kortelės. Užduotys – `UZDUOTYS-ADMIN.md`. |
 | K-04 | Maketas už 1240 px ir po 385 px | **Dizaineris** | Du vartotojo pranešimai per valandą: 3152 px – 976 px tuščios; 385 px – nuotrauka apkarpyta. Plius tuščia `.ct3-nav`. |
+| V-07 | Atmesti skelbimai (pranesimas Nr.2) | **Klaudijus** | Laukia nuotraukos perziuros. |
+| K-06 | `compare.html` be bendros antrastes | **Dizaineris** | Turi `.ct3-header` CSS, bet neturi markupo. |
 | V-05 | Daužtų skelbimų kortelė | **Klaudijus** | `.risk-banner` aprašytas dukart `index.html` (219 ir 1050). Tiriama. |
 | D-03 | Skelbimo puslapio 3 dalis | **Dizaineris** | Kortelės, rinkos padėties skalė, pardavėjo kortelė. Laukiam paketo 07. |
 | L-04 | `/admin/atsarga` rezultatas | **Lukas** | Po paros veikimo pažiūrėti skaičius ir nuspręsti dėl Puppeteer. Priminimas 09-19 14:30. |
 
 ## Kas uždaryta paskutiniu metu
 
+- v1.64.0 - pranesimas Nr.3 uzdarytas: ispletus nebesikartoja zenkliukai (patikrintos abi sakos, 0 dubliu)
+- v1.63.0 - 09 paketas: `.ct-specs`, hero, meniu juosta; aktyvios nuorodos klaida istaisyta
 - v1.60.0 — **`fs` nebuvo įreikalautas `server.js`**: pranešimai niekada nebuvo rašomi į diską. Ištaisyta, patikrinta perkrovimu
 - v1.60.0 — `/admin/atsarga` rodo, kur guli duomenys; `/data` Volume patvirtintas kaip persistentinis
 - v1.59.0 — „Atkurti / Patikrinti užklausas / Kopijuoti" prie kiekvieno pranešimo
