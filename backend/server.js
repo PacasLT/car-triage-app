@@ -7,6 +7,12 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const crypto = require('crypto');
+// v1.60.0 KLAIDA: `fs` cia niekada nebuvo ireikalautas, nors naudojamas 7 vietose.
+// Visos jos apgaubtos try/catch, todel serveris nelūžo - tik TYLIAI nieko nedare:
+// klaidu zurnalas niekada nebuvo irasytas i diska, nuotraukos neissaugotos,
+// katalogas nesukurtas. Keturi pranesimai gyveno TIK atmintyje ir dingo per
+// pirma perkrovima. Klaida matesi tik Railway zurnale: „fs is not defined".
+const fs = require('fs');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const puppeteer = require('puppeteer');
@@ -237,6 +243,10 @@ app.post('/api/klaida', (req, res) => {
       kategorija: KAT.indexOf(kunas.kategorija) >= 0 ? kunas.kategorija : 'kita',
       svarba: SV.indexOf(kunas.svarba) >= 0 ? kunas.svarba : 'trukdo',
       kartojasi: !!kunas.kartojasi,
+      // v1.58.0: is narsykles eiles. Rodo, kad pranesimas veluoja - laikas
+      // `laikas` yra GAVIMO, o ne ivykio. Be sios zymos diagnostika meluoja.
+      persiustas: !!kunas.persiustas,
+      fotoNumesta: !!kunas.fotoNumesta,
       turejoRodyti: kunas.turejoRodyti ? String(kunas.turejoRodyti).slice(0, 500) : null,
       tekstas, foto: fotoFailas,
       diagnostika: kunas.diagnostika || null,
@@ -387,10 +397,28 @@ app.get('/admin/klaidos/:nr/foto', klaiduPrieiga, (req, res) => {
 
 // v1.47.0: atsarginiu nuskaitymo keliu statistika. GET, nemokamas, tik adminui.
 // Klausimas, i kuri atsako: ar Puppeteer produkcijoje kada nors suveikia.
+// v1.60.0: kur GULI duomenys ir ar tai islieka po deploy'aus. Pridėta todel,
+// kad keturi klaidu pranesimai dingo per deploy'u, o is israso nebuvo kaip
+// pasakyti, ar tai Volume problema, ar kas kita. Spejimas cia netinka.
+const saugykla = () => {
+  let dydis = null, yra = false;
+  try { const st = fs.statSync(KLAIDU_FAILAS); yra = true; dydis = st.size; } catch (e) {}
+  return {
+    katalogas: cache.DATA_DIR,
+    saltinis: cache.DATA_SALTINIS,
+    persistentinis: cache.DATA_PERSISTENTINIS,
+    klaiduFailas: KLAIDU_FAILAS,
+    klaiduFailasYra: yra,
+    klaiduFailoDydis: dydis,
+    klaiduAtmintyje: _klaidos.length,
+    ispejimas: cache.DATA_PERSISTENTINIS ? null
+      : 'DUOMENYS KONTEINERIO VIDUJE - kiekvienas deploy juos istrina. Reikia Railway Volume ties /data arba DATA_DIR kintamojo.',
+  };
+};
 app.get('/admin/atsarga', klaiduPrieiga, (req, res) => {
   const val = Math.round((Date.now() - ATSARGA.nuo) / 3600000 * 10) / 10;
   const p = ATSARGA.puppeteer;
-  res.json({
+  res.json(Object.assign({ saugykla: saugykla() }, {
     nuoPaleidimoVal: val,
     paieskosPuslapiai: ATSARGA.paieska,
     skelbimuPuslapiai: ATSARGA.skelbimas,
@@ -400,8 +428,9 @@ app.get('/admin/atsarga', klaiduPrieiga, (req, res) => {
       : p.pavyko === 0
         ? 'Puppeteer pasiektas, bet NE KARTO nepavyko - jis tik verčia vieną klaidą kita.'
         : `Puppeteer pavyko ${p.pavyko} is ${p.pasiektas} kartu - atsarginis kelias realiai veikia.`,
-  });
+  }));
 });
+
 
 app.get('/admin/zurnalas', requireAuth, planai.reikalautiAdmin, (req, res) => {
   try {
@@ -657,7 +686,9 @@ function autopliusAmzius(tekstas) {
 // Kaina, mazesne uz sia riba, realiai beveik niekada nera automobilio kaina:
 // dazniausiai tai menesine lizingo imoka arba klaidingai ivesta suma (5 500 vietoj 55 000).
 // Tokie skelbimai nedalyvauja rinkos medianos skaiciavime ir pazymimi vartotojui.
-const MIN_REALI_KAINA = parseInt(process.env.MIN_REALI_KAINA || '4000', 10);
+// v1.60.0: riba pakelta 4000 -> 4500 pagal klaidos pranesima Nr.1 (2026-09-18):
+// pro 4000 prasprausdavo lizingo imokos, esancios tarp 4000 ir 4500 EUR.
+const MIN_REALI_KAINA = parseInt(process.env.MIN_REALI_KAINA || '4500', 10);
 // Sena, daug vaziuota masina realiai gali kainuoti maziau nei 4000 € - tai NE klaida.
 // Itartina tik tada, kai tokia kaina rodoma palyginti naujam automobiliui.
 const SENAS_METAI = new Date().getFullYear() - 10;

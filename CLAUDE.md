@@ -261,6 +261,7 @@ Grandinė `fetchSearchPage`: **talpykla → ScraperAPI → tiesioginis axios →
 | Du skirtingi įverčiai | kortelė (komentaras kode!) | `detail.html` `ctScore` – v1.48.0 |
 | `diffPct` ženklas | kortelė ir `.dp-hero` | `detail.html` rinkos skiltis – v1.52.0 |
 | Python heredoc ėda `\` | `.join('\\n')` davė tikrą naujos eilutės simbolį | `\\'` atribute – ta pati klaida po 10 min, v1.54.0 |
+| Tylus `try/catch` slepia klaidą | `fetchListingPage` atsarginis kelias nepasiekiamas | `fs` neįreikalautas `server.js` – 7 vietos tyliai nieko nedarė, v1.60.0 |
 | Bendras klasės vardas | `.ct-table` – `<table>` ir `<div>` sąrašas | `.ct-kv` – eilutė ir jos konteineris, v1.56.0 |
 
 **Taisyklė: kai kas nors ištaisoma, iškart paieškoti to paties raginio visame kode.** Dizainerio klausimas prieš 3 dalį („skalė greičiausiai turi savo medianą") pasitvirtino ne visai taip, kaip jis spėjo – mediana ta pati, bet **ženklas priešingas**: tas pats automobilis viršuje rodė „−12 %" žaliai, o rinkos skiltyje „+12 %" raudonai.
@@ -306,6 +307,15 @@ Grandinė `fetchSearchPage`: **talpykla → ScraperAPI → tiesioginis axios →
 - **Kodėl ne dvi:** iš šešių dizainerio radinių **penki nepasitvirtino** – jie jau buvo sutvarkyti. Tokio radinio nei ištrinsi (pamirši, kad buvo tikrintas), nei pažymėsi sutvarkytu (melas). Ir „pataisyta" NEREIŠKIA „veikia produkcijoje" – todėl `laukia-patikros` iš sąrašo nedingsta, kol Lukas nepatvirtina.
 - **Keitimas:** `POST /admin/klaidos/:nr/busena` su `{ busena, pastaba, versija }`. Kiekvienas perjungimas įrašomas į `istorija` (kas, kada, versija, pastaba) – matosi visas kelias, ne tik galutinė buklė. Būtent to trūko, kai dizaineris klausė, ar jo radinys jau padarytas.
 - **`DELETE /admin/klaidos/:nr`** – visiškas ištrynimas su nuotrauka. Sutvarkytos dingsta pačios, tad trinti reikia tik testinius įrašus.
+
+## Tylus `try/catch` (v1.60.0) – brangiausia dienos pamoka
+
+`server.js` **niekada neturėjo `require('fs')`**, nors `fs` naudojamas 7 vietose. Visos septynios apgaubtos `try/catch`, tad serveris nelūžo – jis TYLIAI nieko nedarė: klaidų žurnalas nebuvo rašomas į diską, nuotraukos neišsaugotos, katalogas nesukurtas. Keturi vartotojo pranešimai gyveno tik atmintyje ir dingo per pirmą perkrovimą.
+
+- Klaida matėsi tik Railway žurnale: `[KLAIDOS] nepavyko issaugoti: fs is not defined`. Niekas jo neskaitė, nes niekas neturėjo priežasties.
+- **Taisyklė: `catch`, kuris tik `console.error`, yra ne apsauga, o užmaskavimas.** Jei veiksmas privalo pavykti (įrašymas į diską), nesėkmė turi būti matoma TEN, kur žmogus žiūri – ne žurnale.
+- Todėl `/admin/atsarga` dabar grąžina `saugykla`: katalogą, jo šaltinį, ar jis persistentinis, ar failas egzistuoja, jo dydį ir kiek įrašų atmintyje. Neatitikimas tarp `klaiduAtmintyje` ir `klaiduFailoDydis` iškart matomas.
+- Patikrinta: po pataisymo failas 345 B, nuotrauka `k1.jpg`, 0 įrašymo klaidų, ir įrašas **išgyvena perkrovimą**.
 
 ## Klaidų sąrašas be naršyklės (v1.55.0)
 

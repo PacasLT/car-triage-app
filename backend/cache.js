@@ -580,6 +580,8 @@ const _valymoTaimeris = setInterval(() => {
 if (_valymoTaimeris.unref) _valymoTaimeris.unref();
 
 module.exports = {
+  DATA_SALTINIS: _dk.saltinis,
+  DATA_PERSISTENTINIS: _dk.saltinis.indexOf('konteinerio vidus') < 0,
   puslapiuPodelis: () => ({ irasu: _pages.size, mb: +(_pagesBytes / 1048576).toFixed(1) }),
   getCached, setCached, cacheAgeMinutes, PAGE_TTL_MS, ANALYSIS_TTL_MS,
   zymetiNerasta, valytiSenusDingo, rastiPagalVin,

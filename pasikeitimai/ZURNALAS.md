@@ -251,3 +251,54 @@ režimui ir vienas `<pre class="ad-pre">` su `--font-mono`, `--fs` tokenais ir
 `--border`. Jei manot, kad `pre` bloko vieta yra sistemoje (23/24 sk. dvasia),
 pasakykit – perkelsiu pas jus.
 
+---
+
+## K-04 · 2026-09-18 · Klaudijus → Dizaineriui · LAUKIA ATSAKYMO
+
+**Klausimas:** ką maketas daro už 1240 px ir ką daro nuotraukos juosta siaurame
+ekrane? Abu dabar neturi atsakymo.
+
+**Kodėl klausiu:** du realūs vartotojo pranešimai per tą pačią valandą, abu apie
+plotį — bet iš priešingų galų.
+
+**Platus ekranas (3152 px).** `index.html` 46 eil. `.container { max-width: 1240px }`.
+Pamatuota, kiek lieka tuščios iš abiejų pusių:
+
+```
+1400 px → 100 px     korteles plotis 1200
+2000 px → 400 px     korteles plotis 1200
+3152 px → 976 px     korteles plotis 1200   ← 62 % ekrano nenaudojama
+```
+
+Vartotojo žodžiai: „skelbimai susitraukė ir dešinė pusė tuščia". Turinys
+centruotas, tad tuščia simetriškai — bet pojūtis teisingas: kortelė atrodo
+maža, nes ekranas už ją platesnis 2,6 karto.
+
+**Siauras ekranas (385 px, iPhone).** `index.html` 748 ir 1397 eil.:
+
+```css
+.ct3-hero-photo { background: url('hero-car.png') 40% 55% / cover no-repeat; }
+@media (…) { .ct3-hero-photo { height: 340px !important; } }
+```
+
+Pamatuota: kompiuteryje juosta **1400×600**, telefone **361×340**. Plotis
+nukrenta beveik keturis kartus, o `cover` iš plačios nuotraukos palieka siaurą
+juostelę ties 40 %/55 % — automobilis iš kadro iškrenta. Vartotojo žodžiai:
+„fono nuotrauka nusikirpusi".
+
+**Pakeliui radinys:** `<nav class="ct3-nav" aria-hidden="true"></nav>`
+(`index.html` 2413) yra **tuščia — nulis nuorodų** visuose dydžiuose, o telefone
+dar ir `display:none` trijose vietose. Kompiuteryje ji veikia tik kaip
+nematomas tarpiklis su `margin-left: 56px; flex: 1`. Vartotojas telefone
+pasigedo „meniu juostos"; iš tikrųjų susitraukia antraštės mygtukai:
+planas 117→93 px, mėgstamiausi 42→32 px, versija 70→38 px.
+
+Tad klausimas trigubas: ar `.ct3-nav` turi ką nors turėti, ar ją šalinam?
+
+**Ko nedariau:** nieko. Čia trys sprendimai, ne trys pataisymai — kiek
+stulpelių plačiame ekrane, ką rodyti iš nuotraukos siaurame, ir ar juosta
+išvis reikalinga. Laikinų atsvarų nedėjau.
+
+**Failai:** `pasikeitimai/matavimai/plotis-3152.png`,
+`pasikeitimai/matavimai/plotis-385-tel.png`
+

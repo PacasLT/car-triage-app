@@ -8,6 +8,18 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.60.0', data: '2026-09-18', pavadinimas: 'Klaidų pranešimai pagaliau išsaugomi',
+    pakeitimai: [
+      'ISTAISYTA: klaidų pranešimai niekada nebuvo įrašomi į diską ir dingdavo per kiekvieną atnaujinimą',
+      'Nuotraukos taip pat – dabar išsaugomos ir matomos',
+      'Administravimo skiltyje „Matavimai" dabar matosi, kur guli duomenys ir ar jie išlieka po atnaujinimo',
+      'Kainos patikros riba pakelta iki 4500 € – pro 4000 € prasprūsdavo mėnesinės lizingo įmokos',
+      'Kainos patikros riba pakelta iki 4500 € – pro 4000 € prasprūsdavo mėnesinės lizingo įmokos',
+      'Prie tokio skelbimo klientas mato „PATIKRINKITE KAINĄ" su paaiškinimu, kas būtent įtartina',
+      'Sena ar daug važiuota mašina už tikrai mažą kainą nežymima – patikrinta šešiais atvejais',
+    ],
+  },
+  {
     versija: '1.59.0', data: '2026-09-18', pavadinimas: 'Nuo pranešimo iki klaidos – vienas paspaudimas',
     pakeitimai: [
       'Prie kiekvieno pranešimo mygtukas „Atkurti" – atidaro tą patį puslapį tokio pat dydžio lange kaip pranešusiojo ekranas',
