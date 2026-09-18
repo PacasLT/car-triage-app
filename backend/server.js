@@ -326,6 +326,15 @@ function extractRida(text) {
 // Dabar imame tiesiai is DOM: autoplius saraso kortele turi stabilias klases.
 
 // "Prieš 18 val." / "Prieš 1 d." / "Prieš 25 min." -> laiko zyme (ms)
+// v1.33.0: dienosRinkoje - SKAICIUS, ne tekstas. Kortelė pagal ji sprendzia,
+// ar skelbimas „visai sviezias" (<=2 d.) ar „uzsibuves" (>=30 d.). Tekstinis
+// ikeltaTekstas („Pries 5 val.") slenksciams netinka.
+function dienosNuo(ms) {
+  if (!ms || !Number.isFinite(ms)) return null;
+  const d = Math.floor((Date.now() - ms) / 86400000);
+  return d >= 0 && d < 3650 ? d : null;
+}
+
 function autopliusAmzius(tekstas) {
   if (!tekstas) return null;
   const m = String(tekstas).match(/Prieš\s+(\d+)\s*(min|val|d)/i);
@@ -2306,6 +2315,7 @@ async function runSearchJob(jobId, filters) {
       pardavejoInfo: l.pardavejoInfo || null, vinPaslėptas: !!l.vinPaslėptas, vin: l.vin || null,
       // PRIDETA: portalo ikelimo laikas, mokamas iskelimas, kainos pastaba/ispejimas, miestas, kebulas
       ikeltaTekstas: l.ikeltaTekstas || null, ikeltaLaikas: l.ikeltaLaikas || null, iskeltas: l.iskeltas || null,
+      dienosRinkoje: dienosNuo(l.ikeltaLaikas),
       pirmaRegistracija: l.pirmaRegistracija || null, miestas: l.miestas || null, kebulas: l.kebulas || null,
       kainosPastaba: l.kainosPastaba || null, kainosIspejimas: l.kainosIspejimas || null,
     }));
@@ -2325,6 +2335,7 @@ async function runSearchJob(jobId, filters) {
         : 'Neatitinka j\u016bs\u0173 paie\u0161kos filtr\u0173: ' + l.hardRejectReasons.join('; ') + '.'],
       diffPct: null, marketMedian: null, marketCount: 0,
       ikeltaTekstas: l.ikeltaTekstas || null, ikeltaLaikas: l.ikeltaLaikas || null, iskeltas: l.iskeltas || null,
+      dienosRinkoje: dienosNuo(l.ikeltaLaikas),
       pirmaRegistracija: l.pirmaRegistracija || null, miestas: l.miestas || null, kebulas: l.kebulas || null,
       kainosPastaba: l.kainosPastaba || null, kainosIspejimas: l.kainosIspejimas || null,
     }));

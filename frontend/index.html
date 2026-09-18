@@ -4207,9 +4207,11 @@ async function ctIkeltiIstorijas(urls, skelbimai) {
       blokas.innerHTML = ctIstorijosHTML(sk);
       // Std-kortelė yra flex eilutė – blokas segamas prie pačios kortelės,
       // kad gautų atskirą eilutę per visą plotį (CSS: .ct-std-card > .ct-istorija).
-      const vieta = kortele.classList.contains('ct-std-card')
-        ? kortele
-        : (kortele.querySelector('.top-info-col') || kortele);
+      // v1.33.0: juosta nebekabo po kortele atskiru remeliu – laikas rinkoje
+      // dabar yra „kodėl" punktas, o likusios pastabos (kainos pokyciai, tas pats
+      // pardavejas, ikelta is naujo) keliauja i TRECIA lygi. Informacija islieka,
+      // bet nebeuzstoja rezultatu.
+      const vieta = kortele.querySelector('.ct-l3') || kortele;
       vieta.appendChild(blokas);
     });
   } catch (e) { /* istorija yra papildoma nauda - jos nebuvimas neturi laužyti rezultatų */ }
@@ -5758,6 +5760,26 @@ function ctNavTab(tab) {
     // ji įjungia atskirą „GALIMAI DAUŽTAS" bloką ir riboja balą.
     var CT_DIFF_ITARTINA = 30;
 
+    // v1.33.0: laikas rinkoje kaip „kodėl" punktas (dizainerio §7).
+    // Rodomas TIK kai ka nors sako: <=2 d. arba >=30 d. Intervalas 3-29 d.
+    // nieko nereiskia, o punktas, kuris nieko nereiskia, yra dekoracija.
+    // Lygiai skiriasi samoningai:
+    //   sviezias -> 🟡 (is-signal): „nedelskite" yra SPEJIMAS apie kitu pirkeju elgesi
+    //   uzsibuves -> 🟢: dienosRinkoje + kainos pokytis yra DU patvirtinti faktai
+    function ctLaikoPunktas(c) {
+      var d = c.dienosRinkoje;
+      if (d == null || (d > 2 && d < 30)) return null;
+      var ist = c.istorija || {};
+      var mazinta = ist.kainosPokytis != null && ist.kainosPokytis < 0;
+      if (d <= 2) {
+        return { skuba: true, dienos: d, pastaba: null,
+                 isvada: 'geri pasiūlymai išgraibstomi per kelias dienas' };
+      }
+      return { skuba: false, dienos: d,
+               pastaba: mazinta ? 'kaina mažinta' : (ist.kainosPokytis === 0 ? 'kaina nekeista' : null),
+               isvada: mazinta ? 'pardavėjas jau lankstosi' : 'yra vietos deryboms' };
+    }
+
     // Kortelėje rodom tik pirmą verdikto sakinį – visas tekstas lieka title'e ir
     // skelbimo puslapyje. Su trim sakiniais kortelė nustoja būti skaitoma per 5 s.
     function ctPirmasSakinys(t) {
@@ -5835,18 +5857,26 @@ function ctNavTab(tab) {
       }).join('');
 
       // ── „kodėl" antraštė persirašo pagal žinojimo lygį ──
-      var why = (c.whyReasons || []).slice(0, 3);
+      // Laiko punktas uzima slota, o ne prisideda ketvirtas: trys lieka trys.
+      // Iskrenta maziausiai vertingas (paskutinis) whyReasons punktas.
+      var laikas = ctLaikoPunktas(c);
+      var why = (c.whyReasons || []).slice(0, laikas ? 2 : 3);
       var yraNezinoma = s.parts.some(function (p) { return p[1] == null; }) || c.pasitikejimas == null;
       var whyAntraste = c.filteredOut ? 'KODĖL ATMESTA'
         : (c.itariamaZala || c.kainosIspejimas) ? 'KĄ BŪTINA PATIKRINTI'
         : yraNezinoma ? 'KĄ ŽINOME IR KO NE' : 'KODĖL ŠIS AUTO?';
-      var whyHtml = why.length ? '<div class="ct-why"><span class="ct-why-h">' + whyAntraste + '</span><div class="ct-why-l">'
+      var laikoHtml = laikas
+        ? '<span class="ct-why-i is-wide' + (laikas.skuba ? ' is-signal' : '') + '"><i></i>'
+          + '<b>Rinkoje ' + laikas.dienos + ' d.</b>' + (laikas.pastaba ? ', ' + esc(laikas.pastaba) : '')
+          + '<em> — ' + esc(laikas.isvada) + '</em></span>'
+        : '';
+      var whyHtml = (why.length || laikoHtml) ? '<div class="ct-why"><span class="ct-why-h">' + whyAntraste + '</span><div class="ct-why-l">'
         + why.map(function (t) {
             var txt = typeof t === 'string' ? t : (t.tekstas || '');
             var kl = /nežinom|neaišk|trūksta|nenurodyt|nėra duomen/i.test(txt) ? ' is-unknown'
               : /gali|įtar|patikrin|rizik/i.test(txt) ? ' is-signal' : '';
             return '<span class="ct-why-i' + kl + '"><i></i>' + esc(txt) + '</span>';
-          }).join('') + '</div></div>' : '';
+          }).join('') + laikoHtml + '</div></div>' : '';
 
       // ── trečias lygis: faktai su brūkšniu, o ne praleista eilute ──
       var pard = c.pardavejoInfo && (c.pardavejoInfo.vardas || c.pardavejoInfo.lygis);

@@ -127,6 +127,14 @@
 
 **Ko dar laukiame is dizainerio:** `.ct-btn > i` (mygtuku piktogramu plyteles), `.ct-photo-n` perėmimas i 10 skyriu, `.chip` taisykles (ju 10 skyriuje nera visai).
 
+## Laikas rinkoje kortelėje (v1.33.0)
+
+- `dienosRinkoje` – **skaicius**, skaiciuojamas `dienosNuo(l.ikeltaLaikas)` `server.js` (ne `ikeltaTekstas`, kuris yra tekstas „Pries 5 val.").
+- `ctLaikoPunktas(c)` `index.html`: rodo TIK kai `<= 2` arba `>= 30` dienu. 3–29 d. intervalas nieko nesako, tad punkto nera.
+- **Lygiai skiriasi samoningai:** sviezias → 🟡 `is-signal` (skuba yra SPEJIMAS apie kitu pirkeju elgesi); uzsibuves → 🟢 (`dienosRinkoje` + kainos pokytis yra DU patvirtinti faktai). Nekeisti svieziam i 🟢 – sistema imtu meluoti apie tai, ka zino.
+- Punktas **uzima slota**, ne prisideda ketvirtas: `why = whyReasons.slice(0, laikas ? 2 : 3)`. Trys lieka trys.
+- Atskira `.ct-istorija` juosta po kortele panaikinta – blokas dabar segamas i `.ct-l3` (trecia lygi). Pastabos apie kainos pokycius ir ta pati pardaveja islieka.
+
 ## Saugumas
 
 - `ANTHROPIC_API_KEY`, `SCRAPER_API_KEY`, `JWT_SECRET`, `ADMIN_EMAILS`, `INVITE_CODES` – tik Railway Variables, **niekada į kodą ar GitHub**.

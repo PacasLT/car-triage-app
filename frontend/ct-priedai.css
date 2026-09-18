@@ -61,3 +61,22 @@
 .ct-card .ct-photo img,
 .ct-card .ct-thumbs img { height: auto; }
 .ct-card .ct-photo img { height: 100%; }
+
+/* ── 4. „Kodėl" punktas per visą plotį (laikas rinkoje) ────────────────────
+   Dizainerio CSS 10c skyrius. Jis atsiuntė taisykles žinute, bet naujos
+   `ct-dizainas.css` versijos dar neturime, tad laikinai gyvena čia.
+   KAI ATEIS jo naujas failas su 10c – šitą bloką ištrinti.                  */
+
+.ct-why-i.is-wide { flex: 1 1 100%; }
+.ct-why-i > b { font: var(--fw-bold) 13px/1.4 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--text-primary); }
+.ct-why-i > em { font-style: normal; color: var(--text-muted); }
+
+
+/* ── 5. Istorijos pastabos trečiame lygyje ─────────────────────────────────
+   `.ct-istorija` blokas anksčiau kabėjo PO kortele atskiru rėmeliu ir atrodė
+   kaip antra kortelė. Laikas rinkoje persikėlė į „kodėl" punktą, o likusios
+   pastabos dabar segamos į `.ct-l3`. Nuimam jo paraštes, kad neatrodytų
+   kaip dar vienas blokas bloke.                                             */
+
+.ct-l3 > .ct-istorija { padding: 0; }
+.ct-l3 > .ct-istorija > div { margin-top: 0; }

@@ -8,6 +8,17 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.33.0', data: '2026-09-18', pavadinimas: 'Laikas rinkoje tapo argumentu, o ne atskira juosta',
+    pakeitimai: [
+      'Atskira „Auto istorija“ juosta po kortele dingo – informacija persikėlė į kortelės vidų',
+      'Šviežias skelbimas dabar rodomas kaip „Rinkoje 1 d. — geri pasiūlymai išgraibstomi per kelias dienas“ su geltonu tašku, nes tai spėjimas apie kitų pirkėjų elgesį, o ne faktas',
+      'Užsibuvęs skelbimas rodomas žaliai: „Rinkoje 45 d., kaina mažinta — pardavėjas jau lankstosi“ – tai jūsų derybų argumentas',
+      'Nuo 3 iki 29 dienų šis punktas nerodomas visai – tas intervalas nieko nepasako',
+      'Priežasčių ir toliau lieka trys: laikas rinkoje užima vietą, o ne prisideda ketvirtas',
+      'Likusios skelbimo istorijos pastabos persikėlė į „Ženkliukai, įranga, vieta“ – niekas neprarasta',
+    ],
+  },
+  {
     versija: '1.32.0', data: '2026-09-18', pavadinimas: 'Dizaino taisyklės, kurių laikysimės ir toliau',
     pakeitimai: [
       'Dizaino sistema atskirta nuo mūsų pataisymų – naujos dizainerio versijos nebeištrins mūsų darbo, o mūsų pataisymai nebegadins jo sistemos',
