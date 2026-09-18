@@ -61,7 +61,7 @@
   };
 
   function uztikrinti() {
-    if (!document.getElementById('ct-pask-css')) { var st = document.createElement('style'); st.id = 'ct-pask-css'; st.textContent = CSS; document.head.appendChild(st); }
+    if (!document.getElementById('ct-pask-css')) { var st = document.createElement('style'); st.id = 'ct-pask-css'; st.textContent = CSS; document.head.prepend(st); }
     var m = document.getElementById('ct-pask');
     if (m) return m;
     m = document.createElement('div'); m.id = 'ct-pask'; m.setAttribute('role', 'menu');

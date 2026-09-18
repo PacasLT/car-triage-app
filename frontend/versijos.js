@@ -8,6 +8,19 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.36.0', data: '2026-09-18', pavadinimas: 'Visi mygtukai produkte dabar vienodi',
+    pakeitimai: [
+      'Mygtukai visuose penkiuose puslapiuose gavo vieną išvaizdą – anksčiau jų buvo apie keturiasdešimt skirtingų variantų',
+      'Kiekvienas mygtukas turi piktogramą, o mokami veiksmai – atskirą kainos ženklelį',
+      'Rodyklė → dabar reiškia konkretų dalyką: kad paspaudus atsidursite kitur. „Palyginti“ jos nebeturi, nes jis tik prideda automobilį',
+      'Kai apžvalga jau padaryta, tas pats mygtukas pameta kainą ir gauna rodyklę – nes dabar jis atidaro, o ne perka',
+      '„Nepakanka kreditų“ mygtukas nebeišjungiamas – jis rodo problemą raudonai ir veda į papildymą',
+      'Analizės metu mygtukas nebešokinėja: suktukas atsiranda piktogramos vietoje',
+      'Dingo pulsuojanti animacija – mygtukas, kuris juda pats, konkuravo su įverčiu',
+      'Telefone apžiūros režimo mygtukai tapo dideli apskritimai, pritaikyti nykščiui',
+    ],
+  },
+  {
     versija: '1.35.0', data: '2026-09-18', pavadinimas: 'Rinkos skaičiai rodomi tik tada, kai jie kažką reiškia',
     pakeitimai: [
       'Kai panašių skelbimų rinkoje mažiau nei 8, kainos skirtumas nebėra rodomas – vietoj jo matote „per mažai“ su tikslų skelbimų skaičiumi',
@@ -352,7 +365,7 @@ window.CT_APP_VERSION = 'v' + window.CT_VERSIJOS[0].versija;
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); }
 
   function uztikrinti() {
-    if (!document.getElementById('ct-ver-css')) { var st = document.createElement('style'); st.id = 'ct-ver-css'; st.textContent = CSS; document.head.appendChild(st); }
+    if (!document.getElementById('ct-ver-css')) { var st = document.createElement('style'); st.id = 'ct-ver-css'; st.textContent = CSS; document.head.prepend(st); }
     var m = document.getElementById('ct-ver-modal');
     if (m) return m;
     m = document.createElement('div'); m.id = 'ct-ver-modal';
@@ -387,7 +400,7 @@ window.CT_APP_VERSION = 'v' + window.CT_VERSIJOS[0].versija;
 
   // Antrastes mygtukas: tekstas is saraso, paspaudimas atidaro langa
   function prijungti() {
-    if (!document.getElementById('ct-ver-css')) { var st = document.createElement('style'); st.id = 'ct-ver-css'; st.textContent = CSS; document.head.appendChild(st); }
+    if (!document.getElementById('ct-ver-css')) { var st = document.createElement('style'); st.id = 'ct-ver-css'; st.textContent = CSS; document.head.prepend(st); }
     var b = document.getElementById('app-version'); if (!b) return;
     b.textContent = window.CT_APP_VERSION;
     b.title = 'Versijų istorija – ' + window.CT_VERSIJOS[0].data;

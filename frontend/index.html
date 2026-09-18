@@ -194,22 +194,20 @@
   .ct-rs:has(.ct-rs-bad) .ct-rs-ic { background: var(--warning); }
   #tinder-launch-btn { display: none !important; }
   @media (max-width: 640px) { #tinder-launch-btn { display: inline-block !important; } }
-  .ct-kiti-hdr { display: flex; align-items: center; gap: 12px; margin: 24px 0 14px; cursor: pointer; user-select: none; border: none; background: none; width: 100%; padding: 0; text-align: left; }
-  .ct-kiti-hdr:hover .ct-kiti-t { color: var(--text-primary); }
-  .ct-kiti-t { display: flex; align-items: center; gap: 8px; flex: none; font: 600 13px/1 var(--font); color: var(--text-secondary); }
+  .ct-kiti-hdr { display: flex; align-items: center; margin: 24px 0 14px; user-select: none; width: 100%; text-align: left;}/* v1.36.0: .ct-kiti-hdr:hover .ct-kiti-t – mygtuko išvaizda perkelta į ct-mygtukai.css */
+  .ct-kiti-t { display: flex; align-items: center; flex: none;}
   .ct-kiti-t .kiek { font: 700 10px/1 var(--font-mono); color: var(--accent-light); background: var(--accent-dim); border: 1px solid var(--accent-border); padding: 4px 7px; border-radius: 6px; }
   .ct-kiti-t .chev { font-size: 11px; color: var(--text-dim); transition: transform .18s; }
-  .ct-kiti-hdr[aria-expanded="true"] .chev { transform: rotate(180deg); }
+  .ct-kiti-hdr[aria-expanded="true"] .chev { transform: rotate(180deg);}
   .ct-kiti-t .hint { font: 400 11px var(--font); color: var(--text-dim); }
   .ct-kiti-line { flex: 1; height: 1px; background: var(--border); }
   .std-ico-row { display: flex; align-items: center; gap: 8px; }
-  .std-right .fav-star { position: static !important; }
+  .std-right .fav-star { position: static !important;}
   .std-right .ct-ico { flex: none; width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border-light); background: transparent; color: var(--text-muted); display: grid; place-items: center; font-size: 15px; cursor: pointer; padding: 0; text-decoration: none; }
   .std-right .ct-ico:hover { background: var(--bg-elevated); color: var(--text-primary); }
   .card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 14px; display: flex; gap: 16px; border-left: 4px solid var(--accent); position: relative; box-shadow: var(--shadow-card); }
-  .fav-star { position: absolute; top: 10px; right: 10px; background: rgba(10,12,16,0.75); border: none; color: var(--text-muted); font-size: 20px; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; z-index: 2; }
-  .fav-star.active { color: #ff5c8a; }
-  .card:not(.ct-card) img { width: 140px; height: 100px; object-fit: cover; border-radius: var(--radius-md); background: var(--bg-elevated); flex-shrink: 0; }
+  .fav-star { position: absolute; top: 10px; right: 10px; width: 34px; z-index: 2;}/* v1.36.0: .fav-star.active – mygtuko išvaizda perkelta į ct-mygtukai.css */
+  .card:not(.ct-card) img { width: 140px; object-fit: cover; flex-shrink: 0;}
   .card-body { flex: 1; min-width: 0; }
   .card-title { font-weight: 600; font-size: 16px; color: var(--text-primary); }
   .card-price { color: var(--accent-light); font-weight: 700; font-size: 17px; }
@@ -237,10 +235,7 @@
   .log-step .done-check { color: var(--success); flex-shrink: 0; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .log-step.current { color: var(--text-primary); font-weight: 500; }
-  .card-actions { margin-top: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-  .detail-btn { background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border); padding: 7px 13px; border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; transition: all 0.15s; }
-  .detail-btn:hover { background: var(--border); color: var(--text-primary); }
-  .detail-btn.ready { background: linear-gradient(135deg, var(--accent), var(--accent-light)); color: #fff; font-weight: 600; border-color: transparent; box-shadow: 0 0 14px rgba(124,111,247,0.4); animation: pulse-glow 2.5s ease-in-out infinite; }
+  .card-actions { margin-top: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }/* v1.36.0: .detail-btn – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .detail-btn:hover – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .detail-btn.ready – mygtuko išvaizda perkelta į ct-mygtukai.css */
   @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 8px rgba(124,111,247,0.3); } 50% { box-shadow: 0 0 20px rgba(167,139,250,0.55); } }
   .detail-panel { margin-top: 12px; padding: 14px; background: var(--bg-base); border-radius: var(--radius-md); border-left: 3px solid var(--success); font-size: 13px; display: none; }
   .detail-panel h4 { margin: 10px 0 5px; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.7px; }
@@ -261,34 +256,18 @@
   .card-photo-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(10,12,16,0.7); color: #fff; border: none; width: 26px; height: 26px; border-radius: 50%; font-size: 15px; cursor: pointer; line-height: 1; padding: 0; }
   .card-photo-nav.prev { left: 4px; }
   .card-photo-nav.next { right: 4px; }
-  .card-photo-count { position: absolute; bottom: 4px; right: 6px; background: rgba(10,12,16,0.75); color: var(--accent-light); font-size: 10px; padding: 1px 6px; border-radius: 10px; }
-
-  /* ============ PALYGINIMAS ============ */
-  .compare-toggle {
-    background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border);
-    padding: 5px 10px; border-radius: var(--radius-sm); font-size: 11px; cursor: pointer;
-    transition: all 0.15s; white-space: nowrap;
-  }
+  .card-photo-count { position: absolute; bottom: 4px; right: 6px; background: rgba(10,12,16,0.75); color: var(--accent-light); font-size: 10px; padding: 1px 6px; border-radius: 10px; }/* v1.36.0: /* ============ PALYGINIMAS ============ */
+  .compare-toggle – mygtuko išvaizda perkelta į ct-mygtukai.css */
   /* v1.27.0: itariamai zema kaina - beveik visada rimta priezastis */
   .ct-zala {
-    display: flex; align-items: flex-start; gap: 7px; margin: 8px 0 0; padding: 8px 11px;
-    border-radius: 8px; background: rgba(224,122,106,.12); border: 1px solid rgba(224,122,106,.38);
-    font: 400 11.5px/1.5 var(--font); color: #e07a6a;
-  }
-  .ct-zala b { font-weight: 700; letter-spacing: .04em; }
-  .compare-toggle.active { background: rgba(74,144,217,0.15); color: #74c0fc; border-color: rgba(74,144,217,0.4); }
+    display: flex; align-items: flex-start; margin: 8px 0 0;}
+  .ct-zala b { font-weight: 700; letter-spacing: .04em; }/* v1.36.0: .compare-toggle.active – mygtuko išvaizda perkelta į ct-mygtukai.css */
   /* v1.23.1: plaukiojanti kortele ekrano apacioje vietoj per visa plotį nusidriekusio baro */
   #compare-bar {
     display: none; position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
-    width: max-content; max-width: min(720px, calc(100vw - 32px));
-    background: rgba(17,20,28,.92);
-    border: 1px solid var(--border-light);
-    border-radius: 16px;
-    padding: 10px 12px 10px 14px; z-index: 900;
-    align-items: center; justify-content: flex-start; gap: 10px;
-    box-shadow: 0 12px 34px rgba(0,0,0,.55);
-    backdrop-filter: blur(16px);
-  }
+    width: max-content; max-width: min(720px, calc(100vw - 32px)); z-index: 900;
+    align-items: center; justify-content: flex-start;
+    backdrop-filter: blur(16px);}
   #compare-bar.visible { display: flex; }
   #compare-bar-items { display: flex; gap: 8px; flex: 0 1 auto; overflow: hidden; }
   #compare-bar-label {
@@ -367,7 +346,7 @@
     .card-price { font-size: 16px; }
     .card-actions { flex-direction: column; align-items: stretch; gap: 8px; }
     .card-actions .card-link { padding: 10px; text-align: center; background: var(--bg-elevated); border-radius: var(--radius-sm); }
-    .detail-btn { padding: 11px 12px; font-size: 13px; width: 100%; }
+    .detail-btn { width: 100%;}
     #log-header { font-size: 12px; padding: 12px; }
     #sort-bar select { width: 100%; margin-top: 6px; }
     #sort-bar label { display: block; margin-bottom: 2px; }
@@ -454,26 +433,14 @@
     display: flex; justify-content: center; gap: 24px; align-items: center; flex-shrink: 0;
   }
   .tinder-btn-skip {
-    width: 62px; height: 62px; border-radius: 50%; border: 2px solid var(--danger);
-    background: rgba(255,157,157,0.08); color: var(--danger);
-    font-size: 26px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s; -webkit-tap-highlight-color: transparent;
-  }
-  .tinder-btn-skip:active { background: rgba(255,157,157,0.2); transform: scale(0.92); }
+    width: 62px; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent;}
+  .tinder-btn-skip:active { transform: scale(0.92);}
   .tinder-btn-like {
-    width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--success);
-    background: rgba(127,216,143,0.08); color: var(--success);
-    font-size: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s; -webkit-tap-highlight-color: transparent;
-  }
-  .tinder-btn-like:active { background: rgba(127,216,143,0.2); transform: scale(0.92); }
+    width: 72px; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent;}
+  .tinder-btn-like:active { transform: scale(0.92);}
   .tinder-btn-info {
-    width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--accent);
-    background: var(--accent-dim); color: var(--accent-light);
-    font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s; -webkit-tap-highlight-color: transparent;
-  }
-  .tinder-btn-info:active { background: rgba(124,111,247,0.25); transform: scale(0.92); }
+    width: 48px; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent;}
+  .tinder-btn-info:active { transform: scale(0.92);}
   #tinder-hint { color: var(--text-muted); font-size: 11px; padding: 0 16px 6px; text-align: center; flex-shrink: 0; }
 
   /* ===== SORT BAR ===== */
@@ -555,15 +522,7 @@
 .ct-auth-close:hover { background: rgba(255,255,255,.1); color: #E9EBF2; }
 .ct-auth-tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,.075); }
 .ct-auth-tab {
-  flex: 1; height: 48px; background: transparent; border: none;
-  font: 500 14px 'Archivo', -apple-system, Helvetica, sans-serif;
-  color: #8C93A6; cursor: pointer;
-  border-bottom: 2px solid transparent; margin-bottom: -1px;
-  transition: color .14s, border-color .14s;
-}
-.ct-auth-tab:hover { color: #E9EBF2; }
-.ct-auth-tab.ct-active { color: #E9EBF2; border-bottom-color: #7C5CFF; font-weight: 600; }
-.ct-auth-body { padding: 26px 28px 24px; }
+  flex: 1; margin-bottom: -1px;}/* v1.36.0: /* v1.36.0: .ct-auth-tab:hover – mygtuko išvaizda perkelta į ct-mygtuk – mygtuko išvaizda perkelta į ct-mygtukai.css */
 .ct-auth-logo { display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 22px; }
 .ct-auth-logo svg { width: 32px; height: 32px; flex: none; }
 .ct-auth-logo-text { font: 400 20px 'Archivo',-apple-system,Helvetica,sans-serif; color: #E9EBF2; letter-spacing: -.01em; }
@@ -723,26 +682,19 @@
 .ct3-nav-link:hover { color: var(--text-primary); background: rgba(255,255,255,.05); }
 .ct3-nav-link.active { color: var(--text-primary); }
 .ct3-premium-btn {
-  display: flex; align-items: center; gap: 7px; height: 42px; padding: 0 22px;
-  border-radius: 21px; border: 1px solid var(--accent); background: transparent;
-  color: var(--accent-light); font: 600 15px var(--font); cursor: pointer;
-  transition: background .15s;
-}
+  display: flex; align-items: center;}
 .ct3-avatar {
   width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border-light);
   background: var(--bg-elevated); color: var(--text-secondary); display: grid; place-items: center; cursor: pointer;
 }
 .ct3-header-right { display: flex; align-items: center; gap: 10px; flex: none; }
-.ct3-logo-text { display: flex; flex-direction: column; gap: 1px; }
-.ct3-premium-btn:hover { background: var(--accent-dim); }
+.ct3-logo-text { display: flex; flex-direction: column; gap: 1px; }/* v1.36.0: .ct3-premium-btn:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
 
 /* ---- HERO ---- */
 .ct3-hero {
-  position: relative; min-height: 620px;
-  background: var(--bg-base);
+  position: relative;
   overflow: visible;
-  margin-top: -96px;
-}
+  margin-top: -96px;}
 .ct3-hero-photo {
   position: absolute; top: 0; left: 0; right: 0; height: 600px;
   background: url('../assets/hero-car.png') 40% 55% / cover no-repeat;
@@ -836,14 +788,7 @@
   border-bottom: 1px solid rgba(255,255,255,.06); padding: 0 12px;
 }
 .ct3-search-tabs { display: flex; gap: 0; }
-.ct3-stab {
-  height: 48px; padding: 0 20px; background: transparent; border: none;
-  font: 500 14px var(--font); color: var(--text-muted); cursor: pointer;
-  border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap;
-  transition: color .15s;
-}
-.ct3-stab:hover { color: var(--text-primary); }
-.ct3-stab.active { color: var(--text-primary); border-bottom-color: var(--accent); font-weight: 600; }
+.ct3-stab { margin-bottom: -1px;}/* v1.36.0: .ct3-stab:hover – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .ct3-stab.active – mygtuko išvaizda perkelta į ct-mygtukai.css */
 .ct3-portals-row { display: flex; align-items: center; gap: 10px; }
 .ct3-portal-row { display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:8px; cursor:pointer; color:var(--text-secondary); transition:background .12s; }
 .ct3-portal-row:hover { background:rgba(255,255,255,.06); }
@@ -909,44 +854,18 @@
 .ct3-search-bottom-left { display: flex; align-items: center; gap: 10px; }
 .ct3-search-bottom-right { display: flex; align-items: center; gap: 10px; }
 .ct3-more-btn, .ct3-marketplaces-btn {
-  display: flex; align-items: center; gap: 7px;
-  height: 40px; padding: 0 16px; border-radius: 8px;
-  border: 1px solid var(--border-light); background: transparent;
-  color: var(--text-secondary); font: 500 13px var(--font); cursor: pointer;
-  transition: background .15s;
-}
-.ct3-more-btn:hover, .ct3-marketplaces-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
+  display: flex; align-items: center;}/* v1.36.0: .ct3-more-btn:hover, .ct3-marketplaces-btn:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
 .ct3-badge {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 18px; height: 18px; border-radius: 9px;
-  background: var(--accent); color: #fff; font: 700 9px var(--font-mono);
-}
+  width: 18px;}
 .ct3-save-btn {
-  display: flex; align-items: center; gap: 7px;
-  height: 44px; padding: 0 20px; border-radius: 10px;
-  border: 1px solid var(--border-light); background: transparent;
-  color: var(--text-secondary); font: 500 14px var(--font); cursor: pointer;
-  transition: background .15s;
-}
-.ct3-save-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
+  display: flex; align-items: center;}/* v1.36.0: .ct3-save-btn:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
 .ct3-search-btn {
-  display: flex; align-items: center; gap: 8px;
-  height: 44px; padding: 0 24px; border-radius: 10px;
-  border: none; background: var(--accent);
-  color: #fff; font: 600 15px var(--font); cursor: pointer;
-  transition: filter .15s;
-}
-.ct3-search-btn:hover { filter: brightness(1.1); }
+  display: flex; align-items: center;}/* v1.36.0: .ct3-search-btn:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
 
 /* ---- STATS BAR ---- */
 .ct3-stats-bar {
-  background: rgba(13,16,26,.98);
-  border-bottom: 1px solid rgba(255,255,255,.05);
-  margin: 8px 48px 0;
-  border-radius: 0 0 16px 16px;
-  border: 1px solid rgba(255,255,255,.07);
-  border-top: none;
-}
+  margin: 8px 48px 0;}
 .ct3-stats-inner {
   max-width: 1440px; margin: 0 auto; padding: 16px 24px;
   display: flex; align-items: center; gap: 0;
@@ -983,7 +902,7 @@
   .ct3-hero-sub { font-size: 14px; }
   .ct3-search-bottom { flex-direction: column; align-items: stretch; }
   .ct3-search-bottom-left, .ct3-search-bottom-right { justify-content: space-between; }
-  .ct3-save-btn { flex: 1; justify-content: center; }
+  .ct3-save-btn { flex: 1; justify-content: center;}
   .ct3-stats-inner { gap: 16px; flex-wrap: wrap; padding: 14px 16px; }
   .ct3-stat-div { display: none; }
   .ct3-stats-driven { margin-left: 0; border-left: none; padding-left: 0; }
@@ -993,8 +912,7 @@
   .ct3-hero-title { font-size: 26px; }
   .ct3-hero-feats { gap: 16px; }
   .ct3-portals-row { display: none; }
-  .ct3-search-tabs { overflow-x: auto; }
-  .ct3-stab { font-size: 12px; padding: 0 12px; }
+  .ct3-search-tabs { overflow-x: auto; }/* v1.36.0: .ct3-stab – mygtuko išvaizda perkelta į ct-mygtukai.css */
 }
 
 /* Developer note: hero photo path = './hero-car.png' (included in handoff/)
@@ -1031,12 +949,9 @@
 .card-photo-count { background: rgba(10,12,18,.82); border: 1px solid var(--border-light); color: var(--text-muted); font: 600 9.5px/1 var(--font-mono); padding: 4px 6px; border-radius: 3px; bottom: 8px; right: 8px; }
 .card-photo-nav { background: rgba(10,12,18,.75); border: 1px solid var(--border-light); width: 24px; height: 24px; }
 .card-body { padding: 14px 18px 14px; }
-.fav-star { top: 12px; right: 12px; width: 34px; height: 34px; border-radius: var(--radius-md); background: transparent; border: 1px solid var(--border-light); color: var(--text-muted); font-size: 14px; line-height: 1; display: grid; place-items: center; padding: 0; }
-.fav-star:hover { background: var(--bg-elevated); }
-.fav-star.active { color: #ff5c8a; background: rgba(255,92,138,.14); border-color: rgba(255,92,138,.45); }
-.fav-star:hover { color: #ff5c8a; }
+.fav-star { top: 12px; right: 12px; width: 34px; line-height: 1; display: grid; place-items: center;}/* v1.36.0: .fav-star:hover – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .fav-star.active – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .fav-star:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
 
-.card-title { font-size: 17px; font-weight: 600; letter-spacing: -.01em; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding-right: 44px; }
+.card-title { display: flex; align-items: center; flex-wrap: wrap;}
 .source-tag { font: 600 9px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; padding: 4px 6px; border-radius: 3px; background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border); margin-left: 0; }
 .card-title > span[style] { font: 600 9px/1 var(--font-mono) !important; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; background: var(--success-dim) !important; color: var(--success) !important; border: 1px solid var(--success-border); border-radius: 3px !important; padding: 4px 6px !important; margin-left: 0 !important; }
 
@@ -1056,14 +971,11 @@
 .card-actions { margin-top: 12px; gap: 6px; }
 .card-link { margin-top: 0; font-size: 12.5px; font-weight: 500; color: var(--text-muted); height: 34px; display: inline-flex; align-items: center; white-space: nowrap; padding: 0 12px; border: 1px solid var(--border-light); border-radius: var(--radius-md); }
 .card-link:hover { color: var(--text-primary); background: var(--bg-elevated); }
-.detail-btn { height: 34px; padding: 0 14px; white-space: nowrap; display: inline-flex; align-items: center; background: transparent; border: 1px solid var(--border-light); color: var(--text-primary); border-radius: var(--radius-md); font-size: 12.5px; font-weight: 600; }
-.detail-btn:hover { background: var(--bg-elevated); }
-.detail-btn.ready { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: var(--shadow-glow); animation: none; }
-.compare-toggle { height: 34px; padding: 0 12px; display: inline-flex; align-items: center; white-space: nowrap; background: transparent; border: 1px solid var(--border-light); color: var(--text-muted); border-radius: var(--radius-md); font-size: 12px; font-weight: 500; }
-.compare-toggle.active { background: var(--accent-dim); color: var(--text-primary); border-color: var(--accent); }
+.detail-btn { display: inline-flex; align-items: center;}/* v1.36.0: .detail-btn:hover – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .detail-btn.ready – mygtuko išvaizda perkelta į ct-mygtukai.css */
+.compare-toggle { display: inline-flex; align-items: center;}/* v1.36.0: .compare-toggle.active – mygtuko išvaizda perkelta į ct-mygtukai.css */
 
 /* ===== DETAIL PANEL ===== */
-.detail-panel { margin: 14px -18px -14px; padding: 18px; background: var(--bg-base); border-top: 1px solid var(--border); border-left: none; border-radius: 0; font-size: 13px; }
+.detail-panel { margin: 14px -18px -14px;}
 .detail-panel .verdict { color: var(--text-primary); font-weight: 500; font-size: 13.5px; line-height: 1.6; padding: 14px 16px; background: var(--bg-surface); border: 1px solid var(--accent-border); border-radius: var(--radius-lg); text-wrap: pretty; }
 .detail-panel .verdict::before { content: "AI TRIAGE VERDICT"; display: block; font: 600 9px/1 var(--font-mono); letter-spacing: .13em; color: var(--accent); margin-bottom: 9px; }
 .detail-panel h4 { margin: 20px 0 8px; font: 500 9px/1 var(--font-mono); letter-spacing: .13em; color: var(--text-dim); }
@@ -1150,9 +1062,8 @@
 .ct-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .ct-title-row h3 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -.01em; }
 .ct-card .source-tag { font: 600 9px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; padding: 4px 6px; border-radius: 4px; background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border); margin: 0; }
-.ct-card .fav-star.ct-fav { position: absolute; top: 9px; right: 9px; z-index: 3; width: 32px; height: 32px; border-radius: 8px; background: transparent; border: 1px solid var(--border-light); color: var(--text-muted); font-size: 14px; display: grid; place-items: center; padding: 0; }
-.ct-card .fav-star.ct-fav.active { color: #ff5c8a; background: rgba(255,92,138,.14); border-color: rgba(255,92,138,.45); }
-.ct-price-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+.ct-card .fav-star.ct-fav { position: absolute; top: 9px; right: 9px; z-index: 3; width: 32px; display: grid; place-items: center;}/* v1.36.0: .ct-card .fav-star.ct-fav.active – mygtuko išvaizda perkelta į ct-mygtukai.css */
+.ct-price-row { display: flex; align-items: center; flex-wrap: wrap; margin-top: 8px;}
 .ct-price { font: 600 26px/1 var(--font-mono); letter-spacing: -.02em; color: var(--accent-light); }
 .ct-diff { font: 700 12px/1 var(--font-mono); padding: 6px 8px; border-radius: 6px; }
 .ct-market { font-size: 12.5px; color: var(--text-muted); }
@@ -1170,15 +1081,10 @@
 .ct-comment span { flex: none; font: 700 9px/1 var(--font-mono); padding: 5px 5px; border-radius: 4px; background: var(--accent); color: #fff; height: 18px; display: grid; place-items: center; }
 .ct-comment p { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--text-secondary); text-wrap: pretty; }
 .ct-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
-.ct-btn, .ct-card .compare-toggle.ct-btn, .ct-card .detail-btn.ct-btn { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border-radius: 8px; background: transparent; border: 1px solid var(--border-light); color: var(--text-primary); font-size: 12.5px; font-weight: 600; text-decoration: none; cursor: pointer; white-space: nowrap; transition: background .15s; }
-.ct-btn:hover, .ct-card .compare-toggle.ct-btn:hover, .ct-card .detail-btn.ct-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
-.ct-card .compare-toggle.ct-btn.active { background: var(--accent-dim); border-color: var(--accent); }
-.ct-card .detail-btn.ct-btn-primary, .ct-card .detail-btn.ct-btn-primary.ready { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: none; animation: none; }
-.ct-card .detail-btn.ct-btn-primary:hover { filter: brightness(1.08); }
-.ct-card .detail-btn:disabled { opacity: .6; cursor: progress; }
+.ct-btn, .ct-card .compare-toggle.ct-btn, .ct-card .detail-btn.ct-btn { display: inline-flex; align-items: center; text-decoration: none;}/* v1.36.0: .ct-btn:hover, .ct-card .compare-toggle.ct-btn:hover, .ct-card .detail – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .ct-card .compare-toggle.ct-btn.active – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .ct-card .detail-btn.ct-btn-primary, .ct-card .detail-btn.ct-btn-prima – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .ct-card .detail-btn.ct-btn-primary:hover – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .ct-card .detail-btn:disabled – mygtuko išvaizda perkelta į ct-mygtukai.css */
 
 /* score */
-.ct-score { padding: 12px 0 0 0; border-top: 1px solid var(--border); margin-top: 12px; }
+.ct-score { margin-top: 12px;}
 .ct-eyebrow { font: 500 9px/1 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px; }
 .ct-score-row { display: flex; gap: 14px; align-items: center; }
 .ct-ring { flex: none; width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; position: relative; background: conic-gradient(currentColor calc(var(--pct) * 1%), var(--bg-raised) 0); }
@@ -1304,7 +1210,7 @@
   .ct3-logo-icon { width: 38px !important; height: 38px !important; }
   .ct3-logo-text > span { font-size: 20px !important; }
   .ct3-nav { display: none !important; }
-  .ct3-premium-btn { display: none !important; }
+  .ct3-premium-btn { display: none !important;}
 }
 /* Responsive search panel */
 @media (max-width: 768px) {
@@ -1376,20 +1282,16 @@
   .ct3-logo { gap: 8px !important; min-width: 0; }
   .ct3-logo-icon { width: 32px !important; height: 32px !important; }
   .ct3-logo-text > span { font-size: 19px !important; }
-  .ct3-header-right { gap: 6px !important; }
-  .ct3-premium-btn#ct-planas-btn { padding: 0 8px !important; height: 32px; font-size: 11px; gap: 5px !important; }
-  #ct-planas-btn .ct-pl-kr { padding: 2px 5px; font-size: 10px; }
+  .ct3-header-right { gap: 6px !important; }/* v1.36.0: /* v1.36.0: .ct3-premium-btn#ct-planas-btn – mygtuko išvaizda perkelta – mygtuko išvaizda perkelta į ct-mygtukai.css */
 }
 @media (max-width: 400px) {
   .ct3-header-inner { padding: 10px 10px !important; gap: 4px; }
   .ct3-logo-text > span { font-size: 17px !important; }
-  .ct-ver-btn { margin-left: 4px !important; padding: 0 4px !important; font-size: 8px !important; }
-  .ct3-premium-btn#ct-planas-btn { padding: 0 6px !important; font-size: 10px; }
-  .ct3-header-right { gap: 4px !important; }
+  .ct-ver-btn { margin-left: 4px !important;}/* v1.36.0: /* v1.36.0: .ct3-premium-btn#ct-planas-btn – mygtuko išvaizda perkelta – mygtuko išvaizda perkelta į ct-mygtukai.css */
   .ct-meg-btn, .ct3-avatar { width: 32px !important; height: 32px !important; }
   .ct3-logo-text small { display: none; }
   .ct3-nav { display: none !important; }
-  .ct3-premium-btn { display: none !important; }
+  .ct3-premium-btn { display: none !important;}
   .ct3-avatar { width: 36px; height: 36px; }
 
   /* Hero */
@@ -1408,8 +1310,7 @@
   .ct3-search-top { padding: 0 4px; flex-wrap: wrap; gap: 0; }
   .ct3-portals-row { display: none !important; }
   .ct3-search-tabs { overflow-x: auto; scrollbar-width: none; }
-  .ct3-search-tabs::-webkit-scrollbar { display: none; }
-  .ct3-stab { height: 44px; padding: 0 14px; font-size: 13px; }
+  .ct3-search-tabs::-webkit-scrollbar { display: none; }/* v1.36.0: .ct3-stab – mygtuko išvaizda perkelta į ct-mygtukai.css */
   .ct3-fields { grid-template-columns: repeat(2, minmax(0,1fr)) !important; gap: 6px !important; padding: 8px !important; }
   .ct3-field { padding: 8px 10px; gap: 5px; }
   .ct3-field label { font-size: 7.5px; }
@@ -1417,9 +1318,9 @@
   .ct3-search-bottom { flex-direction: column; align-items: stretch; padding: 8px 10px 10px; gap: 8px; }
   .ct3-search-bottom-left { flex-wrap: wrap; gap: 6px; }
   .ct3-search-bottom-right { flex-direction: row; gap: 6px; }
-  .ct3-save-btn { flex: 1; justify-content: center; }
-  .ct3-search-btn { flex: 1; justify-content: center; height: 46px; font-size: 15px; }
-  .ct3-more-btn, .ct3-marketplaces-btn { flex: 1; justify-content: center; font-size: 12px; height: 38px; }
+  .ct3-save-btn { flex: 1; justify-content: center;}
+  .ct3-search-btn { flex: 1; justify-content: center;}
+  .ct3-more-btn, .ct3-marketplaces-btn { flex: 1; justify-content: center;}
 
   /* Stats bar */
   .ct3-stats-bar { margin: 6px 10px 0 !important; border-radius: 12px !important; }
@@ -1464,7 +1365,7 @@
   .card-price { font-size: 16px; }
   .card-actions { flex-direction: column; align-items: stretch; gap: 8px; }
   .card-actions .card-link { padding: 10px; text-align: center; background: var(--bg-elevated); border-radius: var(--radius-sm); }
-  .detail-btn { padding: 11px 12px; font-size: 13px; width: 100%; }
+  .detail-btn { width: 100%;}
 
   /* Sort meniu — neiš ekrano */
   .ct-sort { position: relative; }
@@ -2248,6 +2149,110 @@
 </style>
 </head>
 <body>
+<!-- ============================================================================
+     ct-ikonos.html · CarTriige · piktogramų rinkinys
+     ----------------------------------------------------------------------------
+     Keturiolika piktogramų, vienas failas, jokio išorinio paketo.
+     Įdėkite šį bloką VIENĄ kartą į kiekvieno puslapio <body> pradžią.
+
+     Iškvietimas pagal vardą:
+         <i><svg class="ct-i"><use href="#i-skelbimas"></use></svg></i>
+
+     Visos 16×16, stroke: currentColor, be fill — spalvą nustato mygtukas.
+     Vienintelė išimtis: #i-issaugoti gauna fill, kai mygtukas .is-on
+     (taisyklė yra ct-mygtukai.css).
+     ========================================================================= -->
+
+<svg width="0" height="0" style="position: absolute; overflow: hidden" aria-hidden="true" focusable="false">
+  <defs>
+
+    <!-- skelbimas · išorinė nuoroda į portalą -->
+    <symbol id="i-skelbimas" viewBox="0 0 16 16">
+      <path d="M13 9.5V13H3V3h3.5"/>
+      <path d="M9.5 3H13v3.5"/>
+      <path d="M13 3 7.5 8.5"/>
+    </symbol>
+
+    <!-- apzvalga · pilna analizė, ataskaita -->
+    <symbol id="i-apzvalga" viewBox="0 0 16 16">
+      <rect x="3" y="2" width="10" height="12" rx="1.5"/>
+      <path d="M5.5 6h5M5.5 8.5h5M5.5 11h3"/>
+    </symbol>
+
+    <!-- palyginti · du keliai priešingomis kryptimis -->
+    <symbol id="i-palyginti" viewBox="0 0 16 16">
+      <path d="M3 6h9"/><path d="M9.5 3.5 12 6 9.5 8.5"/>
+      <path d="M13 10.5H4"/><path d="M6.5 8 4 10.5 6.5 13"/>
+    </symbol>
+
+    <!-- issaugoti · mėgstamiausi -->
+    <symbol id="i-issaugoti" viewBox="0 0 16 16">
+      <path class="ct-i-issaugoti" d="M8 13.2S2.8 10 2.8 6.4a2.9 2.9 0 0 1 5.2-1.8 2.9 2.9 0 0 1 5.2 1.8c0 3.6-5.2 6.8-5.2 6.8Z"/>
+    </symbol>
+
+    <!-- filtrai · trys slankiojami kriterijai -->
+    <symbol id="i-filtrai" viewBox="0 0 16 16">
+      <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/>
+      <circle cx="6" cy="4.5" r="1.6" fill="currentColor" stroke="none"/>
+      <circle cx="10.5" cy="8" r="1.6" fill="currentColor" stroke="none"/>
+      <circle cx="5" cy="11.5" r="1.6" fill="currentColor" stroke="none"/>
+    </symbol>
+
+    <!-- ieskoti · nuskaityti portalus -->
+    <symbol id="i-ieskoti" viewBox="0 0 16 16">
+      <circle cx="7" cy="7" r="4.2"/>
+      <path d="M10.2 10.2 13.5 13.5"/>
+    </symbol>
+
+    <!-- rusiuoti · tvarka pagal reikšmę -->
+    <symbol id="i-rusiuoti" viewBox="0 0 16 16">
+      <path d="M3 4.5h9M3 8h6M3 11.5h3"/>
+      <path d="M12.5 9v4.5"/><path d="M10.8 11.8l1.7 1.7 1.7-1.7"/>
+    </symbol>
+
+    <!-- isskleisti -->
+    <symbol id="i-isskleisti" viewBox="0 0 16 16">
+      <path d="M4 6.5 8 10.5l4-4"/>
+    </symbol>
+
+    <!-- suskleisti -->
+    <symbol id="i-suskleisti" viewBox="0 0 16 16">
+      <path d="M4 9.5 8 5.5l4 4"/>
+    </symbol>
+
+    <!-- vin · kodas, kurį nuskaitome -->
+    <symbol id="i-vin" viewBox="0 0 16 16">
+      <path d="M3 3.5v9M5.5 3.5v9M8 3.5v9M10.5 3.5v9M13 3.5v9" stroke-width="1.4"/>
+    </symbol>
+
+    <!-- pardavejas -->
+    <symbol id="i-pardavejas" viewBox="0 0 16 16">
+      <circle cx="8" cy="6" r="2.6"/>
+      <path d="M3.5 13.2c.6-2.3 2.4-3.6 4.5-3.6s3.9 1.3 4.5 3.6"/>
+    </symbol>
+
+    <!-- nuotraukos · vizualinė analizė -->
+    <symbol id="i-nuotraukos" viewBox="0 0 16 16">
+      <rect x="2.5" y="3.5" width="11" height="9" rx="1.5"/>
+      <circle cx="6" cy="6.8" r="1.1"/>
+      <path d="M3 11.5 6.5 8.5l3 2.5 2-1.6 2 1.6"/>
+    </symbol>
+
+    <!-- kreditai -->
+    <symbol id="i-kreditai" viewBox="0 0 16 16">
+      <circle cx="8" cy="8" r="5.2"/>
+      <path d="M8 5.4v5.2M6.4 6.8h3.2M6.4 9.2h3.2" stroke-width="1.4"/>
+    </symbol>
+
+    <!-- planai · prenumeratos lygiai -->
+    <symbol id="i-planai" viewBox="0 0 16 16">
+      <path d="M8 2.5 13.5 5.5 8 8.5 2.5 5.5 8 2.5Z"/>
+      <path d="M2.5 9 8 12l5.5-3"/>
+    </symbol>
+
+  </defs>
+</svg>
+
 
 <!-- ===== APP HEADER ===== -->
 <header class="ct3-header">
@@ -2264,16 +2269,16 @@
       </div>
     </a>
     <!-- Versija: tekstas ir langas is versijos.js -->
-    <button class="ct-ver-btn" id="app-version" type="button" onclick="ctVersijuModalas()" title="Versijų istorija"></button>
+    <button class="ct-ver-btn ct-btn ct-btn-quiet" id="app-version" type="button" onclick="ctVersijuModalas()" title="Versijų istorija"></button>
     <!-- v1.23.1: virsutine juosta be nuorodu - paieska pasiekiama per logotipa,
          visa kita (ataskaitos, palyginimai, istorija, megstamiausi) paskyros meniu -->
     <nav class="ct3-nav" aria-hidden="true"></nav>
     <div class="ct3-header-right">
-      <button class="ct3-premium-btn" id="ct-planas-btn" onclick="ctPlanuModalas()" title="Planas ir kreditai">
+      <button class="ct3-premium-btn ct-btn ct-btn-sm ct-btn-primary ct-btn-block" id="ct-planas-btn" onclick="ctPlanuModalas()" title="Planas ir kreditai">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V10l6-8 6 8v10"/></svg>
         <span id="ct-planas-btn-text">Planas</span>
       </button>
-      <button class="ct3-avatar" id="ct3-avatar-btn" onclick="window.__ctAvatarClick()" title="Paskyra">
+      <button class="ct3-avatar ct-btn ct-btn-sm ct-btn-icon ct-btn-round" id="ct3-avatar-btn" onclick="window.__ctAvatarClick()" title="Paskyra">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
       </button>
     </div>
@@ -2347,9 +2352,9 @@
     <div class="ct3-search-inner">
       <div class="ct3-search-top">
         <div class="ct3-search-tabs">
-          <button class="ct3-stab active" onclick="ctSearchTabSwitch('search',this)">Ieškoti automobilių</button>
+          <button class="ct3-stab active ct-tab" onclick="ctSearchTabSwitch('search',this)">Ieškoti automobilių</button>
           <div style="position:relative">
-            <button class="ct3-stab" id="ct-hist-tab-btn" onclick="ctSearchTabSwitch('history',this)">🕘 Paskutinės paieškos</button>
+            <button class="ct3-stab ct-tab" id="ct-hist-tab-btn" onclick="ctSearchTabSwitch('history',this)">🕘 Paskutinės paieškos</button>
             <div id="ct-history-dropdown" style="display:none;">
               <div class="ct-hist-head">
                 <div class="ct-hist-head-title"><div class="ct-hist-head-dot"></div>Paskutinės paieškos<span class="ct-hist-head-count" id="ct-hist-count" style="display:none"></span></div>
@@ -2508,13 +2513,13 @@
 
       <div class="ct3-search-bottom">
         <div class="ct3-search-bottom-left">
-          <button class="ct3-more-btn" type="button" onclick="ctToggleMoreFilters()">
+          <button class="ct3-more-btn ct-btn ct-btn-toggle" type="button" onclick="ctToggleMoreFilters()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M7 12h10M10 18h4"/></svg>
             Daugiau filtrų
             <span class="ct3-badge" id="more-filters-badge" style="display:none;">0</span>
           </button>
           <div class="ct3-portal-wrap">
-            <button class="ct3-marketplaces-btn" id="portal-toggle-btn" onclick="ctTogglePortals()">
+            <button class="ct3-marketplaces-btn ct-btn ct-btn-sm ct-btn-quiet" id="portal-toggle-btn" onclick="ctTogglePortals()">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M2 12h20M12 2c-3 4-3 12 0 16M12 2c3 4 3 12 0 16"/></svg>
               <span id="portal-btn-label">Visi portalai</span>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transition:transform .2s" id="portal-chevron"><path d="M6 9l6 6 6-6"/></svg>
@@ -2533,7 +2538,7 @@
         <!-- PASALINTA: "Naršyti viską" režimas. Liko tik CarTriige analizė, todėl režimų pasirinkiklio nebereikia. -->
         <div class="ct3-search-bottom-right">
           <!-- PASALINTA: "Išsaugoti paiešką" - mygtukas neturėjo jokio veiksmo. -->
-          <button class="ct3-search-btn" id="search-btn" onclick="console.log('search-btn clicked, runSearch=', typeof runSearch); if(typeof runSearch==='function'){ runSearch(); } else { showToast('runSearch nerasta — perkraukite puslapį', 'error'); }">
+          <button class="ct3-search-btn ct-btn ct-btn-primary ct-btn-lg" id="search-btn" onclick="console.log('search-btn clicked, runSearch=', typeof runSearch); if(typeof runSearch==='function'){ runSearch(); } else { showToast('runSearch nerasta — perkraukite puslapį', 'error'); }">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
             Ieškoti ir analizuoti
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -2600,7 +2605,7 @@
       <input type="hidden" id="sort-select" value="quality">
       <div id="ct-sort" style="position:relative;display:inline-block;vertical-align:middle;">
         <button type="button" id="ct-sort-btn" onclick="ctSortToggle(event)"
-          style="display:inline-flex;align-items:center;gap:9px;height:34px;padding:0 12px;border-radius:9px;border:1px solid var(--border-light);background:var(--bg-surface);color:var(--text-primary);font:500 12.5px var(--font);cursor:pointer;white-space:nowrap;">
+          style="display:inline-flex;align-items:center;gap:9px;cursor:pointer;white-space:nowrap" class="ct-btn ct-btn-sm">
           <span id="ct-sort-label">Kaina/kokybės santykis</span>
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="opacity:.6;transition:transform .18s" id="ct-sort-chev"><path d="M6 9l6 6 6-6"/></svg>
         </button>
@@ -2622,9 +2627,9 @@
     <div id="tinder-stack"></div>
     <div id="tinder-hint">braukite kairėn / dešinėn arba naudokite mygtukus</div>
     <div id="tinder-actions" style="display:none;">
-      <button class="tinder-btn-skip" onclick="tinderSwipe('left')" title="Praleisti">✕</button>
-      <button class="tinder-btn-info" onclick="toggleTinderDetail()" title="Detali apžvalga">🔍</button>
-      <button class="tinder-btn-like" onclick="tinderSwipe('right')" title="Patinka">♥</button>
+      <button class="tinder-btn-skip ct-btn ct-btn-icon ct-btn-xl is-skip" onclick="tinderSwipe('left')" title="Praleisti">✕</button>
+      <button class="tinder-btn-info ct-btn ct-btn-icon ct-btn-xl" onclick="toggleTinderDetail()" title="Detali apžvalga">🔍</button>
+      <button class="tinder-btn-like ct-btn ct-btn-primary ct-btn-icon ct-btn-xl" onclick="tinderSwipe('right')" title="Patinka">♥</button>
     </div>
   </div>
 
@@ -2644,7 +2649,7 @@
 <div id="compare-bar">
   <span id="compare-bar-label">PALYGINIMUI</span>
   <div id="compare-bar-items"></div>
-  <button id="compare-btn" onclick="openCompareModal()">⚖️ Palyginti</button>
+  <button id="compare-btn" onclick="openCompareModal()" class="ct-btn">⚖️ Palyginti</button>
   <button id="compare-clear" onclick="clearCompare()" title="Išvalyti sąrašą" aria-label="Išvalyti">✕</button>
 </div>
 
@@ -2656,7 +2661,7 @@
         <div class="ct-cmp-title-ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent-light)" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
         Automobilių palyginimas
       </div>
-      <button id="deep-compare-btn" onclick="ctGilusPalyginimas()">
+      <button id="deep-compare-btn" onclick="ctGilusPalyginimas()" class="ct-btn ct-btn-primary">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
         Gilus palyginimas su AI · 2 kr
       </button>
@@ -4579,7 +4584,7 @@ function renderBrowseListings(candidates, container) {
           '</div>' +
         '</div>' +
         '<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;align-items:flex-end;">' +
-          '<button class="fav-star' + (isFav ? ' active' : '') + '" onclick="toggleFavorite(\'' + c.url + '\', ' + favSnap + ', this)" style="width:28px;height:28px;border-radius:6px;background:transparent;border:1px solid var(--border-light);color:var(--text-muted);font-size:14px;display:grid;place-items:center;">' + (isFav ? '♥' : '♡') + '</button>' +
+          '<button class="fav-star ct-btn ct-btn-icon ct-btn-round' + (isFav ? ' active' : '') + '" onclick="toggleFavorite(\'' + c.url + '\', ' + favSnap + ', this)" style="width:28px;height:28px;border-radius:6px;background:transparent;border:1px solid var(--border-light);color:var(--text-muted);font-size:14px;display:grid;place-items:center;">' + (isFav ? '♥' : '♡') + '</button>' +
           '<button class="detail-btn' + (hasDeep ? ' ready' : '') + '" id="' + panelId + '-btn" onclick="' + detailClick + '" style="font-size:12px;padding:6px 10px;white-space:nowrap;">' + detailBtnLabel + '</button>' +
         '</div>' +
       '</div>' +
@@ -4725,7 +4730,7 @@ function renderCandidateCards(candidates, results) {
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
-      <button class="fav-star${isFav ? ' active' : ''}" onclick="toggleFavorite('${c.url}', ${favSnapshot}, this)">${isFav ? '♥' : '♡'}</button>
+      <button class="fav-star ct-btn ct-btn-icon ct-btn-round${isFav ? ' active' : ''}" onclick="toggleFavorite('${c.url}', ${favSnapshot}, this)">${isFav ? '♥' : '♡'}</button>
       <div class="card-photo-wrap">
         <img id="${cardId}-img" src="${c.photo || ''}" onclick="${hasMultiplePhotos ? `openLightbox(window.__galleryStore['${cardId}-strip'], window.__cardPhotoIndex['${cardId}']||0)` : ''}" onerror="this.style.display='none'">
         ${photoNavArrows}
@@ -4743,7 +4748,7 @@ function renderCandidateCards(candidates, results) {
         <div class="card-actions">
           <a class="card-link" href="${c.url}" target="_blank">Žiūrėti skelbimą →</a>
           <button class="detail-btn${hasPreloadedDeep ? ' ready' : ''}" id="${cardId}-btn" data-closed-label="${detailBtnLabel}" onclick="loadDetail('${c.url}', '${cardId}', this, false, {kaina:${c.kaina||'null'}, marketMedian:${c.marketMedian||'null'}, marketCount:${c.marketCount||'null'}, diffPct:${c.diffPct!=null?c.diffPct:'null'}, modelis:'${escJs(c.modelis)}', pardavejas:${c.pardavejas ? `'${escJs(c.pardavejas)}'` : 'null'}, galia:${c.galia||'null'}, variklioTuris:${c.variklioTuris||'null'}})">${detailBtnLabel}</button>
-          <button class="compare-toggle" id="cmp-${cardId}" onclick="toggleCompare('${c.url}', '${escJs(c.modelis)}', ${c.kaina||'null'}, '${escJs(c.photo||'')}', ${c.metai||'null'}, ${c.rida||'null'}, '${escJs(c.kuras||'')}', ${c.galia||'null'}, ${c.variklioTuris||'null'}, '${escJs(c.pavarai||'')}', ${c.diffPct!=null?c.diffPct:'null'}, ${c.marketMedian||'null'}, '${escJs(c.source||'')}', 'cmp-${cardId}')">⚖️ Palyginti</button>
+          <button class="compare-toggle ct-btn" id="cmp-${cardId}" onclick="toggleCompare('${c.url}', '${escJs(c.modelis)}', ${c.kaina||'null'}, '${escJs(c.photo||'')}', ${c.metai||'null'}, ${c.rida||'null'}, '${escJs(c.kuras||'')}', ${c.galia||'null'}, ${c.variklioTuris||'null'}, '${escJs(c.pavarai||'')}', ${c.diffPct!=null?c.diffPct:'null'}, ${c.marketMedian||'null'}, '${escJs(c.source||'')}', 'cmp-${cardId}')">⚖️ Palyginti</button>
         </div>
         <div class="detail-panel" id="${cardId}" data-loaded="${hasPreloadedDeep}" style="display:none">${preloadedPanelHTML}</div>
       </div>
@@ -5811,8 +5816,8 @@ function ctNavTab(tab) {
 
       // ── nuotraukos ──
       var navHtml = multi
-        ? '<button class="ct-nav ct-nav-l" onclick="event.stopPropagation(); cyclePhoto(\'' + cardId + '\', -1)">‹</button>'
-        + '<button class="ct-nav ct-nav-r" onclick="event.stopPropagation(); cyclePhoto(\'' + cardId + '\', 1)">›</button>' : '';
+        ? '<button class="ct-nav ct-nav-l ct-btn ct-btn-icon ct-btn-round ct-btn-over is-left" onclick="event.stopPropagation(); cyclePhoto(\'' + cardId + '\', -1)">‹</button>'
+        + '<button class="ct-nav ct-nav-r ct-btn ct-btn-icon ct-btn-round ct-btn-over is-right" onclick="event.stopPropagation(); cyclePhoto(\'' + cardId + '\', 1)">›</button>' : '';
       var imgClick = multi ? 'openLightbox(window.__galleryStore[\'' + cardId + '-strip\'], window.__cardPhotoIndex[\'' + cardId + '\']||0)' : '';
       var fotoHtml = photos.length
         ? '<img id="' + cardId + '-img" src="' + photos[0] + '" alt="" onclick="' + imgClick + '" onerror="this.style.visibility=\'hidden\'">'
@@ -5907,7 +5912,7 @@ function ctNavTab(tab) {
         +   '<div class="ct-media">'
         +     '<div class="ct-photo">' + fotoHtml + navHtml + skaitiklis
         +       (medalis ? '<span class="ct-medal ct-medal-' + medalis + '"><i>' + medalis + '</i><span>' + medalioTekstas + '</span></span>' : '')
-        +       '<button class="fav-star ct-fav' + (x.isFav ? ' active' : '') + '" title="Išsaugoti" onclick="event.stopPropagation(); toggleFavorite(\'' + c.url + '\', ' + x.favSnap + ', this)">' + (x.isFav ? '♥' : '♡') + '</button>'
+        +       '<button class="fav-star ct-fav ct-btn ct-btn-icon ct-btn-round' + (x.isFav ? ' active' : '') + '" title="Išsaugoti" onclick="event.stopPropagation(); toggleFavorite(\'' + c.url + '\', ' + x.favSnap + ', this)">' + (x.isFav ? '♥' : '♡') + '</button>'
         +     '</div>' + thumbsHtml
         +   '</div>'
         +   '<div class="ct-body">'
@@ -6077,7 +6082,7 @@ function ctNavTab(tab) {
     var restHost = results;
     if (!opts.beTopSekcijos) {
       var _rh = document.createElement('div');
-      _rh.innerHTML = '<button type="button" class="ct-kiti-hdr" id="ct-kiti-hdr" aria-expanded="false" onclick="ctKitiToggle()"><span class="ct-kiti-t"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Kiti skelbimai <span class="kiek" id="ct-kiti-kiek">' + restCands.length + '</span><span class="chev">▾</span><span class="hint" id="ct-kiti-hint">spauskite, kad pamatytumėte visus likusius</span></span><span class="ct-kiti-line"></span></button><div id="ct-kiti-wrap" style="display:none"></div>';
+      _rh.innerHTML = '<button type="button" class="ct-kiti-hdr ct-btn ct-btn-quiet ct-btn-toggle" id="ct-kiti-hdr" aria-expanded="false" onclick="ctKitiToggle()"><span class="ct-kiti-t"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Kiti skelbimai <span class="kiek" id="ct-kiti-kiek">' + restCands.length + '</span><span class="chev">▾</span><span class="hint" id="ct-kiti-hint">spauskite, kad pamatytumėte visus likusius</span></span><span class="ct-kiti-line"></span></button><div id="ct-kiti-wrap" style="display:none"></div>';
       results.appendChild(_rh.children[0]); results.appendChild(_rh.children[0]);
       restHost = document.getElementById('ct-kiti-wrap');
       if (!restCands.length) document.getElementById('ct-kiti-hdr').style.display = 'none';
@@ -6281,8 +6286,8 @@ function ctNavTab(tab) {
   <div class="ct-auth-card">
     <button class="ct-auth-close" onclick="window.hideAuthModal()">&#x2715;</button>
     <div class="ct-auth-tabs">
-      <button class="ct-auth-tab ct-active" id="ct-tab-login"    onclick="ctAuthSwitch('login')">Prisijungti</button>
-      <button class="ct-auth-tab"           id="ct-tab-register" onclick="ctAuthSwitch('register')">Registruotis</button>
+      <button class="ct-auth-tab ct-active ct-tab" id="ct-tab-login"    onclick="ctAuthSwitch('login')">Prisijungti</button>
+      <button class="ct-auth-tab ct-tab"           id="ct-tab-register" onclick="ctAuthSwitch('register')">Registruotis</button>
     </div>
     <div class="ct-auth-body">
       <div class="ct-auth-logo">
@@ -6311,7 +6316,7 @@ function ctNavTab(tab) {
             </button>
           </div>
         </div>
-        <button class="ct-auth-submit" id="ct-login-btn" onclick="ctDoLogin()">
+        <button class="ct-auth-submit ct-btn ct-btn-primary ct-btn-block" id="ct-login-btn" onclick="ctDoLogin()">
           <span class="ct-lbl">Prisijungti</span><div class="ct-spin"></div>
         </button>
         <div class="ct-auth-note">Neturite paskyros? <a href="#" onclick="event.preventDefault();ctAuthSwitch('register')">Registruotis</a></div>
@@ -6344,7 +6349,7 @@ function ctNavTab(tab) {
             <span class="ct-auth-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
           </div>
         </div>
-        <button class="ct-auth-submit" id="ct-reg-btn" onclick="ctDoRegister()">
+        <button class="ct-auth-submit ct-btn ct-btn-block" id="ct-reg-btn" onclick="ctDoRegister()">
           <span class="ct-lbl">Sukurti paskyrą</span><div class="ct-spin"></div>
         </button>
         <div class="ct-auth-note">Jau turite paskyrą? <a href="#" onclick="event.preventDefault();ctAuthSwitch('login')">Prisijungti</a></div>
@@ -6512,7 +6517,7 @@ function ctNavTab(tab) {
 #ct-planas-btn .ct-pl-kr.maza { background: var(--warning-dim); color: var(--warning); border-color: var(--warning-border); }
 #ct-planas-btn .ct-pl-kr.nulis { background: var(--danger-dim); color: var(--danger); border-color: var(--danger-border); }
 @media (max-width: 900px) {
-  .ct3-premium-btn#ct-planas-btn { display: inline-flex !important; padding: 0 10px !important; height: 34px; font-size: 12px; }
+  .ct3-premium-btn#ct-planas-btn { display: inline-flex !important;}
   #ct-planas-btn > svg { display: none; }
 }
 
@@ -6736,5 +6741,6 @@ window.addEventListener('storage', function (e) { if (e.key === 'ct_token') ctIk
      ATJUNGIMAS: istrinti sia viena eilute. Jokie kiti stiliai nepakeisti. -->
 <link rel="stylesheet" href="ct-dizainas.css">
 <link rel="stylesheet" href="ct-priedai.css">
+<link rel="stylesheet" href="ct-mygtukai.css">
 </body>
 </html>

@@ -37,16 +37,15 @@ button{font-family:inherit;cursor:pointer}
 .ct3-nav{display:flex;gap:4px;margin-left:56px;flex:1}
 .ct3-nav-link{padding:10px 20px;border-radius:8px;font-size:15px;font-weight:500;color:var(--text-secondary);text-decoration:none;transition:color .15s,background .15s}
 .ct3-nav-link:hover{color:var(--text-primary);background:rgba(255,255,255,.05)}
-.ct3-premium-btn{display:flex;align-items:center;gap:7px;height:42px;padding:0 22px;border-radius:21px;border:1px solid var(--accent);background:transparent;color:var(--accent-light);font:600 15px var(--font);cursor:pointer;transition:background .15s}
-.ct3-premium-btn:hover{background:var(--accent-dim)}
-.ct3-avatar{width:42px;height:42px;border-radius:50%;border:1px solid var(--border-light);background:var(--bg-elevated);color:var(--text-secondary);display:grid;place-items:center;cursor:pointer}
+.ct3-premium-btn{display:flex;align-items:center;}/* v1.36.0: .ct3-premium-btn:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
+.ct3-avatar{width:42px;display:grid;place-items:center;}
 .ct3-header-right{display:flex;align-items:center;gap:10px;flex:none}
 @media(max-width:768px){
   .ct3-header-inner{padding:14px 20px}
   .ct3-logo-icon{width:38px;height:38px}
   .ct3-logo-text>span{font-size:20px}
   .ct3-nav{display:none}
-  .ct3-premium-btn{display:none}
+  .ct3-premium-btn{display:none;}
 }
 
 /* ── PAGE LAYOUT ── */
@@ -62,14 +61,10 @@ button{font-family:inherit;cursor:pointer}
 .dp-bc-back{display:flex;align-items:center;gap:6px;color:var(--text-secondary);font-weight:500;margin-right:6px}
 .dp-bc-right{display:flex;align-items:center;gap:10px}
 .dp-bc-id{font:500 11px/1 var(--font-mono);color:var(--text-dim);letter-spacing:.08em}
-.dp-bc-btn{display:flex;align-items:center;gap:6px;height:32px;padding:0 14px;border-radius:8px;border:1px solid var(--border-light);background:transparent;color:var(--text-secondary);font:500 13px var(--font)}
-.dp-bc-btn:hover{background:var(--bg-elevated);color:var(--text-primary)}
-.dp-bc-btn.save{color:var(--accent-light);border-color:var(--accent-border);background:var(--accent-dim)}
-.dp-save-toggle.saved{color:#ff5c8a!important;border-color:rgba(255,92,138,.5)!important;background:rgba(255,92,138,.12)!important}
-.dp-save-toggle:hover{color:#ff5c8a}
+.dp-bc-btn{display:flex;align-items:center;}/* v1.36.0: .dp-bc-btn:hover – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .dp-bc-btn.save – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .dp-save-toggle.saved – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .dp-save-toggle:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
 
 /* ── MAIN 3-COL ── */
-.dp-main{display:grid;grid-template-columns:280px minmax(0,1fr) 200px;gap:18px;align-items:start}
+.dp-main{display:grid;grid-template-columns:280px minmax(0,1fr) 200px;align-items:start;}
 @media(max-width:900px){.dp-main{grid-template-columns:1fr}}
 
 /* ── PHOTO COL ── */
@@ -107,16 +102,12 @@ button{font-family:inherit;cursor:pointer}
 .dp-spec{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:7px;background:var(--bg-elevated);border:1px solid var(--border);font-size:12.5px;color:var(--text-secondary)}
 .dp-spec-pos{color:var(--success);border-color:var(--success-border);background:var(--success-dim)}
 .dp-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
-.dp-bc-btn.dp-bc-primary{background:var(--accent);border-color:var(--accent);color:#fff;text-decoration:none}
-.dp-bc-btn.dp-bc-primary:hover{filter:brightness(1.08)}
-.dp-act{display:flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--border-light);background:transparent;color:var(--text-primary);font:500 12.5px var(--font);white-space:nowrap}
-.dp-act:hover{background:var(--bg-elevated)}
-.dp-act-primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
-.dp-act-primary:hover{filter:brightness(1.1)}
+.dp-bc-btn.dp-bc-primary{text-decoration:none;}/* v1.36.0: .dp-bc-btn.dp-bc-primary:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
+.dp-act{display:flex;align-items:center;}/* v1.36.0: .dp-act:hover – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .dp-act-primary – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .dp-act-primary:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
 
 /* ── SELLER COL ── */
 /* ── SELLER CARD ── */
-.dp-seller{background:var(--bg-surface);border:1px solid var(--border);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:0}
+.dp-seller{display:flex;flex-direction:column;}
 .dp-seller-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
 .dp-seller-label{font:700 9px/1 var(--font-mono);letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim);margin-bottom:0}
 .dp-seller-menu{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-muted);display:grid;place-items:center;cursor:pointer;flex:none}
@@ -216,10 +207,8 @@ button{font-family:inherit;cursor:pointer}
 .dp-equip-name{font-size:12.5px;color:var(--text-primary);line-height:1.4;flex:1}
 
 /* ── PHOTOS AI ANALYZE ── */
-.dp-photo-ai-btn{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 20px;border-radius:10px;border:1px solid var(--accent-border);background:var(--accent-dim);color:var(--accent-light);font:600 13px var(--font);cursor:pointer;transition:background .15s}
-.dp-photo-ai-btn:hover{background:rgba(124,92,255,.2)}
-.dp-photo-ai-btn:disabled{opacity:.5;cursor:default}
-.dp-photo-ai-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.dp-photo-ai-btn{display:inline-flex;align-items:center;}/* v1.36.0: .dp-photo-ai-btn:hover – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .dp-photo-ai-btn:disabled – mygtuko išvaizda perkelta į ct-mygtukai.css */
+.dp-photo-ai-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px;}
 .dp-photo-ai-result{background:var(--bg-surface);border:1px solid var(--accent-border);border-radius:12px;padding:16px;margin-bottom:16px;display:none}
 .dp-photo-ai-result-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;font:600 13px var(--font);color:var(--text-primary)}
 .dp-photo-ai-result-badge{width:22px;height:22px;border-radius:6px;background:var(--accent);color:#fff;font:700 10px var(--font-mono);display:grid;place-items:center;flex:none}
@@ -251,14 +240,13 @@ button{font-family:inherit;cursor:pointer}
 #dp-lb { position: fixed; inset: 0; z-index: 2000; background: rgba(4,5,9,.94); display: none; align-items: center; justify-content: center; user-select: none; }
 #dp-lb.open { display: flex; }
 #dp-lb img { max-width: 96vw; max-height: 88vh; object-fit: contain; border-radius: 8px; box-shadow: 0 20px 60px rgba(0,0,0,.6); cursor: zoom-out; }
-.dp-lb-btn { position: absolute; width: 46px; height: 46px; border-radius: 50%; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.08); color: #fff; font-size: 26px; display: grid; place-items: center; cursor: pointer; backdrop-filter: blur(6px); }
-.dp-lb-btn:hover { background: rgba(255,255,255,.18); }
-.dp-lb-l { left: 18px; top: 50%; transform: translateY(-50%); }
+.dp-lb-btn { position: absolute; width: 46px; display: grid; place-items: center; backdrop-filter: blur(6px);}/* v1.36.0: .dp-lb-btn:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
+.dp-lb-l { left: 18px; top: 50%; transform: translateY(-50%);}
 .dp-lb-r { right: 18px; top: 50%; transform: translateY(-50%); }
 .dp-lb-x { top: 16px; right: 16px; font-size: 20px; }
 .dp-lb-n { position: absolute; top: 22px; left: 50%; transform: translateX(-50%); font: 600 12px var(--font-mono); color: rgba(255,255,255,.8); background: rgba(0,0,0,.45); padding: 6px 12px; border-radius: 20px; letter-spacing: .06em; }
 .dp-lb-hint { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); font: 400 11px var(--font); color: rgba(255,255,255,.45); }
-@media (max-width: 640px) { .dp-lb-btn { width: 38px; height: 38px; font-size: 20px; } .dp-lb-l { left: 8px; } .dp-lb-r { right: 8px; } .dp-lb-hint { display: none; } }
+@media (max-width: 640px) { .dp-lb-btn { width: 38px;} .dp-lb-l { left: 8px; } .dp-lb-r { right: 8px; } .dp-lb-hint { display: none; } }
 /* Pelno skaiciuokle */
 #dp-pelno { display: none; margin-top: 12px; border: 1px solid var(--success-border); border-radius: 12px; background: var(--bg-surface); overflow: hidden; }
 #dp-pelno.open { display: block; }
@@ -279,11 +267,8 @@ button{font-family:inherit;cursor:pointer}
 .dp-pel-ai b { color: var(--text-primary); }
 @media (max-width: 720px) { .dp-pel-grid { grid-template-columns: 1fr 1fr; } .dp-pel-rez { grid-template-columns: 1fr; } }
 /* Analizes uzsakymo mygtukas */
-.dp-cta { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; background: var(--accent-dim); border: 1px solid var(--accent-border); }
-.dp-cta p { margin: 0; font: 400 13px/1.55 var(--font); color: var(--text-secondary); }
-.dp-cta button { height: 38px; padding: 0 16px; border-radius: 9px; border: none; background: var(--accent); color: #fff; font: 600 13px var(--font); cursor: pointer; }
-.dp-cta button:disabled { opacity: .6; cursor: default; }
-.dp-cta small { font: 400 11px var(--font); color: var(--text-dim); }
+.dp-cta { display: flex; flex-direction: column; align-items: flex-start;}
+.dp-cta p { margin: 0;}/* v1.36.0: .dp-cta button – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .dp-cta button:disabled – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .dp-cta small – mygtuko išvaizda perkelta į ct-mygtukai.css */
 </style>
 
 <style id="dp-mobile-responsive">
@@ -334,7 +319,7 @@ button{font-family:inherit;cursor:pointer}
   .ct3-logo-text > span { font-size: 18px !important; }
   .ct3-logo-text small { display: none; }
   .ct3-nav { display: none !important; }
-  .ct3-premium-btn { display: none !important; }
+  .ct3-premium-btn { display: none !important;}
 
   /* Breadcrumb — palikti tik "Atgal" */
   .dp-bc { padding: 10px 0; margin-bottom: 14px; }
@@ -342,12 +327,8 @@ button{font-family:inherit;cursor:pointer}
   .dp-bc-left > a:not(.dp-bc-back) { display: none; }
   .dp-bc-left > span:last-child { display: none; }
   .dp-bc-id { display: none; }
-  .dp-bc-btn.save { display: none; } /* sticky bar paima šią funkciją */
-  .dp-bc-right { gap: 6px; }
-  .dp-bc-btn { height: 30px; padding: 0 10px; font-size: 12px; }
-
-  /* Nuotrauka */
-  .dp-photo-main { border-radius: 10px; }
+  .dp-bc-btn.save { display: none;} /* sticky bar paima šią funkciją */
+  .dp-bc-right { gap: 6px; }/* v1.36.0: /* v1.36.0: .dp-bc-btn – mygtuko išvaizda perkelta į ct-mygtukai.css * – mygtuko išvaizda perkelta į ct-mygtukai.css */
   .dp-thumbs { gap: 4px; }
 
   /* Pavadinimas ir kaina */
@@ -375,7 +356,7 @@ button{font-family:inherit;cursor:pointer}
   /* Pelnas / rizika */
   .dp-pr-blocks { gap: 8px; }
   .dp-pr-block { padding: 12px 14px; }
-  .dp-pr-btn { display: none !important; }
+  .dp-pr-btn { display: none !important;}
 
   /* Skirtukai */
   .dp-tabs { margin-top: 16px; }
@@ -406,13 +387,115 @@ button{font-family:inherit;cursor:pointer}
   .dp-price { font-size: 18px !important; }
   .dp-diff-badge { height: 24px; font-size: 12px; }
   .dp-score-bars { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
-  .dp-tab { padding: 0 10px; font-size: 12px; height: 40px; }
-  .dp-bc-btn { padding: 0 8px; font-size: 11px; }
-  .dp-spec { font-size: 11px; height: 25px; padding: 0 7px; }
+  .dp-tab { padding: 0 10px; font-size: 12px; height: 40px; }/* v1.36.0: /* v1.36.0: .dp-bc-btn – mygtuko išvaizda perkelta į ct-mygtukai.css * – mygtuko išvaizda perkelta į ct-mygtukai.css */
 }
 </style>
 </head>
 <body>
+<!-- ============================================================================
+     ct-ikonos.html · CarTriige · piktogramų rinkinys
+     ----------------------------------------------------------------------------
+     Keturiolika piktogramų, vienas failas, jokio išorinio paketo.
+     Įdėkite šį bloką VIENĄ kartą į kiekvieno puslapio <body> pradžią.
+
+     Iškvietimas pagal vardą:
+         <i><svg class="ct-i"><use href="#i-skelbimas"></use></svg></i>
+
+     Visos 16×16, stroke: currentColor, be fill — spalvą nustato mygtukas.
+     Vienintelė išimtis: #i-issaugoti gauna fill, kai mygtukas .is-on
+     (taisyklė yra ct-mygtukai.css).
+     ========================================================================= -->
+
+<svg width="0" height="0" style="position: absolute; overflow: hidden" aria-hidden="true" focusable="false">
+  <defs>
+
+    <!-- skelbimas · išorinė nuoroda į portalą -->
+    <symbol id="i-skelbimas" viewBox="0 0 16 16">
+      <path d="M13 9.5V13H3V3h3.5"/>
+      <path d="M9.5 3H13v3.5"/>
+      <path d="M13 3 7.5 8.5"/>
+    </symbol>
+
+    <!-- apzvalga · pilna analizė, ataskaita -->
+    <symbol id="i-apzvalga" viewBox="0 0 16 16">
+      <rect x="3" y="2" width="10" height="12" rx="1.5"/>
+      <path d="M5.5 6h5M5.5 8.5h5M5.5 11h3"/>
+    </symbol>
+
+    <!-- palyginti · du keliai priešingomis kryptimis -->
+    <symbol id="i-palyginti" viewBox="0 0 16 16">
+      <path d="M3 6h9"/><path d="M9.5 3.5 12 6 9.5 8.5"/>
+      <path d="M13 10.5H4"/><path d="M6.5 8 4 10.5 6.5 13"/>
+    </symbol>
+
+    <!-- issaugoti · mėgstamiausi -->
+    <symbol id="i-issaugoti" viewBox="0 0 16 16">
+      <path class="ct-i-issaugoti" d="M8 13.2S2.8 10 2.8 6.4a2.9 2.9 0 0 1 5.2-1.8 2.9 2.9 0 0 1 5.2 1.8c0 3.6-5.2 6.8-5.2 6.8Z"/>
+    </symbol>
+
+    <!-- filtrai · trys slankiojami kriterijai -->
+    <symbol id="i-filtrai" viewBox="0 0 16 16">
+      <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/>
+      <circle cx="6" cy="4.5" r="1.6" fill="currentColor" stroke="none"/>
+      <circle cx="10.5" cy="8" r="1.6" fill="currentColor" stroke="none"/>
+      <circle cx="5" cy="11.5" r="1.6" fill="currentColor" stroke="none"/>
+    </symbol>
+
+    <!-- ieskoti · nuskaityti portalus -->
+    <symbol id="i-ieskoti" viewBox="0 0 16 16">
+      <circle cx="7" cy="7" r="4.2"/>
+      <path d="M10.2 10.2 13.5 13.5"/>
+    </symbol>
+
+    <!-- rusiuoti · tvarka pagal reikšmę -->
+    <symbol id="i-rusiuoti" viewBox="0 0 16 16">
+      <path d="M3 4.5h9M3 8h6M3 11.5h3"/>
+      <path d="M12.5 9v4.5"/><path d="M10.8 11.8l1.7 1.7 1.7-1.7"/>
+    </symbol>
+
+    <!-- isskleisti -->
+    <symbol id="i-isskleisti" viewBox="0 0 16 16">
+      <path d="M4 6.5 8 10.5l4-4"/>
+    </symbol>
+
+    <!-- suskleisti -->
+    <symbol id="i-suskleisti" viewBox="0 0 16 16">
+      <path d="M4 9.5 8 5.5l4 4"/>
+    </symbol>
+
+    <!-- vin · kodas, kurį nuskaitome -->
+    <symbol id="i-vin" viewBox="0 0 16 16">
+      <path d="M3 3.5v9M5.5 3.5v9M8 3.5v9M10.5 3.5v9M13 3.5v9" stroke-width="1.4"/>
+    </symbol>
+
+    <!-- pardavejas -->
+    <symbol id="i-pardavejas" viewBox="0 0 16 16">
+      <circle cx="8" cy="6" r="2.6"/>
+      <path d="M3.5 13.2c.6-2.3 2.4-3.6 4.5-3.6s3.9 1.3 4.5 3.6"/>
+    </symbol>
+
+    <!-- nuotraukos · vizualinė analizė -->
+    <symbol id="i-nuotraukos" viewBox="0 0 16 16">
+      <rect x="2.5" y="3.5" width="11" height="9" rx="1.5"/>
+      <circle cx="6" cy="6.8" r="1.1"/>
+      <path d="M3 11.5 6.5 8.5l3 2.5 2-1.6 2 1.6"/>
+    </symbol>
+
+    <!-- kreditai -->
+    <symbol id="i-kreditai" viewBox="0 0 16 16">
+      <circle cx="8" cy="8" r="5.2"/>
+      <path d="M8 5.4v5.2M6.4 6.8h3.2M6.4 9.2h3.2" stroke-width="1.4"/>
+    </symbol>
+
+    <!-- planai · prenumeratos lygiai -->
+    <symbol id="i-planai" viewBox="0 0 16 16">
+      <path d="M8 2.5 13.5 5.5 8 8.5 2.5 5.5 8 2.5Z"/>
+      <path d="M2.5 9 8 12l5.5-3"/>
+    </symbol>
+
+  </defs>
+</svg>
+
 
 <!-- HEADER -->
 <header class="ct3-header">
@@ -421,13 +504,13 @@ button{font-family:inherit;cursor:pointer}
       <svg class="ct3-logo-icon" viewBox="0 0 36 36" fill="none"><rect x="18" y="2" width="20" height="20" rx="3" transform="rotate(45 18 2)" fill="#7C5CFF"/><rect x="18" y="9" width="11" height="11" rx="2" transform="rotate(45 18 9)" fill="#0A0C12" opacity="0.7"/><rect x="18" y="13" width="5" height="5" rx="1" transform="rotate(45 18 13)" fill="#7C5CFF" opacity="0.9"/></svg>
       <div class="ct3-logo-text"><span>Car<b>Triige</b></span><small>AUTOMOTIVE MARKET INTELLIGENCE</small></div>
     </a>
-    <button class="ct-ver-btn" id="app-version" type="button" onclick="ctVersijuModalas()" title="Versijų istorija"></button>
+    <button class="ct-ver-btn ct-btn ct-btn-quiet" id="app-version" type="button" onclick="ctVersijuModalas()" title="Versijų istorija"></button>
     <nav class="ct3-nav">
       <!-- v1.23.0: „Palyginti" perkelta prie automobilio veiksmu (zemiau) ir i paskyros meniu -->
     </nav>
     <div class="ct3-header-right">
-      <button class="ct3-premium-btn" id="ct-planas-btn" onclick="location.href='index.html?planas=1'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V10l6-8 6 8v10"/></svg><span id="ct-planas-btn-text">Planas</span></button>
-      <button class="ct3-avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></button>
+      <button class="ct3-premium-btn ct-btn ct-btn-sm ct-btn-primary ct-btn-block" id="ct-planas-btn" onclick="location.href='index.html?planas=1'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V10l6-8 6 8v10"/></svg><span id="ct-planas-btn-text">Planas</span></button>
+      <button class="ct3-avatar ct-btn ct-btn-sm ct-btn-icon ct-btn-round"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></button>
     </div>
   </div>
 </header>
@@ -459,17 +542,17 @@ button{font-family:inherit;cursor:pointer}
     </div>
     <div class="dp-bc-right">
       <span class="dp-bc-id" id="dp-bc-source"></span>
-      <button class="dp-bc-btn" onclick="dpShare()">
+      <button class="dp-bc-btn ct-btn" onclick="dpShare()">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
         Dalintis
       </button>
-      <button class="dp-bc-btn save dp-save-toggle" id="dp-save-btn" onclick="dpToggleSave()">
+      <button class="dp-bc-btn save dp-save-toggle ct-btn" id="dp-save-btn" onclick="dpToggleSave()">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
         <span>Išsaugoti</span>
       </button>
       <!-- v1.27.0: „Palyginti" ir „Žiūrėti skelbimą" perkelti čia, prie širdutės -->
-      <button class="dp-bc-btn" id="dp-compare-btn" onclick="dpAddToCompare()" title="Pridėti prie palyginimo">⇄ Palyginti</button>
-      <a class="dp-bc-btn dp-bc-primary" id="dp-listing-link" href="#" target="_blank" rel="noopener">Žiūrėti skelbimą ↗</a>
+      <button class="dp-bc-btn ct-btn" id="dp-compare-btn" onclick="dpAddToCompare()" title="Pridėti prie palyginimo">⇄ Palyginti</button>
+      <a class="dp-bc-btn dp-bc-primary ct-btn" id="dp-listing-link" href="#" target="_blank" rel="noopener">Žiūrėti skelbimą ↗</a>
     </div>
   </div>
 
@@ -513,7 +596,7 @@ button{font-family:inherit;cursor:pointer}
     <div class="dp-seller">
       <div class="dp-seller-top">
         <div class="dp-seller-label">Pardavėjas</div>
-        <button class="dp-seller-menu" title="Daugiau">
+        <button class="dp-seller-menu ct-btn ct-btn-sm ct-btn-icon" title="Daugiau">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
         </button>
       </div>
@@ -566,7 +649,7 @@ button{font-family:inherit;cursor:pointer}
         <h4>Pelno potencialas</h4>
         <p id="dp-profit-text">Kraunama...</p>
       </div>
-      <button class="dp-pr-btn" id="dp-pelno-btn" onclick="dpPelnoToggle()" style="margin-left:auto;flex:none;padding:7px 14px;border-radius:8px;border:1px solid var(--success-border);background:transparent;color:var(--success);font:600 12px var(--font-sans);cursor:pointer;white-space:nowrap">Skaičiuoti →</button>
+      <button class="dp-pr-btn ct-btn" id="dp-pelno-btn" onclick="dpPelnoToggle()" style="margin-left:auto;flex:none;cursor:pointer;white-space:nowrap">Skaičiuoti →</button>
     </div>
     <div class="dp-pr-block risk">
       <div class="dp-pr-icon">
@@ -576,7 +659,7 @@ button{font-family:inherit;cursor:pointer}
         <h4>Rizikos</h4>
         <p id="dp-risk-text">Kraunama...</p>
       </div>
-      <button class="dp-pr-btn" onclick="dpTab('risk',document.querySelectorAll('.dp-tab')[2]);document.getElementById('dp-pane-risk').scrollIntoView({behavior:'smooth',block:'start'})" style="margin-left:auto;flex:none;padding:7px 14px;border-radius:8px;border:1px solid var(--warning-border);background:transparent;color:var(--warning);font:600 12px var(--font-sans);cursor:pointer;white-space:nowrap">Peržiūrėti →</button>
+      <button class="dp-pr-btn ct-btn" onclick="dpTab('risk',document.querySelectorAll('.dp-tab')[2]);document.getElementById('dp-pane-risk').scrollIntoView({behavior:'smooth',block:'start'})" style="margin-left:auto;flex:none;cursor:pointer;white-space:nowrap">Peržiūrėti →</button>
     </div>
   </div>
   <!-- PELNO SKAICIUOKLE: pirkimo kaina, remontas, islaidos, pardavimo kaina -> pelnas, marza, ROI -->
@@ -598,31 +681,31 @@ button{font-family:inherit;cursor:pointer}
 
   <!-- TABS -->
   <div class="dp-tabs">
-    <button class="dp-tab active" onclick="dpTab('ai',this)">
+    <button class="dp-tab active ct-tab" onclick="dpTab('ai',this)">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M8 12l2 2 4-4"/></svg>
       AI analizė
     </button>
-    <button class="dp-tab" onclick="dpTab('tech',this)">
+    <button class="dp-tab ct-tab" onclick="dpTab('tech',this)">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
       Techninė įranga
     </button>
-    <button class="dp-tab" onclick="dpTab('risk',this)">
+    <button class="dp-tab ct-tab" onclick="dpTab('risk',this)">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
       Rizikos ir derybos
     </button>
-    <button class="dp-tab" onclick="dpTab('vin',this)">
+    <button class="dp-tab ct-tab" onclick="dpTab('vin',this)">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 9h8M8 13h5"/></svg>
       Istorija / VIN
     </button>
-    <button class="dp-tab" onclick="dpTab('market',this)">
+    <button class="dp-tab ct-tab" onclick="dpTab('market',this)">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h18M3 9h12M3 15h9"/></svg>
       Rinkos analizė
     </button>
-    <button class="dp-tab" onclick="dpTab('seller',this)">
+    <button class="dp-tab ct-tab" onclick="dpTab('seller',this)">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
       Pardavėjas
     </button>
-    <button class="dp-tab" onclick="dpTab('photos',this)">
+    <button class="dp-tab ct-tab" onclick="dpTab('photos',this)">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
       Nuotraukos
     </button>
@@ -695,7 +778,7 @@ button{font-family:inherit;cursor:pointer}
   <div class="dp-pane" id="dp-pane-photos">
     <div class="dp-photo-ai-bar">
       <span style="font:500 12px var(--font-mono);color:var(--text-dim)" id="dp-photo-count-label"></span>
-      <button class="dp-photo-ai-btn" id="dp-photo-ai-btn" onclick="dpRunPhotoAI()">
+      <button class="dp-photo-ai-btn ct-btn ct-btn-primary" id="dp-photo-ai-btn" onclick="dpRunPhotoAI()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
         Analizuoti su AI
       </button>
@@ -810,10 +893,10 @@ window.ctApi = function (kelias, params) {
     var lb = document.getElementById('dp-lb');
     if (lb) return lb;
     lb = document.createElement('div'); lb.id = 'dp-lb';
-    lb.innerHTML = '<span class="dp-lb-n" id="dp-lb-n"></span><button class="dp-lb-btn dp-lb-x" onclick="dpLbClose()" title="Uždaryti (Esc)">✕</button>'
-      + '<button class="dp-lb-btn dp-lb-l" onclick="event.stopPropagation();dpLbNav(-1)" title="Ankstesnė (←)">‹</button>'
+    lb.innerHTML = '<span class="dp-lb-n" id="dp-lb-n"></span><button class="dp-lb-btn dp-lb-x ct-btn ct-btn-icon ct-btn-round ct-btn-over" onclick="dpLbClose()" title="Uždaryti (Esc)">✕</button>'
+      + '<button class="dp-lb-btn dp-lb-l ct-btn ct-btn-icon ct-btn-round ct-btn-over" onclick="event.stopPropagation();dpLbNav(-1)" title="Ankstesnė (←)">‹</button>'
       + '<img id="dp-lb-img" alt="">'
-      + '<button class="dp-lb-btn dp-lb-r" onclick="event.stopPropagation();dpLbNav(1)" title="Kita (→)">›</button>'
+      + '<button class="dp-lb-btn dp-lb-r ct-btn ct-btn-icon ct-btn-round ct-btn-over" onclick="event.stopPropagation();dpLbNav(1)" title="Kita (→)">›</button>'
       + '<span class="dp-lb-hint">← → naršyti · Esc uždaryti · paspauskite nuotrauką, kad uždarytumėte</span>';
     lb.addEventListener('click', function (e) { if (e.target === lb || e.target.id === 'dp-lb-img') dpLbClose(); });
     lb.addEventListener('touchstart', function (e) { _lbTouchX = e.touches[0].clientX; }, { passive: true });
@@ -1503,10 +1586,10 @@ window.ctApi = function (kelias, params) {
       // PAKEISTA: analize kainuoja kredita, todel nebeuzsakom automatiskai - rodom aiskų mygtuką
       // v1.27.0: du lygiai - greita (pigiau) ir pilna (su nuotraukų patikrinimu)
       document.getElementById('dp-ai-body').innerHTML =
-        '<div class="dp-cta"><p>Pasirinkite, kiek giliai tikriname šį skelbimą:</p>'
+        '<div class="dp-cta ct-btn ct-btn-primary"><p>Pasirinkite, kiek giliai tikriname šį skelbimą:</p>'
         + '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:4px 0 8px">'
-        + '<button id="dp-analize-greita" onclick="dpPradetiAnalize(\'greita\')" style="background:transparent;border:1px solid var(--border-light);color:var(--text-primary)">Greita apžvalga · 1 kr</button>'
-        + '<button id="dp-analize-cta" onclick="dpPradetiAnalize(\'pilna\')">Pilna apžvalga · 2 kr</button>'
+        + '<button id="dp-analize-greita" onclick="dpPradetiAnalize(\'greita\')" style="background:transparent;border:1px solid var(--border-light);color:var(--text-primary)" class="ct-btn">Greita apžvalga · 1 kr</button>'
+        + '<button id="dp-analize-cta" onclick="dpPradetiAnalize(\'pilna\')" class="ct-btn ct-btn-primary">Pilna apžvalga · 2 kr</button>'
         + '</div>'
         + '<small style="display:block;line-height:1.6">'
         + '<b>Greita</b> – skelbimo tekstas, kaina prieš rinką, rizikos, derybų patarimai.<br>'
@@ -1781,7 +1864,7 @@ window.ctApi = function (kelias, params) {
           + '</div>'
           + '<label style="display:block;font:600 9px/1 var(--font-mono);letter-spacing:.12em;color:var(--text-dim);margin:12px 0 6px">ĮKLIJUOKITE GAMYKLINĮ SĄRAŠĄ ČIA</label>'
           + '<textarea id="dp-bs-laukas" rows="3" placeholder="pvz. S337A Sportinis paketas M&#10;S688A Harman Kardon" style="width:100%;box-sizing:border-box;padding:9px 11px;border-radius:9px;border:1px solid var(--border-light);background:var(--bg-base);color:var(--text-primary);font:400 12px/1.5 var(--font-mono);resize:vertical"></textarea>'
-          + '<button type="button" id="dp-bs-btn" style="margin-top:7px;padding:8px 14px;border-radius:9px;border:none;background:var(--accent);color:#fff;font:600 12px var(--font);cursor:pointer">Sulyginti su skelbimu</button>'
+          + '<button type="button" id="dp-bs-btn" style="margin-top:7px;padding:8px 14px;border-radius:9px;border:none;background:var(--accent);color:#fff;font:600 12px var(--font);cursor:pointer" class="ct-btn">Sulyginti su skelbimu</button>'
           + '<div id="dp-bs-rez" style="margin-top:10px"></div></div>';
         box.insertAdjacentHTML('beforeend', h);
         var kop = document.getElementById('dp-vin-kopijuoti');
@@ -2042,7 +2125,7 @@ window.ctApi = function (kelias, params) {
         }
         if (c.pardavejas) {
           html += '<div style="padding:12px 16px;border-top:1px solid var(--border)">'
-            +'<button id="dp-seller-analyze-btn" onclick="dpSellerAnalyze()" style="width:100%;padding:11px;border-radius:8px;border:none;background:var(--accent);color:#fff;font:600 13px var(--font-sans);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Analizuoti pardavėją</button>'
+            +'<button id="dp-seller-analyze-btn" onclick="dpSellerAnalyze()" style="width:100%;padding:11px;border-radius:8px;border:none;background:var(--accent);color:#fff;font:600 13px var(--font-sans);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" class="ct-btn ct-btn-primary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Analizuoti pardavėją</button>'
             +'</div>';
         }
         html += '</div>';
@@ -2215,7 +2298,7 @@ window.ctApi = function (kelias, params) {
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
     Žiūrėti skelbimą
   </a>
-  <button class="dp-sbar-secondary dp-save-toggle" id="dp-sticky-save-btn" onclick="dpToggleSave()" title="Išsaugoti">
+  <button class="dp-sbar-secondary dp-save-toggle ct-btn" id="dp-sticky-save-btn" onclick="dpToggleSave()" title="Išsaugoti">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
   </button>
 </div>
@@ -2242,5 +2325,6 @@ window.ctApi = function (kelias, params) {
      ATJUNGIMAS: istrinti sia viena eilute. Jokie kiti stiliai nepakeisti. -->
 <link rel="stylesheet" href="ct-dizainas.css">
 <link rel="stylesheet" href="ct-priedai.css">
+<link rel="stylesheet" href="ct-mygtukai.css">
 </body>
 </html>

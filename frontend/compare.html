@@ -183,8 +183,7 @@
   button#search-btn:disabled { background: var(--bg-elevated); color: var(--text-muted); cursor: not-allowed; box-shadow: none; transform: none; }
   #status { color: var(--text-muted); font-size: 14px; margin-bottom: 16px; min-height: 20px; }
   .card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 14px; display: flex; gap: 16px; border-left: 4px solid var(--accent); position: relative; box-shadow: var(--shadow-card); }
-  .fav-star { position: absolute; top: 10px; right: 10px; background: rgba(10,12,16,0.75); border: none; color: var(--text-muted); font-size: 20px; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; z-index: 2; }
-  .fav-star.active { color: var(--warning); }
+  .fav-star { position: absolute; top: 10px; right: 10px; width: 34px; z-index: 2;}/* v1.36.0: .fav-star.active – mygtuko išvaizda perkelta į ct-mygtukai.css */
   .card img { width: 140px; height: 100px; object-fit: cover; border-radius: var(--radius-md); background: var(--bg-elevated); flex-shrink: 0; }
   .card-body { flex: 1; min-width: 0; }
   .card-title { font-weight: 600; font-size: 16px; color: var(--text-primary); }
@@ -213,10 +212,7 @@
   .log-step .done-check { color: var(--success); flex-shrink: 0; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .log-step.current { color: var(--text-primary); font-weight: 500; }
-  .card-actions { margin-top: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-  .detail-btn { background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border); padding: 7px 13px; border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; transition: all 0.15s; }
-  .detail-btn:hover { background: var(--border); color: var(--text-primary); }
-  .detail-btn.ready { background: linear-gradient(135deg, var(--accent), var(--accent-light)); color: #fff; font-weight: 600; border-color: transparent; box-shadow: 0 0 14px rgba(124,111,247,0.4); animation: pulse-glow 2.5s ease-in-out infinite; }
+  .card-actions { margin-top: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }/* v1.36.0: .detail-btn – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .detail-btn:hover – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .detail-btn.ready – mygtuko išvaizda perkelta į ct-mygtukai.css */
   @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 8px rgba(124,111,247,0.3); } 50% { box-shadow: 0 0 20px rgba(167,139,250,0.55); } }
   .detail-panel { margin-top: 12px; padding: 14px; background: var(--bg-base); border-radius: var(--radius-md); border-left: 3px solid var(--success); font-size: 13px; display: none; }
   .detail-panel h4 { margin: 10px 0 5px; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.7px; }
@@ -237,15 +233,8 @@
   .card-photo-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(10,12,16,0.7); color: #fff; border: none; width: 26px; height: 26px; border-radius: 50%; font-size: 15px; cursor: pointer; line-height: 1; padding: 0; }
   .card-photo-nav.prev { left: 4px; }
   .card-photo-nav.next { right: 4px; }
-  .card-photo-count { position: absolute; bottom: 4px; right: 6px; background: rgba(10,12,16,0.75); color: var(--accent-light); font-size: 10px; padding: 1px 6px; border-radius: 10px; }
-
-  /* ============ PALYGINIMAS ============ */
-  .compare-toggle {
-    background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border);
-    padding: 5px 10px; border-radius: var(--radius-sm); font-size: 11px; cursor: pointer;
-    transition: all 0.15s; white-space: nowrap;
-  }
-  .compare-toggle.active { background: rgba(74,144,217,0.15); color: #74c0fc; border-color: rgba(74,144,217,0.4); }
+  .card-photo-count { position: absolute; bottom: 4px; right: 6px; background: rgba(10,12,16,0.75); color: var(--accent-light); font-size: 10px; padding: 1px 6px; border-radius: 10px; }/* v1.36.0: /* ============ PALYGINIMAS ============ */
+  .compare-toggle – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .compare-toggle.active – mygtuko išvaizda perkelta į ct-mygtukai.css */
   #compare-bar {
     display: none; position: fixed; bottom: 0; left: 0; right: 0;
     background: var(--bg-surface);
@@ -322,7 +311,7 @@
     .card-price { font-size: 16px; }
     .card-actions { flex-direction: column; align-items: stretch; gap: 8px; }
     .card-actions .card-link { padding: 10px; text-align: center; background: var(--bg-elevated); border-radius: var(--radius-sm); }
-    .detail-btn { padding: 11px 12px; font-size: 13px; width: 100%; }
+    .detail-btn { width: 100%;}
     #log-header { font-size: 12px; padding: 12px; }
     #sort-bar select { width: 100%; margin-top: 6px; }
     #sort-bar label { display: block; margin-bottom: 2px; }
@@ -330,7 +319,7 @@
     #all-listings-wrap button { font-size: 13px; padding: 12px; }
     #all-listings > div > div:not(.detail-panel) { flex-direction: column !important; align-items: stretch !important; }
     #all-listings img { width: 100% !important; height: 140px !important; }
-    #all-listings .detail-btn { width: 100%; margin-top: 6px; }
+    #all-listings .detail-btn { width: 100%; margin-top: 6px;}
   }
 
   /* ============ TINDER NARSYMAS (visi ekranai) ============ */
@@ -412,26 +401,14 @@
     display: flex; justify-content: center; gap: 24px; align-items: center; flex-shrink: 0;
   }
   .tinder-btn-skip {
-    width: 62px; height: 62px; border-radius: 50%; border: 2px solid var(--danger);
-    background: rgba(255,157,157,0.08); color: var(--danger);
-    font-size: 26px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s; -webkit-tap-highlight-color: transparent;
-  }
-  .tinder-btn-skip:active { background: rgba(255,157,157,0.2); transform: scale(0.92); }
+    width: 62px; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent;}
+  .tinder-btn-skip:active { transform: scale(0.92);}
   .tinder-btn-like {
-    width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--success);
-    background: rgba(127,216,143,0.08); color: var(--success);
-    font-size: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s; -webkit-tap-highlight-color: transparent;
-  }
-  .tinder-btn-like:active { background: rgba(127,216,143,0.2); transform: scale(0.92); }
+    width: 72px; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent;}
+  .tinder-btn-like:active { transform: scale(0.92);}
   .tinder-btn-info {
-    width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--accent);
-    background: var(--accent-dim); color: var(--accent-light);
-    font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s; -webkit-tap-highlight-color: transparent;
-  }
-  .tinder-btn-info:active { background: rgba(124,111,247,0.25); transform: scale(0.92); }
+    width: 48px; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent;}
+  .tinder-btn-info:active { transform: scale(0.92);}
   #tinder-hint { color: var(--text-muted); font-size: 11px; padding: 0 16px 6px; text-align: center; flex-shrink: 0; }
 
   /* ===== SORT BAR ===== */
@@ -512,14 +489,7 @@
 .ct-auth-close:hover { background: rgba(255,255,255,.1); color: #E9EBF2; }
 .ct-auth-tabs { display: flex; border-bottom: 1px solid rgba(255,255,255,.075); }
 .ct-auth-tab {
-  flex: 1; height: 48px; background: transparent; border: none;
-  font: 500 14px 'Archivo', -apple-system, Helvetica, sans-serif;
-  color: #8C93A6; cursor: pointer;
-  border-bottom: 2px solid transparent; margin-bottom: -1px;
-  transition: color .14s, border-color .14s;
-}
-.ct-auth-tab:hover { color: #E9EBF2; }
-.ct-auth-tab.ct-active { color: #E9EBF2; border-bottom-color: #7C5CFF; font-weight: 600; }
+  flex: 1; margin-bottom: -1px;}/* v1.36.0: .ct-auth-tab:hover – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .ct-auth-tab.ct-active – mygtuko išvaizda perkelta į ct-mygtukai.css */
 .ct-auth-body { padding: 26px 28px 24px; }
 .ct-auth-logo { display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 22px; }
 .ct-auth-logo svg { width: 32px; height: 32px; flex: none; }
@@ -682,18 +652,13 @@
 .ct3-nav-link:hover { color: var(--text-primary); background: rgba(255,255,255,.05); }
 .ct3-nav-link.active { color: var(--text-primary); }
 .ct3-premium-btn {
-  display: flex; align-items: center; gap: 7px; height: 42px; padding: 0 22px;
-  border-radius: 21px; border: 1px solid var(--accent); background: transparent;
-  color: var(--accent-light); font: 600 15px var(--font); cursor: pointer;
-  transition: background .15s;
-}
+  display: flex; align-items: center;}
 .ct3-avatar {
   width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border-light);
   background: var(--bg-elevated); color: var(--text-secondary); display: grid; place-items: center; cursor: pointer;
 }
 .ct3-header-right { display: flex; align-items: center; gap: 10px; flex: none; }
-.ct3-logo-text { display: flex; flex-direction: column; gap: 1px; }
-.ct3-premium-btn:hover { background: var(--accent-dim); }
+.ct3-logo-text { display: flex; flex-direction: column; gap: 1px; }/* v1.36.0: .ct3-premium-btn:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
 
 /* ---- HERO ---- */
 .ct3-hero {
@@ -868,34 +833,16 @@
 .ct3-search-bottom-left { display: flex; align-items: center; gap: 10px; }
 .ct3-search-bottom-right { display: flex; align-items: center; gap: 10px; }
 .ct3-more-btn, .ct3-marketplaces-btn {
-  display: flex; align-items: center; gap: 7px;
-  height: 40px; padding: 0 16px; border-radius: 8px;
-  border: 1px solid var(--border-light); background: transparent;
-  color: var(--text-secondary); font: 500 13px var(--font); cursor: pointer;
-  transition: background .15s;
-}
-.ct3-more-btn:hover, .ct3-marketplaces-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
+  display: flex; align-items: center;}/* v1.36.0: .ct3-more-btn:hover, .ct3-marketplaces-btn:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
 .ct3-badge {
   display: inline-flex; align-items: center; justify-content: center;
   width: 18px; height: 18px; border-radius: 9px;
   background: var(--accent); color: #fff; font: 700 9px var(--font-mono);
 }
 .ct3-save-btn {
-  display: flex; align-items: center; gap: 7px;
-  height: 44px; padding: 0 20px; border-radius: 10px;
-  border: 1px solid var(--border-light); background: transparent;
-  color: var(--text-secondary); font: 500 14px var(--font); cursor: pointer;
-  transition: background .15s;
-}
-.ct3-save-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
+  display: flex; align-items: center;}/* v1.36.0: .ct3-save-btn:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
 .ct3-search-btn {
-  display: flex; align-items: center; gap: 8px;
-  height: 44px; padding: 0 24px; border-radius: 10px;
-  border: none; background: var(--accent);
-  color: #fff; font: 600 15px var(--font); cursor: pointer;
-  transition: filter .15s;
-}
-.ct3-search-btn:hover { filter: brightness(1.1); }
+  display: flex; align-items: center;}/* v1.36.0: .ct3-search-btn:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
 
 /* ---- STATS BAR ---- */
 .ct3-stats-bar {
@@ -942,7 +889,7 @@
   .ct3-hero-sub { font-size: 14px; }
   .ct3-search-bottom { flex-direction: column; align-items: stretch; }
   .ct3-search-bottom-left, .ct3-search-bottom-right { justify-content: space-between; }
-  .ct3-save-btn { flex: 1; justify-content: center; }
+  .ct3-save-btn { flex: 1; justify-content: center;}
   .ct3-stats-inner { gap: 16px; flex-wrap: wrap; padding: 14px 16px; }
   .ct3-stat-div { display: none; }
   .ct3-stats-driven { margin-left: 0; border-left: none; padding-left: 0; }
@@ -990,9 +937,7 @@
 .card-photo-count { background: rgba(10,12,18,.82); border: 1px solid var(--border-light); color: var(--text-muted); font: 600 9.5px/1 var(--font-mono); padding: 4px 6px; border-radius: 3px; bottom: 8px; right: 8px; }
 .card-photo-nav { background: rgba(10,12,18,.75); border: 1px solid var(--border-light); width: 24px; height: 24px; }
 .card-body { padding: 14px 18px 14px; }
-.fav-star { top: 12px; right: 12px; width: 34px; height: 34px; border-radius: var(--radius-md); background: transparent; border: 1px solid var(--border-light); color: var(--text-muted); font-size: 14px; line-height: 1; display: grid; place-items: center; padding: 0; }
-.fav-star:hover { background: var(--bg-elevated); }
-.fav-star.active { color: var(--warning); background: var(--warning-dim); border-color: var(--warning-border); }
+.fav-star { top: 12px; right: 12px; width: 34px; line-height: 1; display: grid; place-items: center;}/* v1.36.0: .fav-star:hover – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .fav-star.active – mygtuko išvaizda perkelta į ct-mygtukai.css */
 
 .card-title { font-size: 17px; font-weight: 600; letter-spacing: -.01em; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding-right: 44px; }
 .source-tag { font: 600 9px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; padding: 4px 6px; border-radius: 3px; background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border); margin-left: 0; }
@@ -1014,11 +959,8 @@
 .card-actions { margin-top: 12px; gap: 6px; }
 .card-link { margin-top: 0; font-size: 12.5px; font-weight: 500; color: var(--text-muted); height: 34px; display: inline-flex; align-items: center; white-space: nowrap; padding: 0 12px; border: 1px solid var(--border-light); border-radius: var(--radius-md); }
 .card-link:hover { color: var(--text-primary); background: var(--bg-elevated); }
-.detail-btn { height: 34px; padding: 0 14px; white-space: nowrap; display: inline-flex; align-items: center; background: transparent; border: 1px solid var(--border-light); color: var(--text-primary); border-radius: var(--radius-md); font-size: 12.5px; font-weight: 600; }
-.detail-btn:hover { background: var(--bg-elevated); }
-.detail-btn.ready { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: var(--shadow-glow); animation: none; }
-.compare-toggle { height: 34px; padding: 0 12px; display: inline-flex; align-items: center; white-space: nowrap; background: transparent; border: 1px solid var(--border-light); color: var(--text-muted); border-radius: var(--radius-md); font-size: 12px; font-weight: 500; }
-.compare-toggle.active { background: var(--accent-dim); color: var(--text-primary); border-color: var(--accent); }
+.detail-btn { display: inline-flex; align-items: center;}/* v1.36.0: .detail-btn:hover – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .detail-btn.ready – mygtuko išvaizda perkelta į ct-mygtukai.css */
+.compare-toggle { display: inline-flex; align-items: center;}/* v1.36.0: .compare-toggle.active – mygtuko išvaizda perkelta į ct-mygtukai.css */
 
 /* ===== DETAIL PANEL ===== */
 .detail-panel { margin: 14px -18px -14px; padding: 18px; background: var(--bg-base); border-top: 1px solid var(--border); border-left: none; border-radius: 0; font-size: 13px; }
@@ -1108,8 +1050,7 @@
 .ct-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .ct-title-row h3 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -.01em; }
 .ct-card .source-tag { font: 600 9px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; padding: 4px 6px; border-radius: 4px; background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border); margin: 0; }
-.ct-card .fav-star.ct-fav { position: static; margin-left: auto; width: 32px; height: 32px; border-radius: 8px; background: transparent; border: 1px solid var(--border-light); color: var(--text-muted); font-size: 14px; display: grid; place-items: center; padding: 0; }
-.ct-card .fav-star.ct-fav.active { color: var(--warning); background: var(--warning-dim); border-color: var(--warning-border); }
+.ct-card .fav-star.ct-fav { position: static; margin-left: auto; width: 32px; display: grid; place-items: center;}/* v1.36.0: .ct-card .fav-star.ct-fav.active – mygtuko išvaizda perkelta į ct-mygtukai.css */
 .ct-price-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
 .ct-price { font: 600 26px/1 var(--font-mono); letter-spacing: -.02em; color: var(--accent-light); }
 .ct-diff { font: 700 12px/1 var(--font-mono); padding: 6px 8px; border-radius: 6px; }
@@ -1128,12 +1069,7 @@
 .ct-comment span { flex: none; font: 700 9px/1 var(--font-mono); padding: 5px 5px; border-radius: 4px; background: var(--accent); color: #fff; height: 18px; display: grid; place-items: center; }
 .ct-comment p { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--text-secondary); text-wrap: pretty; }
 .ct-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
-.ct-btn, .ct-card .compare-toggle.ct-btn, .ct-card .detail-btn.ct-btn { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border-radius: 8px; background: transparent; border: 1px solid var(--border-light); color: var(--text-primary); font-size: 12.5px; font-weight: 600; text-decoration: none; cursor: pointer; white-space: nowrap; transition: background .15s; }
-.ct-btn:hover, .ct-card .compare-toggle.ct-btn:hover, .ct-card .detail-btn.ct-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
-.ct-card .compare-toggle.ct-btn.active { background: var(--accent-dim); border-color: var(--accent); }
-.ct-card .detail-btn.ct-btn-primary, .ct-card .detail-btn.ct-btn-primary.ready { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: none; animation: none; }
-.ct-card .detail-btn.ct-btn-primary:hover { filter: brightness(1.08); }
-.ct-card .detail-btn:disabled { opacity: .6; cursor: progress; }
+.ct-btn, .ct-card .compare-toggle.ct-btn, .ct-card .detail-btn.ct-btn { display: inline-flex; align-items: center; text-decoration: none;}/* v1.36.0: .ct-btn:hover, .ct-card .compare-toggle.ct-btn:hover, .ct-card .detail – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .ct-card .compare-toggle.ct-btn.active – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .ct-card .detail-btn.ct-btn-primary, .ct-card .detail-btn.ct-btn-prima – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .ct-card .detail-btn.ct-btn-primary:hover – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .ct-card .detail-btn:disabled – mygtuko išvaizda perkelta į ct-mygtukai.css */
 
 /* score */
 .ct-score { padding: 12px 0 0 0; border-top: 1px solid var(--border); margin-top: 12px; }
@@ -1262,7 +1198,7 @@
   .ct3-logo-icon { width: 38px !important; height: 38px !important; }
   .ct3-logo-text > span { font-size: 20px !important; }
   .ct3-nav { display: none !important; }
-  .ct3-premium-btn { display: none !important; }
+  .ct3-premium-btn { display: none !important;}
 }
 /* Responsive search panel */
 @media (max-width: 768px) {
@@ -1338,7 +1274,7 @@
   .ct3-logo-text > span { font-size: 20px !important; }
   .ct3-logo-text small { display: none; }
   .ct3-nav { display: none !important; }
-  .ct3-premium-btn { display: none !important; }
+  .ct3-premium-btn { display: none !important;}
   .ct3-avatar { width: 36px; height: 36px; }
 
   /* Hero */
@@ -1366,9 +1302,9 @@
   .ct3-search-bottom { flex-direction: column; align-items: stretch; padding: 8px 10px 10px; gap: 8px; }
   .ct3-search-bottom-left { flex-wrap: wrap; gap: 6px; }
   .ct3-search-bottom-right { flex-direction: row; gap: 6px; }
-  .ct3-save-btn { flex: 1; justify-content: center; }
-  .ct3-search-btn { flex: 1; justify-content: center; height: 46px; font-size: 15px; }
-  .ct3-more-btn, .ct3-marketplaces-btn { flex: 1; justify-content: center; font-size: 12px; height: 38px; }
+  .ct3-save-btn { flex: 1; justify-content: center;}
+  .ct3-search-btn { flex: 1; justify-content: center;}
+  .ct3-more-btn, .ct3-marketplaces-btn { flex: 1; justify-content: center;}
 
   /* Stats bar */
   .ct3-stats-bar { margin: 6px 10px 0 !important; border-radius: 12px !important; }
@@ -1415,7 +1351,7 @@
   .card-price { font-size: 16px; }
   .card-actions { flex-direction: column; align-items: stretch; gap: 8px; }
   .card-actions .card-link { padding: 10px; text-align: center; background: var(--bg-elevated); border-radius: var(--radius-sm); }
-  .detail-btn { padding: 11px 12px; font-size: 13px; width: 100%; }
+  .detail-btn { width: 100%;}
 
   /* Sort meniu — neiš ekrano */
   .ct-sort { position: relative; }
@@ -1460,7 +1396,7 @@
   /* All listings */
   #all-listings > div > div:not(.detail-panel) { flex-direction: column !important; align-items: stretch !important; }
   #all-listings img { width: 100% !important; height: 140px !important; }
-  #all-listings .detail-btn { width: 100%; margin-top: 6px; }
+  #all-listings .detail-btn { width: 100%; margin-top: 6px;}
 }
 
 /* TELEFONAS 480px */
@@ -1704,6 +1640,110 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 </style>
 </head>
 <body>
+<!-- ============================================================================
+     ct-ikonos.html · CarTriige · piktogramų rinkinys
+     ----------------------------------------------------------------------------
+     Keturiolika piktogramų, vienas failas, jokio išorinio paketo.
+     Įdėkite šį bloką VIENĄ kartą į kiekvieno puslapio <body> pradžią.
+
+     Iškvietimas pagal vardą:
+         <i><svg class="ct-i"><use href="#i-skelbimas"></use></svg></i>
+
+     Visos 16×16, stroke: currentColor, be fill — spalvą nustato mygtukas.
+     Vienintelė išimtis: #i-issaugoti gauna fill, kai mygtukas .is-on
+     (taisyklė yra ct-mygtukai.css).
+     ========================================================================= -->
+
+<svg width="0" height="0" style="position: absolute; overflow: hidden" aria-hidden="true" focusable="false">
+  <defs>
+
+    <!-- skelbimas · išorinė nuoroda į portalą -->
+    <symbol id="i-skelbimas" viewBox="0 0 16 16">
+      <path d="M13 9.5V13H3V3h3.5"/>
+      <path d="M9.5 3H13v3.5"/>
+      <path d="M13 3 7.5 8.5"/>
+    </symbol>
+
+    <!-- apzvalga · pilna analizė, ataskaita -->
+    <symbol id="i-apzvalga" viewBox="0 0 16 16">
+      <rect x="3" y="2" width="10" height="12" rx="1.5"/>
+      <path d="M5.5 6h5M5.5 8.5h5M5.5 11h3"/>
+    </symbol>
+
+    <!-- palyginti · du keliai priešingomis kryptimis -->
+    <symbol id="i-palyginti" viewBox="0 0 16 16">
+      <path d="M3 6h9"/><path d="M9.5 3.5 12 6 9.5 8.5"/>
+      <path d="M13 10.5H4"/><path d="M6.5 8 4 10.5 6.5 13"/>
+    </symbol>
+
+    <!-- issaugoti · mėgstamiausi -->
+    <symbol id="i-issaugoti" viewBox="0 0 16 16">
+      <path class="ct-i-issaugoti" d="M8 13.2S2.8 10 2.8 6.4a2.9 2.9 0 0 1 5.2-1.8 2.9 2.9 0 0 1 5.2 1.8c0 3.6-5.2 6.8-5.2 6.8Z"/>
+    </symbol>
+
+    <!-- filtrai · trys slankiojami kriterijai -->
+    <symbol id="i-filtrai" viewBox="0 0 16 16">
+      <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/>
+      <circle cx="6" cy="4.5" r="1.6" fill="currentColor" stroke="none"/>
+      <circle cx="10.5" cy="8" r="1.6" fill="currentColor" stroke="none"/>
+      <circle cx="5" cy="11.5" r="1.6" fill="currentColor" stroke="none"/>
+    </symbol>
+
+    <!-- ieskoti · nuskaityti portalus -->
+    <symbol id="i-ieskoti" viewBox="0 0 16 16">
+      <circle cx="7" cy="7" r="4.2"/>
+      <path d="M10.2 10.2 13.5 13.5"/>
+    </symbol>
+
+    <!-- rusiuoti · tvarka pagal reikšmę -->
+    <symbol id="i-rusiuoti" viewBox="0 0 16 16">
+      <path d="M3 4.5h9M3 8h6M3 11.5h3"/>
+      <path d="M12.5 9v4.5"/><path d="M10.8 11.8l1.7 1.7 1.7-1.7"/>
+    </symbol>
+
+    <!-- isskleisti -->
+    <symbol id="i-isskleisti" viewBox="0 0 16 16">
+      <path d="M4 6.5 8 10.5l4-4"/>
+    </symbol>
+
+    <!-- suskleisti -->
+    <symbol id="i-suskleisti" viewBox="0 0 16 16">
+      <path d="M4 9.5 8 5.5l4 4"/>
+    </symbol>
+
+    <!-- vin · kodas, kurį nuskaitome -->
+    <symbol id="i-vin" viewBox="0 0 16 16">
+      <path d="M3 3.5v9M5.5 3.5v9M8 3.5v9M10.5 3.5v9M13 3.5v9" stroke-width="1.4"/>
+    </symbol>
+
+    <!-- pardavejas -->
+    <symbol id="i-pardavejas" viewBox="0 0 16 16">
+      <circle cx="8" cy="6" r="2.6"/>
+      <path d="M3.5 13.2c.6-2.3 2.4-3.6 4.5-3.6s3.9 1.3 4.5 3.6"/>
+    </symbol>
+
+    <!-- nuotraukos · vizualinė analizė -->
+    <symbol id="i-nuotraukos" viewBox="0 0 16 16">
+      <rect x="2.5" y="3.5" width="11" height="9" rx="1.5"/>
+      <circle cx="6" cy="6.8" r="1.1"/>
+      <path d="M3 11.5 6.5 8.5l3 2.5 2-1.6 2 1.6"/>
+    </symbol>
+
+    <!-- kreditai -->
+    <symbol id="i-kreditai" viewBox="0 0 16 16">
+      <circle cx="8" cy="8" r="5.2"/>
+      <path d="M8 5.4v5.2M6.4 6.8h3.2M6.4 9.2h3.2" stroke-width="1.4"/>
+    </symbol>
+
+    <!-- planai · prenumeratos lygiai -->
+    <symbol id="i-planai" viewBox="0 0 16 16">
+      <path d="M8 2.5 13.5 5.5 8 8.5 2.5 5.5 8 2.5Z"/>
+      <path d="M2.5 9 8 12l5.5-3"/>
+    </symbol>
+
+  </defs>
+</svg>
+
 <div class="cr-wrap">
   <div class="cr-top">
     <a class="cr-back" href="index.html?palyginimas=1">
@@ -1827,5 +1867,6 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
      ATJUNGIMAS: istrinti sia viena eilute. Jokie kiti stiliai nepakeisti. -->
 <link rel="stylesheet" href="ct-dizainas.css">
 <link rel="stylesheet" href="ct-priedai.css">
+<link rel="stylesheet" href="ct-mygtukai.css">
 </body>
 </html>

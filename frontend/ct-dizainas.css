@@ -284,45 +284,22 @@ button { font-family: inherit; cursor: pointer; }
 .ct-card-risk > .ct-card-h { background: var(--danger-dim); }
 
 /* ============================================================================
-   KOMPONENTAS · MYGTUKAS
+   KOMPONENTAS · MYGTUKAS · ISKELTAS I ct-mygtukai.css
+   ----------------------------------------------------------------------------
+   v1.36.0: visas mygtuko komponentas gyvena ct-mygtukai.css. Cia jo nebera
+   sąmoningai — du savininkai buvo bloga is pat pradziu, ir tai issilaike
+   tiksliai iki pirmo konflikto:
+
+     buves cia:  .ct-btn { min-height: 36px }
+     tenai:      .ct-btn-sm { height: 32px }
+
+   min-height visada nugali height, nesvarbu kuris failas velesnis, tad
+   .ct-btn-sm niekada negaudavo savo 32 px. Taisymas ne specifikoje —
+   taisymas tame, kad taisykle butu viena.
+
+   .ct-cost pakeistas .ct-btn > u (ct-mygtukai.css). Jei markup'e dar yra
+   <span class="ct-cost">, jis lieka be stiliaus — tai matoma ir tycia.
    ========================================================================== */
-
-.ct-btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
-  min-height: 36px; padding: 0 var(--s-3);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-md);
-  background: transparent;
-  color: var(--text-primary);
-  font: var(--fw-medium) var(--fs-200) / 1 var(--font);
-  transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
-}
-.ct-btn:hover { background: var(--bg-elevated); }
-.ct-btn:disabled { opacity: .45; cursor: not-allowed; }
-
-.ct-btn-primary {
-  background: var(--accent-strong); border-color: var(--accent-strong);
-  color: var(--text-on-accent); font-weight: var(--fw-semi);
-}
-.ct-btn-primary:hover { background: var(--accent-strong-hover); border-color: var(--accent-strong-hover); }
-
-.ct-btn-quiet { border-color: transparent; color: var(--text-secondary); }
-.ct-btn-quiet:hover { background: var(--bg-elevated); color: var(--text-primary); }
-
-.ct-btn-lg { min-height: 44px; padding: 0 var(--s-5); font-size: var(--fs-300); }
-
-/* Kreditų kaina mygtuke — skaičius iš serverio, formatuojame tik vizualiai */
-.ct-btn .ct-cost {
-  font: var(--fw-semi) var(--fs-100) / 1 var(--font-mono);
-  letter-spacing: var(--mono-ls);
-  padding: 3px 6px;
-  border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, .12);
-}
-
-@media (max-width: 600px) {
-  .ct-btn { min-height: var(--tap-min); }
-}
 
 /* ============================================================================
    KOMPONENTAS · ŽYMĖ
@@ -912,9 +889,11 @@ img, svg, video, canvas { max-width: 100%; }
 
 /* Varzeliai -> perjungiami zenkliukai, 44 px zona */
 .ct-flags { display: flex; gap: var(--s-2); flex-wrap: wrap; }
+/* 32 px — tas pats kaip .ct-btn-sm ir .ct-seg. Buvo 36 px: paskutinis
+   ketvirtojo aukscio saltinis visoje sistemoje. */
 .ct-flag {
   display: inline-flex; align-items: center; gap: var(--s-2);
-  min-height: 36px; padding: 0 13px;
+  min-height: 32px; padding: 0 13px;
   border: 1px solid var(--border-light); border-radius: var(--radius-pill);
   background: transparent; color: var(--text-secondary);
   font: var(--fw-medium) var(--fs-200)/1 var(--font); cursor: pointer;
@@ -1243,39 +1222,11 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
 /* Grupe */
 .ct-chips { display: flex; gap: 7px; flex-wrap: wrap; }
 
-/* ── Mygtukai · plytele ir ženklelis ─────────────────────────────────────── */
-
-/* Piktogramos plytele. Simbolis eina i <i> teksta — ne background-image. */
-.ct-btn > i {
-  flex: none; width: 18px; height: 18px; margin-left: -3px;
-  display: grid; place-items: center;
-  border-radius: 5px; background: rgba(255,255,255,.07);
-  font: var(--fw-semi) 10px/1 var(--font-mono); font-style: normal;
-  color: var(--text-secondary);
-}
-.ct-btn:hover > i { background: rgba(255,255,255,.12); color: var(--text-primary); }
-
-/* Pirminis CTA: plytele ant akcento fono turi buti sviesesne, ne tamsesne */
-.ct-btn-primary > i { background: rgba(255,255,255,.20); color: #fff; }
-.ct-btn-primary:hover > i { background: rgba(255,255,255,.28); }
-
-/* Kreditu zenklelis „2 kr" — atskirtas vertikalia linija, ne skliausteliais */
-.ct-btn > u {
-  flex: none; margin-left: 2px; padding-left: 9px;
-  border-left: 1px solid rgba(255,255,255,.28);
-  font: var(--fw-bold) 11px/1 var(--font-mono); font-variant-numeric: tabular-nums;
-  text-decoration: none; letter-spacing: .02em;
-}
-/* Kai kreditu nepakanka — zenklelis raudonas, mygtukas veikia (veda i papildyma) */
-.ct-btn.is-short > u { color: var(--danger); border-left-color: var(--danger-border); }
-
-/* Antriniai mygtukai vos mazesni uz CTA — hierarchija, ne atsitiktinumas */
-.ct-actions > .ct-btn { height: 34px; font-size: 12.5px; }
-.ct-actions > .ct-btn-primary { height: 40px; font-size: var(--fs-300); }
-@media (max-width: 640px) {
-  .ct-actions > .ct-btn { min-height: var(--tap-min); height: auto; }
-  .ct-actions > .ct-btn-primary { min-height: 48px; height: auto; }
-}
+/* ── Mygtukai · ISKELTI I ct-mygtukai.css ────────────────────────────────────
+   Cia buvo .ct-btn > i, > u, .is-short ir .ct-actions auksciai (34 / 40 px).
+   Pastarieji buvo blogiausia dalis: .ct-actions > .ct-btn yra (0,2,0), tad
+   34 px nugalejo ct-mygtukai.css 38 px kiekvienoje veiksmu eileje — o ju
+   produkte daugiausia. Vienas savininkas, viena taisykle.                   */
 
 /* ── .ct-photo-n · nuotrauku skaitiklis ──────────────────────────────────── */
 

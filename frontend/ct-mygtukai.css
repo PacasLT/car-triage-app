@@ -1,0 +1,384 @@
+/* ============================================================================
+   ct-mygtukai.css · CarTriige · VIENAS mygtukų komponentas
+   ----------------------------------------------------------------------------
+   Šis failas PAKEIČIA visas senas mygtukų taisykles, o ne dedasi virš jų.
+   Trys dalykai, be kurių jis neveiks taip, kaip sutarta:
+
+   1. Prijungti PASKUTINĮ — po ct-dizainas.css.
+   2. Ištrinti senas mygtukų taisykles iš šešių <style id=…> blokų.
+      Sąrašą, ką tiksliai trinti, žr. MYGTUKAI.md §6.
+   3. Nė vienos `!important` čia nėra sąmoningai. Jei mygtukas neatrodo
+      teisingai — vadinasi, 2 punktas dar nepadarytas, ir tai matosi.
+      Būtent tam, kad matytųsi.
+
+   Perėjimo laikotarpiui bazinis selektorius apima ir senus klasių vardus:
+   mygtukai gauna naują išvaizdą IŠKART, dar nepakeitus markup'o. Kai klases
+   pakeisite pagal žemėlapį, senus vardus iš šio selektoriaus ištrinkite.
+   ========================================================================== */
+
+
+/* ── Bazė ─────────────────────────────────────────────────────────────────── */
+
+.ct-btn,
+/* perėjimo laikotarpiui — index.html */
+.detail-btn, .compare-toggle, .ct3-search-btn, .ct3-more-btn, .ct3-save-btn,
+.ct3-premium-btn, .ct-sort-btn, .ct-active-clear, .compare-btn, .deep-compare-btn,
+.ct-kiti-hdr,
+/* perėjimo laikotarpiui — detail.html */
+.dp-act, .dp-bc-btn, .dp-cta, .dp-lb-btn, .dp-save-toggle, .dp-pr-btn,
+.dp-photo-ai-btn, .dp-bs-btn, .dp-pelno-btn, .dp-seller-analyze-btn,
+/* perėjimo laikotarpiui — kiti puslapiai */
+.at-btn, .mg-btn, .ct-ver-btn, .ct-auth-tab, .ct-login-btn, .ct-reg-btn,
+.ct-planas-btn {
+  /* Anatomija: vienas flex su gap. Jokių margin tarp dalių. */
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  /* Vienas aukštis visam produktui. Antrinis ir tylus — tas pats. */
+  height: 38px;
+  padding: 0 14px;
+  box-sizing: border-box;
+
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-secondary);
+
+  font-family: var(--font);
+  font-size: var(--fs-300);
+  font-weight: var(--fw-medium);
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+
+  cursor: pointer;
+  transition: background .14s ease, border-color .14s ease, color .14s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 44 px pirštui. Aukštis auto, kad tekstas galėtų laužtis telefone. */
+@media (max-width: 640px) {
+  .ct-btn, .detail-btn, .compare-toggle, .dp-act, .dp-bc-btn, .dp-cta,
+  .at-btn, .mg-btn {
+    min-height: var(--tap-min);
+    height: auto;
+    padding: 9px 14px;
+  }
+}
+
+.ct-btn:hover { background: var(--bg-elevated); border-color: var(--border-light); color: var(--text-primary); }
+
+/* Klaviatūra. Ne :focus — kitaip žiedas lieka po paspaudimo pele. */
+.ct-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+
+/* ── Variantai · TRYS, ne penki ───────────────────────────────────────────── */
+/* „Perjungiklis" nėra variantas — tai antrinio BŪSENA (.is-on).
+   „Ikoninis" nėra variantas — tai forma (.ct-btn-icon), kurią gali gauti
+   bet kuris variantas. Taip lentelė lieka baigtinė: 3 × 2 formos × būsenos. */
+
+/* 1. Pirminis — vienas per ekraną */
+.ct-btn-primary {
+  border-color: var(--accent-strong);
+  background: var(--accent-strong);
+  color: #fff;
+  font-weight: var(--fw-semi);
+}
+.ct-btn-primary:hover { filter: brightness(1.08); background: var(--accent-strong); border-color: var(--accent-strong); color: #fff; }
+
+/* 2. Antrinis — bazė, jokios papildomos klasės */
+
+/* 3. Tylus — trečiaeilis: be rėmelio, be fono */
+.ct-btn-quiet {
+  border-color: transparent;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 0 8px;
+}
+.ct-btn-quiet:hover { background: transparent; border-color: transparent; color: var(--text-primary); text-decoration: underline; }
+
+
+/* ── Formos ───────────────────────────────────────────────────────────────── */
+
+/* Ikoninis: kvadratas, be teksto. Būtinas aria-label. */
+.ct-btn-icon {
+  width: 38px;
+  padding: 0;
+  justify-content: center;
+  gap: 0;
+}
+.ct-btn-icon.ct-btn-round { border-radius: 50%; }
+@media (max-width: 640px) {
+  .ct-btn-icon { width: var(--tap-min); min-width: var(--tap-min); padding: 0; }
+}
+
+/* Didysis: tik paieškos mygtukui ir mobiliam CTA */
+.ct-btn-lg {
+  height: 46px;
+  padding: 0 20px;
+  font-size: var(--fs-400);
+  font-weight: var(--fw-semi);
+  border-radius: var(--radius-md);
+}
+@media (max-width: 640px) { .ct-btn-lg { min-height: 48px; height: auto; } }
+
+/* Per visą plotį — mobilus CTA ir lapelio poraštė */
+.ct-btn-block { width: 100%; justify-content: center; }
+
+
+/* ── Dalys ────────────────────────────────────────────────────────────────── */
+
+/* Piktogramos plytelė. TIK veiksmams, kurie ką nors daro su objektu.
+   Tyliems mygtukams plytelės nėra — žr. MYGTUKAI.md §2. */
+.ct-btn > i {
+  flex: none;
+  width: 18px; height: 18px;
+  margin-left: -3px;
+  display: grid; place-items: center;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, .07);
+  color: var(--text-secondary);
+  font-style: normal;
+}
+.ct-btn:hover > i { background: rgba(255, 255, 255, .12); color: var(--text-primary); }
+
+.ct-btn-primary > i { background: rgba(255, 255, 255, .20); color: #fff; }
+.ct-btn-primary:hover > i { background: rgba(255, 255, 255, .28); }
+
+/* Ikoniniame variante plytelės nėra — piktograma YRA mygtukas */
+.ct-btn-icon > i { width: auto; height: auto; margin: 0; background: transparent; }
+.ct-btn-icon:hover > i { background: transparent; }
+
+/* Piktograma. Vienas dydis visur. */
+.ct-i { width: 14px; height: 14px; display: block; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.ct-btn-icon .ct-i { width: 17px; height: 17px; }
+.ct-btn-lg .ct-i { width: 16px; height: 16px; }
+
+/* Kainos ženklelis. Vertikali linija, ne skliausteliai. */
+.ct-btn > u {
+  flex: none;
+  margin-left: 2px;
+  padding-left: 9px;
+  border-left: 1px solid rgba(255, 255, 255, .28);
+  font: var(--fw-bold) 11px/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .02em;
+  text-decoration: none;
+}
+/* Nemokamas veiksmas TARP mokamų — kitur ženklelio nėra visai */
+.ct-btn > u.is-free { color: var(--k-confirmed); border-left-color: var(--k-confirmed-border); font-weight: var(--fw-semi); }
+/* Nepakanka kreditų — ženklelis raudonas, mygtukas VEIKIA (veda į papildymą) */
+.ct-btn.is-short > u { color: var(--danger); border-left-color: var(--danger-border); }
+
+/* Rodyklė. TIK kai mygtukas kažkur veda arba ką nors atidaro. */
+.ct-btn-go::after {
+  content: '→';
+  flex: none;
+  margin-left: 1px;
+  font-size: 13px;
+  line-height: 1;
+  opacity: .75;
+}
+.ct-btn-go:hover::after { opacity: 1; }
+/* Išskleidimas vietoje — rodyklė apsiverčia, o ne rodo į šoną */
+.ct-btn-toggle::after {
+  content: '⌃';
+  flex: none;
+  margin-left: 1px;
+  font-size: 11px;
+  line-height: 1;
+  opacity: .75;
+  transform: rotate(180deg);
+  transition: transform .18s ease;
+}
+.ct-btn-toggle[aria-expanded="true"]::after { transform: rotate(0deg); }
+
+
+/* ── Būsenos ──────────────────────────────────────────────────────────────── */
+
+/* ĮJUNGTA · „Palyginti" po paspaudimo, širdutė, „Išsaugota" */
+.ct-btn.is-on {
+  border-color: var(--accent-border);
+  background: var(--accent-dim);
+  color: var(--accent-light);
+}
+.ct-btn.is-on > i { background: rgba(124, 92, 255, .22); color: var(--accent-light); }
+.ct-btn.is-on:hover { background: var(--accent-dim); border-color: var(--accent); color: var(--accent-light); }
+
+/* Širdutė įjungta — užpildyta, ne tik violetinė */
+.ct-btn.is-on .ct-i-issaugoti { fill: currentColor; }
+
+/* IŠJUNGTA. Naudoti TIK kai veiksmas iš principo neįmanomas.
+   „Nepakanka kreditų" NĖRA šis atvejis — tam yra .is-short. */
+.ct-btn:disabled,
+.ct-btn.is-disabled {
+  opacity: .45;
+  cursor: not-allowed;
+  filter: none;
+}
+.ct-btn:disabled:hover, .ct-btn.is-disabled:hover { background: transparent; border-color: var(--border-light); color: var(--text-secondary); }
+.ct-btn-primary:disabled:hover { background: var(--accent-strong); }
+
+/* VYKDOMA · 30–90 s. Matomiausia būsena produkte, tad ji ne pilka.
+   Suktukas pakeičia piktogramos plytelę toje pačioje vietoje — mygtukas
+   neperšoka nė pikselio. */
+.ct-btn.is-busy {
+  cursor: progress;
+  pointer-events: none;
+  border-color: var(--accent-border);
+  color: var(--text-primary);
+}
+.ct-btn.is-busy > i,
+.ct-btn.is-busy > u,
+.ct-btn.is-busy::after { display: none; }
+.ct-btn.is-busy::before {
+  content: '';
+  flex: none;
+  width: 14px; height: 14px;
+  margin-left: -1px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  opacity: .9;
+  animation: ct-spin .7s linear infinite;
+}
+@keyframes ct-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .ct-btn.is-busy::before { animation-duration: 2.2s; }
+}
+
+/* PARUOŠTA · analizė kešuota, antrą kartą nemokama.
+   Ženklelis dingsta, rodyklė atsiranda — nes dabar mygtukas TIKRAI atidaro. */
+.ct-btn.is-ready > u { display: none; }
+.ct-btn.is-ready::after { content: '→'; flex: none; margin-left: 1px; font-size: 13px; line-height: 1; opacity: .75; }
+
+/* KLAIDA · nepavyko, galima bandyti dar kartą */
+.ct-btn.is-error {
+  border-color: var(--danger-border);
+  background: var(--danger-dim);
+  color: var(--danger);
+}
+.ct-btn.is-error > i { background: rgba(255, 255, 255, .10); color: var(--danger); }
+.ct-btn.is-error > u { display: none; }
+.ct-btn.is-error:hover { background: var(--danger-dim); border-color: var(--danger); color: var(--danger); }
+
+
+/* ── Grupės ───────────────────────────────────────────────────────────────── */
+
+/* Veiksmų eilė. Pirminis pirmas, tarpas prieš likusius — ne priešingai. */
+.ct-actions { display: flex; gap: 9px; flex-wrap: wrap; align-items: center; }
+.ct-actions-gap { flex: 1 1 0; min-width: 0; }
+
+/* Segmentai · rūšiavimas, skirtukai formoje */
+.ct-seg { display: inline-flex; gap: 2px; padding: 3px; background: var(--bg-sunken); border: 1px solid var(--border); border-radius: calc(var(--radius-md) + 3px); }
+.ct-seg > .ct-btn { height: 32px; border-color: transparent; background: transparent; }
+.ct-seg > .ct-btn.is-on { background: var(--bg-elevated); border-color: var(--border-light); color: var(--text-primary); }
+
+
+/* ── Ką sąmoningai IŠTRINA šis failas ────────────────────────────────────────
+   Trys senos elgsenos, kurių nekartoju, nes jos kenkė:
+
+   1. `animation` ant pirminio CTA (`detail-btn.ct-btn-primary.ready` pulsavo).
+      Mygtukas, kuris juda pats, konkuruoja su įverčiu — svarbiausiu ekrano
+      elementu. PARUOŠTA būsena dabar skaitoma iš rodyklės ir dingusio ženklelio.
+
+   2. `box-shadow` ant mygtukų. Visame kitame produkte šešėlio nėra; mygtukai
+      buvo vieninteliai pakilę.
+
+   3. `:hover` spalvų keitimas pirminiam variantui į kitą atspalvį. Dabar
+      `brightness(1.08)` — tas pats akcentas, tik šviesesnis, tad hover niekada
+      nenukrypsta nuo palettės.
+   ========================================================================== */
+
+
+/* ============================================================================
+   PAPILDYMAS · 12 klasiu, kuriu pirmame sarase nebuvo
+   ----------------------------------------------------------------------------
+   Trys naujos formos. Nė viena nepridėjo naujo aukščio:
+     .ct-btn-sm   32 px — toks pat kaip .ct-seg viduje (jau buvo)
+     .ct-tab      46 px — toks pat kaip .ct-btn-lg (jau buvo)
+     .ct-btn-xl   56 px — TIK @media (max-width: 640px), darbalaukyje nėra
+   ========================================================================== */
+
+/* ── Mazoji forma · TIK antrastėje ───────────────────────────────────────── */
+/* Antraste zema, 38 px joje isties per daug. 32 px sistemoje jau yra —
+   tokio pat aukscio yra segmentu mygtukai. Ketvirto aukscio nepridedame. */
+
+.ct-btn-sm { height: 32px; padding: 0 11px; font-size: 12.5px; gap: 7px; }
+.ct-btn-sm > i { width: 16px; height: 16px; border-radius: 4px; }
+.ct-btn-sm .ct-i { width: 13px; height: 13px; }
+.ct-btn-sm.ct-btn-icon { width: 32px; padding: 0; }
+/* Antrasteje 44 px nereikia: ji sticky ir mygtukai stovi atskirai, ne eileje */
+@media (max-width: 640px) {
+  .ct-btn-sm { min-height: 32px; height: 32px; padding: 0 11px; }
+  .ct-btn-sm.ct-btn-icon { min-width: 32px; }
+}
+
+/* ── Skirtukai · NE mygtukai ─────────────────────────────────────────────── */
+/* Skirtukas nera veiksmas — jis navigacija. Todel jam ne .ct-seg (fonas),
+   o apatinis remelis. Aukstis 46 px — tas pats kaip .ct-btn-lg. */
+
+.ct-tabs { display: flex; gap: 2px; overflow-x: auto; border-bottom: 1px solid var(--border); scrollbar-width: none; -webkit-overflow-scrolling: touch; mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 20px), transparent 100%); }
+.ct-tabs::-webkit-scrollbar { display: none; }
+
+.ct-tab {
+  flex: none;
+  display: inline-flex; align-items: center; gap: 7px;
+  height: 46px; min-height: 44px; padding: 0 16px;
+  border: none; border-bottom: 2px solid transparent;
+  background: transparent; color: var(--text-muted);
+  font-family: var(--font); font-size: var(--fs-300); font-weight: var(--fw-medium);
+  line-height: 1; white-space: nowrap; cursor: pointer;
+  transition: color .14s ease, border-color .14s ease;
+}
+.ct-tab:hover { color: var(--text-primary); }
+.ct-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.ct-tab.is-on { border-bottom-color: var(--accent); color: var(--accent-light); font-weight: var(--fw-semi); }
+/* Skaicius skirtuke — kiek elementu uz jo */
+.ct-tab > u { font: var(--fw-semi) 10.5px/1 var(--font-mono); font-variant-numeric: tabular-nums; text-decoration: none; color: var(--text-dim); }
+.ct-tab.is-on > u { color: var(--accent-light); }
+/* Uzrakintas skirtukas — rodo dp-paywall viduje, tad nera disabled */
+.ct-tab.is-locked > u { color: var(--accent); }
+
+/* ── Rodykles ant nuotraukos · viena forma abiem galerijoms ──────────────── */
+/* .ct-nav korteleje ir .dp-lb-btn skelbimo puslapyje darė tą patį skirtingais
+   dydziais. Dabar viena klase. 640 px zemiau NEkyla iki 44 px: rodykle guli ant
+   nuotraukos, ne eilej — 38 px ten yra tikslus taikinys, o 44 px uzstotu vaizda. */
+
+.ct-btn-over {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  border-color: var(--border-light);
+  background: rgba(5, 6, 10, .70);
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  color: var(--text-secondary);
+}
+.ct-btn-over:hover { background: rgba(5, 6, 10, .88); border-color: var(--text-dim); color: var(--text-primary); }
+.ct-btn-over.is-left  { left: 10px; }
+.ct-btn-over.is-right { right: 10px; }
+@media (max-width: 640px) {
+  .ct-btn-over.ct-btn-icon { width: 38px; min-width: 38px; height: 38px; min-height: 38px; padding: 0; }
+}
+
+/* ── Apziuros rezimas · TIK mobilus ──────────────────────────────────────── */
+/* Paleidimo mygtukas turi display:none virs 640 px, tad sie apskritimai
+   darbalaukyje neegzistuoja. Ketvirto aukscio jie neprideda. */
+
+@media (max-width: 640px) {
+  .ct-btn-xl {
+    width: 56px; height: 56px; min-height: 56px;
+    padding: 0; justify-content: center; gap: 0;
+    border-radius: 50%;
+  }
+  .ct-btn-xl > i { width: auto; height: auto; margin: 0; background: transparent; }
+  .ct-btn-xl .ct-i { width: 24px; height: 24px; stroke-width: 1.5; }
+  /* Pagrindinis veiksmas didesnis uz saluosius — nykstys tiesia i ji */
+  .ct-btn-xl.ct-btn-primary { width: 64px; height: 64px; min-height: 64px; }
+  .ct-btn-xl.ct-btn-primary .ct-i { width: 27px; height: 27px; }
+  /* Atmetimas nera klaida — neutralus, ne raudonas */
+  .ct-btn-xl.is-skip { color: var(--text-muted); }
+  .ct-btn-xl-row { display: flex; gap: 18px; align-items: center; justify-content: center; }
+}

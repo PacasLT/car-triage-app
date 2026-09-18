@@ -148,6 +148,18 @@
 - Priezastis: is 6–7 skelbimu pozicija ir procentas pasikeicia vien todel, kad vienas skelbimas dingo. Skaicius skamba tiksliau, nei yra.
 - Ta pati riba galios ir „Rinkos pozicijos" skalei skelbimo puslapyje.
 
+## MYGTUKAI (v1.36.0) – vienas komponentas
+
+- `frontend/ct-mygtukai.css` – dizainerio failas, **prijungtas PASKUTINIS** (po `ct-priedai.css`). Jo neredaguojame.
+- `frontend/ct-ikonos.html` – 14 piktogramų SVG sprite, iterptas i kiekvieno puslapio `<body>` pradzia. Iskvietimas: `<i><svg class="ct-i"><use href="#i-apzvalga"></use></svg></i>`.
+- **Klases PRIDETOS, ne pakeistos:** `class="dp-tab ct-tab"`. Seni vardai yra JS selektoriai (`querySelectorAll('.dp-tab')`, `getElementById`) – ju perrasymas sulauzytu elgsena. Po valymo jie nebeturi isvaizdos deklaraciju.
+- **Trys aukščiai, du radiusai, trys šriftai** – ir daugiau neturi atsirasti:
+  `38px` iprastas · `46px` `.ct-btn-lg` ir `.ct-tab` · `32px` `.ct-btn-sm` ir `.ct-seg` · `56/64px` **tik** `@media (max-width: 640px)`.
+- **Sargas:** `node backend/testai/mygtukai.test.js` – matuoja visus matomus mygtukus penkiuose puslapiuose. **0 nukrypimu.** Skirtukai (`.ct-tab`) skaiciuojami atskirai – ju `border-radius: 0` nera nukrypimas.
+- Rodykle `.ct-btn-go` tik tada, kai po paspaudimo zmogus **atsiduria kitur**. `⇄ Palyginti` jos neturi. `.is-ready` busena: zenklelis dingsta, rodykle atsiranda.
+- Naujas mygtukas = `ct-btn` + variantas + forma. **Jokiu vietiniu `height`/`border-radius`/`font-size`** – tai buvo priezastis, del kurios ju buvo ~40 skirtingu.
+- `megstami-meniu.js`, `paskyra-meniu.js`, `versijos.js` injektuoja `<style>` su `head.prepend()` (ne `appendChild`) – kitaip ju stiliai atsidurtu po visais `<link>` ir laimetu be jokios specifikos. **Laikinas sprendimas**; galutinis – isvaizdos deklaracijas is tu failu istrinti.
+
 ## Saugumas
 
 - `ANTHROPIC_API_KEY`, `SCRAPER_API_KEY`, `JWT_SECRET`, `ADMIN_EMAILS`, `INVITE_CODES` – tik Railway Variables, **niekada į kodą ar GitHub**.

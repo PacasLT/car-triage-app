@@ -29,21 +29,15 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 .mg-chips .chip { height: 22px; font-size: 11px; padding: 0 7px; }
 .mg-price { font: 700 17px var(--font-mono); letter-spacing: -.02em; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .mg-price small { font: 400 11px var(--font); color: var(--text-dim); }
-.mg-right { flex: none; display: flex; align-items: center; gap: 8px; }
-.mg-btn { height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border-light); background: transparent; color: var(--text-primary); font: 500 12.5px var(--font); cursor: pointer; white-space: nowrap; }
-.mg-btn:hover { background: var(--bg-elevated); }
-.mg-btn.ac { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
-.mg-btn.ac:hover { background: var(--accent-light); }
-.mg-btn.del { color: var(--text-muted); width: 34px; padding: 0; }
-.mg-btn.del:hover { color: var(--danger); border-color: var(--danger-border); }
+.mg-right { flex: none; display: flex; align-items: center; gap: 8px; }/* v1.36.0: .mg-btn – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .mg-btn:hover – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .mg-btn.ac – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .mg-btn.ac:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
+.mg-btn.del { width: 34px;}/* v1.36.0: .mg-btn.del:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
 .mg-data { font: 400 11px/1.6 var(--font); color: var(--text-dim); margin-top: 6px; }
 .mg-data b { color: var(--text-muted); font-weight: 500; }
 .mg-data .sep { margin: 0 6px; opacity: .5; }
 .chip.gerai { color: var(--success); background: var(--success-dim); border-color: var(--success-border); }
 .chip.blogai { color: var(--danger); background: var(--danger-dim); border-color: var(--danger-border); }
 .chip.demesio { color: var(--warning); background: var(--warning-dim); border-color: var(--warning-border); }
-.chip.buvo { color: var(--text-dim); text-decoration: line-through; }
-.mg-btn.del:hover, .mg-btn.del.sirdis { color: #ff5c8a; border-color: rgba(255,92,138,.5); background: rgba(255,92,138,.12); }
+.chip.buvo { color: var(--text-dim); text-decoration: line-through; }/* v1.36.0: .mg-btn.del:hover, .mg-btn.del.sirdis – mygtuko išvaizda perkelta į ct-mygtukai.css */
 @media (max-width: 640px) {
   .mg-photo { width: 100%; height: 160px; border-right: none; border-bottom: 1px solid var(--border); }
   .mg-body { flex-direction: column; align-items: stretch; }
@@ -52,6 +46,110 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 </style>
 </head>
 <body>
+<!-- ============================================================================
+     ct-ikonos.html · CarTriige · piktogramų rinkinys
+     ----------------------------------------------------------------------------
+     Keturiolika piktogramų, vienas failas, jokio išorinio paketo.
+     Įdėkite šį bloką VIENĄ kartą į kiekvieno puslapio <body> pradžią.
+
+     Iškvietimas pagal vardą:
+         <i><svg class="ct-i"><use href="#i-skelbimas"></use></svg></i>
+
+     Visos 16×16, stroke: currentColor, be fill — spalvą nustato mygtukas.
+     Vienintelė išimtis: #i-issaugoti gauna fill, kai mygtukas .is-on
+     (taisyklė yra ct-mygtukai.css).
+     ========================================================================= -->
+
+<svg width="0" height="0" style="position: absolute; overflow: hidden" aria-hidden="true" focusable="false">
+  <defs>
+
+    <!-- skelbimas · išorinė nuoroda į portalą -->
+    <symbol id="i-skelbimas" viewBox="0 0 16 16">
+      <path d="M13 9.5V13H3V3h3.5"/>
+      <path d="M9.5 3H13v3.5"/>
+      <path d="M13 3 7.5 8.5"/>
+    </symbol>
+
+    <!-- apzvalga · pilna analizė, ataskaita -->
+    <symbol id="i-apzvalga" viewBox="0 0 16 16">
+      <rect x="3" y="2" width="10" height="12" rx="1.5"/>
+      <path d="M5.5 6h5M5.5 8.5h5M5.5 11h3"/>
+    </symbol>
+
+    <!-- palyginti · du keliai priešingomis kryptimis -->
+    <symbol id="i-palyginti" viewBox="0 0 16 16">
+      <path d="M3 6h9"/><path d="M9.5 3.5 12 6 9.5 8.5"/>
+      <path d="M13 10.5H4"/><path d="M6.5 8 4 10.5 6.5 13"/>
+    </symbol>
+
+    <!-- issaugoti · mėgstamiausi -->
+    <symbol id="i-issaugoti" viewBox="0 0 16 16">
+      <path class="ct-i-issaugoti" d="M8 13.2S2.8 10 2.8 6.4a2.9 2.9 0 0 1 5.2-1.8 2.9 2.9 0 0 1 5.2 1.8c0 3.6-5.2 6.8-5.2 6.8Z"/>
+    </symbol>
+
+    <!-- filtrai · trys slankiojami kriterijai -->
+    <symbol id="i-filtrai" viewBox="0 0 16 16">
+      <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/>
+      <circle cx="6" cy="4.5" r="1.6" fill="currentColor" stroke="none"/>
+      <circle cx="10.5" cy="8" r="1.6" fill="currentColor" stroke="none"/>
+      <circle cx="5" cy="11.5" r="1.6" fill="currentColor" stroke="none"/>
+    </symbol>
+
+    <!-- ieskoti · nuskaityti portalus -->
+    <symbol id="i-ieskoti" viewBox="0 0 16 16">
+      <circle cx="7" cy="7" r="4.2"/>
+      <path d="M10.2 10.2 13.5 13.5"/>
+    </symbol>
+
+    <!-- rusiuoti · tvarka pagal reikšmę -->
+    <symbol id="i-rusiuoti" viewBox="0 0 16 16">
+      <path d="M3 4.5h9M3 8h6M3 11.5h3"/>
+      <path d="M12.5 9v4.5"/><path d="M10.8 11.8l1.7 1.7 1.7-1.7"/>
+    </symbol>
+
+    <!-- isskleisti -->
+    <symbol id="i-isskleisti" viewBox="0 0 16 16">
+      <path d="M4 6.5 8 10.5l4-4"/>
+    </symbol>
+
+    <!-- suskleisti -->
+    <symbol id="i-suskleisti" viewBox="0 0 16 16">
+      <path d="M4 9.5 8 5.5l4 4"/>
+    </symbol>
+
+    <!-- vin · kodas, kurį nuskaitome -->
+    <symbol id="i-vin" viewBox="0 0 16 16">
+      <path d="M3 3.5v9M5.5 3.5v9M8 3.5v9M10.5 3.5v9M13 3.5v9" stroke-width="1.4"/>
+    </symbol>
+
+    <!-- pardavejas -->
+    <symbol id="i-pardavejas" viewBox="0 0 16 16">
+      <circle cx="8" cy="6" r="2.6"/>
+      <path d="M3.5 13.2c.6-2.3 2.4-3.6 4.5-3.6s3.9 1.3 4.5 3.6"/>
+    </symbol>
+
+    <!-- nuotraukos · vizualinė analizė -->
+    <symbol id="i-nuotraukos" viewBox="0 0 16 16">
+      <rect x="2.5" y="3.5" width="11" height="9" rx="1.5"/>
+      <circle cx="6" cy="6.8" r="1.1"/>
+      <path d="M3 11.5 6.5 8.5l3 2.5 2-1.6 2 1.6"/>
+    </symbol>
+
+    <!-- kreditai -->
+    <symbol id="i-kreditai" viewBox="0 0 16 16">
+      <circle cx="8" cy="8" r="5.2"/>
+      <path d="M8 5.4v5.2M6.4 6.8h3.2M6.4 9.2h3.2" stroke-width="1.4"/>
+    </symbol>
+
+    <!-- planai · prenumeratos lygiai -->
+    <symbol id="i-planai" viewBox="0 0 16 16">
+      <path d="M8 2.5 13.5 5.5 8 8.5 2.5 5.5 8 2.5Z"/>
+      <path d="M2.5 9 8 12l5.5-3"/>
+    </symbol>
+
+  </defs>
+</svg>
+
 
 <header class="ct3-header">
   <div class="ct3-header-inner">
@@ -66,12 +164,12 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
         <small>AUTOMOTIVE MARKET INTELLIGENCE</small>
       </div>
     </a>
-    <button class="ct-ver-btn" id="app-version" type="button" onclick="ctVersijuModalas()" title="Versijų istorija"></button>
+    <button class="ct-ver-btn ct-btn ct-btn-quiet" id="app-version" type="button" onclick="ctVersijuModalas()" title="Versijų istorija"></button>
     <nav class="ct3-nav">
     </nav>
     <div class="ct3-header-right">
-      <button class="ct3-premium-btn" id="ct-planas-btn" onclick="location.href='index.html?planas=1'"><span id="ct-planas-btn-text">Planas</span></button>
-      <a class="ct3-avatar" href="index.html" title="Paskyra"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></a>
+      <button class="ct3-premium-btn ct-btn ct-btn-sm ct-btn-primary ct-btn-block" id="ct-planas-btn" onclick="location.href='index.html?planas=1'"><span id="ct-planas-btn-text">Planas</span></button>
+      <a class="ct3-avatar ct-btn ct-btn-sm ct-btn-icon ct-btn-round" href="index.html" title="Paskyra"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></a>
     </div>
   </div>
 </header>
@@ -133,9 +231,9 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
         + (f.marketMedian ? '<small>vs ' + Number(f.marketMedian).toLocaleString('lt-LT').replace(/,/g, ' ') + ' €</small>' : '') + '</div>'
         + '<div class="mg-data">' + datos.join('<span class="sep">·</span>') + '</div>'
         + '</div><div class="mg-right">'
-        + '<a class="mg-btn" href="' + ctEsc(f.url) + '" target="_blank" rel="noopener">Skelbimas ↗</a>'
-        + '<button class="mg-btn ac" onclick="atidaryti(' + ctEsc(JSON.stringify(f.url)) + ')">Detali apžvalga →</button>'
-        + '<button class="mg-btn del" title="Pašalinti iš mėgstamiausių" onclick="salinti(' + ctEsc(JSON.stringify(f.url)) + ', this)">✕</button>'
+        + '<a class="mg-btn ct-btn" href="' + ctEsc(f.url) + '" target="_blank" rel="noopener">Skelbimas ↗</a>'
+        + '<button class="mg-btn ac ct-btn" onclick="atidaryti(' + ctEsc(JSON.stringify(f.url)) + ')">Detali apžvalga →</button>'
+        + '<button class="mg-btn del ct-btn" title="Pašalinti iš mėgstamiausių" onclick="salinti(' + ctEsc(JSON.stringify(f.url)) + ', this)">✕</button>'
         + '</div></div></div>';
     }).join('');
   }
@@ -162,5 +260,6 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
      ATJUNGIMAS: istrinti sia viena eilute. Jokie kiti stiliai nepakeisti. -->
 <link rel="stylesheet" href="ct-dizainas.css">
 <link rel="stylesheet" href="ct-priedai.css">
+<link rel="stylesheet" href="ct-mygtukai.css">
 </body>
 </html>
