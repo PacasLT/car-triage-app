@@ -322,3 +322,22 @@ body{font-family: var(--font);
 .ct-adm-wrap{overflow-x: auto;}
 @media (max-width: 640px){.ct-pl-dabar, .ct-pl-planai{grid-template-columns: 1fr;}
 #ct-pl-modal{padding: 10px;}}
+
+/* ── Antraste telefone (v1.46.0) ──────────────────────────────────────────────
+   Ismatuota 390 px: `.ct3-header-right` desinysis krastas buvo ties 407 px, t. y.
+   antraste islipo 17 px uz ekrano. Priezastis - logotipo pusė nesitraukia
+   (`.ct3-logo-text` neturi `min-width: 0`), tad eilute platesne uz ekrana.
+
+   `index.html` tai jau turejo savo <style> bloke; kiti keturi puslapiai - ne.
+   Cia ta pati logika vienoje vietoje visiems. index.html !important taisykles
+   lieka virsesnes, tad ten niekas nesikeicia.                                 */
+
+@media (max-width: 640px) {
+  .ct3-header-inner { gap: 8px; }
+  .ct3-logo { min-width: 0; flex: 1 1 auto; }
+  .ct3-logo-text { min-width: 0; }
+  .ct3-logo-text > span { font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ct3-logo-text small { display: none; }
+  .ct3-logo-icon { width: 36px; height: 36px; }
+  .ct3-header-right { gap: 6px; }
+}

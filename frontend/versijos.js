@@ -8,6 +8,25 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.47.0', data: '2026-09-18', pavadinimas: 'Matuojame, ar atsarginis nuskaitymo kelias apskritai veikia',
+    pakeitimai: [
+      'Sistema dabar pati fiksuoja, kuris nuskaitymo būdas davė rezultatą ir kiek kartų teko griebtis paskutinio atsarginio',
+      'Tai reikalinga vienam sprendimui: ar verta laikyti sunkią naršyklę serveryje, ar ji tik verčia vieną klaidą kita',
+      'Naudotojui nieko nesikeičia – tai tik matavimas, jokio elgsenos pakeitimo',
+    ],
+  },
+  {
+    versija: '1.46.0', data: '2026-09-18', pavadinimas: 'Serveris nebestringa per paiešką, duomenys nebeauga be ribos',
+    pakeitimai: [
+      'Paieškos metu serveris nebenustoja atsakinėti – skelbimų istorija dabar įrašoma vieną kartą po visko, o ne 80 kartų iš eilės',
+      'Seni, seniai dingę skelbimai automatiškai išvalomi po 180 dienų – anksčiau duomenys kaupėsi be jokios ribos ir būtų anksčiau ar vėliau nuvertę serverį',
+      'Kreditų nurašymas apvilktas duomenų bazės transakcija – dvigubas nurašymas nebeįmanomas net ir pakeitus kodą ateityje',
+      'Registracija nebeturi viešo atsarginio kvietimo kodo',
+      'Telefone skelbimo puslapyje apžvalgos mygtukai nebeišlipa už ekrano; antraštė nebeišsiplečia ataskaitų ir mėgstamiausių puslapiuose',
+      'Įrašytas priklausomybių sąrašas (package-lock.json) – nuo šiol diegimas atkartojamas ir saugumo spragas galima patikrinti',
+    ],
+  },
+  {
     versija: '1.45.0', data: '2026-09-18', pavadinimas: '„Pro" nebekonkuruoja su apžvalgos mygtuku',
     pakeitimai: [
       'Antraštės „Pro" mygtukas nebe pilnai violetinis – liko tos pačios spalvos giminės, bet nebežiuri kaip pagrindinis veiksmas',

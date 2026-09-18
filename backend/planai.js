@@ -203,7 +203,13 @@ function nesenaiMoketa(userId, veiksmas, raktas) {
   return moketa > grazinta;   // buvo sumoketa ir NEgrazinta -> pakartojimas nemokamas
 }
 
-const nurasyti = (userId, kiekis, veiksmas, raktas, pastaba) => {
+// v1.46.0: apvilkta db.transaction().
+// Iki siol tarp skaitymo (gautiVartotoja) ir rasymo (UPDATE) nebuvo jokio barjero.
+// Veike tik todel, kad better-sqlite3 sinchroninis, o Node vienagijis - niekas
+// neisiterpia. Bet tai netycine apsauga: uztektu vienam zmogui idėti `await`
+// (pvz. loga i isorine sistema), ir atsirastu dviguba nurasymo spraga, kurios
+// testuose nesimatytu. Transakcija padaro apsauga sąmoninga.
+const _nurasytiTx = (userId, kiekis, veiksmas, raktas, pastaba) => {
   const u = gautiVartotoja(userId);
   let plano = u.kreditai_plano || 0, pirkti = u.kreditai_pirkti || 0;
   if (plano + pirkti < kiekis) return null;
@@ -214,8 +220,13 @@ const nurasyti = (userId, kiekis, veiksmas, raktas, pastaba) => {
     .run(userId, Date.now(), veiksmas, raktas || null, -kiekis, plano + pirkti, pastaba || null);
   return plano + pirkti;
 };
+let _nurasytiVykdyk = null;
+const nurasyti = (userId, kiekis, veiksmas, raktas, pastaba) => {
+  if (!_nurasytiVykdyk) _nurasytiVykdyk = db.transaction(_nurasytiTx);
+  return _nurasytiVykdyk(userId, kiekis, veiksmas, raktas, pastaba);
+};
 
-const prideti = (userId, kiekis, veiksmas, raktas, pastaba, iPlano) => {
+const _pridetiTx = (userId, kiekis, veiksmas, raktas, pastaba, iPlano) => {
   const u = gautiVartotoja(userId);
   const stulpelis = iPlano ? 'kreditai_plano' : 'kreditai_pirkti';
   db.prepare(`UPDATE users SET ${stulpelis} = ${stulpelis} + ? WHERE id = ?`).run(kiekis, userId);
@@ -223,6 +234,11 @@ const prideti = (userId, kiekis, veiksmas, raktas, pastaba, iPlano) => {
   db.prepare('INSERT INTO kreditu_zurnalas (user_id, laikas, veiksmas, raktas, kiekis, likutis_po, pastaba) VALUES (?,?,?,?,?,?,?)')
     .run(userId, Date.now(), veiksmas, raktas || null, kiekis, likutis, pastaba || null);
   return likutis;
+};
+let _pridetiVykdyk = null;
+const prideti = (userId, kiekis, veiksmas, raktas, pastaba, iPlano) => {
+  if (!_pridetiVykdyk) _pridetiVykdyk = db.transaction(_pridetiTx);
+  return _pridetiVykdyk(userId, kiekis, veiksmas, raktas, pastaba, iPlano);
 };
 
 // Middleware: patikrina likutį, nurašo; jei serveris grąžina 5xx – grąžina.

@@ -93,8 +93,8 @@ function saveCache() {
   _cacheTimer = setTimeout(() => { _cacheTimer = null; if (_cacheDirty) saveCacheNow(); }, 3000);
 }
 
-process.on('beforeExit', () => { if (_cacheDirty) saveCacheNow(); });
-process.on('SIGTERM', () => { if (_cacheDirty) saveCacheNow(); process.exit(0); });
+process.on('beforeExit', () => { if (_cacheDirty) saveCacheNow(); if (typeof saveLifecycle === 'function') saveLifecycle(); });
+process.on('SIGTERM', () => { if (_cacheDirty) saveCacheNow(); if (typeof saveLifecycle === 'function') saveLifecycle(); process.exit(0); });
 
 valytiPasenusius();
 // Jei is failo ismetem HTML puslapius, perrasom ji NEDELSIANT - kitaip senas
@@ -205,9 +205,21 @@ let _listingTimeline = (() => {
   catch { return {}; }
 })();
 
-function saveListingTimeline() {
-  try { fs.writeFileSync(LISTING_TIMELINE_FILE, JSON.stringify(_listingTimeline)); }
-  catch (err) { console.error('Nepavyko išsaugoti timeline:', err.message); }
+// v1.46.0: dirty veliava, kaip saveLifecycle.
+// Buvo: recordListingSnapshot() kvietesi si sinchroniska VISO failo perrasyma
+// kiekvienam skelbimui, o server.js ji kviecia cikle - 60-100 pilnu irasymu per
+// viena paieska. Kol jie vyksta, Node nedaro nieko kito: serveris neatsako.
+// Tai TA PATI klaida, kuri jau buvo rasta ir istaisyta setCached (zr. komentara
+// ties _cacheDirty). Cia ji buvo likusi.
+let _timelineDirty = false;
+
+function saveListingTimeline(iskart) {
+  if (!iskart) { _timelineDirty = true; return; }
+  if (!_timelineDirty) return;
+  try {
+    fs.writeFileSync(LISTING_TIMELINE_FILE, JSON.stringify(_listingTimeline));
+    _timelineDirty = false;
+  } catch (err) { console.error('Nepavyko išsaugoti timeline:', err.message); }
 }
 
 function recordListingSnapshot(url, kaina, rida) {
@@ -262,6 +274,9 @@ let _lifecycle = (() => {
 let _lifecycleDirty = false;
 
 function saveLifecycle() {
+  // v1.46.0: timeline irasomas kartu - server.js kviecia saveLifecycle() po
+  // kiekvieno ciklo, tad atskiro kvietimo prideti nereikia ir pamirsti negalima.
+  saveListingTimeline(true);
   if (!_lifecycleDirty) return;
   try { fs.writeFileSync(LIFECYCLE_FILE, JSON.stringify(_lifecycle)); _lifecycleDirty = false; }
   catch (err) { console.error('Nepavyko issaugoti gyvavimo ciklo:', err.message); }
@@ -510,6 +525,60 @@ console.log('[KAUPYKLOS] rinkos istorija:', Object.keys(_history).length, 'model
   'gyvavimo ciklas:', Object.keys(_lifecycle).length, 'skelbimu ·',
   'sekama:', Object.keys(_watch).length);
 
+// ============ SENU IRASU VALYMAS ============
+// v1.46.0. Iki siol _lifecycle ir _listingTimeline nieko NETRINDAVO: kiekvienas
+// kada nors matytas skelbimas likdavo amzinai, o abu failai pilnai ikeliami i
+// atminti paleidziant ir pilnai perrasomi kiekvieno issaugojimo metu.
+//
+// Tai ta pati spraga, kuri jau nuverte konteineri per cache.json 'pages' erdve.
+// Skirtumas tik tas, kad cia augimas letesnis, tad problema pasirodo ne is karto.
+//
+// Ka trinam: TIK tai, kas ir dingo, ir sena. Gyvas skelbimas neliecziamas,
+// nesvarbu kiek jam metu - jo kainos istorija yra produktas.
+const VALYMO_RIBA_MS = parseInt(process.env.VALYMO_DIENOS || '180', 10) * 86400000;
+
+function valytiSenusIrasus() {
+  const riba = Date.now() - VALYMO_RIBA_MS;
+  let istrintaCiklu = 0, istrintaLiniju = 0;
+
+  for (const url of Object.keys(_lifecycle)) {
+    const e = _lifecycle[url];
+    if (!e) { delete _lifecycle[url]; istrintaCiklu++; continue; }
+    // Butinos abi salygos: pazymetas dinges IR seniai nematytas.
+    const dinges = !!e.dingo;
+    const seniai = (e.paskutinMatytas || e.pirmaMatytas || 0) < riba;
+    if (dinges && seniai) { delete _lifecycle[url]; istrintaCiklu++; }
+  }
+
+  // Timeline be gyvavimo ciklo yra nasta be prasmes - jo niekas nebeperskaitys.
+  for (const url of Object.keys(_listingTimeline)) {
+    if (!_lifecycle[url]) { delete _listingTimeline[url]; istrintaLiniju++; }
+  }
+
+  if (istrintaCiklu) _lifecycleDirty = true;
+  if (istrintaLiniju) _timelineDirty = true;
+  if (istrintaCiklu || istrintaLiniju) saveLifecycle();
+
+  return { ciklai: istrintaCiklu, linijos: istrintaLiniju,
+           likoCiklu: Object.keys(_lifecycle).length,
+           likoLiniju: Object.keys(_listingTimeline).length };
+}
+
+// Paleidziant ir kas para. Be intervalo failas augtu tol, kol serveris neperkraunamas.
+(function pirmasValymas() {
+  try {
+    const r = valytiSenusIrasus();
+    console.log(`[VALYMAS] gyvavimo ciklas: -${r.ciklai} (liko ${r.likoCiklu}), timeline: -${r.linijos} (liko ${r.likoLiniju})`);
+  } catch (e) { console.error('[VALYMAS] nepavyko:', e.message); }
+})();
+const _valymoTaimeris = setInterval(() => {
+  try {
+    const r = valytiSenusIrasus();
+    if (r.ciklai || r.linijos) console.log(`[VALYMAS] gyvavimo ciklas: -${r.ciklai}, timeline: -${r.linijos}`);
+  } catch (e) { console.error('[VALYMAS] nepavyko:', e.message); }
+}, 24 * 60 * 60 * 1000);
+if (_valymoTaimeris.unref) _valymoTaimeris.unref();
+
 module.exports = {
   puslapiuPodelis: () => ({ irasu: _pages.size, mb: +(_pagesBytes / 1048576).toFixed(1) }),
   getCached, setCached, cacheAgeMinutes, PAGE_TTL_MS, ANALYSIS_TTL_MS,
@@ -521,5 +590,6 @@ module.exports = {
   tapatybesRaktas, rastiTaPatiAuto,
   modelioTendencijos,
   pridetiSekimui, sekamiUrlai, zymetiPatikrinta, valytiSekimoSarasa,
+  valytiSenusIrasus,
   DATA_DIR,
 };

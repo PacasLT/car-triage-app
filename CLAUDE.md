@@ -227,6 +227,32 @@
 - Priežastys, dėl kurių URL gali nebenešti modelio: pasenusi `autoplius-ids.js` lentelė `/data` Volume (atnaujinama kas 30 d.), pakeistas portalo parametras, tuščias `filters.modelis`.
 - Patikrinta gyvai 2026-09-18: `f_model_14[0]=X4` (autogidas) ir `make_id[97]=22769` (autoplius) abu grąžina tik X4. Vadinasi lūžis buvo ne URL formoje.
 
+## Atsarginiai nuskaitymo keliai ir jų matavimas (v1.47.0)
+
+Grandinė `fetchSearchPage`: **talpykla → ScraperAPI → tiesioginis axios → Puppeteer**.
+`fetchListingPage`: **talpykla → ScraperAPI `render=false` → ScraperAPI `render=true` → Puppeteer → `fetchSearchPage`**.
+
+- Puppeteer pasiekiamas TIK kai nepavyko ir mokamas proxy, ir tiesioginis kreipimasis. Jo vertingumas – kitas tinklo kelias (Railway savo IP), ne kitas renderinimas.
+- **Statistika: `GET /admin/atsarga`** (tik adminui, nemokama, be jokio išorinio kvietimo). Rodo, kuris šaltinis davė HTML, kiek kartų Puppeteer buvo pasiektas, kiek kartų pavyko, ir konkrečias klaidas. Skaitliukai atmintyje – po perkrovimo iš nulio.
+- **Sprendimas priimamas iš to skaičiaus, ne iš nuomonės:** `pasiektas: 0` → Puppeteerį galima išimti be jokio praradimo. `pavyko: 0` prie `pasiektas > 0` → jis tik verčia vieną klaidą kita, išimti irgi. `pavyko > 0` → atsarginis kelias realiai veikia, tada tik atnaujinti iki v25 (`npm audit fix --force`).
+- Konteineryje be Chromium klaida yra `Could not find Chrome (ver. ...)` – tai ir yra ta „viena klaida vietoj kitos".
+
+**ŽINOMA SPRAGA, netaisyta sąmoningai iki matavimo pabaigos:** `fetchListingPage` paskutinė atsarga (`fetchSearchPage`) pasiekiama tik tada, kai Puppeteer grąžina tuščią reikšmę. Kai jis **meta klaidą** – o konteineryje be Chromium jis visada meta – klaida keliauja aukščiau ir paskutinė atsarga niekada nesuveikia.
+
+## Duomenų sluoksnis (v1.46.0)
+
+- **Trys JSON failai `/data`:** `market-history.json` (1000 įrašų modeliui), `listing-lifecycle.json`, `listing-timeline.json` (60 momentinių vaizdų URL'ui). Visi pilnai įkeliami į atmintį paleidžiant.
+- **Valymas:** `cache.valytiSenusIrasus()` – paleidžiant ir kas parą. Trina TIK tuos, kurie **ir** pažymėti `dingo`, **ir** nematyti ilgiau nei `VALYMO_DIENOS` (180 pagal nutylėjimą). Gyvas skelbimas neliečiamas, kad ir koks senas – jo kainos istorija yra produktas. Timeline be gyvavimo ciklo trinamas kaip našta be prasmės.
+- **Rašymas į diską – TIK per dirty vėliavą.** `saveListingTimeline()` be argumento tik pažymi, `saveLifecycle()` įrašo abu. Niekada nekvieskite įrašymo cikle: iki v1.46.0 `recordListingSnapshot` perrašinėjo VISĄ failą kiekvienam skelbimui – 80 sinchroninių įrašymų per paiešką, per kuriuos Node neatsakinėjo į nieko. **Ta pati klaida jau buvo `setCached` ir jau buvo taisyta ten** – tik ne čia.
+- **Kai taisote tokią klaidą, iškart klauskite: kur dar yra tas pats?** Sinchroninis įrašymas cikle buvo dviejose vietose, neribotas augimas – trijose, rožinė spalva – 22-ose.
+
+## Kreditai (v1.46.0)
+
+- Kainos gyvena TIK serveryje (`planai.js` `KAINOS`), maršrutas pats pasako veiksmo pavadinimą. Klientas kiekio nesiunčia ir paveikti negali.
+- `nurasyti` ir `prideti` apvilkti **`db.transaction()`**. Iki v1.46.0 jie veikė teisingai tik todėl, kad tarp skaitymo ir rašymo nėra `await` – neapgalvota apsauga, kurią būtų sulaužęs bet kas, įdėjęs ten logą į išorinę sistemą.
+- **Išbandyta:** 5 kreditai → −2 (plano pirma) → tas pats URL per 24 val. nemokamas → −2 → 402 be balanso pokycio. 5xx atsakymas grąžina kreditą (`vin` / `vin-grazinta` žurnale).
+
+
 ## Saugumas
 
 - `ANTHROPIC_API_KEY`, `SCRAPER_API_KEY`, `JWT_SECRET`, `ADMIN_EMAILS`, `INVITE_CODES` – tik Railway Variables, **niekada į kodą ar GitHub**.

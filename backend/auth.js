@@ -37,13 +37,21 @@ function parinktiDbKelia() {
 const _dbPasirinkimas = parinktiDbKelia();
 const DB_PATH = _dbPasirinkimas.kelias;
 
-// Invite kodai iš Railway env var: INVITE_CODES=CARTRIAGE2024,DRAUGAS01
+// Invite kodai is Railway env var: INVITE_CODES=CARTRIAGE2024,DRAUGAS01
+// v1.46.0 SAUGUMAS: atsargines reiksmes NEBERA. Anksciau cia buvo 'CARTRIAGE2024' -
+// viešas kodas, gulejes GitHub'e. Jei Railway kintamasis kada nors dingtu (nauja
+// aplinka, klaida perkeliant), registracija tyliai atsivertu bet kam, kas ta koda
+// skaite. Dabar: nera kintamojo -> registracija uzdaryta, ir tai matosi konsoleje.
 const INVITE_CODES = new Set(
-  (process.env.INVITE_CODES || 'CARTRIAGE2024')
+  (process.env.INVITE_CODES || '')
     .split(',')
     .map(c => c.trim().toUpperCase())
     .filter(Boolean)
 );
+if (!INVITE_CODES.size) {
+  console.error('[SAUGUMAS] INVITE_CODES nenustatytas - registracija uzdaryta.');
+  console.error('            Nustatykite INVITE_CODES Railway Variables.');
+}
 
 // ── DB ─────────────────────────────────────────────────────────────────────
 // Ensure the directory for DB_PATH exists (needed when using Railway Volumes)
@@ -102,7 +110,9 @@ function createToken(email) {
 
 function verifyToken(token) {
   try {
-    const payload = jwt.verify(token, VEIKIANTIS_SECRET);
+    // algorithms pririsam samoningai: be jo bibliotekai leidziama priimti ir kitus
+    // algoritmus, o tai yra klaida, kuri niekada nepasirodo testuose.
+    const payload = jwt.verify(token, VEIKIANTIS_SECRET, { algorithms: ['HS256'] });
     return payload.sub;
   } catch {
     return null;

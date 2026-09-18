@@ -138,6 +138,24 @@ app.post('/admin/kreditai', requireAuth, planai.reikalautiAdmin, (req, res) => {
     res.json({ ok: true, busena: planai.pridetiKreditu(email, kiekis, pastaba, req.user.email) });
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
+// v1.47.0: atsarginiu nuskaitymo keliu statistika. GET, nemokamas, tik adminui.
+// Klausimas, i kuri atsako: ar Puppeteer produkcijoje kada nors suveikia.
+app.get('/admin/atsarga', requireAuth, planai.reikalautiAdmin, (req, res) => {
+  const val = Math.round((Date.now() - ATSARGA.nuo) / 3600000 * 10) / 10;
+  const p = ATSARGA.puppeteer;
+  res.json({
+    nuoPaleidimoVal: val,
+    paieskosPuslapiai: ATSARGA.paieska,
+    skelbimuPuslapiai: ATSARGA.skelbimas,
+    puppeteer: p,
+    isvada: p.pasiektas === 0
+      ? 'Puppeteer nebuvo pasiektas ne karto - ScraperAPI ir axios uztenka.'
+      : p.pavyko === 0
+        ? 'Puppeteer pasiektas, bet NE KARTO nepavyko - jis tik verčia vieną klaidą kita.'
+        : `Puppeteer pavyko ${p.pavyko} is ${p.pasiektas} kartu - atsarginis kelias realiai veikia.`,
+  });
+});
+
 app.get('/admin/zurnalas', requireAuth, planai.reikalautiAdmin, (req, res) => {
   try {
     const id = parseInt(req.query.userId, 10);
@@ -163,7 +181,43 @@ const GILINTI_TOP = parseInt(process.env.GILINTI_TOP || '8', 10);
 
 // ============ SCRAPING (ta pati logika kaip triage.js) ============
 
+// ── ATSARGINIU KELIU MATAVIMAS (v1.47.0) ────────────────────────────────────
+// Klausimas, kuri reikia atsakyti duomenimis, o ne nuomone: ar Puppeteer
+// produkcijoje apskritai kada nors suveikia? Jis pasiekiamas TIK tada, kai
+// nepavyko ir ScraperAPI, ir tiesioginis axios. Jei jis arba niekada
+// nepasiekiamas, arba visada meta klaida (Railway image'e Chromium gali
+// nebuti) - ji galima isimti kartu su 4 high lygio spragomis ir ~300 MB.
+//
+// Skaitliukai atmintyje, matomi per GET /admin/atsarga. Perkrovus - is nulio.
+const ATSARGA = {
+  nuo: Date.now(),
+  paieska:   { talpykla: 0, scraperapi: 0, axios: 0, puppeteer: 0 },
+  skelbimas: { talpykla: 0, scraperapi: 0, puppeteer: 0, atsarginis: 0 },
+  puppeteer: { pasiektas: 0, pavyko: 0, nepavyko: 0, klaidos: {} },
+};
+function atsargaKlaida(zinute) {
+  const k = String(zinute || '').slice(0, 120);
+  ATSARGA.puppeteer.klaidos[k] = (ATSARGA.puppeteer.klaidos[k] || 0) + 1;
+}
+
 async function fetchWithPuppeteer(url) {
+  ATSARGA.puppeteer.pasiektas++;
+  console.log(`[ATSARGA] Puppeteer pasiektas (${ATSARGA.puppeteer.pasiektas} k.): ${url.slice(0, 70)}`);
+  const pradzia = Date.now();
+  try {
+    const h = await _fetchWithPuppeteer(url);
+    ATSARGA.puppeteer.pavyko++;
+    console.log(`[ATSARGA] Puppeteer PAVYKO per ${Math.round((Date.now() - pradzia) / 1000)} s (${h ? h.length : 0} simboliu)`);
+    return h;
+  } catch (e) {
+    ATSARGA.puppeteer.nepavyko++;
+    atsargaKlaida(e && e.message);
+    console.log(`[ATSARGA] Puppeteer NEPAVYKO per ${Math.round((Date.now() - pradzia) / 1000)} s: ${e && e.message}`);
+    throw e;
+  }
+}
+
+async function _fetchWithPuppeteer(url) {
   const browser = await puppeteer.launch({
     headless: 'new',
     executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
@@ -183,6 +237,7 @@ async function fetchWithPuppeteer(url) {
 async function fetchSearchPage(url) {
   const cached = cache.getCached('pages', url, cache.PAGE_TTL_MS);
   if (cached) {
+    ATSARGA.paieska.talpykla++;
     console.log(`  (talpykla: ${url.slice(0, 60)}...)`);
     return cached;
   }
@@ -200,6 +255,7 @@ async function fetchSearchPage(url) {
       const response = await axios.get(scraperUrl, { timeout: 60000 });
       if (response.status === 200 && response.data && response.data.length > 500) {
         html = response.data;
+        ATSARGA.paieska.scraperapi++;
         console.log(`  ScraperAPI OK (${html.length} simboliu)`);
       }
     } catch (err) {
@@ -221,14 +277,14 @@ async function fetchSearchPage(url) {
         timeout: 30000,
         validateStatus: (s) => s < 500,
       });
-      if (response.status === 200) html = response.data;
+      if (response.status === 200) { html = response.data; ATSARGA.paieska.axios++; }
     } catch (err) {
       // tesiame prie Puppeteer
     }
   }
 
   // 3. Puppeteer (paskutinis variantas)
-  if (!html) html = await fetchWithPuppeteer(url);
+  if (!html) { html = await fetchWithPuppeteer(url); ATSARGA.paieska.puppeteer++; }
 
   cache.setCached('pages', url, html);
   return html;
@@ -241,6 +297,7 @@ async function fetchListingPage(url) {
   // giliai analizei kartais atitekdavo puslapis be galerijos ir nuotrauku nebudavo.
   const cached = cache.getCached('pages', 'full:' + url, cache.PAGE_TTL_MS);
   if (cached) {
+    ATSARGA.skelbimas.talpykla++;
     console.log(`  (talpykla: ${url.slice(0, 60)}...)`);
     return cached;
   }
@@ -289,10 +346,16 @@ async function fetchListingPage(url) {
     }
   }
 
+  if (html) ATSARGA.skelbimas.scraperapi++;
+
   // Atsarginis: Puppeteer (jei ScraperAPI neprieinamas)
-  if (!html) html = await fetchWithPuppeteer(url);
+  // ZINOMA SPRAGA (rasta v1.47.0, netaisyta samoningai iki matavimo pabaigos):
+  // jei fetchWithPuppeteer META klaida, ji keliauja auksciau ir zemiau esanti
+  // "paskutine atsarga" NIEKADA nepasiekiama. T. y. eilute po sios veikia tik
+  // tada, kai Puppeteer grazina tuscia - o ne tada, kai jis luzta.
+  if (!html) { html = await fetchWithPuppeteer(url); if (html) ATSARGA.skelbimas.puppeteer++; }
   // Paskutinis atsarginis: paprasta uzklasa
-  if (!html) html = await fetchSearchPage(url);
+  if (!html) { html = await fetchSearchPage(url); if (html) ATSARGA.skelbimas.atsarginis++; }
 
   cache.setCached('pages', 'full:' + url, html);
   return html;

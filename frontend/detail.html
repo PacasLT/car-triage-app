@@ -282,13 +282,17 @@ button{font-family:inherit;cursor:pointer}
 .dp-pel-ai b { color: var(--text-primary); }
 @media (max-width: 720px) { .dp-pel-grid { grid-template-columns: 1fr 1fr; } .dp-pel-rez { grid-template-columns: 1fr; } }
 /* Analizes uzsakymo mygtukas */
-.dp-cta { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; background: var(--accent-dim); border: 1px solid var(--accent-border); }
+/* v1.46.0: min-width: 0 butinas. Be jo flex vaikas negali susitraukti uz savo
+   turinio ploti, ir 390 px ekrane sis blokas issipusdavo iki 554 px - pagrindinis
+   mokamas mygtukas atsidurdavo 106 px uz ekrano ribos. Issimatuota, ne spejama. */
+.dp-cta { display: flex; flex-direction: column; gap: 10px; align-items: stretch; min-width: 0; max-width: 100%; padding: 14px 16px; border-radius: 12px; background: var(--accent-dim); border: 1px solid var(--accent-border); }
+.dp-cta > div { min-width: 0; max-width: 100%; }
 .dp-cta p { margin: 0; font: 400 13px/1.55 var(--font); color: var(--text-secondary); }
 /* v1.44.0: išvaizdos deklaracijos ištrintos – mygtukai dabar yra .ct-btn komponentas
    (.ct-btn-primary pilnai apžvalgai). Čia likę  9px radiusas ir 13px šriftas buvo
    dvi iš  28 mygtukų skolos vietu. */
 .dp-cta button:disabled { opacity: .6; cursor: default; }
-.dp-cta small { font: 400 11px var(--font); color: var(--text-dim); }
+.dp-cta small { font: 400 11px var(--font); color: var(--text-dim); min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
 </style>
 
 <style id="dp-mobile-responsive">
@@ -547,7 +551,7 @@ button{font-family:inherit;cursor:pointer}
     </nav>
     <div class="ct3-header-right">
       <button class="ct3-premium-btn ct-btn ct-btn-sm ct-btn-accent" id="ct-planas-btn" onclick="location.href='index.html?planas=1'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V10l6-8 6 8v10"/></svg><span id="ct-planas-btn-text">Planas</span></button>
-      <button class="ct3-avatar ct-btn ct-btn-sm ct-btn-icon ct-btn-round"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></button>
+      <button class="ct3-avatar ct-btn ct-btn-sm ct-btn-icon ct-btn-round" aria-label="Paskyra" title="Paskyra"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></button>
     </div>
   </div>
 </header>
@@ -648,7 +652,7 @@ button{font-family:inherit;cursor:pointer}
     <div class="dp-seller">
       <div class="dp-seller-top">
         <div class="dp-seller-label">Pardavėjas</div>
-        <button class="dp-seller-menu ct-btn ct-btn-sm ct-btn-icon" title="Daugiau">
+        <button class="dp-seller-menu ct-btn ct-btn-sm ct-btn-icon" title="Daugiau" aria-label="Daugiau apie pardaveja">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
         </button>
       </div>
@@ -2369,7 +2373,7 @@ window.ctApi = function (kelias, params) {
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
     Žiūrėti skelbimą
   </a>
-  <button class="dp-sbar-secondary dp-save-toggle ct-btn" id="dp-sticky-save-btn" onclick="dpToggleSave()" title="Išsaugoti">
+  <button class="dp-sbar-secondary dp-save-toggle ct-btn" id="dp-sticky-save-btn" onclick="dpToggleSave()" title="Išsaugoti" aria-label="Išsaugoti skelbimą">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
   </button>
 </div>
