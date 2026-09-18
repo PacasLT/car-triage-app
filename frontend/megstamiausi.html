@@ -45,7 +45,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 .chip.blogai { color: var(--danger); background: var(--danger-dim); border-color: var(--danger-border); }
 .chip.demesio { color: var(--warning); background: var(--warning-dim); border-color: var(--warning-border); }
 .chip.buvo { color: var(--text-dim); text-decoration: line-through; }
-.mg-btn.del:hover, .mg-btn.del.sirdis { color: #ff5c8a; border-color: rgba(255,92,138,.5); background: rgba(255,92,138,.12); }
+.mg-btn.del:hover, .mg-btn.del.sirdis { color: var(--accent-light); border-color: var(--accent-border); background: var(--accent-dim); }
 @media (max-width: 640px) {
   .mg-photo { width: 100%; height: 160px; border-right: none; border-bottom: 1px solid var(--border); }
   .mg-body { flex-direction: column; align-items: stretch; }
@@ -231,12 +231,22 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
       const h = f.istorija || {};
       const dabartine = (h.dabartineKaina && f.kaina && h.dabartineKaina !== f.kaina) ? h.dabartineKaina : f.kaina;
       const pok = [];
+      let kainosKaita = '';
       if (h.dingo) pok.push('<span class="chip blogai" title="Skelbimo nebematome portale jau kelis patikrinimus iš eilės – tikėtina, parduotas">Nebematome portale ' + ctEsc(ctLaikas(h.dingo)) + '</span>');
-      if (h.nuoIssaugojimo && Math.abs(h.nuoIssaugojimo) >= 50) pok.push('<span class="chip ' + (h.nuoIssaugojimo < 0 ? 'gerai' : 'demesio') + '" title="Kainos pokytis nuo tada, kai išsaugojote">' + skirt(h.nuoIssaugojimo) + ' nuo išsaugojimo</span>');
-      else if (h.kainosPokytis && Math.abs(h.kainosPokytis) >= 50) pok.push('<span class="chip ' + (h.kainosPokytis < 0 ? 'gerai' : 'demesio') + '" title="Kainos pokytis nuo pastebėjimo rinkoje">' + skirt(h.kainosPokytis) + (h.mazinimuKartai > 1 ? ' · ' + h.mazinimuKartai + '× mažinta' : '') + '</span>');
+      // v1.43.0, dizainerio pastaba: šio puslapio prasmė yra kainos kaita laike, tad
+      // pokytis yra PAGRINDINIS elementas, o ne dar vienas ženkliukas šalia „2022".
+      // Rodom kaip `.ct-diff` kortelėje – be rėmelio, kainos eilutėje.
+      // Eilutė skaitoma: kaina, kiek pakito, kada.
+      if (h.nuoIssaugojimo && Math.abs(h.nuoIssaugojimo) >= 50) kainosKaita = '<span class="ct-diff ' + (h.nuoIssaugojimo < 0 ? 'is-good' : 'is-warn') + '" title="Kainos pokytis nuo tada, kai išsaugojote">' + skirt(h.nuoIssaugojimo) + ' nuo išsaugojimo</span>';
+      else if (h.kainosPokytis && Math.abs(h.kainosPokytis) >= 50) kainosKaita = '<span class="ct-diff ' + (h.kainosPokytis < 0 ? 'is-good' : 'is-warn') + '" title="Kainos pokytis nuo pastebėjimo rinkoje">' + skirt(h.kainosPokytis) + (h.mazinimuKartai > 1 ? ' · ' + h.mazinimuKartai + '× mažinta' : '') + '</span>';
       if (h.ridosPokytis > 500) pok.push('<span class="chip demesio">rida +' + Number(h.ridosPokytis).toLocaleString('lt-LT').replace(/,/g, ' ') + ' km</span>');
       const datos = [];
-      datos.push('Išsaugota <b>' + ctEsc(data(f.savedAt)) + '</b> (' + ctEsc(ctLaikas(f.savedAt || Date.now())) + ')');
+      // Brūkšnys su tuščia reikšme atrodo kaip neužpildytas laukas. Jei datos nėra,
+      // rašom tik santykinį laiką: „Išsaugota ką tik", o ne „Išsaugota – (ką tik)".
+      var kada = data(f.savedAt), kadaRel = ctLaikas(f.savedAt || Date.now());
+      datos.push(kada === '–'
+        ? 'Išsaugota <b>' + ctEsc(kadaRel) + '</b>'
+        : 'Išsaugota <b>' + ctEsc(kada) + '</b> (' + ctEsc(kadaRel) + ')');
       if (h.pastebetas) datos.push('rinkoje pastebėtas <b>' + ctEsc(data(h.pastebetas)) + '</b>' + (h.dienosRinkoje != null ? ' – ' + h.dienosRinkoje + ' d.' : ''));
       if (h.paskutinisPatikrinimas) datos.push('paskutinį kartą tikrinta <b>' + ctEsc(ctLaikas(h.paskutinisPatikrinimas)) + '</b>');
       if (!h.pastebetas && !h.paskutinisPatikrinimas) datos.push('istorija kaupiama – pokyčiai matysis po kito tikrinimo');
@@ -246,7 +256,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
         + '<div class="mg-title">' + ctEsc(f.modelis || 'Skelbimas') + (f.source ? '<span class="source-tag">' + ctEsc(f.source) + '</span>' : '') + '</div>'
         + '<div class="mg-chips">' + chips + '</div>'
         + '<div class="mg-price">' + (dabartine ? Number(dabartine).toLocaleString('lt-LT').replace(/,/g, ' ') + ' €' : '–')
-        + (dabartine !== f.kaina && f.kaina ? '<span class="chip buvo" title="Kaina, kai išsaugojote">' + Number(f.kaina).toLocaleString('lt-LT').replace(/,/g, ' ') + ' €</span>' : '') + diff + pok.join('')
+        + kainosKaita + (dabartine !== f.kaina && f.kaina ? '<span class="chip buvo" title="Kaina, kai išsaugojote">' + Number(f.kaina).toLocaleString('lt-LT').replace(/,/g, ' ') + ' €</span>' : '') + diff + pok.join('')
         + (f.marketMedian ? '<small>vs ' + Number(f.marketMedian).toLocaleString('lt-LT').replace(/,/g, ' ') + ' €</small>' : '') + '</div>'
         + '<div class="mg-data">' + datos.join('<span class="sep">·</span>') + '</div>'
         + '</div><div class="mg-right ct-actions">'
@@ -262,7 +272,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
         // Naikinantis veiksmas nestovi veiksmų eilėje – jį nukeėlėm į kortelės
         // dešinįjį viršų, kaip širdutę. Eilės gale jis būtų prie pirminio mygtuko,
         // t. y. prie to, į kurį žmogus ir taiko.
-        + '<button class="mg-del-top ct-btn ct-btn-quiet ct-btn-icon ct-btn-sm" title="Pašalinti iš mėgstamiausių" aria-label="Pašalinti iš mėgstamiausių" onclick="salinti(' + ctEsc(JSON.stringify(f.url)) + ', this)">'
+        + '<button class="mg-del-top ct-btn ct-btn-quiet ct-btn-icon ct-btn-sm is-destructive" title="Pašalinti iš mėgstamiausių" aria-label="Pašalinti iš mėgstamiausių" onclick="salinti(' + ctEsc(JSON.stringify(f.url)) + ', this)">'
         +   '<i><svg class="ct-i"><use href="#i-pasalinti"></use></svg></i>' + '</button>'
         + '</div></div>';
     }).join('');

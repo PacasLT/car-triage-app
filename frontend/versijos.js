@@ -8,6 +8,26 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.44.0', data: '2026-09-18', pavadinimas: 'Akcentas grįžo pagrindiniam veiksmui',
+    pakeitimai: [
+      'Skelbimo puslapyje violetinis mygtukas dabar yra „Pilna apžvalga · 2 kr", o ne nuoroda į portalą – vienintelis mygtukas, kuris išveda iš CarTriige, nebeatrodo kaip pagrindinis',
+      'Pardavėjo varnelė nebe mėlyna – patvirtintą faktą visame produkte žymi žalia',
+      '„Duomenys bus po analizės" gavo ⚪ ženklą – tas pats žinojimo lygis, kurį matote kortelėje',
+      'Trynimo mygtukai gavo užuominą: užvedus pelę atsiranda paviršius, o naikinantis veiksmas paraustą',
+      'Apžvalgos mygtukai skelbimo puslapyje tapo tokie pat kaip visur kitur – mygtukų skola sumažėjo nuo 28 iki 24',
+    ],
+  },
+  {
+    versija: '1.43.0', data: '2026-09-18', pavadinimas: 'Skelbimo puslapio viršus ir mėgstamiausių kainos kaita',
+    pakeitimai: [
+      'Skelbimo puslapio viršus perdarytas: pavadinimas ir ženkliukai kairėje, kaina ir rinkos blokas dešinėje – tas pats rinkos blokas, kurį matote kortelėje',
+      '„GALIMAI DAUŽTAS“ įspėjimas dabar virš viso turinio, ne paslėptas skirtuke',
+      'Kai panašių skelbimų mažiau nei 8, skirtumas nuo rinkos neberodomas visai – aštuonių skelbimų vidurkis nėra rinkos duomenys',
+      'Mėgstamiausiuose kainos pokytis nuo išsaugojimo perkeltas į kainos eilutę – tai pagrindinis šio puslapio dalykas, ne dar vienas ženkliukas',
+      '„Išsaugota – (ką tik)“ tapo „Išsaugota ką tik“',
+    ],
+  },
+  {
     versija: '1.42.0', data: '2026-09-18', pavadinimas: 'Vienas mygtukų žodynas visuose puslapiuose',
     pakeitimai: [
       'Mėgstamiausiuose „Detali apžvalga“ tapo „Pilna apžvalga“ su kainos ženkleliu – tas pats veiksmas visur vadinasi vienodai',

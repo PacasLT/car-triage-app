@@ -170,6 +170,26 @@
 - **Kodėl `ct-priedai.css` 4 blokas:** `ct-mygtukai.css` 420 eil. `.ct-actions > .ct-btn:not(.ct-btn-primary)` (0,3,0) nugali 423 eil. `.ct-actions > .ct-btn-tight` (0,2,0), tad 44 px niekada nepasiekdavo mygtuko, o platusis likdavo 124 px prie 147 px antraštės – tekstas užlipdavo ant kaimyno. Mūsų atsvara – ta pati taisyklė (0,4,0).
 - **Ištrinti mūsų bloką**, kai dizaineris savo 420 eilutėje prašys `:not(.ct-btn-tight)`.
 
+## Akcentas ir žinojimo lygiai skelbimo puslapyje (v1.44.0)
+
+- **Pirminis mygtukas puslapyje yra `Pilna apžvalga · 2 kr`.** `Žiūrėti skelbimą` buvo violetinis – vienintelis mygtukas, kuris IŠVEDA žmogų iš produkto, atrodė kaip pagrindinis veiksmas. Dabar jis antrinis su rodykle (`ct-btn ct-btn-go`), tekstas „Skelbimas" kaip visur.
+- **`.dp-analize-greita` ir `.dp-analize-cta` – `.ct-btn` komponentas** su `<u>1 kr</u>` / `<u>2 kr</u>`. `\.dp-cta button` išvaizdos deklaracijos ištrintos: mygtukų skola 28 → 24.
+- **Mėlyna varnelė (#5b8af5) ištrinta.** Paletėje tos spalvos nėra, ir ji skaitoma kaip socialinių tinklų „verifikuota". Patvirtintą faktą visame produkte žymi žalia (`--k-confirmed`), piešia `ct-dizainas.css` 19b.
+- **„duomenys bus po analizės" = ⚪**, ne pilkas tekstas. Klasė `.dp-seller-pending`, tašką piešia 19b.
+- **`is-destructive`** ant `.at-del-top` ir `.mg-del-top`: 19 sk. duoda paviršių ant `hover`/`focus-visible` ir raudoną tik tada, kai žmogus jau taiko. Tylus variantas be rėmelio lieka – rėmelis naikinančiam veiksmui duotų svorio, kurio jis neturi turėti.
+- **`detail.html` neprijungia `ct-bendras.js`,** tad `ctEsc` ten apibrėžtas vietoje (šalia `fmt()`). Be jo viršaus blokas nutrūkdavo su „ctEsc is not defined".
+
+## Skelbimo puslapio viršus (v1.43.0, DETAIL-SABLONAS.md DALIS 1)
+
+- Struktura: `.dp-crumbs` → `.dp-hero` (kairėje `.dp-hero-l` pavadinimas + `.dp-meta` + `.dp-chips`, dešinėje `.dp-hero-r` `.dp-price-row` + `.ct-market`) → rizikos juosta → `.dp-main`.
+- **Vidurinio `.dp-info` stulpelio nebėra** – jo turinys perkeltas į `.dp-hero`. `.dp-main` dabar dviejų stulpelių: galerija + pardavėjas.
+- **Kaina dešinėje, ne po pavadinimu:** šį puslapį atveria žmogus, kuris kortelėje kainą jau matė. Dešinysis stulpelis leidžia patvirtinti skaičių neperskaičius pavadinimo.
+- **`diffPct` ženklas – MūSŲ konvencija:** teigiamas = pigiau už rinką. Dizainerio šablone atvirkščiai; ribos tos pačios kaip kortelėje (`>= 30` → `is-bad`, `> 0` → `is-good`, kitaip `is-warn`).
+- **`marketCount < 8`:** `PANAŠIŲ SKELBIMŲ` rodo „– per mažai duomenų" su `.is-unrated-val`, o skirtumo blokas nerodomas VISAI. Aštuonių skelbimų vidurkis nėra rinkos duomenys.
+- **`.ct-risk` virš viso turinio**, po `.dp-hero`, prieš galeriją – ne skirtuke.
+- Seni `#dp-subtitle`, `#dp-market-row`, `#dp-specs`, `#dp-tags`, `addSpec()` nebenaudojami; jų CSS liko, ištrinti kartu su 2 dalimi.
+- **DALIS 2 ir 3 dar nepadarytos:** galerija, įverčio skydelis, skirtukai, rinkos pozicijos skalė, pardavėjo kortelė.
+
 ## Mygtukų žodynas penkiuose puslapiuose (v1.42.0)
 
 - **Tvarka fiksuota, sudėtis ne:** `[išorinė nuoroda] [išskleidimas] [palyginimas] ⟵tarpas⟶ [pirminis]`. Kiekvienas puslapis rodo tą poaibį, kuris jam turi prasmę, bet niekada nekeičia eilės ir niekada nepervadina to paties veiksmo.

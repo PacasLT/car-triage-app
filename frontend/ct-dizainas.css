@@ -1421,3 +1421,39 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
    nes verdiktas visada vienas sakinys be tikriniu daiktavardziu. */
 .ct-verdict.is-caps, .dp-panel-t > .ct-verdict.is-caps { text-transform: lowercase; }
 .ct-verdict.is-caps::first-letter { text-transform: uppercase; }
+
+
+/* ── 19. Tylus ikoninis mygtukas · prieinamumas be remelio ───────────────── */
+
+/* Jusu matavimas teisingas: tylus variantas naikinanciam veiksmui yra TEISINGAS
+   pasirinkimas — remelis jam duotu svorio, kurio jis neturi tureti.
+   Bet tylus + ikoninis + kampe = nulis uzuominos, kad tai mygtukas, kol
+   neuzvedei pele. Todel jis gauna pavirsiu ant hover ir focus, o ne remeli.
+   Tai buvau praleides — turejau tai numatyti, kai leidau tyliam variantui
+   buti ikoniniu. */
+
+.ct-btn-quiet.ct-btn-icon:hover { background: var(--bg-elevated); color: var(--text-primary); }
+.ct-btn-quiet.ct-btn-icon:focus-visible { background: var(--bg-elevated); }
+/* Naikinantis veiksmas parodo savo pobudi tik tada, kai zmogus i ji taiko */
+.ct-btn-quiet.ct-btn-icon.is-destructive:hover { background: var(--danger-dim); color: var(--danger); }
+
+/* ── 19b. Melyna varnele pardavejo kortelėje ─────────────────────────────── */
+
+/* Ekrane pardavejo varnele melyna — tos spalvos palettėje nera, ir ji atrodo
+   kaip socialiniu tinklu „verifikuota". Patvirtintas faktas visame produkte
+   yra 🟢, tad ir cia. */
+.dp-seller-verified, .dp-seller-badge {
+  background: var(--k-confirmed-dim);
+  box-shadow: inset 0 0 0 1px var(--k-confirmed-border);
+  color: var(--k-confirmed);
+}
+
+/* „duomenys bus po analizes" yra ⚪ — ne pilkas tekstas, o zinojimo lygis */
+.dp-seller-pending { color: var(--text-muted); }
+.dp-seller-pending::before {
+  content: '';
+  display: inline-block; width: 8px; height: 8px; margin-right: 7px;
+  border-radius: 50%; background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--text-muted);
+  vertical-align: baseline;
+}

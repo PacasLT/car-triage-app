@@ -280,7 +280,7 @@ function piesti() {
       // Naikinantis veiksmas nestovi veiksmų eilėje. Eilės gale „Ištrinti" atsidurtų
       // prie pirminio mygtuko – vienas praleistas pikselis, ir ataskaita, už kurią
       // sumokėta 2 kr, išnyksta. Vieta: kortelės dešinysis viršus.
-      + '<button class="at-del-top ct-btn ct-btn-quiet ct-btn-icon ct-btn-sm" title="Ištrinti ataskaitą" aria-label="Ištrinti ataskaitą" onclick="trinti(' + a.id + ', this)">'
+      + '<button class="at-del-top ct-btn ct-btn-quiet ct-btn-icon ct-btn-sm is-destructive" title="Ištrinti ataskaitą" aria-label="Ištrinti ataskaitą" onclick="trinti(' + a.id + ', this)">'
       +   '<i><svg class="ct-i"><use href="#i-pasalinti"></use></svg></i>' + '</button>'
       + '</div>';
   }).join('');
