@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.75.0', data: '2026-09-18', pavadinimas: 'Filtrai persikele i sona, ekranas naudojamas iki 1600 px',
+    pakeitimai: [
+      'Nuo 1180 px filtrai stovi kaireje ir lieka matomi slenkant - nebereikia grizti i virsu',
+      'Placiuose ekranuose turinys tesiasi iki 1600 px: ties 2364 px kortele platesne 1200 -> 1560 px',
+      'Antrastes aukstis nustojo buti spejimas - 65 / 69 / 97 px pamatuoti ir sudeti i viena vieta',
+      'Ties 1280x720 filtru stulpelis dar slenka: telpa 599 px, reikia 746 - dizaineriui perduota su skaiciais',
+    ],
+  },
+  {
     versija: '1.74.0', data: '2026-09-18', pavadinimas: 'Mygtukai planšetėje nebesusispaudžia',
     pakeitimai: [
       'Liečiamoje planšetėje veiksmų mygtukai atgavo įprastą plotį – užrašai vėl telpa',

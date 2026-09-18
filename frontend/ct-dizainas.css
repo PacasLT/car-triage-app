@@ -176,7 +176,7 @@
   /* ── 10. MAKETAS ──────────────────────────────────────────────────────────*/
   --content-max:  1240px;   /* 1400 px ekrane turinys nesitęsia be ribos */
   --doc-max:      760px;    /* skaitomi dokumentai: gilus palyginimas, ataskaitos */
-  --header-h:     64px;
+  --header-h:     97px;   /* ERRATA-header-h: buvo 64px - negyvas ir neteisingas */
   --tap-min:      44px;     /* minimali paspaudimo zona mobiliajame */
 
   /* ── 11. JUDĖJIMAS ────────────────────────────────────────────────────────*/
@@ -185,6 +185,12 @@
   --dur-slow: .35s;
   --ease:     cubic-bezier(.32, .72, 0, 1);
 }
+
+/* ERRATA-header-h: antraste turi tris aukscius. Slenksciai TIE PATYS, kuriais
+   keiciasi .ct3-header-inner uzpildas (ct-bendras.css 140/165, index.html
+   1306/1313/1365 ir 1389). Keiciant uzpilda - tokenas keiciamas cia pat. */
+@media (max-width: 768px) { :root { --header-h: 69px; } }
+@media (max-width: 400px) { :root { --header-h: 65px; } }
 
 @media (prefers-reduced-motion: reduce) {
   :root { --dur-fast: 0s; --dur-base: 0s; --dur-slow: 0s; }
@@ -1791,8 +1797,8 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
   }
   /* Filtrai lieka matomi slenkant. top = antrastes aukstis + tarpas. */
   .ct-shell > .ct-shell-side {
-    position: sticky; top: 76px;
-    max-height: calc(100vh - 96px);
+    position: sticky; top: var(--header-h);
+    max-height: calc(100vh - var(--header-h) - var(--s-5));
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-width: thin;

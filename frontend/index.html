@@ -2427,7 +2427,7 @@
   </div>
 </header>
 
-<div class="container">
+<div class="container is-wide">
   <!-- Favorites panel (collapsible, below header) -->
   <div id="favorites-wrap" style="display:none; margin-top:16px;">
     <div id="favorites-panel" style="display:none; background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:14px; margin-top:8px;">
@@ -2490,6 +2490,40 @@
 </section>
 
 <!-- SEARCH PANEL -->
+<!-- STATS BAR (perkelta virs saraso maketo - ji full-bleed ir i tinkleli neitelpa) -->
+<div class="ct3-stats-bar">
+  <div class="ct3-stats-inner">
+    <div class="ct3-stat-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/><circle cx="12" cy="12" r="1"/></svg>
+      <div><b>12 480</b><span>skelbimų analizuojama per dieną</span></div>
+    </div>
+    <div class="ct3-stat-div"></div>
+    <div class="ct3-stat-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
+      <div><b>1 200+</b><span>geriausių pasiūlymų per mėnesį</span></div>
+    </div>
+    <div class="ct3-stat-div"></div>
+    <div class="ct3-stat-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h18M3 9h12M3 15h9"/></svg>
+      <div><b>8 Europos</b><span>platformų</span></div>
+    </div>
+    <div class="ct3-stat-div"></div>
+    <div class="ct3-stat-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <div><b>Taupykite laiką</b><span>su AI triažu</span></div>
+    </div>
+    <div class="ct3-stat-div"></div>
+    <div class="ct3-stat-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      <div><b>Geresnės sandoriai</b><span>su realiais rinkos duomenimis</span></div>
+    </div>
+    <div class="ct3-stats-driven">VALDOMA <b>DUOMENŲ</b></div>
+  </div>
+</div>
+
+<!-- v1.75.0: 25 sk. .ct-shell - filtrai i sona nuo 1180 px -->
+<div class="ct-shell">
+  <div class="ct-shell-side">
   <div class="ct3-search-panel">
     <div class="ct3-search-inner">
       <div class="ct3-search-top">
@@ -2522,7 +2556,7 @@
       </div>
 
       <div class="ct3-fields">
-        <div class="ct3-field">
+        <div class="ct3-field is-wide">
           <label>MARKĖ</label>
           <div class="ct3-select-wrap">
             <select id="marke" onchange="updateModels ? updateModels() : null">
@@ -2538,7 +2572,7 @@
             <svg class="ct3-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
           </div>
         </div>
-        <div class="ct3-field">
+        <div class="ct3-field is-wide">
           <label>MODELIS</label>
           <div class="ct3-select-wrap">
             <select id="modelis">
@@ -2590,7 +2624,7 @@
           </div>
         </div>
         <!-- v1.25.0: varantieji ratai ir galia - pagrindiniai vertinimo kriterijai, todel cia, ne "Daugiau filtru" -->
-        <div class="ct3-field">
+        <div class="ct3-field is-wide">
           <label>VARANTIEJI RATAI</label>
           <div class="ct3-select-wrap">
             <select id="varantieji">
@@ -2602,7 +2636,7 @@
             <svg class="ct3-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
           </div>
         </div>
-        <div class="ct3-field">
+        <div class="ct3-field is-wide">
           <label>GALIA (KW)</label>
           <div style="display:flex; gap:6px; align-items:center;">
             <input id="galiaNuo" type="number" min="0" step="10" placeholder="nuo"
@@ -2616,8 +2650,8 @@
 
 
       <!-- Papildomi filtrai (atidaromi mygtuku "Daugiau filtrų") -->
-      <div id="more-filters" style="display:none; margin:0 0 10px; padding:14px 16px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:12px;">
-        <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:flex-end;">
+      <div id="more-filters" class="ct3-more-panel" style="display:none;">
+        <div class="ct3-more-row">
           <div style="display:flex; flex-direction:column; gap:6px;">
             <label style="font:600 10px/1 var(--font-mono); letter-spacing:.08em; color:var(--text-dim);">RIDA IKI (KM)</label>
             <input id="ridaIki" type="number" min="0" step="10000" placeholder="pvz. 200000" oninput="ctUpdateMoreBadge()"
@@ -2685,38 +2719,8 @@
       </div>
     </div>
   </div>
-
-
-<!-- STATS BAR -->
-<div class="ct3-stats-bar">
-  <div class="ct3-stats-inner">
-    <div class="ct3-stat-item">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/><circle cx="12" cy="12" r="1"/></svg>
-      <div><b>12 480</b><span>skelbimų analizuojama per dieną</span></div>
-    </div>
-    <div class="ct3-stat-div"></div>
-    <div class="ct3-stat-item">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
-      <div><b>1 200+</b><span>geriausių pasiūlymų per mėnesį</span></div>
-    </div>
-    <div class="ct3-stat-div"></div>
-    <div class="ct3-stat-item">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h18M3 9h12M3 15h9"/></svg>
-      <div><b>8 Europos</b><span>platformų</span></div>
-    </div>
-    <div class="ct3-stat-div"></div>
-    <div class="ct3-stat-item">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      <div><b>Taupykite laiką</b><span>su AI triažu</span></div>
-    </div>
-    <div class="ct3-stat-div"></div>
-    <div class="ct3-stat-item">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-      <div><b>Geresnės sandoriai</b><span>su realiais rinkos duomenimis</span></div>
-    </div>
-    <div class="ct3-stats-driven">VALDOMA <b>DUOMENŲ</b></div>
   </div>
-</div>
+  <div class="ct-shell-main">
 
 
 
@@ -2754,6 +2758,8 @@
     <button id="tinder-launch-btn" onclick="startTinder()" style="padding:9px 18px; background:linear-gradient(135deg,var(--accent),var(--accent-light)); color:#fff; border:none; border-radius:20px; font-size:13px; font-weight:600; cursor:pointer; box-shadow:0 4px 14px rgba(124,111,247,0.4);">🔥 Tinder naršymas</button>
   </div>
   <div id="results"></div>
+  </div>
+</div>
 
 
   <div id="tinder-view">

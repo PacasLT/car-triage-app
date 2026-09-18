@@ -1325,3 +1325,199 @@ kada nors pamirs - jusu pacio zodziai is 11 paketo.
 su jusu 30 sk. v2. Tai uzdarytu Nr.14 ir dar du vartotojo pranesimus - Nr.2 ir
 Nr.19. Visi trys yra tas pats 1240 px apribojimas, tik is skirtingu pusiu.
 
+
+---
+
+## D-15 · 2026-09-18 · Dizaineris → Klaudijui · VARTOTOJO EKRANAS ATSIŲSTAS
+
+**13 paketas — tik vartotojo ekranas, kaip susitarėm.** Nieko kito jame nėra.
+
+**Naujo CSS nereikia.** Ekranas sudėtas tik iš jau įdiegtų skyrių: 25
+(`.ct-shell`), 29 (`.ct-sidenav`), 28 (`.ct-back`), 22 (`.ct-table.is-dense`),
+23 (`.ct-clamp`), 24 (`.ct-specs`), 21 (`.ct-flag[role=radio]`), 31
+(`.ct-field`) ir `ct-mygtukai.css`.
+
+**Svarbiausias sprendimas atsirado iš kodo, ne iš maketo.** `planai.js`
+297–312: `nustatytiPlana()` **perrašo** `kreditai_plano` (ne prideda —
+nustato, tad gali ir atimti), **nuzeruoja** `paieskos_menesi`, o
+`kreditai_pirkti` nepaliečia. Adminas, perstatydamas „Pro → Verslas", tyliai
+padovanoja 93 kreditus, o atgal — atima 85. Todėl prie plano nėra „Išsaugoti",
+o yra patvirtinimo kortelė su poveikiu skaičiais. Kortelės skaičiai turi eiti
+iš to paties šaltinio kaip backend'as — geriausia atiduoti `PLANAI` naršyklei.
+
+**Dvi kreditų rūšys rodomos atskirai**, ne „viso: 19". **Žurnalas yra ekrano
+ašis**, ne priedas apačioje.
+
+**Reikia iš mūsų pusės:** `created_at` `visiVartotojai()` sąraše (`planai.js`
+291) ir `PLANAI` objektas naršyklei.
+
+**Ką pamatuoti:** 1280×720 šonas su `.ct-sidenav`; 390 px žurnalo lentelė
+(šeši stulpeliai — ties `A-05` riba); patvirtinimo kortelė su visais trimis
+planais.
+
+**Failai:** `pasikeitimai/is-dizainerio/13-vartotojo-rodinys/`
+
+---
+
+## Z-19 · 2026-09-18 · Klaudijus → Dizaineriui · 25 SK. ĮDIEGTAS · v1.75.0
+
+`ERRATA-header-h` gauta ir įdiegta. Įdiegtas ir 25 sk. su 30 sk. v2. Visi
+skaičiai žemiau — iš tikros panelės, ne iš stendo.
+
+### 1. `--header-h` — jūsų trys reikšmės pasitvirtino visos trys
+
+Pamatuota `getPropertyValue('--header-h')` prieš tikrą antraštės aukštį:
+
+| Plotis | Tokenas išsiveda | Tikra antraštė | Sutampa |
+|---|---|---|---|
+| 390 px | 65px | 65 px | taip |
+| 700 px | 69px | 69 px | taip |
+| 1400 px | 97px | 97 px | taip |
+
+Šonas paėmė `top: var(--header-h)` ir
+`max-height: calc(100vh - var(--header-h) - var(--s-5))`. Ties 1280×720 tai
+**599 px** — lygiai ta riba, kurią rašėt. Įrašo `97px` niekur nebeliko.
+
+### 2. Slenkstis ir plotis — veikia kaip suplanuota
+
+| Plotis | `.ct-shell` | Stulpeliai | Kortelė |
+|---|---|---|---|
+| 1179 px | block | — | 1139 px |
+| 1180 px | grid | 276 + 840 | 840 px |
+| 1280 px | grid | 276 + 940 | 940 px |
+| 1680 px | grid | 300 + 1236 | 1236 px |
+| 2364 px | grid | 300 + 1236 | 1236 px |
+
+Horizontalaus slinkimo puslapyje **0 visur**. JS klaidų **0**.
+
+`.container.is-wide` įdiegta: ties 2364 px turinys 1240 → **1600 px**,
+kortelė 1200 → **1236 px** šone su filtrais. Nr. 14 („per daug tuščios vietos")
+tuo ir uždaromas: nenaudojama paraštė iš 562 px į šoną sumažėjo iki 382 px,
+o atsilaisvinusi vieta virto nuolat matomais filtrais.
+
+### 3. Ko 30 sk. nepalietė — ir kiek tai kainavo
+
+**Čia svarbiausia šio įrašo dalis.** 30 sk. aprašė `.ct3-fields`,
+`.ct3-field`, `.ct3-select-wrap`, `.ct3-range-wrap`, `#more-filters`,
+`.ct3-more-row` ir `.ct3-search-btn`. Bet `.ct3-search-panel` turi dar
+keturias dalis, ir kiekviena jų buvo platesnė už 276 px stulpelį.
+
+Pirmas matavimas po įdiegimo, 1280×720:
+
+```
+sono scrollWidth  662 px   prie clientWidth 276 px   ->  386 px horizontalaus slinkimo
+25 elementai kyšo uz stulpelio desinio krasto
+```
+
+Kaltininkai, kiekvienas su skaičiumi:
+
+| Kas | Ką daro | Kiek atima |
+|---|---|---|
+| `.ct3-search-inner` | `padding: 0 48px` | iš 276 px lieka **178 px** |
+| `.ct3-search-tabs` | `nowrap`, natūralus plotis 340 px | kyšo 125 px |
+| `.ct3-portals-row` + `.ct3-flags` | nesilaužo į eilutes | kyšo 386 px |
+| `.ct3-search-bottom-right` | 188 px tėve, kurio vidus 154 px | kyšo 34 px |
+
+`padding: 0 48px` yra prasmingas per visą ekraną einančiai juostai. 276 px
+stulpelyje jis suvalgo 23 % pločio, ir laukai lieka po **71 px**.
+
+Įdėjau **9 bloką** `ct-priedai.css`: mažesnis vidinis užpildas
+(`var(--s-4)`), eilučių laužimas toms trims eilutėms, `min-width: 0`
+lankstiems vaikams. Nieko naujo neišgalvojau — tik neleidžiu dalims išeiti už
+stulpelio. Po jo:
+
+```
+sono horizontalus slinkimas   386 px  ->  0 px    (visuose plociuose)
+laukai                         71 px  ->  103 px  (+45 %)
+```
+
+**Blokas laikinas.** Klausimas `K-09` apačioje.
+
+### 4. Aukštis — skaičius, kurio prašėt
+
+Jūsų stendas davė 527 px prie ribos 599. **Tikra panelė, kai niekas
+nebekyšo — 746 px.** Skirtumas ne matavimo, o turinio: stende nebuvo
+`.ct3-search-top`.
+
+Ties 276 px stulpeliu, uždarius „Daugiau filtrų":
+
+```
+.ct3-search-top     242 px   (skirtukai + portalu eilute su velevomis)
+.ct3-fields         378 px   (8 laukai, du stulpeliai)
+.ct3-search-bottom  128 px
+------------------------------
+viso                746 px
+```
+
+Kur telpa, o kur ne:
+
+| Ekranas | Riba | Reikia | Trūksta |
+|---|---|---|---|
+| 1180×800 | 679 | 746 | 67 |
+| 1280×720 | 599 | 746 | **147** |
+| 1366×768 | 647 | 746 | 99 |
+| 1400×900 | 779 | 746 | telpa |
+| 1680×900 | 779 | 642 | telpa |
+| 2364×1080 | 959 | 642 | telpa |
+
+Ties 1680 px stulpelis platesnis (300 px), tad `.ct3-search-top` nebesilaužia
+ir viršus krenta 242 → 138 px. Nuo ten telpa be slinkimo.
+
+Atidarius „Daugiau filtrų" šonas visada slenka (1215 px turinio). Slinkimas
+neatrodo kaip klaida — panelė turi savo slankiklį ir aiškiai baigiasi, —
+bet ties 1280×720 pirmas ekranas prasideda nuo skirtukų, o ne nuo laukų.
+Ekranvaizdžiai: `matavimai/sonas-1280x720-netelpa.png` ir
+`matavimai/sonas-2364x1080-telpa.png`.
+
+### 5. Ko prireikė markupe
+
+`.ct-shell` apvyniojimas padarytas; `.ct3-stats-bar` iškelta **virš** jo
+(ji full-bleed ir į tinklelį netilptų); `#more-filters` vidinis `<div>` gavo
+`ct3-more-row`, kaip prašėt.
+
+Radau ir antrą to paties dalyko atvejį: pats `#more-filters` turėjo
+`style="padding:14px 16px; background:...; border:..."`, tad ir jūsų
+`.ct-shell-side #more-filters { padding: var(--s-3) }` nieko nedarė. Inline
+stilius nugali ID selektorių taip pat, kaip ir klasę. Perkėliau į
+`.ct3-more-panel` klasę (**8 blokas**, mūsų, ne atsvara). `display:none` liko
+atribute — `ctToggleMoreFilters` skaito `el.style.display === 'none'` ir be jo
+nustotų veikti.
+
+### 6. Pataisymas jūsų būsenos eilutėje
+
+`BUSENA-EILUTES.md` rašo: „6, 7, 8 ištrinti". 6 — taip. Bet **7 ir 8 yra ir
+lieka**, ir jie ne atsvaros:
+
+- **7 blokas** atšaukia `.ct3-search-panel` full-bleed triuką šone. Be jo
+  panelė bandytų būti `100vw` pločio 276 px stulpelyje.
+- **8 blokas** — tas `#more-filters` inline stilius iš 5 punkto.
+
+Abu pažymėti „netrinti". Atsvara šiandien yra tik **9 blokas**.
+
+---
+
+## K-09 · 2026-09-18 · Klaudijus → Dizaineriui · KLAUSIMAS
+
+**25 sk. šonas ties 1280×720 netelpa: 746 px turinio prie 599 px ribos.**
+Jūs rašėt: „Jei netelpa — sakykit skaičių, tada mažinu `gap`, o ne sulankstau
+grupes." Skaičius yra 147 px, bet `gap` jo neuždengs: 104 px iš jų yra
+`.ct3-search-top` išsilaužimas ties siauru stulpeliu.
+
+Trys keliai, kaip matau:
+
+1. **Perimti 9 bloką į 30 sk.** — tada bent nebelieka horizontalaus slinkimo,
+   o vertikalus lieka ties 1280×720. Pigiausia, bet 1280×720 vartotojas
+   pirmiausia mato skirtukus, ne laukus.
+2. **Šone nerodyti `.ct3-search-top`** (skirtukai + portalai + vėliavos).
+   746 − 242 = 504 px, telpa visur nuo 1180 px. Bet portalų pasirinkimas
+   tada dingsta iš akių — ar jis priklauso filtrams, ar antraštei?
+3. **Kelti slenkstį į 1680 px** — ten viskas telpa be jokių atsvarų
+   (642 prie 779). Bet 1280–1679 px ekranuose 25 sk. nieko nepakeis.
+
+Nesirinkau pats, nes tai ne plotis, o sprendimas, kas yra filtrų panelė:
+visa paieškos juosta, ar tik laukai. Kol atsakysit, veikia 9 blokas su jūsų
+slenksčiu 1180 px.
+
+Antras, mažesnis: ar `.ct3-search-inner` `padding: 0 48px` turi likti
+jūsų failo reikšme visiems plotams, ar 25 sk. šonui jam vieta 30 skyriuje?
+Šiandien tai daro `ct-priedai.css`, ir tai ne ten, kur turėtų būti.
