@@ -301,8 +301,14 @@
         }
         _foto = d;
         vardasEl.textContent = vardas + ' · ' + matmenys + ' · ' + Math.round(d.length / 1024) + ' KB';
-        document.getElementById('kp-perziura').innerHTML =
-          '<img src="' + _foto + '" alt="" style="max-width:100%;max-height:150px;border-radius:8px;border:1px solid var(--border);display:block;margin-top:8px">';
+        // v1.61.0: peržiūra atidaroma per visą ekraną. Miniatiūroje 150 px
+        // aukscio neimanoma pamatyti, KAS blogai - o butent tai zmogus ir raso.
+        var pv = document.getElementById('kp-perziura');
+        pv.innerHTML = '<img id="kp-foto-mini" src="' + _foto + '" alt="Paspauskite, kad padidintum\u0117te"'
+          + ' title="Paspauskite, kad padidintum\u0117te"'
+          + ' style="max-width:100%;max-height:150px;border-radius:8px;border:1px solid var(--border);display:block;margin-top:8px;cursor:zoom-in">'
+          + '<div class="ct-hint" style="margin-top:4px">Paspauskite nuotrauk\u0105, kad per\u017Ei\u016Br\u0117tum\u0117te per vis\u0105 ekran\u0105.</div>';
+        document.getElementById('kp-foto-mini').onclick = function () { atidarytiFoto(_foto); };
       });
     }
     inp.onchange = function () {
@@ -470,6 +476,52 @@
   window.addEventListener('online', function () { setTimeout(eileSiusti, 1500); });
 
   window.ctPranestiKlaida = atidaryti;
+
+  // Pilno ekrano nuotraukos perziura. Uzdaroma paspaudus bet kur arba Esc.
+  // Savo CSS nekuriam - tai vienkartinis sluoksnis, gyvenantis tik kol ziurima.
+  function atidarytiFoto(src) {
+    if (!src) return;
+    var sl = document.createElement('div');
+    sl.setAttribute('role', 'dialog');
+    sl.setAttribute('aria-label', 'Nuotraukos perziura');
+    sl.style.cssText = 'position:fixed;inset:0;z-index:2147483646;background:rgba(5,6,10,.94);'
+      + 'display:flex;align-items:center;justify-content:center;padding:16px;cursor:zoom-out;'
+      + 'overflow:auto;-webkit-overflow-scrolling:touch';
+    var img = document.createElement('img');
+    img.id = 'kp-foto-didele';
+    img.src = src;
+    img.alt = '';
+    img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain;border-radius:8px';
+    // Antras paspaudimas ant paties paveikslo - i tikra dydi, kad matytusi smulkmenos.
+    var padidinta = false;
+    img.style.cursor = 'zoom-in';
+    img.onclick = function (e) {
+      e.stopPropagation();
+      padidinta = !padidinta;
+      img.style.maxWidth = padidinta ? 'none' : '100%';
+      img.style.maxHeight = padidinta ? 'none' : '100%';
+      img.style.cursor = padidinta ? 'zoom-out' : 'zoom-in';
+    };
+    function uzdaryk() {
+      sl.remove();
+      document.removeEventListener('keydown', perKlavisa, true);
+    }
+    // Esc turi uzdaryti TIK perziura. Pranesimo langas savo Esc klausytoja turi
+    // ant to paties `document`, o stopPropagation tarp tos pacios saknies
+    // klausytoju neveikia - reikia stopImmediatePropagation IR gaudymo fazes,
+    // kad mūsų klausytojas suveiktu pirmas. Kitaip Esc uzdarytu ir langa kartu
+    // su viskuo, ka zmogus surase (patikrinta testu: langas dingdavo).
+    function perKlavisa(e) {
+      if (e.key !== 'Escape') return;
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      uzdaryk();
+    }
+    sl.onclick = uzdaryk;
+    document.addEventListener('keydown', perKlavisa, true);
+    sl.appendChild(img);
+    document.body.appendChild(sl);
+  }
 
   function mygtukas() {
     if (document.getElementById('kp-mygtukas')) return;

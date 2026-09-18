@@ -394,6 +394,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
         + d.irasai.map(eilute).join('')
         + '</tbody></table></div>';
       el.innerHTML = h;
+      uzkrautiFoto();
     }).catch(function (e) {
       el.innerHTML = tuscia('never', 'Nepavyko įkelti', e.message);
       sub.textContent = '';
@@ -427,7 +428,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
       + (k.turejoRodyti ? '<div class="ad-turejo"><b>Turėjo rodyti:</b> ' + esc(k.turejoRodyti) + '</div>' : '')
       + (k.istorija && k.istorija.length > 1
           ? '<div class="ad-kelias">' + k.istorija.map(function (x) { return esc(x.busena); }).join(' → ') + '</div>' : '')
-      + (k.foto ? '<img class="ad-foto" src="/admin/klaidos/' + k.nr + '/foto" alt="" loading="lazy">' : '')
+      + (k.foto ? '<img class="ad-foto" data-foto="' + k.nr + '" alt="" style="cursor:zoom-in">' : '')
       + ((dg.veiksmai || []).length
           ? '<details open><summary>Ką spaudė prieš tai (' + dg.veiksmai.length + ')</summary><pre class="ad-pre">'
             + dg.veiksmai.map(function (v) { return esc((v.tekstas || '—') + '   ' + (v.elementas || '')); }).join(String.fromCharCode(10))
@@ -524,6 +525,28 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
     } catch (e) {}
     zinia(nr, 'Naršyklė neleidžia kopijuoti — naudokite „Viskas tekstu".');
   };
+
+  // Nuotraukos negalima paduoti per <img src> - marsrutas reikalauja antrastes,
+  // o <img> jos nesiuncia (patikrinta produkcijoje: 401). Todel paimam su
+  // antraste ir paduodam kaip blob. Rakto i adresa nededam niekada.
+  var _fotoUrl = {};
+  function uzkrautiFoto() {
+    document.querySelectorAll('img.ad-foto[data-foto]').forEach(function (img) {
+      var nr = img.getAttribute('data-foto');
+      if (_fotoUrl[nr]) { img.src = _fotoUrl[nr]; pridetiDidinima(img, nr); return; }
+      var antr = {};
+      try { var z = localStorage.getItem('ct_token'); if (z) antr.Authorization = 'Bearer ' + z; } catch (e) {}
+      fetch('/admin/klaidos/' + nr + '/foto', { headers: antr })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.blob(); })
+        .then(function (b) { _fotoUrl[nr] = URL.createObjectURL(b); img.src = _fotoUrl[nr]; pridetiDidinima(img, nr); })
+        .catch(function (e) { img.replaceWith(Object.assign(document.createElement('div'),
+          { className: 'ad-meta', textContent: 'Nuotraukos nepavyko uzkrauti (' + e.message + ')' })); });
+    });
+  }
+  function pridetiDidinima(img, nr) {
+    img.onclick = function (e) { e.stopPropagation(); window.open(_fotoUrl[nr], '_blank'); };
+    img.title = 'Paspauskite, kad atidarytumete atskirame lange';
+  }
 
   window.adIsskleisti = function (nr) { _isskleista = (_isskleista === nr ? null : nr); piestiKlaidas(); };
   window.adVisi = function (v) { _visi = v; _isskleista = null; piestiKlaidas(); };

@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.61.0', data: '2026-09-18', pavadinimas: 'Nuotrauką galima pamatyti',
+    pakeitimai: [
+      'Pridėtą nuotrauką galima atidaryti per visą ekraną, o antru paspaudimu – tikru dydžiu',
+      'Esc uždaro tik peržiūrą – surašytas tekstas ir nuotrauka lieka',
+      'ISTAISYTA: administravime nuotraukos visai nebuvo matomos (grąžindavo 401) – dabar rodomos ir atidaromos atskirai',
+    ],
+  },
+  {
     versija: '1.60.0', data: '2026-09-18', pavadinimas: 'Klaidų pranešimai pagaliau išsaugomi',
     pakeitimai: [
       'ISTAISYTA: klaidų pranešimai niekada nebuvo įrašomi į diską ir dingdavo per kiekvieną atnaujinimą',
