@@ -30,6 +30,9 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 
 /* Isskleista eilute - viena celė per visa plotį */
 .ad-detales { background: var(--bg-elevated); }
+/* .chip gyvena ct-dizainas.css, kuris krauna VELIAU uz si <style>. Prie tos
+   pacios specifikos jis nugalėtų, todel `.chip.ad-sena` - (0,2,0) vs (0,1,0). */
+.chip.ad-sena { border-color: var(--warning-border); color: var(--warning); }
 .ad-irankiai { display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: center; margin: 12px 0 4px; }
 .ad-irankiu-zinia { font: var(--fw-regular) 11.5px/1.5 var(--font-mono); color: var(--text-muted); }
 .ad-pre { margin: 0; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-surface); font: var(--fw-regular) 11.5px/1.6 var(--font-mono); color: var(--text-secondary); white-space: pre-wrap; word-break: break-word; }
@@ -163,7 +166,10 @@ BODY = u'''
       e.push('TEKSTAS: ' + k.tekstas);
       if (k.turejoRodyti) e.push('TUREJO RODYTI: ' + k.turejoRodyti);
       e.push('');
+      var dbr = dabartineVersija();
+      var senesne = g.versija && dbr && versijaSkaicium(g.versija) < versijaSkaicium(dbr);
       e.push('PUSLAPIS: ' + (g.puslapis || '?') + '  v' + (g.versija || '?')
+        + (senesne ? '  [PRANESTA v' + g.versija + ', DABAR v' + dbr + ' - galejo buti istaisyta]' : '')
         + '  ' + (ek.plotis || '?') + 'x' + (ek.aukstis || '?') + '@' + (ek.tankis || '?')
         + '  planas=' + ((g.planas || {}).planas || '?')
         + '  kreditai=' + ((g.planas || {}).kreditai == null ? '?' : g.planas.kreditai)
@@ -242,7 +248,7 @@ BODY = u'''
 
       h += '<div class="ct-table-w"><table class="ct-table is-dense"><thead><tr>'
         + '<th class="is-num">NR.</th><th>KATEGORIJA</th><th>KLAIDA</th>'
-        + '<th class="is-time">KADA</th><th>B\u016aSENA</th><th class="is-act"></th>'
+        + '<th class="is-time">KADA</th><th>VERSIJA</th><th>B\u016aSENA</th><th class="is-act"></th>'
         + '</tr></thead><tbody>'
         + d.irasai.map(eilute).join('')
         + '</tbody></table></div>';
@@ -264,6 +270,7 @@ BODY = u'''
       +   (k.kartojasi ? ' <span class="chip">kartojasi</span>' : '') + '</td>'
       + '<td class="is-text"><span class="ct-clamp">' + esc(k.tekstas) + '</span></td>'
       + '<td class="is-time">' + laikas(k.laikas) + '</td>'
+      + '<td class="is-time">' + versijosZyme(k) + '</td>'
       + '<td>' + busenosZenklas(k.busena) + '</td>'
       + '<td class="is-act">'
       +   '<button class="ct-btn ct-btn-quiet ct-btn-icon ct-btn-sm is-destructive" title="I\u0161trinti visi\u0161kai"'
@@ -272,7 +279,7 @@ BODY = u'''
     if (_isskleista !== k.nr) return eil;
 
     var ek = dg.ekranas || {};
-    return eil + '<tr class="ad-detales"><td colspan="6">'
+    return eil + '<tr class="ad-detales"><td colspan="7">'
       + '<div class="ad-meta ad-kelias">' + esc(k.kas || 'neprisijung\u0119s')
       +   (dg.puslapis ? ' \u00B7 ' + esc(dg.puslapis) : '')
       +   (dg.versija ? ' \u00B7 v' + esc(dg.versija) : '')
@@ -306,6 +313,26 @@ BODY = u'''
               + '" onclick="event.stopPropagation();adBusena(' + k.nr + ', &quot;' + b.k + '&quot;)">' + b.t + '</button>';
           }).join('')
       + '</div></td></tr>';
+  }
+
+  // v1.65.0: prie kiekvieno pranesimo - versija, KURIOJE jis parasytas, ir ar ji
+  // senesne uz dabartine. Pranesimas is v1.60.0, kai jau v1.65.0, gali buti jau
+  // istaisytas - tai matyti is karto, o ne po atkurimo bandymo.
+  function dabartineVersija() {
+    try { return (window.CT_VERSIJOS && window.CT_VERSIJOS[0] && window.CT_VERSIJOS[0].versija) || null; }
+    catch (e) { return null; }
+  }
+  function versijaSkaicium(v) {
+    return String(v || '').split('.').map(function (x) { return parseInt(x, 10) || 0; })
+      .reduce(function (a, x) { return a * 1000 + x; }, 0);
+  }
+  function versijosZyme(k) {
+    var v = ((k.diagnostika || {}).versija) || null;
+    if (!v) return '<span class="ad-meta">?</span>';
+    var dbr = dabartineVersija();
+    var sena = dbr && versijaSkaicium(v) < versijaSkaicium(dbr);
+    return '<span class="chip' + (sena ? ' ad-sena' : '') + '">v' + esc(v)
+      + (sena ? ' \u2192 v' + esc(dbr) : '') + '</span>';
   }
 
   function pagalNr(nr) { return (_irasai || []).filter(function (x) { return x.nr === nr; })[0]; }

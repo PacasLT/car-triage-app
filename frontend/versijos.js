@@ -8,6 +8,16 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.65.0', data: '2026-09-18', pavadinimas: 'Antraštė telefone nebesusispaudžia',
+    pakeitimai: [
+      'ISTAISYTA: po praeito atnaujinimo pagrindinė nuotrauka iškrito iš vietos ir dešinėje liko juodas plotas',
+      'Antraštės mygtukai telefone padidinti iki 44 px – anksčiau buvo 32 px ir sunkiai pataikomi',
+      'Meniu juosta pašalinta: nuorodos jau gyvena kitur, o tuščia juosta tik spaudė mygtukus',
+      'Klaidų sąraše prie kiekvieno pranešimo matosi versija, kurioje jis parašytas',
+      'Jei pranešimas senesnis už dabartinę versiją – tai pažymima, nes galėjo būti jau ištaisyta',
+    ],
+  },
+  {
     versija: '1.64.0', data: '2026-09-18', pavadinimas: 'Išplėtus nebesikartoja tas pats',
     pakeitimai: [
       'ISTAISYTA: paspaudus „Daugiau" apačioje pasirodydavo tie patys ženkliukai, kurie jau matomi viršuje',

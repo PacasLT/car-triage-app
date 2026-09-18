@@ -740,8 +740,15 @@
   margin-top: -96px;
 }
 .ct3-hero-photo {
-  /* v1.63.0: aukstis, dydis ir kadravimo taskas dabar 26 sk. - kiekvienam
-     plociui atskirai. Cia lieka tik pati nuotrauka. */
+  /* v1.64.1 KLAIDA (pranesimai Nr.7, Nr.8): diegdamas 26 sk. istryniau visa
+     bloka, nors dizaineris prase istrinti TIK height / background-size /
+     background-position. Kartu isejo `position: absolute` su top/left/right,
+     ir nuotraukos juosta is po turinio sluoksnio persikele i eiles srauta:
+     `position` tapo `static`, hero isaugo 620 -> 1200 px, o desineje liko
+     juodas plotas. Kadravimas priklauso dizaineriui, isdestymas - mums.
+     Pamatuota: tel 366x180, web 1400x600, bet pozicija buvo `static`. */
+  position: absolute; top: 0; left: 0; right: 0;
+  overflow: hidden;
   background-image: url('../assets/hero-car.png');
 }
 .ct3-hero-photo-placeholder { display: none; }
@@ -982,6 +989,11 @@
   .ct3-stats-inner { gap: 16px; flex-wrap: wrap; padding: 14px 16px; }
   .ct3-stat-div { display: none; }
   .ct3-stats-driven { margin-left: 0; border-left: none; padding-left: 0; }
+}
+/* v1.65.0: lieciami taikiniai 44 px visame telefono ruoze, ne tik iki 400 px.
+   Iki siol 401-640 px (pvz. 430 px iPhone) mygtukai likdavo 32-36 px. */
+@media (max-width: 640px) {
+  .ct-meg-btn, .ct3-avatar, .ct3-avatar-btn { width: 44px !important; height: 44px !important; }
 }
 @media (max-width: 480px) {
   .ct3-fields { grid-template-columns: 1fr 1fr; }
@@ -1368,19 +1380,22 @@
   .ct3-logo-icon { width: 32px !important; height: 32px !important; }
   .ct3-logo-text > span { font-size: 19px !important; }
   .ct3-header-right { gap: 6px !important; }
-  .ct3-premium-btn#ct-planas-btn { padding: 0 8px !important; height: 32px; font-size: 11px; gap: 5px !important; }
+  /* v1.65.0 (pranesimas Nr.4): 32 px telefone yra zemiau lieciamo taikinio
+     minimumo - dizainerio taisykle sako 44 px. Butent del to antraste atrodo
+     susispaudusi, ir vartotojas tai apraso kaip „nesimato meniu juostos". */
+  .ct3-premium-btn#ct-planas-btn { padding: 0 10px !important; height: 44px; font-size: 11px; gap: 5px !important; }
   #ct-planas-btn .ct-pl-kr { padding: 2px 5px; font-size: 10px; }
 }
 @media (max-width: 400px) {
   .ct3-header-inner { padding: 10px 10px !important; gap: 4px; }
   .ct3-logo-text > span { font-size: 17px !important; }
   .ct-ver-btn { margin-left: 4px !important; padding: 0 4px !important; font-size: 8px !important; }
-  .ct3-premium-btn#ct-planas-btn { padding: 0 6px !important; font-size: 10px; }
+  .ct3-premium-btn#ct-planas-btn { padding: 0 8px !important; font-size: 10px; height: 44px; }
   .ct3-header-right { gap: 4px !important; }
-  .ct-meg-btn, .ct3-avatar { width: 32px !important; height: 32px !important; }
+  .ct-meg-btn, .ct3-avatar { width: 44px !important; height: 44px !important; }
   .ct3-logo-text small { display: none; }
   .ct3-premium-btn { display: none !important; }
-  .ct3-avatar { width: 36px; height: 36px; }
+  .ct3-avatar { width: 44px; height: 44px; }
 
   /* Hero */
   .ct3-hero { min-height: 340px !important; margin-top: 0 !important; }
@@ -2399,11 +2414,7 @@
     <button class="ct-ver-btn ct-btn ct-btn-quiet" id="app-version" type="button" onclick="ctVersijuModalas()" title="Versijų istorija"></button>
     <!-- v1.23.1: virsutine juosta be nuorodu - paieska pasiekiama per logotipa,
          visa kita (ataskaitos, palyginimai, istorija, megstamiausi) paskyros meniu -->
-    <nav class="ct3-nav">
-      <a class="ct3-nav-link active" href="index.html">Paieška</a>
-      <a class="ct3-nav-link" href="compare.html">Palyginimas</a>
-      <a class="ct3-nav-link" href="ataskaitos.html">Ataskaitos</a>
-    </nav>
+    <nav class="ct3-nav"></nav>
     <div class="ct3-header-right">
       <button class="ct3-premium-btn ct-btn ct-btn-sm ct-btn-accent" id="ct-planas-btn" onclick="ctPlanuModalas()" title="Planas ir kreditai">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V10l6-8 6 8v10"/></svg>
@@ -6693,7 +6704,10 @@ function ctNavTab(tab) {
 #ct-planas-btn .ct-pl-kr.maza { background: var(--warning-dim); color: var(--warning); border-color: var(--warning-border); }
 #ct-planas-btn .ct-pl-kr.nulis { background: var(--danger-dim); color: var(--danger); border-color: var(--danger-border); }
 @media (max-width: 900px) {
-  .ct3-premium-btn#ct-planas-btn { display: inline-flex !important; padding: 0 10px !important; height: 34px; font-size: 12px; }
+  /* v1.65.0: cia buvo `height: 34px`, ir si eilute nugalejo 1381 eil. 44 px,
+     nes ta pati specifika, o si faile YRA VELIAU. Ta pati klaida, kaip su
+     `.ct-table` ir `.ct-kv` - taisykle dviejose vietose. */
+  .ct3-premium-btn#ct-planas-btn { display: inline-flex !important; padding: 0 10px !important; height: 44px; font-size: 12px; }
   #ct-planas-btn > svg { display: none; }
 }
 
