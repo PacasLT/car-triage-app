@@ -267,7 +267,7 @@ Grandinė `fetchSearchPage`: **talpykla → ScraperAPI → tiesioginis axios →
 ## Administravimo puslapis (v1.53.0, lentelės v1.54.0)
 
 - `frontend/admin.html` – trys skiltys: **Klaidos**, **Matavimai** (`/admin/atsarga`), **Vartotojai**. Atidaromas tiesiogiai adresu, antraštėje nuorodos nėra sąmoningai.
-- **Generuojamas, ne rašomas ranka:** `dizaino-juodrasciai/mk-admin.py` paima sprite’ą ir antraštę iš `ataskaitos.html` ir įdeda į šabloną. Taip piktogramos ir antraštė lieka TIE PATYS, o ne kopija, kuri nudreifuos. Pakeitus – paleisti iš naujo iš `frontend/`.
+- **Generuojamas, ne rašomas ranka:** `tools/mk-admin.py` paima sprite’ą ir antraštę iš `ataskaitos.html` ir įdeda į šabloną. Taip piktogramos ir antraštė lieka TIE PATYS, o ne kopija, kuri nudreifuos. Pakeitus – paleisti iš naujo iš `frontend/`.
 - **Nieko naujo dizaine:** `.ct-tab`, `.ct-flag[role=radio]`, `.ct-btn`, `.ct-k`, `.chip`. Savas CSS tik išdėstymui (`.ad-*`).
 - **Būsena perjungiama paspaudimu** – `.ct-flag` eilė po kiekvienu įrašu; `laukia-patikros` įrašas gauna akcento foną ir keliamas į viršų.
 - **Trynimas klausia** (`confirm`) ir stovi dešiniajame viršuje, ne veiksmų eilėje – ta pati taisyklė kaip ataskaitose.
@@ -277,7 +277,7 @@ Grandinė `fetchSearchPage`: **talpykla → ScraperAPI → tiesioginis axios →
 - **Trys tuščios būsenos, ne viena:** `is-never` (dar nieko nebuvo – paaiškina, kaip atsiras), `is-good` (nėra ką taisyti – žalias ženklas), `is-filtered` (yra, bet paslėpta filtro – su mygtuku „Rodyti visas"). Viena bendra „Nieko nerasta" meluoja dviem atvejais iš trijų.
 - **`display` ant `<td>` išima langelį iš lentelės (v1.54.0):** 22 sk. `.ct-table .is-text` uždėjo `display: -webkit-box` pačiam langeliui – jis nustojo tempti iki eilutės aukščio ir apatinis rėmelis nusipiešė 12 px aukščiau už kaimynų (matuota: apačios 467/467/**455**/467/467/467). Apkarpymas priklauso VIDINIAM `<span class="ct-clamp">`; perkėlus – 0 px. Atsvara `ct-priedai.css` 6 bloke.
 - **`.ct-table` vardas dubliuojasi:** `index.html` ir `compare.html` jau turi savo vietinį `.ct-table` – tai NE lentelė, o `<div>` raktas/reikšmė sąrašas. Šiandien nekenkia (iš 22 sk. jiems taikosi tik `width:100%` ir `font-size`, abu inertiški), bet pridėjus `.is-time` ar `display:table` į bet kurią pusę – lūš. Tikrinta: tų klasių ten nėra nė vienos.
-- **Generatoriaus spąstai:** `mk-admin.py` šablonas yra Python trigubų kabučių eilutė, todėl JS viduje **negalima** nei `\n`, nei `\'` – abu virsta tikru simboliu ir sulaužo JS. Vietoj jų: `String.fromCharCode(10)` ir `&quot;` HTML esybė atributuose. Abi klaidos jau buvo padarytos – po kiekvieno generavimo `node --check` ištrauktam `<script>`.
+- **Generatoriaus spąstai:** `tools/mk-admin.py` šablonas yra Python trigubų kabučių eilutė, todėl JS viduje **negalima** nei `\n`, nei `\'` – abu virsta tikru simboliu ir sulaužo JS. Vietoj jų: `String.fromCharCode(10)` ir `&quot;` HTML esybė atributuose. Abi klaidos jau buvo padarytos – po kiekvieno generavimo `node --check` ištrauktam `<script>`.
 
 ## Klaidų pranešimai (v1.49.0)
 
@@ -330,10 +330,34 @@ Grandinė `fetchSearchPage`: **talpykla → ScraperAPI → tiesioginis axios →
 
 - Prieš rašant į įrenginį – Playwright regresija (web 1400 px ir tel 390 px), 0 JS klaidų.
 - Į įrenginį rašoma per naują `/mnt/user-data/outputs/vN/` kelią, po įrašymo tikrinamas md5.
-- `git status` tik su `--no-optional-locks` (kitaip lieka `.git/index.lock`).
+- **Jokios `git` komandos iš `device_bash`** – ji sukuria `.git/index.lock`, kurio tas pats apvalkalas negali ištrinti. `git` vykdo TIK Lukas PowerShell'e, atskiromis eilutėmis (`&&` neveikia).
+- `git push origin main` vykdo **tik Lukas**. Claude niekada nepushina.
 - Serveryje niekada nekviesti mokamų maršrutų (analyze, vin, seller, compare) testavimui – tik GET.
+
+## Bendras kanalas su dizaineriu (v1.54.0)
+
+Dviejų Claude sesijų susirašinėjimas gyvena `pasikeitimai/`, ne pokalbyje.
+Lukas nieko neperrašinėja ir nesiunčia failų – kiekvienas skaito iš ten, kur kitas baigė.
+
+- **Pirmas veiksmas kiekvienoje sesijoje:** `pasikeitimai/BUSENA.md` (kieno ėjimas), tada `pasikeitimai/ZURNALAS.md` nuo paskutinio savo įrašo.
+- `TAISYKLES.md` – protokolas. `DIZAINERIUI.md` – dizainerio pradžios puslapis: kurie failai jo, kurie ne, kur atkeliauja jo paketai (`is-dizainerio/`), kaip dingsta atsvaros.
+- `ZURNALAS.md` **tik pildomas į galą**. Klausimas `K-nn`, atsakymas `A-nn`, būsenos tik trys: `LAUKIA ATSAKYMO`, `UŽDARYTA`, `ATIDĖTA`.
+- `matavimai/` – ekranvaizdžiai ir skaičiai, į kuriuos rodo žurnalo įrašai.
+- Nebeklausti Luko „ką perduoti dizaineriui?" – **įrašas žurnale ir yra perdavimas.**
+
+## Dizaino sprendimas klausiamas IŠKART (v1.54.0)
+
+Jei pakeitimas reikalauja dizaino sprendimo – naujos spalvos, naujo vardo, naujo komponento, pasirinkimo tarp dviejų išvaizdų – nespėliojam ir neatidedam. Tą pačią akimirką:
+
+1. **Klausimas `K-nn` žurnale** – vienas sakinys, į kurį galima atsakyti taip/ne arba vienu vardu.
+2. **Matavimas arba ekranvaizdis** į `pasikeitimai/matavimai/` – dizaineris turi gauti įrodymą, ne prašymą „pažiūrėk".
+3. **Jei darbas negali sustoti** – laikina atsvara `ct-priedai.css` su `ATŠAUKIMAS: ištrinti, kai dizaineris perims`, ir tai pasakoma žurnale. Atsvara niekada nekeliauja į dizainerio failus.
+
+Klausimas paruošiamas KARTU su darbu, ne po jo. Taip dizaineris niekada nelaukia, kol kas nors prisimins paklausti.
 
 ## Struktūra
 
 - `backend/server.js` – Express API, scraping, AI; `planai.js` – planai/kreditai; `vartotojo-duomenys.js` – mėgstamiausi/ataskaitos; `auth.js` – JWT; `cache.js` – podėlis.
-- `frontend/index.html` – pagrindinis (monolitas); `detail.html`, `compare.html`, `megstamiausi.html`, `ataskaitos.html`; bendri `ct-bendras.css/js`, `versijos.js` (versijų istorija), `megstami-meniu.js` (širdutė antraštėje su mėgstamiausių sąrašu), `paskyra-meniu.js` (paskyros meniu po profilio mygtuku).
+- `pasikeitimai/` – bendras kanalas su dizaineriu: `BUSENA.md`, `ZURNALAS.md`, `TAISYKLES.md`, `DIZAINERIUI.md`, `matavimai/`, `is-dizainerio/`.
+- `tools/mk-admin.py` – generuoja `frontend/admin.html`. Paleidžiama iš `frontend/`.
+- `frontend/index.html` – pagrindinis (monolitas); `detail.html`, `compare.html`, `megstamiausi.html`, `ataskaitos.html`; bendri `ct-bendras.css/js`, `versijos.js` (versijų istorija), `megstami-meniu.js` (širdutė antraštėje su mėgstamiausių sąrašu), `paskyra-meniu.js` (paskyros meniu po profilio mygtuku), `klaidu-pranesimas.js` (klaidų pranešimo mygtukas), `admin.html` (generuojamas).

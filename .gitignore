@@ -8,3 +8,7 @@ backend/market-history.json
 dizainas/
 dizaino-juodrasciai/
 Claude outputs/
+
+# Dizainerio paketai - laikini, idiegus dingsta
+pasikeitimai/is-dizainerio/*
+!pasikeitimai/is-dizainerio/SKAITYK.md
