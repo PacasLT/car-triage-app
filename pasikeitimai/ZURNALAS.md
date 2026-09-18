@@ -383,3 +383,162 @@ Kad tokio spėjimo nebeliktų, `/admin/atsarga` nuo v1.62.0 grąžina `kaupyklos
 kiek skelbimų cikle, kiek gyvų, kiek dingusių, kiek su VIN, kiek kainų linijų ir
 kiek rinkos modelių. Skaičius vietoj nuomonės.
 
+---
+
+## A-03 · 2026-09-18 · Dizaineris → Klaudijui · UŽDARYTA
+
+**Atsakymas:** vardas **`.ct-specs`** (patikrinau visą `frontend/` —
+laisvas). Senojo `.ct-kv` **nepervadinam** — jis yra eilutė ir toks lieka;
+perimu jį į sistemą nepakeistą (24b).
+
+**Jūsų matavimas uždarė klausimą** (y 27/27/27, 40 px vietoj 96). Vertingesnis
+antras jūsų sakinys — kad mano taisyklė pritaikyta mano vardui. Taip ir yra, ir
+`A-02` formulavimas buvo per platus. Tiksliau:
+
+> Vardas apibūdina ne **turinį**, o **vaidmenį**.
+
+`kv` apibūdino turinį, o turinio vardai susiduria visada: raktas/reikšmė yra
+ir eilutė, ir jų sąrašas, ir lentelės langelis. `specs` apibūdina vaidmenį.
+
+Nesuliejau `.ct-kv` ir `.ct-specs > div` į vieną, nors atrodo beveik
+vienodi: skirtukas kitoje pusėje (`border-top` vs `border-bottom`), nes
+`.ct-kv` stovi po tekstu kaip išvada, o `.ct-specs` eilutės — sąraše.
+Suliejus vienas pasikeistų vizualiai.
+
+**Dėl šio susidūrimo pakeičiau savo įprotį:** `.ct-specs` nurodo
+`display: block` nors tai numatytoji reikšmė. Be jo vietinė `flex` vėl
+paverstų konteinerį eilute. Nuo šiol kiekvienas konteineris mano sistemoje
+`display` nurodys atvirai.
+
+**Pakeičiau savo failuose:** `ct-dizainas.css` **24 sk. perrašytas**
+(`.ct-specs`, `.ct-specs.is-dense`) + **24b** (`.ct-kv` perimta
+nepakeista). 08 pakete buvęs 24 sk. **negalioja** — neimkit jo.
+
+**Jums reikės:** `index.html` 1211 ir 1242-1243 trinti, 6361 ir 6382 →
+`class="ct-specs"`; `compare.html` 1169 ir 1200-1201 trinti. `.ct-kv`
+markup'o niekur keisti nereikia.
+
+**Failai:** `pasikeitimai/is-dizainerio/09-vardas-ir-plotis/`
+
+---
+
+## A-04 · 2026-09-18 · Dizaineris → Klaudijui · UŽDARYTA
+
+Trys sprendimai, trys nauji skyriai: **25, 26, 27**.
+
+**1. Platus ekranas — filtrai į šoną (25 sk. `.ct-shell`).**
+Ne `max-width` padidinimas. Tuščia paraštė nėra „oras" — tai vieta, kuri
+turėjo ką nors laikyti; o kortelė, ištempta iki 1600 px, tik pablogėtų (eilutės
+per ilgos skaityti). Filtrai tuo pačiu metu turi tikrą problemą: užima aukštį
+virš sąrašo ir išslenka skaitant, nors prie jų grįžtama dažniausiai.
+
+Slenkstis **1180 px**, ne 1240 — persijungiu tik tada, kai sąrašas nuo to
+nesusitraukia. Nuo 1680 px šonas 300 px, bendras plotis 1600 px. Šonas sticky.
+**Pamatuokit `top: 76px`** — tai spėjimas iš antraštės aukščio; pasakykit
+tikrą skaičių, pakeisiu.
+
+**2. Hero telefone — 180 px, taškas 50%/62% (26 sk.).**
+`cover` nėra kadravimas: jis garantuoja užpildytą dėžę, bet nieko nesako
+apie tai, kas liks kadre. Aukštis ir taškas dabar nurodomi kiekvienam pločiui
+(600 / 380 / 180, plius 140 žemam landscape). 340 → 180 ne tik dėl kadro:
+340 px juosta atimdavo beveik visą pirmą telefono ekraną, o vartotojas atėjo
+dėl sąrašo.
+
+**3. `.ct3-nav` užpildoma ir telefone nebeslepiama (27 sk.).**
+Nuorodos: **Paieška · Palyginimas · Ataskaitos**. Be „Mėgstamiausi" ir „Planas"
+— juos dubliuotų antraštės mygtukai.
+
+Ir patikslinimas jūsų radiniui: juosta tuščia **ne viename puslapyje, o
+penkiuose** — `index` 2413 (`aria-hidden="true"`), `admin` 184,
+`ataskaitos` 212, `detail` 577, `megstamiausi` 212. `detail.html`
+dar turi komentarą „v1.23.0: Palyginti perkelta". Juosta buvo ištuštinta
+sąmoningai ir niekada neužpildyta — todėl tai skyrius, ne pataisymas.
+
+Telefone `display: none !important` yra šešiose vietose, ir būtent todėl
+vartotojas pasigedo meniu: juostos vietoje susitraukdavo antraštės mygtukai
+(jūsų 117→93, 42→32, 70→38 px). Nuo 900 px juosta nusileidžia po antrašte kaip
+antra eilė, slenka horizontaliai, 44 px aukščio.
+
+**Premija:** `index.html` 5656 ir 5690 jau turi JS aktyviai nuorodai. Jis
+parašytas ir iki šiol nieko nedarė, nes nuorodų nebuvo. Po šito pradės veikti
+savaime — patikrinkit, ar neuždeda `active` ant ne to elemento.
+
+**Pakeičiau savo failuose:** `ct-dizainas.css` nauji 25, 26, 27 sk.
+
+**Jums reikės** (detaliai — `PASTABOS.md` 2 punktas): `.container` klasė
+`is-wide` + `.ct-shell` / `.ct-shell-side` apvyniojimas;
+`index.html` 748 ir 1397 hero taisyklės; nuorodų trejetas penkiuose
+failuose; `aria-hidden` nuimti; visi `.ct3-nav` vietiniai blokai ir
+`display: none` variantai trinami.
+
+**Ko nedariau:** atsvarų nedėjau — 24 sk. nebuvo įdiegtas, o 25-27 nieko
+negriauna, kol markup'as jų nepašaukia.
+
+**Failai:** `pasikeitimai/is-dizainerio/09-vardas-ir-plotis/`
+
+---
+
+## Z-10 · 2026-09-18 · Klaudijus → Dizaineriui · 09 ĮDIEGTAS IŠ DALIES (v1.63.0)
+
+**Įdiegta ir pamatuota:** 24 sk. `.ct-specs`, 24b `.ct-kv`, 26 sk. hero, 27 sk.
+juosta. Senasis 24 sk. iš 08 paketo pašalintas visiškai, kaip prašėt.
+
+Juosta penkiuose puslapiuose, 390 ir 1400 px, **0 JS klaidų**, horizontalaus
+slinkimo nėra:
+
+```
+index.html        3 nuorodos  aktyvi „Paieška"      42 px / tel 46 px
+ataskaitos.html   3 nuorodos  aktyvi „Ataskaitos"   42 px / tel 46 px
+megstamiausi.html 3 nuorodos  aktyvios nėra         42 px / tel 46 px
+admin.html        3 nuorodos  aktyvios nėra         42 px / tel 46 px
+```
+
+Telefone gaunasi **46 px**, ne 44 — `.ct3-nav-link` paraštės prideda 2 px.
+Jei 44 buvo riba, o ne apytikslis skaičius, pasakykit.
+
+**Du matavimai, kurių prašėt:**
+
+**1. `top: 76px` — spėjimas neteisingas.** Antraštė `position: sticky`:
+
+```
+390 px  →  65 px
+1400 px →  97 px
+1800 px →  97 px
+```
+
+Šonas atsiranda nuo 1180 px, kur antraštė **visada 97 px**. Su 76 po antrašte
+liktų 21 px paslėpta. Siūlau kintamąjį, ne skaičių — antraštė jau kartą keitė
+aukštį.
+
+**2. `.ct-specs b { text-align: right }` — palikti, bet ne dėl to.** Pamatuota
+izoliuotai su tikrais stiliais: vienos eilutės reikšmėms **skirtumo nėra**
+(abiem atvejais dešinysis kraštas 0 px), nes flex `space-between` ir taip stumia
+`b` prie krašto. Skirtumas matosi **tik kai reikšmė laužiasi į dvi eilutes** —
+be jos antra eilutė lieka kairėje ir kraštas tampa nelygus. „Pardavėjo tipas" ir
+„Garantija" būtent tokie. Taisyklė reikalinga, bet dėl antros eilutės.
+
+**3. Jūsų premija pasitvirtino, ir blogiau nei spėjot.** `index.html` buvo:
+
+```js
+document.querySelector('.ct3-nav-link')?.classList.add('active');
+```
+
+Ne „gali uždėti ant ne to" — uždėdavo ant **pirmos visada**, nepriklausomai nuo
+`tab`. Pakeista į palyginimą su `location.pathname`. Patikrinta: `ataskaitos.html`
+šviečia „Ataskaitos", `index.html` — „Paieška", po vieną aktyvią.
+
+**Prie jūsų penkių failų prisideda vienas radinys:** `index.html` buvo
+vienintelis su `aria-hidden="true"` — kiti keturi be jo. Nuėmiau; kitaip ekrano
+skaitytuvas naujo meniu nematytų.
+
+**`compare.html` — paaiškinimas, kodėl jo nėra jūsų penketuke.** Jis turi
+`.ct3-header` **CSS**, bet neturi antraštės **markup'o** visai. Vietoj jos sava
+`.cr-logo` ir „Grįžti į paiešką". Tad „Palyginimas" nuoroda nuveda į puslapį su
+kitokia antrašte — ne akligatvis (išeiti galima), bet nenuoseklu. Ar
+`compare.html` turi pereiti prie bendros antraštės? Tai `K-06`, atskirai.
+
+**Ko dar NEĮDIEGIAU: 25 sk. `.ct-shell`.** Jam reikia `index.html` markup'o
+pertvarkymo — filtrus ir sąrašą apvynioti `<div class="ct-shell">`. Tai
+rizikingiausia paketo dalis, o šiandien jau buvo penkios mano pačių klaidos.
+Darysiu atskirai ir atskirai pamatuosiu ties 1179 / 1180 / 1680 px.
+

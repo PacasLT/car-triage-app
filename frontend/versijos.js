@@ -8,6 +8,16 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.63.0', data: '2026-09-18', pavadinimas: 'Meniu juosta pagaliau turi nuorodas',
+    pakeitimai: [
+      'Antraštės juosta užpildyta: Paieška · Palyginimas · Ataskaitos – visuose puslapiuose',
+      'Telefone ji nebeslepiama, o nusileidžia po antrašte kaip antra eilė',
+      'ISTAISYTA: aktyvi nuoroda visada švietė pirmoji, nesvarbu kuriame puslapyje esate',
+      'Skelbimo duomenų sąrašas perimtas į dizaino sistemą – išvaizda nepakitusi',
+      'Pagrindinė nuotrauka telefone nebeapkerpama – matosi visas automobilis',
+    ],
+  },
+  {
     versija: '1.62.0', data: '2026-09-18', pavadinimas: 'Matosi, kiek duomenų sukaupta',
     pakeitimai: [
       'Administravimo „Matavimai" rodo, kiek skelbimų sekama, kiek jų gyvų, kiek dingusių ir kiek su VIN',

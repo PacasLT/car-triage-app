@@ -715,13 +715,9 @@
 .ct3-logo-text > span { font-size: 28px; font-weight: 400; color: var(--text-primary); letter-spacing: -.01em; line-height: 1; }
 .ct3-logo-text > span b { font-weight: 700; color: var(--accent-light); }
 .ct3-logo-text small { font: 600 9px/1 var(--font-mono); letter-spacing: .15em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
-.ct3-nav { display: flex; gap: 4px; margin-left: 56px; flex: 1; }
-.ct3-nav-link {
   padding: 10px 20px; border-radius: 8px; font-size: 15px; font-weight: 500;
   color: var(--text-secondary); text-decoration: none; transition: color .15s, background .15s;
 }
-.ct3-nav-link:hover { color: var(--text-primary); background: rgba(255,255,255,.05); }
-.ct3-nav-link.active { color: var(--text-primary); }
 .ct3-premium-btn {
   display: flex; align-items: center; gap: 7px; height: 42px; padding: 0 22px;
   border-radius: 21px; border: 1px solid var(--accent); background: transparent;
@@ -744,9 +740,9 @@
   margin-top: -96px;
 }
 .ct3-hero-photo {
-  position: absolute; top: 0; left: 0; right: 0; height: 600px;
-  background: url('../assets/hero-car.png') 40% 55% / cover no-repeat;
-  overflow: hidden;
+  /* v1.63.0: aukstis, dydis ir kadravimo taskas dabar 26 sk. - kiekvienam
+     plociui atskirai. Cia lieka tik pati nuotrauka. */
+  background-image: url('../assets/hero-car.png');
 }
 .ct3-hero-photo-placeholder { display: none; }
 /* Gradient overlay: dark left, transparent center-right */
@@ -974,7 +970,6 @@
   .ct3-header-inner { padding: 14px 20px; }
   .ct3-logo-icon { width: 38px; height: 38px; }
   .ct3-logo-text > span { font-size: 22px; }
-  .ct3-nav { display: none; }
   .ct3-search-panel { margin: -16px 12px 0; border-radius: 14px; }
   .ct3-stats-bar { margin: 8px 12px 0; border-radius: 0 0 12px 12px; }
   .ct3-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1208,9 +1203,6 @@
 .ct-side ul { margin: 8px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; }
 .ct-side li { position: relative; padding-left: 12px; font-size: 12px; line-height: 1.4; color: var(--text-secondary); }
 .ct-side li::before { content: ""; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: .6; }
-.ct-table > div { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 12.5px; }
-.ct-table > div:last-child { border-bottom: none; } .ct-table span { color: var(--text-muted); } .ct-table b { font-weight: 600; text-align: right; }
-.ct-kv { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-top: 7px; padding-top: 7px; border-top: 1px solid rgba(255,255,255,.06); font-size: 12px; } .ct-kv span { color: var(--text-muted); white-space: nowrap; } .ct-kv b { color: var(--text-primary); font-weight: 600; text-align: right; min-width: 0; word-break: break-word; max-width: 65%; line-height: 1.35; }
 .ct-mini { margin-top: 10px; height: 28px; padding: 0 10px; border-radius: 6px; background: transparent; border: 1px solid var(--border-light); color: var(--text-primary); font-size: 11.5px; font-weight: 600; cursor: pointer; white-space: nowrap; }
 .ct-mini:hover { background: rgba(255,255,255,.06); }
 
@@ -1303,7 +1295,6 @@
   .ct3-header-inner { padding: 14px 20px !important; }
   .ct3-logo-icon { width: 38px !important; height: 38px !important; }
   .ct3-logo-text > span { font-size: 20px !important; }
-  .ct3-nav { display: none !important; }
   .ct3-premium-btn { display: none !important; }
 }
 /* Responsive search panel */
@@ -1388,13 +1379,11 @@
   .ct3-header-right { gap: 4px !important; }
   .ct-meg-btn, .ct3-avatar { width: 32px !important; height: 32px !important; }
   .ct3-logo-text small { display: none; }
-  .ct3-nav { display: none !important; }
   .ct3-premium-btn { display: none !important; }
   .ct3-avatar { width: 36px; height: 36px; }
 
   /* Hero */
   .ct3-hero { min-height: 340px !important; margin-top: 0 !important; }
-  .ct3-hero-photo { height: 340px !important; }
   .ct3-hero-content { min-height: 340px !important; padding: 60px 16px 24px !important; }
   .ct3-hero-title { font-size: 26px !important; margin-bottom: 12px !important; }
   .ct3-hero-sub { font-size: 13px !important; margin-bottom: 16px !important; max-width: 100% !important; }
@@ -2410,7 +2399,11 @@
     <button class="ct-ver-btn ct-btn ct-btn-quiet" id="app-version" type="button" onclick="ctVersijuModalas()" title="Versijų istorija"></button>
     <!-- v1.23.1: virsutine juosta be nuorodu - paieska pasiekiama per logotipa,
          visa kita (ataskaitos, palyginimai, istorija, megstamiausi) paskyros meniu -->
-    <nav class="ct3-nav" aria-hidden="true"></nav>
+    <nav class="ct3-nav">
+      <a class="ct3-nav-link active" href="index.html">Paieška</a>
+      <a class="ct3-nav-link" href="compare.html">Palyginimas</a>
+      <a class="ct3-nav-link" href="ataskaitos.html">Ataskaitos</a>
+    </nav>
     <div class="ct3-header-right">
       <button class="ct3-premium-btn ct-btn ct-btn-sm ct-btn-accent" id="ct-planas-btn" onclick="ctPlanuModalas()" title="Planas ir kreditai">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V10l6-8 6 8v10"/></svg>
@@ -5687,7 +5680,15 @@ function ctNavTab(tab) {
     }
     return;
   }
-  document.querySelector('.ct3-nav-link')?.classList.add('active');
+  // v1.63.0: anksciau cia buvo `querySelector('.ct3-nav-link')` be jokios salygos -
+  // t. y. `active` visada atitekdavo PIRMAI nuorodai, i kuria skilti beeitum.
+  // Iki siol nesimate, nes nuorodu nebuvo visai (27 sk. juosta buvo tuscia).
+  // Dizaineris tai nuspejo atiduodamas 09 paketa; pasitvirtino.
+  var dabartinis = (location.pathname.split('/').pop() || 'index.html');
+  navLinks.forEach(function (l) {
+    var tikslas = (l.getAttribute('href') || '').split('/').pop();
+    if (tikslas === dabartinis) l.classList.add('active');
+  });
 }
 
 // ── On-load: handle ?tab= param (e.g. coming from detail.html) ──
@@ -6358,7 +6359,7 @@ function ctNavTab(tab) {
       <div class="ct-pane" data-pane="tech" style="display:none">
         <div class="ct-cols ct-cols-2" style="margin-bottom:12px">
           <div class="ct-box"><div class="ct-box-h"><span class="ct-box-ic">⚙</span>Techninė specifikacija</div><p>${esc(a.technine_specifikacija || 'Specifikacija nepateikta.')}</p></div>
-          <div class="ct-box"><div class="ct-box-h"><span class="ct-box-ic">▦</span>Skelbimo duomenys</div><div class="ct-table">${specRows.map(([k, v]) => `<div><span>${k}</span><b>${esc(v)}</b></div>`).join('') || '<p class="ct-dash">–</p>'}</div></div>
+          <div class="ct-box"><div class="ct-box-h"><span class="ct-box-ic">▦</span>Skelbimo duomenys</div><div class="ct-specs">${specRows.map(([k, v]) => `<div><span>${k}</span><b>${esc(v)}</b></div>`).join('') || '<p class="ct-dash">–</p>'}</div></div>
         </div>
         <div class="ct-box"><div class="ct-box-h"><span class="ct-box-ic ct-bg-ac">★</span>Pilna įrangos sąrašas</div>${a.irangos_akcentai && a.irangos_akcentai.length ? `<div class="ct-tags">${a.irangos_akcentai.map((x) => `<span>${esc(x)}</span>`).join('')}</div>` : '<p class="ct-dash">Įrangos akcentai nenurodyti.</p>'}</div>
       </div>`;
@@ -6379,7 +6380,7 @@ function ctNavTab(tab) {
         <div class="ct-cols ct-cols-2">
           <div class="ct-box"><div class="ct-box-h"><span class="ct-box-ic">#</span>VIN ir istorija</div>
             ${data.vin ? `<div class="ct-vin"><code>${esc(data.vin)}</code><button class="ct-mini" onclick="lookupVin('${data.vin}', '${vinResultId}', this)">Ieškoti VIN istorijos · 1 kr ↗</button></div><div id="${vinResultId}"></div>` : '<p class="ct-dash">VIN skelbime nenurodytas.</p>'}
-            <div class="ct-table" style="margin-top:12px">${[['Patikrinta istorija', c.turiIstorijosAtaskaita ? 'Taip' : 'Nenurodyta'], ['Garantija', c.garantijosTipas || 'Nenurodyta'], ['Pardavėjo tipas', c.yraVerslas ? 'Verslas / dealeris' : 'Privatus / nenurodyta']].map(([k, v]) => `<div><span>${k}</span><b>${esc(v)}</b></div>`).join('')}</div>
+            <div class="ct-specs" style="margin-top:12px">${[['Patikrinta istorija', c.turiIstorijosAtaskaita ? 'Taip' : 'Nenurodyta'], ['Garantija', c.garantijosTipas || 'Nenurodyta'], ['Pardavėjo tipas', c.yraVerslas ? 'Verslas / dealeris' : 'Privatus / nenurodyta']].map(([k, v]) => `<div><span>${k}</span><b>${esc(v)}</b></div>`).join('')}</div>
           </div>
           <div class="ct-box ${a.nuotrauku_pastebejimai && a.nuotrauku_pastebejimai.length ? 'ct-box-neg' : ''}"><div class="ct-box-h"><span class="ct-box-ic ${a.nuotrauku_pastebejimai && a.nuotrauku_pastebejimai.length ? 'ct-bg-neg' : ''}">◉</span>AI nuotraukų peržiūra</div>${a.nuotrauku_pastebejimai && a.nuotrauku_pastebejimai.length ? list(a.nuotrauku_pastebejimai, 'ct-list-neg') : '<p class="ct-muted">Matomų pažeidimų nuotraukose neaptikta.</p>'}</div>
         </div>

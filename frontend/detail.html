@@ -34,9 +34,6 @@ button{font-family:inherit;cursor:pointer}
 .ct3-logo-text>span{font-size:28px;font-weight:400;color:var(--text-primary);letter-spacing:-.01em;line-height:1}
 .ct3-logo-text>span b{font-weight:700;color:var(--accent-light)}
 .ct3-logo-text small{font:600 9px/1 var(--font-mono);letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim);margin-top:4px}
-.ct3-nav{display:flex;gap:4px;margin-left:56px;flex:1}
-.ct3-nav-link{padding:10px 20px;border-radius:8px;font-size:15px;font-weight:500;color:var(--text-secondary);text-decoration:none;transition:color .15s,background .15s}
-.ct3-nav-link:hover{color:var(--text-primary);background:rgba(255,255,255,.05)}
 .ct3-premium-btn{display:flex;align-items:center;gap:7px;height:42px;padding:0 22px;border-radius:21px;border:1px solid var(--accent);background:transparent;color:var(--accent-light);font:600 15px var(--font);cursor:pointer;transition:background .15s}
 .ct3-premium-btn:hover{background:var(--accent-dim)}
 .ct3-avatar{width:42px;height:42px;border-radius:50%;border:1px solid var(--border-light);background:var(--bg-elevated);color:var(--text-secondary);display:grid;place-items:center;cursor:pointer}
@@ -45,7 +42,6 @@ button{font-family:inherit;cursor:pointer}
   .ct3-header-inner{padding:14px 20px}
   .ct3-logo-icon{width:38px;height:38px}
   .ct3-logo-text>span{font-size:20px}
-  .ct3-nav{display:none}
   .ct3-premium-btn{display:none}
 }
 
@@ -345,7 +341,6 @@ button{font-family:inherit;cursor:pointer}
   .ct3-logo-icon { width: 34px !important; height: 34px !important; }
   .ct3-logo-text > span { font-size: 18px !important; }
   .ct3-logo-text small { display: none; }
-  .ct3-nav { display: none !important; }
   .ct3-premium-btn { display: none !important; }
 
   /* Breadcrumb — palikti tik "Atgal" */
@@ -575,7 +570,9 @@ button{font-family:inherit;cursor:pointer}
     </a>
     <button class="ct-ver-btn ct-btn ct-btn-quiet" id="app-version" type="button" onclick="ctVersijuModalas()" title="Versijų istorija"></button>
     <nav class="ct3-nav">
-      <!-- v1.23.0: „Palyginti" perkelta prie automobilio veiksmu (zemiau) ir i paskyros meniu -->
+      <a class="ct3-nav-link" href="index.html">Paieška</a>
+      <a class="ct3-nav-link" href="compare.html">Palyginimas</a>
+      <a class="ct3-nav-link" href="ataskaitos.html">Ataskaitos</a>
     </nav>
     <div class="ct3-header-right">
       <button class="ct3-premium-btn ct-btn ct-btn-sm ct-btn-accent" id="ct-planas-btn" onclick="location.href='index.html?planas=1'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V10l6-8 6 8v10"/></svg><span id="ct-planas-btn-text">Planas</span></button>

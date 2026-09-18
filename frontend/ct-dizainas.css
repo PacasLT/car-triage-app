@@ -1699,30 +1699,210 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
 
 
 /* ============================================================================
-   24. RAKTAS / REIKSME SARASAS · .ct-kv
+   24. SPECIFIKACIJU SARASAS · .ct-specs   (buvo .ct-kv — zr. A-03)
    ----------------------------------------------------------------------------
-   Vienas principas: vardas apibudina, KAS elementas yra, ne kur jis stovi.
-   `<table>` yra lentele → .ct-table. Raktas/reiksme sarasas nera lentele,
-   net jei atrodo lygiai taip pat → .ct-kv (key/value).
+   Vienas principas, pataisytas po K-03: vardas apibudina ne TURINI, o
+   VAIDMENI puslapyje. "kv" apibudino turini (raktas/reiksme), o turinio
+   vardai visada susiduria — raktas/reiksme yra ir eilute, ir jos sarasas, ir
+   dar penki dalykai. "specs" apibudina vaidmeni: tai skelbimo duomenu sarasas.
 
-   Sis komponentas jau tris kartus gyvena `<style>` blokuose (index.html 1242,
-   compare.html 1200) po vardu `.ct-table`. Butent todel ir atsirado K-02:
-   nepriglobtas komponentas visada pasiima geriausia laisva varda, o geriausi
-   vardai yra bendri. Cia jis perimamas i sistema.
+   Senasis .ct-kv (index.html 1211, compare.html 1169) yra EILUTE ir toks
+   lieka — ji perimu nepakeista, zr. 24b. Cia konteineris, kurio vaikai
+   > div yra eilutes.
 
-   Isvaizda NEKEICIAMA ne vienu taskeliu — 12.5px yra --fs-200, tarpai tie
-   patys. Tai perkelimas, ne perdarymas. */
+   display nurodomas SAMONINGAI, nors block yra numatytasis: tai uzdaras
+   klausimas. Be jo bet kuri vietine display: flex reiksme vel padarytu
+   konteineri eilute — butent taip ir luzo .ct-kv. */
 
-.ct-kv { width: 100%; }
-.ct-kv > div {
+.ct-specs {
+  display: block;
+  width: 100%;
+}
+.ct-specs > div {
   display: flex; justify-content: space-between; gap: var(--s-3);
   padding: 7px 0;
   border-bottom: 1px solid var(--border);
   font-size: var(--fs-200);
 }
-.ct-kv > div:last-child { border-bottom: none; }
-.ct-kv span { color: var(--text-muted); }
-.ct-kv b    { font-weight: var(--fw-semi); text-align: right; }
+.ct-specs > div:last-child { border-bottom: none; }
+.ct-specs span { color: var(--text-muted); }
+.ct-specs b    { font-weight: var(--fw-semi); text-align: right; }
 
 /* Tanki atmaina — ta pati logika kaip .ct-table.is-dense */
-.ct-kv.is-dense > div { padding: 4px 0; }
+.ct-specs.is-dense > div { padding: 4px 0; }
+
+
+/* ── 24b. Viena raktas/reiksme EILUTE · .ct-kv — perimta nepakeista ──────────
+   Sis blokas jau gyvena index.html 1211 ir compare.html 1169 vietose,
+   vienodas abiejose. Perkeliamas i sistema TAIP, KAIP YRA — nei vieno taskelio
+   nekeiciu, nes jis naudojamas gyvose vietose ("Pelno potencialas",
+   index.html 5824-5825).
+
+   Skiriasi nuo .ct-specs > div samoningai: skirtukas VIRSUJE (border-top),
+   nes .ct-kv stovi po tekstu kaip isvada, o .ct-specs eilutes stovi sarase
+   viena po kitos. Todel jie NESULIEJAMI i viena. */
+
+.ct-kv {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: var(--s-2);
+  margin-top: 7px; padding-top: 7px;
+  border-top: 1px solid rgba(255, 255, 255, .06);
+  font-size: 12px;
+}
+
+
+/* ============================================================================
+   25. SARASO MAKETAS · .ct-shell · filtrai i sona, kortele placiau
+   ----------------------------------------------------------------------------
+   Vienas principas: tuscia paraste nera "oras" — tai vieta, kuri turejo ka
+   nors laikyti. 3152 px ekrane nenaudojama 976 px is abieju pusiu, o filtrai
+   tuo paciu metu uzima auksti virs saraso ir slenka is ekrano skaitant.
+
+   Filtrai yra idealus kandidatas i sona: jie skaitomi ne kartu su kortele, o
+   PRIES ja, ir prie ju grizinama. Sone jie lieka matomi visa laika.
+
+   Slenksciai:
+     < 1180 px   vienas stulpelis, filtrai virsuje (kaip siandien)
+     >= 1180 px  du stulpeliai: filtrai 276 px kaireje, sarasas likusiame
+     >= 1680 px  filtrai 300 px, sarasas iki 1600 px bendro plocio
+
+   Kodel 1180, ne 1240: prie 1240 dar netelpa 276 + 20 tarpas + skaitoma
+   kortele. Persijungiam tik tada, kai SARASAS nuo to nesusitraukia. */
+
+.container.is-wide { max-width: 1600px; }
+
+.ct-shell { display: block; }
+
+@media (min-width: 1180px) {
+  .ct-shell {
+    display: grid;
+    grid-template-columns: 276px minmax(0, 1fr);
+    align-items: start;
+    gap: var(--s-5);
+  }
+  /* Filtrai lieka matomi slenkant. top = antrastes aukstis + tarpas. */
+  .ct-shell > .ct-shell-side {
+    position: sticky; top: 76px;
+    max-height: calc(100vh - 96px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-light) transparent;
+  }
+  .ct-shell > .ct-shell-side::-webkit-scrollbar { width: 6px; }
+  .ct-shell > .ct-shell-side::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+}
+
+@media (min-width: 1680px) {
+  .ct-shell { grid-template-columns: 300px minmax(0, 1fr); }
+}
+
+/* Zemiau slenkscio sonas grizta virsun ir atsisako sticky */
+@media (max-width: 1179px) {
+  .ct-shell > .ct-shell-side { position: static; max-height: none; overflow: visible; }
+}
+
+
+/* ============================================================================
+   26. HERO NUOTRAUKA · kadras priklauso nuo ekrano, ne nuo nuotraukos
+   ----------------------------------------------------------------------------
+   Vienas principas: cover nera kadravimas. Jis garantuoja, kad deze bus
+   uzpildyta, bet nieko nesako apie tai, KAS liks kadre. Kai deze pasikeicia
+   nuo 1400x600 iki 361x340, cover islaiko auksti ir nurezga ploti — ir
+   automobilis, kuris buvo kadro viduryje, iskrenta.
+
+   Todel auksti ir kadravimo taska nurodome kiekvienam plociui atskirai.
+   Nuotraukos adresas (background-image) lieka jusu HTML — cia tik geometrija.
+
+   Pamatuota (juostos plotis x auk. / mastelis / kiek nurezama plocio):
+     1400 x 600   1.00   visas kadras
+      768 x 260   0.55   ~22 %
+      361 x 180   0.30   ~16 %, automobilis kadre */
+
+.ct3-hero-photo {
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: 40% 55%;
+  height: 600px;
+}
+
+@media (max-width: 1024px) {
+  .ct3-hero-photo { height: 380px; background-position: 45% 58%; }
+}
+
+/* Telefonas: 180 px. Auksciau (340) juosta atimdavo visa pirma ekrana,
+   o vartotojas i ji atejo del saraso, ne del nuotraukos. */
+@media (max-width: 640px) {
+  .ct3-hero-photo { height: 180px; background-position: 50% 62%; }
+}
+
+/* Labai zemas ekranas horizontaliai — nuotrauka atsisako vietos pirma */
+@media (max-height: 520px) and (orientation: landscape) {
+  .ct3-hero-photo { height: 140px; }
+}
+
+
+/* ============================================================================
+   27. ANTRASTES JUOSTA · .ct3-nav · turi nuorodas ir telefone
+   ----------------------------------------------------------------------------
+   Vienas principas: tuscias konteineris sistemoje nelaikomas. Arba jis turi
+   turini, arba jo nera — treciojo kelio (nematomas tarpiklis) nebuna, nes
+   tarpikliui yra margin.
+
+   Kodel tai 27 sk., o ne pataisymas viename puslapyje: <nav class="ct3-nav">
+   tuscia PENKIUOSE failuose (index 2413 su aria-hidden, admin 184,
+   ataskaitos 212, detail 577, megstamiausi 212). Vienur dar likes komentaras
+   "v1.23.0: Palyginti perkelta". Juosta buvo istustinta ir niekada neuzpildyta.
+
+   Telefone ji NEBESLEPIAMA. Dabar display: none !important yra sesiose
+   vietose, ir butent todel vartotojas "pasigedo meniu": vietoj juostos
+   susitraukdavo antrastes mygtukai. Telefone juosta nusileidzia po antraste
+   kaip antra eile ir slenka horizontaliai. */
+
+.ct3-nav {
+  display: flex;
+  gap: 4px;
+  margin-left: 56px;
+  flex: 1;
+  min-width: 0;
+}
+.ct3-nav:empty { display: none; }   /* jei kada nors vel bus tuscia — nekabo */
+
+.ct3-nav-link {
+  display: inline-flex; align-items: center;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  font-size: var(--fs-300); font-weight: var(--fw-medium);
+  color: var(--text-secondary);
+  text-decoration: none; white-space: nowrap;
+  transition: color .15s, background .15s;
+}
+.ct3-nav-link:hover { background: var(--bg-elevated); color: var(--text-primary); }
+
+/* Aktyvus — pabraukimas, ne fonas. Fonas jau reiskia "uzvesta pele". */
+.ct3-nav-link.active {
+  color: var(--text-primary);
+  box-shadow: inset 0 -2px 0 var(--accent);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+/* Telefonas ir planses: antra eile po antraste, slenka horizontaliai.
+   44 px auksciо — pirsto minimumas, ne 40. */
+@media (max-width: 900px) {
+  .ct3-nav {
+    order: 3;
+    flex: 1 0 100%;
+    margin-left: 0;
+    margin-top: 2px;
+    padding: 0 2px 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .ct3-nav::-webkit-scrollbar { display: none; }
+  .ct3-nav-link {
+    min-height: 44px;
+    padding: 0 14px;
+    font-size: var(--fs-200);
+  }
+}
