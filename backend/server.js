@@ -1885,6 +1885,25 @@ async function runSearchJob(jobId, filters) {
         siteParsed = siteParsed.filter((l) =>
           (l.modelis || '').toLowerCase().includes(modelQuery) || (l.rawText || '').toLowerCase().includes(modelQuery)
         );
+      } else if (modelQuery && siteParsed.length >= 5) {
+        // v1.39.0 SAUGIKLIS. Kai nuskaitom struktūriškai, pasitikim, kad portalo URL
+        // jau atfiltravo modelį – ir tekstinio filtro nebetaikom. Bet jei URL modelio
+        // NENUNESA (pasenusi ID lentelė, pakeistas portalo parametras), gaudavom visą
+        // markę: „BMW X4" paieška grąžindavo BMW 520, X3, 320. Mokėjom už jų nuskaitymą
+        // ir AI triažą, o paskui patys išmesdavom.
+        //
+        // Tikrinam rezultatą, ne prielaidą: jei daugiau nei trečdalis grąžintų skelbimų
+        // nėra prašyto modelio, portalo filtras nesuveikė – įjungiam tekstinį ir sakom,
+        // kuris portalas sulūžo.
+        const sutampa = siteParsed.filter((l) =>
+          (l.modelis || '').toLowerCase().includes(modelQuery) || (l.rawText || '').toLowerCase().includes(modelQuery)
+        );
+        const netinkamuDalis = 1 - (sutampa.length / siteParsed.length);
+        if (netinkamuDalis > 0.33) {
+          const pries = siteParsed.length;
+          siteParsed = sutampa;
+          logJob(jobId, `\u26a0 ${site}: modelio filtras portale nesuveikė \u2013 is ${pries} skelbimų tik ${sutampa.length} yra „${filters.modelis}". Atfiltravom patys.`);
+        }
       }
       siteParsed.forEach((l) => (l.source = site));
       resolveSite(`✅ ${site}: rasta ${siteParsed.length} skelbimų.`);

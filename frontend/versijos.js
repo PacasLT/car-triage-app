@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.39.0', data: '2026-09-18', pavadinimas: 'Paieška nebeparneša svetimų modelių',
+    pakeitimai: [
+      'Ieškant konkretaus modelio (pvz. BMW X4) nebepatenka kitų tos pačios markės automobilių – anksčiau į sąrašą prasprūsdavo BMW 520, X3 ar 320',
+      'Jei portalo filtras nesuveikia, sistema tai pastebi pati, atfiltruoja ir žurnale parašo, kuris portalas suklydo',
+      'Mažiau nereikalingų skelbimų reiškia mažesnes nuskaitymo ir analizės sąnaudas',
+    ],
+  },
+  {
     versija: '1.38.0', data: '2026-09-18', pavadinimas: 'Mygtukai su piktogramomis, telefone trumpesnė kortelė',
     pakeitimai: [
       'Mygtukai gavo piktogramas, o „Pilna apžvalga“ – atskirą kainos ženklelį ir rodyklę',

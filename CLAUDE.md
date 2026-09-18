@@ -160,6 +160,13 @@
 - Naujas mygtukas = `ct-btn` + variantas + forma. **Jokiu vietiniu `height`/`border-radius`/`font-size`** – tai buvo priezastis, del kurios ju buvo ~40 skirtingu.
 - `megstami-meniu.js`, `paskyra-meniu.js`, `versijos.js` injektuoja `<style>` su `head.prepend()` (ne `appendChild`) – kitaip ju stiliai atsidurtu po visais `<link>` ir laimetu be jokios specifikos. **Laikinas sprendimas**; galutinis – isvaizdos deklaracijas is tu failu istrinti.
 
+## Modelio filtro saugiklis (v1.39.0)
+
+- Struktūriškai nuskaitant (`format === 'parsed'`) modelio tekstinis filtras NETAIKOMAS – pasitikima portalo URL. Taip specialiai, kad „Mercedes-Benz C 220" nebūtų išmestas ieškant „c klase".
+- **Bet** jei daugiau nei **33 %** portalo grąžintų skelbimų neturi prašyto modelio, filtras portale nesuveikė: tada tekstinis filtras įjungiamas ir į žurnalą rašoma, kuris portalas suklydo.
+- Priežastys, dėl kurių URL gali nebenešti modelio: pasenusi `autoplius-ids.js` lentelė `/data` Volume (atnaujinama kas 30 d.), pakeistas portalo parametras, tuščias `filters.modelis`.
+- Patikrinta gyvai 2026-09-18: `f_model_14[0]=X4` (autogidas) ir `make_id[97]=22769` (autoplius) abu grąžina tik X4. Vadinasi lūžis buvo ne URL formoje.
+
 ## Saugumas
 
 - `ANTHROPIC_API_KEY`, `SCRAPER_API_KEY`, `JWT_SECRET`, `ADMIN_EMAILS`, `INVITE_CODES` – tik Railway Variables, **niekada į kodą ar GitHub**.
