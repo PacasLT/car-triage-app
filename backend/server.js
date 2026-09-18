@@ -18,6 +18,15 @@ const komplektacija = require('./komplektacija');
 const { requireAuth, handleRegister, handleLogin, handleMe, planai, duomenys, verifyToken } = require('./auth');
 
 const app = express();
+// v1.54.0 KLAIDA, rasta per pati pranesimo mygtuka: „Uzklausa per didele".
+// app.use(express.json()) turi NUTYLETA 100 KB riba ir veikia PIRMAS - tad
+// marsruto lygio express.json({limit:'3mb'}) prie /api/klaida niekada
+// nespedavo suveikti: kunas jau buvo atmestas su 413. Ekrano nuotrauka
+// base64 pavidalu yra ~33 % didesne uz faila, tad bet kokia normali
+// nuotrauka virsydavo riba.
+// Sprendimas: platesnis analizatorius TIK siam keliui ir PRIES bendraji.
+// body-parser pazymi req._body, tad bendrasis po to praleidzia.
+app.use('/api/klaida', express.json({ limit: '6mb' }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../frontend')));
 
@@ -181,7 +190,7 @@ function issaugotiKlaidas() {
   catch (e) { console.error('[KLAIDOS] nepavyko issaugoti:', e.message); }
 }
 
-app.post('/api/klaida', express.json({ limit: '3mb' }), (req, res) => {
+app.post('/api/klaida', (req, res) => {
   try {
     const ip = String(req.headers['x-forwarded-for'] || req.ip || '').split(',')[0].trim() || 'nezinomas';
     const dabar = Date.now();

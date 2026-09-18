@@ -255,21 +255,44 @@
 
     var inp = document.getElementById('kp-failas');
     document.getElementById('kp-prideti').onclick = function () { inp.click(); };
+    // v1.54.0: nuotrauka SUMAZINAMA narsykleje, ne atmetama.
+    // Rasta per pati sita mygtuka: iklijuotas ekrano vaizdas bydavo kelios MB,
+    // o base64 dar prideda ~33 % - uzklausa nueidavo su „per didele".
+    // Ekrano nuotraukai 1600 px pilnai uztenka perskaityti, kas joje yra.
+    function sumazinti(f, atgal) {
+      var url = URL.createObjectURL(f);
+      var img = new Image();
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        var mst = Math.min(1, 1600 / Math.max(img.width, img.height));
+        var c = document.createElement('canvas');
+        c.width = Math.round(img.width * mst);
+        c.height = Math.round(img.height * mst);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        var d = c.toDataURL('image/jpeg', 0.78);
+        // Jei vis dar per didelis - dar kartą, smarkiau.
+        if (d.length > MAX_FOTO) d = c.toDataURL('image/jpeg', 0.55);
+        atgal(d, c.width + '×' + c.height);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); atgal(null, null); };
+      img.src = url;
+    }
+
     function priimtiFaila(f, vardas) {
       if (!f) return;
-      if (f.size > MAX_FOTO) {
-        document.getElementById('kp-failo-vardas').textContent =
-          'Per didelė (' + Math.round(f.size / 1048576 * 10) / 10 + ' MB). Riba 1,5 MB.';
-        return;
-      }
-      var fr = new FileReader();
-      fr.onload = function () {
-        _foto = fr.result;
-        document.getElementById('kp-failo-vardas').textContent = vardas;
+      var vardasEl = document.getElementById('kp-failo-vardas');
+      vardasEl.textContent = 'ruošiame…';
+      sumazinti(f, function (d, matmenys) {
+        if (!d) { vardasEl.textContent = 'Nepavyko perskaityti nuotraukos.'; return; }
+        if (d.length > MAX_FOTO) {
+          vardasEl.textContent = 'Nuotrauka per didelė net ir sumažinta. Pabandykite iškirpti tik svarbią dalį.';
+          return;
+        }
+        _foto = d;
+        vardasEl.textContent = vardas + ' · ' + matmenys + ' · ' + Math.round(d.length / 1024) + ' KB';
         document.getElementById('kp-perziura').innerHTML =
           '<img src="' + _foto + '" alt="" style="max-width:100%;max-height:150px;border-radius:8px;border:1px solid var(--border);display:block;margin-top:8px">';
-      };
-      fr.readAsDataURL(f);
+      });
     }
     inp.onchange = function () {
       var f = inp.files && inp.files[0];
@@ -333,7 +356,11 @@
         .catch(function (err) {
           zin.hidden = false;
           zin.style.color = '';
-          zin.textContent = 'Nepavyko išsiųsti: ' + (err && err.message) + '. Pabandykite dar kartą.';
+          var z = String((err && err.message) || '');
+          // 413 beveik visada reiskia nuotrauka - pasakom, ka daryti, o ne tik kas blogai.
+          zin.textContent = /didel|413|large/i.test(z)
+            ? 'Nepavyko išsiųsti: siuntinys per didelis. Pabandykite be nuotraukos arba iškirpkite tik svarbią jos dalį.'
+            : 'Nepavyko išsiųsti: ' + z + '. Pabandykite dar kartą.';
           btn.disabled = false;
           btn.querySelector('span').textContent = 'Siųsti';
         });

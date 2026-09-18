@@ -8,6 +8,27 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.54.0', data: '2026-09-18', pavadinimas: 'Klaidų pranešimai su nuotraukomis',
+    pakeitimai: [
+      'ISTAISYTA: pranešimas su nuotrauka grąžindavo „Užklausa per didelė" ir dingdavo – dabar išsiunčiamas',
+      'Nuotrauka sumažinama pačioje naršyklėje iki 1600 taškų; jei vis tiek per didelė – suspaudžiama dar kartą',
+      'Jei serveris atmeta dėl dydžio, parašoma būtent tai, o ne bendra klaida',
+      'Administravimo puslapio klaidų sąrašas perdarytas į tankią lentelę',
+      'Skubios eilutės žymimos linija kairėje, uždarytos – prigesinamos',
+      'Trys skirtingos tuščios būsenos: nieko dar nebuvo, nėra ką taisyti, ir paslėpta filtro',
+    ],
+  },
+  {
+    versija: '1.53.0', data: '2026-09-18', pavadinimas: 'Administravimo puslapis',
+    pakeitimai: [
+      'Naujas puslapis `/admin.html`: klaidų sąrašas, nuskaitymo matavimai ir vartotojai vienoje vietoje',
+      'Klaidos būseną galima perjungti paspaudimu – nebereikia komandinės eilutės',
+      '„Laukia patikros" įrašai pažymimi ir keliami į viršų: tai vienintelė būsena, kur laukiama jūsų',
+      'Prie kiekvieno pranešimo matosi, ką žmogus spaudė prieš tai, ir visa techninė diagnostika',
+      'Puslapis pilnai veikia ir telefone',
+    ],
+  },
+  {
     versija: '1.52.0', data: '2026-09-18', pavadinimas: 'Skelbimo puslapis nebeprieštarauja pats sau',
     pakeitimai: [
       'ISTAISYTA: skelbimo puslapio rinkos skiltis rodė „+12 %" raudonai, nors viršuje tas pats skaičius buvo „−12 %" žaliai – t. y. gera žinia atrodė kaip bloga',

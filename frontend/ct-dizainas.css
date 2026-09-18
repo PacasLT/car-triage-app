@@ -1533,18 +1533,21 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
    border-color: transparent, o po juo slenka nezinomas turinys — ant
    nuotraukos jis isnyksta visai. Jam reikia savo pavirsiaus.
    Bet ir pirminis jis nera. Tad: iprastas .ct-btn su savo fonu. */
-.ct-report-fab {
+/* Specifika (0,2,0): .ct-btn { background: transparent } yra (0,1,0) ir guli
+   velesniame faile. Tai ta pati klaida, kuria radote 420/423 eilutese —
+   dabar suraciau ja pats. */
+.ct-btn.ct-report-fab {
   position: fixed; right: 16px; bottom: 16px; z-index: 900;
   background: var(--bg-elevated);
   border-color: var(--border-light);
   box-shadow: 0 8px 20px -8px rgba(0, 0, 0, .8);
   opacity: .72;
 }
-.ct-report-fab:hover, .ct-report-fab:focus-visible { opacity: 1; }
+.ct-btn.ct-report-fab:hover, .ct-btn.ct-report-fab:focus-visible { opacity: 1; background: var(--bg-elevated); }
 @media (max-width: 640px) {
   /* Telefone pakyla virs veiksmu eiles ir lieka ikoninis */
-  .ct-report-fab { right: 12px; bottom: 12px; }
-  .ct-report-fab > span { display: none; }
+  .ct-btn.ct-report-fab { right: 12px; bottom: 12px; }
+  .ct-btn.ct-report-fab > span { display: none; }
 }
 
 
@@ -1591,3 +1594,77 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
 /* Etikete prie langelio yra TEKSTAS, ne mono etikete — ja reikia perskaityti,
    ne nuskenuoti. Mono didziosiomis prie pazymejimo atrodo kaip antrastė. */
 .ct-check > span { font-size: var(--fs-300); line-height: var(--lh-snug); color: var(--text-secondary); }
+
+
+/* ============================================================================
+   22. ADMINISTRAVIMAS · duomenu lentele ir tuscios busenos
+   ----------------------------------------------------------------------------
+   Vienas principas: administravimas naudoja TA PACIA sistema, bet TANKIAU.
+   Ne kita paletе, ne kiti radiusai — tik mazesni tarpai ir 12.5px tekstas,
+   nes cia dirbama su 200 iraso, ne su vienu automobiliu.
+   ========================================================================== */
+
+.ct-table-w { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-surface); }
+.ct-table { width: 100%; border-collapse: collapse; font-size: var(--fs-200); }
+
+/* Antraste lipni — 200 iraso sarase be jos nezinai, kuris stulpelis kuris */
+.ct-table thead th {
+  position: sticky; top: 0; z-index: 1;
+  padding: 10px 13px; text-align: left; white-space: nowrap;
+  background: var(--bg-sunken);
+  border-bottom: 1px solid var(--border-light);
+  font: var(--fw-semi) 9.5px/1 var(--font-mono); letter-spacing: .12em;
+  color: var(--text-muted);
+}
+.ct-table tbody td { padding: 11px 13px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.ct-table tbody tr:last-child td { border-bottom: none; }
+.ct-table tbody tr:hover { background: var(--bg-raised); }
+
+/* Skaiciai — mono ir i desine. Taip stulpelis skaitomas vertikaliai. */
+.ct-table .is-num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+/* Data/laikas — mono, bet prislopinta: tai kontekstas, ne turinys */
+.ct-table .is-time { white-space: nowrap; font: var(--fw-regular) 11px/1.5 var(--font-mono); color: var(--text-muted); }
+/* ID ir techniniai laukai — sutrumpinami, bet pilna verte per title */
+.ct-table .is-id { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: var(--fw-regular) 11px/1.5 var(--font-mono); color: var(--text-secondary); }
+/* Ilgas tekstas (klaidos aprasymas) — dvi eilutes, ne begalybe */
+.ct-table .is-text { min-width: 220px; max-width: 420px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+/* Veiksmu stulpelis — visada paskutinis, niekada nesitraukia */
+.ct-table .is-act { width: 1%; white-space: nowrap; }
+
+/* Busena lenteleje — tie patys zinojimo lygiu zenkleliai (.ct-k), ne naujos
+   spalvos. „Istaisyta" = 🟢 patvirtinta, „Tikrinama" = 🟡 signalas,
+   „Nauja" = ⚪ neivertinta. Sistema ta pati, tik zodziai kiti. */
+
+/* Eilute, i kuria reikia reaguoti — linija kaireje, ne raudonas fonas.
+   Raudonas fonas 30 eiluciu sarase padaro visa ekrana signalu. */
+.ct-table tbody tr.is-urgent > td:first-child { box-shadow: inset 3px 0 0 var(--danger); }
+.ct-table tbody tr.is-done { opacity: .62; }
+
+/* Tanki atmaina — kai ekrane 50+ eiluciu */
+.ct-table.is-dense thead th { padding: 7px 11px; }
+.ct-table.is-dense tbody td { padding: 7px 11px; }
+
+/* ── 22b. Tuscia busena · trys rusys, ne viena ───────────────────────────── */
+
+/* Pats principas is 3.6: tuscia nera klaida. Administravime ji dazniausiai
+   yra GERA naujiena („nera nauju klaidu"), ir ji turi taip ir atrodyti —
+   ne pilkas „Nieko nerasta". */
+
+.ct-empty { display: flex; flex-direction: column; align-items: center; gap: var(--s-3); padding: 48px var(--s-5); text-align: center; }
+.ct-empty > i {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--bg-elevated); color: var(--text-muted);
+  font-style: normal;
+}
+.ct-empty-t { font-size: var(--fs-400); font-weight: var(--fw-semi); }
+.ct-empty-d { max-width: 42ch; font-size: var(--fs-300); line-height: var(--lh-snug); color: var(--text-secondary); }
+/* Skaiciai tuscioje busenoje — tas pats principas kaip „rasta 40, atitiko 0" */
+.ct-empty-n { display: flex; gap: 20px; margin-top: 3px; }
+
+/* 1. TUSCIA IR GERAI — nera nauju klaidu. Zalias taskas, ne pilkas. */
+.ct-empty.is-good > i { background: var(--k-confirmed-dim); box-shadow: inset 0 0 0 1px var(--k-confirmed-border); color: var(--k-confirmed); }
+/* 2. TUSCIA DEL FILTRO — yra irasu, bet ne siame vaizde. Reikia iejimo atgal. */
+.ct-empty.is-filtered > i { background: var(--accent-dim); box-shadow: inset 0 0 0 1px var(--accent-border); color: var(--accent-light); }
+/* 3. DAR NIEKO NEBUVO — pirmas paleidimas, nulinis irasas. ⚪ */
+.ct-empty.is-never > i { box-shadow: inset 0 0 0 1.5px var(--text-muted); }

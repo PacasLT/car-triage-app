@@ -260,8 +260,24 @@ Grandinė `fetchSearchPage`: **talpykla → ScraperAPI → tiesioginis axios →
 | Rožinė #ff5c8a | taisyta 4 kartus | **22 vietose** – v1.44.0 |
 | Du skirtingi įverčiai | kortelė (komentaras kode!) | `detail.html` `ctScore` – v1.48.0 |
 | `diffPct` ženklas | kortelė ir `.dp-hero` | `detail.html` rinkos skiltis – v1.52.0 |
+| Python heredoc ėda `\` | `.join('\\n')` davė tikrą naujos eilutės simbolį | `\\'` atribute – ta pati klaida po 10 min, v1.54.0 |
 
 **Taisyklė: kai kas nors ištaisoma, iškart paieškoti to paties raginio visame kode.** Dizainerio klausimas prieš 3 dalį („skalė greičiausiai turi savo medianą") pasitvirtino ne visai taip, kaip jis spėjo – mediana ta pati, bet **ženklas priešingas**: tas pats automobilis viršuje rodė „−12 %" žaliai, o rinkos skiltyje „+12 %" raudonai.
+
+## Administravimo puslapis (v1.53.0, lentelės v1.54.0)
+
+- `frontend/admin.html` – trys skiltys: **Klaidos**, **Matavimai** (`/admin/atsarga`), **Vartotojai**. Atidaromas tiesiogiai adresu, antraštėje nuorodos nėra sąmoningai.
+- **Generuojamas, ne rašomas ranka:** `dizaino-juodrasciai/mk-admin.py` paima sprite’ą ir antraštę iš `ataskaitos.html` ir įdeda į šabloną. Taip piktogramos ir antraštė lieka TIE PATYS, o ne kopija, kuri nudreifuos. Pakeitus – paleisti iš naujo iš `frontend/`.
+- **Nieko naujo dizaine:** `.ct-tab`, `.ct-flag[role=radio]`, `.ct-btn`, `.ct-k`, `.chip`. Savas CSS tik išdėstymui (`.ad-*`).
+- **Būsena perjungiama paspaudimu** – `.ct-flag` eilė po kiekvienu įrašu; `laukia-patikros` įrašas gauna akcento foną ir keliamas į viršų.
+- **Trynimas klausia** (`confirm`) ir stovi dešiniajame viršuje, ne veiksmų eilėje – ta pati taisyklė kaip ataskaitose.
+- **Duomenų lentelė (dizainerio 22 sk., v1.54.0):** `.ct-table.is-dense` – ta pati sistema kaip visur, tik tankiau. Būsena eilutėje yra `.ct-k` žinojimo lygis, ne atskira spalvų gama.
+- **Skubi eilutė gauna liniją kairėje** (`.is-urgent`), NE raudoną foną: raudonas fonas sąraše rėkia ir tada, kai skubių yra pusė. Uždarytos eilutės prigesinamos (`.is-done`), ne slepiamos.
+- **Eilutė išsiskleidžia** (`.ad-detales`) – diagnostika ir būsenų mygtukai po ja, ne atskirame lange. Vienu metu atidaryta viena.
+- **Trys tuščios būsenos, ne viena:** `is-never` (dar nieko nebuvo – paaiškina, kaip atsiras), `is-good` (nėra ką taisyti – žalias ženklas), `is-filtered` (yra, bet paslėpta filtro – su mygtuku „Rodyti visas"). Viena bendra „Nieko nerasta" meluoja dviem atvejais iš trijų.
+- **`display` ant `<td>` išima langelį iš lentelės (v1.54.0):** 22 sk. `.ct-table .is-text` uždėjo `display: -webkit-box` pačiam langeliui – jis nustojo tempti iki eilutės aukščio ir apatinis rėmelis nusipiešė 12 px aukščiau už kaimynų (matuota: apačios 467/467/**455**/467/467/467). Apkarpymas priklauso VIDINIAM `<span class="ct-clamp">`; perkėlus – 0 px. Atsvara `ct-priedai.css` 6 bloke.
+- **`.ct-table` vardas dubliuojasi:** `index.html` ir `compare.html` jau turi savo vietinį `.ct-table` – tai NE lentelė, o `<div>` raktas/reikšmė sąrašas. Šiandien nekenkia (iš 22 sk. jiems taikosi tik `width:100%` ir `font-size`, abu inertiški), bet pridėjus `.is-time` ar `display:table` į bet kurią pusę – lūš. Tikrinta: tų klasių ten nėra nė vienos.
+- **Generatoriaus spąstai:** `mk-admin.py` šablonas yra Python trigubų kabučių eilutė, todėl JS viduje **negalima** nei `\n`, nei `\'` – abu virsta tikru simboliu ir sulaužo JS. Vietoj jų: `String.fromCharCode(10)` ir `&quot;` HTML esybė atributuose. Abi klaidos jau buvo padarytos – po kiekvieno generavimo `node --check` ištrauktam `<script>`.
 
 ## Klaidų pranešimai (v1.49.0)
 
@@ -269,6 +285,7 @@ Grandinė `fetchSearchPage`: **talpykla → ScraperAPI → tiesioginis axios →
 - Renka automatiškai: versiją, ekrano plotį ir tankį, naršyklę, planą ir kreditų likutį, **paskutines 20 JS klaidų** (`error` + `unhandledrejection`) ir **nepavykusias užklausas** į `/api|/auth|/admin` (`fetch` apvalkalas).
 - **PRIVATUMAS:** į žurnalą raso `localStorage` RAKTŲ VARDUS, ne reikšmes. Žetonas ir el. paštas ten nepatenka – patikrinta testu (`arYraZetonasReiksme: false`).
 - `POST /api/klaida` – **be autentifikacijos sąmoningai**: dažniausia vieta, kur reikia pranešti, yra pats prisijungimas. Vietoj to: **5 pranešimai per 10 min iš IP**, tekstas iki 2000 simbolių, nuotrauka iki 1,5 MB. Jei žetonas galioja – įrašom, kas pranešė.
+- **Kūno riba yra maršruto, ne globali (v1.54.0):** `app.use(express.json())` be ribos reiškia 100 kB, ir nuotrauka grąžindavo 413 „Užklausa per didelė". Sprendimas – `app.use('/api/klaida', express.json({ limit: '6mb' }))` **PRIEŠ** globalų: `body-parser` nustato `req._body`, tad pirmas nugali. Naršyklėje nuotrauka dar ir sumažinama iki 1600 tšk. JPEG 0.78 (nepavykus – 0.55).
 - **Ribos nuo pirmos dienos:** `/data/klaidu-zurnalas.json` laiko 200 naujausių; nuotraukos – atskirais failais `/data/klaidu-foto/`, trinamos kartu su įrašu. Į JSON nuotraukos NEDĖTI – žurnalas išsipustų.
 - **Kas pranešime, išskyrus tekstą (v1.50.0):** `kategorija` (dizainas / negyvas / duomenys / kreditai / greitis / prisijungimas), `svarba` (blokuoja / trukdo / smulkme), `kartojasi`, `turejoRodyti` (tik prie „duomenys"), ir **`diagnostika.veiksmai`** – paskutiniai 12 paspaudimų su selektoriumi ir tekstu. Pastarasis yra vertingiausias: puslapyje 63 mygtukai, ir be jo „paspaudžiau, nieko neįvyko" yra neatsakomas.
 - **Skaitymas:** `GET /admin/klaidos` rodo **tik nesutvarkytas**, surūkiuotas pagal svarbą. `?visi=1` – ir sutvarkytas, `?trumpai=1` – be diagnostikos, `?kategorija=` / `?svarba=` – filtrai. `GET /admin/klaidos/:nr/foto` – nuotrauka.
@@ -286,7 +303,9 @@ Grandinė `fetchSearchPage`: **talpykla → ScraperAPI → tiesioginis axios →
 
 - **Kodėl ne dvi:** iš šešių dizainerio radinių **penki nepasitvirtino** – jie jau buvo sutvarkyti. Tokio radinio nei ištrinsi (pamirši, kad buvo tikrintas), nei pažymėsi sutvarkytu (melas). Ir „pataisyta" NEREIŠKIA „veikia produkcijoje" – todėl `laukia-patikros` iš sąrašo nedingsta, kol Lukas nepatvirtina.
 - **Keitimas:** `POST /admin/klaidos/:nr/busena` su `{ busena, pastaba, versija }`. Kiekvienas perjungimas įrašomas į `istorija` (kas, kada, versija, pastaba) – matosi visas kelias, ne tik galutinė buklė. Būtent to trūko, kai dizaineris klausė, ar jo radinys jau padarytas.
-- **`DELETE /admin/klaidos/:nr`** – visiškas ištrynimas su nuotrauka. Sutvarkytos dingsta pačios, tad trinti reikia tik testinius įrašus.## Duomenų sluoksnis (v1.46.0)
+- **`DELETE /admin/klaidos/:nr`** – visiškas ištrynimas su nuotrauka. Sutvarkytos dingsta pačios, tad trinti reikia tik testinius įrašus.
+
+## Duomenų sluoksnis (v1.46.0)
 
 - **Trys JSON failai `/data`:** `market-history.json` (1000 įrašų modeliui), `listing-lifecycle.json`, `listing-timeline.json` (60 momentinių vaizdų URL'ui). Visi pilnai įkeliami į atmintį paleidžiant.
 - **Valymas:** `cache.valytiSenusIrasus()` – paleidžiant ir kas parą. Trina TIK tuos, kurie **ir** pažymėti `dingo`, **ir** nematyti ilgiau nei `VALYMO_DIENOS` (180 pagal nutylėjimą). Gyvas skelbimas neliečiamas, kad ir koks senas – jo kainos istorija yra produktas. Timeline be gyvavimo ciklo trinamas kaip našta be prasmės.
