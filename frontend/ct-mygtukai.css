@@ -427,3 +427,28 @@
   .ct-actions > .ct-btn-tight > i { margin-left: 0; }
   .ct-actions > .ct-btn-tight::after { display: none; }
 }
+
+
+/* ── Akcento atmaina · antrastes nuolatiniai mygtukai ────────────────────── */
+
+/* Atsakymas i „ar pirminis — vienas per ekrana apima antraste":
+   taisykle skirta SPRENDIMO pavirsiui, ne langui. Antraste yra chrome — ji ta
+   pati visuose penkiuose puslapiuose, tad ji nekonkuruoja su „ka man daryti
+   siame puslapyje".
+
+   BET „Pro · 13 kr" ir „Pilna apzvalga · 2 kr" yra tos pacios rusies veiksmai:
+   abu prasο pinigu. Du violetiniai pirkimo mygtukai viename ekrane konkuruoja,
+   ir pralaimi tas, kurio zmogui reikia dabar.
+
+   Plius: nuolat matomas pirminis mygtukas tampa baldu — po trecios dienos jo
+   nebemato. Akcento atmaina lieka akcento gimines, bet nebeima pirminio vietos. */
+
+.ct-btn-accent {
+  border-color: var(--accent-border);
+  background: var(--accent-dim);
+  color: var(--accent-light);
+}
+.ct-btn-accent:hover { background: var(--accent-dim); border-color: var(--accent); color: var(--accent-light); }
+.ct-btn-accent > i { background: rgba(124, 92, 255, .22); color: var(--accent-light); }
+/* Kreditu likutis mygtuke — mono, bet ne raudonas, kol kreditu yra */
+.ct-btn-accent > u { border-left-color: var(--accent-border); color: var(--accent-light); }

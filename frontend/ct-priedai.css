@@ -11,6 +11,7 @@
      v1.34.0  `.chip` ir `.ct-btn > i`          → jo 15 skyrius
      v1.41.0  telefone paslėptas įvertis    → jo 17 skyrius (balas lieka)
      v1.42.0  siaurų mygtukų 44 px atsvara → jo 420 eilutė su :not(.ct-btn-tight)
+     v1.45.0  `.ct-btn-accent` (laikina)      → laukiam jo varianto
 
    TAISYKLĖS: jokių kietai įrašytų spalvų, jokių naujų tokenų, kiekvienas
    blokas su komentaru KAS ir KODĖL.
@@ -44,3 +45,26 @@
 /* ── 4. Veiksmų eilė telefone – PERIMTA, IŠTRINTA ───────────────────
    v1.42.0: dizaineris įrašė `:not(.ct-btn-tight)` į ct-mygtukai.css 420 eilutę,
    tad `.ct-btn-tight` 44 px vėl pasiekia mygtuką ir mūsų atsvaros nebereikia.   */
+
+/* ── 5. .ct-btn-accent – LAIKINA, laukia dizainerio varianto ──────────────
+   Dizaineris parašė: „ne `.ct-btn-sm` plikas, o `.ct-btn-sm ct-btn-accent` –
+   nauja atmaina zip'e". Zip'e jos nėra – nei `ct-mygtukai.css`, nei
+   `ct-dizainas.css`. Ta pati istorija kaip su `#i-zenkliukai`.
+
+   Kodėl jos reikia: `Pro · 13 kr` ir `Pilna apžvalga · 2 kr` abu prašo pinigų.
+   Du violetiniai pirkimo mygtukai viename ekrane konkuruoja, ir pralaimi tas,
+   kurio žmogui reikia dabar. Akcento šeimoje gali būti keli, pirminis – vienas.
+
+   Tik tokenai, jokios naujos spalvos.
+   ATŠAUKIMAS: ištrinti, kai atsiųs savo variantą.                             */
+
+.ct-btn-accent {
+  background: var(--accent-dim);
+  border-color: var(--accent-border);
+  color: var(--accent-light);
+}
+.ct-btn-accent:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--text-primary);
+}

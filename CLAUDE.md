@@ -170,6 +170,13 @@
 - **Kodėl `ct-priedai.css` 4 blokas:** `ct-mygtukai.css` 420 eil. `.ct-actions > .ct-btn:not(.ct-btn-primary)` (0,3,0) nugali 423 eil. `.ct-actions > .ct-btn-tight` (0,2,0), tad 44 px niekada nepasiekdavo mygtuko, o platusis likdavo 124 px prie 147 px antraštės – tekstas užlipdavo ant kaimyno. Mūsų atsvara – ta pati taisyklė (0,4,0).
 - **Ištrinti mūsų bloką**, kai dizaineris savo 420 eilutėje prašys `:not(.ct-btn-tight)`.
 
+## Akcento šeima (v1.45.0)
+
+- **Akcento šeimoje gali būti keli, pirminis – vienas.** `.ct-btn-primary` = pilnas akcentas; `.ct-btn-accent` = akcento rėmelis ir `--accent-dim` fonas.
+- **„Pirminis – vienas per ekraną" taikoma SPRENDIMO paviršiui, ne langui.** Antraštė yra chrome – ji ta pati visuose penkiuose puslapiuose ir nekonkuruoja su „ką man daryti šiame puslapyje".
+- **Bet `Pro · 13 kr` vis tiek nusileidžia:** jis ir `Pilna apžvalga · 2 kr` yra tos pačios rūšies veiksmai – abu prašo pinigų. Du violetiniai pirkimo mygtukai viename ekrane konkuruoja, ir pralaimi tas, kurio žmogui reikia dabar. Plius nuolat matomas pirminis tampa baldu.
+- `ct3-premium-btn` visuose keturiuose puslapiuose: `ct-btn ct-btn-sm ct-btn-accent`.
+
 ## Akcentas ir žinojimo lygiai skelbimo puslapyje (v1.44.0)
 
 - **Pirminis mygtukas puslapyje yra `Pilna apžvalga · 2 kr`.** `Žiūrėti skelbimą` buvo violetinis – vienintelis mygtukas, kuris IŠVEDA žmogų iš produkto, atrodė kaip pagrindinis veiksmas. Dabar jis antrinis su rodykle (`ct-btn ct-btn-go`), tekstas „Skelbimas" kaip visur.

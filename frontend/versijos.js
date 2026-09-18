@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.45.0', data: '2026-09-18', pavadinimas: '„Pro" nebekonkuruoja su apžvalgos mygtuku',
+    pakeitimai: [
+      'Antraštės „Pro" mygtukas nebe pilnai violetinis – liko tos pačios spalvos giminės, bet nebežiuri kaip pagrindinis veiksmas',
+      'Priežastis: „Pro · 13 kr" ir „Pilna apžvalga · 2 kr" abu prašo pinigų, tad du violetiniai mygtukai viename ekrane konkuravo, ir pralaimėdavo tas, kurio jums reikia dabar',
+    ],
+  },
+  {
     versija: '1.44.0', data: '2026-09-18', pavadinimas: 'Akcentas grįžo pagrindiniam veiksmui',
     pakeitimai: [
       'Skelbimo puslapyje violetinis mygtukas dabar yra „Pilna apžvalga · 2 kr", o ne nuoroda į portalą – vienintelis mygtukas, kuris išveda iš CarTriige, nebeatrodo kaip pagrindinis',
