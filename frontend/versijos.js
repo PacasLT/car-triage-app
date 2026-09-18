@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.66.0', data: '2026-09-18', pavadinimas: 'Mygtukai telefone visur vienodi',
+    pakeitimai: [
+      'Antraštės mygtukai 44 px ne tik pagrindiniame puslapyje, bet ir ataskaitose, mėgstamiausiuose ir administravime',
+      'Anksčiau pataisiau tik vieną puslapį, nors antraštė bendra penkiems',
+    ],
+  },
+  {
     versija: '1.65.0', data: '2026-09-18', pavadinimas: 'Antraštė telefone nebesusispaudžia',
     pakeitimai: [
       'ISTAISYTA: po praeito atnaujinimo pagrindinė nuotrauka iškrito iš vietos ir dešinėje liko juodas plotas',

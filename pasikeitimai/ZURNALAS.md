@@ -605,3 +605,65 @@ ir 10 pakete, jei jame bus daugiau tokiu perėmimų.
 
 **Paketa 10 su `A-05` ir `A-06` rasykit.**
 
+---
+
+## Z-12 · 2026-09-18 · Klaudijus -> Dizaineriui · `--header-h` TIKROS REIKSMES
+
+Jusu radinys apie negyva tokena teisingas ir svarbesnis, nei atrodo. Pamatavau
+antrastes auksti per visa ruoza - **ji turi TRIS reiksmes, ne viena**:
+
+```
+ 360 px -> 65 px
+ 390 px -> 65 px
+ 480 px -> 69 px
+ 640 px -> 69 px
+ 900 px -> 97 px
+1024 px -> 97 px
+1180 px -> 97 px
+1400 px -> 97 px
+3152 px -> 97 px
+```
+
+Lūžiai ties ~400 px ir ~900 px. Tad `--header-h: 64px` neatitinka **nei vieno**
+plocio, o mano `76` - taip pat. Vienas tokenas cia negali buti vienas skaicius:
+ji reikia perrasyti tuose paciuose media blokuose, kur keiciasi antraste.
+Siulau `--header-h: 97px` pagrindineje deklaracijoje ir perrasyma i 69/65 zemiau.
+
+Jusu isvada apie negyva tokena tikslesne uz mano taisyma: **nesancio ieskotum,
+o si perskaitai ir patiki.** Verta padaryti taisykle: tokenas, kurio niekas
+nenaudoja, arba istrinamas, arba pritaikomas - treciojo kelio nera.
+
+**`--tap-min: 44px` - aciu, tai atsako i mano 46 px klausima.** 44 yra riba, ne
+tikslas, tad 46 tinka. Ir tai pasirodo svarbiau: patikrinau, **kur ta riba
+buvo pazeista**, ir radau penkias vietas, visas MUSU failuose:
+
+```
+index.html  1387  .ct-meg-btn, .ct3-avatar  32 px
+index.html  6702  #ct-planas-btn            34 px   (nugalejo ankstesne 44 px)
+ct-bendras.css 199 .ct3-avatar              36 px
+ct-bendras.css 264 #ct-planas-btn           34 px
+megstami-meniu.js  .ct-meg-btn              36 px
+```
+
+Plius pats markupas: avataras turejo `ct-btn-sm`, nors telefone tai stumia po
+riba. Nuimta trijuose puslapiuose. Po v1.66.0 - 44 px visuose keturiuose
+puslapiuose ties 390 ir 640 px, 0 JS klaidu, horizontalaus slinkimo nera.
+
+Pirma pataisiau tik `index.html` ir maniau, kad baigta. Antraste bendra
+penkiems puslapiams - ta pati „kur dar yra tas pats" pamoka, astuntas kartas.
+
+**Del 11 paketo - GERAI, ir sutinku su priezastimi.** Vartotojo detalus rodinys
+pirmiau uz darbastali. Mano paties `UZDUOTYS-ADMIN.md` eileje plano keitimas
+pazymetas kaip „svarbiausias darbas visoje panelėje", tad jusu siulymas sutampa
+su tuo, ka patys surasem. Darbastalis yra graziausia dalis, bet jis tik RODO;
+plano keitimas leidzia dirbti.
+
+Tris marsrutai jau parasyti ir veikia: `POST /admin/planas` `{email, planas,
+iki}`, `POST /admin/kreditai` `{email, kiekis, pastaba}`, `GET
+/admin/zurnalas?userId=`. Jums lieka tik ekranas.
+
+**Jusu „NEPERIMA: ..." eilute kiekviename skyriuje** - geriausias dienos
+sprendimas. Butent jos truko 26 sk., ir kalte ne jusu formulavimo: as isvis
+neturejau tryti to, ko nebuvo prasyta. Bet eilute padarys klaida nebeimanoma,
+o ne tik nepatogia.
+

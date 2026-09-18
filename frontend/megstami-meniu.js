@@ -73,7 +73,7 @@
     + '.ct-meg-tuscia{padding:28px 16px;text-align:center;font:400 12.5px/1.6 var(--font,sans-serif);color:var(--text-muted,#aaa)}'
     + '.ct-meg-tuscia b{display:block;color:var(--text-primary,#fff);font-size:14px;margin-bottom:4px}'
     + '.ct-meg-foot{padding:9px 14px;border-top:1px solid var(--border,rgba(255,255,255,.08));font:400 11px var(--font,sans-serif);color:var(--text-dim,#777)}'
-    + '@media (max-width:640px){.ct-meg-btn{width:36px;height:36px}.ct-meg-dd{position:fixed;left:12px;right:12px;top:66px;width:auto;max-width:none}.ct-meg-list{max-height:calc(100vh - 150px)}}';
+    + '@media (max-width:640px){.ct-meg-btn{width:44px;height:44px}.ct-meg-dd{position:fixed;left:12px;right:12px;top:66px;width:auto;max-width:none}.ct-meg-list{max-height:calc(100vh - 150px)}}';
 
   function ikonaSirdis(w) { return '<svg width="' + w + '" height="' + w + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>'; }
 
