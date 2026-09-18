@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.35.0', data: '2026-09-18', pavadinimas: 'Rinkos skaičiai rodomi tik tada, kai jie kažką reiškia',
+    pakeitimai: [
+      'Kai panašių skelbimų rinkoje mažiau nei 8, kainos skirtumas nebėra rodomas – vietoj jo matote „per mažai“ su tikslų skelbimų skaičiumi',
+      'Priežastis: iš šešių skelbimų „−12 %“ pasikeičia vien todėl, kad vienas skelbimas dingo. Toks skaičius skamba tiksliau, nei yra',
+      'Medianai skaičiuoti riba lieka ta pati – keičiasi tik tai, ką rodome jums',
+    ],
+  },
+  {
     versija: '1.34.0', data: '2026-09-18', pavadinimas: 'Ženkliukai ir mygtukai perėjo į dizaino sistemą',
     pakeitimai: [
       'Ženkliukai kortelėje (VIN, Istorija, vieta, Verslas) atrodo vienodai visuose puslapiuose ir įgavo aiškesnes spalvas pagal reikšmę',

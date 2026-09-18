@@ -5759,6 +5759,11 @@ function ctNavTab(tab) {
     // >0 pigiau (žalia), <=0 brangiau (geltona). 49 % riba lieka backend'e –
     // ji įjungia atskirą „GALIMAI DAUŽTAS" bloką ir riboja balą.
     var CT_DIFF_ITARTINA = 30;
+    // v1.35.0: rinkos skaiciai rodomi tik nuo 8 panasiu skelbimu. Is septyniu
+    // „5-as pigiausias" ir „-12 %" skamba tiksliau, nei yra: uztenka vienam
+    // skelbimui dingti, ir pozicija pasikeicia. Medianai skaiciuoti riba lieka 5
+    // (server.js) - keiciasi tik tai, ka rodom vartotojui.
+    var CT_RINKOS_MIN = 8;
 
     // v1.33.0: laikas rinkoje kaip „kodėl" punktas (dizainerio §7).
     // Rodomas TIK kai ka nors sako: <=2 d. arba >=30 d. Intervalas 3-29 d.
@@ -5794,7 +5799,8 @@ function ctNavTab(tab) {
       var multi = photos.length > 1;
 
       // ── išvestiniai ──
-      var d = c.diffPct;
+      var rinkaSilpna = !(c.marketCount >= CT_RINKOS_MIN);
+      var d = rinkaSilpna ? null : c.diffPct;
       var diffTonas = d == null ? '' : (d >= CT_DIFF_ITARTINA ? 'is-bad' : d > 0 ? 'is-good' : 'is-warn');
       var diffTekstas = d == null ? '' : (d > 0 ? '−' + d + '%' : '+' + Math.abs(d) + '%');
       var skirtEtik = d == null ? '' : (d >= CT_DIFF_ITARTINA ? 'PIGIAU · ĮTARTINAI' : d > 0 ? 'PIGIAU' : 'BRANGIAU');
@@ -5917,11 +5923,11 @@ function ctNavTab(tab) {
         +           (d != null ? '<span class="ct-diff ' + diffTonas + '">' + diffTekstas + '</span>' : '')
         +         '</div>'
         +         '<div class="ct-market">'
-        +           (c.marketMedian
+        +           ((c.marketMedian && !rinkaSilpna)
                       ? '<div class="ct-market-row"><span class="ct-market-k">RINKOS VIDURKIS</span><span class="ct-market-v">' + formatEUR(c.marketMedian) + '</span></div>'
                         + (skirtSuma != null ? '<div class="ct-market-row ' + diffTonas + '"><span class="ct-market-k">' + skirtEtik + '</span><span class="ct-market-v">' + formatEUR(skirtSuma) + '</span></div>' : '')
                       : '<div class="ct-market-row"><span class="ct-market-k">RINKOS VIDURKIS</span><span class="ct-market-v is-unrated-val">–</span></div>'
-                        + '<div class="ct-market-row"><span class="ct-market-k">PANAŠIŲ SKELBIMŲ</span><span class="ct-market-v is-unrated-val">per mažai</span></div>')
+                        + '<div class="ct-market-row"><span class="ct-market-k">PANAŠIŲ SKELBIMŲ</span><span class="ct-market-v is-unrated-val">' + (c.marketCount ? c.marketCount + ' – per mažai' : 'per mažai') + '</span></div>')
         +         '</div>'
         +       '</div>'
         +     '</div>'

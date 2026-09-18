@@ -141,6 +141,13 @@
 - Regitros sandoriu duomenys (TPSAIS) **NETURI markes/modelio/metu** – patikrinta gyvai 2026-09-18. „Sandoriu per men." pagal modeli is atviru duomenu neimanoma.
 - Parko duomenys turi `MARKE` ir `KOMERCINIS_PAV`, atnaujinami **kas ketvirti**. Imti tiesiai is `regitra.lt/wp-content/uploads/failai/Atviri_TP_parko_duomenys.zip` (data.gov.lt veidrodis pasenes nuo 2023 III ketv.).
 
+## Rinkos imtis (v1.35.0)
+
+- `CT_RINKOS_MIN = 8` (`index.html`): kortelėje `diffPct` ir rinkos vidurkis rodomi **tik nuo 8 panasiu skelbimu**. Maziau – ⚪ „N – per mazai" (dizainerio `is-unrated-val` busena).
+- Medianai **skaiciuoti** riba serveryje lieka 5 – keiciasi tik atvaizdavimas. Skaiciavimai (balas, `itariamaZala`) nepaliesti.
+- Priezastis: is 6–7 skelbimu pozicija ir procentas pasikeicia vien todel, kad vienas skelbimas dingo. Skaicius skamba tiksliau, nei yra.
+- Ta pati riba galios ir „Rinkos pozicijos" skalei skelbimo puslapyje.
+
 ## Saugumas
 
 - `ANTHROPIC_API_KEY`, `SCRAPER_API_KEY`, `JWT_SECRET`, `ADMIN_EMAILS`, `INVITE_CODES` – tik Railway Variables, **niekada į kodą ar GitHub**.
