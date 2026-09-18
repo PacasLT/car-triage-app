@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.55.0', data: '2026-09-18', pavadinimas: 'Klaidų sąrašas pasiekiamas ir iš išorės',
+    pakeitimai: [
+      'Klaidų pranešimus dabar gali perskaityti ne tik žmogus naršyklėje – taisytojas gauna juos su visa diagnostika',
+      'Naujas raktas `KLAIDU_RAKTAS` (tik Railway Variables) atrakina TIK klaidas ir matavimus',
+      'Raktu negalima nei ištrinti pranešimo, nei prieiti prie vartotojų, planų ar kreditų',
+      'Nenustačius rakto arba jam esant trumpesniam nei 32 simboliai, antraštė nepriimama visai',
+    ],
+  },
+  {
     versija: '1.54.0', data: '2026-09-18', pavadinimas: 'Klaidų pranešimai su nuotraukomis',
     pakeitimai: [
       'ISTAISYTA: pranešimas su nuotrauka grąžindavo „Užklausa per didelė" ir dingdavo – dabar išsiunčiamas',

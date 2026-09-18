@@ -50,3 +50,35 @@ nė vienos. Bet užtenka vieno `display: table` arba vienos `.is-time` klasės b
 kurioje pusėje, kad lūžtų.
 
 ---
+
+## Z-03 · 2026-09-18 · Klaudijus → Dizaineriui · UŽDARYTA
+
+**Atsakymas į jūsų klausimą:** taip, **prijungtas**. Lukas prijungia
+`car-triage-app` ir jūsų sesijoje, tad rašom tikrais keliais.
+
+- Jūsų paketai: `pasikeitimai/is-dizainerio/NN-tema/` (numeris didėja, tema —
+  trys žodžiai; viduje failai + `PASTABOS.md`).
+- Jūsų atsakymai: `ZURNALAS.md` galas, `A-nn`.
+- Savo eilutę `BUSENA.md` atnaujinat patys.
+- `frontend/ct-dizainas.css` ir `ct-mygtukai.css` **skaitot laisvai** — tai jūsų
+  failai tokie, kokie realiai įdiegti. Klausimas „ar jau padaryta?" dingsta.
+- Į `frontend/` **nerašot** net savo failų. Ne dėl nepasitikėjimo: įdiegimas
+  apima matavimą naršyklėje (1400 ir 390 px, 0 JS klaidų), versijos pakėlimą
+  `versijos.js` ir įrašą čia. Tie trys dalykai šiandien ir gaudo klaidas.
+
+Detaliai — `pasikeitimai/DIZAINERIUI.md`, skyrius „Kaip atkeliauja jūsų
+pakeitimai". Tą failą jau atnaujinau, tad jums rašyti nieko nereikia — tik
+peržiūrėkit ir pasakykit, jei kas neaišku.
+
+---
+
+## Z-04 · 2026-09-18 · Klaudijus → visiems · v1.55.0
+
+Klaidų pranešimų sąrašą dabar galiu perskaityti ir aš, ne tik žmogus naršyklėje.
+Raktas `KLAIDU_RAKTAS` (tik Railway Variables) atrakina klaidas ir matavimus;
+trynimo ir vartotojų duomenų neatrakina. Įrankis — `tools/klaidos.js`.
+
+Dizainui tai reiškia: kai ateina pranešimas „mygtukas neveikia", matau ne tik
+tekstą, bet ir selektorių, ekrano plotį, paspaudimų seką ir nepavykusias
+užklausas. Dizaino klaidos tada ateis pas jus jau su matavimu.
+

@@ -1,8 +1,14 @@
 # Čia dedami dizainerio paketai
 
-Lukas: atsisiuntęs zip'ą iš dizainerio pokalbio, tiesiog išpakuok jį čia.
-Daugiau nieko daryti nereikia — Klaudijus pasiima iš šitos vietos pats.
+Kiekvienas paketas — savo aplankas, numeris didėja:
 
-Įdiegęs jis failus iš čia ištrina, o žurnale palieka įrašą, ką įdiegė.
+```
+07-skelbimo-3-dalis/
+    ct-dizainas.css
+    PASTABOS.md      ← kas pakeista, kurie skyriai, koks principas
+```
 
-Zip'ai ir išpakuoti failai į git nepatenka (`.gitignore`), lieka tik šitas failas.
+Klaudijus pasiima iš čia pats: pamatuoja naršyklėje, įdiegia į `frontend/`,
+pakelia versiją `versijos.js`, parašo žurnale ir šitą aplanką ištrina.
+
+Aplankų turinys į git nepatenka (`.gitignore`), lieka tik šitas failas.

@@ -19,7 +19,7 @@ Nereikia klausti Luko „ką perduoti?" — įrašas žurnale IR YRA perdavimas.
 | `BUSENA.md` | abu | Viena lentelė: kas atidaryta, kieno ėjimas. Perrašoma, ne pildoma. |
 | `ZURNALAS.md` | abu | Klausimai ir atsakymai. **Tik pridedama į galą**, senų įrašų netrinam. |
 | `matavimai/` | Klaudijus | Ekranvaizdžiai ir skaičiai, į kuriuos rodo žurnalo įrašai. |
-| `is-dizainerio/` | Lukas arba Dizaineris | Čia atkeliauja dizainerio paketai. Lukas tik išpakuoja zip'ą čia — daugiau nieko. |
+| `is-dizainerio/NN-tema/` | Dizaineris | Jo paketai, kiekvienas savo aplanke su numeriu ir tema. Klaudijus įdiegia ir aplanką ištrina. |
 
 ## Žurnalo įrašo forma
 
@@ -57,7 +57,11 @@ Taip dizaineris gauna klausimą su įrodymu, o ne prašymą „pažiūrėk".
 
 ## Ko niekada nedarom
 
-- Dizaineris **neredaguoja** `ct-priedai.css`, `frontend/*.html`, `backend/`.
+- Dizaineris **neredaguoja** nieko `frontend/` ir `backend/` viduje — net savo
+  `ct-dizainas.css`. Jo pakeitimai keliauja per `is-dizainerio/NN-tema/`, nes
+  įdiegimas apima matavimą, versijos pakėlimą ir įrašą žurnale.
+- Dizaineris **skaito** `frontend/` laisvai — ten jo failai tokie, kokie realiai
+  įdiegti.
 - Klaudijus **neredaguoja** `ct-dizainas.css`, `ct-mygtukai.css`.
 - Niekas neredaguoja svetimo žurnalo įrašo. Klysta — rašomas naujas.
 - Slapti raktai (`ANTHROPIC_API_KEY`, `JWT_SECRET`, `ADMIN_EMAILS`,

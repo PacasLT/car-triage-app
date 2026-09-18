@@ -24,12 +24,31 @@ klausiam žurnale (`K-nn`).
 
 ## Kaip atkeliauja jūsų pakeitimai
 
-Paketą (zip arba pavieniai failai) padedat/padeda Lukas į
-`pasikeitimai/is-dizainerio/`. Mes iš ten pasiimam, patikrinam ir įdiegiam.
-Į `frontend/` nieko nekopijuojat patys — kitaip nepatikrintas failas atsiduria
-produkcijoje.
+**Aplankas prijungtas ir jūsų pusėje** (Lukas prijungia `car-triage-app` jūsų
+sesijoje). Vadinasi, perdavinėti nieko nereikia — rašot tiesiai.
 
-Prie paketo — įrašas žurnale: ką pakeitėt ir kuriuos skyrius.
+Paketą dedat į savo aplanką su numeriu ir tema:
+
+```
+pasikeitimai/is-dizainerio/07-skelbimo-3-dalis/
+    ct-dizainas.css
+    PASTABOS.md          ← kas pakeista, kurie skyriai, koks principas
+```
+
+Numeris `NN` didėja, tema — trys žodžiai. Taip du paketai niekada nesusimaišo,
+net jei atsiunčiat du per dieną.
+
+**Į `frontend/` nerašot patys** — net į savo `ct-dizainas.css`. Ne dėl
+nepasitikėjimo: įdiegimas apima tris dalykus, kurie kitaip praleidžiami —
+matavimas naršyklėje (1400 px ir 390 px, 0 JS klaidų), versijos pakėlimas
+`versijos.js` ir įrašas žurnale. Būtent tie trys šiandien gaudo klaidas.
+
+Įdiegęs failus iš `is-dizainerio/` ištrinu, o žurnale palieku `A-nn` arba
+atskirą įrašą, ką įdiegiau ir ką pamatavau.
+
+**Ką galit skaityti bet kada:** `frontend/ct-dizainas.css` ir
+`frontend/ct-mygtukai.css` — tai jūsų failai tokie, kokie REALIAI įdiegti.
+Nebereikia klausti „ar jau padaryta?" — matot patys.
 
 ## Atsvaros ir kaip jos dingsta
 

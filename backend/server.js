@@ -6,6 +6,7 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const crypto = require('crypto');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const puppeteer = require('puppeteer');
@@ -257,8 +258,39 @@ app.post('/api/klaida', (req, res) => {
   }
 });
 
+// ── v1.55.0: prieiga prie klaidu saraso be narsykles ─────────────────────────
+// Kam: klaidu sarasa turi matyti ne tik zmogus narsykleje, bet ir Claude, kuris
+// tas klaidas taiso. Kitaip pranesimas keliauja per ekranvaizdzius ir perrasyma,
+// ir puse diagnostikos (selektoriai, uzklausos, veiksmu seka) pakeliui dingsta.
+//
+// Kaip: antraste `X-Klaidu-Raktas`, reiksme is `KLAIDU_RAKTAS` (TIK Railway
+// Variables ir vietinis backend/.env, niekada i koda ar GitHub). Jei raktas
+// nenustatytas arba trumpesnis nei 32 simboliai - antraste nepriimama visai,
+// t. y. numatytoji bukle yra „isjungta", ne „silpna".
+//
+// Ko raktas NEGALI: istrinti iraso (DELETE lieka tik zetonui) ir prieiti prie
+// vartotoju, planu ar kreditu. Tik klaidos ir matavimai.
+const KLAIDU_RAKTAS = process.env.KLAIDU_RAKTAS || '';
+if (KLAIDU_RAKTAS && KLAIDU_RAKTAS.length < 32) {
+  console.warn('[KLAIDOS] KLAIDU_RAKTAS per trumpas (<32), antraste NEPRIIMAMA.');
+}
+function raktasSutampa(gautas) {
+  if (!gautas || KLAIDU_RAKTAS.length < 32) return false;
+  const a = Buffer.from(String(gautas));
+  const b = Buffer.from(KLAIDU_RAKTAS);
+  if (a.length !== b.length) return false;          // timingSafeEqual reikalauja vienodo ilgio
+  return crypto.timingSafeEqual(a, b);
+}
+function klaiduPrieiga(req, res, next) {
+  if (raktasSutampa(req.get('X-Klaidu-Raktas'))) {
+    req.user = { email: 'raktas', tikRaktas: true };
+    return next();
+  }
+  return requireAuth(req, res, (e) => (e ? next(e) : planai.reikalautiAdmin(req, res, next)));
+}
+
 // Sarasas man/administratoriui. GET, nemokamas.
-app.get('/admin/klaidos', requireAuth, planai.reikalautiAdmin, (req, res) => {
+app.get('/admin/klaidos', klaiduPrieiga, (req, res) => {
   const kiek = Math.min(parseInt(req.query.kiek, 10) || 50, KLAIDU_RIBA);
   const beDiag = req.query.trumpai === '1';
   const arUzdaryta = (k) => !!(KLAIDU_BUSENOS[k.busena] || {}).uzdaryta;
@@ -297,7 +329,7 @@ app.get('/admin/klaidos', requireAuth, planai.reikalautiAdmin, (req, res) => {
 // Busenos keitimas. Kiekvienas perjungimas iraso KAS, KADA, KOKIA VERSIJA ir
 // PASTABA - taip matosi visas kelias, o ne tik galutine bukle. Butent to truko,
 // kai dizaineris klause, ar jo radinys jau padarytas.
-app.post('/admin/klaidos/:nr/busena', requireAuth, planai.reikalautiAdmin, (req, res) => {
+app.post('/admin/klaidos/:nr/busena', klaiduPrieiga, (req, res) => {
   const k = _klaidos.find((x) => x.nr === parseInt(req.params.nr, 10));
   if (!k) return res.status(404).json({ error: 'Nera' });
   const nauja = String((req.body && req.body.busena) || '').trim();
@@ -320,7 +352,7 @@ app.post('/admin/klaidos/:nr/busena', requireAuth, planai.reikalautiAdmin, (req,
 });
 
 // Senasis kelias lieka kaip trumpinys - kad niekas nesulustu.
-app.post('/admin/klaidos/:nr/sutvarkyta', requireAuth, planai.reikalautiAdmin, (req, res) => {
+app.post('/admin/klaidos/:nr/sutvarkyta', klaiduPrieiga, (req, res) => {
   const k = _klaidos.find((x) => x.nr === parseInt(req.params.nr, 10));
   if (!k) return res.status(404).json({ error: 'Nera' });
   k.busena = 'sutvarkyta';
@@ -336,6 +368,7 @@ app.post('/admin/klaidos/:nr/sutvarkyta', requireAuth, planai.reikalautiAdmin, (
 // Visiskas istrynimas kartu su nuotrauka. Naudoti tada, kai iraso nebereikia
 // visai - pvz. testinis pranesimas. Sutvarkytos klaidos is saraso dingsta
 // pacios, tad trinti ju nebutina: tekstas pravercia, jei tas pats pasikartotu.
+// TYCIA be `klaiduPrieiga`: trynimas negriztamas, tad tik zmogus su zetonu.
 app.delete('/admin/klaidos/:nr', requireAuth, planai.reikalautiAdmin, (req, res) => {
   const i = _klaidos.findIndex((x) => x.nr === parseInt(req.params.nr, 10));
   if (i < 0) return res.status(404).json({ error: 'Nera' });
@@ -346,7 +379,7 @@ app.delete('/admin/klaidos/:nr', requireAuth, planai.reikalautiAdmin, (req, res)
 });
 
 // Viena nuotrauka pagal numeri.
-app.get('/admin/klaidos/:nr/foto', requireAuth, planai.reikalautiAdmin, (req, res) => {
+app.get('/admin/klaidos/:nr/foto', klaiduPrieiga, (req, res) => {
   const k = _klaidos.find((x) => x.nr === parseInt(req.params.nr, 10));
   if (!k || !k.foto) return res.status(404).json({ error: 'Nera' });
   res.sendFile(path.join(KLAIDU_FOTO_KAT, k.foto));
@@ -354,7 +387,7 @@ app.get('/admin/klaidos/:nr/foto', requireAuth, planai.reikalautiAdmin, (req, re
 
 // v1.47.0: atsarginiu nuskaitymo keliu statistika. GET, nemokamas, tik adminui.
 // Klausimas, i kuri atsako: ar Puppeteer produkcijoje kada nors suveikia.
-app.get('/admin/atsarga', requireAuth, planai.reikalautiAdmin, (req, res) => {
+app.get('/admin/atsarga', klaiduPrieiga, (req, res) => {
   const val = Math.round((Date.now() - ATSARGA.nuo) / 3600000 * 10) / 10;
   const p = ATSARGA.puppeteer;
   res.json({

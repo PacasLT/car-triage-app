@@ -305,6 +305,17 @@ Grandinė `fetchSearchPage`: **talpykla → ScraperAPI → tiesioginis axios →
 - **Keitimas:** `POST /admin/klaidos/:nr/busena` su `{ busena, pastaba, versija }`. Kiekvienas perjungimas įrašomas į `istorija` (kas, kada, versija, pastaba) – matosi visas kelias, ne tik galutinė buklė. Būtent to trūko, kai dizaineris klausė, ar jo radinys jau padarytas.
 - **`DELETE /admin/klaidos/:nr`** – visiškas ištrynimas su nuotrauka. Sutvarkytos dingsta pačios, tad trinti reikia tik testinius įrašus.
 
+## Klaidų sąrašas be naršyklės (v1.55.0)
+
+Pranešimo mygtukas buvo pusiau bevertis, kol sąrašą matė tik žmogus: per ekranvaizdį keliauja tekstas, o dingsta būtent tai, dėl ko visa tai daryta – selektoriai, nepavykusios užklausos ir paspaudimų seka.
+
+- **`KLAIDU_RAKTAS`** – tik Railway Variables ir vietinis `backend/.env`, **niekada į kodą ar GitHub**. Antraštė `X-Klaidu-Raktas`, niekada ne adreso parametras (patektų į serverio žurnalus).
+- **Numatytoji būklė – išjungta:** nenustatytas arba trumpesnis nei 32 simboliai raktas reiškia, kad antraštė nepriimama visai, o į žurnalą rašomas įspėjimas. Palyginimas – `crypto.timingSafeEqual`, prieš tai patikrinus ilgį.
+- **Ką raktas atrakina:** `GET /admin/klaidos`, `POST .../busena`, `POST .../sutvarkyta`, `GET .../foto`, `GET /admin/atsarga`. **Ko ne:** `DELETE` (negrįžtama, tad tik žmogus su žetonu), `/admin/vartotojai`, `/admin/planas`, `/admin/kreditai`.
+- **Istorijoje matosi, kas keitė:** raktu padarytas įrašas gauna `kas: 'raktas'`, ne žmogaus el. paštą.
+- **`tools/klaidos.js`** – paleidžiama Luko kompiuteryje, skaito `backend/.env`. `node tools/klaidos.js` (atviros), `<nr>` (viena su visa diagnostika), `<nr> <busena> [pastaba]`, `--visi`, `--atsarga`. Raktas niekada nespausdinamas.
+- Patikrinta: be antraštės 401, su blogu raktu 401, su trumpu raktu 401, trynimas raktu 401, `/admin/vartotojai` raktu 401, teisingas raktas 200.
+
 ## Duomenų sluoksnis (v1.46.0)
 
 - **Trys JSON failai `/data`:** `market-history.json` (1000 įrašų modeliui), `listing-lifecycle.json`, `listing-timeline.json` (60 momentinių vaizdų URL'ui). Visi pilnai įkeliami į atmintį paleidžiant.
@@ -321,7 +332,7 @@ Grandinė `fetchSearchPage`: **talpykla → ScraperAPI → tiesioginis axios →
 
 ## Saugumas
 
-- `ANTHROPIC_API_KEY`, `SCRAPER_API_KEY`, `JWT_SECRET`, `ADMIN_EMAILS`, `INVITE_CODES` – tik Railway Variables, **niekada į kodą ar GitHub**.
+- `ANTHROPIC_API_KEY`, `SCRAPER_API_KEY`, `JWT_SECRET`, `ADMIN_EMAILS`, `INVITE_CODES`, `KLAIDU_RAKTAS` – tik Railway Variables, **niekada į kodą ar GitHub**.
 - `backend/.env` – niekada į GitHub.
 - `git push origin main` vykdo **tik Lukas** PowerShell'e; Claude niekada nepushina.
 - Windows PowerShell: `&&` neveikia – git komandos rašomos atskiromis eilutėmis.
