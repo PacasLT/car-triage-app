@@ -4,6 +4,11 @@ Dizainerio maketas (2026-09-18) sudėliotas pagal šoninį meniu su keturiomis
 grupėmis. Šis failas sugretina kiekvieną maketo dalį su tuo, kas **realiai yra**
 serveryje, ir paverčia skirtumą užduotimis.
 
+> **Pataisyta 2026-09-18 (Z-09):** pirminėje versijoje buvo parašyta, kad
+> skelbimai nesaugomi. Tai netiesa — saugomi. Dizaineris pastebėjo, kad
+> pataisymas buvo pritaikytas tik pusiau ir trys sakiniai liko prieštarauti;
+> dabar pašalinti.
+
 ## Tikrovė šiandien (2026-09-18, produkcija)
 
 | Maketas rodo | Realiai yra |
@@ -48,10 +53,6 @@ prasimanytais skaičiais atrodytų veikianti ir slėptų, kad produkto ten nėra
   Todėl darbas yra **pridėti kelis laukus prie jau rašomo įrašo**, ne sukurti
   saugyklą. `irasytiGyvavimoCikla` kviečiamas kiekvienai paieškai — ten pat
   įrašyti ir signalus. Eilė tada yra užklausa į tai, kas jau diske.
-  Kad atsirastų eilė, reikia juos rašyti į DB su būsena. **Bet pusė turinio jau
-  skaičiuojama:** `qualityScore`, `triageLevel`, `kainosIspejimas` (lizingo
-  įmoka), `itariamaZala` (per didelė nuolaida), `rizikosBusena`. Maketo stulpelis
-  „SIGNALAI" beveik tiksliai atitinka tai, ką jau turim – tik niekur nekaupiam.
 - **VIN užklausos** — **[+BACK]** Kvietimai fiksuojami kreditų žurnale
   (`veiksmas: 'vin'`). Reikia bendro sąrašo, ne po vieną vartotoją.
 - **AI įverčiai** — **[+BACK]** Tas pats šaltinis (`veiksmas: 'analize'`).
@@ -84,9 +85,10 @@ prasimanytais skaičiais atrodytų veikianti ir slėptų, kad produkto ten nėra
 
 ## Viršutinė juosta
 
-- **Paieška „VIN, valst. nr. arba skelbimo ID"** — VIN **[+BACK]**;
-  **valst. nr. [NĖRA]** – niekur nerenkamas; skelbimo ID **[NAUJA]**, nes
-  skelbimai nesaugomi.
+- **Paieška „VIN, valst. nr. arba skelbimo ID"** — VIN **[+BACK]** (yra
+  `listing-lifecycle.json` lauke `vin`); **skelbimo ID [+BACK]** — skelbimai
+  saugomi, raktas yra URL, tad reikia tik paieškos pagal jį; **valst. nr.
+  [NĖRA]** — tokio lauko produkte nėra visai.
 - **„SISTEMA VEIKIA"** — **[+BACK]** iš šaltinių būklės.
 
 ---

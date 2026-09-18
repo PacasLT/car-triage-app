@@ -370,6 +370,22 @@ Lukas nieko neperrašinėja ir nesiunčia failų – kiekvienas skaito iš ten, 
 - `matavimai/` – ekranvaizdžiai ir skaičiai, į kuriuos rodo žurnalo įrašai.
 - Nebeklausti Luko „ką perduoti dizaineriui?" – **įrašas žurnale ir yra perdavimas.**
 
+## Zurnale parašyta – Lukui PASAKOMA (v1.65.0)
+
+Kanalas `pasikeitimai/` yra **traukiamas, ne stumiamas**: dizaineris pranešimo
+negauna. Jis skaito `BUSENA.md` ir `ZURNALAS.md` tik pradėdamas sesiją. Vadinasi,
+įrašas žurnale pats savaime jo nepasiekia.
+
+**Taisyklė: kaskart, kai į `ZURNALAS.md` arba `BUSENA.md` įrašomas naujas
+dalykas, atsakymo pabaigoje Lukui pasakoma atskira eilute:**
+
+> **Parašykit dizaineriui: „Patikrink žurnalą".**
+
+Ne užuomina, ne „jis perskaitys" – tiesioginis nurodymas, ką padaryti dabar.
+Be jo klausimas gali gulėti žurnale valandą, o abu laukia vienas kito.
+
+Jei įrašo nebuvo – tos eilutės nerašom, kad ji neprarastų reikšmės.
+
 ## Dizaino sprendimas klausiamas IŠKART (v1.54.0)
 
 Jei pakeitimas reikalauja dizaino sprendimo – naujos spalvos, naujo vardo, naujo komponento, pasirinkimo tarp dviejų išvaizdų – nespėliojam ir neatidedam. Tą pačią akimirką:

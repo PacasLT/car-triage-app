@@ -80,6 +80,18 @@ neatidėlioja ir nespėlioja. Tą pačią akimirką:
 
 Taip dizaineris gauna klausimą su įrodymu, o ne prašymą „pažiūrėk".
 
+## Kanalas yra traukiamas, ne stumiamas
+
+Pranešimo niekas negauna. Abu skaito `BUSENA.md` ir `ZURNALAS.md` **pradėdami
+sesiją**. Todėl įrašas pats savaime kito pusės nepasiekia.
+
+Vienintelis rankinis žingsnis, kuris liko: kai kas nors įrašoma, Lukas parašo
+kitai pusei **„Patikrink žurnalą"**. Vienas žodis, ne turinys.
+
+Klaudijus **privalo** apie tai priminti kiekviename atsakyme, kuriame rašė į
+žurnalą – atskira eilute, atsakymo gale. Be to priminimo klausimas gali guleti
+valandą, o abi pusės lauks viena kitos.
+
 ## Ko niekada nedarom
 
 - Dizaineris **neredaguoja** nieko `frontend/` ir `backend/` viduje — net savo

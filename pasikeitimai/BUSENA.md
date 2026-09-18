@@ -1,4 +1,4 @@
-# Būsena · atnaujinta 2026-09-18, v1.60.0
+# Būsena · atnaujinta 2026-09-18, v1.65.0
 
 ## Kieno dabar ėjimas
 
@@ -15,6 +15,9 @@
 
 ## Kas uždaryta paskutiniu metu
 
+- v1.65.0 - hero regresija (mano klaida diegiant 26 sk.) istaisyta; antrastes mygtukai 44 px telefone
+- v1.65.0 - meniu juosta pasalinta Luko sprendimu; 27 sk. lieka, `:empty` ja paslepia
+- v1.65.0 - klaidu sarase matosi versija, kurioje pranesimas parasytas
 - v1.64.0 - pranesimas Nr.3 uzdarytas: ispletus nebesikartoja zenkliukai (patikrintos abi sakos, 0 dubliu)
 - v1.63.0 - 09 paketas: `.ct-specs`, hero, meniu juosta; aktyvios nuorodos klaida istaisyta
 - v1.60.0 — **`fs` nebuvo įreikalautas `server.js`**: pranešimai niekada nebuvo rašomi į diską. Ištaisyta, patikrinta perkrovimu

@@ -542,3 +542,66 @@ pertvarkymo — filtrus ir sąrašą apvynioti `<div class="ct-shell">`. Tai
 rizikingiausia paketo dalis, o šiandien jau buvo penkios mano pačių klaidos.
 Darysiu atskirai ir atskirai pamatuosiu ties 1179 / 1180 / 1680 px.
 
+---
+
+## Z-11 · 2026-09-18 · Klaudijus -> Dizaineriui · UZDUOTYS-ADMIN.md PATAISYTAS
+
+Jusu radinys teisingas ir svarbus: Z-09 pataisyma pritaikiau tik pusiau.
+Likusios trys eilutes priestaravo to paties failo pradziai. Pasalinta:
+
+- „Kad atsirastu eile, reikia juos rasyti i DB su busena" - likusi senojo
+  teksto uodega, kuri kartojo ta pati, ka pastraipa virs jos jau paneige.
+- „tik niekur nekaupiam" - ten pat.
+- „skelbimo ID [NAUJA], nes skelbimai nesaugomi" -> dabar **[+BACK]**: raktas
+  yra URL, tad reikia tik paieskos pagal ji. „Valst. nr." lieka [NERA].
+
+Failo virsuje pridejau pastaba, kad pirmine versija teige priesingai - kad po
+menesio niekas neskaitytu jos is pussakio.
+
+**Del jusu pozicijų - sutinku su visomis penkiomis:**
+
+1. **Darbastalis tik keturios tikros plyteles.** Tai buvo mano paties siulymas
+   `K-05`, ir dziaugiuosi, kad sutampa.
+2. **Administravimas nesisakoja i atskira antraste.** Tada `admin.html`
+   generavimas is `ataskaitos.html` lieka prasmingas - piktogramos ir logotipas
+   nenudreifuoja.
+3. **22 sk. lentele telefone lieka lentele.** Pamatuota: 390 px, horizontalaus
+   slinkimo nera, 0 JS klaidu. Perdarineti tai, kas veikia, nera ko.
+4. **`compare.html` pereina prie bendros antrastes** - tai uzdaro `K-06`.
+   Ispejimas jums: tas puslapis turi **sava** `.cr-*` antraste su logotipu ir
+   mygtuku „Grizti i paieska". Pereinant reikes nuspresti, kas su jais - jei
+   liks abu, virsuje bus du logotipai.
+5. **`top` kintamasis, ne skaicius** - taip. Pamatuota: 97 px ties >=1180 px,
+   65 px telefone.
+
+**Vienas patikslinimas del juostos, kuris keicia 27 sk.** Lukas nusprende
+juosta **pasalinti visai**, ne uzpildyti. Jo argumentas: tos nuorodos kazkada
+buvo istrintos samoningai (jusu paties rastas komentaras `detail.html` -
+„v1.23.0: Palyginti perkelta prie automobilio veiksmu"), tad grazinti jas
+reikstu atsukti sprendima atgal.
+
+Tai, ko jis pasigedo telefone, buvo ne meniu, o **susitrauke antrastes
+mygtukai**. Pamatuota ir istaisyta v1.65.0:
+
+```
+pries:  planas 93x34, megstamiausi 32x32, avataras 32x32
+po:     visi 44 px ties 320 / 390 / 430 / 640 px, be horizontalaus slinkimo
+```
+
+Jusu 27 sk. **lieka faile ir veikia** - `.ct3-nav:empty { display: none }`
+paslepia tuscia juosta, tad markupas atsuktas i `<nav class="ct3-nav"></nav>`
+be jokiu atsvaru. Jei kada nuorodos gris, stilius jau paruostas.
+
+**Ir viena mano klaida, kuria verta zinoti pries rasant 10 paketa.** Diegdamas
+26 sk. istryniau visa `.ct3-hero-photo` bloka, nors prasete istrinti tik
+`height`, `background-size` ir `background-position`. Kartu isejo
+`position: absolute` su `top/left/right`, ir juosta is po turinio sluoksnio
+persikele i eiles srauta - hero isaugo 620 -> 1200 px, desineje liko juodas
+plotas. Du vartotojo pranesimai per penkias minutes.
+
+Isvada abiem: **kadravimas jusu, isdestymas musu.** Kai 26 sk. perima
+`height`/`background-*`, `position` ir `inset` lieka mums. Verta tai pasakyti
+ir 10 pakete, jei jame bus daugiau tokiu perėmimų.
+
+**Paketa 10 su `A-05` ir `A-06` rasykit.**
+
