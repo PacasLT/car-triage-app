@@ -667,3 +667,86 @@ sprendimas. Butent jos truko 26 sk., ir kalte ne jusu formulavimo: as isvis
 neturejau tryti to, ko nebuvo prasyta. Bet eilute padarys klaida nebeimanoma,
 o ne tik nepatogia.
 
+---
+
+## K-07 - 2026-09-18 - Klaudijus -> Dizaineriui - LAUKIA ATSAKYMO
+
+**Klausimas:** kaip turi atrodyti korteles veiksmu eile telefone, ir ar ji turi
+sutapti su skelbimo puslapio eile?
+
+**Kodel klausiu:** vartotojo pranesimas Nr.11 - „trys mygtukai nesusitvarke
+skelbimu sarase, nors detail atrodo graziai - suvienodink". Atkuriau 385 px ir
+pamatavau:
+
+```
+.ct-actions  327x99, dvi eiles
+  eile 1:  [Pilna apzvalga | 2 kr]   327 px, pirmine
+  eile 2:  [^ ikona]  44 px
+           [Daugiau | 6 v]          223 px, su uzrasu
+           [<> ikona]                44 px
+```
+
+Taigi apacioje trys mygtukai, is kuriu **du tik piktogramos, o vidurinis su
+uzrasu ir dvigubai platesnis**. Skelbimo puslapyje tie patys veiksmai atrodo
+kitaip. Vartotojas tai ivardija kaip „nesusitvarke".
+
+**Ko NEdariau:** nieko. Cia sprendimas, ne pataisymas - ar abu tapatus, ar
+sarasas sąmoningai trumpesnis. Atsvaros nedejau.
+
+**Pakeliui - `.ct-report-fab` pazeidzia jusu pacio `--tap-min`.** Pamatuota
+385 px: **37x32 px**, kai riba 44. Tai pranesimo apie klaida mygtukas, t. y.
+vienintelis budas pranesti apie klaida is telefono. Failas jusu (perimtas
+v1.54.0), tad nelieciau.
+
+**Ir Nr.14 - krovimo juosta placiame ekrane.** Pamatuota ties 2101 px:
+konteineris lieka 1240 px, **po 431 px tuscios is abieju pusiu**. Tai tas pats,
+del ko rasiau `K-04`, ir jusu **25 sk. `.ct-shell` yra tiesioginis sprendimas**.
+Ta skyriu buvau atidejes; dabar aisku, kad ji verta daryti pirma.
+
+---
+
+## K-08 - 2026-09-18 - Klaudijus -> Dizaineriui - 25 SK. NEIDIEGIAMAS BE SIAURO FILTRU VARIANTO
+
+Lukas leido imtis 25 sk. Persiurau markupa ir sustojau pries keisdamas - trūksta
+vienos dalies, ir be jos idiegimas duotu blogesni rezultata nei dabar.
+
+**Kas yra siandien** (`index.html`, pamatuota 1400 px):
+
+```
+<section class="ct3-hero">      pilno ploto nuotraukos juosta
+<div class="ct3-search-panel">  FILTRAI - 1400 px platus
+   .ct3-search-inner            max-width 1440 px
+   .ct3-fields                  grid, 6 STULPELIU, 23 laukai
+<div class="ct3-stats-bar">     pilno ploto
+<div id="sort-bar">             rikiavimas
+<div id="results">              korteles
+```
+
+Filtrai ir sarasas **jau yra broliai**, tad `.ct-shell` juos apvynioti lengva.
+Bet `.ct3-fields` yra **sesiu stulpeliu tinklelis su 23 laukais**, suprojektuotas
+horizontaliai per visa ploti. Idejus ji i 276 px sona, sesi stulpeliai suspaustu
+kiekviena lauka iki ~40 px.
+
+25 sk. duoda **karkasa** (`grid-template-columns: 276px minmax(0,1fr)`), bet
+neduoda **siauro filtru varianto**. Be jo idiegimas pakeistu 431 px tuscios
+vietos i nenaudojama filtru stulpeli - vartotojui blogiau, ne geriau.
+
+**Todel neidiegiau ir atsvaru nedejau.** Reikia vieno is dviejuo, ir tai jusu
+sprendimas:
+
+1. **`.ct3-fields` siaurus variantas** sone - vienas stulpelis, gal sulankstomos
+   grupes (Markė/modelis · Kaina · Metai · Rida · Papildomai). Tada 25 sk.
+   idiegiamas tą pačią dieną.
+2. **Filtrai lieka virsuje, o i sona eina kas kita** - pvz. paieskos santrauka,
+   rikiavimas ir aktyvus filtrai kaip zenkliukai. Tada platus ekranas isnaudojamas,
+   o 23 lauku forma nejudinama.
+
+Mano nuomone - antras kelias pigesnis ir maziau rizikingas, bet pirmas isprendzia
+ir ta problema, kuria pats ivardijot: filtrai uzima auksti ir isslenka is ekrano.
+
+**Kas tuo tarpu ISTAISYTA** (`Nr.14` prieztaraujanti dalis): nieko - be 25 sk.
+1240 px riba lieka. Vartotojui pasakyta, kad tai laukia jusu atsakymo.
+
+**Ir patikslinimas 25 sk. viduje:** `top: 76px` -> **97px**. Pamatuota: antraste
+97 px visur nuo 900 px, o sonas atsiranda nuo 1180 px, tad ten visada 97.
+

@@ -4,6 +4,9 @@
 
 | Nr. | Kas | Kieno ėjimas | Trumpai |
 |---|---|---|---|
+| K-08 | 25 sk. be siauru filtru varianto | **Dizaineris** | `.ct3-fields` - 6 stulpeliu tinklelis, 23 laukai. I 276 px sona netelpa. Reikia siauro varianto arba kito turinio sone. |
+| K-07 | Korteles veiksmu eile telefone | **Dizaineris** | Nr.11: du mygtukai tik piktogramos, vidurinis su uzrasu. Plius `.ct-report-fab` 37x32 pazeidzia `--tap-min`. |
+| V-14 | Krovimo juosta placiame ekrane | **Klaudijus** | Nr.14: ties 2101 px po 431 px tuscios. Sprendimas - 25 sk. `.ct-shell`. |
 | K-03 | `.ct-kv` vardas irgi užimtas | **Dizaineris** | Senasis `.ct-kv` = eilutė, naujas = konteineris. Pamatuota: trys eilutės sugultų į vieną (y 27/27/27). 24 sk. sustabdytas. |
 | K-05 | Administravimo panelės maketas | **Dizaineris** | Karkasas geras; keturi klausimai: tikri skaičiai, moderavimo eilė, atskira antraštė, 880 px kortelės. Užduotys – `UZDUOTYS-ADMIN.md`. |
 | K-04 | Maketas už 1240 px ir po 385 px | **Dizaineris** | Du vartotojo pranešimai per valandą: 3152 px – 976 px tuščios; 385 px – nuotrauka apkarpyta. Plius tuščia `.ct3-nav`. |
