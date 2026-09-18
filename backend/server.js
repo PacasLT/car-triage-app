@@ -245,6 +245,16 @@ app.post('/api/klaida', (req, res) => {
       kartojasi: !!kunas.kartojasi,
       // v1.58.0: is narsykles eiles. Rodo, kad pranesimas veluoja - laikas
       // `laikas` yra GAVIMO, o ne ivykio. Be sios zymos diagnostika meluoja.
+      // v1.69.0: trys laukai, kurie atsako i pirmus tris klausimus, kuriuos
+      // sau uzduodu skaitydamas pranesima.
+      perkrovus: !!kunas.perkrovus,
+      kada: ['siandien','savaite','seniai'].indexOf(kunas.kada) >= 0 ? kunas.kada : null,
+      vieta: (kunas.vieta && typeof kunas.vieta === 'object') ? {
+        elementas: String(kunas.vieta.elementas || '').slice(0, 200),
+        tekstas: String(kunas.vieta.tekstas || '').slice(0, 80),
+        dydis: String(kunas.vieta.dydis || '').slice(0, 20),
+        vieta: String(kunas.vieta.vieta || '').slice(0, 20),
+      } : null,
       persiustas: !!kunas.persiustas,
       fotoNumesta: !!kunas.fotoNumesta,
       turejoRodyti: kunas.turejoRodyti ? String(kunas.turejoRodyti).slice(0, 500) : null,

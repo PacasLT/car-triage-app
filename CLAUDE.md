@@ -370,6 +370,26 @@ Lukas nieko neperrašinėja ir nesiunčia failų – kiekvienas skaito iš ten, 
 - `matavimai/` – ekranvaizdžiai ir skaičiai, į kuriuos rodo žurnalo įrašai.
 - Nebeklausti Luko „ką perduoti dizaineriui?" – **įrašas žurnale ir yra perdavimas.**
 
+## Po kiekvienos versijos – KLAIDŲ BŪSENOS (v1.69.0)
+
+Versijos pakėlimas ir klaidų būsenos yra **vienas veiksmas, ne du**. Jei
+versija pakelta, o būsenos ne, sąrašas meluoja: pranešimas atrodo atviras,
+nors jau ištaisytas, ir kitą kartą prie jo grįžama be reikalo.
+
+**Taisyklė: pakėlus versiją, tuoj pat pereinama per atvirus pranešimus ir:**
+
+1. ką ši versija ištaiso → `laukia-patikros`, su pastaba ir versijos numeriu;
+2. kas pasirodė neatkartojamas → `nepasitvirtino`, su paaiškinimu kodėl;
+3. kas laukia dizainerio → `atideta`, nurodant, kurio paketo;
+4. kas pradėtas → `tvarkoma`.
+
+**Ir Lukui atsakyme parodoma suvestinė** – kiek kurioje būsenoje ir kurie
+numeriai laukia jo patikros. Push'inėdamas jis turi matyti ne tik versiją, bet
+ir kur esame kartu.
+
+Būsenos gyvena produkcijoje, ne repozitorijoje, tad jos keiciamos per
+`/admin.html` arba `POST /admin/klaidos/:nr/busena` – push'as ju NEPAKEICIA.
+
 ## Zurnale parašyta – Lukui PASAKOMA (v1.65.0)
 
 Kanalas `pasikeitimai/` yra **traukiamas, ne stumiamas**: dizaineris pranešimo

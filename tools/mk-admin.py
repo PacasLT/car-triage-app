@@ -165,6 +165,10 @@ BODY = u'''
       e.push('');
       e.push('TEKSTAS: ' + k.tekstas);
       if (k.turejoRodyti) e.push('TUREJO RODYTI: ' + k.turejoRodyti);
+      if (k.vieta) e.push('PARODE VIETA: ' + (k.vieta.tekstas || '-') + '   ' + k.vieta.elementas
+        + '   ' + (k.vieta.dydis || '') + ' @ ' + (k.vieta.vieta || ''));
+      if (k.perkrovus) e.push('PERKROVE PUSLAPI - liko taip pat');
+      if (k.kada) e.push('PIRMA KARTA PASTEBEJO: ' + ({siandien:'siandien', savaite:'sia savaite', seniai:'seniai'}[k.kada] || k.kada));
       e.push('');
       var dbr = dabartineVersija();
       var senesne = g.versija && dbr && versijaSkaicium(g.versija) < versijaSkaicium(dbr);

@@ -171,7 +171,7 @@
     });
   }
 
-  var _foto = null, _kat = null, _svarba = 'trukdo';
+  var _foto = null, _kat = null, _svarba = 'trukdo', _vieta = null;
 
   // Kategorijos sudėtos ne iš teorijos, o iš to, kas šioje sistemoje realiai lūžta.
   // Kiekviena nurodo, KURIAME sluoksnyje ieškoti — tai vienintelė jų prasmė.
@@ -238,7 +238,23 @@
       +     '<span class="ct-field-err" id="kp-tekstas-err" hidden>Parašykite bent sakinį.</span>'
       +   '</div>'
       +   '<div id="kp-papildomas"></div>'
+      +   '<div class="ct-flag-group">'
+      +     '<span class="ct-field-k">KUR TAI ĮVYKO (NEBŪTINA)</span>'
+      +     '<button type="button" class="ct-btn ct-btn-sm" id="kp-rodyti">'
+      +       '<span>Parodyti vietą ekrane</span></button>'
+      +     '<div class="ct-hint" id="kp-vieta-z">Langas trumpam pasitrauks – bakstelėkite į vietą, kuri sugedo.</div>'
+      +   '</div>'
       +   '<label class="ct-check"><input type="checkbox" id="kp-kartojasi"><i></i><span>Taip jau buvo anksčiau</span></label>'
+      +   '<label class="ct-check"><input type="checkbox" id="kp-perkrovus"><i></i><span>Perkroviau puslapį – liko taip pat</span></label>'
+      +   '<div class="ct-flag-group">'
+      +     '<label class="ct-field-k" for="kp-kada">KADA PIRMĄ KARTĄ PASTEBĖJOTE</label>'
+      +     '<select class="ct-field" id="kp-kada">'
+      +       '<option value="">— nesvarbu —</option>'
+      +       '<option value="siandien">Šiandien</option>'
+      +       '<option value="savaite">Šią savaitę</option>'
+      +       '<option value="seniai">Seniai, bet nepranešiau</option>'
+      +     '</select>'
+      +   '</div>'
       +   '<div class="ct-flag-group">'
       +     '<span class="ct-field-k">EKRANO NUOTRAUKA (NEBŪTINA)</span>'
       +     '<div class="ct-flags">'
@@ -262,7 +278,7 @@
     document.getElementById('kp-diag-pre').textContent = JSON.stringify(d, null, 1);
 
     var uzdaryti = function () {
-      _foto = null; _kat = null; _svarba = 'trukdo';
+      _foto = null; _kat = null; _svarba = 'trukdo'; _vieta = null;
       scrim.remove(); document.removeEventListener('keydown', esc2);
     };
     var esc2 = function (e) { if (e.key === 'Escape') uzdaryti(); };
@@ -307,6 +323,83 @@
         : '';
     };
     rinktis(document.getElementById('kp-svarba'), function (k) { _svarba = k; });
+
+    // ── „Parodyti vieta ekrane" (v1.69.0) ──────────────────────────────────
+    // Kam: „neveikia mygtukas" be elemento yra mįslė. Paspaudimu seka pasako,
+    // KA zmogus spaude, bet ne KA jis mato sugedus - o tai daznai skirtingi
+    // dalykai („paspaudziau Daugiau, bet blogai atrodo kaina virsuje").
+    //
+    // Kaip: langas pasitraukia, pelė/pirštas veda ryskinimo remeli, paspaudus
+    // ivykis PERIMAMAS (capture + preventDefault), kad puslapis nepajustu
+    // paspaudimo - kitaip zmogus, rodydamas i „Pilna apzvalga", ja ir paleistu,
+    // o tai kainuoja kreditus.
+    document.getElementById('kp-rodyti').onclick = function () {
+      var langas = scrim;
+      langas.style.visibility = 'hidden';
+
+      var remelis = document.createElement('div');
+      remelis.style.cssText = 'position:fixed;z-index:2147483645;pointer-events:none;'
+        + 'border:2px solid var(--accent, #7c6ff7);border-radius:6px;'
+        + 'background:rgba(124,111,247,.14);transition:all .06s linear';
+      var juosta = document.createElement('div');
+      juosta.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:2147483646;'
+        + 'padding:12px 16px;text-align:center;background:rgba(5,6,10,.92);'
+        + 'color:#e8ebf2;font:600 13px/1.4 system-ui,sans-serif';
+      juosta.textContent = 'Bakstelėkite į vietą, kuri sugedo. Atšaukti – Esc.';
+      document.body.appendChild(remelis);
+      document.body.appendChild(juosta);
+
+      var paskutinis = null;
+      function podKursoriumi(x, y) {
+        remelis.style.display = 'none'; juosta.style.display = 'none';
+        var el = document.elementFromPoint(x, y);
+        remelis.style.display = ''; juosta.style.display = '';
+        return el;
+      }
+      function vesti(e) {
+        var t = e.touches ? e.touches[0] : e;
+        var el = podKursoriumi(t.clientX, t.clientY);
+        if (!el || el === paskutinis) return;
+        paskutinis = el;
+        var b = el.getBoundingClientRect();
+        remelis.style.left = b.left + 'px'; remelis.style.top = b.top + 'px';
+        remelis.style.width = b.width + 'px'; remelis.style.height = b.height + 'px';
+      }
+      function baigti() {
+        document.removeEventListener('mousemove', vesti, true);
+        document.removeEventListener('touchmove', vesti, true);
+        document.removeEventListener('click', pasirinkti, true);
+        document.removeEventListener('keydown', atsaukti, true);
+        remelis.remove(); juosta.remove();
+        langas.style.visibility = '';
+      }
+      function pasirinkti(e) {
+        e.preventDefault(); e.stopPropagation();   // puslapis sio paspaudimo nepajus
+        var t = e.touches ? e.touches[0] : e;
+        var el = podKursoriumi(t.clientX, t.clientY) || paskutinis;
+        if (!el) {   // bakstelejo i tuscia vieta - neuzdarom, pasakom
+          juosta.textContent = 'Ten nieko nėra. Bakstelėkite į matomą elementą arba spauskite Esc.';
+          return;
+        }
+        if (el) {
+          var b = el.getBoundingClientRect();
+          _vieta = {
+            elementas: kelias(el),
+            tekstas: (el.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 60),
+            dydis: Math.round(b.width) + 'x' + Math.round(b.height),
+            vieta: Math.round(b.left) + ',' + Math.round(b.top),
+          };
+          var z = document.getElementById('kp-vieta-z');
+          if (z) z.textContent = 'Pasirinkta: ' + (_vieta.tekstas || _vieta.elementas) + '  (' + _vieta.dydis + ')';
+        }
+        baigti();
+      }
+      function atsaukti(e) { if (e.key === 'Escape') { e.stopImmediatePropagation(); baigti(); } }
+      document.addEventListener('mousemove', vesti, true);
+      document.addEventListener('touchmove', vesti, true);
+      document.addEventListener('click', pasirinkti, true);
+      document.addEventListener('keydown', atsaukti, true);
+    };
 
     var inp = document.getElementById('kp-failas');
     document.getElementById('kp-prideti').onclick = function () { inp.click(); };
@@ -399,6 +492,9 @@
         kategorija: _kat,
         svarba: _svarba,
         kartojasi: !!document.getElementById('kp-kartojasi').checked,
+        perkrovus: !!document.getElementById('kp-perkrovus').checked,
+        kada: (document.getElementById('kp-kada') || {}).value || null,
+        vieta: _vieta,
         turejoRodyti: ((document.getElementById('kp-turejo') || {}).value || '').trim().slice(0, 500) || null,
         diagnostika: surinkti(),
         foto: _foto || null,

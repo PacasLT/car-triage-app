@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.69.0', data: '2026-09-18', pavadinimas: 'Galima parodyti, kur sugedo',
+    pakeitimai: [
+      'Pranešime naujas mygtukas „Parodyti vietą ekrane" – langas pasitraukia, jūs bakstelėjate į sugedusią vietą',
+      'Paspaudimas perimamas, tad rodydami į „Pilna apžvalga" jos nepaleisite ir kreditas nenusirašys',
+      'Naujas langelis „Perkroviau puslapį – liko taip pat"',
+      'Ir klausimas, kada pirmą kartą pastebėjote – šiandien, šią savaitę ar seniai',
+    ],
+  },
+  {
     versija: '1.68.0', data: '2026-09-18', pavadinimas: 'Pranešimo langas tikslesnis',
     pakeitimai: [
       'Klaidos rūšis renkama iš sąrašo – trylika aiškių pasirinkimų vietoj šešių ženkliukų',
