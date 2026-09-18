@@ -382,3 +382,46 @@
   .ct-btn-xl.is-skip { color: var(--text-muted); }
   .ct-btn-xl-row { display: flex; gap: 18px; align-items: center; justify-content: center; }
 }
+
+
+/* ============================================================================
+   MOBILUS · 390 px · atsakymai i tris klausimus
+   ========================================================================== */
+
+/* ── 2. Paspaudimo zona didesne uz mygtuka ───────────────────────────────── */
+/* Rodykle ant nuotraukos lieka 38 px VIZUALIAI, bet nykstys turi 44 px.
+   ::before neturi fono, tad vaizdo neuzstoja — tik gaudo paspaudima. */
+
+.ct-btn-over { position: absolute; }
+.ct-btn-over::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+}
+@media (max-width: 640px) {
+  /* 38 + 2x3 = 44 px zona. Rodykles yra priesinguose krastuose, tad zonos
+     nepersidengia net ant 250 px nuotraukos. */
+  .ct-btn-over::before { inset: -3px; }
+}
+
+/* ── 3. Veiksmu eile korteleje telefone ──────────────────────────────────── */
+/* Keturi mygtukai po 44 px vienas po kito = ~200 px vienai kortelei.
+   Sprendimas: pirminis per visa ploti (tai vienintelis sprendimas, kuri
+   zmogus priima), likusieji trys — viena eile. ~97 px vietoj ~200 px. */
+
+@media (max-width: 640px) {
+  .ct-actions { gap: 8px; }
+  /* Pirminis virsuje ir per visa ploti — nykstys jo neieskos */
+  .ct-actions > .ct-btn-primary { order: -1; flex: 1 1 100%; justify-content: center; }
+  /* Tarpas darbalaukyje atskiria pirmini; telefone jis nieko neatskiria */
+  .ct-actions > .ct-actions-gap { display: none; }
+  /* Likusieji dalijasi eile */
+  .ct-actions > .ct-btn:not(.ct-btn-primary) { flex: 1 1 0; min-width: 0; justify-content: center; }
+  /* .ct-btn-tight: telefone numeta teksta, pasilieka piktograma.
+     Reikalauja, kad tekstas butu apvyniotas <span> — zr. MYGTUKAI.md §10. */
+  .ct-actions > .ct-btn-tight { flex: 0 0 auto; width: var(--tap-min); padding: 0; gap: 0; }
+  .ct-actions > .ct-btn-tight > span { display: none; }
+  .ct-actions > .ct-btn-tight > i { margin-left: 0; }
+  .ct-actions > .ct-btn-tight::after { display: none; }
+}

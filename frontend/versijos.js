@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.37.0', data: '2026-09-18', pavadinimas: 'Mygtukų taisymai ir meniu atstatymas',
+    pakeitimai: [
+      'Skelbimo puslapyje violetinė juosta virš apžvalgos lygių dingo – tai buvo blokas, per klaidą paverstas mygtuku',
+      'Mėgstamiausių širdutė ir paskyros meniu vėl veikia normaliai',
+      'Kortelės mygtukai gavo vieną bendrą išvaizdą',
+    ],
+  },
+  {
     versija: '1.36.1', data: '2026-09-18', pavadinimas: 'Skubus taisymas: atstatyti sugadinti stiliai',
     pakeitimai: [
       'Atstatyti puslapių stiliai – praeitame atnaujinime automatinis valymas sugadino dalį taisyklių, todėl dingo nuotraukos, iškrito mygtukai ir palyginimo ataskaita liko be apipavidalinimo',
@@ -373,7 +381,7 @@ window.CT_APP_VERSION = 'v' + window.CT_VERSIJOS[0].versija;
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); }
 
   function uztikrinti() {
-    if (!document.getElementById('ct-ver-css')) { var st = document.createElement('style'); st.id = 'ct-ver-css'; st.textContent = CSS; document.head.prepend(st); }
+    if (!document.getElementById('ct-ver-css')) { var st = document.createElement('style'); st.id = 'ct-ver-css'; st.textContent = CSS; document.head.appendChild(st); }
     var m = document.getElementById('ct-ver-modal');
     if (m) return m;
     m = document.createElement('div'); m.id = 'ct-ver-modal';
@@ -408,7 +416,7 @@ window.CT_APP_VERSION = 'v' + window.CT_VERSIJOS[0].versija;
 
   // Antrastes mygtukas: tekstas is saraso, paspaudimas atidaro langa
   function prijungti() {
-    if (!document.getElementById('ct-ver-css')) { var st = document.createElement('style'); st.id = 'ct-ver-css'; st.textContent = CSS; document.head.prepend(st); }
+    if (!document.getElementById('ct-ver-css')) { var st = document.createElement('style'); st.id = 'ct-ver-css'; st.textContent = CSS; document.head.appendChild(st); }
     var b = document.getElementById('app-version'); if (!b) return;
     b.textContent = window.CT_APP_VERSION;
     b.title = 'Versijų istorija – ' + window.CT_VERSIJOS[0].data;

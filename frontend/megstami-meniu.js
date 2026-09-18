@@ -79,12 +79,12 @@
 
   function sukurti() {
     if (document.getElementById('ct-meg-wrap')) return;
-    if (!document.getElementById('ct-meg-css')) { var st = document.createElement('style'); st.id = 'ct-meg-css'; st.textContent = CSS; document.head.prepend(st); }
+    if (!document.getElementById('ct-meg-css')) { var st = document.createElement('style'); st.id = 'ct-meg-css'; st.textContent = CSS; document.head.appendChild(st); }
     var avatar = document.querySelector('.ct3-header-right .ct3-avatar') || document.querySelector('.ct3-avatar');
     var host = avatar ? avatar.parentElement : document.querySelector('.ct3-header-right');
     if (!host) return;
     var wrap = document.createElement('div'); wrap.className = 'ct-meg-wrap'; wrap.id = 'ct-meg-wrap';
-    wrap.innerHTML = '<button class="ct-meg-btn ct-btn ct-btn-sm" id="ct-meg-btn" type="button" title="Mėgstamiausi" aria-haspopup="true" aria-expanded="false">' + ikonaSirdis(18) + '<span class="ct-meg-kiek" id="ct-meg-kiek">0</span></button>'
+    wrap.innerHTML = '<button class="ct-meg-btn" id="ct-meg-btn" type="button" title="Mėgstamiausi" aria-haspopup="true" aria-expanded="false">' + ikonaSirdis(18) + '<span class="ct-meg-kiek" id="ct-meg-kiek">0</span></button>'
       + '<div class="ct-meg-dd" id="ct-meg-dd" role="menu"></div>';
     if (avatar) host.insertBefore(wrap, avatar); else host.appendChild(wrap);
     var btn = wrap.querySelector('#ct-meg-btn');

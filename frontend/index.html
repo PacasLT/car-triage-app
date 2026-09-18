@@ -1150,7 +1150,7 @@
 .ct-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .ct-title-row h3 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -.01em; }
 .ct-card .source-tag { font: 600 9px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; padding: 4px 6px; border-radius: 4px; background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border); margin: 0; }
-.ct-card .fav-star.ct-fav { position: absolute; top: 9px; right: 9px; z-index: 3; width: 32px; height: 32px; border-radius: 8px; background: transparent; border: 1px solid var(--border-light); color: var(--text-muted); font-size: 14px; display: grid; place-items: center; padding: 0; }
+.ct-card .fav-star.ct-fav { position: absolute; top: 9px; right: 9px; z-index: 3;}  /* v1.37.0: išvaizda – ct-mygtukai.css, čia tik pozicija */
 .ct-card .fav-star.ct-fav.active { color: #ff5c8a; background: rgba(255,92,138,.14); border-color: rgba(255,92,138,.45); }
 .ct-price-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
 .ct-price { font: 600 26px/1 var(--font-mono); letter-spacing: -.02em; color: var(--accent-light); }
@@ -1170,11 +1170,12 @@
 .ct-comment span { flex: none; font: 700 9px/1 var(--font-mono); padding: 5px 5px; border-radius: 4px; background: var(--accent); color: #fff; height: 18px; display: grid; place-items: center; }
 .ct-comment p { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--text-secondary); text-wrap: pretty; }
 .ct-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
-.ct-btn, .ct-card .compare-toggle.ct-btn, .ct-card .detail-btn.ct-btn { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border-radius: 8px; background: transparent; border: 1px solid var(--border-light); color: var(--text-primary); font-size: 12.5px; font-weight: 600; text-decoration: none; cursor: pointer; white-space: nowrap; transition: background .15s; }
-.ct-btn:hover, .ct-card .compare-toggle.ct-btn:hover, .ct-card .detail-btn.ct-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
-.ct-card .compare-toggle.ct-btn.active { background: var(--accent-dim); border-color: var(--accent); }
-.ct-card .detail-btn.ct-btn-primary, .ct-card .detail-btn.ct-btn-primary.ready { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: none; animation: none; }
-.ct-card .detail-btn.ct-btn-primary:hover { filter: brightness(1.08); }
+/* v1.37.0: mygtuko išvaizda – ct-mygtukai.css. Čia liko tik tai, ko komponentas nenustato. */
+.ct-card .compare-toggle, .ct-card .detail-btn {}  /* v1.37.0: visa išvaizda – ct-mygtukai.css */
+/* v1.37.0: hover – ct-mygtukai.css */
+/* v1.37.0: įjungta būsena – ct-mygtukai.css (.is-on) */
+/* v1.37.0: pirminis mygtukas ir .is-ready – ct-mygtukai.css */
+/* v1.37.0: pirminio hover – ct-mygtukai.css */
 .ct-card .detail-btn:disabled { opacity: .6; cursor: progress; }
 
 /* score */

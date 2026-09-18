@@ -543,60 +543,27 @@ textarea:focus-visible,
 }
 
 /* ── 2. TEKSTA NESANTIS AKCENTAS · AA ───────────────────────────────────────
-   #fff ant --accent (#7C5CFF) = 4,35:1, nepraeina. --accent-strong = 4,66:1.
-   Specifika suderinta su .ct-card .detail-btn.ct-btn-primary (0,3,0).       */
+   ISKELTA I ct-mygtukai.css .ct-btn-primary.
 
-.ct-card .detail-btn.ct-btn-primary,
-.card.ct-card .detail-btn.ct-btn-primary,
-.ct-card .detail-btn.ready,
-.card .detail-btn.ready,
-.detail-btn.detail-btn.ready,
-button#search-btn,
-#compare-btn,
-.dp-act.dp-act-primary,
-.dp-bc-btn.dp-bc-primary,
-.dp-empty a[href] {
-  background: var(--accent-strong);
-  border-color: var(--accent-strong);
-  color: var(--text-on-accent);
-}
-.ct-card .detail-btn.ct-btn-primary:hover,
-.card.ct-card .detail-btn.ct-btn-primary:hover,
-.ct-card .detail-btn.ready:hover,
-.card .detail-btn.ready:hover,
-.detail-btn.detail-btn.ready:hover,
-button#search-btn:hover,
-#compare-btn:hover,
-.dp-act.dp-act-primary:hover,
-.dp-bc-btn.dp-bc-primary:hover,
-.dp-empty a[href]:hover {
-  background: var(--accent-strong-hover);
-  border-color: var(--accent-strong-hover);
-  filter: none;
-}
+   Sis blokas buvo parasytas 2022 m. specifikai — (0,3,0) selektoriu grandine,
+   kad nugaletu jusu .ct-card .detail-btn.ct-btn-primary. Ta sena taisykle jau
+   istrinta, tad grandines nebereikia, o palikta ji nugaletu .ct-btn-primary.
 
-/* Pulsavimas prie kainos: po 2 s nebeinformuoja, o nuolatinis judesys prie
-   pinigu mazina pasitikejima. Zenklas lieka, animacija ne.                  */
-.ct-card .detail-btn.ready,
-.detail-btn.detail-btn.ready { animation: none; box-shadow: none; }
+   Kontrastas issaugotas: --accent-strong (#7856F7) su #fff = 4,66:1.
+   Tikrinti verta vienoje vietoje — ct-mygtukai.css .ct-btn-primary.
+
+   Pulsavimo ir box-shadow panaikinimas ant .ready irgi persikele tenai
+   (.is-ready busena): zenklas lieka, animacijos nera.                       */
 
 /* ── 3. PASPAUDIMO ZONA 390 px ──────────────────────────────────────────────*/
 
+/* Mygtukus 44 px pakelia pats ct-mygtukai.css. Cia lieka tik tai, kas NE
+   mygtukas ir ko tas failas nevaldo. Anksciau cia buvo dvigubu klasiu
+   grandines (.dp-act.dp-act = 0,2,0) — jos nugalejo ir .ct-btn-sm (32 px),
+   ir .ct-btn-over (38 px ant nuotraukos), t. y. abi vietas, kur 44 px yra
+   klaida, ne prieinamumas.                                                  */
 @media (max-width: 640px) {
-  .ct-card .detail-btn,
-  .card .detail-btn,
-  .ct-card .compare-toggle,
-  .card .compare-toggle,
-  .app-header .nav-btn,
-  .ct-card .fav-star,
-  .dp-act.dp-act,
-  .dp-bc-btn.dp-bc-btn,
-  .dp-tab.dp-tab,
-  .ct3-nav-link.ct3-nav-link,
-  .dp-photo-ai-btn.dp-photo-ai-btn,
-  button#search-btn,
-  #compare-btn,
-  #toggle-all-btn,
+  .ct3-nav-link,
   #sort-select {
     min-height: var(--tap-min);
   }
@@ -688,17 +655,11 @@ img, svg, video, canvas { max-width: 100%; }
 .dp-col-h span { font-size: var(--fs-400); font-weight: var(--fw-semi); }
 .dp-col-h-ic { border-radius: var(--radius-sm); }
 
-/* Skirtukai */
-.dp-tab { height: 46px; font-size: var(--fs-200); font-weight: var(--fw-medium); color: var(--text-muted); }
-.dp-tab:hover { color: var(--text-primary); }
-.dp-tab.active { color: var(--accent-light); border-bottom-color: var(--accent); font-weight: var(--fw-semi); }
-
-/* Veiksmai */
-.dp-act { min-height: 38px; border-radius: var(--radius-md); border-color: var(--border-light); font-size: var(--fs-200); }
-.dp-act:hover { background: var(--bg-elevated); }
-.dp-bc-btn { min-height: 34px; border-radius: var(--radius-md); border-color: var(--border-light); font-size: var(--fs-200); }
-.dp-bc-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
-.dp-bc-btn.save { background: var(--accent-dim); border-color: var(--accent-border); color: var(--accent-light); }
+/* Skirtukai ir veiksmai · ISKELTI I ct-mygtukai.css
+   v1.36.0: cia buvo .dp-tab (46px), .dp-act (38px) ir .dp-bc-btn (34px).
+   Trecias is ju buvo ketvirtasis aukstis sistemoje, gyves po 15 sk. istrynimo.
+   Elgesys nepasikeite: .dp-tab -> .ct-tab (46px), .dp-act -> .ct-btn (38px),
+   .dp-bc-btn -> .ct-btn (38px). .dp-bc-btn.save -> .is-on.               */
 
 /* Galerija */
 .dp-thumb { border-radius: var(--radius-md); background: var(--bg-elevated); }
@@ -715,24 +676,21 @@ img, svg, video, canvas { max-width: 100%; }
 .dp-ai-text { font-size: var(--fs-200); line-height: var(--lh-body); color: var(--text-secondary); }
 .dp-ai-header h3 { font-size: var(--fs-400); font-weight: var(--fw-semi); }
 
-/* Pardavejas ir nuotrauku analize */
-.dp-seller-link-btn { min-height: 42px; border-radius: var(--radius-md); border-color: var(--accent-border); }
-.dp-seller-link-btn:hover { background: var(--accent-dim); }
-.dp-photo-ai-btn {
-  border-radius: var(--radius-md);
-  border-color: var(--accent-border);
-  background: var(--accent-dim);
-  color: var(--accent-light);
-}
+/* Pardavejas ir nuotrauku analize
+   .dp-seller-link-btn (42 px!) ir .dp-photo-ai-btn iskelti i ct-mygtukai.css.
+   Pirmasis buvo dar vienas aukstis, kurio nebuvo nei jusu, nei mano sarase.
+   .dp-seller-link-btn -> .ct-btn;  .dp-photo-ai-btn -> .ct-btn ct-btn-primary. */
 .dp-photo-ai-result { border-radius: var(--radius-lg); border-color: var(--accent-border); }
 .dp-photo-ai-result-badge { background: var(--accent); border-radius: var(--radius-sm); }
 
 /* Antraste */
 .ct3-nav-link { border-radius: var(--radius-md); font-size: var(--fs-300); color: var(--text-secondary); }
 .ct3-nav-link:hover { background: var(--bg-elevated); color: var(--text-primary); }
-.ct3-premium-btn { border-radius: var(--radius-pill); border-color: var(--accent); color: var(--accent-light); }
-.ct3-premium-btn:hover { background: var(--accent-dim); }
-.ct3-avatar { border-color: var(--border-light); background: var(--bg-elevated); }
+/* .ct3-premium-btn ir .ct3-avatar iskelti i ct-mygtukai.css (.ct-btn-sm).
+   PENKTAS radinys: .ct3-premium-btn turejo border-radius: var(--radius-pill),
+   t. y. TRECIA radiusa sistemoje. Jusu matavimuose jo nesimato tik todel, kad
+   mygtukas jau turi ir .ct-btn klase, kuri laimi failu tvarka — bet nuemus
+   .ct-btn jis atsistatytu. Antraštes akcentas dabar: .ct-btn-sm + .is-on.  */
 
 /* Skaiciai — mono ir lygiuoti stulpeliuose */
 /* .dp-spec-v ir .dp-score-num jusu kode neegzistuoja — isimta (v1.29.0 patikra) */
@@ -1131,8 +1089,10 @@ img, svg, video, canvas { max-width: 100%; }
 .dp-panel-sec { display: flex; flex-direction: column; gap: var(--s-2); padding-top: 11px; border-top: 1px solid var(--border); }
 .dp-panel-sec-h { font: var(--fw-semi) 9.5px/1 var(--font-mono); letter-spacing: .12em; color: var(--text-muted); }
 .dp-panel-act { display: flex; gap: var(--s-2); flex-wrap: wrap; padding-top: 11px; border-top: 1px solid var(--border); }
-.dp-panel-act > .dp-act-primary { flex: 1 1 100%; min-height: var(--tap-min); font-size: var(--fs-300); }
-.dp-panel-act > :not(.dp-act-primary) { flex: 1 1 0; min-width: 110px; }
+/* Tik isdestymas — aukscio ir srifto cia nera samoningai (juos valdo
+   ct-mygtukai.css). Buvo min-height: 44px + font-size. */
+.dp-panel-act > .ct-btn-primary, .dp-panel-act > .dp-act-primary { flex: 1 1 100%; }
+.dp-panel-act > :not(.ct-btn-primary):not(.dp-act-primary) { flex: 1 1 0; min-width: 110px; }
 
 /* ── Trys zinojimo lygiai sarasuose ─────────────────────────────────────── */
 
