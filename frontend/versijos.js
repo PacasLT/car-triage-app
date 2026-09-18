@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.32.0', data: '2026-09-18', pavadinimas: 'Dizaino taisyklės, kurių laikysimės ir toliau',
+    pakeitimai: [
+      'Dizaino sistema atskirta nuo mūsų pataisymų – naujos dizainerio versijos nebeištrins mūsų darbo, o mūsų pataisymai nebegadins jo sistemos',
+      'Atsirado automatinis patikrinimas, kuris neleidžia grįžti prie kietai įrašytų spalvų ir šriftų',
+      'Patikrinimas saugo ir produkto taisykles: neįvertinta lieka neįvertinta, o įspėjimai nevirsta gražesniais',
+      'Nuotraukų skaitiklis vėl matomas – jį buvo paslėpusi viena per plati dizaino taisyklė',
+    ],
+  },
+  {
     versija: '1.31.1', data: '2026-09-18', pavadinimas: 'Kortelės smulkmenos: skaitiklis, trumpesnis verdiktas',
     pakeitimai: [
       'Ant nuotraukos vėl matomas skaitiklis „1 / 28“ – žinote, kiek nuotraukų yra',

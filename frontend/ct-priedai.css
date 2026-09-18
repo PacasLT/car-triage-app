@@ -1,0 +1,63 @@
+/* ============================================================================
+   ct-priedai.css · CarTriige · MŪSŲ priedai prie dizaino sistemos
+   ----------------------------------------------------------------------------
+   KAM ŠIS FAILAS
+
+   `ct-dizainas.css` yra DIZAINERIO failas. Mes jo NELIEČIAME niekada – jis
+   perrašomas vienu veiksmu, kai ateina nauja versija. Iki v1.31.1 lopydavome
+   jį tiesiai, ir kiekviena nauja versija tuos lopus ištrindavo.
+
+   Viskas, ko mums reikia papildomai, gyvena čia. Failas prijungiamas IŠ KART
+   PO `ct-dizainas.css`, tad laimi vien dėl eilės tvarkos – be `!important`,
+   išskyrus ten, kur reikia atsverti dizainerio `!important`.
+
+   TAISYKLĖS ŠIAM FAILUI
+   1. Jokių kietai įrašytų spalvų, šriftų ar radiusų – tik `var(--…)`.
+   2. Jokių naujų tokenų. Tokenai apibrėžiami tik `ct-dizainas.css` `:root`.
+   3. Kiekvienas blokas turi komentarą: KAS ir KODĖL.
+   4. Kai dizaineris perima taisyklę į savo failą – ištriname ją iš čia.
+   ========================================================================== */
+
+
+/* ── 1. Nuotraukų skaitiklis „1 / 28" ──────────────────────────────────────
+   Elementas egzistavo nuo seno (`cyclePhoto()` jį atnaujina pagal id
+   `<cardId>-photocount`), bet naujoje kortelės struktūroje neturėjo stiliaus.
+   PAPRAŠYTA dizainerio perimti į 10 skyrių. Kol neperėmė – gyvena čia.      */
+
+.ct-photo-n {
+  position: absolute; right: 9px; bottom: 9px;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  font: var(--fw-semi) 10px/1.4 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+
+
+/* ── 2. Atsvara dizainerio 12 skyriui ──────────────────────────────────────
+   `ct-dizainas.css` 12 sk. turi:
+     .ct-photo > :not(img):not(.ct-medal):not(.fav-star):not(.ct-nav):not(.ct-photo-empty)
+       { display: none !important }
+   Ji slepia viską, ko dizaineris nenumatė. `.ct-photo-n` į jo išimčių sąrašą
+   dar nepatekęs, tad grąžiname jį čia. Anksčiau tam redagavome jo failą –
+   ir pataisa dingdavo su kiekviena nauja versija.                           */
+
+/* Specifikos aritmetika, kad būtų aišku, iš kur tiek klasių:
+   dizainerio selektorius .ct-photo > :not(img):not(.ct-medal):not(.fav-star)
+   :not(.ct-nav):not(.ct-photo-empty) yra (0,5,1) su !important.
+   Kad jį atsvertume, reikia bent (0,6,0) – iš čia kartojama klasė.
+   Kai dizaineris pridės .ct-photo-n į savo išimtis, visas šis blokas dingsta. */
+.ct-card .ct-l1 .ct-media .ct-photo > .ct-photo-n.ct-photo-n { display: block !important; }
+
+
+/* ── 3. Senos kortelės taisyklių atribojimas ───────────────────────────────
+   `index.html` turi `.card img { height: 158px/180px }` iš senosios kortelės.
+   Kadangi nauja kortelė turi klasę `.card`, jos traiškydavo miniatiūras.
+   Selektoriai jau pakeisti į `.card:not(.ct-card) img` pačiame `index.html`,
+   bet paliekame tinklą čia – jei kas nors kada grąžins seną taisyklę.        */
+
+.ct-card .ct-photo img,
+.ct-card .ct-thumbs img { height: auto; }
+.ct-card .ct-photo img { height: 100%; }

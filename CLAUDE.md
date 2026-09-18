@@ -108,6 +108,25 @@
 - `ctPirmasSakinys()` – kortelėje rodom tik pirma `analysis.verdiktas` sakini (visas lieka `title` atribute). Su trim sakiniais kortele nustodavo buti skaitoma per 5 s.
 - Eilutės kortelėse (`restCands`) dabar irgi nustatoma `window.__galleryStore[cardId + '-strip']` – be jo rodykles nieko nedarydavo.
 
+## DIZAINO TAISYKLES (privaloma, nuo v1.32.0)
+
+**Nuosavybe.** `frontend/ct-dizainas.css` yra DIZAINERIO failas – **niekada jo neredaguojame**. Nauja versija idedama vienu perrasymu. Viskas, ko mums reikia papildomai, eina i `frontend/ct-priedai.css`, prijungta iskart po jo.
+
+**Sesios taisykles naujam kodui:**
+
+1. Spalva, sriftas, tarpas, radiusas – **tik per `var(--…)`**. Kietai irasyta reiksme naujame kode yra klaida.
+2. Naujas tokenas apibreziamas **tik `ct-dizainas.css` `:root`** bloke. Reikia naujo – tai uzduotis dizaineriui, ne vietinis sprendimas.
+3. `style="` leidziamas **tik isdestymui** (`display`, `width`, `grid-*`, `position`). Niekada spalvai, sriftui ar remeliui.
+4. Naujas komponentas: pirma klase, tada CSS. Ne inline.
+5. Ispejimu tekstai nekeiciami i kategoriskesnius (galioja nuo v1.24.0).
+6. Neivertinta ⚪ niekada neatrodo kaip nulis ar klaida (galioja nuo v1.29.0).
+
+**Sargas:** `node backend/testai/dizainas.test.js` – 24 patikros. Jis neleidzia skolai AUGTI: esamas palikimas uzfiksuotas kaip riba, testas krenta tik kai skaicius pakyla. Sutvarkius dali skolos – **nuleiskite riba faile**. Ribos kelimas = samoningas sprendimas.
+
+**Specifika.** Dizainerio 12 skyrius turi placiu `!important` taisykliu. Jei musu elementas dingsta – pirma pasiziurekite ju, ne savo CSS. Atsvara rasoma `ct-priedai.css` su komentaru, kiek specifikos reikia ir kodel.
+
+**Ko dar laukiame is dizainerio:** `.ct-btn > i` (mygtuku piktogramu plyteles), `.ct-photo-n` perėmimas i 10 skyriu, `.chip` taisykles (ju 10 skyriuje nera visai).
+
 ## Saugumas
 
 - `ANTHROPIC_API_KEY`, `SCRAPER_API_KEY`, `JWT_SECRET`, `ADMIN_EMAILS`, `INVITE_CODES` – tik Railway Variables, **niekada į kodą ar GitHub**.
