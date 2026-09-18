@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.81.0', data: '2026-09-18', pavadinimas: 'Vartotojo ekranas administravime',
+    pakeitimai: [
+      'Paspaudus vartotoja atsidaro jo ekranas: kreditai, planas ir kreditu zurnalas vienoje vietoje',
+      'Keiciant plana rodoma, ka tai TIKRAI padarys - plano kreditai gali ir sumazeti, o paieskos nuzeruojamos',
+      'Kreditu zurnale matyti nemokami pakartojimai, grazinimai ir plano keitimai',
+      'Vartotoju sarase planas ir registracijos data rodesi neteisingai - taisyta',
+    ],
+  },
+  {
     versija: '1.80.0', data: '2026-09-18', pavadinimas: 'Komentarai prie klaidu, antraste susitvarke, admin lentele telefone',
     pakeitimai: [
       'Tikrinant pataisyma galima prirasyti komentara prie to paties pranesimo - nebereikia kurti naujo',

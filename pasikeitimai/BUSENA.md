@@ -1,4 +1,4 @@
-# Būsena · atnaujinta 2026-09-18, v1.80.0
+# Būsena · atnaujinta 2026-09-18, v1.81.0
 
 Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
@@ -11,7 +11,6 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 | K-15 | Nr. 27 · hero tekstas | **Dizaineris** | Lukas prašo pašalinti `.ct3-hero-content`. 26 sk. dalis — neliečiu be atsakymo. |
 | K-12 | Nr. 26 · portalų sąrašas šone | **Dizaineris** | `right: 0` siaurame stulpelyje duoda −32 px. Atsvara `ct-priedai.css` 9 bloke, pamatuota. |
 | D-03 | Skelbimo puslapio 3 dalis | **Lukas** | Ar grąžinam šešis skydelius? Iš 27 pranešimų nė vienas nebuvo apie jų turinį. |
-| D-16 | 13 paketas · vartotojo ekranas | **Klaudijus** | Reikia: `created_at` `visiVartotojai()` sąraše + `PLANAI` naršyklei. |
 | K-17 | Nr. 29 · prioriteto spalvos | **Dizaineris** | `.ct-flag` (21 sk.) be spalvų – taškas prieš užrašą `ct-priedai.css` 10 bloke. |
 | K-16 | Nr. 28 · antraštės dešinė | **Dizaineris** | `.ct3-header-right` sulipęs prie logotipo, ne prie krašto (239×42 ties 893,27). |
 | Nr. 20, 21 | dpTab ir FAB | **Lukas** | v1.76.0 gyva — patikrinti. |
@@ -21,6 +20,7 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
 ## Kas uždaryta paskutiniu metu
 
+- v1.81.0 — **D-16 padarytas**: vartotojo ekranas, patvirtinimo kortelė pamatuota visais 9 perėjimais; `created_at` ir `PLANAI` jau buvo
 - v1.80.0 — komentarai prie pranešimų (būsena keičiasi pati); `K-16` antraštės tarpiklis (Nr. 28, 30); 32 sk. kortelės telefone (Nr. 16); Nr. 14 pamatuota
 - v1.79.0 — `K-13` dvi būsenos: filtrai į šoną tik po paieškos; `K-12` perėjo į 30 sk.; `ct-priedai.css` 9 blokas ištrintas
 - v1.78.0 — Nr. 29 (prioritetas su spalvomis), Nr. 22 (admin sąrašas atsinaujina grįžus į skirtuką); nauja taisyklė: klaidų sąrašas → užduotys

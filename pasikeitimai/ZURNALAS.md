@@ -2061,3 +2061,82 @@ po:       busena patvirtinta, komentaru 1
 Veikia taip, kaip suprojektuota. Nr. 6 grąžinau į `laukia-patikros` ir
 komentare parašyta, kad tai buvo mano testas — trynimo kelio komentarams
 nėra, tad įrašas lieka, bet pažymėtas.
+
+---
+
+## Z-27 · 2026-09-18 · Klaudijus → Dizaineriui · 13 PAKETAS PADARYTAS · v1.81.0
+
+### 1. Abu dalykai, kurių prašėt, jau buvo
+
+Prašėt dviejų: `created_at` `visiVartotojai()` sąraše ir `PLANAI` naršyklei.
+Patikrinau **gyvai produkcijoje**, ne kode:
+
+```
+GET /admin/vartotojai  -> laukai: id, email, plan, plan_iki, kreditai_plano,
+                          kreditai_pirkti, paieskos_menesi, paieskos_viso,
+                          is_active, is_admin, created_at, busena
+GET /api/planas        -> laukai: ..., planai: { trial, pro, business }
+                          business: { pavadinimas, kaina: 39, paieskosMen: null,
+                                      paieskosViso: null, kreditaiMen: 100 }
+```
+
+`created_at` yra `planai.js` 291 eilutės `SELECT`e, o `PLANAI` atiduodamas per
+`busena()` kiekvienam prisijungusiam. Tad **backend'o keisti nereikėjo nė
+eilutės**, ir jūsų 2 punkto prašymas — kad kortelės skaičiai eitų iš to paties
+šaltinio kaip `nustatytiPlana` — išsipildo savaime: abu skaito tą patį
+`PLANAI[planas].kreditaiMen`.
+
+### 2. Patvirtinimo kortelė — pamatuota visais devyniais perėjimais
+
+Jūs rašėt, kad tai vienintelė vieta, kur klaida būtų tyli ir kainuotų pinigus.
+Todėl tikrinau ne vieną atvejį, o visus:
+
+| Iš | → trial | → pro | → business |
+|---|---|---|---|
+| trial (1 kr) | kortelės nėra | 1 → 15 | 1 → 100 |
+| pro (7 kr) | **7 → 1  −6** | kortelės nėra | 7 → 100 |
+| business (80 kr) | **80 → 1  −79** | **80 → 15  −65** | kortelės nėra |
+
+Atėmimai rodomi atskiru ženklu (`−6`, `−79`, `−65`) — būtent tas tylus
+praradimas, dėl kurio kortelė ir atsirado. Tas pats planas kortelės neatidaro.
+
+Jūsų pavyzdys atkartotas tiksliai: `Planas Pro → Verslas`,
+`Plano kreditai 7 → 100`, `Pirkti kreditai 12 → 12 nepakis`,
+`Paieškos šį mėn. 43 → 0`, `Paieškų riba 100 per mėn. → neribota`,
+`Mėnesio kaina 9.9 € → 39 €`. **„Išsaugoti" mygtuko prie plano nėra.**
+
+### 3. Kas ekrane
+
+Iš jūsų sąrašo (4 punktas) panaudota: **28** `.ct-back`, **22**
+`.ct-table.is-dense`, **23** `.ct-clamp`, **24** `.ct-specs` (poveikio sąrašas),
+**21** `.ct-flag[role=radio]` (planai), **31** `.ct-field`, `ct-mygtukai.css`.
+**Naujo CSS nereikėjo** — tik `.ad-*` išdėstymui, kaip ir visame admin puslapyje.
+
+`.ct-shell` ir `.ct-sidenav` **nenaudojau**: su vienu vartotoju šoninis meniu
+neturi ko rodyti, o `.ct-shell` čia neturi antro stulpelio. Jei norit jų —
+sakykit, bet tada tai jau bus antras klausimas.
+
+Trys kreditų rūšys rodomos atskirai, kaip prašėt, su ribomis iš `PLANAI` ir
+viena eilute apie nurašymo tvarką. Plano kreditų skaičius nuspalvinamas:
+`0` raudonas, `≤ 20 % ribos` geltonas.
+
+Žurnalo trys būsenos atpažįstamos iš turinio, be naujo stulpelio — patikrinta:
+`NEMOKAMAI` (kiekis 0), `GRĄŽINTA` (`-grazinta`), `PLANAS`.
+
+### 4. Jūsų 2 matavimas · 390 px
+
+Žurnalo lentelė turi **šešis** stulpelius, ir jūs sakėt, kad ji ties `A-05`
+riba. Atsakymas: **kortelės jau veikia** — 32 sk. (17 paketas) taikosi
+`.is-dense`, o šita lentelė `.is-dense` ir yra. Ties 390 px ji virsta
+kortelėmis su `data-stulpelis` etiketėmis, horizontalaus slinkimo 0.
+
+Tad `A-05` 4 punktas šįkart nusprendė **pirma** — skyrius egzistavo anksčiau
+už lentelę.
+
+### 5. Radinys pakeliui
+
+Senoji vartotojų lentelė skaitė `u.planas` ir `u.sukurta`, o API grąžina
+`plan` ir `created_at`. Planas visiems rodėsi „trial", data — „—".
+**Ta pati klaida abiejuose stulpeliuose**, ir abu tylūs: reikšmė buvo,
+tik ne ta, kurios prašoma. Ištaisyta, plius pridėti atskiri plano ir pirktų
+kreditų stulpeliai.

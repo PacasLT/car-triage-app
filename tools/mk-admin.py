@@ -47,6 +47,24 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 .ad-kom-t { font-size: 13px; color: var(--text-primary); margin-top: 3px; white-space: pre-wrap; }
 .ad-kom-f { display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap; }
 .ad-kom-f textarea { flex: 1 1 260px; min-width: 0; resize: vertical; }
+.ad-vart-h { margin: 14px 0 10px; }
+.ad-vart-e { font: 600 18px/1.2 var(--font); color: var(--text-primary); }
+.ad-vart-m { font: 400 12px/1.5 var(--font-mono); color: var(--text-dim); margin-top: 4px; }
+.ad-sk { display: flex; flex-wrap: wrap; gap: 18px; margin: 14px 0 18px; }
+.ad-sk-e { display: flex; flex-direction: column; gap: 3px; min-width: 120px; }
+.ad-sk-v { font: 700 26px/1 var(--font-mono); color: var(--text-primary); }
+.ad-sk-v.ad-mazai { color: var(--warning); }
+.ad-sk-v.ad-nulis { color: var(--danger); }
+.ad-sk-p { font: 500 10px/1.3 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--text-dim); }
+.ad-sk-z { flex: 1 1 100%; font-size: 12px; color: var(--text-muted); }
+.ad-sekcija { margin: 18px 0; padding-top: 14px; border-top: 1px solid var(--border); }
+.ad-sek-h { font: 600 10px/1 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px; }
+.ad-kred-f { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.ad-kred-f input { flex: 0 1 200px; min-width: 0; }
+.ad-poveikis { margin-top: 12px; border: 1px solid var(--warning-border, var(--border-light)); border-radius: 12px; padding: 12px 14px; background: var(--bg-elevated); }
+.ad-pov-h { font: 600 10px/1 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--warning); margin-bottom: 8px; }
+.ad-pov-v { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+.ad-nepakis { font: 500 11px/1 var(--font-mono); color: var(--text-dim); margin-left: 6px; }
 .ad-pre { max-height: 260px; overflow: auto; padding: 10px 12px; border-radius: 8px; background: var(--bg-base); font: 400 11px/1.55 var(--font-mono); color: var(--text-secondary); white-space: pre-wrap; word-break: break-word; margin: 8px 0 0; }
 .ad-foto { max-width: 100%; max-height: 240px; border-radius: 8px; border: 1px solid var(--border); display: block; margin-top: 10px; }
 .ad-kelias { font: 500 10.5px/1.6 var(--font-mono); color: var(--text-muted); }
@@ -547,30 +565,202 @@ BODY = u'''
     }).catch(function (e) { el.innerHTML = tuscia('never', 'Nepavyko \u012Fkelti', e.message); sub.textContent = ''; });
   }
 
-  // ── Vartotojai ─────────────────────────────────────────
+  // ── Vartotojai ─────────────────────────────────
+  // v1.81.0 (13 paketas, D-16). Du dalykai, kuriuos dizaineris prase pridėti
+  // backend'e, JAU BUVO: /admin/vartotojai grazina `created_at`, o /api/planas
+  // grazina `planai` su `kreditaiMen`. Patikrinta gyvai, zr. Z-27.
+  //
+  // Sena lentele skaitė `u.planas` ir `u.sukurta` - tokiu lauku API negrazina
+  // (yra `plan` ir `created_at`), tad planas visiems rodesi „trial", o data
+  // visiems „—". Ta pati klaida abiejuose stulpeliuose.
+  var _vartotojas = null;
+  var _planai = null;
+
+  function planoVardas(k) {
+    return (_planai && _planai[k] && _planai[k].pavadinimas) || k || '\u2014';
+  }
+  function planoRiba(k, laukas) {
+    return (_planai && _planai[k]) ? _planai[k][laukas] : null;
+  }
+  function paieskuRiba(k) {
+    var men = planoRiba(k, 'paieskosMen'), viso = planoRiba(k, 'paieskosViso');
+    if (viso != null) return viso + ' i\u0161 viso';
+    if (men != null) return men + ' per m\u0117n.';
+    return 'neribota';
+  }
+
   function piestiVartotojus() {
     el.innerHTML = '';
-    imti('/admin/vartotojai').then(function (d) {
-      var v = d.vartotojai || [];
-      sub.textContent = 'I\u0161 viso ' + v.length + ' vartotoj\u0173';
-      if (!v.length) {
-        el.innerHTML = tuscia('never', 'Vartotoj\u0173 n\u0117ra', 'Dar niekas neu\u017Esiregistravo.');
-        return;
-      }
-      el.innerHTML = '<div class="ct-table-w"><table class="ct-table is-dense"><thead><tr>'
-        + '<th>EL. PA\u0160TAS</th><th>PLANAS</th><th class="is-num">KREDITAI</th>'
-        + '<th class="is-num">PAIE\u0160K\u0172</th><th class="is-time">NUO</th>'
-        + '</tr></thead><tbody>'
-        + v.map(function (u) {
-            return '<tr><td class="is-id">' + esc(u.email || '\u2014') + '</td>'
-              + '<td><span class="chip">' + esc(u.planas || 'trial') + '</span></td>'
-              + '<td class="is-num">' + ((u.kreditai_plano || 0) + (u.kreditai_pirkti || 0)) + '</td>'
-              + '<td class="is-num">' + (u.paieskos_viso != null ? u.paieskos_viso : '\u2014') + '</td>'
-              + '<td class="is-time">' + (u.sukurta ? laikas(u.sukurta) : '\u2014') + '</td></tr>';
-          }).join('')
-        + '</tbody></table></div>';
-    }).catch(function (e) { el.innerHTML = tuscia('never', 'Nepavyko \u012Fkelti', e.message); sub.textContent = ''; });
+    _vartotojas = null;
+    Promise.all([imti('/admin/vartotojai'), _planai ? Promise.resolve(null) : imti('/api/planas')])
+      .then(function (r) {
+        if (r[1] && r[1].planai) _planai = r[1].planai;
+        var v = (r[0] && r[0].vartotojai) || [];
+        sub.textContent = 'I\u0161 viso ' + v.length + ' vartotoj\u0173';
+        if (!v.length) {
+          el.innerHTML = tuscia('never', 'Vartotoj\u0173 n\u0117ra', 'Dar niekas neu\u017Esiregistravo.');
+          return;
+        }
+        window._vartotojai = v;
+        el.innerHTML = '<div class="ct-table-w"><table class="ct-table is-dense"><thead><tr>'
+          + '<th>EL. PA\u0160TAS</th><th>PLANAS</th><th class="is-num">PLANO KR.</th>'
+          + '<th class="is-num">PIRKTI KR.</th><th class="is-num">PAIE\u0160KOS</th><th class="is-time">NUO</th>'
+          + '</tr></thead><tbody>'
+          + v.map(function (u, i) {
+              return '<tr class="ad-tr" onclick="adVartotojas(' + i + ')">'
+                + '<td class="is-id" data-stulpelis="EL. PA\u0160TAS">' + esc(u.email || '\u2014') + '</td>'
+                + '<td data-stulpelis="PLANAS"><span class="chip">' + esc(planoVardas(u.plan)) + '</span></td>'
+                + '<td class="is-num" data-stulpelis="PLANO KR.">' + (u.kreditai_plano || 0) + '</td>'
+                + '<td class="is-num" data-stulpelis="PIRKTI KR.">' + (u.kreditai_pirkti || 0) + '</td>'
+                + '<td class="is-num" data-stulpelis="PAIE\u0160KOS">' + (u.paieskos_menesi || 0) + '</td>'
+                + '<td class="is-time" data-stulpelis="NUO">' + (u.created_at ? laikas(u.created_at) : '\u2014') + '</td></tr>';
+            }).join('')
+          + '</tbody></table></div>';
+      }).catch(function (e) { el.innerHTML = tuscia('never', 'Nepavyko \u012Fkelti', e.message); sub.textContent = ''; });
   }
+
+  window.adVartotojas = function (i) {
+    var u = (window._vartotojai || [])[i];
+    if (!u) return;
+    _vartotojas = u;
+    piestiVartotoja();
+  };
+
+  function skaitikliai(u) {
+    var pl = u.kreditai_plano || 0, pi = u.kreditai_pirkti || 0;
+    var men = planoRiba(u.plan, 'kreditaiMen');
+    var t = pl === 0 ? 'ad-nulis' : (men && pl <= men * 0.2 ? 'ad-mazai' : '');
+    return '<div class="ad-sk">'
+      + '<div class="ad-sk-e"><span class="ad-sk-v ' + t + '">' + pl + '</span>'
+      +   '<span class="ad-sk-p">plano kreditai' + (men != null ? ' \u00B7 riba ' + men : '') + '</span></div>'
+      + '<div class="ad-sk-e"><span class="ad-sk-v">' + pi + '</span>'
+      +   '<span class="ad-sk-p">pirkti \u00B7 nesibaigia</span></div>'
+      + '<div class="ad-sk-e"><span class="ad-sk-v">' + (u.paieskos_menesi || 0) + '</span>'
+      +   '<span class="ad-sk-p">paie\u0161kos \u0161\u012F m\u0117n. \u00B7 ' + paieskuRiba(u.plan) + '</span></div>'
+      + '<div class="ad-sk-z">Nura\u0161oma pirmiausia i\u0161 plano kredit\u0173; pirktieji lie\u010Diami tik jiems pasibaigus.</div>'
+      + '</div>';
+  }
+
+  function piestiVartotoja() {
+    var u = _vartotojas;
+    sub.textContent = u.email;
+    el.innerHTML = '<button type="button" class="ct-back ct-btn ct-btn-sm" onclick="piestiVartotojus()"><span>\u2190 Vartotojai</span></button>'
+      + '<div class="ad-vart-h"><div class="ad-vart-e">' + esc(u.email) + '</div>'
+      +   '<div class="ad-vart-m">' + esc(planoVardas(u.plan))
+      +     (u.plan_iki ? ' \u00B7 iki ' + esc(u.plan_iki) : '')
+      +     (u.created_at ? ' \u00B7 nuo ' + laikas(u.created_at) : '')
+      +     (u.is_admin ? ' \u00B7 administratorius' : '') + '</div></div>'
+      + skaitikliai(u)
+      + '<div class="ad-sekcija"><div class="ad-sek-h">PLANAS</div>'
+      +   '<div class="ct-flags" role="radiogroup">'
+      +     ['trial', 'pro', 'business'].map(function (k) {
+            return '<button type="button" class="ct-flag" role="radio" aria-checked="' + (k === u.plan)
+              + '" onclick="adPlanoPasirinkimas(&quot;' + k + '&quot;)">' + esc(planoVardas(k)) + '</button>';
+          }).join('')
+      +   '</div><div id="ad-plano-poveikis"></div></div>'
+      + '<div class="ad-sekcija"><div class="ad-sek-h">PRID\u0116TI KREDIT\u0172</div>'
+      +   '<div class="ad-kred-f">'
+      +     '<input class="ct-field" id="ad-kr-kiekis" type="number" step="1" placeholder="kiek">'
+      +     '<input class="ct-field" id="ad-kr-pastaba" type="text" placeholder="kod\u0117l (matysis \u017eurnale)">'
+      +     '<button type="button" class="ct-btn ct-btn-sm" onclick="adKredituPrideti()"><span>Prid\u0117ti</span></button>'
+      +     '<span class="ad-irankiu-zinia" id="ad-kr-z"></span>'
+      +   '</div></div>'
+      + '<div class="ad-sekcija"><div class="ad-sek-h">KREDIT\u0172 \u017dURNALAS</div><div id="ad-zurnalas">Kraunama\u2026</div></div>';
+    imti('/admin/zurnalas?userId=' + u.id).then(piestiZurnala)
+      .catch(function (e) { document.getElementById('ad-zurnalas').innerHTML = tuscia('never', 'Nepavyko', e.message); });
+  }
+
+  // Trys busenos atpazistamos IS TURINIO, be naujo stulpelio (13 paketas, 6):
+  //   kiekis === 0            -> NEMOKAMAI (24 h pakartojimas)
+  //   veiksmas baigiasi -grazinta -> GRAZINTA
+  //   veiksmas === 'planas'   -> PLANAS
+  function zurnaloZenklas(x) {
+    if (x.veiksmas === 'planas') return '<span class="chip">PLANAS</span>';
+    if (/-grazinta$/.test(x.veiksmas || '')) return '<span class="chip ad-istaisyta">GR\u0104\u017dINTA</span>';
+    if (x.kiekis === 0) return '<span class="chip">NEMOKAMAI</span>';
+    return '';
+  }
+
+  function piestiZurnala(d) {
+    var ir = (d && d.irasai) || [];
+    var z = document.getElementById('ad-zurnalas');
+    if (!z) return;
+    if (!ir.length) { z.innerHTML = tuscia('never', '\u017durnalas tu\u0161\u010Dias', 'Kredit\u0173 jud\u0117jimo dar nebuvo.'); return; }
+    z.innerHTML = '<div class="ct-table-w"><table class="ct-table is-dense"><thead><tr>'
+      + '<th class="is-time">KADA</th><th>VEIKSMAS</th><th>OBJEKTAS</th>'
+      + '<th class="is-num">KIEKIS</th><th class="is-num">LIKUTIS</th><th>PASTABA</th>'
+      + '</tr></thead><tbody>'
+      + ir.map(function (x) {
+          return '<tr><td class="is-time" data-stulpelis="KADA">' + laikas(x.laikas) + '</td>'
+            + '<td data-stulpelis="VEIKSMAS">' + esc(x.veiksmas || '\u2014') + ' ' + zurnaloZenklas(x) + '</td>'
+            + '<td class="is-id" data-stulpelis="OBJEKTAS">' + esc((x.raktas || '\u2014')).slice(0, 60) + '</td>'
+            + '<td class="is-num" data-stulpelis="KIEKIS">' + (x.kiekis > 0 ? '+' : '') + (x.kiekis != null ? x.kiekis : '\u2014') + '</td>'
+            + '<td class="is-num" data-stulpelis="LIKUTIS">' + (x.likutis_po != null ? x.likutis_po : '\u2014') + '</td>'
+            + '<td class="is-text" data-stulpelis="PASTABA"><span class="ct-clamp">' + esc(x.pastaba || '') + '</span></td></tr>';
+        }).join('')
+      + '</tbody></table></div>';
+  }
+
+  // Prie plano NERA „Issaugoti" mygtuko. nustatytiPlana() PERRASO kreditai_plano
+  // i naujo plano menesio kieki (gali ir atimti) ir nuzeruoja paieskas - is
+  // mygtuko to nesimato niekaip. Todel pasirinkus kita plana rodoma kortele su
+  // poveikiu skaiciais, ir tik ji turi patvirtinima. Skaiciai imami is PLANAI,
+  // t.y. IS TO PATIES SALTINIO, kuri naudos backend'as (13 paketas, 2).
+  window.adPlanoPasirinkimas = function (k) {
+    var u = _vartotojas, d = document.getElementById('ad-plano-poveikis');
+    if (!u || !d) return;
+    if (k === u.plan) { d.innerHTML = ''; return; }
+    if (!_planai || !_planai[k]) { d.innerHTML = '<div class="ad-poveikis">Tr\u016Bksta plan\u0173 duomen\u0173.</div>'; return; }
+    var senas = u.plan, senasKr = u.kreditai_plano || 0, naujasKr = _planai[k].kreditaiMen;
+    var eil = function (p, a, b, z) {
+      return '<div class="ct-specs-e"><span class="ct-specs-k">' + p + '</span>'
+        + '<span class="ct-specs-v">' + a + ' \u2192 ' + b + (z ? ' <span class="ad-nepakis">' + z + '</span>' : '') + '</span></div>';
+    };
+    d.innerHTML = '<div class="ad-poveikis">'
+      + '<div class="ad-pov-h">K\u0104 tai padarys</div>'
+      + '<div class="ct-specs">'
+      +   eil('Planas', esc(planoVardas(senas)), esc(planoVardas(k)), '')
+      +   eil('Plano kreditai', senasKr, naujasKr, naujasKr < senasKr ? '\u2212' + (senasKr - naujasKr) : '')
+      +   eil('Pirkti kreditai', (u.kreditai_pirkti || 0), (u.kreditai_pirkti || 0), 'nepakis')
+      +   eil('Paie\u0161kos \u0161\u012F m\u0117n.', (u.paieskos_menesi || 0), 0, '')
+      +   eil('Paie\u0161k\u0173 riba', paieskuRiba(senas), paieskuRiba(k), '')
+      +   eil('M\u0117nesio kaina', (_planai[senas] ? _planai[senas].kaina : '?') + ' \u20AC', _planai[k].kaina + ' \u20AC', '')
+      + '</div>'
+      + '<div class="ad-pov-v">'
+      +   '<button type="button" class="ct-btn ct-btn-sm ct-btn-primary" onclick="adPlanoPatvirtinti(&quot;' + k + '&quot;)"><span>Patvirtinu</span></button>'
+      +   '<button type="button" class="ct-btn ct-btn-sm" onclick="piestiVartotoja()"><span>At\u0161aukti</span></button>'
+      +   '<span class="ad-irankiu-zinia" id="ad-pl-z"></span>'
+      + '</div></div>';
+  };
+
+  window.adPlanoPatvirtinti = function (k) {
+    var u = _vartotojas, z = document.getElementById('ad-pl-z');
+    if (!u) return;
+    if (z) z.textContent = 'Kei\u010Diama\u2026';
+    siusti('/admin/planas', { email: u.email, planas: k }).then(function () {
+      return imti('/admin/vartotojai');
+    }).then(function (d) {
+      window._vartotojai = d.vartotojai || [];
+      var n = window._vartotojai.filter(function (x) { return x.id === u.id; })[0];
+      if (n) { _vartotojas = n; piestiVartotoja(); }
+    }).catch(function (e) { if (z) z.textContent = 'Nepavyko: ' + e.message; });
+  };
+
+  window.adKredituPrideti = function () {
+    var u = _vartotojas, z = document.getElementById('ad-kr-z');
+    var kiekis = parseInt((document.getElementById('ad-kr-kiekis') || {}).value, 10);
+    var past = (document.getElementById('ad-kr-pastaba') || {}).value || '';
+    if (!u) return;
+    if (!kiekis) { if (z) z.textContent = 'Kiek?'; return; }
+    if (z) z.textContent = 'Siun\u010Diama\u2026';
+    siusti('/admin/kreditai', { email: u.email, kiekis: kiekis, pastaba: past }).then(function () {
+      return imti('/admin/vartotojai');
+    }).then(function (d) {
+      window._vartotojai = d.vartotojai || [];
+      var n = window._vartotojai.filter(function (x) { return x.id === u.id; })[0];
+      if (n) { _vartotojas = n; piestiVartotoja(); }
+    }).catch(function (e) { if (z) z.textContent = 'Nepavyko: ' + e.message; });
+  };
 
   document.getElementById('ad-tabs').addEventListener('click', function (e) {
     var b = e.target.closest('.ct-tab'); if (!b) return;
