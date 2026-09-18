@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.62.0', data: '2026-09-18', pavadinimas: 'Matosi, kiek duomenų sukaupta',
+    pakeitimai: [
+      'Administravimo „Matavimai" rodo, kiek skelbimų sekama, kiek jų gyvų, kiek dingusių ir kiek su VIN',
+      'Plius kiek kainų istorijos linijų ir kiek modelių rinkos archyve',
+      'Anksčiau apie kaupyklą buvo galima tik spėti – dabar matyti skaičiai',
+    ],
+  },
+  {
     versija: '1.61.0', data: '2026-09-18', pavadinimas: 'Nuotrauką galima pamatyti',
     pakeitimai: [
       'Pridėtą nuotrauką galima atidaryti per visą ekraną, o antru paspaudimu – tikru dydžiu',

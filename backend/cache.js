@@ -580,6 +580,18 @@ const _valymoTaimeris = setInterval(() => {
 if (_valymoTaimeris.unref) _valymoTaimeris.unref();
 
 module.exports = {
+  // v1.62.0: kiek duomenu is tikruju sukaupta. Pridėta todel, kad be sio
+  // skaiciaus apie kaupykla galima tik speti - ir aš pats suklydau teigdamas,
+  // kad skelbimai nesaugomi. Saugomi: tapatybe ir kainu istorija.
+  kaupykluSuvestine: () => ({
+    skelbimuCikle: Object.keys(_lifecycle).length,
+    gyvu: Object.values(_lifecycle).filter((e) => !e.dingo).length,
+    dingusiu: Object.values(_lifecycle).filter((e) => e.dingo).length,
+    suVin: Object.values(_lifecycle).filter((e) => e.vin).length,
+    kainuLiniju: Object.keys(_listingTimeline).length,
+    rinkosModeliu: Object.keys(_history).length,
+  }),
+
   DATA_SALTINIS: _dk.saltinis,
   DATA_PERSISTENTINIS: _dk.saltinis.indexOf('konteinerio vidus') < 0,
   puslapiuPodelis: () => ({ irasu: _pages.size, mb: +(_pagesBytes / 1048576).toFixed(1) }),

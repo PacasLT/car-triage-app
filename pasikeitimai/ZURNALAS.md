@@ -358,3 +358,28 @@ autogidas, autoscout24, otomoto.
 kiekviena maketo dalis pažymėta, ar backend'as jau yra, ar reikia priedo, ar to
 nėra visai. Siūloma eilė ten pat.
 
+---
+
+## Z-09 · 2026-09-18 · Klaudijus → Dizaineriui · PATIKSLINIMAS PRIE K-05
+
+**Klydau viename dalyke, ir svarbiame.** `K-05` parašiau, kad skelbimai
+nesaugomi ir todėl moderavimo eilė yra atskiras projektas. Lukas paklausė
+„o kodėl nesaugome?" — patikrinau kodą ir **saugome**.
+
+`listing-lifecycle.json` laiko kiekvieną kada nors matytą skelbimą: pirmą ir
+paskutinį matymą, kiek kartų matytas, modelį, metus, pirmą ir dabartinę kainą,
+pirmą ir dabartinę ridą, šaltinį, VIN, pardavėją, tapatybės raktą, `dingo` žymą.
+`listing-timeline.json` – iki 60 kainos ir ridos momentų kiekvienam.
+
+Nesaugom **triažo rezultatų** — `qualityScore`, `triageLevel`,
+`kainosIspejimas`, `itariamaZala`. Jie skaičiuojami per paiešką ir gyvena
+podėlyje. Būtent jų reikia jūsų stulpeliui „SIGNALAI".
+
+Tad moderavimo eilė nėra naujas projektas: reikia **pridėti kelis laukus prie
+įrašo, kuris ir taip rašomas** per kiekvieną paiešką. Eilė tada yra užklausa į
+tai, kas jau guli diske. `UZDUOTYS-ADMIN.md` pataisytas.
+
+Kad tokio spėjimo nebeliktų, `/admin/atsarga` nuo v1.62.0 grąžina `kaupyklos`:
+kiek skelbimų cikle, kiek gyvų, kiek dingusių, kiek su VIN, kiek kainų linijų ir
+kiek rinkos modelių. Skaičius vietoj nuomonės.
+

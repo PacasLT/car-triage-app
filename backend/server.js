@@ -411,6 +411,7 @@ const saugykla = () => {
     klaiduFailasYra: yra,
     klaiduFailoDydis: dydis,
     klaiduAtmintyje: _klaidos.length,
+    kaupyklos: (function () { try { return cache.kaupykluSuvestine(); } catch (e) { return null; } })(),
     ispejimas: cache.DATA_PERSISTENTINIS ? null
       : 'DUOMENYS KONTEINERIO VIDUJE - kiekvienas deploy juos istrina. Reikia Railway Volume ties /data arba DATA_DIR kintamojo.',
   };

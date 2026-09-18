@@ -9,7 +9,7 @@ serveryje, ir paverčia skirtumą užduotimis.
 | Maketas rodo | Realiai yra |
 |---|---|
 | 8 412 aktyvių vartotojų | **1** |
-| 1 284 nauji skelbimai / 24 h | neskaičiuojama, skelbimai nesaugomi |
+| 1 284 nauji skelbimai / 24 h | skelbimai **saugomi**, bet nauji per parą neskaičiuojami |
 | 128 moderavimo eilėje | moderavimo sąvokos **nėra** |
 | 3 942 VIN užklausos / 24 h | VIN kvietimai fiksuojami kreditų žurnale |
 | 37 AI įverčių apeliacijos | apeliacijų **nėra** |
@@ -34,8 +34,20 @@ prasimanytais skaičiais atrodytų veikianti ir slėptų, kad produkto ten nėra
 
 ## TURINYS
 
-- **Skelbimai / moderavimo eilė** — **[NAUJA]** Didžiausias darbas visame makete.
-  Skelbimai šiandien **nesaugomi** – jie gyvena paieškos rezultate ir podėlyje.
+- **Skelbimai / moderavimo eilė** — **[+BACK]**, ne [NAUJA]. **Pataisymas:
+  skelbimus SAUGOME.** `listing-lifecycle.json` laiko kiekvieną kada nors matytą
+  skelbimą: pirmą ir paskutinį matymą, kiek kartų matytas, modelį, metus,
+  pirmą ir dabartinę kainą, pirmą ir dabartinę ridą, šaltinį, VIN, pardavėją,
+  tapatybės raktą ir `dingo` žymą. `listing-timeline.json` – iki 60 kainos ir
+  ridos momentų kiekvienam.
+
+  Ko **nesaugom** – triažo rezultatų: `qualityScore`, `triageLevel`,
+  `kainosIspejimas`, `itariamaZala`. Jie skaičiuojami per paiešką ir gyvena
+  podėlyje su galiojimo laiku. Būtent jų ir reikia maketo stulpeliui „SIGNALAI".
+
+  Todėl darbas yra **pridėti kelis laukus prie jau rašomo įrašo**, ne sukurti
+  saugyklą. `irasytiGyvavimoCikla` kviečiamas kiekvienai paieškai — ten pat
+  įrašyti ir signalus. Eilė tada yra užklausa į tai, kas jau diske.
   Kad atsirastų eilė, reikia juos rašyti į DB su būsena. **Bet pusė turinio jau
   skaičiuojama:** `qualityScore`, `triageLevel`, `kainosIspejimas` (lizingo
   įmoka), `itariamaZala` (per didelė nuolaida), `rizikosBusena`. Maketo stulpelis
@@ -87,4 +99,4 @@ prasimanytais skaičiais atrodytų veikianti ir slėptų, kad produkto ten nėra
    dėžučių.
 3. **Duomenų šaltinių būklė** — pusė jau yra `/admin/atsarga`.
 4. **VIN / analizės / palyginimai iš žurnalo** — vienas priedas, trys ekranai.
-5. **Moderavimo eilė** — atskiras projektas, ne šio paketo dalis.
+5. **Moderavimo eilė** — signalų įrašymas į gyvavimo ciklą, tada eilė yra užklausa. Mažiau darbo, nei atrodė iš pradžių.
