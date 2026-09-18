@@ -1996,3 +1996,68 @@ produkciją** — vietinis serveris reikalauja duomenų bazės, o produkcijos i�
 atsiunčiamas, sąrašas persipiešia, 0 klaidų), bet automatinį būsenos keitimą
 patikrinsiu **po push'o, gyvai**, ir parašysiu rezultatą. Sakau iš anksto, kad
 nebūtų „patikrinta" ten, kur tik „turėtų veikti".
+
+---
+
+## Z-25 · 2026-09-18 · Klaudijus → Dizaineriui · `K-15` ATSAKYTAS + HERO MATAVIMAI
+
+### 1. Luko sprendimas: **antras kelias**
+
+Hero tampa **juosta, ne sekcija**, ir paieškos panelė stovi ant jos. Tekstas
+(`.ct3-hero-content`) išimamas. Nr. 27 ir Nr. 32 abu priklauso nuo šito.
+
+### 2. Kas ten yra šiandien — kad skaičių nereikėtų išvedinėti
+
+Pamatuota v1.80.0, prieš paiešką (t. y. `.ct-shell` be `.is-split`):
+
+| Plotis | `.ct3-hero` | `.ct3-hero-content` | `.ct3-hero-photo` | Panelė prasideda |
+|---|---|---|---|---|
+| 390 | 340 | **340** | 180 | 714 |
+| 768 | 620 | **600** | 380 | 841 |
+| 1280 | 620 | **600** | 600 | 810 |
+| 1400 | 620 | **600** | 600 | 810 |
+| 2101 | 620 | **600** (turinys 1440 px pločio) | 600 | 810 |
+| 2364 | 620 | **600** | 600 | 810 |
+
+Trys dalykai, kurie jums gali praversti:
+
+1. **620 = 600 + 20.** Sekcijos aukštį duoda būtent `.ct3-hero-content`;
+   nuotrauka yra `position: absolute` po juo ir savo aukščio neturi
+   (`ct-priedai` tos vietos neliečia — tai `index.html` 26 sk. įdiegimas po
+   v1.65.0 regresijos). Išėmus turinį, sekcija subliūkš iki nuotraukos
+   aukščio, ne iki nulio.
+2. **Nuotraukos aukštis jau dabar keičiasi**: 180 / 380 / 600. Tad „juosta"
+   telefone jau egzistuoja — trūksta tik darbalaukio reikšmės.
+3. **Kadravimas jau trijų žingsnių**: `50% 62%` (390), `45% 58%` (768),
+   `40% 55%` (1280+). Jei juosta bus žemesnė, kadras keisis — tai jūsų 26 sk.,
+   ir aš jo neliečiu.
+
+Panelė šiandien prasideda ties 810 px (darbalaukyje). Jei hero taps ~200 px,
+ji pakiltų iki ~390 px — t. y. **matoma be slinkimo** 720 px aukščio ekrane,
+ko dabar nėra.
+
+### 3. Ko iš manęs reikės
+
+Sakykit, ir padarysiu: `.ct3-hero-content` išėmimą iš `index.html`, panelės
+įkėlimą į hero (jei norit jos ten, o ne po juo), ir bet kokį markupo pakeitimą.
+Skaičių nesiūlau — jūs rašėt, kad atsiųsit pamatavęs, ir tai teisinga tvarka.
+
+---
+
+## Z-26 · 2026-09-18 · Klaudijus · KOMENTARŲ KELIAS PATIKRINTAS GYVAI
+
+`Z-24` 5 punkte pažadėjau patikrinti po push'o. Patikrinta produkcijoje,
+v1.80.0, su tikru pranešimu (Nr. 6):
+
+```
+pries:    busena laukia-patikros, komentaru 0
+POST /admin/klaidos/6/komentaras
+atsakymas: 200, busena patvirtinta, busenaPakeista patvirtinta, komentaru 1
+po:       busena patvirtinta, komentaru 1
+          komentare irasyta busena PRIES (laukia-patikros)
+          istorijoje: „Komentaras tikrinant: ..."
+```
+
+Veikia taip, kaip suprojektuota. Nr. 6 grąžinau į `laukia-patikros` ir
+komentare parašyta, kad tai buvo mano testas — trynimo kelio komentarams
+nėra, tad įrašas lieka, bet pažymėtas.

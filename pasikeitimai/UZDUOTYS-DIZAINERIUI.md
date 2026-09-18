@@ -1,6 +1,6 @@
 # Užduotys dizaineriui · iš klaidų sąrašo
 
-Sugeneruota **2026-09-18, v1.80.0** (dar ne gyva), iš gyvo `/admin/klaidos`.
+Sugeneruota **2026-09-18, v1.80.0** (gyva), iš gyvo `/admin/klaidos`.
 Perrašoma visa iš sąrašo, ne iš atminties.
 
 Kiekviena eilutė: **Nr. · ką parašė Lukas · selektorius · ką pamatavau · ko reikia.**
@@ -11,7 +11,7 @@ Kiekviena eilutė: **Nr. · ką parašė Lukas · selektorius · ką pamatavau �
 
 | Nr. | Lukas | Elementas | Pamatuota | Ko reikia |
 |---|---|---|---|---|
-| **27** | „Pašalinam šitą tekstą" | `.ct3-hero-content` (1440×600) | — | `K-15`: hero lieka be teksto ar dingsta visas. **Laukia Luko**, ne jūsų — bet be jo stovi ir Nr. 32 |
+| **27** | „Pašalinam šitą tekstą" | `.ct3-hero-content` | 390/768/1280+: turinys **340 / 600 / 600**, nuotrauka 180 / 380 / 600, sekcija 620 = 600 + 20 | **`K-15` ATSAKYTAS: Lukas pasirinko 2 kelą** – hero tampa juosta, panelė ant jos. Matavimai `Z-25`. Laukiu jūsų skaičiaus |
 | **24** | „Reikia patobulinti filtro šoninio dizainą" | — | Šonas 540 px, telpa nuo 1180 px | Jūsų spėjimas (`A-21`), kad `K-13` tai uždaro. **Po push — Luko žvilgsnis** |
 | **19** | „Išfiltravus skelbimus liko apačioje susitraukę" | — | Nepamatuota | Ar jau uždaryta 25 sk.? Galiu pamatuoti, jei pasakysit ką |
 | **2** | „Atmesta irgi pabėgę" | — | Nepamatuota | Tas pats klausimas |
