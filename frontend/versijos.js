@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.36.1', data: '2026-09-18', pavadinimas: 'Skubus taisymas: atstatyti sugadinti stiliai',
+    pakeitimai: [
+      'Atstatyti puslapių stiliai – praeitame atnaujinime automatinis valymas sugadino dalį taisyklių, todėl dingo nuotraukos, iškrito mygtukai ir palyginimo ataskaita liko be apipavidalinimo',
+      'Planų mygtukas antraštėje nebeišsitempia per visą plotį',
+      'Mygtukų dydžiai laikinai grįžta į ankstesnius – vieną išvaizdą sugrąžinsime kitu atnaujinimu, šįkart be automatinio valymo',
+    ],
+  },
+  {
     versija: '1.36.0', data: '2026-09-18', pavadinimas: 'Visi mygtukai produkte dabar vienodi',
     pakeitimai: [
       'Mygtukai visuose penkiuose puslapiuose gavo vieną išvaizdą – anksčiau jų buvo apie keturiasdešimt skirtingų variantų',

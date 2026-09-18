@@ -37,15 +37,16 @@ button{font-family:inherit;cursor:pointer}
 .ct3-nav{display:flex;gap:4px;margin-left:56px;flex:1}
 .ct3-nav-link{padding:10px 20px;border-radius:8px;font-size:15px;font-weight:500;color:var(--text-secondary);text-decoration:none;transition:color .15s,background .15s}
 .ct3-nav-link:hover{color:var(--text-primary);background:rgba(255,255,255,.05)}
-.ct3-premium-btn{display:flex;align-items:center;}/* v1.36.0: .ct3-premium-btn:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
-.ct3-avatar{width:42px;display:grid;place-items:center;}
+.ct3-premium-btn{display:flex;align-items:center;gap:7px;height:42px;padding:0 22px;border-radius:21px;border:1px solid var(--accent);background:transparent;color:var(--accent-light);font:600 15px var(--font);cursor:pointer;transition:background .15s}
+.ct3-premium-btn:hover{background:var(--accent-dim)}
+.ct3-avatar{width:42px;height:42px;border-radius:50%;border:1px solid var(--border-light);background:var(--bg-elevated);color:var(--text-secondary);display:grid;place-items:center;cursor:pointer}
 .ct3-header-right{display:flex;align-items:center;gap:10px;flex:none}
 @media(max-width:768px){
   .ct3-header-inner{padding:14px 20px}
   .ct3-logo-icon{width:38px;height:38px}
   .ct3-logo-text>span{font-size:20px}
   .ct3-nav{display:none}
-  .ct3-premium-btn{display:none;}
+  .ct3-premium-btn{display:none}
 }
 
 /* ── PAGE LAYOUT ── */
@@ -61,10 +62,14 @@ button{font-family:inherit;cursor:pointer}
 .dp-bc-back{display:flex;align-items:center;gap:6px;color:var(--text-secondary);font-weight:500;margin-right:6px}
 .dp-bc-right{display:flex;align-items:center;gap:10px}
 .dp-bc-id{font:500 11px/1 var(--font-mono);color:var(--text-dim);letter-spacing:.08em}
-.dp-bc-btn{display:flex;align-items:center;}/* v1.36.0: .dp-bc-btn:hover – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .dp-bc-btn.save – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .dp-save-toggle.saved – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .dp-save-toggle:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
+.dp-bc-btn{display:flex;align-items:center;gap:6px;height:32px;padding:0 14px;border-radius:8px;border:1px solid var(--border-light);background:transparent;color:var(--text-secondary);font:500 13px var(--font)}
+.dp-bc-btn:hover{background:var(--bg-elevated);color:var(--text-primary)}
+.dp-bc-btn.save{color:var(--accent-light);border-color:var(--accent-border);background:var(--accent-dim)}
+.dp-save-toggle.saved{color:#ff5c8a!important;border-color:rgba(255,92,138,.5)!important;background:rgba(255,92,138,.12)!important}
+.dp-save-toggle:hover{color:#ff5c8a}
 
 /* ── MAIN 3-COL ── */
-.dp-main{display:grid;grid-template-columns:280px minmax(0,1fr) 200px;align-items:start;}
+.dp-main{display:grid;grid-template-columns:280px minmax(0,1fr) 200px;gap:18px;align-items:start}
 @media(max-width:900px){.dp-main{grid-template-columns:1fr}}
 
 /* ── PHOTO COL ── */
@@ -102,12 +107,16 @@ button{font-family:inherit;cursor:pointer}
 .dp-spec{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:7px;background:var(--bg-elevated);border:1px solid var(--border);font-size:12.5px;color:var(--text-secondary)}
 .dp-spec-pos{color:var(--success);border-color:var(--success-border);background:var(--success-dim)}
 .dp-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
-.dp-bc-btn.dp-bc-primary{text-decoration:none;}/* v1.36.0: .dp-bc-btn.dp-bc-primary:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
-.dp-act{display:flex;align-items:center;}/* v1.36.0: .dp-act:hover – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .dp-act-primary – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .dp-act-primary:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
+.dp-bc-btn.dp-bc-primary{background:var(--accent);border-color:var(--accent);color:#fff;text-decoration:none}
+.dp-bc-btn.dp-bc-primary:hover{filter:brightness(1.08)}
+.dp-act{display:flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--border-light);background:transparent;color:var(--text-primary);font:500 12.5px var(--font);white-space:nowrap}
+.dp-act:hover{background:var(--bg-elevated)}
+.dp-act-primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.dp-act-primary:hover{filter:brightness(1.1)}
 
 /* ── SELLER COL ── */
 /* ── SELLER CARD ── */
-.dp-seller{display:flex;flex-direction:column;}
+.dp-seller{background:var(--bg-surface);border:1px solid var(--border);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:0}
 .dp-seller-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
 .dp-seller-label{font:700 9px/1 var(--font-mono);letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim);margin-bottom:0}
 .dp-seller-menu{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-muted);display:grid;place-items:center;cursor:pointer;flex:none}
@@ -207,8 +216,10 @@ button{font-family:inherit;cursor:pointer}
 .dp-equip-name{font-size:12.5px;color:var(--text-primary);line-height:1.4;flex:1}
 
 /* ── PHOTOS AI ANALYZE ── */
-.dp-photo-ai-btn{display:inline-flex;align-items:center;}/* v1.36.0: .dp-photo-ai-btn:hover – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .dp-photo-ai-btn:disabled – mygtuko išvaizda perkelta į ct-mygtukai.css */
-.dp-photo-ai-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px;}
+.dp-photo-ai-btn{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 20px;border-radius:10px;border:1px solid var(--accent-border);background:var(--accent-dim);color:var(--accent-light);font:600 13px var(--font);cursor:pointer;transition:background .15s}
+.dp-photo-ai-btn:hover{background:rgba(124,92,255,.2)}
+.dp-photo-ai-btn:disabled{opacity:.5;cursor:default}
+.dp-photo-ai-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)}
 .dp-photo-ai-result{background:var(--bg-surface);border:1px solid var(--accent-border);border-radius:12px;padding:16px;margin-bottom:16px;display:none}
 .dp-photo-ai-result-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;font:600 13px var(--font);color:var(--text-primary)}
 .dp-photo-ai-result-badge{width:22px;height:22px;border-radius:6px;background:var(--accent);color:#fff;font:700 10px var(--font-mono);display:grid;place-items:center;flex:none}
@@ -240,13 +251,14 @@ button{font-family:inherit;cursor:pointer}
 #dp-lb { position: fixed; inset: 0; z-index: 2000; background: rgba(4,5,9,.94); display: none; align-items: center; justify-content: center; user-select: none; }
 #dp-lb.open { display: flex; }
 #dp-lb img { max-width: 96vw; max-height: 88vh; object-fit: contain; border-radius: 8px; box-shadow: 0 20px 60px rgba(0,0,0,.6); cursor: zoom-out; }
-.dp-lb-btn { position: absolute; width: 46px; display: grid; place-items: center; backdrop-filter: blur(6px);}/* v1.36.0: .dp-lb-btn:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
-.dp-lb-l { left: 18px; top: 50%; transform: translateY(-50%);}
+.dp-lb-btn { position: absolute; width: 46px; height: 46px; border-radius: 50%; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.08); color: #fff; font-size: 26px; display: grid; place-items: center; cursor: pointer; backdrop-filter: blur(6px); }
+.dp-lb-btn:hover { background: rgba(255,255,255,.18); }
+.dp-lb-l { left: 18px; top: 50%; transform: translateY(-50%); }
 .dp-lb-r { right: 18px; top: 50%; transform: translateY(-50%); }
 .dp-lb-x { top: 16px; right: 16px; font-size: 20px; }
 .dp-lb-n { position: absolute; top: 22px; left: 50%; transform: translateX(-50%); font: 600 12px var(--font-mono); color: rgba(255,255,255,.8); background: rgba(0,0,0,.45); padding: 6px 12px; border-radius: 20px; letter-spacing: .06em; }
 .dp-lb-hint { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); font: 400 11px var(--font); color: rgba(255,255,255,.45); }
-@media (max-width: 640px) { .dp-lb-btn { width: 38px;} .dp-lb-l { left: 8px; } .dp-lb-r { right: 8px; } .dp-lb-hint { display: none; } }
+@media (max-width: 640px) { .dp-lb-btn { width: 38px; height: 38px; font-size: 20px; } .dp-lb-l { left: 8px; } .dp-lb-r { right: 8px; } .dp-lb-hint { display: none; } }
 /* Pelno skaiciuokle */
 #dp-pelno { display: none; margin-top: 12px; border: 1px solid var(--success-border); border-radius: 12px; background: var(--bg-surface); overflow: hidden; }
 #dp-pelno.open { display: block; }
@@ -267,8 +279,11 @@ button{font-family:inherit;cursor:pointer}
 .dp-pel-ai b { color: var(--text-primary); }
 @media (max-width: 720px) { .dp-pel-grid { grid-template-columns: 1fr 1fr; } .dp-pel-rez { grid-template-columns: 1fr; } }
 /* Analizes uzsakymo mygtukas */
-.dp-cta { display: flex; flex-direction: column; align-items: flex-start;}
-.dp-cta p { margin: 0;}/* v1.36.0: .dp-cta button – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .dp-cta button:disabled – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .dp-cta small – mygtuko išvaizda perkelta į ct-mygtukai.css */
+.dp-cta { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; padding: 14px 16px; border-radius: 12px; background: var(--accent-dim); border: 1px solid var(--accent-border); }
+.dp-cta p { margin: 0; font: 400 13px/1.55 var(--font); color: var(--text-secondary); }
+.dp-cta button { height: 38px; padding: 0 16px; border-radius: 9px; border: none; background: var(--accent); color: #fff; font: 600 13px var(--font); cursor: pointer; }
+.dp-cta button:disabled { opacity: .6; cursor: default; }
+.dp-cta small { font: 400 11px var(--font); color: var(--text-dim); }
 </style>
 
 <style id="dp-mobile-responsive">
@@ -319,7 +334,7 @@ button{font-family:inherit;cursor:pointer}
   .ct3-logo-text > span { font-size: 18px !important; }
   .ct3-logo-text small { display: none; }
   .ct3-nav { display: none !important; }
-  .ct3-premium-btn { display: none !important;}
+  .ct3-premium-btn { display: none !important; }
 
   /* Breadcrumb — palikti tik "Atgal" */
   .dp-bc { padding: 10px 0; margin-bottom: 14px; }
@@ -327,8 +342,12 @@ button{font-family:inherit;cursor:pointer}
   .dp-bc-left > a:not(.dp-bc-back) { display: none; }
   .dp-bc-left > span:last-child { display: none; }
   .dp-bc-id { display: none; }
-  .dp-bc-btn.save { display: none;} /* sticky bar paima šią funkciją */
-  .dp-bc-right { gap: 6px; }/* v1.36.0: /* v1.36.0: .dp-bc-btn – mygtuko išvaizda perkelta į ct-mygtukai.css * – mygtuko išvaizda perkelta į ct-mygtukai.css */
+  .dp-bc-btn.save { display: none; } /* sticky bar paima šią funkciją */
+  .dp-bc-right { gap: 6px; }
+  .dp-bc-btn { height: 30px; padding: 0 10px; font-size: 12px; }
+
+  /* Nuotrauka */
+  .dp-photo-main { border-radius: 10px; }
   .dp-thumbs { gap: 4px; }
 
   /* Pavadinimas ir kaina */
@@ -356,7 +375,7 @@ button{font-family:inherit;cursor:pointer}
   /* Pelnas / rizika */
   .dp-pr-blocks { gap: 8px; }
   .dp-pr-block { padding: 12px 14px; }
-  .dp-pr-btn { display: none !important;}
+  .dp-pr-btn { display: none !important; }
 
   /* Skirtukai */
   .dp-tabs { margin-top: 16px; }
@@ -387,7 +406,9 @@ button{font-family:inherit;cursor:pointer}
   .dp-price { font-size: 18px !important; }
   .dp-diff-badge { height: 24px; font-size: 12px; }
   .dp-score-bars { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
-  .dp-tab { padding: 0 10px; font-size: 12px; height: 40px; }/* v1.36.0: /* v1.36.0: .dp-bc-btn – mygtuko išvaizda perkelta į ct-mygtukai.css * – mygtuko išvaizda perkelta į ct-mygtukai.css */
+  .dp-tab { padding: 0 10px; font-size: 12px; height: 40px; }
+  .dp-bc-btn { padding: 0 8px; font-size: 11px; }
+  .dp-spec { font-size: 11px; height: 25px; padding: 0 7px; }
 }
 </style>
 </head>
@@ -509,7 +530,7 @@ button{font-family:inherit;cursor:pointer}
       <!-- v1.23.0: „Palyginti" perkelta prie automobilio veiksmu (zemiau) ir i paskyros meniu -->
     </nav>
     <div class="ct3-header-right">
-      <button class="ct3-premium-btn ct-btn ct-btn-sm ct-btn-primary ct-btn-block" id="ct-planas-btn" onclick="location.href='index.html?planas=1'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V10l6-8 6 8v10"/></svg><span id="ct-planas-btn-text">Planas</span></button>
+      <button class="ct3-premium-btn ct-btn ct-btn-sm ct-btn-primary" id="ct-planas-btn" onclick="location.href='index.html?planas=1'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V10l6-8 6 8v10"/></svg><span id="ct-planas-btn-text">Planas</span></button>
       <button class="ct3-avatar ct-btn ct-btn-sm ct-btn-icon ct-btn-round"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></button>
     </div>
   </div>
@@ -649,7 +670,7 @@ button{font-family:inherit;cursor:pointer}
         <h4>Pelno potencialas</h4>
         <p id="dp-profit-text">Kraunama...</p>
       </div>
-      <button class="dp-pr-btn ct-btn" id="dp-pelno-btn" onclick="dpPelnoToggle()" style="margin-left:auto;flex:none;cursor:pointer;white-space:nowrap">Skaičiuoti →</button>
+      <button class="dp-pr-btn ct-btn" id="dp-pelno-btn" onclick="dpPelnoToggle()" style="margin-left:auto;flex:none;padding:7px 14px;border-radius:8px;border:1px solid var(--success-border);background:transparent;color:var(--success);font:600 12px var(--font-sans);cursor:pointer;white-space:nowrap">Skaičiuoti →</button>
     </div>
     <div class="dp-pr-block risk">
       <div class="dp-pr-icon">
@@ -659,7 +680,7 @@ button{font-family:inherit;cursor:pointer}
         <h4>Rizikos</h4>
         <p id="dp-risk-text">Kraunama...</p>
       </div>
-      <button class="dp-pr-btn ct-btn" onclick="dpTab('risk',document.querySelectorAll('.dp-tab')[2]);document.getElementById('dp-pane-risk').scrollIntoView({behavior:'smooth',block:'start'})" style="margin-left:auto;flex:none;cursor:pointer;white-space:nowrap">Peržiūrėti →</button>
+      <button class="dp-pr-btn ct-btn" onclick="dpTab('risk',document.querySelectorAll('.dp-tab')[2]);document.getElementById('dp-pane-risk').scrollIntoView({behavior:'smooth',block:'start'})" style="margin-left:auto;flex:none;padding:7px 14px;border-radius:8px;border:1px solid var(--warning-border);background:transparent;color:var(--warning);font:600 12px var(--font-sans);cursor:pointer;white-space:nowrap">Peržiūrėti →</button>
     </div>
   </div>
   <!-- PELNO SKAICIUOKLE: pirkimo kaina, remontas, islaidos, pardavimo kaina -> pelnas, marza, ROI -->
@@ -1586,10 +1607,10 @@ window.ctApi = function (kelias, params) {
       // PAKEISTA: analize kainuoja kredita, todel nebeuzsakom automatiskai - rodom aiskų mygtuką
       // v1.27.0: du lygiai - greita (pigiau) ir pilna (su nuotraukų patikrinimu)
       document.getElementById('dp-ai-body').innerHTML =
-        '<div class="dp-cta"><p>Pasirinkite, kiek giliai tikriname šį skelbimą:</p>'
+        '<div class="dp-cta ct-btn ct-btn-primary"><p>Pasirinkite, kiek giliai tikriname šį skelbimą:</p>'
         + '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:4px 0 8px">'
-        + '<button id="dp-analize-greita" onclick="dpPradetiAnalize(\'greita\')" style="background:transparent;border:1px solid var(--border-light);color:var(--text-primary)" class="ct-btn">Greita apžvalga · 1 kr</button>'
-        + '<button id="dp-analize-cta" onclick="dpPradetiAnalize(\'pilna\')" class="ct-btn ct-btn-primary">Pilna apžvalga · 2 kr</button>'
+        + '<button id="dp-analize-greita" onclick="dpPradetiAnalize(\'greita\')" style="background:transparent;border:1px solid var(--border-light);color:var(--text-primary)">Greita apžvalga · 1 kr</button>'
+        + '<button id="dp-analize-cta" onclick="dpPradetiAnalize(\'pilna\')">Pilna apžvalga · 2 kr</button>'
         + '</div>'
         + '<small style="display:block;line-height:1.6">'
         + '<b>Greita</b> – skelbimo tekstas, kaina prieš rinką, rizikos, derybų patarimai.<br>'

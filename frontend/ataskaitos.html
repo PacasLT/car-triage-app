@@ -19,8 +19,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 .pg-tuscia b { display: block; color: var(--text-primary); font-size: 16px; margin-bottom: 8px; }
 .pg-tuscia a { color: var(--accent-light); }
 .filtrai { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
-/* v1.36.0: mygtuko išvaizda – ct-mygtukai.css (.ct-btn.ct-btn-sm). Čia lieka tik tai, ko komponentas nenustato. */
-.filtrai button {}
+.filtrai button { height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-surface); color: var(--text-secondary); font: 500 12.5px var(--font); cursor: pointer; }
 .filtrai button.on { background: var(--accent-dim); border-color: var(--accent-border); color: var(--accent-light); }
 .filtrai button b { font-family: var(--font-mono); font-weight: 600; margin-left: 5px; opacity: .8; }
 .at-card { display: flex; gap: 14px; align-items: center; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
@@ -36,10 +35,14 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 .at-title { font: 700 14px var(--font); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .at-sant { font: 400 12.5px/1.5 var(--font); color: var(--text-muted); margin-top: 3px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .at-meta { font: 500 10.5px var(--font-mono); color: var(--text-dim); margin-top: 6px; }
-.at-right { flex: none; display: flex; gap: 8px; align-items: center; }/* v1.36.0: .at-btn – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .at-btn.ac – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .at-btn.ac:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
-.at-btn.del { width: 34px;}/* v1.36.0: .at-btn.del:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
+.at-right { flex: none; display: flex; gap: 8px; align-items: center; }
+.at-btn { height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border-light); background: transparent; color: var(--text-primary); font: 500 12.5px var(--font); cursor: pointer; white-space: nowrap; }
+.at-btn.ac { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.at-btn.ac:hover { background: var(--accent-light); }
+.at-btn.del { color: var(--text-muted); width: 34px; padding: 0; }
+.at-btn.del:hover { color: var(--danger); border-color: var(--danger-border); }
 /* VIN / pardavėjo ataskaita rodoma vietoje */
-.at-inline { grid-column: 1 / -1; width: 100%; margin-top: 10px;}
+.at-inline { grid-column: 1 / -1; width: 100%; margin-top: 10px; padding: 12px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; font: 400 13px/1.6 var(--font); color: var(--text-secondary); white-space: pre-wrap; }
 .at-inline b { color: var(--text-primary); }
 .at-card.open { flex-wrap: wrap; }
 @media (max-width: 640px) {
@@ -171,7 +174,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
     <nav class="ct3-nav">
     </nav>
     <div class="ct3-header-right">
-      <button class="ct3-premium-btn ct-btn ct-btn-sm ct-btn-primary ct-btn-block" id="ct-planas-btn" onclick="location.href='index.html?planas=1'"><span id="ct-planas-btn-text">Planas</span></button>
+      <button class="ct3-premium-btn ct-btn ct-btn-sm ct-btn-primary" id="ct-planas-btn" onclick="location.href='index.html?planas=1'"><span id="ct-planas-btn-text">Planas</span></button>
       <a class="ct3-avatar ct-btn ct-btn-sm ct-btn-icon ct-btn-round" href="index.html" title="Paskyra"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></a>
     </div>
   </div>
@@ -207,9 +210,9 @@ function piesti() {
   const el = document.getElementById('sarasas'), kiek = document.getElementById('kiek'), fl = document.getElementById('filtrai');
   kiek.textContent = visos.length;
   const kiekTipo = {}; visos.forEach(function (a) { kiekTipo[a.tipas] = (kiekTipo[a.tipas] || 0) + 1; });
-  fl.innerHTML = '<button class="ct-btn ct-btn-sm ' + (filtras ? '' : 'on') + '" onclick="filtruoti(\'\')">Visos<b>' + visos.length + '</b></button>'
+  fl.innerHTML = '<button class="' + (filtras ? '' : 'on') + '" onclick="filtruoti(\'\')">Visos<b>' + visos.length + '</b></button>'
     + Object.keys(TIPAI).filter(function (t) { return kiekTipo[t]; }).map(function (t) {
-      return '<button class="ct-btn ct-btn-sm ' + (filtras === t ? 'on' : '') + '" onclick="filtruoti(\'' + t + '\')">' + TIPAI[t][0] + '<b>' + kiekTipo[t] + '</b></button>';
+      return '<button class="' + (filtras === t ? 'on' : '') + '" onclick="filtruoti(\'' + t + '\')">' + TIPAI[t][0] + '<b>' + kiekTipo[t] + '</b></button>';
     }).join('');
   const list = filtras ? visos.filter(function (a) { return a.tipas === filtras; }) : visos;
   // v1.25.0: atidarius „Palyginimai" pirmiausia rodom, KURIUOS automobilius šiuo metu lygini -

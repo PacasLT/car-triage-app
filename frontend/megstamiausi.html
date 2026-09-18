@@ -29,15 +29,21 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 .mg-chips .chip { height: 22px; font-size: 11px; padding: 0 7px; }
 .mg-price { font: 700 17px var(--font-mono); letter-spacing: -.02em; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .mg-price small { font: 400 11px var(--font); color: var(--text-dim); }
-.mg-right { flex: none; display: flex; align-items: center; gap: 8px; }/* v1.36.0: .mg-btn – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .mg-btn:hover – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .mg-btn.ac – mygtuko išvaizda perkelta į ct-mygtukai.css *//* v1.36.0: .mg-btn.ac:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
-.mg-btn.del { width: 34px;}/* v1.36.0: .mg-btn.del:hover – mygtuko išvaizda perkelta į ct-mygtukai.css */
+.mg-right { flex: none; display: flex; align-items: center; gap: 8px; }
+.mg-btn { height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border-light); background: transparent; color: var(--text-primary); font: 500 12.5px var(--font); cursor: pointer; white-space: nowrap; }
+.mg-btn:hover { background: var(--bg-elevated); }
+.mg-btn.ac { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.mg-btn.ac:hover { background: var(--accent-light); }
+.mg-btn.del { color: var(--text-muted); width: 34px; padding: 0; }
+.mg-btn.del:hover { color: var(--danger); border-color: var(--danger-border); }
 .mg-data { font: 400 11px/1.6 var(--font); color: var(--text-dim); margin-top: 6px; }
 .mg-data b { color: var(--text-muted); font-weight: 500; }
 .mg-data .sep { margin: 0 6px; opacity: .5; }
 .chip.gerai { color: var(--success); background: var(--success-dim); border-color: var(--success-border); }
 .chip.blogai { color: var(--danger); background: var(--danger-dim); border-color: var(--danger-border); }
 .chip.demesio { color: var(--warning); background: var(--warning-dim); border-color: var(--warning-border); }
-.chip.buvo { color: var(--text-dim); text-decoration: line-through; }/* v1.36.0: .mg-btn.del:hover, .mg-btn.del.sirdis – mygtuko išvaizda perkelta į ct-mygtukai.css */
+.chip.buvo { color: var(--text-dim); text-decoration: line-through; }
+.mg-btn.del:hover, .mg-btn.del.sirdis { color: #ff5c8a; border-color: rgba(255,92,138,.5); background: rgba(255,92,138,.12); }
 @media (max-width: 640px) {
   .mg-photo { width: 100%; height: 160px; border-right: none; border-bottom: 1px solid var(--border); }
   .mg-body { flex-direction: column; align-items: stretch; }
@@ -168,7 +174,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
     <nav class="ct3-nav">
     </nav>
     <div class="ct3-header-right">
-      <button class="ct3-premium-btn ct-btn ct-btn-sm ct-btn-primary ct-btn-block" id="ct-planas-btn" onclick="location.href='index.html?planas=1'"><span id="ct-planas-btn-text">Planas</span></button>
+      <button class="ct3-premium-btn ct-btn ct-btn-sm ct-btn-primary" id="ct-planas-btn" onclick="location.href='index.html?planas=1'"><span id="ct-planas-btn-text">Planas</span></button>
       <a class="ct3-avatar ct-btn ct-btn-sm ct-btn-icon ct-btn-round" href="index.html" title="Paskyra"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></a>
     </div>
   </div>
