@@ -121,7 +121,16 @@
     try { for (var i = 0; i < localStorage.length; i++) raktai.push(localStorage.key(i)); } catch (e) {}
     return {
       puslapis: location.pathname.split('/').pop() || 'index.html',
-      adresas: (location.pathname + location.search).slice(0, 400),
+      adresas: (location.pathname + location.search + location.hash).slice(0, 400),
+      // v1.57.0: du laukai, kurie atskiria „luzo kraunantis" nuo „luzo po valandos"
+      // ir „serveris neatsako" nuo „telefonas neteko rysio".
+      nuoIkelimo: (function () { try { return Math.round(performance.now()); } catch (e) { return null; } })(),
+      tinklas: (function () {
+        try {
+          var c = navigator.connection || {};
+          return (navigator.onLine === false ? 'offline' : 'online') + (c.effectiveType ? '/' + c.effectiveType : '');
+        } catch (e) { return null; }
+      })(),
       versija: v,
       laikas: new Date().toISOString(),
       ekranas: { plotis: window.innerWidth, aukstis: window.innerHeight,

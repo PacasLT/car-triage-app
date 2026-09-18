@@ -29,6 +29,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 
 /* Isskleista eilute - viena celė per visa plotį */
 .ad-detales { background: var(--bg-elevated); }
+.ad-pre { margin: 0; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-surface); font: var(--fw-regular) 11.5px/1.6 var(--font-mono); color: var(--text-secondary); white-space: pre-wrap; word-break: break-word; }
 .ad-detales > td { padding: 14px 13px !important; }
 .ad-pre { max-height: 260px; overflow: auto; padding: 10px 12px; border-radius: 8px; background: var(--bg-base); font: 400 11px/1.55 var(--font-mono); color: var(--text-secondary); white-space: pre-wrap; word-break: break-word; margin: 8px 0 0; }
 .ad-foto { max-width: 100%; max-height: 240px; border-radius: 8px; border: 1px solid var(--border); display: block; margin-top: 10px; }
@@ -222,6 +223,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
   var sub = document.getElementById('ad-sub');
   var _rodyti = 'klaidos';
   var _visi = false;
+  var _tekstas = /[?&]tekstas=1/.test(location.search);
 
   function zetonas() { try { return localStorage.getItem('ct_token') || ''; } catch (e) { return ''; } }
   function imti(kelias) {
@@ -273,6 +275,68 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
     return '<span class="ct-k ' + lygis + '"><i></i>' + esc(t) + '</span>';
   }
 
+  // v1.57.0: visas sarasas PLOKSCIU TEKSTU. Kam: taisytojas puslapio nemato taip,
+  // kaip zmogus - jam reikia visko is karto, vienoje vietoje, be spaudymo. Adresu
+  // ?tekstas=1 puslapis atsidaro tiesiai si rezimu.
+  function tekstoIsklotine(d) {
+    var NL = String.fromCharCode(10);
+    var e = [];
+    e.push('CARTRIIGE KLAIDOS  ' + new Date().toISOString().slice(0, 16).replace('T', ' '));
+    e.push('Is viso ' + d.viso + ' | atviru ' + d.atviru + ' | laukia jusu ' + d.lauksiaJusu);
+    e.push('Pagal busena: ' + JSON.stringify(d.pagalBusena || {}));
+    e.push('');
+    d.irasai.forEach(function (k) {
+      var g = k.diagnostika || {}, ek = g.ekranas || {};
+      e.push('================================================================');
+      e.push('#' + k.nr + '  ' + k.busena + '  svarba=' + k.svarba + '  kategorija=' + k.kategorija
+        + (k.kartojasi ? '  KARTOJASI' : '') + (k.foto ? '  [NUOTRAUKA]' : ''));
+      e.push(new Date(k.laikas).toISOString().slice(0, 16).replace('T', ' ') + '  ' + (k.kas || 'neprisijunges'));
+      e.push('');
+      e.push('TEKSTAS: ' + k.tekstas);
+      if (k.turejoRodyti) e.push('TUREJO RODYTI: ' + k.turejoRodyti);
+      e.push('');
+      e.push('PUSLAPIS: ' + (g.puslapis || '?') + '  v' + (g.versija || '?')
+        + '  ' + (ek.plotis || '?') + 'x' + (ek.aukstis || '?') + '@' + (ek.tankis || '?')
+        + '  planas=' + ((g.planas || {}).planas || '?')
+        + '  kreditai=' + ((g.planas || {}).kreditai == null ? '?' : g.planas.kreditai)
+        + (g.nuoIkelimo != null ? '  po ' + Math.round(g.nuoIkelimo / 1000) + ' s nuo ikelimo' : '')
+        + (g.tinklas ? '  tinklas=' + g.tinklas : ''));
+      if (g.adresas) e.push('ADRESAS: ' + g.adresas);
+      if (g.narsykle) e.push('NARSYKLE: ' + g.narsykle);
+      if (g.saugyklosRaktai) e.push('SAUGYKLOS RAKTAI: ' + g.saugyklosRaktai.join(', '));
+      if ((g.veiksmai || []).length) {
+        e.push('');
+        e.push('PASPAUDIMAI (paskutinis apacioje):');
+        g.veiksmai.forEach(function (v) { e.push('   ' + (v.tekstas || '') + '   ' + (v.elementas || '')); });
+      }
+      if ((g.klaidos || []).length) {
+        e.push('');
+        e.push('JS KLAIDOS:');
+        g.klaidos.forEach(function (x) {
+          e.push('   ' + x.zinute + (x.failas ? '   (' + x.failas + ':' + x.eilute + ')' : ''));
+          if (x.stekas) e.push('     ' + String(x.stekas).split(String.fromCharCode(10)).slice(0, 3).join(' | '));
+        });
+      }
+      if ((g.uzklausos || []).length) {
+        e.push('');
+        e.push('NEPAVYKUSIOS UZKLAUSOS:');
+        g.uzklausos.forEach(function (x) { e.push('   ' + x.kodas + '  ' + (x.tipas || '') + '  ' + x.adresas); });
+      }
+      if ((k.istorija || []).length) {
+        e.push('');
+        e.push('KELIAS: ' + k.istorija.map(function (x) { return x.busena; }).join(' -> '));
+      }
+      if (k.foto) e.push('NUOTRAUKA: /admin/klaidos/' + k.nr + '/foto');
+      e.push('');
+    });
+    return e.join(NL);
+  }
+
+  window.adTekstas = function (v) {
+    _tekstas = v;
+    piestiKlaidas();
+  };
+
   function piestiKlaidas() {
     el.innerHTML = '<div class="ct-empty is-never"><i>·</i><span class="ct-empty-t">Kraunama…</span></div>';
     imti('/admin/klaidos' + (_visi ? '?visi=1' : '')).then(function (d) {
@@ -285,7 +349,17 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
         + '<div class="ct-flags" style="margin-bottom:14px">'
         +   '<button type="button" class="ct-flag" role="radio" aria-checked="' + (!_visi) + '" onclick="adVisi(false)">Tik atviros</button>'
         +   '<button type="button" class="ct-flag" role="radio" aria-checked="' + (!!_visi) + '" onclick="adVisi(true)">Visos</button>'
+        + '</div>'
+        + '<div class="ct-flags" style="margin-bottom:14px">'
+        +   '<button type="button" class="ct-flag" role="radio" aria-checked="' + (!_tekstas) + '" onclick="adTekstas(false)">Lentelė</button>'
+        +   '<button type="button" class="ct-flag" role="radio" aria-checked="' + (!!_tekstas) + '" onclick="adTekstas(true)">Viskas tekstu</button>'
         + '</div>';
+
+      if (_tekstas) {
+        el.innerHTML = h + '<pre id="ad-tekstas" class="ad-pre"></pre>';
+        document.getElementById('ad-tekstas').textContent = tekstoIsklotine(d);
+        return;
+      }
 
       if (!d.irasai.length) {
         el.innerHTML = h + (d.viso === 0

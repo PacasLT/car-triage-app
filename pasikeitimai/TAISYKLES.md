@@ -16,10 +16,35 @@ Nereikia klausti Luko „ką perduoti?" — įrašas žurnale IR YRA perdavimas.
 
 | Failas | Kas rašo | Kam |
 |---|---|---|
-| `BUSENA.md` | abu | Viena lentelė: kas atidaryta, kieno ėjimas. Perrašoma, ne pildoma. |
-| `ZURNALAS.md` | abu | Klausimai ir atsakymai. **Tik pridedama į galą**, senų įrašų netrinam. |
+| `BUSENA.md` | Klaudijus | Viena lentelė: kas atidaryta, kieno ėjimas. Perrašoma, ne pildoma. |
+| `ZURNALAS.md` | Klaudijus | Klausimai ir atsakymai. **Tik pridedama į galą**, senų įrašų netrinam. Dizainerio atsakymus perkelia Klaudijus iš paketo (žr. žemiau). |
 | `matavimai/` | Klaudijus | Ekranvaizdžiai ir skaičiai, į kuriuos rodo žurnalo įrašai. |
 | `is-dizainerio/NN-tema/` | Dizaineris | Jo paketai, kiekvienas savo aplanke su numeriu ir tema. Klaudijus įdiegia ir aplanką ištrina. |
+
+## Dizaineris aplanką SKAITO, bet nerašo
+
+Prijungtas aplankas jam yra tik skaitymui. Vadinasi, jis fiziškai negali nei
+įrašyti `A-nn` į žurnalą, nei atnaujinti savo eilutės `BUSENA.md`. Todėl:
+
+**Paketas yra vienintelis jo kanalas.** Kiekviename pakete jis palieka du
+failus, o Klaudijus juos perkelia diegdamas — tai privalomas įdiegimo žingsnis,
+ne malonė:
+
+```
+pasikeitimai/is-dizainerio/NN-tema/
+    ct-dizainas.css
+    PASTABOS.md              ← kas pakeista, kurie skyriai, koks principas
+    ZURNALAS-PRIDETI.md      ← turinys keliauja į ZURNALAS.md galą
+    BUSENA-EILUTES.md        ← eilutės, kurias Klaudijus įrašo į BUSENA.md
+```
+
+Klaudijaus įdiegimo žingsniai, iš eilės:
+1. Perkelti `ZURNALAS-PRIDETI.md` turinį į `ZURNALAS.md` galą (tekstas
+   nekeičiamas — tai jo žodžiai).
+2. Įrašyti `BUSENA-EILUTES.md` eilutes į `BUSENA.md`.
+3. Įdiegti failus į `frontend/`, pamatuoti naršyklėje (1400 ir 390 px, 0 JS klaidų).
+4. Pakelti versiją `versijos.js`.
+5. Ištrinti `NN-tema/` aplanką ir parašyti žurnale, ką įdiegė ir ką pamatavo.
 
 ## Žurnalo įrašo forma
 

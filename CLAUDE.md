@@ -261,6 +261,7 @@ Grandinė `fetchSearchPage`: **talpykla → ScraperAPI → tiesioginis axios →
 | Du skirtingi įverčiai | kortelė (komentaras kode!) | `detail.html` `ctScore` – v1.48.0 |
 | `diffPct` ženklas | kortelė ir `.dp-hero` | `detail.html` rinkos skiltis – v1.52.0 |
 | Python heredoc ėda `\` | `.join('\\n')` davė tikrą naujos eilutės simbolį | `\\'` atribute – ta pati klaida po 10 min, v1.54.0 |
+| Bendras klasės vardas | `.ct-table` – `<table>` ir `<div>` sąrašas | `.ct-kv` – eilutė ir jos konteineris, v1.56.0 |
 
 **Taisyklė: kai kas nors ištaisoma, iškart paieškoti to paties raginio visame kode.** Dizainerio klausimas prieš 3 dalį („skalė greičiausiai turi savo medianą") pasitvirtino ne visai taip, kaip jis spėjo – mediana ta pati, bet **ženklas priešingas**: tas pats automobilis viršuje rodė „−12 %" žaliai, o rinkos skiltyje „+12 %" raudonai.
 
@@ -275,7 +276,8 @@ Grandinė `fetchSearchPage`: **talpykla → ScraperAPI → tiesioginis axios →
 - **Skubi eilutė gauna liniją kairėje** (`.is-urgent`), NE raudoną foną: raudonas fonas sąraše rėkia ir tada, kai skubių yra pusė. Uždarytos eilutės prigesinamos (`.is-done`), ne slepiamos.
 - **Eilutė išsiskleidžia** (`.ad-detales`) – diagnostika ir būsenų mygtukai po ja, ne atskirame lange. Vienu metu atidaryta viena.
 - **Trys tuščios būsenos, ne viena:** `is-never` (dar nieko nebuvo – paaiškina, kaip atsiras), `is-good` (nėra ką taisyti – žalias ženklas), `is-filtered` (yra, bet paslėpta filtro – su mygtuku „Rodyti visas"). Viena bendra „Nieko nerasta" meluoja dviem atvejais iš trijų.
-- **`display` ant `<td>` išima langelį iš lentelės (v1.54.0):** 22 sk. `.ct-table .is-text` uždėjo `display: -webkit-box` pačiam langeliui – jis nustojo tempti iki eilutės aukščio ir apatinis rėmelis nusipiešė 12 px aukščiau už kaimynų (matuota: apačios 467/467/**455**/467/467/467). Apkarpymas priklauso VIDINIAM `<span class="ct-clamp">`; perkėlus – 0 px. Atsvara `ct-priedai.css` 6 bloke.
+- **`display` ant elemento, kurio vaidmenį nustato tėvas (v1.54.0):** dizainerio apibendrinimas, tikslesnis už mano pirminę diagnozę – lūžo ne todėl, kad tai lentelė, o todėl, kad `display` buvo uždėtas ant `<td>`, kurio `display` priklauso tėvui. Ant flex vaiko būtų tas pats. `.ct-summary` (`ct-dizainas.css` 798 eil.) turi tą patį bloką, bet ten `<div>`, kurio `display` iš išorės niekas nenustato – todėl nelūžta.
+- **Kaip tai atrodė (v1.54.0):** 22 sk. `.ct-table .is-text` uždėjo `display: -webkit-box` pačiam langeliui – jis nustojo tempti iki eilutės aukščio ir apatinis rėmelis nusipiešė 12 px aukščiau už kaimynų (matuota: apačios 467/467/**455**/467/467/467). Apkarpymas priklauso VIDINIAM `<span class="ct-clamp">`; perkėlus – 0 px. Atsvara `ct-priedai.css` 6 bloke.
 - **`.ct-table` vardas dubliuojasi:** `index.html` ir `compare.html` jau turi savo vietinį `.ct-table` – tai NE lentelė, o `<div>` raktas/reikšmė sąrašas. Šiandien nekenkia (iš 22 sk. jiems taikosi tik `width:100%` ir `font-size`, abu inertiški), bet pridėjus `.is-time` ar `display:table` į bet kurią pusę – lūš. Tikrinta: tų klasių ten nėra nė vienos.
 - **Generatoriaus spąstai:** `tools/mk-admin.py` šablonas yra Python trigubų kabučių eilutė, todėl JS viduje **negalima** nei `\n`, nei `\'` – abu virsta tikru simboliu ir sulaužo JS. Vietoj jų: `String.fromCharCode(10)` ir `&quot;` HTML esybė atributuose. Abi klaidos jau buvo padarytos – po kiekvieno generavimo `node --check` ištrauktam `<script>`.
 
@@ -313,6 +315,8 @@ Pranešimo mygtukas buvo pusiau bevertis, kol sąrašą matė tik žmogus: per e
 - **Numatytoji būklė – išjungta:** nenustatytas arba trumpesnis nei 32 simboliai raktas reiškia, kad antraštė nepriimama visai, o į žurnalą rašomas įspėjimas. Palyginimas – `crypto.timingSafeEqual`, prieš tai patikrinus ilgį.
 - **Ką raktas atrakina:** `GET /admin/klaidos`, `POST .../busena`, `POST .../sutvarkyta`, `GET .../foto`, `GET /admin/atsarga`. **Ko ne:** `DELETE` (negrįžtama, tad tik žmogus su žetonu), `/admin/vartotojai`, `/admin/planas`, `/admin/kreditai`.
 - **Istorijoje matosi, kas keitė:** raktu padarytas įrašas gauna `kas: 'raktas'`, ne žmogaus el. paštą.
+- **`/admin.html?tekstas=1` – rodinys „Viskas tekstu" (v1.57.0).** Visi pranešimai su visa diagnostika viename `<pre>`. Tai PAGRINDINIS kelias Claude'ui: `*.up.railway.app` nėra nei debesies konteinerio, nei įrenginio apvalkalo leidžiamų domenų sąraše (patikrinta: npm ir GitHub 200, Railway 000), o individualiose paskyrose to sąrašo keisti negalima. Todėl produkciją pasiekia tik naršyklė.
+- **Naršyklės polangis prisijungia vieną kartą** ir sesija išlieka tarp pokalbių – nuo tada sąrašą atidaro pats Claude, be rakto ir be komandų.
 - **`tools/klaidos.js`** – paleidžiama Luko kompiuteryje, skaito `backend/.env`. `node tools/klaidos.js` (atviros), `<nr>` (viena su visa diagnostika), `<nr> <busena> [pastaba]`, `--visi`, `--atsarga`. Raktas niekada nespausdinamas.
 - Patikrinta: be antraštės 401, su blogu raktu 401, su trumpu raktu 401, trynimas raktu 401, `/admin/vartotojai` raktu 401, teisingas raktas 200.
 

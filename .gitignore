@@ -12,3 +12,6 @@ Claude outputs/
 # Dizainerio paketai - laikini, idiegus dingsta
 pasikeitimai/is-dizainerio/*
 !pasikeitimai/is-dizainerio/SKAITYK.md
+
+# Klaidu saraso nuotraukos - laikinos, skaitomos ir istrinamos
+pasikeitimai/klaidos-*.txt

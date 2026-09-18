@@ -1627,7 +1627,9 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
 /* ID ir techniniai laukai — sutrumpinami, bet pilna verte per title */
 .ct-table .is-id { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: var(--fw-regular) 11px/1.5 var(--font-mono); color: var(--text-secondary); }
 /* Ilgas tekstas (klaidos aprasymas) — dvi eilutes, ne begalybe */
-.ct-table .is-text { min-width: 220px; max-width: 420px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+/* Ilgas tekstas (klaidos aprasymas) — tik plotis. Apkarpymas priklauso
+   vidiniam .ct-clamp (23 sk.), nes display ant <td> isima ji is lenteles. */
+.ct-table .is-text { min-width: 220px; max-width: 420px; }
 /* Veiksmu stulpelis — visada paskutinis, niekada nesitraukia */
 .ct-table .is-act { width: 1%; white-space: nowrap; }
 
@@ -1668,3 +1670,59 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
 .ct-empty.is-filtered > i { background: var(--accent-dim); box-shadow: inset 0 0 0 1px var(--accent-border); color: var(--accent-light); }
 /* 3. DAR NIEKO NEBUVO — pirmas paleidimas, nulinis irasas. ⚪ */
 .ct-empty.is-never > i { box-shadow: inset 0 0 0 1.5px var(--text-muted); }
+
+
+/* ============================================================================
+   23. TEKSTO APKARPYMAS · vienas elementas, ne kiekvienas atskirai
+   ----------------------------------------------------------------------------
+   Vienas principas: apkarpymas priklauso TEKSTUI, ne vietai, kurioje tekstas
+   stovi. Todel jis niekada nededamas ant `<td>`, ant `<li>` ar ant kortelės
+   kūno — visada ant vidinio elemento, kuris nieko daugiau nedaro.
+
+   `display: -webkit-box` yra tikras display: jis pakeicia elemento vaidini
+   tevo isdestyme. Ant `<td>` tai reiskia, kad langelis nustoja buti langeliu:
+   nebetempia iki eilutes aukscio, ir jo rėmelis nusipiesia savo vietoje, ne
+   eilutes. Tas pats nutiktu ant flex vaiko ir ant grid vaiko. Vidinis
+   `<span>` neturi jokio vaidinio, tad ir sugadinti nieko negali.
+
+   Eiluciu skaicius — per kintamaji, ne per nauja klase kiekvienam atvejui. */
+
+.ct-clamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--clamp, 2);
+  overflow: hidden;
+}
+.ct-clamp.is-1 { --clamp: 1; }
+.ct-clamp.is-3 { --clamp: 3; }
+.ct-clamp.is-4 { --clamp: 4; }
+
+
+/* ============================================================================
+   24. RAKTAS / REIKSME SARASAS · .ct-kv
+   ----------------------------------------------------------------------------
+   Vienas principas: vardas apibudina, KAS elementas yra, ne kur jis stovi.
+   `<table>` yra lentele → .ct-table. Raktas/reiksme sarasas nera lentele,
+   net jei atrodo lygiai taip pat → .ct-kv (key/value).
+
+   Sis komponentas jau tris kartus gyvena `<style>` blokuose (index.html 1242,
+   compare.html 1200) po vardu `.ct-table`. Butent todel ir atsirado K-02:
+   nepriglobtas komponentas visada pasiima geriausia laisva varda, o geriausi
+   vardai yra bendri. Cia jis perimamas i sistema.
+
+   Isvaizda NEKEICIAMA ne vienu taskeliu — 12.5px yra --fs-200, tarpai tie
+   patys. Tai perkelimas, ne perdarymas. */
+
+.ct-kv { width: 100%; }
+.ct-kv > div {
+  display: flex; justify-content: space-between; gap: var(--s-3);
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--fs-200);
+}
+.ct-kv > div:last-child { border-bottom: none; }
+.ct-kv span { color: var(--text-muted); }
+.ct-kv b    { font-weight: var(--fw-semi); text-align: right; }
+
+/* Tanki atmaina — ta pati logika kaip .ct-table.is-dense */
+.ct-kv.is-dense > div { padding: 4px 0; }

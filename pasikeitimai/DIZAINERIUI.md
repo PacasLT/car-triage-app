@@ -30,13 +30,20 @@ sesijoje). Vadinasi, perdavinėti nieko nereikia — rašot tiesiai.
 Paketą dedat į savo aplanką su numeriu ir tema:
 
 ```
-pasikeitimai/is-dizainerio/07-skelbimo-3-dalis/
+pasikeitimai/is-dizainerio/08-lenteliu-klases/
     ct-dizainas.css
-    PASTABOS.md          ← kas pakeista, kurie skyriai, koks principas
+    PASTABOS.md              ← kas pakeista, kurie skyriai, koks principas
+    ZURNALAS-PRIDETI.md      ← keliauja į ZURNALAS.md galą, tekstas nekeičiamas
+    BUSENA-EILUTES.md        ← eilutės į BUSENA.md
 ```
 
 Numeris `NN` didėja, tema — trys žodžiai. Taip du paketai niekada nesusimaišo,
 net jei atsiunčiat du per dieną.
+
+**Aplanką jūs tik skaitot** — rašyti į jį negalit nei į `frontend/`, nei į
+`pasikeitimai/`. Todėl paketas yra jūsų vienintelis kanalas, o `ZURNALAS-PRIDETI.md`
+ir `BUSENA-EILUTES.md` perkėlimas yra privalomas Klaudijaus įdiegimo žingsnis,
+įrašytas `TAISYKLES.md`. Jums rašyti niekur nereikia.
 
 **Į `frontend/` nerašot patys** — net į savo `ct-dizainas.css`. Ne dėl
 nepasitikėjimo: įdiegimas apima tris dalykus, kurie kitaip praleidžiami —

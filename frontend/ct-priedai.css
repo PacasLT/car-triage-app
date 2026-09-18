@@ -13,6 +13,8 @@
      v1.42.0  siaurų mygtukų 44 px atsvara → jo 420 eilutė su :not(.ct-btn-tight)
      v1.45.0  `.ct-btn-accent`              → jo ct-mygtukai.css
      v1.54.0  `.ct-report-fab` fonas         → jo `.ct-btn.ct-report-fab`
+     v1.56.0  `.ct-clamp` apkarpymas          → jo 23 skyrius
+     v1.56.0  `.ct-table` vardo dublikatas     → jo 24 skyrius `.ct-kv`
 
    TAISYKLĖS: jokių kietai įrašytų spalvų, jokių naujų tokenų, kiekvienas
    blokas su komentaru KAS ir KODĖL.
@@ -74,23 +76,3 @@
    v1.54.0: dizaineris pakėlė specifiką iki `.ct-btn.ct-report-fab` savo faile.
    Jo žodžiais: „ta pati klaida, kurią radote 420/423 eilutėse – dabar surinkau
    ją pats, tame pačiame faile."                                             */
-
-
-/* ── 6. Lentelės teksto stulpelio apkarpymas ───────────────────────────────
-   22 sk. `.ct-table .is-text` uždeda `display: -webkit-box` PAČIAM `<td>`.
-   Tai išima langelį iš lentelės išdėstymo: jis nebesitempia iki eilutės
-   aukščio, ir jo apatinis rėmelis nusipiešia 12 px aukščiau už kaimynų.
-   Matuota admin.html: langelių apačios [467, 467, 455, 467, 467, 467].
-
-   Apkarpymas priklauso VIDINIAM elementui, ne langeliui. Perkėlus į
-   `> .ct-clamp` skirtumas 12 px → 0 px, o apkarpymas iki 2 eilučių lieka
-   (`scrollHeight > clientHeight` vis dar tiesa).
-   ATŠAUKIMAS: ištrinti, kai dizaineris perkels apkarpymą savo faile.        */
-
-.ct-table td.is-text { display: table-cell; }
-.ct-table td.is-text > .ct-clamp {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}

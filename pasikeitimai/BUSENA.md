@@ -1,18 +1,18 @@
-# Būsena · atnaujinta 2026-09-18, v1.55.0
+# Būsena · atnaujinta 2026-09-18, v1.56.0
 
 ## Kieno dabar ėjimas
 
 | Nr. | Kas | Kieno ėjimas | Trumpai |
 |---|---|---|---|
-| K-01 | `.ct-table .is-text` apkarpymas | **Dizaineris** | `display:-webkit-box` ant `<td>` išima langelį iš lentelės. Atsvara įdiegta, laukiam ar perims. |
-| K-02 | `.ct-table` vardas jau užimtas | **Dizaineris** | `index.html` ir `compare.html` turi savo `<div>` sąrašą tuo pačiu vardu. |
-| D-03 | Skelbimo puslapio 3 dalis | **Dizaineris** | Kortelės, rinkos padėties skalė, pardavėjo kortelė. Laukiam paketo. |
+| K-03 | `.ct-kv` vardas irgi užimtas | **Dizaineris** | Senasis `.ct-kv` = eilutė, naujas = konteineris. Pamatuota: trys eilutės sugultų į vieną (y 27/27/27). 24 sk. sustabdytas. |
+| D-03 | Skelbimo puslapio 3 dalis | **Dizaineris** | Kortelės, rinkos padėties skalė, pardavėjo kortelė. Laukiam paketo 07. |
 | L-04 | `/admin/atsarga` rezultatas | **Lukas** | Po paros veikimo pažiūrėti skaičius ir nuspręsti dėl Puppeteer. Priminimas 09-19 14:30. |
 | L-05 | `KLAIDU_RAKTAS` įjungimas | **Lukas** | Sugeneruoti raktą, įdėti į Railway Variables ir `backend/.env` kartu su `CT_URL`. Iki tol klaidų sąrašo nematau. |
-| Z-03 | Aplankas dizainerio pusėje | **Lukas** | Prijungti `car-triage-app` dizainerio sesijoje. |
 
 ## Kas uždaryta paskutiniu metu
 
+- v1.56.0 — A-01 įdiegtas: 23 sk. `.ct-clamp`, 22 sk. 1630 eil., `ct-priedai.css` 6 blokas ištrintas (0 px, 0 JS klaidų)
+- Z-03 — `car-triage-app` prijungtas dizainerio sesijoje, perdavinėjimas ranka baigtas
 - v1.55.0 — klaidų sąrašas pasiekiamas raktu (`tools/klaidos.js`), be trynimo ir be vartotojų
 - v1.54.0 — 22 sk. (lentelės ir tuščios būsenos) įdiegtas, patikrintas, 0 JS klaidų
 - v1.54.0 — `.ct-report-fab` perimtas dizainerio, atsvara ištrinta

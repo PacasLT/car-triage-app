@@ -8,6 +8,23 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.57.0', data: '2026-09-18', pavadinimas: 'Klaidų sąrašas vienu žvilgsniu',
+    pakeitimai: [
+      'Administravimo puslapyje naujas rodinys „Viskas tekstu" – visi pranešimai su visa diagnostika vienoje vietoje',
+      'Atidaromas ir tiesiogiai adresu `/admin.html?tekstas=1`',
+      'Prie kiekvieno pranešimo dabar matosi, po kiek laiko nuo puslapio įkėlimo įvyko klaida',
+      'Ir ar tuo metu buvo ryšys – „serveris neatsako" nebesupainiojama su „telefonas neteko ryšio"',
+    ],
+  },
+  {
+    versija: '1.56.0', data: '2026-09-18', pavadinimas: 'Teksto apkarpymas grįžo ten, kur priklauso',
+    pakeitimai: [
+      'Administravimo lentelėje ilgo teksto langelis nebeišsiskiria iš eilutės – rėmelis vėl vienoje linijoje',
+      'Apkarpymas iki dviejų eilučių dabar yra atskira dizaino sistemos dalis, o ne lentelės ypatybė',
+      'Laikinas mūsų pataisymas ištrintas – dizaino sistema tai daro pati',
+    ],
+  },
+  {
     versija: '1.55.0', data: '2026-09-18', pavadinimas: 'Klaidų sąrašas pasiekiamas ir iš išorės',
     pakeitimai: [
       'Klaidų pranešimus dabar gali perskaityti ne tik žmogus naršyklėje – taisytojas gauna juos su visa diagnostika',
