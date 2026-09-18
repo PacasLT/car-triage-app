@@ -302,3 +302,59 @@ išvis reikalinga. Laikinų atsvarų nedėjau.
 **Failai:** `pasikeitimai/matavimai/plotis-3152.png`,
 `pasikeitimai/matavimai/plotis-385-tel.png`
 
+---
+
+## K-05 · 2026-09-18 · Klaudijus → Dizaineriui · LAUKIA ATSAKYMO
+
+**Dėl administravimo panelės maketo.** Karkasas geras ir atsako į tai, ko
+klausiau `K-04`: šoninis meniu, `max-width 1600`, ne centrinis stulpelis.
+Bet prieš statant reikia keturių sprendimų.
+
+**Pirma — skaičių tikrovė.** Sugretinau maketą su produkcija:
+
+| Maketas | Realiai |
+|---|---|
+| 8 412 aktyvių vartotojų | **1** |
+| 1 284 nauji skelbimai / 24 h | neskaičiuojama, skelbimai nesaugomi |
+| 128 moderavimo eilėje | moderavimo sąvokos nėra |
+| 3 942 VIN užklausos / 24 h | fiksuojama kreditų žurnale, sąrašo nėra |
+| 37 AI įverčių apeliacijos | apeliacijų nėra |
+
+Iš išorės to nematyti, tad tai ne priekaištas. Bet **dėžutė be duomenų yra ne
+tuščia būsena, o melas** — pilna panelė su prasimanytais skaičiais atrodytų
+veikianti. Klausimas: statom karkasą su **keturiomis tikromis** plytelėmis, ar
+su visomis penkiomis, kur trys rodytų jūsų pačių 22 sk. `is-never` būseną?
+Mano nuomone — tik tikros. Tuščia skiltis meniu su skaitikliu „0" kasdien
+klausia „kodėl aš čia".
+
+**Antra — „Skelbimai / moderavimo eilė".** Tai didžiausias darbas makete ir jo
+šiandien nėra visai: skelbimai niekur nesaugomi, jie gyvena paieškos rezultate.
+**Bet stulpelis „SIGNALAI" beveik tiksliai atitinka tai, ką jau skaičiuojam** —
+`kainosIspejimas` („greičiausiai lizingo įmoka"), `itariamaZala` („−52 % nuo
+rinkos"), `rizikosBusena`, `qualityScore`. Jūsų maketo eilutės „Ridos
+neatitikimas", „Dublikatas · 3 šaltiniai", „Kaina −38 % nuo rinkos" yra beveik
+mūsų žodžiai. Klausimas: ar tai buvo pasiūlymas naujai funkcijai, ar manėt, kad
+ji jau yra? Nuo to priklauso, ar tai kitas paketas, ar atskiras projektas.
+
+**Trečia — ar administravimas atsiskiria nuo kliento programos?** Makete
+`admin.cartriige.lt` su sava antrašte ir šoniniu meniu. Šiandien `admin.html`
+sąmoningai naudoja **tą pačią** antraštę, generuojamą iš `ataskaitos.html`, kad
+piktogramos ir logotipas nenudreifuotų. Jei einam prie atskiros antraštės —
+tai dizaino sistemos išsišakojimas, ir jį verta padaryti sąmoningai, ne
+pakeliui.
+
+**Ketvirta — 880 px kortelės.** Makete lentelė virsta kortelėmis. Ar ta pati
+taisyklė galioja **jau įdiegtai** klaidų lentelei (22 sk. `.ct-table.is-dense`)?
+Dabar ji telefone lieka lentelė ir veikia (0 horizontalaus slinkimo, pamatuota),
+bet jei taisyklė bendra — perdarysiu abi vienu ėjimu, ne po vieną.
+
+**Smulkmena:** viršutinės juostos paieška siūlo „VIN, valst. nr. arba skelbimo
+ID". **Valstybinių numerių niekur nerenkam** — tokio lauko produkte nėra. VIN
+yra. Ir maketo šaltinių sąraše yra mobile.de (blokuoja Akamai, todėl jo ir
+atsisakėm), Regitra API ir draudimo partneris — tikri keturi yra autoplius,
+autogidas, autoscout24, otomoto.
+
+**Visą sugretinimą su užduotimis surašiau** į `pasikeitimai/UZDUOTYS-ADMIN.md` —
+kiekviena maketo dalis pažymėta, ar backend'as jau yra, ar reikia priedo, ar to
+nėra visai. Siūloma eilė ten pat.
+
