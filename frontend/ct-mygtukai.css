@@ -452,3 +452,84 @@
 .ct-btn-accent > i { background: rgba(124, 92, 255, .22); color: var(--accent-light); }
 /* Kreditu likutis mygtuke — mono, bet ne raudonas, kol kreditu yra */
 .ct-btn-accent > u { border-left-color: var(--accent-border); color: var(--accent-light); }
+
+
+/* ── A) VEIKSMU EILE TELEFONE · visi antriniai vienodi ───────────────────────
+   K-07 atsakymas. Iki siol .ct-btn-tight gaudavo du mygtukai, o trecias
+   ("Daugiau") likdavo be jos — tad jis islaikydavo uzrasa ir gaudavo
+   flex 1 1 0, isaugdamas iki 223 px tarp dvieju 44 px ikonu. Butent tai
+   vartotojas ivardijo kaip "nesusitvarke": ne dydis, o NEVIENODAS elgesys
+   vienoje eileje.
+
+   Taisykle: vienoje veiksmu eileje telefone arba VISI antriniai su uzrasais,
+   arba ne vienas. Trys su uzrasais ties 327 px netelpa, tad ne vienas.
+
+   Nieko neisimam — visi veiksmai pasiekiami, tik be uzrasu. "Daugiau" gauna
+   tritaski, viena is nedaugelio piktogramu, kuriai uzrasas nereikalingas.
+
+   NEPERIMA: pacio mygtuko fono, rėmelio, spalvos — tik ploti ir uzraso
+   matomuma eileje. NEPERIMA .ct-btn-primary elgesio (jis jau teisingas). */
+
+@media (max-width: 640px) {
+  /* Antriniai eilutes mygtukai — visi ikoniniai ir vienodi.
+     (0,2,0), tas pats kaip 422 ir 425 eil., tad sprendzia eiles tvarka. */
+  .ct-actions > .ct-btn:not(.ct-btn-primary) {
+    flex: 0 0 auto;
+    width: var(--tap-min);
+    min-width: var(--tap-min);
+    padding: 0;
+    gap: 0;
+    justify-content: center;
+  }
+  .ct-actions > .ct-btn:not(.ct-btn-primary) > span { display: none; }
+  .ct-actions > .ct-btn:not(.ct-btn-primary) > i { margin-left: 0; }
+  .ct-actions > .ct-btn:not(.ct-btn-primary)::after { display: none; }
+}
+
+
+/* ── B) PASPAUDIMO ZONOS RIBA · pagal ivesties buda, ne pagal ploti ──────────
+   Vienas principas: riba, kuri gyvena tik prozoje, bus pazeista. Per si
+   projekta --tap-min pazeistas SESIOSE vietose (jusu penkios is Z-12 ir mano
+   .ct-report-fab), ir kiekviena karta taisyta rankomis. Septintas perejimas
+   nieko nepakeis — reikia, kad pazeidimas butu NEIMANOMAS.
+
+   Todel riba uzdedama ne ties plociu, o ties pointer: coarse — ten, kur
+   pirstas yra pagrindinis ivesties budas. Tai tikslesne uz max-width: 32 px
+   mygtukas tankioje darbalaukio lenteleje yra teisingas, o tas pats mygtukas
+   telefone — ne, ir plotis apie tai nieko nesako (planse 1024 px yra pirstas,
+   1024 px monitorius — ne).
+
+   Sarasas isvardytas SUDETINIAIS selektoriais samoningai: .ct-btn-sm nustato
+   height, o height nugali min-height. Tad reikia ir vieno, ir kito, ir tokios
+   pat specifikos, kokia yra originale.
+
+   SIS BLOKAS TURI BUTI PASKUTINIS ct-mygtukai.css FAILE. */
+
+@media (pointer: coarse) {
+  .ct-btn,
+  .ct-btn.ct-btn-sm,
+  .ct-btn.ct-btn-over {
+    height: auto;
+    min-height: var(--tap-min);
+  }
+
+  .ct-btn.ct-btn-icon,
+  .ct-btn-sm.ct-btn-icon,
+  .ct-btn-over.ct-btn-icon {
+    width: auto;
+    min-width: var(--tap-min);
+    height: auto;
+    min-height: var(--tap-min);
+  }
+
+  .ct-actions > .ct-btn-tight,
+  .ct-actions > .ct-btn:not(.ct-btn-primary) {
+    width: var(--tap-min);
+    min-width: var(--tap-min);
+    min-height: var(--tap-min);
+  }
+
+  /* Zymimasis langelis ir soninis meniu — tos pacios ribos */
+  .ct-check > i { width: var(--tap-min); height: var(--tap-min); }
+  .ct-sidenav-i { min-height: var(--tap-min); }
+}

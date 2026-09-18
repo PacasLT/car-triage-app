@@ -176,6 +176,7 @@ BODY = u'''
         + (g.nuoIkelimo != null ? '  po ' + Math.round(g.nuoIkelimo / 1000) + ' s nuo ikelimo' : '')
         + (g.tinklas ? '  tinklas=' + g.tinklas : ''));
       if (g.adresas) e.push('ADRESAS: ' + g.adresas);
+      if (g.skelbimas) e.push('SKELBIMAS: ' + (g.skelbimas.pavadinimas || '?') + '  ' + (g.skelbimas.url || ''));
       if (g.narsykle) e.push('NARSYKLE: ' + g.narsykle);
       if (g.saugyklosRaktai) e.push('SAUGYKLOS RAKTAI: ' + g.saugyklosRaktai.join(', '));
       if ((g.veiksmai || []).length) {

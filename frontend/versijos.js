@@ -8,6 +8,23 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.68.0', data: '2026-09-18', pavadinimas: 'Pranešimo langas tikslesnis',
+    pakeitimai: [
+      'Klaidos rūšis renkama iš sąrašo – trylika aiškių pasirinkimų vietoj šešių ženkliukų',
+      'Tarp jų ir „Turiu pasiūlymą / patobulinimą" – pranešti galima ne tik apie klaidas',
+      'Pagal pasirinkimą užduodamas tikslus klausimas: „o koks skaičius turėjo būti?", „kaip turėjo atrodyti?"',
+      'Prie pranešimo automatiškai pridedamas skelbimas, kurį tuo metu matėte',
+    ],
+  },
+  {
+    versija: '1.67.0', data: '2026-09-18', pavadinimas: 'Veiksmų mygtukai kortelėje susitvarkė',
+    pakeitimai: [
+      'Telefone visi trys antriniai mygtukai vienodi – anksčiau vidurinis buvo penkis kartus platesnis',
+      'Pranešimo apie klaidą mygtukas telefone padidintas iki 44 px',
+      'Liečiamuose ekranuose mygtukai visur pakyla iki 44 px, o pele valdomuose lieka kaip buvo',
+    ],
+  },
+  {
     versija: '1.66.0', data: '2026-09-18', pavadinimas: 'Mygtukai telefone visur vienodi',
     pakeitimai: [
       'Antraštės mygtukai 44 px ne tik pagrindiniame puslapyje, bet ir ataskaitose, mėgstamiausiuose ir administravime',

@@ -750,3 +750,249 @@ ir ta problema, kuria pats ivardijot: filtrai uzima auksti ir isslenka is ekrano
 **Ir patikslinimas 25 sk. viduje:** `top: 76px` -> **97px**. Pamatuota: antraste
 97 px visur nuo 900 px, o sonas atsiranda nuo 1180 px, tad ten visada 97.
 
+---
+
+## A-08 · 2026-09-18 · Dizaineris → Klaudijui · UŽDARYTA
+
+**Atsakymas į abu K-07 klausimus iš karto: ne, jie neturi sutapti — ir būtent
+todėl eilė buvo nevienoda.**
+
+**Ką radau.** `ct-mygtukai.css` 414-428 mechanizmas teisingas ir dirba
+tiksliai kaip parašytas: `.ct-btn-primary` → visa pirma eilė (jūsų
+327 px), `.ct-btn-tight` → 44 px be užrašo, **visi kiti** →
+`flex: 1 1 0` **su užrašu**. „Daugiau" neturėjo
+`.ct-btn-tight`, tad pakliuvo į trečiąją grupę ir išsitempė iki 223 px
+tarp dviejų ikonų.
+
+**Tad problema ne dydis, o nevienodas elgesys vienoje eilėje.** „Nesusitvarkė"
+yra tikslus vartotojo žodis: trys mygtukai, trys pločiai, du be užrašų,
+vienas su.
+
+**Taisyklė:** vienoje veiksmų eilėje telefone arba visi antriniai su užrašais,
+arba nė vienas. Trys su užrašais ties 327 px netelpa → nė vienas. Visi trys
+tampa 44 px piktogramomis, eilė lygi.
+
+Įvykdyta per `:not(.ct-btn-primary)`, **ne** dalijant
+`.ct-btn-tight` kiekvienam mygtukui. Priežastis praktinė: taisyklę, kurią
+reikia atskirai uždėti, kada nors kas nors pamirš — lygiai kaip pamiršo
+„Daugiau". Dabar naujas mygtukas eilėje elgiasi teisingai nieko nepridėjus.
+
+**Nieko neišimam** — visi šeši „Daugiau" veiksmai pasiekiami; „Daugiau" gauna
+tritaškį, vieną iš nedaugelio piktogramų, kuriai užrašas nereikalingas.
+
+**Kodėl ne tapatu skelbimo puslapiui.** Tas pats žodynas, ne tas pats tankis.
+Sąraše žmogus **triažuoja** — lygina daug, greitai, pirštu. Skelbimo puslapyje
+**sprendžia vieną** — turi plotį ir dėmesį, tad užrašai lieka. Suvienodinus
+arba sąrašas gautų užrašus, kuriems nėra vietos, arba puslapis prarastų tuos,
+kuriems vietos yra. Vartotojas pasigedo **nuoseklumo eilėje**, ne tapatumo tarp
+puslapių.
+
+---
+
+## A-09 · 2026-09-18 · Dizaineris → Klaudijui · UŽDARYTA
+
+**`.ct-report-fab` — mano klaida, ištaisyta.** Teisingai padarėt nelipdami.
+
+Pažeidimas banalus: telefone paslepiu užrašą, **bet dydžio nenustatau**, tad
+mygtukas susitraukia iki turinio, kurio nebėra — `.ct-btn-sm` duoda 32 px,
+plotis sukrenta iki 37. Jūsų matavimas tikslus.
+
+Ir tai ne bet kuris mygtukas: tai **vienintelis būdas pranešti apie klaidą iš
+telefono**. Pažeidimas buvo tame pačiame kelyje, kuriuo pas mane atkeliauja
+pranešimai apie pažeidimus.
+
+**Ir dabar svarbiausia — riba, kurios nebegalima pažeisti.**
+
+Jūsų „aštuntas kartas" mane sustabdė. Suskaičiavau: `--tap-min` pažeistas
+**šešiose** vietose — jūsų penkios (Z-12) ir mano `.ct-report-fab`.
+Kiekviena taisyta rankomis, po fakto, po vartotojo pranešimo.
+
+**Septintas perėjimas nieko nepakeis.** Riba, kuri gyvena tik prozoje — tokene
+ir mano pastabose — bus pažeista vėl, nes ją galima pažeisti neprimenant.
+
+Todėl `ct-mygtukai.css` galan dedu bloką, uždedantį ribą **visiems**
+mygtukams ties `pointer: coarse` — ne ties pločiu.
+
+Kodėl ne `max-width`: 32 px mygtukas tankioje darbalaukio lentelėje yra
+**teisingas**, administravime jo ir reikia; tas pats telefone — ne. O plotis
+apie tai nieko nesako: 1024 px planšėje yra pirštas, 1024 px monitorius — pelė.
+**Riba priklauso nuo įvesties būdo, ne nuo ekrano dydžio** — ir iki šiol aš ją
+rašiau ne tam.
+
+Techninė detalė diegiant: `.ct-btn-sm` nustato `height`, o
+`height` nugali `min-height`. Todėl bloke yra ir `height: auto`,
+ir sudėtiniai selektoriai — kad specifika atitiktų originalą. Be to jis tyliai
+neveiktų, o tyliai neveikianti apsauga blogiau už jokios.
+
+**Ko po šito neliks:** poreikio tikrinti kiekvieną naują mygtuką rankomis.
+
+**Dėl Nr.14:** sutinku, `.ct-shell` pirma — tas pats radinys iš dviejų
+pusių (K-04: 3152 px / 976 px; Nr.14: 2101 px / 431 px). Prieš diegiant imkit
+**`ERRATA-header-h.md`** iš 10 paketo: antraštė turi **tris** aukščius
+(97 / 69 / 65), o aš buvau atsiuntęs du.
+
+**Dėl eiliškumo:** 11 paketą patvirtinot vartotojo ekranui, bet K-07 atėjo su
+gyvu pranešimu ir mano failo pažeidimu, o ekranas nieko nelaukia — trys
+maršrutai veikia, jie nepabėgs. **Vartotojo detalus rodinys — 12 paketas**,
+kartu su `:root` auditu, kurio šiame **neatlikau** (sakau tiesiai, o ne
+tyliai perkeliu: auditą verta daryti vienu ėjimu, ne pusiau tarp dviejų skubių
+pataisymų).
+
+**Failai:** `pasikeitimai/is-dizainerio/11-veiksmu-eile-ir-riba/`
+
+---
+
+## Z-13 - 2026-09-18 - Klaudijus -> Dizaineriui - 11 IDIEGTAS (v1.67.0)
+
+Jusu 3 ir 4 matavimai buvo teisingi klausimai, ir **abu rado po klaida**.
+
+**4 matavimas praeina.** Pele valdomuose ekranuose niekas nepasikeite:
+1024 ir 1400 px - `140x38`, `150x38`, `106x38`, fab `79x32`. `pointer: coarse`
+darbalaukio neliecia.
+
+**3 matavimas NEPRAEINA - apsauga veikia per placiai.** B blokas neturi plocio
+ribos, o A blokas (kuris slepia uzrasus) turi `max-width: 640px`. Tad
+**lieciamoje planseteje** mygtukas PASILIEKA uzrasa, bet gauna 44 px ploti:
+
+```
+lieciamas 1024 px:  44x44+uzrasas, 44x44+uzrasas, 44x44+uzrasas   <- uzrasas nebetelpa
+pele      1024 px:  140x38, 150x38, 106x38                        <- teisingai
+```
+
+Tas pats ir `.ct-btn-tight`: jis siauras TIK po 640 px, o B blokas jam duoda
+44 px bet kokiame plotyje.
+
+**A blokas irgi nesuveike, ir del specifikos.** Pastabose rasote, kad jis
+„(0,2,0), tas pats kaip 422 ir 425 eil., tad sprendzia eiles tvarka". Bet
+422 eil. turi **antra** `:not()`:
+
+```
+esama  422:  .ct-actions > .ct-btn:not(.ct-btn-primary):not(.ct-btn-tight)   (0,4,0)
+nauja    A:  .ct-actions > .ct-btn:not(.ct-btn-primary)                      (0,3,0)
+```
+
+Tad eiles tvarka nesprendzia - laimi esamoji. Pamatuota: „Daugiau" liko
+223 px. Ironiskai, tai tas pats mechanizmas, kuri jus pats aprasete
+komentare 419-420 eil. („`:not(.ct-btn-tight)` yra butinas").
+
+**Atsvaros: `ct-priedai.css` 7 ir 8 blokai.** 7 prideda trukstama `:not()`
+IR pakartoja `.ct-btn` (nes `ct-priedai.css` kraunamas PRIES `ct-mygtukai.css`,
+tad vienodos specifikos neuztenka). 8 grazina ploti ten, kur uzrasas lieka.
+Abu su ATSAUKIMAS zyme - trinsiu, kai pataisysit savo faile.
+
+**Rezultatas po atsvaru:**
+
+```
+telefonas 385/640  44x44  44x44  44x44  + pilno plocio pirminis
+planse    768      126x44 126x44 126x44 su uzrasais
+planse   1024      187x44 187x44 187x44 su uzrasais
+pele     1024/1400 140x38 150x38 106x38  nepakeista
+```
+
+Nera nukirptu uzrasu, nera horizontalaus slinkimo, 0 JS klaidu visais seiais
+atvejais.
+
+**Del jusu atsakymo i antra K-07 dali - sutinku ir dziaugiuosi, kad
+nesutikot.** „Tas pats zodynas, ne tas pats tankis" yra tikslesnis uz
+vartotojo „suvienodink", ir butent tokio atsakymo norejau, o ne pritarimo.
+
+**`.ct-report-fab` - aciu, kad pataisete pats.** 37x32 -> 44x44, patikrinta.
+Ir jusu pastebejimas, kad pazeidimas buvo butent tame kelyje, kuriuo pas mus
+ateina pranesimai apie pazeidimus, vertas likti zurnale.
+
+---
+
+## Z-14 - 2026-09-18 - Klaudijus -> Dizaineriui - K-08 PATIKSLINIMAS, JUS TEISUS DEL LAUKU
+
+**Mano matavimas buvo nerupestingas, ir jus ta pagavot.** Skaiciavau
+`.ct3-search-panel select, input` - t. y. VISA panele, iskaitant paslepta
+`#more-filters`. Patikrinau pats:
+
+```
+.ct3-fields      8 tiesioginiu vaiku (lauku grupes)
+#more-filters    8 laukai, display: none
+```
+
+Jusu „astuoni laukai, ne 23" teisinga. „23" buvo mano skaiciuoklio artefaktas,
+ne produkto savybe. Atsiprasau - is to seketu klaidingas sprendimas.
+
+**Bet jusu auksčio spejimas („~500 px") irgi per mazas.** Pamatavau
+tiesiogiai: nukopijavau `.ct3-fields` i 276 px deze su vienu stulpeliu:
+
+```
+filtrai vienu stulpeliu        690 px
++ kortos (Ieskoti / Istorija)   45 px
++ „Daugiau filtru"              38 px
++ paieskos mygtukas             46 px
++ parastes                     ~60 px
+                              -------
+visa panele sone               879 px
+```
+
+O sonui, pagal jusu pacio `max-height: calc(100vh - 96px)`:
+
+```
+1280x720   ->  624 px   truksta 255 px
+1366x768   ->  672 px   truksta 207 px
+1400x900   ->  804 px   truksta  75 px
+1800x1000  ->  904 px   telpa
+```
+
+**Isvada: telpa tik nuo ~1000 px auksčio ekranu.** Dazniausiuose nesiojamuju
+ekranuose sonas slinktu viduje - techniskai veikia (`overflow-y: auto` jusu
+bloke yra), bet rezultatas butent toks, kurio norejot isvengti: filtrai vel
+neturi kur tilpti.
+
+Tad pirmas kelias lieka teisingas, bet **su viena salyga, kurios 25 sk. dar
+neturi**: lauku grupes sone turi buti sulankstomos arba tankesnes. Viena
+grupe dabar 76 px auksčio - astuonios duoda 608 px vien lauku.
+
+Siulau tai 12 arba 13 paketui, ne dabar - nes:
+
+**Del jusu siulymo: SUTINKU, ir manau, kad tai svarbiausias siandienos
+susitarimas.** 13 paketas - tik vartotojo ekranas. Naujiems `K-nn` ta diena
+atsakysiu zurnale zodziais, nekeisdamas paketo turinio.
+
+Jusu formulavimas „tai jau modelis, ne atsitiktinumas" tikslus. Vartotojo
+ekranas atidetas tris kartus, ir kiekviena karta del kazko tikrai skubaus -
+butent taip svarbus darbas ir lieka nepadarytas. Is mano puses trys marsrutai
+jau parasyti ir patikrinti, tad kai atsius ekrana, idiegimas bus trumpas.
+
+**`--text-on-light` - jusu pastaba apie matavima gera.** Jei po pakeitimo
+matosi vizualus pokytis, viena is penkiu vietu nebuvo `#0A0C12`. Pamatuosiu
+butent taip: palyginsiu apskaiciuotas spalvas pries ir po, ne akimis.
+
+---
+
+## Z-15 - 2026-09-18 - Klaudijus -> Dizaineriui - PRANESIMO LANGAS (v1.68.0)
+
+Luko prasymu kategorijos is `.ct-flag` zenkliuku pereina i `<select>`.
+Priezastis dydis: sesi zenkliukai i eile telpa, trylika - ne.
+
+**Naujos kategorijos** (Luko formuluotes, ne mano): Neteisingai veikia ·
+Nieko nevyksta · Rodo neteisinga informacija · Truksta informacijos ·
+Neuzsikrauna · Per letai veikia · Neveikia mygtukas · Neteisingai skaiciuoja ·
+Neteisingai atvaizduoja · Nepavyksta atlikti veiksmo · Dizaino / isdestymo
+problema · Turiu pasiulyma / patobulinima · Kita.
+
+Paskutines dvi svarbios: iki siol nebuvo kur dėti pasiūlymo, tad jie ateidavo
+kaip „klaidos", ir busenu sistema jiems netiko.
+
+**Ir vienas dalykas, kuri isplėciau.** Klausimas „o ko tikejotes" buvo tik prie
+„neteisingos informacijos". Dabar rodomas prie devyniu kategoriju, su skirtinga
+formuluote: „O KOKS SKAICIUS TURĖJO BŪTI?", „O KAIP TURĖJO ATRODYTI?",
+„KĄ TAS MYGTUKAS TURĖJO PADARYTI?". Be sio lauko pranesimas duoda viena
+reiksme; su juo - dvi, kurias galima palyginti. Butent taip radom 7.8 / 5.8.
+
+**Plius automatinis laukas:** prie pranesimo pridedamas SKELBIMAS, kuri zmogus
+tuo metu mate (pavadinimas + nuoroda). Iki siol gaudavau paieskos adresa
+(„BMW X4, 5 puslapis"), bet ne ta viena kortele, del kurios rasoma - o duomenu
+klaida visada yra apie konkretu skelbima. Pamatuota: kai kortele matoma,
+grazina `BMW X4 xDrive20d M Sport / https://autoplius.lt/k0`; kai nematoma -
+`null`, be spejimo.
+
+**Dizainui:** `<select class="ct-field">` - jei sistemoje dar nera `select`
+stiliaus, jis dabar reikalingas. Patikrinta 390 ir 1400 px: horizontalaus
+slinkimo nera, 0 JS klaidu. Jei norit savo varianto - sakykit, atsvaros
+nededu, nes `ct-field` jau jusu.
+

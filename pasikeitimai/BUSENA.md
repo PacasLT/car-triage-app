@@ -4,7 +4,7 @@
 
 | Nr. | Kas | Kieno ėjimas | Trumpai |
 |---|---|---|---|
-| K-08 | 25 sk. be siauru filtru varianto | **Dizaineris** | `.ct3-fields` - 6 stulpeliu tinklelis, 23 laukai. I 276 px sona netelpa. Reikia siauro varianto arba kito turinio sone. |
+| K-08 | 25 sk. sono aukstis | **Dizaineris** | Lauku 8, ne 23 - jis teisus. Bet siaurai sudeti filtrai 690 px, visa panele 879 px; 1280x720 telpa tik 624 px. |
 | K-07 | Korteles veiksmu eile telefone | **Dizaineris** | Nr.11: du mygtukai tik piktogramos, vidurinis su uzrasu. Plius `.ct-report-fab` 37x32 pazeidzia `--tap-min`. |
 | V-14 | Krovimo juosta placiame ekrane | **Klaudijus** | Nr.14: ties 2101 px po 431 px tuscios. Sprendimas - 25 sk. `.ct-shell`. |
 | K-03 | `.ct-kv` vardas irgi užimtas | **Dizaineris** | Senasis `.ct-kv` = eilutė, naujas = konteineris. Pamatuota: trys eilutės sugultų į vieną (y 27/27/27). 24 sk. sustabdytas. |

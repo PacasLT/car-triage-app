@@ -124,6 +124,21 @@
     return {
       puslapis: location.pathname.split('/').pop() || 'index.html',
       adresas: (location.pathname + location.search + location.hash).slice(0, 400),
+      // v1.68.0: KURIS skelbimas buvo ekrane. Iki siol gaudavau paieskos
+      // adresa („BMW X4, 5 puslapis"), bet ne ta viena kortele, del kurios
+      // pranesama - o duomenu klaida visada yra apie konkretu skelbima.
+      // Imamas virsutinis matomas skelbimas, nes zmogus rase ziuredamas i ji.
+      skelbimas: (function () {
+        try {
+          var k = [].slice.call(document.querySelectorAll('.ct-card, .card'))
+            .filter(function (e) { var b = e.getBoundingClientRect(); return b.bottom > 0 && b.top < innerHeight; })[0];
+          if (!k) return null;
+          var a = k.querySelector('a[href*="://"]');
+          var pav = k.querySelector('.ct-title, h3, h2');
+          return { url: a ? a.href.slice(0, 200) : null,
+                   pavadinimas: pav ? pav.textContent.trim().slice(0, 80) : null };
+        } catch (e) { return null; }
+      })(),
       // v1.57.0: du laukai, kurie atskiria „luzo kraunantis" nuo „luzo po valandos"
       // ir „serveris neatsako" nuo „telefonas neteko rysio".
       nuoIkelimo: (function () { try { return Math.round(performance.now()); } catch (e) { return null; } })(),
@@ -160,13 +175,23 @@
 
   // Kategorijos sudėtos ne iš teorijos, o iš to, kas šioje sistemoje realiai lūžta.
   // Kiekviena nurodo, KURIAME sluoksnyje ieškoti — tai vienintelė jų prasmė.
+  // v1.68.0: is zenkliuku i sarasa. Sesi zenkliukai telpa i eile, trylika - ne,
+  // o siauresnis pasirinkimas reiskia tikslesni pranesima. `k` reiksmes senos
+  // ten, kur prasme sutampa - kad jau surinkti pranesimai neliktu be kategorijos.
   var KATEGORIJOS = [
-    { k: 'dizainas',      t: 'Atrodo ne taip' },
-    { k: 'negyvas',       t: 'Paspaudžiau — nieko neįvyko' },
-    { k: 'duomenys',      t: 'Rodo neteisingą skaičių ar tekstą' },
-    { k: 'kreditai',      t: 'Nusirašė kreditas, o rezultato nėra' },
-    { k: 'greitis',       t: 'Ilgai užtrunka arba užstringa' },
-    { k: 'prisijungimas', t: 'Neleidžia prisijungti' },
+    { k: 'negyvas',       t: 'Neteisingai veikia' },
+    { k: 'nieko',         t: 'Nieko nevyksta' },
+    { k: 'duomenys',      t: 'Rodo neteisingą informaciją' },
+    { k: 'truksta',       t: 'Trūksta informacijos' },
+    { k: 'neuzsikrauna',  t: 'Neužsikrauna' },
+    { k: 'greitis',       t: 'Per lėtai veikia' },
+    { k: 'mygtukas',      t: 'Neveikia mygtukas' },
+    { k: 'skaiciavimas',  t: 'Neteisingai skaičiuoja' },
+    { k: 'atvaizdavimas', t: 'Neteisingai atvaizduoja' },
+    { k: 'veiksmas',      t: 'Nepavyksta atlikti veiksmo' },
+    { k: 'dizainas',      t: 'Dizaino / išdėstymo problema' },
+    { k: 'pasiulymas',    t: 'Turiu pasiūlymą / patobulinimą' },
+    { k: 'kita',          t: 'Kita' },
   ];
   var SVARBOS = [
     { k: 'blokuoja', t: 'Negaliu tęsti' },
@@ -196,9 +221,12 @@
       + '</div>'
       + '<div class="ct-modal-b">'
       +   '<div class="ct-flag-group" id="kp-kat-g">'
-      +     '<span class="ct-field-k">KOKIA TAI KLAIDA</span>'
-      +     zenkliukai('kp-kat', KATEGORIJOS, null)
-      +     '<span class="ct-field-err" id="kp-kat-err" hidden>Pasirinkite, kokia tai klaida.</span>'
+      +     '<label class="ct-field-k" for="kp-kat-sel">KOKIA TAI PROBLEMA</label>'
+      +     '<select class="ct-field" id="kp-kat-sel">'
+      +       '<option value="">— pasirinkite —</option>'
+      +       KATEGORIJOS.map(function (x) { return '<option value="' + x.k + '">' + esc(x.t) + '</option>'; }).join('')
+      +     '</select>'
+      +     '<span class="ct-field-err" id="kp-kat-err" hidden>Pasirinkite, kokia tai problema.</span>'
       +   '</div>'
       +   '<div class="ct-flag-group">'
       +     '<span class="ct-field-k">KIEK TRUKDO</span>'
@@ -251,17 +279,33 @@
     }
 
     var papildomas = document.getElementById('kp-papildomas');
-    rinktis(document.getElementById('kp-kat'), function (k) {
-      _kat = k;
+    // Klausimas „o ko tikejotes" yra vertingiausias visame pranesime: be jo
+    // lieka tik „blogai", o su juo - dvi reiksmes, kurias galima palyginti.
+    // Butent taip radom, kad kortele rodo 7.8, o skelbimo puslapis 5.8.
+    // v1.68.0: rodomas ne tik prie „neteisingos informacijos", bet visur, kur
+    // yra ko tiketis; formuluote keiciasi pagal kategorija.
+    var TIKETASI = {
+      duomenys:      'O KOKIA INFORMACIJA TURĖJO BŪTI?',
+      skaiciavimas:  'O KOKS SKAIČIUS TURĖJO BŪTI?',
+      atvaizdavimas: 'O KAIP TURĖJO ATRODYTI?',
+      truksta:       'KOKIOS INFORMACIJOS TRŪKSTA?',
+      veiksmas:      'KĄ BANDĖTE PADARYTI?',
+      mygtukas:      'KĄ TAS MYGTUKAS TURĖJO PADARYTI?',
+      nieko:         'KO TIKĖJOTĖS, KAD ĮVYKS?',
+      negyvas:       'KAIP TURĖJO VEIKTI?',
+      pasiulymas:    'KAIP NORĖTUMĖTE, KAD BŪTŲ?',
+    };
+    document.getElementById('kp-kat-sel').onchange = function () {
+      var k = this.value;
+      _kat = k || null;
       document.getElementById('kp-kat-g').classList.remove('has-error');
       document.getElementById('kp-kat-err').hidden = true;
-      // Klaidingo skaičiaus atveju lemiamas klausimas yra „o kiek turėjo būti".
-      // Būtent taip radom, kad kortelė rodo 7.8, o skelbimo puslapis 5.8.
-      papildomas.innerHTML = (k === 'duomenys')
-        ? '<div class="ct-flag-group"><label class="ct-field-k" for="kp-turejo">O KĄ TURĖJO RODYTI?</label>'
-          + '<textarea id="kp-turejo" rows="2" placeholder="Pvz.: kortelėje buvo 7.8, o čia rodo 5.8."></textarea></div>'
+      var klausimas = TIKETASI[k];
+      papildomas.innerHTML = klausimas
+        ? '<div class="ct-flag-group"><label class="ct-field-k" for="kp-turejo">' + esc(klausimas) + '</label>'
+          + '<textarea id="kp-turejo" rows="2"></textarea></div>'
         : '';
-    });
+    };
     rinktis(document.getElementById('kp-svarba'), function (k) { _svarba = k; });
 
     var inp = document.getElementById('kp-failas');

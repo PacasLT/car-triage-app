@@ -15,6 +15,7 @@
      v1.54.0  `.ct-report-fab` fonas         → jo `.ct-btn.ct-report-fab`
      v1.56.0  `.ct-clamp` apkarpymas          → jo 23 skyrius
      v1.56.0  `.ct-table` vardo dublikatas     → jo 24 skyrius `.ct-kv`
+   (7 blokas – veiksmų eilė – laukia jo selektoriaus pataisymo)
 
    TAISYKLĖS: jokių kietai įrašytų spalvų, jokių naujų tokenų, kiekvienas
    blokas su komentaru KAS ir KODĖL.
@@ -76,3 +77,73 @@
    v1.54.0: dizaineris pakėlė specifiką iki `.ct-btn.ct-report-fab` savo faile.
    Jo žodžiais: „ta pati klaida, kurią radote 420/423 eilutėse – dabar surinkau
    ją pats, tame pačiame faile."                                             */
+
+
+/* ── 7. Veiksmų eilė telefone – 11 paketo A bloko atsvara ──────────────────
+   11 pakete `.ct-actions > .ct-btn:not(.ct-btn-primary)` turi susiaurinti
+   visus antrinius iki 44 px. Jis nesuveikia, nes `ct-mygtukai.css` 422 eil.
+   jau turi SPECIFIŠKESNĘ taisyklę:
+
+     esama:  .ct-actions > .ct-btn.ct-btn:not(.ct-btn-primary):not(.ct-btn-tight)
+             (0,4,0)  →  flex: 1 1 0; min-width: 0
+     nauja:  .ct-actions > .ct-btn:not(.ct-btn-primary)
+             (0,3,0)
+
+   Dizainerio pastaboje parašyta „(0,2,0), tas pats kaip 422 ir 425 eil.,
+   tad sprendžia eilės tvarka" – bet 422 turi antrą `:not()`, tad eilės
+   tvarka nesprendžia. Pamatuota 385 px: „Daugiau" liko 223 px, o ne 44.
+
+   Atsvara prideda trūkstamą `:not(.ct-btn-tight)` IR pakartoja `.ct-btn`,
+   kad specifika taptų (0,5,0). Vien susilyginti neužtenka: `ct-priedai.css`
+   kraunamas PRIEŠ `ct-mygtukai.css`, tad prie vienodos specifikos laimi jo
+   failas. Pamatuota – su (0,4,0) „Daugiau" liko 223 px.
+   Turinio nekeičia, tik plotį ir užrašo matomumą.
+   ATŠAUKIMAS: ištrinti, kai dizaineris pataisys selektorių savo faile.     */
+
+@media (max-width: 640px) {
+  .ct-actions > .ct-btn.ct-btn:not(.ct-btn-primary):not(.ct-btn-tight) {
+    flex: 0 0 auto;
+    width: var(--tap-min);
+    min-width: var(--tap-min);
+    padding: 0;
+    gap: 0;
+    justify-content: center;
+  }
+  .ct-actions > .ct-btn.ct-btn:not(.ct-btn-primary):not(.ct-btn-tight) > span { display: none; }
+  .ct-actions > .ct-btn.ct-btn:not(.ct-btn-primary):not(.ct-btn-tight) > i { margin-left: 0; }
+  .ct-actions > .ct-btn.ct-btn:not(.ct-btn-primary):not(.ct-btn-tight)::after { display: none; }
+}
+
+
+/* ── 8. 11 paketo B blokas veikia per plačiai ──────────────────────────────
+   Dizaineris pats prašė patikrinti, ar `pointer: coarse` apsauga neveikia per
+   plačiai. Veikia. Jo B bloke yra:
+
+     @media (pointer: coarse) {
+       .ct-actions > .ct-btn:not(.ct-btn-primary) { width: var(--tap-min); ... }
+     }
+
+   Ši dalis neturi pločio ribos, o A blokas (kuris slepia užrašus) turi
+   `max-width: 640px`. Tad liečiamoje planšetėje ties 1024 px mygtukas
+   PASILIEKA užrašą, bet gauna 44 px plotį – užrašas nebetelpa.
+
+   Pamatuota, liečiamas 1024 px: `44x44+užrašas` visiems trims antriniams.
+   Pele tame pačiame plotyje: `140x38`, `150x38`, `106x38` – teisingai.
+
+   Atsvara grąžina plotį ten, kur užrašas lieka. `min-height` neliečiam –
+   jis teisingas visur, ir būtent dėl jo visa B bloko idėja gera.
+   ATŠAUKIMAS: ištrinti, kai B blokas gaus pločio ribą.                      */
+
+@media (pointer: coarse) and (min-width: 641px) {
+  /* Ir `.ct-btn-tight` – jis siauras TIK po 640 px, o B blokas jam duoda
+     44 px bet kokiame plotyje. Liečiamoje planšetėje uzrasas likdavo, o
+     vieta jam – ne. Pamatuota 768 ir 1024 px. */
+  .ct-actions > .ct-btn.ct-btn:not(.ct-btn-primary) {
+    width: auto;
+    min-width: 0;
+    flex: 1 1 0;
+    padding: 0 14px;
+    gap: 8px;
+  }
+  .ct-actions > .ct-btn.ct-btn:not(.ct-btn-primary) > span { display: inline; }
+}
