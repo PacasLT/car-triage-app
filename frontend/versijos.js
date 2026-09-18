@@ -8,6 +8,22 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.74.0', data: '2026-09-18', pavadinimas: 'Mygtukai planšetėje nebesusispaudžia',
+    pakeitimai: [
+      'Liečiamoje planšetėje veiksmų mygtukai atgavo įprastą plotį – užrašai vėl telpa',
+      'Telefone lieka trys vienodi 44 px mygtukai, kompiuteryje niekas nesikeičia',
+      'Du laikini mūsų pataisymai ištrinti – dizaino sistema tai daro pati',
+    ],
+  },
+  {
+    versija: '1.73.0', data: '2026-09-18', pavadinimas: 'Formos laukai gavo savo išvaizdą',
+    pakeitimai: [
+      'Pasirinkimo ir teksto laukai nebeatrodo kaip naršyklės numatytieji – tas pats stilius kaip mygtukų',
+      'Liečiamame ekrane laukas 44 px aukščio, kaip ir mygtukai',
+      'Paruošta filtrų vieta šone plačiuose ekranuose – pats perkėlimas bus kitame žingsnyje',
+    ],
+  },
+  {
     versija: '1.72.0', data: '2026-09-18', pavadinimas: 'Lizingo įmoka atpažįstama pagal formą, ne pagal sumą',
     pakeitimai: [
       'ISTAISYTA: skelbimai, kur vietoj kainos rodoma „739 € / mėn.", nebuvo pažymimi, jei suma didesnė už ribą',

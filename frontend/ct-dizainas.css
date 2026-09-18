@@ -1915,3 +1915,159 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
     font-size: var(--fs-200);
   }
 }
+
+
+/* ============================================================================
+   30. FILTRAI SONE · du tankio zingsniai   (antra redakcija)
+   ----------------------------------------------------------------------------
+   Vienas principas: siauras variantas nera „tas pats, tik suspaustas". Tai tas
+   pats turinys kitame skaitymo bude — horizontaliai skenuojamas tinklelis
+   virsta vertikaliai skaitomu sarasu.
+
+   Pirmoje redakcijoje padariau viena zingsni (nuimiau lauku korteles) ir
+   spejau, kad pakaks. Pamatavus — nepakanka: 643 px netelpa i 1280x720
+   (riba 599). Reikia dvieju zingsniu.
+
+   ZINGSNIS 1 — kortele nuo lauko. Sone lauko fonas ir remelis nieko neskiria:
+   laukai jau vienas po kitu viename stulpelyje, o kortele tik prideda 22 px
+   kiekvienam. 73 px -> 50 px.
+
+   ZINGSNIS 2 — semantiniai broliai poromis. Du diapazonai (METAI, KAINA)
+   ir du sarasai (KURAS, PAVARU DEZE) eina po du. Ne „trumpi su trumpais",
+   o TOKS PAT SU TOKIU PAT — kad pora skaitytusi kaip vienas sprendimas.
+   8 eiles -> 6 eiles.
+
+   Platus lieka tie, kuriu pasirinkimo tekstas ilgas (MARKE, MODELIS,
+   VARANTIEJI RATAI) ir GALIA, kurios du skaiciu laukai siauroje puseje
+   butu po 52 px.
+
+   PAMATUOTA (panele sone, 276 px):
+     A be nieko          829 px   telpa tik nuo 1800x1000
+     B po 1 zingsnio     643 px   netelpa i 1280x720 (riba 599)
+     C po abieju         527 px   telpa visur, 1280x720 su 72 px atsarga
+   Apkirpimu nei viename lauke nera (patikrinta scrollWidth visiems astuoniems).
+
+   NEPERIMA: lauku vidaus — select, input, .ct3-select-wrap, .ct3-range-wrap
+   fonai, remeliai, aukstis lieka jusu.
+   NEPERIMA: .ct3-search-panel fono, remelio, radiuso.
+   NEPERIMA: „Daugiau filtru" mygtuko ir jo zenkliuko logikos.
+   PERIMA tik: tinklelio stulpelius, tarpus, lauko korteles nuemima sone.
+
+   PRIRISTA prie: min-width 1180px — to paties slenkscio, kuriame 25 sk.
+   sukuria sona. Kitoje salygoje sitas blokas neturi ka veikti, ir butent
+   todel jis priristas prie tos, o ne prie „siauro ekrano". */
+
+@media (min-width: 1180px) {
+
+  /* Zingsnis 2: du stulpeliai, platus laukai per abu */
+  .ct-shell-side .ct3-fields {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s-2) var(--s-3);
+    padding: var(--s-3);
+  }
+
+  /* Zingsnis 1: kortele nuo lauko */
+  .ct-shell-side .ct3-field {
+    gap: 5px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    min-width: 0;
+  }
+
+  /* Platus — visas sono plotis. Klase deda jusu generatorius (zr. errata). */
+  .ct-shell-side .ct3-field.is-wide { grid-column: 1 / -1; }
+
+  /* Siauroje puseje tekstui lieka 99 px, tad rodykle arciau ir sriftas 13.5 */
+  .ct-shell-side .ct3-select-wrap { padding-right: 20px; }
+  .ct-shell-side .ct3-select-wrap select,
+  .ct-shell-side .ct3-range-wrap input { font-size: 13.5px; }
+
+  /* Diapazonai: markupe jie turi max-width 52-60 px, sone tai palieka tuscia
+     vieta. Atsaukiu ir leidziu dalintis eilute po lygiai. */
+  .ct-shell-side .ct3-range-wrap { display: flex; align-items: center; gap: 6px; }
+  .ct-shell-side .ct3-range-wrap > input { flex: 1 1 0; min-width: 0; max-width: none; }
+
+  /* „Daugiau filtru" skydas sone — vienas stulpelis.
+     REIKIA JUSU: #more-filters vidinis div su inline display:flex
+     turi gauti klase ct3-more-row. */
+  .ct-shell-side #more-filters { padding: var(--s-3); }
+  .ct-shell-side .ct3-more-row { flex-direction: column; gap: var(--s-3); align-items: stretch; }
+  .ct-shell-side .ct3-more-row > div { width: 100%; }
+
+  .ct-shell-side .ct3-search-btn { width: 100%; justify-content: center; }
+}
+
+
+/* ============================================================================
+   31. FORMOS LAUKAS · .ct-field   (Z-15)
+   ----------------------------------------------------------------------------
+   Teisingai pastebejot: sistemoje .ct-field NEBUVO. Yra tik .ct-field-k
+   (1497 eil.) ir .ct-field-err (1590 eil.) — t. y. lauko ETIKETE ir jo
+   KLAIDA, bet ne pats laukas. Tad <select class="ct-field"> iki siol gauna
+   narsykles numatytaji, ir tai matosi.
+
+   Tai ne jusu klaida — tai mano sistemos skyle, ir gera, kad ji issilupo per
+   tikra poreiki, o ne per audita.
+
+   Vienas principas: laukas ir zenkliukas (.ct-flag) yra tos pacios formos
+   broliai, tad remelis, radiusas ir fokusas jiems VIENODI. Skiriasi tik tuo,
+   kad zenkliukas turi busena, o laukas — turini.
+
+   Fokusas — ziedas, ne remelis (ta pati taisykle kaip .ct-flag 1581 eil.):
+   pasirinkimas ir fokusas negali atrodyti vienodai.
+
+   NEPERIMA: lauko vietos formoje, tarpu tarp lauku, etiketes (.ct-field-k) ir
+   klaidos (.ct-field-err) — jos jau aprasytos.
+   NEPERIMA: .ct3-field / .ct3-select-wrap paieskos panelėje — tai atskiras
+   komponentas su savo geometrija, ir suliesti juos butu K-02 is naujo. */
+
+.ct-field {
+  display: block;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 var(--s-3);
+  background: var(--bg-base);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font: var(--fw-medium) var(--fs-300)/1.4 var(--font);
+  transition: border-color var(--dur-fast) var(--ease);
+}
+.ct-field::placeholder { color: var(--text-dim); }
+.ct-field:hover { border-color: var(--border-strong, rgba(255,255,255,.22)); }
+.ct-field:focus-visible {
+  outline: none;
+  border-color: var(--accent-border);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+.ct-field:disabled { opacity: .55; cursor: not-allowed; }
+
+/* select — sava rodykle, nes numatytoji nepaklusta spalvai.
+   appearance: none reikalauja rodykles PACIAM laukui, ne apvalkalui: taip
+   .ct-field veikia be papildomo <div>, kitaip nei .ct3-select-wrap. */
+select.ct-field {
+  appearance: none; -webkit-appearance: none;
+  padding-right: var(--s-6);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238C93A6' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--s-3) center;
+  cursor: pointer;
+}
+select.ct-field option { background: var(--bg-elevated); color: var(--text-primary); }
+
+/* textarea — tas pats laukas, tik auga */
+textarea.ct-field {
+  min-height: 92px;
+  padding: 10px var(--s-3);
+  resize: vertical;
+  line-height: var(--lh-snug);
+}
+
+/* Lieciamas ekranas — ta pati riba kaip mygtukams.
+   Cia ji rasoma atskirai, nes ct-mygtukai.css pointer: coarse blokas taikosi
+   mygtukams, o .ct-field yra ne mygtukas. */
+@media (pointer: coarse) {
+  .ct-field { min-height: var(--tap-min); }
+  select.ct-field { min-height: var(--tap-min); }
+}

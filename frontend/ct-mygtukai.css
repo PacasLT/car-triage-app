@@ -416,16 +416,22 @@
   .ct-actions > .ct-btn-primary { order: -1; flex: 1 1 100%; justify-content: center; }
   /* Tarpas darbalaukyje atskiria pirmini; telefone jis nieko neatskiria */
   .ct-actions > .ct-actions-gap { display: none; }
-  /* Likusieji dalijasi eile */
-  /* :not(.ct-btn-tight) yra butinas: be jo si taisykle (0,3,0) nugali
-     .ct-btn-tight (0,2,0) ir siauras piktogramu mygtukas issitiesia. */
-  .ct-actions > .ct-btn:not(.ct-btn-primary):not(.ct-btn-tight) { flex: 1 1 0; min-width: 0; justify-content: center; }
-  /* .ct-btn-tight: telefone numeta teksta, pasilieka piktograma.
-     Reikalauja, kad tekstas butu apvyniotas <span> — zr. MYGTUKAI.md §10. */
-  .ct-actions > .ct-btn-tight { flex: 0 0 auto; width: var(--tap-min); padding: 0; gap: 0; }
-  .ct-actions > .ct-btn-tight > span { display: none; }
-  .ct-actions > .ct-btn-tight > i { margin-left: 0; }
-  .ct-actions > .ct-btn-tight::after { display: none; }
+  /* ERRATA-2: abu senieji blokai (422 ir 425) sulieti i viena. Telefone VISI
+     antriniai elgiasi vienodai, o uzrasas paslepiamas IR plotis nustatomas
+     TAME PACIAME bloke - atskyrus juos atsiranda bukle, kur veikia tik viena
+     puse (lieciama planse 1024 px). */
+  .ct-actions > .ct-btn:not(.ct-btn-primary) {
+    flex: 0 0 auto;
+    width: var(--tap-min);
+    min-width: var(--tap-min);
+    min-height: var(--tap-min);
+    padding: 0;
+    gap: 0;
+    justify-content: center;
+  }
+  .ct-actions > .ct-btn:not(.ct-btn-primary) > span { display: none; }
+  .ct-actions > .ct-btn:not(.ct-btn-primary) > i { margin-left: 0; }
+  .ct-actions > .ct-btn:not(.ct-btn-primary)::after { display: none; }
 }
 
 
@@ -452,39 +458,6 @@
 .ct-btn-accent > i { background: rgba(124, 92, 255, .22); color: var(--accent-light); }
 /* Kreditu likutis mygtuke — mono, bet ne raudonas, kol kreditu yra */
 .ct-btn-accent > u { border-left-color: var(--accent-border); color: var(--accent-light); }
-
-
-/* ── A) VEIKSMU EILE TELEFONE · visi antriniai vienodi ───────────────────────
-   K-07 atsakymas. Iki siol .ct-btn-tight gaudavo du mygtukai, o trecias
-   ("Daugiau") likdavo be jos — tad jis islaikydavo uzrasa ir gaudavo
-   flex 1 1 0, isaugdamas iki 223 px tarp dvieju 44 px ikonu. Butent tai
-   vartotojas ivardijo kaip "nesusitvarke": ne dydis, o NEVIENODAS elgesys
-   vienoje eileje.
-
-   Taisykle: vienoje veiksmu eileje telefone arba VISI antriniai su uzrasais,
-   arba ne vienas. Trys su uzrasais ties 327 px netelpa, tad ne vienas.
-
-   Nieko neisimam — visi veiksmai pasiekiami, tik be uzrasu. "Daugiau" gauna
-   tritaski, viena is nedaugelio piktogramu, kuriai uzrasas nereikalingas.
-
-   NEPERIMA: pacio mygtuko fono, rėmelio, spalvos — tik ploti ir uzraso
-   matomuma eileje. NEPERIMA .ct-btn-primary elgesio (jis jau teisingas). */
-
-@media (max-width: 640px) {
-  /* Antriniai eilutes mygtukai — visi ikoniniai ir vienodi.
-     (0,2,0), tas pats kaip 422 ir 425 eil., tad sprendzia eiles tvarka. */
-  .ct-actions > .ct-btn:not(.ct-btn-primary) {
-    flex: 0 0 auto;
-    width: var(--tap-min);
-    min-width: var(--tap-min);
-    padding: 0;
-    gap: 0;
-    justify-content: center;
-  }
-  .ct-actions > .ct-btn:not(.ct-btn-primary) > span { display: none; }
-  .ct-actions > .ct-btn:not(.ct-btn-primary) > i { margin-left: 0; }
-  .ct-actions > .ct-btn:not(.ct-btn-primary)::after { display: none; }
-}
 
 
 /* ── B) PASPAUDIMO ZONOS RIBA · pagal ivesties buda, ne pagal ploti ──────────
@@ -522,10 +495,9 @@
     min-height: var(--tap-min);
   }
 
-  .ct-actions > .ct-btn-tight,
-  .ct-actions > .ct-btn:not(.ct-btn-primary) {
-    width: var(--tap-min);
-    min-width: var(--tap-min);
+  /* ERRATA-2: TIK aukstis. Plotis priklauso nuo VIETOS, ne nuo ivesties budo -
+     ji nustato 640 px blokas. `pointer: coarse` atsako i „kuo paspaudziama". */
+  .ct-actions > .ct-btn {
     min-height: var(--tap-min);
   }
 

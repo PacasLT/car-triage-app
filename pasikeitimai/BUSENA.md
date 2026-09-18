@@ -1,46 +1,45 @@
-# Būsena · atnaujinta 2026-09-18, v1.65.0
+# Būsena · atnaujinta 2026-09-18, v1.72.0
 
 ## Kieno dabar ėjimas
 
 | Nr. | Kas | Kieno ėjimas | Trumpai |
 |---|---|---|---|
-| K-08 | 25 sk. sono aukstis | **Dizaineris** | Lauku 8, ne 23 - jis teisus. Bet siaurai sudeti filtrai 690 px, visa panele 879 px; 1280x720 telpa tik 624 px. |
-| K-07 | Korteles veiksmu eile telefone | **Dizaineris** | Nr.11: du mygtukai tik piktogramos, vidurinis su uzrasu. Plius `.ct-report-fab` 37x32 pazeidzia `--tap-min`. |
-| V-14 | Krovimo juosta placiame ekrane | **Klaudijus** | Nr.14: ties 2101 px po 431 px tuscios. Sprendimas - 25 sk. `.ct-shell`. |
-| K-03 | `.ct-kv` vardas irgi užimtas | **Dizaineris** | Senasis `.ct-kv` = eilutė, naujas = konteineris. Pamatuota: trys eilutės sugultų į vieną (y 27/27/27). 24 sk. sustabdytas. |
-| K-05 | Administravimo panelės maketas | **Dizaineris** | Karkasas geras; keturi klausimai: tikri skaičiai, moderavimo eilė, atskira antraštė, 880 px kortelės. Užduotys – `UZDUOTYS-ADMIN.md`. |
-| K-04 | Maketas už 1240 px ir po 385 px | **Dizaineris** | Du vartotojo pranešimai per valandą: 3152 px – 976 px tuščios; 385 px – nuotrauka apkarpyta. Plius tuščia `.ct3-nav`. |
-| V-07 | Atmesti skelbimai (pranesimas Nr.2) | **Klaudijus** | Laukia nuotraukos perziuros. |
-| K-06 | `compare.html` be bendros antrastes | **Dizaineris** | Turi `.ct3-header` CSS, bet neturi markupo. |
-| V-05 | Daužtų skelbimų kortelė | **Klaudijus** | `.risk-banner` aprašytas dukart `index.html` (219 ir 1050). Tiriama. |
-| D-03 | Skelbimo puslapio 3 dalis | **Dizaineris** | Kortelės, rinkos padėties skalė, pardavėjo kortelė. Laukiam paketo 07. |
-| L-04 | `/admin/atsarga` rezultatas | **Lukas** | Po paros veikimo pažiūrėti skaičius ir nuspręsti dėl Puppeteer. Priminimas 09-19 14:30. |
+| D-11 | 11 paketo ERRATA-2 | **Klaudijus** | Pakeičia `ct-mygtukai-PRIDETI.css`: 422-428 eil. pakeitimas + tik-aukštis `pointer: coarse`. Įdiegus trinami `ct-priedai.css` 7 ir 8 blokai. |
+| D-12 | 12 paketas + ERRATA-30sk-tankis | **Klaudijus** | 30 sk. antra redakcija (pamatuota: 527 px, telpa visur), 31 sk. `.ct-field` (Z-15), `:root` auditas. Reikia `.is-wide` klasės keturiems laukams. |
+| D-09 | 25 sk. `.ct-shell` įdiegimas | **Klaudijus** | Nebeblokuojamas — 30 sk. v2 yra ta trūkstama dalis. Imti `ERRATA-header-h.md` (97/69/65). Uždaro V-14 (Nr.14). |
+| D-13 | Vartotojo detalus rodinys | **Dizaineris** | **13 paketas, ir tik jis** — susitarta Z-14. Planas, kreditai, žurnalas. |
+| D-03 | Skelbimo puslapio 3 dalis | **Dizaineris** | Kortelės, rinkos padėties skalė, pardavėjo kortelė. Paketas 07 rezervuotas. |
+| V-05 | Daužtų skelbimų kortelė | **Klaudijus** | `.risk-banner` aprašytas dukart `index.html` (219 ir 1050). |
+| V-07 | Atmesti skelbimai (Nr.2) | **Klaudijus** | Laukia nuotraukos peržiūros. |
+| L-04 | `/admin/atsarga` rezultatas | **Lukas** | Po paros pažiūrėti skaičius, nuspręsti dėl Puppeteer. |
+
+**Iškelta kaip atsakyta** (buvo klaidingai grąžinta į lentelę, žr. D-14):
+K-03 → A-03 · K-04 → A-04 · K-05 → A-05 · K-06 → A-06 · K-07 → A-08 ·
+K-08 → A-10 + A-12. Visi UŽDARYTA, atsakymai žurnale.
 
 ## Kas uždaryta paskutiniu metu
 
-- v1.65.0 - hero regresija (mano klaida diegiant 26 sk.) istaisyta; antrastes mygtukai 44 px telefone
-- v1.65.0 - meniu juosta pasalinta Luko sprendimu; 27 sk. lieka, `:empty` ja paslepia
-- v1.65.0 - klaidu sarase matosi versija, kurioje pranesimas parasytas
-- v1.64.0 - pranesimas Nr.3 uzdarytas: ispletus nebesikartoja zenkliukai (patikrintos abi sakos, 0 dubliu)
-- v1.63.0 - 09 paketas: `.ct-specs`, hero, meniu juosta; aktyvios nuorodos klaida istaisyta
-- v1.60.0 — **`fs` nebuvo įreikalautas `server.js`**: pranešimai niekada nebuvo rašomi į diską. Ištaisyta, patikrinta perkrovimu
-- v1.60.0 — `/admin/atsarga` rodo, kur guli duomenys; `/data` Volume patvirtintas kaip persistentinis
-- v1.59.0 — „Atkurti / Patikrinti užklausas / Kopijuoti" prie kiekvieno pranešimo
-- v1.58.0 — neišsiųstas pranešimas nebedingsta
-- v1.57.0 — rodinys „Viskas tekstu"
-- v1.56.0 — A-01 įdiegtas: 23 sk. `.ct-clamp`, 22 sk. 1630 eil., `ct-priedai.css` 6 blokas ištrintas (0 px, 0 JS klaidų)
-- Z-03 — `car-triage-app` prijungtas dizainerio sesijoje, perdavinėjimas ranka baigtas
-- v1.55.0 — klaidų sąrašas pasiekiamas raktu (`tools/klaidos.js`), be trynimo ir be vartotojų
-- v1.54.0 — 22 sk. (lentelės ir tuščios būsenos) įdiegtas, patikrintas, 0 JS klaidų
-- v1.54.0 — `.ct-report-fab` perimtas dizainerio, atsvara ištrinta
-- v1.54.0 — 413 „Užklausa per didelė" ištaisyta (maršruto kūno riba + nuotraukos mažinimas naršyklėje)
-- v1.53.0 — administravimo puslapis
-- v1.52.0 — `diffPct` ženklas skelbimo puslapio rinkos skiltyje
+- A-12 — 30 sk. pamatuotas: A 829 / B 643 / **C 527** px; du tankio žingsniai, sulankstomų grupių nereikia
+- A-13 — 31 sk. `.ct-field`: sistemoje jo nebuvo, tik `.ct-field-k` ir `.ct-field-err`
+- v1.68.0 — pranešimo langas: kategorijos į `<select>`, „o ko tikėjotės" prie devynių, automatinis skelbimo laukas
+- v1.67.0 — 11 paketas; A ir B blokai pataisyti per ERRATA-2 (specifika (0,3,0) vs (0,4,0); plotis be užrašo paslėpimo)
+- v1.66.0 — `--tap-min` pažeidimai penkiose vietose ištaisyti; `.ct-report-fab` 37×32 → 44×44
+- v1.65.0 — hero regresija ištaisyta; meniu juosta pašalinta Luko sprendimu, 27 sk. lieka su `:empty`
+- v1.63.0 — 09 paketas: `.ct-specs`, hero, juosta; aktyvios nuorodos klaida ištaisyta
+- v1.56.0 — A-01: 23 sk. `.ct-clamp`, `ct-priedai.css` 6 blokas ištrintas
 
 ## Kur kas guli
 
 - Dizainerio failai: `frontend/ct-dizainas.css`, `frontend/ct-mygtukai.css`
-- Laikinos atsvaros: `frontend/ct-priedai.css` (blokai 1, 2, 6)
+- Laikinos atsvaros: `frontend/ct-priedai.css` — **blokai 1, 2, 7, 8**
+  (6 ištrintas v1.56.0; 7 ir 8 atsirado v1.67.0 ir trinami įdiegus ERRATA-2)
 - Generuojami puslapiai: `frontend/admin.html` ← `tools/mk-admin.py`
 - Versija ir istorija: `frontend/versijos.js` — **vienintelė vieta**
 - Visos projekto taisyklės: `CLAUDE.md`
+
+## Atviri matavimai
+
+1. **1280×720** — 30 sk. v2 tikroje panelėje. Maketas duoda 527 prie ribos 599.
+2. Lietimo planšetė 768 / 1024 px po ERRATA-2 — mygtukai su užrašais, `min-height 44`, **be** fiksuoto 44 px pločio.
+3. Pelė 1024 / 1400 px — turi likti `140×38 150×38 106×38`, nepakeista.
+4. `--text-on-light` penkiose vietose — **jokio vizualaus pokyčio neturi būti**; jei matosi, viena vieta nebuvo `#0A0C12`.

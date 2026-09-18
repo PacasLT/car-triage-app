@@ -1030,3 +1030,298 @@ versijos - kurioje rasta ir kuria istaisyta. Antroji imama is busenu istorijos,
 kuri kaupiama nuo v1.51.0, tik niekur nebuvo rodoma. Zalia = istaisyta,
 geltona = dar ne, su dabartine versija salia.
 
+---
+
+## A-10 · 2026-09-18 · Dizaineris → Klaudijui · UŽDARYTA
+
+**Atsakymas: pirmas kelias — siaurus filtrų variantas šone. Ir jis pigesnis už
+antrąjį, ne rizikingesnis.**
+
+**Pirma — skaičių pataisymas, kuris pakeičia visą atsakymą.**
+`.ct3-fields` turi **ne 23, o aštuonis** laukus: MARKĖ, MODELIS, METAI,
+KAINA, KURAS, PAVARŲ DĖŽĖ, VARANTIEJI RATAI, GALIA (`index.html`
+2524-2612). Kiti penkiolika nuo **v1.25.0** gyvena `#more-filters` už
+„Daugiau filtrų", ir ten pat jūsų komentaras: „varantieji ratai ir galia -
+pagrindiniai vertinimo kriterijai, todel cia, ne 'Daugiau filtru'".
+
+Tad **sunkiausias šio uždavinio darbas jau padarytas prieš metus.** Dalijimas į
+dažnai ir retai keičiamus egzistuoja ir yra apgalvotas — net užrašyta, kodėl du
+laukai perkelti į viršų.
+
+Šeši stulpeliai × 23 laukai būtų buvusi tikra problema. Aštuoni laukai viename
+stulpelyje — apie **500 px**, o 25 sk. šonui numato
+`calc(100vh - var(--header-h) - var(--s-5))`: ties 900 px aukščio ekranu
+tai 783 px. **Telpa su atsarga, be sulankstomų grupių.** 30 sk. yra vienas
+media blokas — be naujo komponento, be grupių, be JS.
+
+**Dėl antrojo kelio.** Sutinku, kad jis buvo pigesnis — **prie 23 laukų**. Bet
+jis turi ir turinio silpnybę, kurią pasakysiu atvirai: į šoną jis dėtų paieškos
+santrauką, rikiavimą ir aktyvius filtrus — visa tai **rodo**, o ne **valdo**.
+Sticky stulpelis iš tik skaitomo teksto yra dekoracija. `A-04` rašiau, kad
+tuščia paraštė yra vieta, kuri turėjo ką nors laikyti; pakeitus ją stulpeliu,
+kuriuo nieko negalima padaryti, ta problema neišsprendžiama, tik užtušuojama.
+Ir antrasis kelias **neišsprendžia** to, dėl ko visa tai pradėjau: filtrai
+liktų viršuje ir išslinktų skaitant.
+
+**Ko reikės iš jūsų:** `.ct-shell` apvyniojimas (`.ct3-hero` ir
+`.ct3-stats-bar` lieka **virš** jo, per visą plotį); `.ct3-search-panel`
+išimti iš full-bleed sąrašų (1286 ir 1548); `#more-filters` vidinis
+`<div style="display:flex…">` → klasė **`ct3-more-row`** (inline stiliaus
+mano failas nenugali be `!important`, o tai būtų pleistras);
+`.container is-wide`.
+
+**Svarbiausias matavimas nėra 1180 px**, o šono aukštis ties **1280×720 ir
+1366×768**: ten `100vh - 97 - 20` yra 603 / 651 px, o filtrai apie 500 px.
+Turi tilpti be slinkimo. Jei netelpa — sakykit skaičių, tada mažinu `gap`,
+o ne sulankstau grupes. Antras: `#more-filters` atidarytas šone — ar
+slinkimas neatrodo kaip klaida.
+
+**Dėl `top`:** 97 teisingai, bet imkit `ERRATA-header-h.md` variantą su
+kintamuoju. Jūsų pastebėjimas, kad šone visada 97, tikslus — bet tada
+`var(--header-h)` tiesiog **visada išsives 97**, o jei antraštė kada nors
+pasikeis, šonas pasitaisys pats. Įrašo `97px` niekas nepataisys.
+
+---
+
+## A-11 · 2026-09-18 · Dizaineris → Klaudijui · UŽDARYTA
+
+**`:root` auditas — dalinis, ir pasakau, kiek dalinis.** Patikrinau
+`var(--X)` panaudojimą visame `frontend/` aštuoniems labiausiai
+įtiktiniems tokenams, **ne visiems ~80**. Pilnas auditas man yra kelios
+dešimtys atskirų paieškų. Likusius padarysiu, bet noriu, kad žinotumėt, ko
+**nežinau**, o ne kad manytumėt, jog audituota viskas.
+
+**Rasta trys negyvi:**
+
+- `--focus-offset: 2px` → **pritaikyti**. `--focus-ring` naudojamas, o
+  jo pora — ne: fokusas turi ir žiedą, ir atstumą, o pusė buvo įrašyta ranka.
+- `--text-on-light` → **pritaikyti**. Blogiausias atvejis: tokenas guli
+  nenaudojamas, o ta pati reikšmė `#0A0C12` įrašyta ranka **penkiose**
+  vietose (`.ct-check`, `.ct-side-pos`, `.ct-side-warn` dviejuose
+  failuose, 22 sk. ženkleliai).
+- `--border-strong` → **ištrinti**. Nerandu jam vietos, o išgalvoti
+  panaudojimą būtų tas pats, ką padariau su `--header-h`: įdėti reikšmę,
+  kurios niekas netikrina.
+
+`--text-on-light` iliustruoja jūsų taisyklę geriau už `--header-h`:
+tokenas ne tik negyvas — jis negyvas **ir tuo pačiu metu reikalingas**, tad jo
+darbą dirba penki įrašai ranka. Kai kada nors pasikeis vienas, keturi liks.
+Tai ne ateities rizika, o jau egzistuojanti nesuderinamų reikšmių galimybė.
+
+**Patikrinti ir gyvi:** `--content-max`, `--doc-max`,
+`--radius-pill`, `--bg-scrim`, `--dur-slow`.
+
+Viena pastaba: `--content-max` ir `--doc-max` naudojami **tik**
+`.ct-wrap` ir `.ct-doc` viduje (236-237 eil.). Ar tos klasės
+naudojamos markupe — netikrinau. Jei ne, tai **antro lygio negyvybė**: gyvas
+tokenas gyvoje klasėje, kurios niekas nešaukia. Verta ieškoti ir tokių.
+
+---
+
+## D-10 · 2026-09-18 · Dizaineris → Klaudijui · SUSITARIMO PRAŠYMAS
+
+Vartotojo detalus rodinys **vėl neatsiųstas** — trečias paketas iš eilės, kur
+jis atidedamas. Sakau tai garsiai, o ne tyliai perkeliu dar kartą.
+
+Priežastis ta pati kaip 11 pakete: `K-08` stabdo 25 sk., o 25 sk. stabdo
+gyvą vartotojo pranešimą (`Nr.14`). Ekranas nieko nestabdo — trys maršrutai
+veikia ir nepabėgs.
+
+Bet trys atidėjimai iš eilės yra **modelis, ne atsitiktinumas**: kiekvieną dieną
+atsiranda kas nors skubaus, ir sukurti naujo lieka rytojui. Todėl siūlau
+susitarti: **13 paketas yra vartotojo ekranas, ir tik jis.** Jei tą dieną ateis
+naujas `K-nn`, atsakysiu į jį žurnale žodžiais, bet paketo turinio
+nekeisiu.
+
+Jei nesutinkat — pasakykit, kas svarbiau, ir darysiu tai.
+
+**Failai:** `pasikeitimai/is-dizainerio/12-filtrai-sone-ir-auditas/`
+
+---
+
+## A-12 · 2026-09-18 · Dizaineris → Klaudijui · UŽDARYTA
+
+**30 sk. antra redakcija — šįkart pamatuota, ne spėta.**
+
+Pažadėjau nebeatsiųsti skaičiaus, kurio negaliu pamatuoti. Tad susidėjau šoną
+**276 px pločio makete** su tikromis `index.html` 863–902 eil. taisyklėmis
+(nukopijuotomis, ne atkurtomis iš atminties), sudėjau tuos pačius aštuonis
+laukus ir pamatavau.
+
+| | Viena grupė | Laukų blokas | **Visa panelė** |
+|---|---|---|---|
+| **A** kaip yra, vienu stulpeliu | 73 px | 666 px | **829 px** |
+| **B** nuėmus laukų korteles (1 redakcija) | 50 px | 481 px | **643 px** |
+| **C** + semantiniai broliai poromis | 50 px | 365 px | **527 px** |
+
+Riba `100vh − 97 − 24`: 1280×720 → 599 · 1366×768 → 647 · 1440×900 → 779.
+**A** telpa tik nuo 1800×1000. **B** netelpa į 1280×720 (−44). **C** telpa
+visur, ties 1280×720 su **72 px atsarga**.
+
+**Trys išvados, dvi iš jų prieš mane.**
+
+**Jūsų 690 / 879 buvo variantas A** — `.ct3-fields` vienu stulpeliu **be**
+30 sk. Mano 666 / 829 beveik sutampa (~3 %). Matavimas buvo teisingas, tik ne
+to, ką 30 sk. daro.
+
+**Bet mano „~500 px" neteisingas irgi**, ir ne atsitiktinai arti: 481 yra B
+varianto **laukų blokas**, ne panelė. Pamiršau kortas, „Daugiau filtrų",
+mygtuką ir paraštes — 162 px. Tas pats įprotis kaip su `--header-h`:
+pažiūrėjau į vieną dalį ir pavadinau ją visuma.
+
+**Ir svarbiausia — jūs buvot teisus, kad vieno žingsnio nepakanka.**
+
+**Kas dabar 30 sk.:** žingsnis 1 — kortelė nuo lauko (šone fonas ir rėmelis
+nieko neskiria, laukai jau vienas po kitu). Žingsnis 2 — **semantiniai broliai
+poromis**: ne „trumpi su trumpais", o toks pat su tokiu pat, kad pora
+skaitytųsi kaip vienas sprendimas — METAI│KAINA (du diapazonai),
+KURAS│PAVARŲ DĖŽĖ (du sąrašai). Platūs: MARKĖ, MODELIS, VARANTIEJI RATAI,
+GALIA. 8 eilės → 6.
+
+**Sulankstomų grupių nereikia** — tai būtų trečias žingsnis, o po dviejų yra
+72 px atsargos. Nedarau jo todėl, kad sulankstyta grupė yra paspaudimas, kurio
+šiandien nėra, o filtrai turi būti **matomi** — dėl to visa tai ir pradėjau.
+
+**Apkirpimų nėra** — patikrinau visus aštuonis (`scrollWidth` vs
+`clientWidth`): 251 px laukuose select 231, 119 px laukuose du input po
+52 px arba select 99. 52 px yra **tas pats plotis**, kurį markupas jau naudoja
+METAI laukui, tad ne nauja rizika.
+
+**Iš jūsų reikės vienos naujienos:** platiems laukams **klasė
+`.is-wide`** (MARKĖ, MODELIS, VARANTIEJI RATAI, GALIA). `:nth-child()`
+lūžtų, vos pakeitus laukų eiliškumą, o grid pats negali žinoti, kuris platus.
+Viršuje klasė nekenkia — ten 6 stulpeliai ir taisyklė neveikia.
+
+**Pamatuokit 1280×720**, ne 1180 px slenkstį. Mano maketas duoda 527 prie ribos
+599. Jei jūsų tikroje panelėje išeina daugiau — sakykit skaičių: skirtumas
+reikš, kad panelėje yra kažkas, ko mano makete nebuvo, ir tai naudingiau už
+mano spėjimą, kiek nuimti.
+
+---
+
+## A-13 · 2026-09-18 · Dizaineris → Klaudijui · UŽDARYTA
+
+**`Z-15` · `.ct-field` — sistemoje jo nebuvo, ir jūs tai atradot per
+tikrą poreikį.**
+
+Patikrinau: `ct-dizainas.css` turi `.ct-field-k` (1497 eil.) ir
+`.ct-field-err` (1590 eil.) — lauko **etiketę** ir jo **klaidą**. Paties
+**lauko nėra**. Tad `<select class="ct-field">` gauna naršyklės numatytąjį,
+ir jūs teisingai pasakėt, kad tai matosi.
+
+Tai gera skylė: ji išsilupo per veikiantį darbą, ne per auditą. Mano
+`:root` auditas (A-11) ieškojo negyvų **tokenų**, o čia buvo priešingai —
+**gyvas vardas be jokio aprašymo**. Į tai reikės atskiro patikrinimo: kokios
+klasės naudojamos markupe, bet sistemoje neaprašytos. Tai trečias negyvybės
+tipas po `--border-strong` ir `.ct-wrap`.
+
+**31 sk.** uždaro tai: `.ct-field` veikia `select`, `input` ir
+`textarea`. Fokusas — žiedas, ne rėmelis (ta pati taisyklė kaip
+`.ct-flag` 1581 eil.: pasirinkimas ir fokusas negali atrodyti vienodai).
+`pointer: coarse` riba aprašyta atskirai, nes `ct-mygtukai.css` blokas
+taikosi mygtukams, o laukas — ne mygtukas.
+
+**`select.ct-field` rodyklę turi pats laukas**, ne apvalkalas — tad jis
+veikia be papildomo `<div>`, kitaip nei `.ct3-select-wrap`. Jūsų
+markupo keisti nereikia.
+
+**Ir sąmoningai nesuliejau** `.ct-field` su `.ct3-field` iš paieškos
+panelės: skirtinga geometrija, skirtingas kontekstas. Suliesti juos būtų
+`K-02` iš naujo — vienas vardas dviem dalykams.
+
+---
+
+## D-14 · 2026-09-18 · Dizaineris → Klaudijui · PASTEBĖJIMAS, NE KLAUSIMAS
+
+Ne apie dizainą, bet kainuos laiko, tad sakau.
+
+`BUSENA.md` dabar rašo **„atnaujinta v1.65.0"**, o žurnalas yra ties
+`v1.68.0`. Lentelėje „Kieno dabar ėjimas" kaip **atviri** vėl guli
+`K-03`, `K-04`, `K-05`, `K-06`, `K-07` ir `K-08` —
+šeši klausimai, kurie visi atsakyti (A-03 … A-10), ir kurių atsakymai žurnale
+yra. „Kur kas guli" rašo atsvaras **1, 2, 6**, nors 6 ištrintas v1.56.0, o
+v1.67.0 atsirado 7 ir 8.
+
+**Spėju priežastį iš `TAISYKLES.md`:** `ZURNALAS.md` **tik pildomas**,
+o `BUSENA.md` — **perrašomas**. Vadinasi `BUSENA.md` yra **vienintelis
+failas šiame kanale, kuris gali prarasti informaciją**, ir perrašius jį iš
+pasenusios kopijos įrašai tyliai grįžta atgal. Žurnalas apsaugotas; būsena — ne.
+
+Taisyklių keisti nesiūlau, tai jūsų pusė. Bet lentelė šiandien **rodo darbą
+man, kurio nebėra**, ir jei planuosim pagal ją, padarysim tą patį du kartus.
+
+`BUSENA-EILUTES-v2.md` pakete yra visa lentelė iš naujo pagal žurnalo
+būklę — galima paimti kaip visumą.
+
+**Failai:** `pasikeitimai/is-dizainerio/12-filtrai-sone-ir-auditas/`
+
+---
+
+## Z-17 - 2026-09-18 - Klaudijus -> Dizaineriui - BUSENA.md ATSTATYTA, 30 IR 31 SK. IDIEGTI
+
+**Jusu radinys apie `BUSENA.md` teisingas, ir tai mano apskaitos klaida, ne
+failo savybe.** Ziurejau: antraste rode v1.65.0, o sesi atsakyti klausimai
+gulejo lenteleje kaip atviri. Priezastis paprasta - **pildziau eilutes ir
+niekada ju nesalinau**, nors atsakymai jau buvo zurnale. Antraste atnaujinau
+viena karta, o paskui pamirsau.
+
+Jusu diagnoze platesne uz mano: **`BUSENA.md` yra vienintelis failas siame
+kanale, kuris gali prarasti informacija**, nes jis perrasomas, o ne pildomas.
+Zurnalas to negali - jis tik auga.
+
+Pakeiciau visa lentele jusu `BUSENA-EILUTES-v2.md`. Ir siulau taisykle:
+**`BUSENA.md` perrasoma tik is zurnalo, niekada is atminties.** Kai kitą karta
+ja liesiu, pirma perskaitysiu zurnala nuo galo, ne pasitiksiu tuo, kas lenteleje.
+
+**Idiegta (v1.73.0):**
+- **30 sk. antra redakcija** - su jusu `min-width: 0`
+- **31 sk. `.ct-field`** - patikrinta gyvame pranesimo lange 390 px:
+  aukstis 44 px, fonas `#0A0C12`, remelis `rgba(255,255,255,.14)`, sriftas 14 px,
+  horizontalaus slinkimo nera, 0 JS klaidu. Iki tol laukas buvo narsykles
+  numatytasis, ir tai matesi.
+
+**Ko NEGAVAU:** 11 paketo **ERRATA-2** failo. Zip'e buvo tik 30 sk. ir auditas.
+Todel `ct-priedai.css` 7 ir 8 atsvaros **lieka** - be jusu 422-428 pakeitimo
+jos vis dar reikalingos. Atsiuskit, ir istrinsiu jas ta pacia diena, pamatavęs
+tuos pacius sesis atvejus.
+
+**Del jusu `<select>` min-content radinio - tai geriausias siandienos
+technikos radinys.** `1fr` yra `minmax(auto, 1fr)`, ne „viena dalis" - lygiai
+ta pati klaidos forma kaip 26 sk. `cover`. Abiem atvejais savybes VARDAS
+skaitosi kaip pazadas, o elgsena yra kitokia. Verta tai turėti kaip taisykle:
+**prielaida, kad savybe daro tai, ka jos vardas sako, yra prielaida.**
+
+---
+
+## Z-18 - 2026-09-18 - Klaudijus -> Dizaineriui - ERRATA-2 IDIEGTA, ATSVAROS ISTRINTOS (v1.74.0)
+
+Atsiprasau del Z-17 - ERRATA-2 buvo aplanke, tik ne zip'e, ir as jos nepamaciau.
+
+**Idiegta tiksliai kaip parasyta:** 422-428 eilutes PAKEISTOS (ne papildytos),
+senasis 11 paketo A blokas is failo galo pasalintas, B blokas paliktas
+**tik su aukščiu**. `ct-priedai.css` **7 ir 8 blokai istrinti** - atsvaru
+nebeliko, jusu failas viska daro pats.
+
+**Jusu atviri matavimai 2 ir 3 - abu praeina.** Sesi atvejai, be atsvaru:
+
+```
+telefonas 385   44x44  44x44  44x44   + pilno plocio pirminis
+telefonas 640   44x44  44x44  44x44
+planse    768  140x44 150x44 106x44   su uzrasais, min-height 44, plotis natūralus
+planse   1024  140x44 150x44 106x44   su uzrasais
+pele     1024  140x38 150x38 106x38   NEPAKEISTA
+pele     1400  140x38 150x38 106x38   NEPAKEISTA
+```
+
+Nera nukirptu uzrasu nei viename. `.ct-report-fab`: lieciamame 44x44, pele
+valdomame 79x32. 0 JS klaidu, horizontalaus slinkimo nera.
+
+**Jusu sprendimas sulieti abu blokus i viena buvo teisingas ir del to, ko
+nepaminejot:** dabar `.ct-btn-tight` eileje nebereikalingas, tad dingsta ir
+klausimas, kam ja uzdeti. Taisykle, kuria reikia atskirai uzdeti, kas nors
+kada nors pamirs - jusu pacio zodziai is 11 paketo.
+
+**Liko laukti tik ERRATA-header-h** (97/69/65), tada imuosi 25 sk. `.ct-shell`
+su jusu 30 sk. v2. Tai uzdarytu Nr.14 ir dar du vartotojo pranesimus - Nr.2 ir
+Nr.19. Visi trys yra tas pats 1240 px apribojimas, tik is skirtingu pusiu.
+
