@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.34.0', data: '2026-09-18', pavadinimas: 'Ženkliukai ir mygtukai perėjo į dizaino sistemą',
+    pakeitimai: [
+      'Ženkliukai kortelėje (VIN, Istorija, vieta, Verslas) atrodo vienodai visuose puslapiuose ir įgavo aiškesnes spalvas pagal reikšmę',
+      'Mygtukai gavo piktogramas, o „Pilna apžvalga“ – atskirą kainos ženklelį',
+      'Kainos skirtumas („−12 %“) nebesilaužo į dvi eilutes',
+      'Nuotraukų skaitiklis ir laiko rinkoje punktas perėjo į bendrą dizaino sistemą',
+    ],
+  },
+  {
     versija: '1.33.0', data: '2026-09-18', pavadinimas: 'Laikas rinkoje tapo argumentu, o ne atskira juosta',
     pakeitimai: [
       'Atskira „Auto istorija“ juosta po kortele dingo – informacija persikėlė į kortelės vidų',

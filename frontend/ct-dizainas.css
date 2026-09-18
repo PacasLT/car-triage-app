@@ -821,7 +821,7 @@ img, svg, video, canvas { max-width: 100%; }
 .ct-price-block { flex: none; display: flex; flex-direction: column; gap: var(--s-1); align-items: flex-end; text-align: right; }
 .ct-price-row { display: flex; align-items: center; gap: var(--s-3); flex-wrap: wrap; justify-content: flex-end; }
 .ct-price { font: var(--fw-bold) 28px/1 var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
-.ct-diff  { padding: 4px 10px; border-radius: var(--radius-pill); border: 1px solid; font: var(--fw-bold) var(--fs-200)/1.3 var(--font-mono); }
+.ct-diff  { padding: 4px 10px; border-radius: var(--radius-pill); border: 1px solid; font: var(--fw-bold) var(--fs-200)/1.3 var(--font-mono); white-space: nowrap; }
 .ct-diff.is-good { background: var(--success-dim); border-color: var(--success-border); color: var(--success); }
 .ct-diff.is-warn { background: var(--warning-dim); border-color: var(--warning-border); color: var(--warning); }
 .ct-diff.is-bad  { background: var(--danger-dim);  border-color: var(--danger-border);  color: var(--danger); }
@@ -1007,7 +1007,7 @@ img, svg, video, canvas { max-width: 100%; }
 /* Salutinis tekstas (portalo vandenzymis) nuotraukos konteineryje.
    v1.30.0 PATAISA: be :not(.ct-nav) si taisykle paslepe nuotrauku perjungimo
    rodykles. :not(.ct-photo-empty) — kad neuzgestu ir „BE NUOTRAUKOS". */
-.ct-photo > :not(img):not(.ct-medal):not(.fav-star):not(.ct-nav):not(.ct-photo-empty) { display: none !important; }
+.ct-photo > :not(img):not(.ct-medal):not(.fav-star):not(.ct-nav):not(.ct-photo-empty):not(.ct-photo-n) { display: none !important; }
 
 /* Balas: 32px ir savo blokas, ne eiles elementas */
 .ct-l2 > .ct-score { flex: none !important; width: auto !important; }
@@ -1100,4 +1100,189 @@ img, svg, video, canvas { max-width: 100%; }
 @media (max-width: 640px) {
   .ct-log-h { min-height: var(--tap-min); }
   .ct-log-time { margin-left: 0; width: 100%; }
+}
+
+
+/* ============================================================================
+   14. SKELBIMO PUSLAPIS · nauji selektoriai
+   ----------------------------------------------------------------------------
+   Kas jau yra ir NAUDOJAMA IS NAUJO (nauju klasiu nereikia):
+     .dp-col-box .dp-tab .dp-act .dp-bc-btn .dp-thumb .dp-ai-* .ct-nav
+     .ct-medal .ct-market .ct-diff .ct-score .ct-bars .ct-bar-w .ct-k .ct-risk
+   Iverčio skydelis ir rinkos mikro-blokas yra TIE PATYS komponentai kaip
+   rezultatu korteleje — sutampa 1:1, todel ju cia nera.
+   ========================================================================== */
+
+/* ── Virsus ─────────────────────────────────────────────────────────────── */
+
+.dp-crumbs { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font: 500 11.5px/1 var(--font-mono); color: var(--text-dim); }
+.dp-crumbs a { color: var(--text-muted); text-decoration: none; }
+.dp-crumbs a:hover { color: var(--text-primary); text-decoration: underline; }
+
+.dp-hero { display: flex; flex-wrap: wrap; gap: var(--s-4) 28px; align-items: flex-start; }
+.dp-hero-l { flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 9px; }
+.dp-hero-r { flex: none; display: flex; flex-direction: column; gap: 7px; align-items: flex-end; }
+
+.dp-title-row { display: flex; align-items: center; gap: 11px; flex-wrap: wrap; }
+.dp-title-row h1 { margin: 0; font-size: var(--fs-600); line-height: 1.15; font-weight: var(--fw-semi); letter-spacing: -.01em; }
+.dp-meta { font: var(--fw-medium) var(--fs-200)/1.5 var(--font-mono); color: var(--text-muted); }
+.dp-chips { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 3px; }
+
+.dp-price-row { display: flex; align-items: center; gap: var(--s-3); flex-wrap: wrap; justify-content: flex-end; }
+.dp-price { font: var(--fw-bold) 30px/1 var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -.015em; }
+
+/* ── Galerija ───────────────────────────────────────────────────────────── */
+
+.dp-gallery { flex: 1 1 520px; min-width: 300px; display: flex; flex-direction: column; gap: 9px; }
+.dp-stage { position: relative; aspect-ratio: 16/10; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border); background: linear-gradient(145deg, var(--bg-elevated), #0E1118); }
+.dp-stage > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.dp-stage-count { position: absolute; bottom: 12px; right: 12px; padding: 4px 10px; border-radius: var(--radius-sm); background: rgba(5,6,10,.78); font: var(--fw-semi) 11px/1.4 var(--font-mono); color: var(--text-secondary); }
+.dp-strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+@media (min-width: 900px) { .dp-strip { grid-template-columns: repeat(8, minmax(0, 1fr)); } }
+
+/* Pastebejimo taskas ant miniatiuros — susieja galerija su vizualine bukle */
+.dp-thumb { position: relative; }
+.dp-thumb > i { position: absolute; bottom: 4px; right: 4px; width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 0 2px rgba(5,6,10,.7); }
+
+/* ── Iverčio skydelis ───────────────────────────────────────────────────── */
+
+.dp-panel { flex: 1 1 320px; min-width: 280px; display: flex; flex-direction: column; gap: var(--s-3); padding: var(--s-4); background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+.dp-panel-h { display: flex; gap: var(--s-4); align-items: flex-start; flex-wrap: wrap; }
+.dp-panel-t { flex: 1 1 150px; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.dp-panel-sec { display: flex; flex-direction: column; gap: var(--s-2); padding-top: 11px; border-top: 1px solid var(--border); }
+.dp-panel-sec-h { font: var(--fw-semi) 9.5px/1 var(--font-mono); letter-spacing: .12em; color: var(--text-muted); }
+.dp-panel-act { display: flex; gap: var(--s-2); flex-wrap: wrap; padding-top: 11px; border-top: 1px solid var(--border); }
+.dp-panel-act > .dp-act-primary { flex: 1 1 100%; min-height: var(--tap-min); font-size: var(--fs-300); }
+.dp-panel-act > :not(.dp-act-primary) { flex: 1 1 0; min-width: 110px; }
+
+/* ── Trys zinojimo lygiai sarasuose ─────────────────────────────────────── */
+
+.dp-checks { display: flex; flex-direction: column; gap: 9px; }
+.dp-check { display: flex; align-items: flex-start; gap: 11px; }
+.dp-check > i { flex: none; width: 9px; height: 9px; margin-top: 5px; border-radius: 50%; background: var(--k-confirmed); }
+.dp-check.is-signal > i { border-radius: 0; background: var(--k-signal); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+.dp-check.is-unknown > i { background: transparent; box-shadow: inset 0 0 0 1.5px var(--text-muted); }
+.dp-check-b { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.dp-check-t { font-size: var(--fs-300); font-weight: var(--fw-medium); line-height: 1.35; }
+.dp-check-d { font-size: 11.5px; line-height: var(--lh-body); color: var(--text-muted); }
+
+/* Paspaudziamas pastebejimas — atidaro nuotrauka galerijoje */
+button.dp-check { width: 100%; text-align: left; padding: 10px 13px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-elevated); color: inherit; }
+button.dp-check:hover { border-color: var(--border-light); }
+button.dp-check.is-active { border-color: var(--accent-border); background: var(--accent-dim); }
+.dp-check-foto { flex: none; padding: 3px 8px; border-radius: var(--radius-sm); background: rgba(255,255,255,.06); font: var(--fw-semi) 10px/1.5 var(--font-mono); color: var(--text-secondary); }
+
+/* ── Rinkos pozicijos skale ─────────────────────────────────────────────── */
+
+.dp-scale { position: relative; height: 34px; border-radius: var(--radius-sm); background: var(--bg-sunken); border: 1px solid var(--border); overflow: hidden; }
+.dp-scale-fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--success-dim); }
+.dp-scale-me { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--success); }
+.dp-scale-avg { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,.18); }
+.dp-scale-lbl { position: absolute; top: 50%; transform: translateY(-50%); font: var(--fw-bold) 10px/1 var(--font-mono); white-space: nowrap; }
+.dp-scale-ends { display: flex; justify-content: space-between; font: var(--fw-medium) 10px/1 var(--font-mono); color: var(--text-dim); }
+
+/* ── VIN ─────────────────────────────────────────────────────────────────── */
+
+.dp-vin-code { display: flex; align-items: center; gap: var(--s-3); flex-wrap: wrap; padding: var(--s-3) var(--s-4); background: var(--bg-sunken); border: 1px solid var(--border); border-radius: var(--radius-md); }
+.dp-vin-code > b { font: var(--fw-semi) 15px/1 var(--font-mono); letter-spacing: .04em; color: var(--text-primary); }
+.dp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--s-2); }
+.dp-cell { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; background: var(--bg-elevated); border-radius: var(--radius-md); min-width: 0; }
+.dp-cell-k { font: var(--fw-semi) 9px/1 var(--font-mono); letter-spacing: .12em; color: var(--text-muted); }
+.dp-cell-v { font-size: var(--fs-200); font-weight: var(--fw-medium); line-height: var(--lh-snug); }
+.dp-cell-v.is-unknown { color: var(--text-muted); }
+
+/* Mokamos dalies porase — vienas raštas visoms mokamoms skiltims */
+.dp-paywall { display: flex; gap: 13px; align-items: flex-start; flex-wrap: wrap; padding: var(--s-4); background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-md); }
+.dp-paywall-t { flex: 1 1 260px; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+
+
+/* ── 10c. „Rinkoje N d." punktas .ct-why sarase ──────────────────────────── */
+
+/* Ilgesnis punktas uzima savo eile, o ne lauzia dvieju stulpeliu ritma */
+.ct-why-i.is-wide { flex: 1 1 100%; }
+.ct-why-i > b { font: var(--fw-bold) var(--fs-300)/1.4 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--text-primary); }
+.ct-why-i > em { font-style: normal; color: var(--text-muted); }
+
+
+/* ============================================================================
+   15. ZENKLIUKAI, MYGTUKAI, SKAITIKLIS · perimta is ct-priedai.css
+   ----------------------------------------------------------------------------
+   Po sio skyriaus ct-priedai.css turi istuseti visas.
+   12 sk. grandine gavo :not(.ct-photo-n) — 2 priedu blokas nebereikalingas.
+   ========================================================================== */
+
+/* ── .chip · trys atmainos, dvi ismieros ─────────────────────────────────── */
+
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 26px; padding: 0 10px;
+  border: 1px solid var(--border); border-radius: var(--radius-pill);
+  background: var(--bg-elevated); color: var(--text-secondary);
+  font-family: var(--font); font-size: 12px; font-weight: var(--fw-medium); line-height: 1; white-space: nowrap;
+}
+
+/* Patvirtintas faktas: ✓ VIN, ✓ Istorija, ✓ Garantija */
+.chip.chip-pos { border-color: var(--k-confirmed-border); background: var(--k-confirmed-dim); color: var(--k-confirmed); }
+/* Kontekstas, ne kokybe: Verslas */
+.chip.chip-ac { border-color: var(--accent-border); background: var(--accent-dim); color: var(--accent-light); }
+/* Ne kokybes zenklas: „Iskeltas 7x" — prislopintas sazningai */
+.chip.chip-dim { color: var(--text-dim); }
+/* Signalas: „Neatitinka filtro" */
+.chip.chip-warn { border-color: var(--warning-border); background: var(--warning-dim); color: var(--warning); }
+
+/* Eilutes kortele: TA PATI klase, mazesne atmaina.
+   Pakeicia inline style="height:22px;font-size:11px;padding:0 7px" (index.html 6102+). */
+.chip.chip-sm { height: 22px; padding: 0 8px; font-size: 11px; gap: 5px; }
+
+/* Skaitine chip reiksme lygiuojasi kaip lentelej */
+.chip > b { font: var(--fw-semi) 11.5px/1 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--text-primary); }
+/* Mono etikete pries reiksme — pakeicia emoji, kai ju atsisakysite */
+.chip > span { font: var(--fw-semi) 8.5px/1 var(--font-mono); letter-spacing: .1em; color: var(--text-dim); }
+.chip.chip-pos > span, .chip.chip-ac > span { color: currentColor; opacity: .7; }
+
+/* Grupe */
+.ct-chips { display: flex; gap: 7px; flex-wrap: wrap; }
+
+/* ── Mygtukai · plytele ir ženklelis ─────────────────────────────────────── */
+
+/* Piktogramos plytele. Simbolis eina i <i> teksta — ne background-image. */
+.ct-btn > i {
+  flex: none; width: 18px; height: 18px; margin-left: -3px;
+  display: grid; place-items: center;
+  border-radius: 5px; background: rgba(255,255,255,.07);
+  font: var(--fw-semi) 10px/1 var(--font-mono); font-style: normal;
+  color: var(--text-secondary);
+}
+.ct-btn:hover > i { background: rgba(255,255,255,.12); color: var(--text-primary); }
+
+/* Pirminis CTA: plytele ant akcento fono turi buti sviesesne, ne tamsesne */
+.ct-btn-primary > i { background: rgba(255,255,255,.20); color: #fff; }
+.ct-btn-primary:hover > i { background: rgba(255,255,255,.28); }
+
+/* Kreditu zenklelis „2 kr" — atskirtas vertikalia linija, ne skliausteliais */
+.ct-btn > u {
+  flex: none; margin-left: 2px; padding-left: 9px;
+  border-left: 1px solid rgba(255,255,255,.28);
+  font: var(--fw-bold) 11px/1 var(--font-mono); font-variant-numeric: tabular-nums;
+  text-decoration: none; letter-spacing: .02em;
+}
+/* Kai kreditu nepakanka — zenklelis raudonas, mygtukas veikia (veda i papildyma) */
+.ct-btn.is-short > u { color: var(--danger); border-left-color: var(--danger-border); }
+
+/* Antriniai mygtukai vos mazesni uz CTA — hierarchija, ne atsitiktinumas */
+.ct-actions > .ct-btn { height: 34px; font-size: 12.5px; }
+.ct-actions > .ct-btn-primary { height: 40px; font-size: var(--fs-300); }
+@media (max-width: 640px) {
+  .ct-actions > .ct-btn { min-height: var(--tap-min); height: auto; }
+  .ct-actions > .ct-btn-primary { min-height: 48px; height: auto; }
+}
+
+/* ── .ct-photo-n · nuotrauku skaitiklis ──────────────────────────────────── */
+
+.ct-photo-n {
+  position: absolute; right: 9px; bottom: 9px;
+  padding: 3px 8px; border-radius: var(--radius-sm);
+  background: rgba(5, 6, 10, .78);
+  font: var(--fw-semi) 11px/1.4 var(--font-mono); font-variant-numeric: tabular-nums;
+  color: var(--text-secondary); pointer-events: none;
 }

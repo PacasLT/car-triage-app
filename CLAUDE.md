@@ -135,6 +135,12 @@
 - Punktas **uzima slota**, ne prisideda ketvirtas: `why = whyReasons.slice(0, laikas ? 2 : 3)`. Trys lieka trys.
 - Atskira `.ct-istorija` juosta po kortele panaikinta – blokas dabar segamas i `.ct-l3` (trecia lygi). Pastabos apie kainos pokycius ir ta pati pardaveja islieka.
 
+## Rinkos duomenu modulis
+
+- Specifikacija: `docs/rinkos-duomenys.md`. **Perskaityti „Kas jau padaryta" pries imantis** – originale buvo Postgres schemos (mes naudojam SQLite) ir VIN tikrinimas, kuris padarytas dar v1.23.0.
+- Regitros sandoriu duomenys (TPSAIS) **NETURI markes/modelio/metu** – patikrinta gyvai 2026-09-18. „Sandoriu per men." pagal modeli is atviru duomenu neimanoma.
+- Parko duomenys turi `MARKE` ir `KOMERCINIS_PAV`, atnaujinami **kas ketvirti**. Imti tiesiai is `regitra.lt/wp-content/uploads/failai/Atviri_TP_parko_duomenys.zip` (data.gov.lt veidrodis pasenes nuo 2023 III ketv.).
+
 ## Saugumas
 
 - `ANTHROPIC_API_KEY`, `SCRAPER_API_KEY`, `JWT_SECRET`, `ADMIN_EMAILS`, `INVITE_CODES` – tik Railway Variables, **niekada į kodą ar GitHub**.
