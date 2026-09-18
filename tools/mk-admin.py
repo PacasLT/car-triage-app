@@ -30,6 +30,8 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 
 /* Isskleista eilute - viena celė per visa plotį */
 .ad-detales { background: var(--bg-elevated); }
+.ad-irankiai { display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: center; margin: 12px 0 4px; }
+.ad-irankiu-zinia { font: var(--fw-regular) 11.5px/1.5 var(--font-mono); color: var(--text-muted); }
 .ad-pre { margin: 0; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-surface); font: var(--fw-regular) 11.5px/1.6 var(--font-mono); color: var(--text-secondary); white-space: pre-wrap; word-break: break-word; }
 .ad-detales > td { padding: 14px 13px !important; }
 .ad-pre { max-height: 260px; overflow: auto; padding: 10px 12px; border-radius: 8px; background: var(--bg-base); font: 400 11px/1.55 var(--font-mono); color: var(--text-secondary); white-space: pre-wrap; word-break: break-word; margin: 8px 0 0; }
@@ -76,6 +78,7 @@ BODY = u'''
   var sub = document.getElementById('ad-sub');
   var _rodyti = 'klaidos';
   var _visi = false;
+  var _irasai = [];
   var _tekstas = /[?&]tekstas=1/.test(location.search);
 
   function zetonas() { try { return localStorage.getItem('ct_token') || ''; } catch (e) { return ''; } }
@@ -139,10 +142,22 @@ BODY = u'''
     e.push('Pagal busena: ' + JSON.stringify(d.pagalBusena || {}));
     e.push('');
     d.irasai.forEach(function (k) {
-      var g = k.diagnostika || {}, ek = g.ekranas || {};
       e.push('================================================================');
+      e.push(tekstasVieno(k));
+    });
+    return e.join(NL);
+  }
+
+  // Vienas irasas tekstu - naudoja ir isklotine, ir mygtukas „Kopijuoti".
+  function tekstasVieno(k) {
+    var NL = String.fromCharCode(10);
+    var e = [];
+    (function () {
+      var g = k.diagnostika || {}, ek = g.ekranas || {};
       e.push('#' + k.nr + '  ' + k.busena + '  svarba=' + k.svarba + '  kategorija=' + k.kategorija
-        + (k.kartojasi ? '  KARTOJASI' : '') + (k.foto ? '  [NUOTRAUKA]' : ''));
+        + (k.kartojasi ? '  KARTOJASI' : '') + (k.foto ? '  [NUOTRAUKA]' : '')
+        + (k.persiustas ? '  [PERSIUSTAS IS EILES - laikas yra GAVIMO, ne ivykio]' : '')
+        + (k.fotoNumesta ? '  [NUOTRAUKA NETILPO]' : ''));
       e.push(new Date(k.laikas).toISOString().slice(0, 16).replace('T', ' ') + '  ' + (k.kas || 'neprisijunges'));
       e.push('');
       e.push('TEKSTAS: ' + k.tekstas);
@@ -180,8 +195,7 @@ BODY = u'''
         e.push('KELIAS: ' + k.istorija.map(function (x) { return x.busena; }).join(' -> '));
       }
       if (k.foto) e.push('NUOTRAUKA: /admin/klaidos/' + k.nr + '/foto');
-      e.push('');
-    });
+    })();
     return e.join(NL);
   }
 
@@ -193,6 +207,7 @@ BODY = u'''
   function piestiKlaidas() {
     el.innerHTML = '<div class="ct-empty is-never"><i>\u00B7</i><span class="ct-empty-t">Kraunama\u2026</span></div>';
     imti('/admin/klaidos' + (_visi ? '?visi=1' : '')).then(function (d) {
+      _irasai = d.irasai || [];
       sub.textContent = 'I\u0161 viso ' + d.viso + ' \u00B7 atvir\u0173 ' + d.atviru + ' \u00B7 laukia j\u016Bs\u0173 ' + d.lauksiaJusu;
       var h = '<div class="ad-sant">'
         + '<div class="ad-plyt' + (d.lauksiaJusu ? ' svarbu' : '') + '"><b>' + d.lauksiaJusu + '</b><span>laukia j\u016Bs\u0173 patikros</span></div>'
@@ -271,6 +286,19 @@ BODY = u'''
             + dg.veiksmai.map(function (v) { return esc((v.tekstas || '\u2014') + '   ' + (v.elementas || '')); }).join(String.fromCharCode(10))
             + '</pre></details>' : '')
       + '<details><summary>Visa diagnostika</summary><pre class="ad-pre">' + esc(JSON.stringify(dg, null, 1)) + '</pre></details>'
+      + '<div class="ad-irankiai">'
+      +   (dg.adresas
+            ? '<button type="button" class="ct-btn ct-btn-sm" onclick="event.stopPropagation();adAtkurti(' + k.nr + ')">'
+              + '<span>Atkurti ' + (ek.plotis ? ek.plotis + '\u00D7' + (ek.aukstis || '?') : '') + '</span></button>'
+            : '')
+      +   ((dg.uzklausos || []).length
+            ? '<button type="button" class="ct-btn ct-btn-sm" onclick="event.stopPropagation();adTikrinti(' + k.nr + ')">'
+              + '<span>Patikrinti u\u017Eklausas (' + dg.uzklausos.length + ')</span></button>'
+            : '')
+      +   '<button type="button" class="ct-btn ct-btn-sm" onclick="event.stopPropagation();adKopijuoti(' + k.nr + ')">'
+      +     '<span>Kopijuoti</span></button>'
+      +   '<span class="ad-irankiu-zinia" id="ad-iz-' + k.nr + '"></span>'
+      + '</div>'
       + '<div class="ad-veiksmai">'
       +   BUSENOS.map(function (b) {
             return '<button type="button" class="ct-flag" role="radio" aria-checked="' + (b.k === k.busena)
@@ -278,6 +306,77 @@ BODY = u'''
           }).join('')
       + '</div></td></tr>';
   }
+
+  function pagalNr(nr) { return (_irasai || []).filter(function (x) { return x.nr === nr; })[0]; }
+  function zinia(nr, t) { var e = document.getElementById('ad-iz-' + nr); if (e) e.textContent = t; }
+
+  // „Atkurti" — atidaro TA PATI adresa TOKIO PAT dydzio lange. Butent sito
+  // truko: du siandienos dizaino pranesimai buvo apie plocius (3152 ir 385 px),
+  // ir abu teko atkurti rankomis, spejant dydi.
+  window.adAtkurti = function (nr) {
+    var k = pagalNr(nr); if (!k) return;
+    var g = k.diagnostika || {}, ek = g.ekranas || {};
+    if (!g.adresas) return zinia(nr, 'Adreso pranesime nera.');
+    var sav = ek.plotis ? 'width=' + Math.min(ek.plotis, screen.availWidth) + ',height=' + Math.min(ek.aukstis || 900, screen.availHeight) : '';
+    window.open(g.adresas, '_blank', sav);
+    zinia(nr, 'Atidaryta' + (sav ? ' ' + ek.plotis + '×' + ek.aukstis + ' px lange.' : '.'));
+  };
+
+  // Mokami marsrutai NIEKADA nekvieciami automatiskai - mygtukas, kviecianti
+  // juos kas paspaudima, tyliai pravalgytu kreditus. Rodom su kaina, be kvietimo.
+  var MOKAMI = /\/api\/(analyze-single|compare-deep|vin-lookup|seller-lookup|history-counts)/;
+
+  window.adTikrinti = function (nr) {
+    var k = pagalNr(nr); if (!k) return;
+    var u = ((k.diagnostika || {}).uzklausos) || [];
+    if (!u.length) return zinia(nr, 'Uzklausu pranesime nera.');
+    zinia(nr, 'Tikrinama…');
+    var eil = [], liko = u.length;
+    u.forEach(function (x, i) {
+      var buvo = x.kodas == null ? 'tinklas' : x.kodas;
+      if (MOKAMI.test(x.adresas)) {
+        eil[i] = x.adresas + '   buvo ' + buvo + '   — MOKAMAS, nekviesta';
+        if (!--liko) baigti();
+        return;
+      }
+      if (x.metodas && x.metodas.toUpperCase() !== 'GET') {
+        eil[i] = x.adresas + '   buvo ' + buvo + '   — ' + x.metodas + ', nekartojama';
+        if (!--liko) baigti();
+        return;
+      }
+      var antr = {};
+      try { var z = localStorage.getItem('ct_token'); if (z) antr.Authorization = 'Bearer ' + z; } catch (e) {}
+      fetch(x.adresas, { headers: antr })
+        .then(function (r) { eil[i] = x.adresas + '   buvo ' + buvo + '   dabar ' + r.status + (r.ok ? '  VEIKIA' : ''); })
+        .catch(function () { eil[i] = x.adresas + '   buvo ' + buvo + '   dabar: nepavyko prisijungti'; })
+        .then(function () { if (!--liko) baigti(); });
+    });
+    function baigti() {
+      var el = document.getElementById('ad-tikr-' + nr);
+      if (!el) {
+        el = document.createElement('pre');
+        el.className = 'ad-pre'; el.id = 'ad-tikr-' + nr;
+        el.style.marginTop = '10px';
+        var t = document.getElementById('ad-iz-' + nr);
+        if (t && t.parentNode) t.parentNode.appendChild(el);
+      }
+      el.textContent = eil.join(String.fromCharCode(10));
+      zinia(nr, '');
+    }
+  };
+
+  window.adKopijuoti = function (nr) {
+    var k = pagalNr(nr); if (!k) return;
+    var t = tekstasVieno(k);
+    var gerai = function () { zinia(nr, 'Nukopijuota.'); };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(t).then(gerai, function () { zinia(nr, 'Nepavyko — pasirinkite ranka.'); });
+        return;
+      }
+    } catch (e) {}
+    zinia(nr, 'Naršyklė neleidžia kopijuoti — naudokite „Viskas tekstu".');
+  };
 
   window.adIsskleisti = function (nr) { _isskleista = (_isskleista === nr ? null : nr); piestiKlaidas(); };
   window.adVisi = function (v) { _visi = v; _isskleista = null; piestiKlaidas(); };

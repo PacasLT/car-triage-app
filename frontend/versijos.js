@@ -8,6 +8,24 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.59.0', data: '2026-09-18', pavadinimas: 'Nuo pranešimo iki klaidos – vienas paspaudimas',
+    pakeitimai: [
+      'Prie kiekvieno pranešimo mygtukas „Atkurti" – atidaro tą patį puslapį tokio pat dydžio lange kaip pranešusiojo ekranas',
+      '„Patikrinti užklausas" parodo, ar nepavykusios užklausos vis dar neveikia, ar jau sutvarkytos',
+      'Mokamos užklausos (analizė, VIN, pardavėjas, palyginimas) rodomos, bet NIEKADA nekviečiamos automatiškai – kreditai lieka jūsų',
+      '„Kopijuoti" – visas pranešimas su diagnostika į iškarpinę',
+    ],
+  },
+  {
+    versija: '1.58.0', data: '2026-09-18', pavadinimas: 'Neišsiųstas pranešimas nebedingsta',
+    pakeitimai: [
+      'Jei pranešimo išsiųsti nepavyksta, jis išsaugomas ir išsiunčiamas automatiškai kitą kartą atidarius puslapį',
+      'Būtent taip praradome pirmuosius pranešimus – klaida grįžo, o tekstas dingdavo kartu su ja',
+      'Nepavykus dėl dydžio, nuotrauka numetama, o tekstas išlieka',
+      'Sąraše matosi, kad pranešimas vėluoja – kad laikas nebūtų palaikytas įvykio laiku',
+    ],
+  },
+  {
     versija: '1.57.0', data: '2026-09-18', pavadinimas: 'Klaidų sąrašas vienu žvilgsniu',
     pakeitimai: [
       'Administravimo puslapyje naujas rodinys „Viskas tekstu" – visi pranešimai su visa diagnostika vienoje vietoje',

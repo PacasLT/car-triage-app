@@ -89,18 +89,20 @@
 
   if (window.fetch) {
     var _fetch = window.fetch;
-    window.fetch = function (input) {
+    window.fetch = function (input, init) {
       var adresas = typeof input === 'string' ? input : (input && input.url) || '';
       var pradzia = Date.now();
       return _fetch.apply(this, arguments).then(function (r) {
         if (!r.ok && /^\/(api|auth|admin)\//.test(adresas)) {
           ideti(_uzklausos, { t: pradzia, tipas: 'http', adresas: adresas.slice(0, 200),
+            metodas: String((init && init.method) || (input && input.method) || 'GET').toUpperCase(),
             kodas: r.status, trukmeMs: Date.now() - pradzia });
         }
         return r;
       }).catch(function (err) {
         if (/^\/(api|auth|admin)\//.test(adresas)) {
           ideti(_uzklausos, { t: pradzia, tipas: 'tinklas', adresas: adresas.slice(0, 200),
+            metodas: String((init && init.method) || (input && input.method) || 'GET').toUpperCase(),
             klaida: String(err && err.message).slice(0, 160), trukmeMs: Date.now() - pradzia });
         }
         throw err;
@@ -342,17 +344,18 @@
       btn.querySelector('span').textContent = 'Siunčiame…';
       var antrastes = { 'Content-Type': 'application/json' };
       try { var z = localStorage.getItem('ct_token'); if (z) antrastes.Authorization = 'Bearer ' + z; } catch (e) {}
+      var kunas = {
+        tekstas: tekstas.slice(0, 2000),
+        kategorija: _kat,
+        svarba: _svarba,
+        kartojasi: !!document.getElementById('kp-kartojasi').checked,
+        turejoRodyti: ((document.getElementById('kp-turejo') || {}).value || '').trim().slice(0, 500) || null,
+        diagnostika: surinkti(),
+        foto: _foto || null,
+      };
       fetch('/api/klaida', {
         method: 'POST', headers: antrastes,
-        body: JSON.stringify({
-          tekstas: tekstas.slice(0, 2000),
-          kategorija: _kat,
-          svarba: _svarba,
-          kartojasi: !!document.getElementById('kp-kartojasi').checked,
-          turejoRodyti: ((document.getElementById('kp-turejo') || {}).value || '').trim().slice(0, 500) || null,
-          diagnostika: surinkti(),
-          foto: _foto || null,
-        }),
+        body: JSON.stringify(kunas),
       }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
         .then(function (x) {
           if (!x.ok) throw new Error((x.j && x.j.error) || 'nepavyko');
@@ -366,8 +369,25 @@
           zin.hidden = false;
           zin.style.color = '';
           var z = String((err && err.message) || '');
-          // 413 beveik visada reiskia nuotrauka - pasakom, ka daryti, o ne tik kas blogai.
-          zin.textContent = /didel|413|large/i.test(z)
+          var perDidelis = /didel|413|large/i.test(z);
+          var turejoFoto = !!kunas.foto;
+          if (perDidelis) {
+            // 413 pakartojus nepasitaisys - saugom BE nuotraukos ir sakom tiesiai.
+            kunas.foto = null;
+            kunas.fotoNumesta = true;
+          }
+          var isaugota = eilePridėti(kunas);
+          zin.hidden = false;
+          zin.style.color = '';
+          if (isaugota) {
+            zin.style.color = 'var(--warning)';
+            zin.textContent = 'Išsiųsti nepavyko, bet pranešimas išsaugotas ir bus išsiųstas automatiškai. '
+              + (turejoFoto && !kunas.foto ? 'Nuotrauka netilpo – jos nebus.' : 'Galite uždaryti langą.');
+            btn.querySelector('span').textContent = 'Išsaugota';
+            setTimeout(uzdaryti, 2600);
+            return;
+          }
+          zin.textContent = perDidelis
             ? 'Nepavyko išsiųsti: siuntinys per didelis. Pabandykite be nuotraukos arba iškirpkite tik svarbią jos dalį.'
             : 'Nepavyko išsiųsti: ' + z + '. Pabandykite dar kartą.';
           btn.disabled = false;
@@ -377,6 +397,78 @@
 
     setTimeout(function () { var t = document.getElementById('kp-tekstas'); if (t) t.focus(); }, 30);
   }
+  // ── NEISSIUSTU PRANESIMU EILE (v1.58.0) ────────────────────────────────────
+  // Kam: iki siol nepavykes siuntimas dingdavo kartu su viskuo, ka zmogus
+  // surase. Butent taip ir praradome pirmuosius pranesimus - 413 grazino
+  // klaida, o teksto niekas nebesaugojo. Dabar pranesimas islieka narsykleje
+  // ir issiunciamas pats, kita karta atidarius bet kuri puslapi.
+  //
+  // Ribos: daugiausia 5 pranesimai; nuotrauka saugoma tik jei telpa (localStorage
+  // kvota ~5 MB, o nuotrauka gali buti ~0,5 MB). Netelpant nuotrauka numetama,
+  // o pranesimo tekstas islieka - tekstas vertingesnis uz paveiksla.
+  var EILES_RAKTAS = 'ct_klaidu_eile';
+  var EILES_RIBA = 5;
+
+  function eileSkaityti() {
+    try {
+      var t = localStorage.getItem(EILES_RAKTAS);
+      var a = t ? JSON.parse(t) : [];
+      return Object.prototype.toString.call(a) === '[object Array]' ? a : [];
+    } catch (e) { return []; }
+  }
+  function eileRasyti(a) {
+    try { localStorage.setItem(EILES_RAKTAS, JSON.stringify(a.slice(-EILES_RIBA))); return true; }
+    catch (e) { return false; }
+  }
+  // Grazina: 'su-foto' | 'be-foto' | null (nepavyko issaugoti visai)
+  function eilePridėti(kunas) {
+    var a = eileSkaityti();
+    a.push(kunas);
+    if (eileRasyti(a)) return kunas.foto ? 'su-foto' : 'be-foto';
+    if (kunas.foto) {                      // greiciausiai kvota - bandom be nuotraukos
+      kunas.foto = null;
+      kunas.fotoNumesta = true;
+      a[a.length - 1] = kunas;
+      if (eileRasyti(a)) return 'be-foto';
+    }
+    return null;
+  }
+
+  function eileSiusti() {
+    var a = eileSkaityti();
+    if (!a.length) return;
+    var pirmas = a[0];
+    var antrastes = { 'Content-Type': 'application/json' };
+    try { var z = localStorage.getItem('ct_token'); if (z) antrastes.Authorization = 'Bearer ' + z; } catch (e) {}
+    pirmas.persiustas = true;              // matosi isklotineje: pranesimas veluodamas
+    fetch('/api/klaida', { method: 'POST', headers: antrastes, body: JSON.stringify(pirmas) })
+      .then(function (r) {
+        if (r.ok) {
+          eileRasyti(a.slice(1));
+          if (a.length > 1) setTimeout(eileSiusti, 1500);
+          return;
+        }
+        nepavyko(a);
+      })
+      .catch(function () { nepavyko(a); });   // nera rysio - irgi bandymas
+  }
+
+  // Kodel skaitiklis, o ne „4xx = metam lauk": pirmas pranesimas, kuri pametem,
+  // grizo su 413, t. y. 4xx. Iskart ismetus tai butu tiksliai ta pati klaida
+  // antra karta. Bet ir amzinai laikyti negalima - blogas pranesimas uzstatytu
+  // eile visiems kitiems. Todel PENKI bandymai: laikina problema spes praeiti,
+  // tikrai blogas pranesimas pats pasitrauks.
+  var BANDYMU_RIBA = 5;
+  function nepavyko(a) {
+    a[0].bandymai = (a[0].bandymai || 0) + 1;
+    if (a[0].bandymai >= BANDYMU_RIBA) a = a.slice(1);
+    eileRasyti(a);
+  }
+
+  // Ne is karto: puslapis pirma turi uzsikrauti, o pranesimas gali palaukti.
+  setTimeout(eileSiusti, 6000);
+  window.addEventListener('online', function () { setTimeout(eileSiusti, 1500); });
+
   window.ctPranestiKlaida = atidaryti;
 
   function mygtukas() {
