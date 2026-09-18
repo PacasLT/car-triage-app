@@ -88,9 +88,25 @@
       + '<div class="ct-meg-dd" id="ct-meg-dd" role="menu"></div>';
     if (avatar) host.insertBefore(wrap, avatar); else host.appendChild(wrap);
     var btn = wrap.querySelector('#ct-meg-btn');
-    btn.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); if (_atidaryta) uzdaryti(); else atidaryti(); });
+    // v1.71.0 (pranesimas Nr.6): pele valdomame irenginyje uzvedimas JAU atidaro
+    // sarasa, tad paspaudimas ta pati darbą darydavo antra karta - ir atrodydavo,
+    // kad sirdele "dingsta" (is tikruju uzsidarydavo tai, ka uzvedimas atidare).
+    // Dabar paspaudimas veda i pilna sarasa, o uzvedimas lieka greitai perziurai.
+    //
+    // Liecianciame irenginyje uzvedimo NERA, tad ten paspaudimas privalo atidaryti
+    // sarasa - kitaip iskleidziamasis tampa nepasiekiamas. Nuoroda i pilna sarasa
+    // ten lieka pacioje iskleidziamoje dalyje ("Visi -->").
+    var _peleValdomas = !!(window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches);
+    btn.addEventListener('click', function (e) {
+      e.preventDefault(); e.stopPropagation();
+      if (_peleValdomas) { window.location.href = 'megstamiausi.html'; return; }
+      if (_atidaryta) uzdaryti(); else atidaryti();
+    });
+    if (_peleValdomas) {
+      btn.title = 'Mėgstamiausi – užveskite peržiūrai, paspauskite visam sąrašui';
+    }
     // Pele: uzvedus atsidaro, nuvedus - uzsidaro (tik irenginiuose su pele)
-    if (window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    if (_peleValdomas) {
       wrap.addEventListener('mouseenter', function () { clearTimeout(_hoverT); _hoverT = setTimeout(atidaryti, 120); });
       wrap.addEventListener('mouseleave', function () { clearTimeout(_hoverT); _hoverT = setTimeout(uzdaryti, 260); });
     }

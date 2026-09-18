@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.71.0', data: '2026-09-18', pavadinimas: 'Širdelė nebeslepia savęs',
+    pakeitimai: [
+      'Užvedus pelę mėgstamiausių sąrašas atsidaro kaip anksčiau – spausti nereikia',
+      'O paspaudus dabar nuveda į visą mėgstamiausių sąrašą, o ne uždaro tai, ką ką tik atidarėte',
+      'Telefone niekas nesikeičia: paspaudimas atidaro sąrašą, o iš jo veda nuoroda „Visi →"',
+    ],
+  },
+  {
     versija: '1.70.0', data: '2026-09-18', pavadinimas: 'Matosi, kuria versija ištaisyta',
     pakeitimai: [
       'Klaidų sąraše prie pranešimo dabar dvi versijos: kurioje rasta ir kuria ištaisyta',
