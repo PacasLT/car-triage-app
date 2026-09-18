@@ -15,7 +15,7 @@ const autopliusIds = require('./autoplius-ids');
 const vinTikrinimas = require('./vin-tikrinimas');
 const nuotrAnalize = require('./nuotrauku-analize');
 const komplektacija = require('./komplektacija');
-const { requireAuth, handleRegister, handleLogin, handleMe, planai, duomenys } = require('./auth');
+const { requireAuth, handleRegister, handleLogin, handleMe, planai, duomenys, verifyToken } = require('./auth');
 
 const app = express();
 app.use(express.json());
@@ -138,6 +138,211 @@ app.post('/admin/kreditai', requireAuth, planai.reikalautiAdmin, (req, res) => {
     res.json({ ok: true, busena: planai.pridetiKreditu(email, kiekis, pastaba, req.user.email) });
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
+// ── KLAIDU PRANESIMAI (v1.49.0) ─────────────────────────────────────────────
+// Zmogus paspaudzia mygtuka bet kuriame puslapyje, paraso sakini, o narsykle
+// prideda diagnostika: versija, ekrano plotis, paskutines JS klaidos ir
+// nepavykusios uzklausos. Nuotrauka - pasirinktinai.
+//
+// AUTENTIFIKACIJOS NEREIKALAUJAM samoningai: dazniausia vieta, kur reikia
+// pranesti, yra pats prisijungimas. Vietoj to - griezti dydzio ir tempo limitai.
+//
+// RIBOS NUO PIRMOS DIENOS: 200 naujausiu irasu, nuotraukos atskirais failais.
+// Sioje sistemoje jau du kartus neribotas augimas buvo problema - nekartojam.
+const KLAIDU_FAILAS = path.join(cache.DATA_DIR, 'klaidu-zurnalas.json');
+const KLAIDU_FOTO_KAT = path.join(cache.DATA_DIR, 'klaidu-foto');
+const KLAIDU_RIBA = 200;
+const KLAIDOS_MAX_FOTO = 1.6 * 1024 * 1024;   // base64 su atsarga
+const KLAIDOS_TEMPAS = { langasMs: 10 * 60 * 1000, kiek: 5 };
+const _klaiduTempas = new Map();               // ip -> [laikai]
+
+// v1.51.0. Kiekviena busena atsako i viena klausima: KIENO dabar ejimas.
+// Dvieju („nauja / sutvarkyta") buvo per mazai: is sesiu dizainerio radiniu
+// penki NEPASITVIRTINO - jie jau buvo sutvarkyti. Tokio radinio nei istrinsi
+// (pamirsi, kad buvo tikrintas), nei pazymesi sutvarkytu (melas).
+// Ir „pataisyta" NEREISKIA „veikia produkcijoje" - todel yra atskira
+// „laukia-patikros", kuri is saraso nedingsta, kol Lukas nepatvirtina.
+const KLAIDU_BUSENOS = {
+  'rasta':            { uzdaryta: false, ejimas: 'claude' },
+  'patvirtinta':      { uzdaryta: false, ejimas: 'claude' },
+  'nepasitvirtino':   { uzdaryta: true,  ejimas: null },
+  'tvarkoma':         { uzdaryta: false, ejimas: 'claude' },
+  'laukia-patikros':  { uzdaryta: false, ejimas: 'lukas' },
+  'sutvarkyta':       { uzdaryta: true,  ejimas: null },
+  'atideta':          { uzdaryta: false, ejimas: 'claude' },
+};
+
+let _klaidos = (() => {
+  try { return JSON.parse(fs.readFileSync(KLAIDU_FAILAS, 'utf-8')) || []; } catch { return []; }
+})();
+try { fs.mkdirSync(KLAIDU_FOTO_KAT, { recursive: true }); } catch (e) {}
+
+function issaugotiKlaidas() {
+  try { fs.writeFileSync(KLAIDU_FAILAS, JSON.stringify(_klaidos)); }
+  catch (e) { console.error('[KLAIDOS] nepavyko issaugoti:', e.message); }
+}
+
+app.post('/api/klaida', express.json({ limit: '3mb' }), (req, res) => {
+  try {
+    const ip = String(req.headers['x-forwarded-for'] || req.ip || '').split(',')[0].trim() || 'nezinomas';
+    const dabar = Date.now();
+    const laikai = (_klaiduTempas.get(ip) || []).filter((t) => dabar - t < KLAIDOS_TEMPAS.langasMs);
+    if (laikai.length >= KLAIDOS_TEMPAS.kiek) {
+      return res.status(429).json({ error: 'Per daug pranesimu is eiles. Pabandykite po keliu minuciu.' });
+    }
+    laikai.push(dabar);
+    _klaiduTempas.set(ip, laikai);
+
+    const kunas = req.body || {};
+    const tekstas = String(kunas.tekstas || '').trim().slice(0, 2000);
+    if (tekstas.length < 5) return res.status(400).json({ error: 'Per trumpas aprasymas.' });
+
+    const nr = (_klaidos.length ? (_klaidos[_klaidos.length - 1].nr || 0) : 0) + 1;
+
+    // Nuotrauka i atskira faila - i JSON jos nededam, kitaip zurnalas issipustu.
+    let fotoFailas = null;
+    const foto = typeof kunas.foto === 'string' ? kunas.foto : null;
+    if (foto && /^data:image\/(png|jpe?g|webp);base64,/.test(foto) && foto.length <= KLAIDOS_MAX_FOTO) {
+      try {
+        const pletinys = foto.slice(11, foto.indexOf(';')).replace('jpeg', 'jpg');
+        const baitai = Buffer.from(foto.slice(foto.indexOf(',') + 1), 'base64');
+        fotoFailas = `k${nr}.${pletinys}`;
+        fs.writeFileSync(path.join(KLAIDU_FOTO_KAT, fotoFailas), baitai);
+      } catch (e) { fotoFailas = null; }
+    }
+
+    // Kas pranese - tik jei zetonas galioja. Be jo pranesimas vis tiek priimamas.
+    let kas = null;
+    try {
+      const h = String(req.headers.authorization || '');
+      if (h.startsWith('Bearer ')) {
+        const v = verifyToken(h.slice(7));
+        if (v) kas = (typeof v === 'string' ? v : v.email) || null;
+      }
+    } catch (e) {}
+
+    const KAT = ['dizainas', 'negyvas', 'duomenys', 'kreditai', 'greitis', 'prisijungimas'];
+    const SV = ['blokuoja', 'trukdo', 'smulkme'];
+    _klaidos.push({
+      nr, laikas: dabar, kas, ip: ip.slice(0, 45),
+      kategorija: KAT.indexOf(kunas.kategorija) >= 0 ? kunas.kategorija : 'kita',
+      svarba: SV.indexOf(kunas.svarba) >= 0 ? kunas.svarba : 'trukdo',
+      kartojasi: !!kunas.kartojasi,
+      turejoRodyti: kunas.turejoRodyti ? String(kunas.turejoRodyti).slice(0, 500) : null,
+      tekstas, foto: fotoFailas,
+      diagnostika: kunas.diagnostika || null,
+      busena: 'rasta',
+      istorija: [{ laikas: dabar, busena: 'rasta', kas: kas || 'pranesejas' }],
+    });
+    if (_klaidos.length > KLAIDU_RIBA) {
+      const ismetami = _klaidos.splice(0, _klaidos.length - KLAIDU_RIBA);
+      ismetami.forEach((k) => {
+        if (k.foto) { try { fs.unlinkSync(path.join(KLAIDU_FOTO_KAT, k.foto)); } catch (e) {} }
+      });
+    }
+    issaugotiKlaidas();
+    console.log(`[KLAIDOS] Nr.${nr} nuo ${kas || ip}: ${tekstas.slice(0, 80)}`);
+    res.json({ ok: true, nr });
+  } catch (e) {
+    console.error('[KLAIDOS]', e.message);
+    res.status(500).json({ error: 'Nepavyko priimti pranesimo.' });
+  }
+});
+
+// Sarasas man/administratoriui. GET, nemokamas.
+app.get('/admin/klaidos', requireAuth, planai.reikalautiAdmin, (req, res) => {
+  const kiek = Math.min(parseInt(req.query.kiek, 10) || 50, KLAIDU_RIBA);
+  const beDiag = req.query.trumpai === '1';
+  const arUzdaryta = (k) => !!(KLAIDU_BUSENOS[k.busena] || {}).uzdaryta;
+
+  // Pagal nutylejima rodom TIK atviras. ?visi=1 - viskas, ?busena= - konkreti.
+  let sar = req.query.visi === '1' ? _klaidos.slice() : _klaidos.filter((k) => !arUzdaryta(k));
+  if (req.query.busena) sar = sar.filter((k) => k.busena === req.query.busena);
+  if (req.query.kategorija) sar = sar.filter((k) => k.kategorija === req.query.kategorija);
+  if (req.query.svarba) sar = sar.filter((k) => k.svarba === req.query.svarba);
+
+  // „laukia-patikros" visada virsuje: tai vienintele busena, kur laukiama Luko.
+  const sv = { blokuoja: 0, trukdo: 1, smulkme: 2 };
+  sar.sort((a, b) => {
+    const la = a.busena === 'laukia-patikros' ? 0 : 1;
+    const lb = b.busena === 'laukia-patikros' ? 0 : 1;
+    return (la - lb) || (sv[a.svarba] - sv[b.svarba]) || (b.laikas - a.laikas);
+  });
+
+  const pagalBusena = {};
+  _klaidos.forEach((k) => { pagalBusena[k.busena] = (pagalBusena[k.busena] || 0) + 1; });
+
+  res.json({
+    viso: _klaidos.length,
+    atviru: _klaidos.filter((k) => !arUzdaryta(k)).length,
+    lauksiaJusu: _klaidos.filter((k) => k.busena === 'laukia-patikros').length,
+    pagalBusena,
+    galimosBusenos: Object.keys(KLAIDU_BUSENOS),
+    riba: KLAIDU_RIBA,
+    irasai: sar.slice(0, kiek).map((k) => (beDiag
+      ? { nr: k.nr, laikas: k.laikas, kas: k.kas, kategorija: k.kategorija, svarba: k.svarba,
+          kartojasi: k.kartojasi, tekstas: k.tekstas, foto: !!k.foto, busena: k.busena }
+      : k)),
+  });
+});
+
+// Busenos keitimas. Kiekvienas perjungimas iraso KAS, KADA, KOKIA VERSIJA ir
+// PASTABA - taip matosi visas kelias, o ne tik galutine bukle. Butent to truko,
+// kai dizaineris klause, ar jo radinys jau padarytas.
+app.post('/admin/klaidos/:nr/busena', requireAuth, planai.reikalautiAdmin, (req, res) => {
+  const k = _klaidos.find((x) => x.nr === parseInt(req.params.nr, 10));
+  if (!k) return res.status(404).json({ error: 'Nera' });
+  const nauja = String((req.body && req.body.busena) || '').trim();
+  if (!KLAIDU_BUSENOS[nauja]) {
+    return res.status(400).json({ error: 'Nezinoma busena', galimos: Object.keys(KLAIDU_BUSENOS) });
+  }
+  const irasas = {
+    laikas: Date.now(), busena: nauja, kas: req.user.email,
+    pastaba: req.body && req.body.pastaba ? String(req.body.pastaba).slice(0, 300) : null,
+    versija: req.body && req.body.versija ? String(req.body.versija).slice(0, 20) : null,
+  };
+  k.busena = nauja;
+  (k.istorija = k.istorija || []).push(irasas);
+  if (k.istorija.length > 20) k.istorija.splice(0, k.istorija.length - 20);
+  issaugotiKlaidas();
+  res.json({
+    ok: true, nr: k.nr, busena: k.busena, kelias: k.istorija.map((x) => x.busena).join(' \u2192 '),
+    atviru: _klaidos.filter((x) => !(KLAIDU_BUSENOS[x.busena] || {}).uzdaryta).length,
+  });
+});
+
+// Senasis kelias lieka kaip trumpinys - kad niekas nesulustu.
+app.post('/admin/klaidos/:nr/sutvarkyta', requireAuth, planai.reikalautiAdmin, (req, res) => {
+  const k = _klaidos.find((x) => x.nr === parseInt(req.params.nr, 10));
+  if (!k) return res.status(404).json({ error: 'Nera' });
+  k.busena = 'sutvarkyta';
+  (k.istorija = k.istorija || []).push({
+    laikas: Date.now(), busena: 'sutvarkyta', kas: req.user.email,
+    versija: req.body && req.body.versija ? String(req.body.versija).slice(0, 20) : null, pastaba: null,
+  });
+  issaugotiKlaidas();
+  res.json({ ok: true, nr: k.nr, busena: k.busena,
+    atviru: _klaidos.filter((x) => !(KLAIDU_BUSENOS[x.busena] || {}).uzdaryta).length });
+});
+
+// Visiskas istrynimas kartu su nuotrauka. Naudoti tada, kai iraso nebereikia
+// visai - pvz. testinis pranesimas. Sutvarkytos klaidos is saraso dingsta
+// pacios, tad trinti ju nebutina: tekstas pravercia, jei tas pats pasikartotu.
+app.delete('/admin/klaidos/:nr', requireAuth, planai.reikalautiAdmin, (req, res) => {
+  const i = _klaidos.findIndex((x) => x.nr === parseInt(req.params.nr, 10));
+  if (i < 0) return res.status(404).json({ error: 'Nera' });
+  const [k] = _klaidos.splice(i, 1);
+  if (k.foto) { try { fs.unlinkSync(path.join(KLAIDU_FOTO_KAT, k.foto)); } catch (e) {} }
+  issaugotiKlaidas();
+  res.json({ ok: true, istrinta: k.nr, viso: _klaidos.length });
+});
+
+// Viena nuotrauka pagal numeri.
+app.get('/admin/klaidos/:nr/foto', requireAuth, planai.reikalautiAdmin, (req, res) => {
+  const k = _klaidos.find((x) => x.nr === parseInt(req.params.nr, 10));
+  if (!k || !k.foto) return res.status(404).json({ error: 'Nera' });
+  res.sendFile(path.join(KLAIDU_FOTO_KAT, k.foto));
+});
+
 // v1.47.0: atsarginiu nuskaitymo keliu statistika. GET, nemokamas, tik adminui.
 // Klausimas, i kuri atsako: ar Puppeteer produkcijoje kada nors suveikia.
 app.get('/admin/atsarga', requireAuth, planai.reikalautiAdmin, (req, res) => {

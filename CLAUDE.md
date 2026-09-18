@@ -186,6 +186,16 @@
 - **`is-destructive`** ant `.at-del-top` ir `.mg-del-top`: 19 sk. duoda paviršių ant `hover`/`focus-visible` ir raudoną tik tada, kai žmogus jau taiko. Tylus variantas be rėmelio lieka – rėmelis naikinančiam veiksmui duotų svorio, kurio jis neturi turėti.
 - **`detail.html` neprijungia `ct-bendras.js`,** tad `ctEsc` ten apibrėžtas vietoje (šalia `fmt()`). Be jo viršaus blokas nutrūkdavo su „ctEsc is not defined".
 
+## Skelbimo puslapis – galerija ir skydelis (v1.48.0, DALIS 2)
+
+- `.dp-virsus` = `.dp-gallery` (`.dp-stage` + `.dp-strip`) šalia `.dp-panel`. Pardavėjo kortelė laikinai nužemyn (`.dp-main-sell`) – ji yra 3 dalies darbas.
+- **ID palikti seni** (`dp-main-img`, `dp-thumbs`, `dp-photo-count`, `dp-nav-l/r`), pakeistos tik klasės. Ta pati taktika kaip su mygtukais: pridedam vardą, nelaužom JS kabliuko.
+- **Juosta rodo VISAS nuotraukas** ir slenka; aktyvi gauna `.dp-thumb-active` **ir** `.is-active`. Buvo penkios su „+N" perdanga – šeštos nepamatydavai neatidaręs lightbox'o, o pastebėjimo taškams nelikdavo vietos.
+- **Pastebėjimo taškai** (`.dp-thumb > i`) iš `vizualus.pastebejimai`; `nuotrauka` laukas skaičiuojamas **nuo 1**. Spalva ta pati kaip sąraše: `matoma` → `--k-confirmed`, `galimas` → `--k-signal`.
+- **Greita vs pilna:** `window.__dpViz` nustatomas `load()` pradžioje, PRIEŠ piešiant. Greitu lygiu – 3 patikrinimo punktai plius ⚪ eilutė „dar N punktai / atsiveria su pilna apžvalga", CTA yra `Pilna apžvalga` + `<u>2 kr</u>`. Pilnu – visi punktai, CTA `Atsisiųsti PDF` su rodykle.
+
+**RADINYS, ištaisytas čia:** `detail.html` turėjo SAVĄ `ctScore()`, kuri visai nežiūrėjo į `qualityScore` / `baloKomponentai` ir skaičiavo balą sena formule. Tas pats automobilis kortelėje rodė **7.8**, o skelbimo puslapyje **5.8**. Tai tiksliai ta pati klaida, kuri kortelėje jau buvo rasta ir ištaisyta („kortele rodydavo du skirtingus CarTriige skaicius") – tik čia liko. **Kur dar yra tas pats?** – klausimas, kurį verta užduoti kiekvieną kartą.
+
 ## Skelbimo puslapio viršus (v1.43.0, DETAIL-SABLONAS.md DALIS 1)
 
 - Struktura: `.dp-crumbs` → `.dp-hero` (kairėje `.dp-hero-l` pavadinimas + `.dp-meta` + `.dp-chips`, dešinėje `.dp-hero-r` `.dp-price-row` + `.ct-market`) → rizikos juosta → `.dp-main`.
@@ -239,7 +249,44 @@ Grandinė `fetchSearchPage`: **talpykla → ScraperAPI → tiesioginis axios →
 
 **ŽINOMA SPRAGA, netaisyta sąmoningai iki matavimo pabaigos:** `fetchListingPage` paskutinė atsarga (`fetchSearchPage`) pasiekiama tik tada, kai Puppeteer grąžina tuščią reikšmę. Kai jis **meta klaidą** – o konteineryje be Chromium jis visada meta – klaida keliauja aukščiau ir paskutinė atsarga niekada nesuveikia.
 
-## Duomenų sluoksnis (v1.46.0)
+## „Kur dar yra tas pats?" – trys kartai iš eilės
+
+Ši praktika per vieną dieną rado tris klaidas, kurių nerado joks kitas būdas:
+
+| Kas | Rasta ištaisyta vienoje vietoje | Liko kitoje |
+|---|---|---|
+| Sinchroninis viso failo įrašymas cikle | `setCached` (v1.36) | `saveListingTimeline` – ištaisyta v1.46.0 |
+| Neribotas augimas | `cache.json` `pages` | `lifecycle` + `timeline` – v1.46.0 |
+| Rožinė #ff5c8a | taisyta 4 kartus | **22 vietose** – v1.44.0 |
+| Du skirtingi įverčiai | kortelė (komentaras kode!) | `detail.html` `ctScore` – v1.48.0 |
+| `diffPct` ženklas | kortelė ir `.dp-hero` | `detail.html` rinkos skiltis – v1.52.0 |
+
+**Taisyklė: kai kas nors ištaisoma, iškart paieškoti to paties raginio visame kode.** Dizainerio klausimas prieš 3 dalį („skalė greičiausiai turi savo medianą") pasitvirtino ne visai taip, kaip jis spėjo – mediana ta pati, bet **ženklas priešingas**: tas pats automobilis viršuje rodė „−12 %" žaliai, o rinkos skiltyje „+12 %" raudonai.
+
+## Klaidų pranešimai (v1.49.0)
+
+- `frontend/klaidu-pranesimas.js`, prijungtas **anksti** (iš karto po sprite’o `<body>` pradžioje) visuose penkiuose puslapiuose – kitaip nespėtų pagauti klaidų, įvykusių kraunantis.
+- Renka automatiškai: versiją, ekrano plotį ir tankį, naršyklę, planą ir kreditų likutį, **paskutines 20 JS klaidų** (`error` + `unhandledrejection`) ir **nepavykusias užklausas** į `/api|/auth|/admin` (`fetch` apvalkalas).
+- **PRIVATUMAS:** į žurnalą raso `localStorage` RAKTŲ VARDUS, ne reikšmes. Žetonas ir el. paštas ten nepatenka – patikrinta testu (`arYraZetonasReiksme: false`).
+- `POST /api/klaida` – **be autentifikacijos sąmoningai**: dažniausia vieta, kur reikia pranešti, yra pats prisijungimas. Vietoj to: **5 pranešimai per 10 min iš IP**, tekstas iki 2000 simbolių, nuotrauka iki 1,5 MB. Jei žetonas galioja – įrašom, kas pranešė.
+- **Ribos nuo pirmos dienos:** `/data/klaidu-zurnalas.json` laiko 200 naujausių; nuotraukos – atskirais failais `/data/klaidu-foto/`, trinamos kartu su įrašu. Į JSON nuotraukos NEDĖTI – žurnalas išsipustų.
+- **Kas pranešime, išskyrus tekstą (v1.50.0):** `kategorija` (dizainas / negyvas / duomenys / kreditai / greitis / prisijungimas), `svarba` (blokuoja / trukdo / smulkme), `kartojasi`, `turejoRodyti` (tik prie „duomenys"), ir **`diagnostika.veiksmai`** – paskutiniai 12 paspaudimų su selektoriumi ir tekstu. Pastarasis yra vertingiausias: puslapyje 63 mygtukai, ir be jo „paspaudžiau, nieko neįvyko" yra neatsakomas.
+- **Skaitymas:** `GET /admin/klaidos` rodo **tik nesutvarkytas**, surūkiuotas pagal svarbą. `?visi=1` – ir sutvarkytas, `?trumpai=1` – be diagnostikos, `?kategorija=` / `?svarba=` – filtrai. `GET /admin/klaidos/:nr/foto` – nuotrauka.
+- **Būsenos (v1.51.0)** – kiekviena atsako, KIENO dabar ėjimas:
+
+  | Būsena | Reikšmė | Ėjimas |
+  |---|---|---|
+  | `rasta` | pranešta, dar nežiūrėta | Claude |
+  | `patvirtinta` | atkartota, matau tą patį | Claude |
+  | `nepasitvirtino` | neatsikartoja arba jau buvo ištaisyta | uždaryta |
+  | `tvarkoma` | dirbama | Claude |
+  | `laukia-patikros` | pataisyta ir išleista | **Lukas** |
+  | `sutvarkyta` | patvirtinta produkcijoje | uždaryta |
+  | `atideta` | tikra, bet ne dabar | Claude |
+
+- **Kodėl ne dvi:** iš šešių dizainerio radinių **penki nepasitvirtino** – jie jau buvo sutvarkyti. Tokio radinio nei ištrinsi (pamirši, kad buvo tikrintas), nei pažymėsi sutvarkytu (melas). Ir „pataisyta" NEREIŠKIA „veikia produkcijoje" – todėl `laukia-patikros` iš sąrašo nedingsta, kol Lukas nepatvirtina.
+- **Keitimas:** `POST /admin/klaidos/:nr/busena` su `{ busena, pastaba, versija }`. Kiekvienas perjungimas įrašomas į `istorija` (kas, kada, versija, pastaba) – matosi visas kelias, ne tik galutinė buklė. Būtent to trūko, kai dizaineris klausė, ar jo radinys jau padarytas.
+- **`DELETE /admin/klaidos/:nr`** – visiškas ištrynimas su nuotrauka. Sutvarkytos dingsta pačios, tad trinti reikia tik testinius įrašus.## Duomenų sluoksnis (v1.46.0)
 
 - **Trys JSON failai `/data`:** `market-history.json` (1000 įrašų modeliui), `listing-lifecycle.json`, `listing-timeline.json` (60 momentinių vaizdų URL'ui). Visi pilnai įkeliami į atmintį paleidžiant.
 - **Valymas:** `cache.valytiSenusIrasus()` – paleidžiant ir kas parą. Trina TIK tuos, kurie **ir** pažymėti `dingo`, **ir** nematyti ilgiau nei `VALYMO_DIENOS` (180 pagal nutylėjimą). Gyvas skelbimas neliečiamas, kad ir koks senas – jo kainos istorija yra produktas. Timeline be gyvavimo ciklo trinamas kaip našta be prasmės.

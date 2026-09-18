@@ -11,7 +11,8 @@
      v1.34.0  `.chip` ir `.ct-btn > i`          → jo 15 skyrius
      v1.41.0  telefone paslėptas įvertis    → jo 17 skyrius (balas lieka)
      v1.42.0  siaurų mygtukų 44 px atsvara → jo 420 eilutė su :not(.ct-btn-tight)
-     v1.45.0  `.ct-btn-accent` (laikina)      → laukiam jo varianto
+     v1.45.0  `.ct-btn-accent`              → jo ct-mygtukai.css
+     v1.52.0  `.ct-report-fab` fonas         → laukiam jo taisymo
 
    TAISYKLĖS: jokių kietai įrašytų spalvų, jokių naujų tokenų, kiekvienas
    blokas su komentaru KAS ir KODĖL.
@@ -67,4 +68,30 @@
   background: var(--accent-dim);
   border-color: var(--accent);
   color: var(--text-primary);
+}
+
+/* ── 5. Plaukiojantis pranešimo mygtukas – atsvara failų tvarkai ──────────
+   Dizaineris 20b skyriuje parašė `.ct-report-fab { background: var(--bg-elevated) }`
+   būtent todėl, kad plaukiojantis elementas negali būti be paviršiaus – po juo
+   slenka nežinomas turinys, ir ant nuotraukos jis išnyktų.
+
+   Bet `.ct-btn { background: transparent }` (ct-mygtukai.css 45 eil.) yra TOS
+   PAČIOS specifikos (0,1,0) ir guli VĖLESNIAME faile, tad laimi jis.
+   Išmatuota naudojant naršyklę: mygtuko fonas `rgba(0, 0, 0, 0)` – t. y.
+   tiksliai tai, ko jis ir vengė.
+
+   Ta pati klaidos rūšis kaip 420/423 eilučių istorija: taisyklė parašyta,
+   bet nepasiekia elemento.
+
+   ATŠAUKIMAS: ištrinti, kai `.ct-report-fab` jo faile gaus aukštesnę specifiką
+   (pvz. `.ct-btn.ct-report-fab`).                                             */
+
+.ct-btn.ct-report-fab {
+  background: var(--bg-elevated);
+  border-color: var(--border-light);
+}
+.ct-btn.ct-report-fab:hover,
+.ct-btn.ct-report-fab:focus-visible {
+  background: var(--bg-raised);
+  border-color: var(--border-light);
 }

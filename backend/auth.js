@@ -197,6 +197,7 @@ const asyncRoute = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next
 });
 
 module.exports = {
+  verifyToken,   // v1.49.0: klaidu pranesimams - kas pranese, jei zetonas galioja
   requireAuth, handleMe, planai, duomenys,
   handleRegister: asyncRoute(handleRegister),
   handleLogin: asyncRoute(handleLogin),

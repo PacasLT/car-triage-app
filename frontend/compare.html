@@ -1745,6 +1745,28 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
       <path class="ct-i-issaugoti" d="M8 13.2S2.8 10 2.8 6.4a2.9 2.9 0 0 1 5.2-1.8 2.9 2.9 0 0 1 5.2 1.8c0 3.6-5.2 6.8-5.2 6.8Z"/>
     </symbol>
 
+    <!-- pranesti apie klaida · sauktukas apskritime. NE trikampis:
+         trikampis yra „atsargiai, tu kazka darai blogai", o cia zmogus
+         padeda mums. -->
+    <symbol id="i-pranesti" viewBox="0 0 16 16">
+      <circle cx="8" cy="8" r="6"/>
+      <path d="M8 5v4"/>
+      <circle cx="8" cy="11.2" r=".55" fill="currentColor" stroke="none"/>
+    </symbol>
+
+    <!-- klaida · sistemos busena (5xx, portalas neatsako). Tas pats sauktukas,
+         bet trikampyje — cia kalba sistema, ne zmogus. -->
+    <symbol id="i-klaida" viewBox="0 0 16 16">
+      <path d="M8 2.6l5.4 9.4H2.6L8 2.6z"/>
+      <path d="M8 6.4v2.8"/>
+      <circle cx="8" cy="10.9" r=".55" fill="currentColor" stroke="none"/>
+    </symbol>
+
+    <!-- siusti · lekstuve -->
+    <symbol id="i-siusti" viewBox="0 0 16 16">
+      <path d="M2.4 8l11.2-5-3.4 11.4-2.6-4.4L2.4 8z"/>
+    </symbol>
+
     <!-- zenkliukai · ko yra skelbime (Daugiau mygtukas) -->
     <symbol id="i-zenkliukai" viewBox="0 0 16 16">
       <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h7"/>
@@ -1818,6 +1840,9 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 
   </defs>
 </svg>
+<!-- Klaidu pranesimas. Prijungiamas ANKSTI, kad spetu pagauti kraunantis ivykusias klaidas. -->
+<script src="klaidu-pranesimas.js"></script>
+
 
 <div class="cr-wrap">
   <div class="cr-top">

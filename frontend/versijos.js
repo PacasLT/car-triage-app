@@ -8,6 +8,58 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.52.0', data: '2026-09-18', pavadinimas: 'Skelbimo puslapis nebeprieštarauja pats sau',
+    pakeitimai: [
+      'ISTAISYTA: skelbimo puslapio rinkos skiltis rodė „+12 %" raudonai, nors viršuje tas pats skaičius buvo „−12 %" žaliai – t. y. gera žinia atrodė kaip bloga',
+      'Pranešimo apie klaidą langas perdarytas pagal dizaino sistemą – savo stilių turėjusių eilučių nebeliko',
+      'Klaidos pranešimas dabar rodomas prie to klausimo, kurio neatsakėte, o ne lango apačioje',
+      'Plaukiojantis mygtukas gavo savo paviršių – ant nuotraukos jis nebeišnyksta',
+      'Trys naujos piktogramos: pranešimo, sistemos klaidos ir siųstuvo',
+      'Nuotraukos užrašas peržiūros duomenyse nebenukerpamas',
+    ],
+  },
+  {
+    versija: '1.51.0', data: '2026-09-18', pavadinimas: 'Klaidų sąrašas rodo, kieno dabar ėjimas',
+    pakeitimai: [
+      'Klaida turi kelią, ne dvi būsenas: rasta → patvirtinta → tvarkoma → laukia patikros → sutvarkyta',
+      'Atskira būsena „nepasitvirtino" – kai klaida neatsikartoja arba jau buvo ištaisyta anksčiau',
+      '„Laukia patikros" visada sąrašo viršuje: tai vienintelė būsena, kur laukiama jūsų patvirtinimo',
+      'Pataisyta klaida iš sąrašo nebedingsta tol, kol nepatvirtinate, kad produkcijoje veikia',
+      'Kiekvienas perjungimas įrašo, kas, kada, kokia versija ir kodėl – matosi visas kelias',
+    ],
+  },
+  {
+    versija: '1.50.0', data: '2026-09-18', pavadinimas: 'Pranešimas apie klaidą pasako, kurį mygtuką spaudėte',
+    pakeitimai: [
+      'Prie pranešimo automatiškai prisegama, ką spaudėte prieš tai – paskutiniai 12 veiksmų su tikslais mygtukų pavadinimais',
+      'Galima pasakyti, kokia tai klaida: atrodo ne taip, nieko neįvyko, neteisingas skaičius, nusirašė kreditas, užstringa ar neleidžia prisijungti',
+      'Pažymėjus „neteisingas skaičius" atsiranda laukas „o ką turėjo rodyti" – be to klausimo tokias klaidas taisyti sunkiausia',
+      'Galima nurodyti, kiek trukdo, ir pažymėti, kad taip jau buvo anksčiau',
+      'Sutvarkytos klaidos iš sąrašo dingsta pačios',
+      'Skelbimo puslapio naršymo juosta gavo tinkamą stilių',
+    ],
+  },
+  {
+    versija: '1.49.0', data: '2026-09-18', pavadinimas: 'Pranešimas apie klaidą iš bet kurio puslapio',
+    pakeitimai: [
+      'Apatiniame dešiniajame kampe atsirado mygtukas „Klaida" – veikia ir kompiuteryje, ir telefone, visuose penkiuose puslapiuose',
+      'Užtenka parašyti vieną sakinį: techninę informaciją sistema prideda pati – versiją, ekrano plotį, naršyklę ir paskutines klaidas, kurios įvyko prieš tai',
+      'Galima prisegti ekrano nuotrauką arba įklijuoti ją iš atminties',
+      'Prieš siunčiant matote, kas tiksliai bus išsiųsta – nieko neslėpiama',
+      'Prisijungti nebūtina: pranešti galima ir tada, kai neveikia pats prisijungimas',
+    ],
+  },
+  {
+    versija: '1.48.0', data: '2026-09-18', pavadinimas: 'Skelbimo puslapyje – galerija ir įverčio skydelis',
+    pakeitimai: [
+      'Skelbimo puslapis gavo tikrą galeriją: visos nuotraukos juostoje, aktyvi pažymėta, o ten, kur AI ką nors mato, uždegtas spalvotas taškas',
+      'Šalia galerijos – įverčio skydelis: balas, verdiktas, rizika, penkios dedamosios ir „ką būtina patikrinti"',
+      'ISTAISYTA: tas pats automobilis kortelėje rodė vieną įvertį, o skelbimo puslapyje – kitą. Dabar abu rodo tą patį skaičių',
+      'Santrauka nebenutrūksta ties „2022 m." – taškas po trumpinio nebelaikomas sakinio pabaiga',
+      'Neturint pilnos apžvalgos matosi, kiek patikrinimo punktų dar atsivers – vietoj tuščios vietos',
+    ],
+  },
+  {
     versija: '1.47.0', data: '2026-09-18', pavadinimas: 'Matuojame, ar atsarginis nuskaitymo kelias apskritai veikia',
     pakeitimai: [
       'Sistema dabar pati fiksuoja, kuris nuskaitymo būdas davė rezultatą ir kiek kartų teko griebtis paskutinio atsarginio',

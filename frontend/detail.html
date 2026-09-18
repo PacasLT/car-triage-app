@@ -71,6 +71,9 @@ button{font-family:inherit;cursor:pointer}
 /* ── MAIN 3-COL ── */
 /* v1.43.0: vidurinis (INFO) stulpelis perkeltas i .dp-hero virsuje */
 .dp-main{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:18px;align-items:start}
+/* v1.48.0, DALIS 2: galerija ir ivercio skydelis salia. Pardavejas laikinai zemiau. */
+.dp-virsus{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;margin-bottom:18px}
+.dp-main-sell{display:grid;grid-template-columns:minmax(0,320px);gap:18px;margin-bottom:18px}
 @media(max-width:900px){.dp-main{grid-template-columns:1fr}}
 
 /* ── PHOTO COL ── */
@@ -463,6 +466,28 @@ button{font-family:inherit;cursor:pointer}
       <path class="ct-i-issaugoti" d="M8 13.2S2.8 10 2.8 6.4a2.9 2.9 0 0 1 5.2-1.8 2.9 2.9 0 0 1 5.2 1.8c0 3.6-5.2 6.8-5.2 6.8Z"/>
     </symbol>
 
+    <!-- pranesti apie klaida · sauktukas apskritime. NE trikampis:
+         trikampis yra „atsargiai, tu kazka darai blogai", o cia zmogus
+         padeda mums. -->
+    <symbol id="i-pranesti" viewBox="0 0 16 16">
+      <circle cx="8" cy="8" r="6"/>
+      <path d="M8 5v4"/>
+      <circle cx="8" cy="11.2" r=".55" fill="currentColor" stroke="none"/>
+    </symbol>
+
+    <!-- klaida · sistemos busena (5xx, portalas neatsako). Tas pats sauktukas,
+         bet trikampyje — cia kalba sistema, ne zmogus. -->
+    <symbol id="i-klaida" viewBox="0 0 16 16">
+      <path d="M8 2.6l5.4 9.4H2.6L8 2.6z"/>
+      <path d="M8 6.4v2.8"/>
+      <circle cx="8" cy="10.9" r=".55" fill="currentColor" stroke="none"/>
+    </symbol>
+
+    <!-- siusti · lekstuve -->
+    <symbol id="i-siusti" viewBox="0 0 16 16">
+      <path d="M2.4 8l11.2-5-3.4 11.4-2.6-4.4L2.4 8z"/>
+    </symbol>
+
     <!-- zenkliukai · ko yra skelbime (Daugiau mygtukas) -->
     <symbol id="i-zenkliukai" viewBox="0 0 16 16">
       <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h7"/>
@@ -536,6 +561,9 @@ button{font-family:inherit;cursor:pointer}
 
   </defs>
 </svg>
+<!-- Klaidu pranesimas. Prijungiamas ANKSTI, kad spetu pagauti kraunantis ivykusias klaidas. -->
+<script src="klaidu-pranesimas.js"></script>
+
 
 
 <!-- HEADER -->
@@ -571,7 +599,7 @@ button{font-family:inherit;cursor:pointer}
 
   <!-- BREADCRUMB -->
   <div class="dp-bc">
-    <div class="dp-bc-left">
+    <div class="dp-bc-left dp-crumbs">
       <a class="dp-bc-back" href="index.html">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
         Atgal į rezultatus
@@ -625,19 +653,20 @@ button{font-family:inherit;cursor:pointer}
   <!-- Rizikos juosta VIRS viso turinio, po .dp-hero, pries galerija - ne skirtuke -->
   <div id="dp-risk-slot"></div>
 
-  <!-- MAIN 3-COL -->
-  <div class="dp-main">
+  <!-- DALIS 2 · GALERIJA IR IVERCIO SKYDELIS (v1.48.0) -->
+  <!-- Klases pagal DETAIL-SABLONAS.md; ID palikti seni, kad veiktu esamas JS.
+       Ta pati taktika kaip su mygtukais: PRIDEDAM varda, nelauzom kabliuko. -->
+  <section class="dp-virsus">
 
-    <!-- PHOTO COL -->
-    <div class="dp-photo">
-      <div class="dp-photo-main" id="dp-photo-main">
+    <div class="dp-gallery">
+      <div class="dp-stage" id="dp-photo-main">
         <img id="dp-main-img" alt="" style="display:none" onclick="dpLightbox(window.__dpPhotoIdx||0)" title="Padidinti">
-        <div id="dp-no-photo" style="width:100%;height:100%;background:linear-gradient(135deg,#1a1f2e,#0d1020);display:flex;align-items:center;justify-content:center;color:var(--text-dim);font:500 11px var(--font-mono);letter-spacing:.1em">BEZ NUOTRAUKOS</div>
-        <span class="dp-photo-count" id="dp-photo-count" style="display:none"></span>
-        <button class="dp-nav dp-nav-l" id="dp-nav-l" onclick="dpPhotoNav(-1)" style="display:none">&#8249;</button>
-        <button class="dp-nav dp-nav-r" id="dp-nav-r" onclick="dpPhotoNav(1)" style="display:none">&#8250;</button>
+        <span class="ct-photo-empty" id="dp-no-photo">BE NUOTRAUKOS</span>
+        <span class="ct-photo-n" id="dp-photo-count" style="display:none"></span>
+        <button class="ct-nav ct-nav-l" id="dp-nav-l" onclick="dpPhotoNav(-1)" style="display:none" aria-label="Ankstesnė">&#8249;</button>
+        <button class="ct-nav ct-nav-r" id="dp-nav-r" onclick="dpPhotoNav(1)" style="display:none" aria-label="Sekanti">&#8250;</button>
       </div>
-      <div class="dp-thumbs" id="dp-thumbs"></div>
+      <div class="dp-strip" id="dp-thumbs"></div>
       <div class="dp-ai-insight" id="dp-ai-insight" style="display:none">
         <div class="dp-ai-badge">AI</div>
         <div>
@@ -647,8 +676,12 @@ button{font-family:inherit;cursor:pointer}
       </div>
     </div>
 
+    <div class="dp-panel" id="dp-panel"></div>
+  </section>
 
-    <!-- SELLER COL -->
+  <!-- Pardavejo kortele - 3 dalis; kol kas lieka kaip buvo, tik zemiau -->
+  <div class="dp-main-sell">
+    <!-- SELLER COL (laukia 3 dalies) -->
     <div class="dp-seller">
       <div class="dp-seller-top">
         <div class="dp-seller-label">Pardavėjas</div>
@@ -915,6 +948,22 @@ window.ctApi = function (kelias, params) {
   };
 
   function ctScore(c, a) {
+    // v1.48.0 RADINYS: sis puslapis skaiciavo bala SAVO sena formule ir visai
+    // neziurejo i backend'o `qualityScore` / `baloKomponentai`. Pasekme - tas pats
+    // automobilis kortelėje rodė 7.8, o skelbimo puslapyje 5.8. Tiksliai ta pati
+    // klaida, kuri kortelėje jau buvo rasta ir istaisyta („kortele rodydavo du
+    // skirtingus CarTriige skaicius") - tik cia liko nepataisyta.
+    // Dabar: kai backend'as atsiunte bala ir dedamasias, rodom BUTENT ji.
+    if (c && c.qualityScore != null && c.baloKomponentai) {
+      var k = c.baloKomponentai;
+      var v = function (x) { return x == null ? null : Math.round((x / 10) * 10) / 10; };
+      return {
+        total: c.qualityScore / 10,
+        parts: [['Kaina', v(k.price)], ['Rida', v(k.mileage)], ['\u012Aranga', v(k.equipment)],
+                ['Istorija', v(k.history)], ['Potencialas', v(k.demand)]],
+        triage: true,
+      };
+    }
     var pr = a && a.perikupo_radaras;
     var kaina = clamp(5 + (c.diffPct || 0) / 6, 0, 10);
     var rida = c.ridaDiffPct == null ? 6.5 : clamp(7 - c.ridaDiffPct / 10, 0, 10);
@@ -1019,48 +1068,140 @@ window.ctApi = function (kelias, params) {
       document.getElementById('dp-nav-l').style.display = _photos.length > 1 ? '' : 'none';
       document.getElementById('dp-nav-r').style.display = _photos.length > 1 ? '' : 'none';
       document.querySelectorAll('.dp-thumb[data-idx]').forEach(function(t) {
-        t.classList.toggle('dp-thumb-active', parseInt(t.dataset.idx) === idx);
+        var akt = parseInt(t.dataset.idx) === idx;
+        t.classList.toggle('dp-thumb-active', akt);
+        t.classList.toggle('is-active', akt);   // dizainerio 14 sk. vardas
+        if (akt && t.scrollIntoView) t.scrollIntoView({ block: 'nearest', inline: 'nearest' });
       });
     }
   }
 
-  function buildThumbs(photos) {
-    var el = document.getElementById('dp-thumbs');
-    el.innerHTML = '';
-    var max = Math.min(photos.length, 5);
-    for (var i = 0; i < max; i++) {
-      (function(i) {
-        var d = document.createElement('div');
-        d.className = 'dp-thumb' + (i === 0 ? ' dp-thumb-active' : '');
-        d.dataset.idx = i;
-        if (i === 4 && photos.length > 5) {
-          var img = document.createElement('img');
-          img.src = photos[i];
-          img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
-          d.appendChild(img);
-          var ov = document.createElement('div');
-          ov.style.cssText = 'position:absolute;inset:0;background:rgba(10,12,18,.6);display:flex;align-items:center;justify-content:center;font:600 12px var(--font-mono);color:var(--text-secondary)';
-          ov.textContent = '+' + (photos.length - 4);
-          d.appendChild(ov);
-          d.title = 'Visos nuotraukos';
-        } else {
-          var img = document.createElement('img');
-          img.src = photos[i];
-          img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
-          d.appendChild(img);
-        }
-        d.onclick = function() { if (i === 4 && photos.length > 5) { dpShowPhoto(i); dpLightbox(i); } else dpShowPhoto(i); };
-        el.appendChild(d);
-      })(i);
-    }
+  // v1.48.0, DETAIL-SABLONAS.md DALIS 2: juosta rodo VISAS nuotraukas ir slenka.
+  // Buvo penkios su „+N" perdanga - tai reiske, kad sesta nuotrauka egzistuoja,
+  // bet jos nepamatysi neatidares lightbox'o. Pastebejimo taskai (`> i`) sedi
+  // ant tos nuotraukos, kurioje AI kazka mato - be pilnos juostos jiems nera vietos.
+  // ── DALIS 2 · ivercio skydelis ──────────────────────────────────────────
+  // Greita apzvalga NIEKO nemeluoja ir nieko nenutyli: ko nera, tas rodomas
+  // ⚪ su tekstu, kas tai atvers. Uzrakinta skiltis rodo, kad ji uzrakinta.
+  function dpPiestiSkydeli(c, a, sc) {
+    var el = document.getElementById('dp-panel');
+    if (!el) return;
+    var pilna = !!(window.__dpViz);
+    var tonas = sc.total >= 7.5 ? 'is-good' : sc.total >= 5.5 ? 'is-warn' : 'is-bad';
+    var verdiktas = _sakinys((c && c.triageLabel) || scoreVerdict(sc.total)[0]);
+    var santrauka = (a && a.verdiktas) ? ctPirmasSakinys(a.verdiktas) : null;
+
+    // Dedamosios. „Potencialas" be pilnos apzvalgos yra ⚪ - rodom, bet sakom kodel.
+    var PAST = { 'Kaina': 'rinkos duomenu nera', 'Rida': 'ridos nenurodyta', '\u012Aranga': 'saraso nera',
+                 'Istorija': 'ataskaitos nera', 'Potencialas': 'reikia pilnos apzvalgos' };
+    var juostos = sc.parts.map(function (par) {
+      var k = par[0], v = par[1];
+      var t = v == null ? '' : (v >= 7.5 ? 'is-good' : v >= 5.5 ? 'is-warn' : 'is-bad');
+      return '<div class="ct-bar-w"><div class="ct-bar-h"><span class="ct-bar-k">' + k.toUpperCase() + '</span>'
+        + (v == null
+            ? '<span class="ct-bar-v is-unrated-val">\u2013</span>'
+            : '<span class="ct-bar-v ' + t + '">' + v.toFixed(1) + '</span>')
+        + '</div><div class="ct-bar' + (v == null ? ' is-unrated' : '') + '"><span style="width:' + (v == null ? 0 : v * 10) + '%"></span></div>'
+        + (v == null ? '<span class="ct-bar-n">' + (PAST[k] || 'duomenu nera') + '</span>' : '')
+        + '</div>';
+    }).join('');
+
+    // „Ka butina patikrinti": Greita - trys punktai, Pilna - visi.
+    var visi = (a && a.ka_patikrinti_gyvai) || [];
+    var rodomi = pilna ? visi : visi.slice(0, 3);
+    var patikros = rodomi.length
+      ? rodomi.map(function (x) {
+          return '<div class="dp-check is-signal"><i></i><span class="dp-check-b"><span class="dp-check-t">' + ctEsc(x) + '</span></span></div>';
+        }).join('')
+        + (!pilna && visi.length > 3
+            ? '<div class="dp-check is-unknown"><i></i><span class="dp-check-b"><span class="dp-check-t">dar ' + (visi.length - 3) + ' punktai</span><span class="dp-check-d">atsiveria su pilna apzvalga</span></span></div>'
+            : '')
+      : '<div class="dp-check is-unknown"><i></i><span class="dp-check-b"><span class="dp-check-t">Sarasas dar nesudarytas</span><span class="dp-check-d">atsiras po apzvalgos</span></span></div>';
+
+    var kreditai = (window.__ctPlanas && window.__ctPlanas.kreditai && window.__ctPlanas.kreditai.viso);
+    var maza = kreditai != null && kreditai < 2;
+    var cta = pilna
+      ? '<button class="dp-act ct-btn ct-btn-primary ct-btn-go" onclick="window.print()">'
+        + '<i><svg class="ct-i"><use href="#i-apzvalga"></use></svg></i><span>Atsisiųsti PDF</span></button>'
+      : '<button class="dp-act ct-btn ct-btn-primary' + (maza ? ' is-short' : '') + '" onclick="dpPradetiAnalize(\'pilna\')">'
+        + '<i><svg class="ct-i"><use href="#i-apzvalga"></use></svg></i><span>Pilna apžvalga</span><u>2 kr</u></button>';
+
+    el.innerHTML =
+      '<div class="dp-panel-h">'
+      + '<div class="ct-score ' + tonas + '"><span class="ct-score-lbl">CARTRIIGE \u012EVERTIS</span>'
+      +   '<div class="ct-score-v"><span class="ct-score-n">' + sc.total.toFixed(1) + '</span><span class="ct-score-max">/10</span></div></div>'
+      + '<div class="dp-panel-t"><span class="ct-verdict ' + tonas + '">' + ctEsc(verdiktas) + '</span>'
+      +   (santrauka ? '<span class="ct-summary">' + ctEsc(santrauka) + '</span>' : '') + '</div>'
+      + '</div>'
+      + '<div class="ct-l2-tags">'
+      +   (c.rizikosBusena ? '<span class="ct-k ' + (/zema|\u017eema/i.test(c.rizikosBusena.label || '') ? 'ct-k-confirmed' : 'ct-k-signal') + '"><i></i>Rizika: ' + ctEsc((c.rizikosBusena.label || '').split('\u2013')[0].trim()) + '</span>' : '')
+      +   (c.pasitikejimas != null ? '<span class="ct-k ct-k-unknown"><i></i>Duomenys ' + c.pasitikejimas + ' %</span>' : '')
+      + '</div>'
+      + '<div class="ct-bars">' + juostos + '</div>'
+      + '<div class="dp-panel-sec"><span class="dp-panel-sec-h">K\u0104 B\u016aTINA PATIKRINTI</span>'
+      +   '<div class="dp-checks">' + patikros + '</div></div>'
+      + '<div class="dp-panel-act ct-actions">' + cta
+      +   '<a class="dp-act ct-btn ct-btn-go" href="' + ctEsc(c.url || '#') + '" target="_blank" rel="noopener"><i><svg class="ct-i"><use href="#i-skelbimas"></use></svg></i><span>Skelbimas</span></a>'
+      +   '<button class="dp-act ct-btn" onclick="dpToggleSave()"><i><svg class="ct-i"><use href="#i-issaugoti"></use></svg></i><span>I\u0161saugoti</span></button>'
+      +   '<button class="dp-act ct-btn" onclick="dpAddToCompare()"><i><svg class="ct-i"><use href="#i-palyginti"></use></svg></i><span>Palyginti</span></button>'
+      + '</div>';
   }
 
-  window.dpTab = function(key, btn) {
-    document.querySelectorAll('.dp-pane').forEach(function(p) { p.classList.remove('active'); });
-    document.querySelectorAll('.dp-tab').forEach(function(b) { b.classList.remove('active'); });
-    document.getElementById('dp-pane-' + key).classList.add('active');
-    if (btn) btn.classList.add('active');
-  };
+  // Pirmas sakinys - ta pati taisykle kaip kortelėje
+  function ctPirmasSakinys(t) {
+    if (!t) return '';
+    // „2022 m. BMW X5..." - taskas po „m." NEBAIGIA sakinio. Todel reikalaujam,
+    // kad po tasko eitu tarpas ir DIDZIOJI raide (arba teksto galas), ir
+    // praleidziam trumpus lietuviskus trumpinius (m., km., pvz., t. y.).
+    var x = String(t).trim();
+    var re = /([.!?])\s+(?=[A-Z\u0104\u010C\u0116\u0118\u012E\u0160\u0172\u016A\u017D])/g, m, pab = null;
+    while ((m = re.exec(x)) !== null) {
+      var pries = x.slice(0, m.index + 1);
+      var paskutinis = (pries.match(/(\S+)$/) || [''])[0].replace(/[.!?]$/, '');
+      if (paskutinis.length <= 2 && m.index < 60) continue;   // „m", „t", „y" - trumpinys
+      pab = m.index + 1; break;
+    }
+    if (pab == null) return x.length > 160 ? x.slice(0, 157).trim() + '\u2026' : x;
+    return x.slice(0, pab).trim();
+  }
+  function _sakinys(t) {
+    return (t && t === t.toUpperCase() && /[A-Z\u0100-\u017F]/.test(t)) ? t.charAt(0) + t.slice(1).toLowerCase() : t;
+  }
+
+  function buildThumbs(photos) {
+    var el = document.getElementById('dp-thumbs');
+    if (!el) return;
+    el.innerHTML = '';
+    var viz = (window.__dpViz && window.__dpViz.pastebejimai) || [];
+    // pastebejimai nurodo nuotraukos numeri nuo 1
+    var tasko = {};
+    viz.forEach(function (o) {
+      var i = (o.nuotrauka || 0) - 1;
+      if (i < 0) return;
+      var pirmumas = { matoma: 3, galimas: 2 }[o.lygis] || 1;
+      if (!tasko[i] || pirmumas > tasko[i].p) tasko[i] = { p: pirmumas, lygis: o.lygis, tekstas: o.tekstas || '' };
+    });
+    photos.forEach(function (src, i) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'dp-thumb' + (i === 0 ? ' dp-thumb-active is-active' : '');
+      b.dataset.idx = i;
+      b.setAttribute('aria-label', 'Nuotrauka ' + (i + 1));
+      var img = document.createElement('img');
+      img.src = src; img.alt = '';
+      b.appendChild(img);
+      var t = tasko[i];
+      if (t) {
+        var d = document.createElement('i');
+        // ta pati spalva kaip sarase: matoma -> 🟢, galimas -> 🟡
+        d.style.background = t.lygis === 'matoma' ? 'var(--k-confirmed)' : 'var(--k-signal)';
+        d.title = t.tekstas;
+        b.appendChild(d);
+      }
+      b.onclick = function () { dpShowPhoto(i); };
+      el.appendChild(b);
+    });
+  }
 
   function buildPhotosGrid(photos) {
     var grid = document.getElementById('dp-photos-grid');
@@ -1386,6 +1527,10 @@ window.ctApi = function (kelias, params) {
     document.getElementById('dp-empty').style.display = 'none';
     document.getElementById('dp-content').style.display = '';
 
+    // v1.48.0: nustatom PRIES piesiant galerija ir skydeli - jiems reikia zinoti,
+    // ar vizualinis sluoksnis jau yra (pilna apzvalga), ar dar ne (greita).
+    window.__dpViz = data.vizualus || null;
+
     var title = c.modelis || 'Automobilis';
     document.getElementById('dp-bc-title').textContent = title;
     document.getElementById('dp-bc-source').textContent = (c.source || '').toUpperCase();
@@ -1535,6 +1680,10 @@ window.ctApi = function (kelias, params) {
     document.getElementById('dp-score-verdict').textContent = verd[0];
     document.getElementById('dp-score-verdict2').textContent = verd[1];
 
+    // v1.48.0, DALIS 2: ivercio skydelis salia galerijos. Tie patys skaiciai
+    // kaip ziede - `ctScore(c, a)` kvieciamas VIENA karta ir perduodamas.
+    try { dpPiestiSkydeli(c, a, sc); } catch (e) { console.error('[SKYDELIS]', e.message); }
+
     var barsEl = document.getElementById('dp-score-bars');
     barsEl.innerHTML = '';
     var barLabels = ['Kaina', 'Rida', 'Įranga', 'Istorija', 'Potencialas'];
@@ -1570,6 +1719,7 @@ window.ctApi = function (kelias, params) {
     if (photos.length) { buildThumbs(photos); dpShowPhoto(0); }
     buildPhotosGrid(photos);
     // v1.24.0: irodymu sluoksnis (jei analize jau padaryta)
+    window.__dpViz = data.vizualus || null;   // atnaujinam po analizes
     try { if (data.vizualus) window.dpVizualasPiesti(data.vizualus); } catch (e) {}
     // Atnaujinti nuotraukų skaičiaus etiketę
     (function() {
@@ -2105,7 +2255,7 @@ window.ctApi = function (kelias, params) {
           if (prog) prog.style.display = 'none';
           if (btn) btn.style.display = '';
           var res = document.getElementById('dp-vin-result');
-          if (res) res.innerHTML = '<div style="color:#ef4444;font-size:13px">Klaida tikrinant VIN.</div>';
+          if (res) res.innerHTML = '<div style="color:var(--danger);font-size:13px">Klaida tikrinant VIN.</div>';
         });
       };
       // VIN zinomas - nemokamas issifravimas paleidziamas is karto (po funkciju apibrezimo)
@@ -2117,9 +2267,17 @@ window.ctApi = function (kelias, params) {
       var html = '<div style="display:flex;flex-direction:column;gap:14px">';
       var median = c.marketMedian || 0;
       var carPrice = c.kaina || 0;
+      // v1.52.0 RADINYS (dizainerio klausimas „kur dar yra tas pats?"):
+      // cia buvo PRIESINGAS zenklo supratimas. Musu konvencija: TEIGIAMAS diffPct
+      // reiskia PIGIAU uz rinka. Sis blokas teigiama piese raudonai ir su „+",
+      // t. y. kaip bloga zinia. Tas pats automobilis tame paciame puslapyje
+      // virsuje rode „-12 %" zaliai, o cia „+12 %" raudonai.
+      // Ribos tos pacios kaip kortelėje ir virsuje: >=30 itartina, >0 gerai.
       var diff = c.diffPct != null ? c.diffPct : null;
-      var diffColor = diff == null ? 'var(--text-muted)' : (diff <= 0 ? '#22c55e' : '#ef4444');
-      var diffText = diff == null ? '—' : (diff > 0 ? '+' : '') + diff + '%';
+      var diffColor = diff == null ? 'var(--text-muted)'
+        : (diff >= 30 ? 'var(--danger)' : diff > 0 ? 'var(--success)' : 'var(--warning)');
+      var diffText = diff == null ? '—'
+        : (diff > 0 ? '−' : '+') + Math.abs(Math.round(diff)) + '%';
       if (median || carPrice) {
         html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">';
         html += '<div style="padding:14px 10px;background:var(--card);border:1px solid var(--border);border-radius:12px;text-align:center">'
@@ -2145,7 +2303,8 @@ window.ctApi = function (kelias, params) {
           var carPct = pct(carPrice);
           var fillFrom = Math.min(medPct, carPct);
           var fillTo = Math.max(medPct, carPct);
-          var fillColor = carPrice <= median ? '#22c55e' : '#ef4444';
+          // v1.52.0: tokenai vietoj kietai irasytu spalvu; logika ta pati (pigiau = gerai)
+          var fillColor = carPrice <= median ? 'var(--success)' : 'var(--danger)';
           html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px">';
           html += '<div style="font-weight:700;font-size:12px;letter-spacing:.06em;color:var(--text-muted);margin-bottom:14px">KAINŲ POZICIJA RINKOJE</div>';
           html += '<div style="position:relative;height:6px;background:var(--border);border-radius:3px;margin:0 4px 24px">';
@@ -2281,7 +2440,7 @@ window.ctApi = function (kelias, params) {
           clearInterval(iv2);
           var pd2 = document.getElementById('dp-seller-prog'); if (pd2) pd2.remove();
           var btnBack = document.getElementById('dp-seller-analyze-btn'); if (btnBack) btnBack.style.display = '';
-          renderSellerBase('<div style="color:#ef4444;font-size:13px;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px">Klaida ieškant pardavėjo informacijos.</div>');
+          renderSellerBase('<div style="color:var(--danger);font-size:13px;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px">Klaida ieškant pardavėjo informacijos.</div>');
         });
       };
       renderSellerBase(null);
