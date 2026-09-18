@@ -208,7 +208,7 @@
   .std-right .ct-ico:hover { background: var(--bg-elevated); color: var(--text-primary); }
   .card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 14px; display: flex; gap: 16px; border-left: 4px solid var(--accent); position: relative; box-shadow: var(--shadow-card); }
   .fav-star { position: absolute; top: 10px; right: 10px; background: rgba(10,12,16,0.75); border: none; color: var(--text-muted); font-size: 20px; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; z-index: 2; }
-  .fav-star.active { color: #ff5c8a; }
+  /* v1.41.0: rozine (#ff5c8a) istrinta - dizainerio 16 ir 18 sk. sirdute yra neutrali, o issaugota - akcento spalvos */
   .card:not(.ct-card) img { width: 140px; height: 100px; object-fit: cover; border-radius: var(--radius-md); background: var(--bg-elevated); flex-shrink: 0; }
   .card-body { flex: 1; min-width: 0; }
   .card-title { font-weight: 600; font-size: 16px; color: var(--text-primary); }
@@ -1033,8 +1033,7 @@
 .card-body { padding: 14px 18px 14px; }
 .fav-star { top: 12px; right: 12px; width: 34px; height: 34px; border-radius: var(--radius-md); background: transparent; border: 1px solid var(--border-light); color: var(--text-muted); font-size: 14px; line-height: 1; display: grid; place-items: center; padding: 0; }
 .fav-star:hover { background: var(--bg-elevated); }
-.fav-star.active { color: #ff5c8a; background: rgba(255,92,138,.14); border-color: rgba(255,92,138,.45); }
-.fav-star:hover { color: #ff5c8a; }
+/* v1.41.0: rozine (#ff5c8a) istrinta - dizainerio 16 ir 18 sk. sirdute yra neutrali, o issaugota - akcento spalvos */
 
 .card-title { font-size: 17px; font-weight: 600; letter-spacing: -.01em; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding-right: 44px; }
 .source-tag { font: 600 9px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; padding: 4px 6px; border-radius: 3px; background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border); margin-left: 0; }
@@ -1151,7 +1150,7 @@
 .ct-title-row h3 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -.01em; }
 .ct-card .source-tag { font: 600 9px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; padding: 4px 6px; border-radius: 4px; background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border); margin: 0; }
 .ct-card .fav-star.ct-fav { position: absolute; top: 9px; right: 9px; z-index: 3;}  /* v1.37.0: išvaizda – ct-mygtukai.css, čia tik pozicija */
-.ct-card .fav-star.ct-fav.active { color: #ff5c8a; background: rgba(255,92,138,.14); border-color: rgba(255,92,138,.45); }
+/* v1.41.0: rozine (#ff5c8a) istrinta - dizainerio 16 ir 18 sk. sirdute yra neutrali, o issaugota - akcento spalvos */
 .ct-price-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
 .ct-price { font: 600 26px/1 var(--font-mono); letter-spacing: -.02em; color: var(--accent-light); }
 .ct-diff { font: 700 12px/1 var(--font-mono); padding: 6px 8px; border-radius: 6px; }
@@ -1589,6 +1588,9 @@
 
 /* ── Compare table ── */
 .ct-cmp-tbl { width: 100%; border-collapse: collapse; min-width: 440px; }
+/* v1.42.0, dizainerio §7: palyginime trečioji vieta priklauso priešingam veiksmui –
+   „Pašalinti“, ir jis TYLUS. Pirminis („Gilus palyginimas“) yra puslapio, ne stulpelio. */
+.ct-cmp-acts { justify-content: center; gap: 6px; margin: 0 0 8px; }
 .ct-cmp-tbl thead tr { background: var(--bg-elevated); border-bottom: 2px solid var(--border); }
 .ct-cmp-tbl th.crit-h {
   width: 140px; min-width: 120px; text-align: left;
@@ -2288,6 +2290,17 @@
     <!-- issaugoti · mėgstamiausi -->
     <symbol id="i-issaugoti" viewBox="0 0 16 16">
       <path class="ct-i-issaugoti" d="M8 13.2S2.8 10 2.8 6.4a2.9 2.9 0 0 1 5.2-1.8 2.9 2.9 0 0 1 5.2 1.8c0 3.6-5.2 6.8-5.2 6.8Z"/>
+    </symbol>
+
+    <!-- zenkliukai · ko yra skelbime (Daugiau mygtukas) -->
+    <symbol id="i-zenkliukai" viewBox="0 0 16 16">
+      <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h7"/>
+    </symbol>
+
+    <!-- pasalinti · nuimti is saraso. NE siukslinė: skelbimas neistrinamas,
+         tik nuimamas nuo saraso. -->
+    <symbol id="i-pasalinti" viewBox="0 0 16 16">
+      <path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/>
     </symbol>
 
     <!-- filtrai · trys slankiojami kriterijai -->
@@ -5355,7 +5368,10 @@ function openCompareModal() {
       <div class="ct-cmp-car-name">${ctEsc(c.modelis)}</div>
       <div class="ct-cmp-car-price">${formatEUR(c.kaina)}</div>
       ${isWinner ? '<div style="font:600 10px/1 var(--font-mono);color:var(--success);margin-bottom:6px;letter-spacing:.08em">✓ GERIAUSIAS PASIRINKIMAS</div>' : ''}
-      <a class="ct-cmp-car-link" href="${ctEsc(c.url)}" target="_blank">Skelbimas ↗</a>
+      <div class="ct-actions ct-cmp-acts">
+        <a class="ct-btn ct-btn-go ct-btn-tight" href="${ctEsc(c.url)}" target="_blank" rel="noopener" aria-label="Skelbimas"><i><svg class="ct-i"><use href="#i-skelbimas"></use></svg></i><span>Skelbimas</span></a>
+        <button class="ct-btn ct-btn-quiet ct-btn-tight" aria-label="Pašalinti iš palyginimo" onclick="removeFromCompare(${i})"><i><svg class="ct-i"><use href="#i-pasalinti"></use></svg></i><span>Pašalinti</span></button>
+      </div>
     </th>`;
   });
   tbl += '</tr></thead><tbody>';
@@ -5839,7 +5855,13 @@ function ctNavTab(tab) {
     const _toneBo = (v) => v >= 7.5 ? 'var(--success-border)' : v >= 5.5 ? 'var(--warning-border)' : 'var(--danger-border)';
     const _verdictBase = (v) => v >= 7.5 ? 'Didelė galimybė' : v >= 5.5 ? 'Gera galimybė' : 'Verta apsvarstyti';
     // Verdiktas imamas is to paties triage lygio, kuri rodo zenklelis virsuje.
-    const _verdictFor = (c, v) => (c && c.triageLabel) ? c.triageLabel : _verdictBase(v);
+    // v1.41.0, dizainerio 18a sk.: verdiktas rašomas sakinio raide, ne DIDŽIOSIOMIS.
+    // Backend'as siunčia „LABAI VERTA ANALIZUOTI“, o kortelėje balas ir verdiktas
+    // buvo dvi vienu metu šaukiančios antraštės. Vertę serveryje nekeičiam – ją naudoja
+    // ir kiti blokai; mažinam tik piešiant, ir tik tada, kai visa ji didžiosiomis.
+    const _sakinys = (t) => (t && t === t.toUpperCase() && /[A-Z\u0100-\u017F]/.test(t))
+      ? t.charAt(0) + t.slice(1).toLowerCase() : t;
+    const _verdictFor = (c, v) => _sakinys((c && c.triageLabel) ? c.triageLabel : _verdictBase(v));
     const _diffCls = (d) => (d||0) >= 39 ? 'diff-neg' : (d||0) >= 8 ? 'diff-pos' : 'diff-warn';
     // Palyginimo mygtuko argumentai - vienoje vietoje, kad visos korteles elgtusi vienodai.
     const _cmpArgs = (c, cardId) => 'toggleCompare(' + [
@@ -5955,7 +5977,11 @@ function ctNavTab(tab) {
       // ── penkios dedamosios ──
       var PAST = { 'Kaina': 'rinkos duomenų nėra', 'Rida': 'ridos nenurodyta', 'Įranga': 'sąrašo nėra',
                    'Istorija': 'ataskaitos nėra', 'Potencialas': 'reikia pilnos apžvalgos' };
-      var barsHtml = s.parts.map(function (p) {
+      // v1.41.0, dizainerio PERDUOTI-CLAUDE.md §3.1: „Potencialas“ (baloKomponentai.demand)
+      // kortelėje VISADA buvo ⚪ „reikia pilnos apžvalgos“ – užėmė penktą stulpelį nieko
+      // nepasakydamas ir laužė tinklelį į 4 + 1. Skelbimo puslapyje jis lieka.
+      // `s.parts` nekeičiam – jį naudoja ir kiti blokai; filtruojam tik piešiant.
+      var barsHtml = s.parts.filter(function (p) { return p[0] !== 'Potencialas'; }).map(function (p) {
         var k = p[0], v = p[1];
         var tonas = v == null ? '' : (v >= 7.5 ? 'is-good' : v >= 5.5 ? 'is-warn' : 'is-bad');
         return '<div class="ct-bar-w">'
@@ -6006,6 +6032,11 @@ function ctNavTab(tab) {
       }).join('');
 
       var rizK = c.rizikosBusena && /žema|zema/i.test(c.rizikosBusena.label || '') ? 'ct-k-confirmed' : 'ct-k-signal';
+
+      // Kiek dalykų atsiskleis paspaudus „Daugiau“: ženkliukai, kurių pirmame
+      // lygyje nesimato (ten telpa 6), plius keturi faktai. Skaičius ženklelyje
+      // pasako daugiau nei trys žodžiai – dizainerio PERDUOTI-CLAUDE.md §4.
+      var l3Kiek = Math.max(0, chipsVisi.length - 6) + faktai.length;
 
       // ── surinkimas ──
       return (c.filteredOut ? '<div class="ct-reject"><span>ATMESTA</span><span>'
@@ -6062,10 +6093,10 @@ function ctNavTab(tab) {
         +       '<div class="ct-facts">' + faktaiHtml + '</div>'
         +     '</div>'
         +     '<div class="ct-actions">'
-        +       '<a class="detail-btn ct-btn ct-btn-go ct-btn-tight" href="' + c.url + '" target="_blank" rel="noopener" aria-label="Atidaryti skelbimą portale">'
+        +       '<a class="detail-btn ct-btn ct-btn-go ct-btn-tight" href="' + c.url + '" target="_blank" rel="noopener" aria-label="Skelbimas">'
         +         ctIkona('i-skelbimas') + '<span>Skelbimas</span></a>'
-        +       '<button class="detail-btn ct-btn ct-btn-toggle" onclick="ctToggleL3(\'' + cardId + '\', this)" aria-expanded="false">'
-        +         ctIkona('i-isskleisti') + '<span>Ženkliukai, įranga, vieta</span></button>'
+        +       '<button class="detail-btn ct-btn ct-btn-toggle" onclick="ctToggleL3(\'' + cardId + '\', this)" aria-expanded="false" aria-label="Daugiau">'
+        +         ctIkona('i-zenkliukai') + '<span>Daugiau</span>' + (l3Kiek ? '<u>' + l3Kiek + '</u>' : '') + '</button>'
         +       '<button class="compare-toggle ct-btn ct-btn-tight" id="cmp-' + cardId + '" onclick="' + x.cmpArgs + '" aria-label="Pridėti palyginimui">'
         +         ctIkona('i-palyginti') + '<span>Palyginti</span></button>'
         +       '<span class="ct-actions-gap"></span>'
@@ -6082,7 +6113,12 @@ function ctNavTab(tab) {
       var el = document.getElementById('ct-l3-' + id);
       if (!el) return;
       var atidaryta = el.classList.toggle('is-open');
-      btn.textContent = atidaryta ? 'Suskleisti ⌃' : 'Ženkliukai, įranga, vieta →';
+      // v1.41.0: keiciam TIK <span> teksta. Anksciau cia buvo `btn.textContent = ...`,
+      // kuris istrindavo ir piktogramos plytele, ir zenkleli - mygtukas po pirmo
+      // paspaudimo nustodavo atitikti dizaino sistema.
+      var et = btn.querySelector('span');
+      if (et) et.textContent = atidaryta ? 'Mažiau' : 'Daugiau';
+      btn.setAttribute('aria-label', atidaryta ? 'Mažiau' : 'Daugiau');
       btn.setAttribute('aria-expanded', atidaryta ? 'true' : 'false');
     };
 

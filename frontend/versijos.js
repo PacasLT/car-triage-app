@@ -8,6 +8,35 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.42.0', data: '2026-09-18', pavadinimas: 'Vienas mygtukų žodynas visuose puslapiuose',
+    pakeitimai: [
+      'Mėgstamiausiuose „Detali apžvalga“ tapo „Pilna apžvalga“ su kainos ženkleliu – tas pats veiksmas visur vadinasi vienodai',
+      'Ataskaitose pagrindinis mygtukas yra „Atidaryti“, be rodyklės',
+      '„Ištrinti“ ir „Pašalinti iš mėgstamiausių“ iškeltas iš veiksmų eilės į kortelės dešinįjį viršų – naikinantis mygtukas nebestovi šalia to, į kurį taikote',
+      'Palyginime prie kiekvieno automobilio atsirado „Pašalinti“ – kryželis, ne šiukšlinė: skelbimas nuimamas nuo sąrašo, ne ištrinamas',
+      'Piktogramų rinkinys papildytas dviem naujomis – žymės ir pašalinimo',
+    ],
+  },
+  {
+    versija: '1.41.0', data: '2026-09-18', pavadinimas: 'Dizainerio 16–18f skyriai ir keturi vienodi mygtukai',
+    pakeitimai: [
+      'Kortelėje rodomos keturios įverčio dedamosios – „Potencialas“ iš jos išimtas, nes be pilnos apžvalgos jis visada buvo tuščias; skelbimo puslapyje jis lieka',
+      'Kaina nebe violetinė – violetinė reiškia „mūsų skaičiavimas“, o kaina yra portalo faktas',
+      'Verdiktas rašomas sakinio raide, ne didžiosiomis – kortelėje nebešaukia dvi antraštės vienu metu',
+      'Mygtukas „Ženkliukai, įranga, vieta“ tapo „Daugiau“ su skaičiumi, kiek dalykų atsiskleis',
+      'Išskleidus mygtukas nebepraranda piktogramos – anksčiau visas jo vidus būdavo perrašomas tekstu',
+      'Širdutė nebe rožinė – neutrali, kol neišsaugota, ir akcento spalvos, kai išsaugota',
+      'Telefone įvertis grįžo: balas rodomas verdikto kairėje, o penkios dedamosios keliauja į trečią lygį',
+    ],
+  },
+  {
+    versija: '1.40.0', data: '2026-09-18', pavadinimas: 'Telefone veiksmų eilė nebeužlipa viena ant kitos',
+    pakeitimai: [
+      'Telefone kortelės apačioje mygtuko „Ženkliukai, įranga, vieta“ antraštė nebeuždengia „Palyginti“ – siaurieji mygtukai vėl gavo savo 44 px, platusis – likusį plotį',
+      'Nieko nauja nepridėta: tai dizaino sistemos taisyklė, kuri buvo parašyta, bet nepasiekdavo mygtuko',
+    ],
+  },
+  {
     versija: '1.39.0', data: '2026-09-18', pavadinimas: 'Paieška nebeparneša svetimų modelių',
     pakeitimai: [
       'Ieškant konkretaus modelio (pvz. BMW X4) nebepatenka kitų tos pačios markės automobilių – anksčiau į sąrašą prasprūsdavo BMW 520, X3 ar 320',

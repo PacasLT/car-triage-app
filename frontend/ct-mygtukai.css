@@ -417,7 +417,9 @@
   /* Tarpas darbalaukyje atskiria pirmini; telefone jis nieko neatskiria */
   .ct-actions > .ct-actions-gap { display: none; }
   /* Likusieji dalijasi eile */
-  .ct-actions > .ct-btn:not(.ct-btn-primary) { flex: 1 1 0; min-width: 0; justify-content: center; }
+  /* :not(.ct-btn-tight) yra butinas: be jo si taisykle (0,3,0) nugali
+     .ct-btn-tight (0,2,0) ir siauras piktogramu mygtukas issitiesia. */
+  .ct-actions > .ct-btn:not(.ct-btn-primary):not(.ct-btn-tight) { flex: 1 1 0; min-width: 0; justify-content: center; }
   /* .ct-btn-tight: telefone numeta teksta, pasilieka piktograma.
      Reikalauja, kad tekstas butu apvyniotas <span> — zr. MYGTUKAI.md §10. */
   .ct-actions > .ct-btn-tight { flex: 0 0 auto; width: var(--tap-min); padding: 0; gap: 0; }

@@ -290,8 +290,8 @@ button { font-family: inherit; cursor: pointer; }
    sąmoningai — du savininkai buvo bloga is pat pradziu, ir tai issilaike
    tiksliai iki pirmo konflikto:
 
-     buves cia:  .ct-btn { min-height: 36px }
-     tenai:      .ct-btn-sm { height: 32px }
+     buves cia:  bazinis mygtukas su min-height 36 px
+     tenai:      mazoji forma su height 32 px
 
    min-height visada nugali height, nesvarbu kuris failas velesnis, tad
    .ct-btn-sm niekada negaudavo savo 32 px. Taisymas ne specifikoje —
@@ -656,10 +656,9 @@ img, svg, video, canvas { max-width: 100%; }
 .dp-col-h-ic { border-radius: var(--radius-sm); }
 
 /* Skirtukai ir veiksmai · ISKELTI I ct-mygtukai.css
-   v1.36.0: cia buvo .dp-tab (46px), .dp-act (38px) ir .dp-bc-btn (34px).
-   Trecias is ju buvo ketvirtasis aukstis sistemoje, gyves po 15 sk. istrynimo.
-   Elgesys nepasikeite: .dp-tab -> .ct-tab (46px), .dp-act -> .ct-btn (38px),
-   .dp-bc-btn -> .ct-btn (38px). .dp-bc-btn.save -> .is-on.               */
+   v1.36.0: skirtuko (46 px), veiksmo (38 px) ir antrastes veiksmo (34 px)
+   auksciai. Trecias buvo ketvirtasis aukstis sistemoje.
+   Atitikmenys: skirtukas -> .ct-tab, abu veiksmai -> .ct-btn, issaugota -> .is-on.               */
 
 /* Galerija */
 .dp-thumb { border-radius: var(--radius-md); background: var(--bg-elevated); }
@@ -677,18 +676,18 @@ img, svg, video, canvas { max-width: 100%; }
 .dp-ai-header h3 { font-size: var(--fs-400); font-weight: var(--fw-semi); }
 
 /* Pardavejas ir nuotrauku analize
-   .dp-seller-link-btn (42 px!) ir .dp-photo-ai-btn iskelti i ct-mygtukai.css.
-   Pirmasis buvo dar vienas aukstis, kurio nebuvo nei jusu, nei mano sarase.
-   .dp-seller-link-btn -> .ct-btn;  .dp-photo-ai-btn -> .ct-btn ct-btn-primary. */
+   Pardavejo nuorodos mygtukas (42 px!) ir nuotrauku analizes mygtukas iskelti
+   i ct-mygtukai.css. Pirmasis buvo dar vienas aukstis, kurio nebuvo nei jusu,
+   nei mano sarase. Atitikmenys: .ct-btn ir .ct-btn ct-btn-primary. */
 .dp-photo-ai-result { border-radius: var(--radius-lg); border-color: var(--accent-border); }
 .dp-photo-ai-result-badge { background: var(--accent); border-radius: var(--radius-sm); }
 
 /* Antraste */
 .ct3-nav-link { border-radius: var(--radius-md); font-size: var(--fs-300); color: var(--text-secondary); }
 .ct3-nav-link:hover { background: var(--bg-elevated); color: var(--text-primary); }
-/* .ct3-premium-btn ir .ct3-avatar iskelti i ct-mygtukai.css (.ct-btn-sm).
-   PENKTAS radinys: .ct3-premium-btn turejo border-radius: var(--radius-pill),
-   t. y. TRECIA radiusa sistemoje. Jusu matavimuose jo nesimato tik todel, kad
+/* Antrastes planu mygtukas ir avataras iskelti i ct-mygtukai.css (.ct-btn-sm).
+   PENKTAS radinys: planu mygtukas turejo pill radiusa,
+   t. y. trecia radiusa sistemoje. Jusu matavimuose jo nesimato tik todel, kad
    mygtukas jau turi ir .ct-btn klase, kuri laimi failu tvarka — bet nuemus
    .ct-btn jis atsistatytu. Antraštes akcentas dabar: .ct-btn-sm + .is-on.  */
 
@@ -1197,3 +1196,228 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
   font: var(--fw-semi) 11px/1.4 var(--font-mono); font-variant-numeric: tabular-nums;
   color: var(--text-secondary); pointer-events: none;
 }
+
+
+/* ============================================================================
+   16. GYNYBA · v1.37.0 ekrano perziura
+   ========================================================================== */
+
+/* Dedamosios: etikete ir reiksme VIENOJE eileje virs juostos, juosta — po.
+   Ekrane jos buvo vienoje eileje su juosta tarp ju, tad juosta atrode kaip
+   punktyrine linija, o reiksme nubego i desini krasta. */
+.ct-bars > .ct-bar-w { display: flex !important; flex-direction: column !important; align-items: stretch !important; gap: 4px !important; }
+.ct-bar-w > .ct-bar-h { display: flex !important; flex-direction: row !important; align-items: baseline !important; justify-content: space-between !important; gap: 6px !important; width: auto !important; }
+.ct-bar-w > .ct-bar { display: block !important; width: 100% !important; height: 3px !important; flex: none !important; border-radius: 2px; background: var(--bg-raised); overflow: hidden; }
+.ct-bar-w > .ct-bar > span { display: block; height: 100%; border-radius: 2px; }
+
+/* Miniatiuros: tuscias src rode alt teksta („ius.l") kaip raudona uzrasa.
+   color: transparent paslepia alt teksta nesulauzant .ct-thumbs img[src=""]. */
+.ct-thumbs img, .dp-strip img { color: transparent; font-size: 0; }
+
+/* Sirdute: buvo rozine (#FF4D8D) — palettes uzsienietis.
+   Neutrali, kol neissaugota; akcentas, kai issaugota. */
+.fav-star, .ct-fav { color: var(--text-secondary); }
+.fav-star.is-on, .ct-fav.is-on, .fav-star.active, .ct-fav.active { color: var(--accent-light); }
+
+
+/* ============================================================================
+   17. TELEFONAS · balas lieka, dedamosios dingsta
+   ----------------------------------------------------------------------------
+   Jusu sprendimas isimti iverti 390 px yra teisingas dedamosiosioms ir
+   neteisingas balui. Penkios dedamosios tikrai uzima trecdali kortelės.
+   Bet balas yra PRODUKTAS: be jo mobilus vartotojas mato kaina ir zenkliukus,
+   t. y. tai, ka mato bet kuriame portale.
+
+   Sis blokas pakeicia jusu viena bloka: dedamosios paslepiamos, balas lieka,
+   bet ne 32 px kvadratu — jis persikelia i verdikto eilute.
+   ========================================================================== */
+
+@media (max-width: 640px) {
+  /* .ct-l2 nustoja buti dezute — tampa eilute */
+  .ct-l2 { padding: 0; background: transparent; border: none; gap: var(--s-3); }
+
+  /* Penkios dedamosios — i treciaji lygi. Ne istrinamos: .ct-l3 jas turi. */
+  .ct-l2 .ct-bars { display: none; }
+
+  /* Balas: 32 px skaicius verdikto kaireje, be etiketes ir be dezutes */
+  .ct-l2 > .ct-score {
+    flex: none; align-self: flex-start;
+    padding: 0; background: transparent; border: none;
+    flex-direction: row; align-items: baseline; gap: 2px;
+  }
+  .ct-score .ct-score-lbl { display: none; }
+  .ct-score .ct-score-n { font-size: 30px; }
+  .ct-score .ct-score-max { font-size: 11px; }
+
+  /* Verdiktas ir balas vienoje eileje — vienas sprendimas, ne du blokai */
+  .ct-l2 { flex-wrap: nowrap; align-items: baseline; }
+  .ct-l2 > .ct-l2-r { flex: 1 1 0; min-width: 0; }
+  .ct-l2-h { gap: var(--s-2); }
+
+  /* Treciame lygyje dedamosios atsiranda — ten vietos yra */
+  .ct-l3 .ct-bars { display: grid; }
+}
+
+
+/* ============================================================================
+   18. v1.38.0 perziura
+   ========================================================================== */
+
+/* Kaina buvo violetine. Akcentas reiskia „musu sistema“ — o kaina yra
+   portalo faktas. Violetine ant jos pasako, kad tai mes ja nustateme.
+   Akcentas korteleje priklauso tik CTA ir iverciui. */
+.ct-price, .dp-price { color: var(--text-primary); }
+
+/* Verdiktas buvo DIDZIOSIOMIS ir zalias — dvi vienu metu konkuruojancios
+   antrastes su balu. Balas yra skaicius, verdiktas — sakinys. */
+.ct-verdict, .dp-panel-t > .ct-verdict {
+  text-transform: none;
+  font-size: var(--fs-300);
+  font-weight: var(--fw-semi);
+  letter-spacing: 0;
+}
+
+/* „Rinkoje 1 d." lauzesi telefone i „Rinkoje 1" / „d." */
+.ct-why-i > b { white-space: nowrap; }
+
+/* Sirdute: rozinis buvo FONAS, ne tekstas — 16 sk. taisykle jo nepagavo */
+.fav-star, .ct-fav {
+  background: rgba(5, 6, 10, .70);
+  border: 1px solid var(--border-light);
+  color: var(--text-secondary);
+}
+.fav-star.is-on, .ct-fav.is-on, .fav-star.active, .ct-fav.active {
+  background: var(--accent-dim);
+  border-color: var(--accent-border);
+  color: var(--accent-light);
+}
+
+/* Juostos uzpildas turi buti dedamosios spalvos, ne baltas */
+.ct-bar > span { background: currentColor; }
+.ct-bar-w > .ct-bar { color: var(--text-dim); }
+.ct-bar-w:has(> .ct-bar-h > .is-good) > .ct-bar { color: var(--success); }
+.ct-bar-w:has(> .ct-bar-h > .is-warn) > .ct-bar { color: var(--warning); }
+.ct-bar-w:has(> .ct-bar-h > .is-bad)  > .ct-bar { color: var(--danger); }
+
+@media (max-width: 640px) {
+  /* Antra veiksmu eile lauzesi: isskleidimas liko su pilnu tekstu ir isstume
+     kaimynus. Telefone jis tampa „Daugiau" + skaicius. */
+  .ct-actions > .ct-btn-toggle { flex: 1 1 0; min-width: 0; overflow: hidden; }
+  .ct-actions > .ct-btn-toggle > span { overflow: hidden; text-overflow: ellipsis; }
+}
+
+
+/* ── 18b. Du lauzymosi defektai ──────────────────────────────────────────── */
+
+/* „Kodel" punktai persidengdavo: flex-wrap eileje ilgi punktai lipdavo vienas
+   ant kito. Grid su aiskiomis eilemis to neleidzia. */
+.ct-why-l {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--s-2) 22px;
+  align-items: start;
+}
+.ct-why-i { display: flex !important; }
+.ct-why-i.is-wide { grid-column: 1 / -1; }
+
+/* Rinkos bloko etiketes lauzesi i dvi eilutes, o reiksmes nusleidavo.
+   Etikete niekada nesilauzo; jei netelpa — blokas placiau. */
+.ct-market-k { white-space: nowrap; }
+.ct-market { min-width: 196px; }
+.ct-market-row { gap: var(--s-4); }
+
+
+/* ── 18c. Iverčio blokas be dezutes ──────────────────────────────────────── */
+
+/* .ct-l2 buvo --bg-sunken dezute: juodesne uz kortele, tad ji atsiskyre nuo
+   bendro fono ir atrode kaip atskira kortele korteleje. Dabar tik plona
+   linija virsuje — blokas skiriamas tarpu, ne spalva. */
+.ct-l2 {
+  padding: 13px 0 0;
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  gap: var(--s-4);
+}
+
+/* Balas atsiskiria savo pavirsiumi — jam dezute reikalinga, blokui ne */
+.ct-l2 > .ct-score { background: var(--bg-elevated); }
+
+/* KETURIOS dedamosios, ne penkios: POTENCIALAS korteleje visada buvo ⚪
+   („reikia pilnos apzvalgos“), tad uzimdavo penktaji stulpeli nieko
+   nepasakydamas — ir lauzdavo tinkleli i 4 + 1. Jis lieka skelbimo puslapyje,
+   kur reiksme tikrai yra. Generatoriuje: neberodyti demand korteleje. */
+.ct-bars { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 900px) { .ct-bars { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+
+/* ── 18d. Rinkos blokas be dezutes ───────────────────────────────────────── */
+
+/* Ta pati bėda kaip .ct-l2: --bg-sunken buvo juodesnis uz kortele, tad blokas
+   atsiskirdavo nuo bendro fono. Dabar be fono — tik plona linija kaireje,
+   kuri sieja tris eilutes ir nekonkuruoja su kaina virsuje. */
+.ct-market {
+  padding: 0 0 0 11px;
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--border-light);
+  border-radius: 0;
+  gap: 2px;
+}
+
+
+/* ── 18e. Korteles tinklelis · „kodel" ir veiksmai per visa ploti ────────── */
+
+/* Po miniatiūromis kaireje liko tuscia vieta, o „kodel" punktai ir mygtukai
+   spaudesi i desini stulpeli ir lauzesi i dvi eiles. Dabar .ct-l1 yra grid,
+   o .ct-body — display: contents, tad jo vaikai patenka i ta pati tinkleli
+   ir du apatiniai gali uzimti abu stulpelius. Markup nepakeistas. */
+
+.ct-l1 {
+  display: grid;
+  grid-template-columns: minmax(210px, 290px) minmax(0, 1fr);
+  gap: 13px 18px;
+  align-items: start;
+}
+.ct-l1 > .ct-media { grid-column: 1; grid-row: 1 / span 3; }
+.ct-l1 > .ct-body { display: contents; }
+
+/* Virsus, zenkliukai ir ivertis — desiniajame stulpelyje */
+.ct-body > .ct-head, .ct-body > .ct-l3-chips, .ct-body > .ct-chips, .ct-body > .ct-l2 { grid-column: 2; }
+/* „Kodel", treciasis lygis ir veiksmai — per visa ploti, po nuotrauka */
+.ct-body > .ct-why, .ct-body > .ct-l3, .ct-body > .ct-actions { grid-column: 1 / -1; }
+/* Rizikos juosta irgi per visa ploti: ji apie visa skelbima, ne apie stulpeli */
+.ct-body > .ct-risk { grid-column: 1 / -1; }
+
+/* Pirminis mygtukas desineje; wrap tik kai tikrai netelpa */
+.ct-actions > .ct-btn-primary { margin-left: auto; }
+
+@media (max-width: 760px) {
+  .ct-l1 { grid-template-columns: minmax(0, 1fr); }
+  .ct-l1 > .ct-media { grid-column: 1; grid-row: auto; }
+  .ct-body > .ct-head, .ct-body > .ct-l3-chips, .ct-body > .ct-chips, .ct-body > .ct-l2 { grid-column: 1; }
+  .ct-body > .ct-why, .ct-body > .ct-l3, .ct-body > .ct-actions, .ct-body > .ct-risk { grid-column: 1; }
+  .ct-actions > .ct-btn-primary { margin-left: 0; }
+}
+
+
+/* ── 18f. Telefonas · rinkos blokas i viena eilute ───────────────────────── */
+
+@media (max-width: 640px) {
+  /* Visas rinkos blokas isimtas. 390 px ekrane uztenka „−12 %" zenklelio:
+     proporcija pasako tiek pat, kiek suma, ir uzima viena eilute vietoj trijų.
+     Rinkos vidurkis, suma ir imtis lieka skelbimo puslapyje. */
+  .ct-market { display: none; }
+}
+
+
+/* ── 18g. Verdiktas, kai backend siuncia DIDZIOSIOMIS ────────────────────── */
+
+/* text-transform: none nieko neduoda, jei pati verte yra „LABAI VERTA
+   ANALIZUOTI". Jusu sprendimas (mazinti pieciant) yra teisingas ir geresnis.
+   Si taisykle — atsvara tik tam atvejui, jei kur nors backend liks
+   nepakeistas: lowercase + pirma raide didzioji. Veikia vienam sakiniui,
+   nes verdiktas visada vienas sakinys be tikriniu daiktavardziu. */
+.ct-verdict.is-caps, .dp-panel-t > .ct-verdict.is-caps { text-transform: lowercase; }
+.ct-verdict.is-caps::first-letter { text-transform: uppercase; }

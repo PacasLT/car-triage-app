@@ -9,6 +9,8 @@
      v1.34.0  atsvara 12 sk. grandinei          → jis pridėjo :not(.ct-photo-n)
      v1.34.0  `.ct-why-i.is-wide` (CSS 10c)     → jo 10 skyrius
      v1.34.0  `.chip` ir `.ct-btn > i`          → jo 15 skyrius
+     v1.41.0  telefone paslėptas įvertis    → jo 17 skyrius (balas lieka)
+     v1.42.0  siaurų mygtukų 44 px atsvara → jo 420 eilutė su :not(.ct-btn-tight)
 
    TAISYKLĖS: jokių kietai įrašytų spalvų, jokių naujų tokenų, kiekvienas
    blokas su komentaru KAS ir KODĖL.
@@ -33,16 +35,12 @@
 .ct-l3 > .ct-istorija { padding: 0; }
 .ct-l3 > .ct-istorija > div { margin-top: 0; }
 
-/* ── 3. Telefone kortelėje nerodom CarTriige įverčio ───────────────────────
-   v1.38.0, produkto sprendimas (ne dizainerio): 390 px ekrane balas su
-   penkiomis dedamosiomis užima trečdalį kortelės, o pirmam sprendimui
-   („ar apskritai žiūrėti") užtenka kainos, skirtumo nuo rinkos, rizikos
-   ženklo ir „kodėl šis auto". Įvertis lieka skelbimo puslapyje.
+/* ── 3. Telefone kortelėje nerodom įverčio – PERIMTA, IŠTRINTA ──────────
+   v1.41.0: dizaineris perdarė sprendimą savo 17 skyriuje. Dedamosios telefone
+   keliauja į trečią lygį, o balas LIEKA – 30 px skaičius verdikto kairėje.
+   Jo argumentas: dedamosios tikrai užima trečdalį kortelės, bet balas yra
+   produktas – be jo telefone matome tą patį, ką bet kuriame portale.       */
 
-   ATŠAUKIMAS: ištrinti šitą bloką. Markup'as nepakeistas – tik paslėpta.   */
-
-@media (max-width: 640px) {
-  .ct-card .ct-l2 > .ct-score,
-  .ct-card .ct-l2 .ct-bars { display: none; }
-  .ct-card .ct-l2 { padding: 9px 11px; }
-}
+/* ── 4. Veiksmų eilė telefone – PERIMTA, IŠTRINTA ───────────────────
+   v1.42.0: dizaineris įrašė `:not(.ct-btn-tight)` į ct-mygtukai.css 420 eilutę,
+   tad `.ct-btn-tight` 44 px vėl pasiekia mygtuką ir mūsų atsvaros nebereikia.   */

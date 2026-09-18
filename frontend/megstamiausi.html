@@ -18,7 +18,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 .pg-tuscia { text-align: center; padding: 60px 20px; background: var(--bg-surface); border: 1px dashed var(--border-light); border-radius: 16px; color: var(--text-muted); font-size: 14px; }
 .pg-tuscia b { display: block; color: var(--text-primary); font-size: 16px; margin-bottom: 8px; }
 .pg-tuscia a { color: var(--accent-light); }
-.mg-card { display: flex; flex-wrap: wrap; align-items: stretch; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 8px; }
+.mg-card { position: relative; display: flex; flex-wrap: wrap; align-items: stretch; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 8px; }
 .mg-card:hover { border-color: var(--border-light); }
 .mg-photo { width: 192px; flex: none; border-right: 1px solid var(--border); position: relative; min-height: 96px; background: #141822; }
 .mg-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -30,6 +30,8 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 .mg-price { font: 700 17px var(--font-mono); letter-spacing: -.02em; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .mg-price small { font: 400 11px var(--font); color: var(--text-dim); }
 .mg-right { flex: none; display: flex; align-items: center; gap: 8px; }
+/* v1.42.0: ✕ išimtas iš eilės – dešinysis viršus, kaip širdutė kortelėje */
+.mg-del-top { position: absolute; top: 10px; right: 10px; z-index: 2; }
 .mg-btn { height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border-light); background: transparent; color: var(--text-primary); font: 500 12.5px var(--font); cursor: pointer; white-space: nowrap; }
 .mg-btn:hover { background: var(--bg-elevated); }
 .mg-btn.ac { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
@@ -91,6 +93,17 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
     <!-- issaugoti · mėgstamiausi -->
     <symbol id="i-issaugoti" viewBox="0 0 16 16">
       <path class="ct-i-issaugoti" d="M8 13.2S2.8 10 2.8 6.4a2.9 2.9 0 0 1 5.2-1.8 2.9 2.9 0 0 1 5.2 1.8c0 3.6-5.2 6.8-5.2 6.8Z"/>
+    </symbol>
+
+    <!-- zenkliukai · ko yra skelbime (Daugiau mygtukas) -->
+    <symbol id="i-zenkliukai" viewBox="0 0 16 16">
+      <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h7"/>
+    </symbol>
+
+    <!-- pasalinti · nuimti is saraso. NE siukslinė: skelbimas neistrinamas,
+         tik nuimamas nuo saraso. -->
+    <symbol id="i-pasalinti" viewBox="0 0 16 16">
+      <path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/>
     </symbol>
 
     <!-- filtrai · trys slankiojami kriterijai -->
@@ -236,11 +249,22 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
         + (dabartine !== f.kaina && f.kaina ? '<span class="chip buvo" title="Kaina, kai išsaugojote">' + Number(f.kaina).toLocaleString('lt-LT').replace(/,/g, ' ') + ' €</span>' : '') + diff + pok.join('')
         + (f.marketMedian ? '<small>vs ' + Number(f.marketMedian).toLocaleString('lt-LT').replace(/,/g, ' ') + ' €</small>' : '') + '</div>'
         + '<div class="mg-data">' + datos.join('<span class="sep">·</span>') + '</div>'
-        + '</div><div class="mg-right">'
-        + '<a class="mg-btn ct-btn" href="' + ctEsc(f.url) + '" target="_blank" rel="noopener">Skelbimas ↗</a>'
-        + '<button class="mg-btn ac ct-btn" onclick="atidaryti(' + ctEsc(JSON.stringify(f.url)) + ')">Detali apžvalga →</button>'
-        + '<button class="mg-btn del ct-btn" title="Pašalinti iš mėgstamiausių" onclick="salinti(' + ctEsc(JSON.stringify(f.url)) + ', this)">✕</button>'
-        + '</div></div></div>';
+        + '</div><div class="mg-right ct-actions">'
+        // v1.42.0, dizainerio §7: tas pats veiksmas visur vadinasi vienodai.
+        // Buvo „Detali apžvalga →" – tas pats, ką kortelėje daro „Pilna apžvalga",
+        // tik kitu vardu ir be kainos ženklelio.
+        + '<a class="mg-btn ct-btn ct-btn-go ct-btn-tight" href="' + ctEsc(f.url) + '" target="_blank" rel="noopener" aria-label="Skelbimas">'
+        +   '<i><svg class="ct-i"><use href="#i-skelbimas"></use></svg></i>' + '<span>Skelbimas</span></a>'
+        + '<span class="ct-actions-gap"></span>'
+        + '<button class="mg-btn ct-btn ct-btn-primary" onclick="atidaryti(' + ctEsc(JSON.stringify(f.url)) + ')">'
+        +   '<i><svg class="ct-i"><use href="#i-apzvalga"></use></svg></i>' + '<span>Pilna apžvalga</span><u>2 kr</u></button>'
+        + '</div>'
+        // Naikinantis veiksmas nestovi veiksmų eilėje – jį nukeėlėm į kortelės
+        // dešinįjį viršų, kaip širdutę. Eilės gale jis būtų prie pirminio mygtuko,
+        // t. y. prie to, į kurį žmogus ir taiko.
+        + '<button class="mg-del-top ct-btn ct-btn-quiet ct-btn-icon ct-btn-sm" title="Pašalinti iš mėgstamiausių" aria-label="Pašalinti iš mėgstamiausių" onclick="salinti(' + ctEsc(JSON.stringify(f.url)) + ', this)">'
+        +   '<i><svg class="ct-i"><use href="#i-pasalinti"></use></svg></i>' + '</button>'
+        + '</div></div>';
     }).join('');
   }
 

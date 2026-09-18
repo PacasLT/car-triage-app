@@ -155,10 +155,43 @@
 - **Klases PRIDETOS, ne pakeistos:** `class="dp-tab ct-tab"`. Seni vardai yra JS selektoriai (`querySelectorAll('.dp-tab')`, `getElementById`) – ju perrasymas sulauzytu elgsena. Po valymo jie nebeturi isvaizdos deklaraciju.
 - **Trys aukščiai, du radiusai, trys šriftai** – ir daugiau neturi atsirasti:
   `38px` iprastas · `46px` `.ct-btn-lg` ir `.ct-tab` · `32px` `.ct-btn-sm` ir `.ct-seg` · `56/64px` **tik** `@media (max-width: 640px)`.
-- **Sargas:** `node backend/testai/mygtukai.test.js` – matuoja visus matomus mygtukus penkiuose puslapiuose. **0 nukrypimu.** Skirtukai (`.ct-tab`) skaiciuojami atskirai – ju `border-radius: 0` nera nukrypimas.
+- **Sargas:** `node backend/testai/mygtukai.test.js` – matuoja visus matomus mygtukus penkiuose puslapiuose (reikia veikiančio peržiūros serverio). Skirtukai (`.ct-tab`) skaičiuojami atskirai – ju `border-radius: 0` nera nukrypimas.
+- **Tikroji būklė (išmatuota v1.40.0): 166 mygtukai, 28 nukrypimai.** „0 nukrypimu" galiojo tik iki v1.36.1 atstatymo – tada grįžo senos vietinės taisyklės, o rankinis valymas dar nepadarytas. Likusi skola, šešios taisyklės:
+  `ataskaitos.html` plikas `button` ir `.on` (`r=8px`) · `detail.html` `.dp-pr-btn`, `.dp-analize-greita`, `.dp-analize-cta` (`r=8/9px`, `f=12/13px`) · `.ct-meg-btn.yra` (`h=42/36px`, `f=13.33px`, `megstami-meniu.js`) · `.ct-btn-sm` (`h=34px`, `r=9px`) · `.ct3-premium-btn` telefone (`h=34px`, `f=12px`) · `.ct-ver-btn` telefone (`f=8px`, `versijos.js`).
+- **Valymas tik rankomis, po vieną taisyklę.** `dizaino-juodrasciai/valyti-mygtukus.py` sugadino CSS v1.36.0 (regex per visą HTML nukirsdavo kaimynines taisykles) – jo nebenaudojame.
 - Rodykle `.ct-btn-go` tik tada, kai po paspaudimo zmogus **atsiduria kitur**. `⇄ Palyginti` jos neturi. `.is-ready` busena: zenklelis dingsta, rodykle atsiranda.
 - Naujas mygtukas = `ct-btn` + variantas + forma. **Jokiu vietiniu `height`/`border-radius`/`font-size`** – tai buvo priezastis, del kurios ju buvo ~40 skirtingu.
-- `megstami-meniu.js`, `paskyra-meniu.js`, `versijos.js` injektuoja `<style>` su `head.prepend()` (ne `appendChild`) – kitaip ju stiliai atsidurtu po visais `<link>` ir laimetu be jokios specifikos. **Laikinas sprendimas**; galutinis – isvaizdos deklaracijas is tu failu istrinti.
+- `megstami-meniu.js`, `paskyra-meniu.js`, `versijos.js` injektuoja `<style>` su `document.head.appendChild()`. **`head.prepend()` bandytas v1.36.0 ir atmestas v1.37.0** – tie failai injektuoja visą komponento CSS, ne tik mygtukų, tad perkėlus į pradžią sugriuvo meniu. **Laikinas sprendimas**; galutinis – isvaizdos deklaracijas is tu failu istrinti.
+
+## Veiksmų eilė telefone (v1.40.0)
+
+- 390 px kortelėje apačioje: CTA per visą plotį viršuje, po juo **44 px** „Skelbimas", platus „Ženkliukai, įranga, vieta" ir **44 px** „Palyginti".
+- Siaurieji (`.ct-btn-tight`) telefone numeta antraštę ir palieka piktogramą – tam reikia, kad tekstas būtų apvyniotas `<span>`.
+- **Kodėl `ct-priedai.css` 4 blokas:** `ct-mygtukai.css` 420 eil. `.ct-actions > .ct-btn:not(.ct-btn-primary)` (0,3,0) nugali 423 eil. `.ct-actions > .ct-btn-tight` (0,2,0), tad 44 px niekada nepasiekdavo mygtuko, o platusis likdavo 124 px prie 147 px antraštės – tekstas užlipdavo ant kaimyno. Mūsų atsvara – ta pati taisyklė (0,4,0).
+- **Ištrinti mūsų bloką**, kai dizaineris savo 420 eilutėje prašys `:not(.ct-btn-tight)`.
+
+## Mygtukų žodynas penkiuose puslapiuose (v1.42.0)
+
+- **Tvarka fiksuota, sudėtis ne:** `[išorinė nuoroda] [išskleidimas] [palyginimas] ⟵tarpas⟶ [pirminis]`. Kiekvienas puslapis rodo tą poaibį, kuris jam turi prasmę, bet niekada nekeičia eilės ir niekada nepervadina to paties veiksmo.
+- **Tas pats veiksmas visur vadinasi vienodai.** „Detali apžvalga →" mėgstamiausiuose ir „Pilna apžvalga · 2 kr" kortelėje buvo tas pats veiksmas dviem vardais – blogiau nei skirtingi dydžiai, nes žmogus nežino, ar tai tas pats dalykas.
+- **Naikinantis veiksmas NIEKADA nestovi veiksmų eilėje.** Eilės gale jis atsidurtų prie pirminio mygtuko – prie to, į kurį žmogus taiko. Vieta: kortelės dešinysis viršus (`.at-del-top`, `.mg-del-top`), tylus ikoninis mygtukas su `#i-pasalinti`.
+- **`#i-pasalinti` yra kryželis, ne šiukšlinė.** Šiukšlinė reikštų „ištrinti duomenis", o skelbimas tik nuimamas nuo sąrašo.
+- **Padaryta:** `index` (Skelbimas · Daugiau N · Palyginti · Pilna apžvalga 2 kr) · `ataskaitos` (Atidaryti, be rodyklės) · `megstamiausi` (Skelbimas · Pilna apžvalga 2 kr) · palyginimo lentelės stulpelis (Skelbimas · Pašalinti).
+- **Neturi `.ct-actions`:** `detail.html` (laukia perdarymo pagal `DETAIL-SABLONAS.md`; `dp-bc-btn` yra ANTRAŠTĖS veiksmai, jiems eilės taisyklės netaikomos) ir `compare.html` (gilios ataskaitos puslapis, ne sąrašas).
+- **Mėgstamiausiuose nėra „Daugiau" ir „Palyginti"** – ten nėra trečiojo lygio ir nėra palyginimo mechanizmo. Dizainerio lentelė juos numato; reikia atsakymo, ar kurti.
+- `ct-priedai.css` 4 blokas ištrintas: dizaineris įrašė `:not(.ct-btn-tight)` į savo 420 eilutę.
+
+## Dizainerio 16–18f skyriai (v1.41.0)
+
+- `ct-dizainas.css` pakeistas visas. Diff patikrintas prieš diegiant: **grynai papildomas**, +214 eilutės, nieko neištrinta. `ct-mygtukai.css` ir `ct-ikonos.html` atsiųsti nepakitę – jų nekeitėm.
+- **16 sk.** dedamųjų juostos, miniatiūrų `alt` tekstas, širdutė. **17 sk.** telefone balas lieka, dedamosios į trečią lygį – tai PAKEIČIA mūsų `ct-priedai.css` 3 bloką (ištrintas). **18a–18f** kaina balta, verdiktas sakinio raide, `.ct-l2` ir `.ct-market` be dėžučių, kortelės tinklelis per visą plotį.
+- **Keturi mygtukai** pagal `ct-mygtukai-snippet.html`: `Skelbimas` (siauras, rodyklė) · `Daugiau` + skaičius (išskleidžia) · `Palyginti` (siauras) · `Pilna apžvalga` + `2 kr` (pirminis).
+- `ctToggleL3` keičia **tik `<span>` tekstą**. Buvęs `btn.textContent = ...` ištrindavo piktogramos plytelę ir ženklelį – mygtukas po pirmo paspaudimo nustodavo atitikti sistemą.
+- **Trūksta `#i-zenkliukai`:** dizainerio `PERDUOTI-CLAUDE.md` §4 jo reikalauja, bet jo `ct-ikonos.html` faile tik 14 simbolių. Laikinai įdėjom savo žymės piktogramą į visus penkis puslapius – pakeisti, kai atsiųs savo.
+- **Verdikto raidė:** backend siunčia `LABAI VERTA ANALIZUOTI`. Serveryje nekeičiam – `_sakinys()` mažina tik piešiant ir tik tada, kai visa vertė didžiosiomis.
+- **Patikra (jo §5):** `node scratchpad/testas/sablonas.js` prie veikiančio peržiūros serverio. `index.html` grąžina `auksciai: [38]`, `rodykles: 1`, `zenkleliai: 2`, `pirminiai: 1`, `ikonos: 4`.
+- **Dar nepadaryta:** `detail.html`, `compare.html`, `ataskaitos.html`, `megstamiausi.html` neturi `.ct-actions` bloko išvis – ten savi mygtukai (`mg-btn`, `at-btn`, `dp-bc-btn`). Vienodinimas reikalauja produkto sprendimo, ne CSS.
+- **Rožinė (#ff5c8a) liko** `detail.html` (3 vietos), `megstamiausi.html`, `megstami-meniu.js` (4 vietos), `paskyra-meniu.js`. Kortelėje jos nebėra.
 
 ## Modelio filtro saugiklis (v1.39.0)
 

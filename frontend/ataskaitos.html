@@ -22,7 +22,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 .filtrai button { height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-surface); color: var(--text-secondary); font: 500 12.5px var(--font); cursor: pointer; }
 .filtrai button.on { background: var(--accent-dim); border-color: var(--accent-border); color: var(--accent-light); }
 .filtrai button b { font-family: var(--font-mono); font-weight: 600; margin-left: 5px; opacity: .8; }
-.at-card { display: flex; gap: 14px; align-items: center; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
+.at-card { position: relative; display: flex; gap: 14px; align-items: center; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
 .at-card:hover { border-color: var(--border-light); }
 .at-ic { width: 44px; height: 44px; border-radius: 10px; flex: none; display: grid; place-items: center; font-size: 18px; background: var(--bg-elevated); border: 1px solid var(--border); overflow: hidden; }
 .at-ic img { width: 100%; height: 100%; object-fit: cover; }
@@ -36,6 +36,8 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 .at-sant { font: 400 12.5px/1.5 var(--font); color: var(--text-muted); margin-top: 3px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .at-meta { font: 500 10.5px var(--font-mono); color: var(--text-dim); margin-top: 6px; }
 .at-right { flex: none; display: flex; gap: 8px; align-items: center; }
+/* v1.42.0: ✕ išimtas iš veiksmų eilės – dešinysis viršus, atokiai nuo pirminio */
+.at-del-top { position: absolute; top: 10px; right: 10px; z-index: 2; }
 .at-btn { height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--border-light); background: transparent; color: var(--text-primary); font: 500 12.5px var(--font); cursor: pointer; white-space: nowrap; }
 .at-btn.ac { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
 .at-btn.ac:hover { background: var(--accent-light); }
@@ -91,6 +93,17 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
     <!-- issaugoti · mėgstamiausi -->
     <symbol id="i-issaugoti" viewBox="0 0 16 16">
       <path class="ct-i-issaugoti" d="M8 13.2S2.8 10 2.8 6.4a2.9 2.9 0 0 1 5.2-1.8 2.9 2.9 0 0 1 5.2 1.8c0 3.6-5.2 6.8-5.2 6.8Z"/>
+    </symbol>
+
+    <!-- zenkliukai · ko yra skelbime (Daugiau mygtukas) -->
+    <symbol id="i-zenkliukai" viewBox="0 0 16 16">
+      <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h7"/>
+    </symbol>
+
+    <!-- pasalinti · nuimti is saraso. NE siukslinė: skelbimas neistrinamas,
+         tik nuimamas nuo saraso. -->
+    <symbol id="i-pasalinti" viewBox="0 0 16 16">
+      <path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/>
     </symbol>
 
     <!-- filtrai · trys slankiojami kriterijai -->
@@ -257,10 +270,19 @@ function piesti() {
       + '<div class="at-title">' + ctEsc(a.pavadinimas || a.raktas) + '</div>'
       + (a.santrauka ? '<div class="at-sant">' + ctEsc(a.santrauka) + '</div>' : '')
       + '<div class="at-meta">' + ctLaikas(a.laikas) + '</div></div>'
-      + '<div class="at-right">'
-      + '<button class="at-btn ac ct-btn" onclick="atidaryti(' + a.id + ', this)">' + (inline ? 'Rodyti' : 'Atidaryti →') + '</button>'
-      + '<button class="at-btn del ct-btn" title="Ištrinti" onclick="trinti(' + a.id + ', this)">✕</button>'
-      + '</div></div>';
+      + '<div class="at-right ct-actions">'
+      // v1.42.0, dizainerio §7: ataskaitose pirminis yra „Atidaryti" – vienintelis
+      // veiksmas, kurio žmogus čia nori. Rodyklės nereikia: violetinė spalva jau
+      // pasako, kad tai pagrindinis veiksmas.
+      + '<button class="at-btn ct-btn ct-btn-primary" onclick="atidaryti(' + a.id + ', this)">'
+      +   '<i><svg class="ct-i"><use href="#i-apzvalga"></use></svg></i>' + '<span>' + (inline ? 'Rodyti' : 'Atidaryti') + '</span></button>'
+      + '</div>'
+      // Naikinantis veiksmas nestovi veiksmų eilėje. Eilės gale „Ištrinti" atsidurtų
+      // prie pirminio mygtuko – vienas praleistas pikselis, ir ataskaita, už kurią
+      // sumokėta 2 kr, išnyksta. Vieta: kortelės dešinysis viršus.
+      + '<button class="at-del-top ct-btn ct-btn-quiet ct-btn-icon ct-btn-sm" title="Ištrinti ataskaitą" aria-label="Ištrinti ataskaitą" onclick="trinti(' + a.id + ', this)">'
+      +   '<i><svg class="ct-i"><use href="#i-pasalinti"></use></svg></i>' + '</button>'
+      + '</div>';
   }).join('');
 }
 
