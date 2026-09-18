@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.38.0', data: '2026-09-18', pavadinimas: 'Mygtukai su piktogramomis, telefone trumpesnė kortelė',
+    pakeitimai: [
+      'Mygtukai gavo piktogramas, o „Pilna apžvalga“ – atskirą kainos ženklelį ir rodyklę',
+      'Rodyklė rodoma tik ten, kur paspaudus atsidursite kitur – „Palyginti“ jos neturi',
+      'Kai apžvalga jau padaryta, mygtukas pameta kainą ir gauna rodyklę',
+      'Telefone kortelėje neberodomas CarTriige įvertis su dedamosiomis – pirmam sprendimui užtenka kainos, skirtumo nuo rinkos ir rizikos; įvertis lieka skelbimo puslapyje',
+    ],
+  },
+  {
     versija: '1.37.0', data: '2026-09-18', pavadinimas: 'Mygtukų taisymai ir meniu atstatymas',
     pakeitimai: [
       'Skelbimo puslapyje violetinė juosta virš apžvalgos lygių dingo – tai buvo blokas, per klaidą paverstas mygtuku',

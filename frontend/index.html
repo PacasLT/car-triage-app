@@ -2638,11 +2638,7 @@
         <!-- PASALINTA: "Naršyti viską" režimas. Liko tik CarTriige analizė, todėl režimų pasirinkiklio nebereikia. -->
         <div class="ct3-search-bottom-right">
           <!-- PASALINTA: "Išsaugoti paiešką" - mygtukas neturėjo jokio veiksmo. -->
-          <button class="ct3-search-btn ct-btn ct-btn-primary ct-btn-lg" id="search-btn" onclick="console.log('search-btn clicked, runSearch=', typeof runSearch); if(typeof runSearch==='function'){ runSearch(); } else { showToast('runSearch nerasta — perkraukite puslapį', 'error'); }">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
-            Ieškoti ir analizuoti
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </button>
+          <button class="ct3-search-btn ct-btn ct-btn-primary ct-btn-lg" id="search-btn" onclick="console.log('search-btn clicked, runSearch=', typeof runSearch); if(typeof runSearch==='function'){ runSearch(); } else { showToast('runSearch nerasta — perkraukite puslapį', 'error'); }"><i><svg class="ct-i"><use href="#i-ieskoti"></use></svg></i><span>Ieškoti ir analizuoti</span></button>
         </div>
       </div>
     </div>
@@ -5864,6 +5860,12 @@ function ctNavTab(tab) {
     // >0 pigiau (žalia), <=0 brangiau (geltona). 49 % riba lieka backend'e –
     // ji įjungia atskirą „GALIMAI DAUŽTAS" bloką ir riboja balą.
     var CT_DIFF_ITARTINA = 30;
+
+    // v1.38.0: piktograma mygtukui. Sprite'as yra ct-ikonos.html, iterptas
+    // i <body> pradzia. Vardai - MYGTUKAI.md 4 skyriuje.
+    function ctIkona(vardas) {
+      return '<i><svg class="ct-i ct-i-' + vardas.replace('i-', '') + '"><use href="#' + vardas + '"></use></svg></i>';
+    }
     // v1.35.0: rinkos skaiciai rodomi tik nuo 8 panasiu skelbimu. Is septyniu
     // „5-as pigiausias" ir „-12 %" skamba tiksliau, nei yra: uztenka vienam
     // skelbimui dingti, ir pozicija pasikeicia. Medianai skaiciuoti riba lieka 5
@@ -6060,11 +6062,15 @@ function ctNavTab(tab) {
         +       '<div class="ct-facts">' + faktaiHtml + '</div>'
         +     '</div>'
         +     '<div class="ct-actions">'
-        +       '<a class="detail-btn ct-btn" href="' + c.url + '" target="_blank" rel="noopener">Skelbimas ↗</a>'
-        +       '<button class="detail-btn ct-btn" onclick="ctToggleL3(\'' + cardId + '\', this)" aria-expanded="false">Ženkliukai, įranga, vieta →</button>'
-        +       '<button class="compare-toggle ct-btn" id="cmp-' + cardId + '" onclick="' + x.cmpArgs + '">⇄ Palyginti</button>'
+        +       '<a class="detail-btn ct-btn ct-btn-go ct-btn-tight" href="' + c.url + '" target="_blank" rel="noopener" aria-label="Atidaryti skelbimą portale">'
+        +         ctIkona('i-skelbimas') + '<span>Skelbimas</span></a>'
+        +       '<button class="detail-btn ct-btn ct-btn-toggle" onclick="ctToggleL3(\'' + cardId + '\', this)" aria-expanded="false">'
+        +         ctIkona('i-isskleisti') + '<span>Ženkliukai, įranga, vieta</span></button>'
+        +       '<button class="compare-toggle ct-btn ct-btn-tight" id="cmp-' + cardId + '" onclick="' + x.cmpArgs + '" aria-label="Pridėti palyginimui">'
+        +         ctIkona('i-palyginti') + '<span>Palyginti</span></button>'
         +       '<span class="ct-actions-gap"></span>'
-        +       '<button class="detail-btn ct-btn ct-btn-primary' + (x.hasDeep ? ' ready' : '') + '" id="' + x.btnId + '" data-closed-label="' + x.detailBtnLabel + '" onclick="' + x.detailClick + '">' + x.detailBtnLabel + '</button>'
+        +       '<button class="detail-btn ct-btn ct-btn-primary' + (x.hasDeep ? ' is-ready ct-btn-go' : '') + '" id="' + x.btnId + '" data-closed-label="' + x.detailBtnLabel + '" onclick="' + x.detailClick + '">'
+        +         ctIkona('i-apzvalga') + '<span>Pilna apžvalga</span>' + (x.hasDeep ? '' : '<u>2 kr</u>') + '</button>'
         +     '</div>'
         +   '</div>'
         + '</div>'

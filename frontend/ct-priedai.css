@@ -32,3 +32,17 @@
 
 .ct-l3 > .ct-istorija { padding: 0; }
 .ct-l3 > .ct-istorija > div { margin-top: 0; }
+
+/* ── 3. Telefone kortelėje nerodom CarTriige įverčio ───────────────────────
+   v1.38.0, produkto sprendimas (ne dizainerio): 390 px ekrane balas su
+   penkiomis dedamosiomis užima trečdalį kortelės, o pirmam sprendimui
+   („ar apskritai žiūrėti") užtenka kainos, skirtumo nuo rinkos, rizikos
+   ženklo ir „kodėl šis auto". Įvertis lieka skelbimo puslapyje.
+
+   ATŠAUKIMAS: ištrinti šitą bloką. Markup'as nepakeistas – tik paslėpta.   */
+
+@media (max-width: 640px) {
+  .ct-card .ct-l2 > .ct-score,
+  .ct-card .ct-l2 .ct-bars { display: none; }
+  .ct-card .ct-l2 { padding: 9px 11px; }
+}
