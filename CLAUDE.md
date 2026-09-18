@@ -265,6 +265,9 @@ Grandinė `fetchSearchPage`: **talpykla → ScraperAPI → tiesioginis axios →
 | Bendras klasės vardas | `.ct-table` – `<table>` ir `<div>` sąrašas | `.ct-kv` – eilutė ir jos konteineris, v1.56.0 |
 | Inline `style=""` nugali dizainerio failą | `#more-filters` vidinis `<div>` – 30 sk. `.ct3-more-row` nieko nedarė | pats `#more-filters` – 30 sk. `.ct-shell-side #more-filters` irgi nieko nedarė, v1.75.0 |
 | Pilno pločio triukas siaurame stulpelyje | `.ct3-search-panel` full-bleed (`ct-priedai.css` 7 blokas) | `.ct3-search-inner` `padding: 0 48px` – 23 % iš 276 px stulpelio, v1.75.0 |
+| `onclick` kviecia funkcija, kurios nera | – | `dpTab` dingo per v1.43.0 perdarymus; septyni skirtukai `detail.html` tyliai metė `ReferenceError`, o skydeliai buvo pildomi ir niekada nerodomi. Patikrinta visuose 6 puslapiuose (`tools/onclick-patikra.py`) – daugiau nėra, v1.76.0 |
+
+**`onclick` klaida yra TYLI.** Atributas nieko nesako, kol nepaspaudi; paspaudus `ReferenceError` nukrenta į konsolę, kurios niekas nežiūri. Naudotojui atrodo, kad mygtukas tiesiog negyvas – Lukas tai aprašė kaip „paspaudžiu, niekas nesikeičia“ (Nr. 20). Todėl po kiekvieno didesnio perdarymo: `cd frontend && python3 ../tools/onclick-patikra.py`.
 
 **Taisyklė: kai kas nors ištaisoma, iškart paieškoti to paties raginio visame kode.** Dizainerio klausimas prieš 3 dalį („skalė greičiausiai turi savo medianą") pasitvirtino ne visai taip, kaip jis spėjo – mediana ta pati, bet **ženklas priešingas**: tas pats automobilis viršuje rodė „−12 %" žaliai, o rinkos skiltyje „+12 %" raudonai.
 

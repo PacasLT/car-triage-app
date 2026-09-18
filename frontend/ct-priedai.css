@@ -145,51 +145,25 @@
 
 
 /* ----------------------------------------------------------------------------
-   9 BLOKAS · 25 sk. sonas: panele sutalpinama i stulpeli · v1.75.0
+   9 BLOKAS · apatines eiles kaire dalis laužiasi · v1.76.0
 
-   30 sk. aprasė `.ct3-fields`, `.ct3-field`, `.ct3-select-wrap`,
-   `.ct3-range-wrap`, `#more-filters`, `.ct3-more-row` ir `.ct3-search-btn`.
-   Bet `.ct3-search-panel` turi dar keturias dalis, kuriu 30 sk. nelieté, ir
-   ju kiekviena buvo platesne uz 276 px stulpeli. Pamatuota, 1280x720:
+   30 sk. v3 uzdare beveik viska: po idiegimo liko 58 px horizontalaus slinkimo
+   ties 1180-1366 px ir 34 px ties 1680+. Kaltininkas vienas:
 
-     sono `scrollWidth` 662 px prie `clientWidth` 276  ->  386 px h. slinkimo
-     25 elementai kyso uz stulpelio desinio krasto
+     .ct3-search-bottom-left  laiko DU mygtukus vienoje eiluteje -
+     „Daugiau filtru" (~110 px) ir portalu mygtuka su
+     `white-space: nowrap` („autoplius.lt · autogidas.lt", 173 px).
+     Kartu 283 px + tarpas, o stulpelio vidus 252 px.
 
-   Kaltininkai ir kiek kuris atema:
+   v3 davė paciai `.ct3-search-bottom` `flex-wrap: wrap` ir vaikams
+   `flex: 1 1 100%` - tad KAIRE ir DESINE dalys jau krenta i atskiras eilutes.
+   Bet kaires VIDUS liko viena eile.
 
-     .ct3-search-inner  padding: 0 48px   -> is 276 px lieka 178 px (64 px)
-     .ct3-search-tabs   nowrap, 340 px    -> kyso 125 px
-     .ct3-portals-row + .ct3-flags        -> kyso 386 px
-     .ct3-search-bottom-right 188 px      -> kyso 34 px (tevas 154 px)
+   Pamatuota su siuo bloku: horizontalus slinkimas 58 -> 0 px visuose
+   plociuose (1180 / 1280 / 1680 / 2364), sonas 540 px prie 599 px ribos.
 
-   Sis blokas nieko nepersapalvoja - tik neleidzia dalims iseiti uz stulpelio:
-   mazesnis vidinis uzpildas, eiluciu lauzimas, `min-width: 0` lanksciems
-   vaikams. Laukai nuo to platejä 71 -> 103 px (+45%).
-
-   LAIKINA: istrinti, kai dizaineris perima i 30 sk. Klausimas `K-09`.  */
+   LAIKINA: klausimas `K-10`. Viena eilute, jo failo vieta.  */
 
 @media (min-width: 1180px) {
-  .ct-shell-side .ct3-search-inner {
-    padding-left: var(--s-4);
-    padding-right: var(--s-4);
-  }
-
-  .ct-shell-side .ct3-search-tabs { flex-wrap: wrap; }
-  .ct-shell-side .ct3-search-tabs > *,
-  .ct-shell-side .ct3-stab { min-width: 0; max-width: 100%; }
-
-  .ct-shell-side .ct3-portals-row { flex-wrap: wrap; row-gap: var(--s-2); }
-  .ct-shell-side .ct3-portals-row > *,
-  .ct-shell-side .ct3-portal-wrap { min-width: 0; max-width: 100%; }
-  .ct-shell-side .ct3-flags { flex-wrap: wrap; row-gap: var(--s-2); }
-
-  .ct-shell-side .ct3-marketplaces-btn {
-    max-width: 100%;
-    white-space: normal;
-    height: auto;
-    text-align: left;
-  }
-
-  .ct-shell-side .ct3-search-bottom { flex-direction: column; align-items: stretch; }
-  .ct-shell-side .ct3-search-bottom > * { min-width: 0; width: 100%; }
+  .ct-shell-side .ct3-search-bottom-left { flex-wrap: wrap; }
 }

@@ -1521,3 +1521,102 @@ slenksčiu 1180 px.
 Antras, mažesnis: ar `.ct3-search-inner` `padding: 0 48px` turi likti
 jūsų failo reikšme visiems plotams, ar 25 sk. šonui jam vieta 30 skyriuje?
 Šiandien tai daro `ct-priedai.css`, ir tai ne ten, kur turėtų būti.
+
+---
+
+## D-17 · 2026-09-18 · Dizaineris → Klaudijui · 30 sk. TREČIA REDAKCIJA (14 paketas)
+
+Atsakymas į `K-09`: **1 ir 2 keliai kartu**, 3 atmestas. Jie sprendžia
+skirtingas ašis — 9 blokas uždaro horizontalų slinkimą, perkėlimas vertikalų.
+Slenkstis 1680 px reikštų, kad 25 sk. neegzistuoja 1280–1679 px ekranams.
+
+**Portalai priklauso ne filtrams ir ne antraštei, o RETIEMS filtrams** — tam
+pačiam skirstymui, kurį padarėm v1.25.0. Skirtukai keliauja į rezultatų
+stulpelį, nes tai ne filtras, o du rodiniai. **Slėpti negalima, tik perkelti:**
+juosta pašalinta v1.65.0, tad `Istorija` neturi kito kelio — `display: none`
+būtų `K-06` iš naujo.
+
+`padding: 0 48px` lieka jo faile visiems pločiams; šono atšaukimas priklauso
+30 skyriui, ne `ct-priedai.css`. v3 tai ir daro.
+
+Ir jis pats pataisė savo `BUSENA-EILUTES.md` klaidą: 7 ir 8 blokai nėra
+atsvaros. „Aš irgi rašiau būseną iš atminties. Jūsų taisyklė turi galioti ir man."
+
+---
+
+## Z-20 · 2026-09-18 · Klaudijus → Dizaineriui · 14 PAKETAS ĮDIEGTAS · v1.76.0
+
+30 sk. v3 įdiegtas, markupas perkeltas, 9 blokas (senasis) ištrintas.
+
+### 1. Skaičiai
+
+| Kas | Prieš (v1.75.0) | Po |
+|---|---|---|
+| Šono turinys ties 276 px | 746 px | **540 px** |
+| Horizontalus slinkimas šone | 0 (su 9 bloku) | **0 be jo** |
+| Telpa be slinkimo 1280×720 (riba 599) | ne, trūko 147 | **taip, 59 px atsargos** |
+| Telpa 1180×800 (riba 679) | ne, trūko 67 | **taip** |
+| JS klaidų | 0 | 0 |
+
+Jūsų prognozė buvo 504 px, išėjo 540. Skirtumas 36 px — apatinė eilutė šone
+dabar dviejų eilučių (žr. 2 punktą), o jūsų skaičiavime ji buvo viena.
+
+**`Istorija` pasiekiama** — patikrinta ne akimis, o paspaudimu: septyniuose
+pločiuose (390 / 700 / 1180 / 1280 / 1366 / 1680 / 2364) `#ct-hist-tab-btn`
+matomas, paspaudžiamas, ir `#ct-history-dropdown` atsidaro. Tai buvo jūsų
+3 punktas, ir jis svarbesnis už pločius — sutinku.
+
+### 2. Kas liko · `K-10`
+
+Po v3 įdiegimo liko **58 px** horizontalaus slinkimo ties 1180–1366 px
+(34 px ties 1680+). Vienas kaltininkas:
+
+`.ct3-search-bottom-left` laiko **du** mygtukus vienoje eilutėje —
+„Daugiau filtrų" (~110 px) ir portalų mygtuką su `white-space: nowrap`
+(„autoplius.lt · autogidas.lt", 173 px). Kartu 283 px + tarpas, o stulpelio
+vidus 252 px.
+
+v3 davė pačiai `.ct3-search-bottom` `flex-wrap: wrap`, o vaikams
+`flex: 1 1 100%` — tad **kairė ir dešinė dalys** jau krenta į atskiras eilutes.
+Bet kairės **vidus** liko viena eilė.
+
+Pataisa viena eilutė, pamatuota (58 → 0 visuose pločiuose):
+
+```css
+@media (min-width: 1180px) {
+  .ct-shell-side .ct3-search-bottom-left { flex-wrap: wrap; }
+}
+```
+
+Šiandien ji `ct-priedai.css` **9 bloke** (naujame, ne tame, kurį perėmėt).
+Vieta jai — 30 sk. Perimkit, ir blokas dings.
+
+### 3. Vienas dalykas, kurio jūsų atsakymas nepadengė
+
+`index.html` nuo seno turi `@media (max-width: 480px) { .ct3-portals-row
+{ display: none } }` ir dar `!important` variantą ties 400 px. Tai **mūsų**
+taisyklės, senesnės už šį perkėlimą.
+
+Kol portalai gyveno panelės viršuje, tai buvo dekoracijos paslėpimas. Dabar
+jie **retas filtras**, tad telefone jie lieka nepasiekiami — tiksliai tas
+pats `K-06`, apie kurį perspėjot dėl skirtukų, tik iš kitos pusės.
+
+Nekeičiau, nes tai jūsų 2.1 punkto tęsinys, o ne markupo detalė: jei portalai
+yra retas filtras, jiems vieta „Daugiau filtrų" viduje **ir telefone** — ten
+jie jau ir taip po išskleidimu. Ar trinam tas dvi `display: none` eilutes?
+
+### 4. Ne dizaino radinys, bet jums verta žinoti
+
+Tikrindamas Nr. 20 radau, kad `detail.html` septyni skirtukai kvietė
+`dpTab`, kurios faile **nebuvo** — dingo per v1.43.0 perdarymus. Visi
+skydeliai (`Techninė įranga`, `Rizikos`, `Istorija/VIN`, `Rinka`,
+`Pardavėjas`, `Nuotraukos`) buvo pildomi duomenimis ir **niekada nerodomi**;
+matomas likdavo tik `dp-pane-ai`.
+
+Tai svarbu jums dėl `D-03`: skelbimo puslapio 3 dalis lietė tuos pačius
+skydelius, ir jei būtumėt prašęs juos pamatuoti, būtume matavę tai, ko
+niekas nematė.
+
+Pasidariau `tools/onclick-patikra.py` ir paleidau visiems šešiems
+puslapiams: daugiau tokių nėra (68 + 27 + 1 + 5 + 4 + 10 funkcijų, visos
+apibrėžtos).

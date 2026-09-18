@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.76.0', data: '2026-09-18', pavadinimas: 'Skelbimo skirtukai vel veikia, filtru stulpelis susitvarke',
+    pakeitimai: [
+      'Skelbimo puslapyje skirtukai (Technine iranga, Rizikos, Istorija, Rinka, Pardavejas) vel persijungia - funkcija buvo dingusi ir kiekvienas paspaudimas metė klaida',
+      'Telefone pranesimo mygtukas nebeuzlipa ant sirdeles skelbimo puslapyje',
+      'Filtru stulpelis sutrumpejo 746 -> 540 px ir telpa be slinkimo nuo 1180 px',
+      'Skirtukai „Ieskoti / Paskutines paieskos" persikele virs rezultatu, portalu pasirinkimas - i „Daugiau filtru"',
+    ],
+  },
+  {
     versija: '1.75.0', data: '2026-09-18', pavadinimas: 'Filtrai persikele i sona, ekranas naudojamas iki 1600 px',
     pakeitimai: [
       'Nuo 1180 px filtrai stovi kaireje ir lieka matomi slenkant - nebereikia grizti i virsu',

@@ -1924,55 +1924,70 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
 
 
 /* ============================================================================
-   30. FILTRAI SONE · du tankio zingsniai   (antra redakcija)
+   30. FILTRAI SONE · visa panele, ne tik laukai   (trecia redakcija)
    ----------------------------------------------------------------------------
-   Vienas principas: siauras variantas nera „tas pats, tik suspaustas". Tai tas
-   pats turinys kitame skaitymo bude — horizontaliai skenuojamas tinklelis
-   virsta vertikaliai skaitomu sarasu.
+   Vienas principas nepakito: siauras variantas nera „tas pats, tik suspaustas".
+   Tai tas pats turinys kitame skaitymo bude.
 
-   Pirmoje redakcijoje padariau viena zingsni (nuimiau lauku korteles) ir
-   spejau, kad pakaks. Pamatavus — nepakanka: 643 px netelpa i 1280x720
-   (riba 599). Reikia dvieju zingsniu.
+   Kas pakito — apimtis. Panele turi keturias dalis, ir tik viena is ju yra
+   laukai. Kitos trys buvo suprojektuotos per visa ekrana ir 276 px stulpelyje
+   neturi ka veikti:
 
-   ZINGSNIS 1 — kortele nuo lauko. Sone lauko fonas ir remelis nieko neskiria:
-   laukai jau vienas po kitu viename stulpelyje, o kortele tik prideda 22 px
-   kiekvienam. 73 px -> 50 px.
+     .ct3-search-inner      padding 0 48px  — is 276 px lieka 178
+     .ct3-search-tabs       nowrap, 340 px  — kyso 125
+     .ct3-portals-row       nesilauzo       — kyso 386
+     .ct3-search-bottom-*   188 px tėve 154 — kyso 34
 
-   ZINGSNIS 2 — semantiniai broliai poromis. Du diapazonai (METAI, KAINA)
-   ir du sarasai (KURAS, PAVARU DEZE) eina po du. Ne „trumpi su trumpais",
-   o TOKS PAT SU TOKIU PAT — kad pora skaitytusi kaip vienas sprendimas.
-   8 eiles -> 6 eiles.
-
-   Platus lieka tie, kuriu pasirinkimo tekstas ilgas (MARKE, MODELIS,
-   VARANTIEJI RATAI) ir GALIA, kurios du skaiciu laukai siauroje puseje
-   butu po 52 px.
-
-   PAMATUOTA (panele sone, 276 px):
-     A be nieko          829 px   telpa tik nuo 1800x1000
-     B po 1 zingsnio     643 px   netelpa i 1280x720 (riba 599)
-     C po abieju         527 px   telpa visur, 1280x720 su 72 px atsarga
-   Apkirpimu nei viename lauke nera (patikrinta scrollWidth visiems astuoniems).
-
-   NEPERIMA: lauku vidaus — select, input, .ct3-select-wrap, .ct3-range-wrap
-   fonai, remeliai, aukstis lieka jusu.
-   NEPERIMA: .ct3-search-panel fono, remelio, radiuso.
-   NEPERIMA: „Daugiau filtru" mygtuko ir jo zenkliuko logikos.
-   PERIMA tik: tinklelio stulpelius, tarpus, lauko korteles nuemima sone.
+   Du is ju sprendziami CSS (uzpildas, laužymas). Du — MARKUPU, nes tai ne
+   dydzio, o vietos klausimas: skirtukai ir portalai sone neturi buti visai.
+   Zr. PASTABOS.md 2.
 
    PRIRISTA prie: min-width 1180px — to paties slenkscio, kuriame 25 sk.
-   sukuria sona. Kitoje salygoje sitas blokas neturi ka veikti, ir butent
-   todel jis priristas prie tos, o ne prie „siauro ekrano". */
+   sukuria sona.
+
+   NEPERIMA: .ct3-search-panel fono, remelio, radiuso — jie teisingi abiejose
+   vietose. NEPERIMA lauku vidaus (select, input, ju aukscio). NEPERIMA
+   „Daugiau filtru" mygtuko logikos. NEPERIMA .ct3-search-inner uzpildо
+   PLACIAME variante — 0 48px ten teisinga reiksme ir lieka jusu faile. */
 
 @media (min-width: 1180px) {
 
-  /* Zingsnis 2: du stulpeliai, platus laukai per abu */
+  /* ── Panele: uzpildas pagal stulpeli, ne pagal ekrana ────────────────────
+     48 px per visa ekrana yra teisinga. 276 px stulpelyje tai 23 % plocio ir
+     laukai lieka po 71 px. Sone uzpildas ateina is tokenų. */
+  .ct-shell-side .ct3-search-inner {
+    max-width: none;
+    padding: 0;
+  }
+
+  /* ── Viskas, kas lanksti, turi leisti sau susitraukti ────────────────────
+     Be min-width: 0 flex vaikas nesitraukia zemiau savo turinio — ta pati
+     savybe, del kurios <select> ispute grida v2 matavime. */
+  .ct-shell-side .ct3-search-panel,
+  .ct-shell-side .ct3-search-inner,
+  .ct-shell-side .ct3-search-bottom,
+  .ct-shell-side .ct3-search-bottom-left,
+  .ct-shell-side .ct3-search-bottom-right { min-width: 0; }
+
+  /* Apatine eile: sone ji ne eile, o stulpelis */
+  .ct-shell-side .ct3-search-bottom {
+    flex-wrap: wrap;
+    gap: var(--s-2);
+    padding: var(--s-3);
+  }
+  .ct-shell-side .ct3-search-bottom-left,
+  .ct-shell-side .ct3-search-bottom-right {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+  }
+
+  /* ── Laukai: du tankio zingsniai (nepakito nuo v2) ───────────────────────
+     Zingsnis 1 — kortele nuo lauko. Zingsnis 2 — semantiniai broliai poromis. */
   .ct-shell-side .ct3-fields {
     grid-template-columns: 1fr 1fr;
     gap: var(--s-2) var(--s-3);
     padding: var(--s-3);
   }
-
-  /* Zingsnis 1: kortele nuo lauko */
   .ct-shell-side .ct3-field {
     gap: 5px;
     padding: 0;
@@ -1980,26 +1995,28 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
     border: none;
     min-width: 0;
   }
-
-  /* Platus — visas sono plotis. Klase deda jusu generatorius (zr. errata). */
   .ct-shell-side .ct3-field.is-wide { grid-column: 1 / -1; }
 
-  /* Siauroje puseje tekstui lieka 99 px, tad rodykle arciau ir sriftas 13.5 */
   .ct-shell-side .ct3-select-wrap { padding-right: 20px; }
   .ct-shell-side .ct3-select-wrap select,
   .ct-shell-side .ct3-range-wrap input { font-size: 13.5px; }
-
-  /* Diapazonai: markupe jie turi max-width 52-60 px, sone tai palieka tuscia
-     vieta. Atsaukiu ir leidziu dalintis eilute po lygiai. */
   .ct-shell-side .ct3-range-wrap { display: flex; align-items: center; gap: 6px; }
   .ct-shell-side .ct3-range-wrap > input { flex: 1 1 0; min-width: 0; max-width: none; }
 
-  /* „Daugiau filtru" skydas sone — vienas stulpelis.
-     REIKIA JUSU: #more-filters vidinis div su inline display:flex
-     turi gauti klase ct3-more-row. */
-  .ct-shell-side #more-filters { padding: var(--s-3); }
+  /* ── „Daugiau filtru" skydas ─────────────────────────────────────────────
+     .ct3-more-panel yra jusu klase (8 blokas) — cia tik jos uzpildas sone. */
+  .ct-shell-side .ct3-more-panel { padding: var(--s-3); }
   .ct-shell-side .ct3-more-row { flex-direction: column; gap: var(--s-3); align-items: stretch; }
   .ct-shell-side .ct3-more-row > div { width: 100%; }
+
+  /* Portalai sone gyvena TIK „Daugiau filtru" viduje (zr. PASTABOS 2.2).
+     Ten jiems reikia laužymo — keturios veleveles i viena eile netelpa. */
+  .ct-shell-side .ct3-more-panel .ct3-portals-row,
+  .ct-shell-side .ct3-more-panel .ct3-flags {
+    flex-wrap: wrap;
+    gap: var(--s-2);
+    min-width: 0;
+  }
 
   .ct-shell-side .ct3-search-btn { width: 100%; justify-content: center; }
 }

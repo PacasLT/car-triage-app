@@ -336,6 +336,15 @@ button{font-family:inherit;cursor:pointer}
   #dp-sticky-bar { display: flex; }
   .dp-wrap { padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important; }
 
+  /* v1.76.0 (Nr. 21): pranesimo mygtukas gulejo ant sirdeles. Pamatuota, 390 px:
+     FAB 675-719, sticky juosta 664-731, sirdele 330-376 - FAB dengia ja visa.
+     Juosta 67 px + saugi zona; keliam virs jos.
+     Specifika (0,3,0), nes `ct-dizainas.css` idedamas PO siuo <style> bloku
+     (zr. komentara prie <link> zymu) ir prie lygios specifikos nugaletu jis. */
+  .ct-btn.ct-btn.ct-report-fab {
+    bottom: calc(79px + env(safe-area-inset-bottom, 0px));
+  }
+
   /* Header */
   .ct3-header-inner { padding: 12px 16px !important; }
   .ct3-logo-icon { width: 34px !important; height: 34px !important; }
@@ -990,6 +999,21 @@ window.ctApi = function (kelias, params) {
     if (!_photos.length) return;
     _photoIdx = (_photoIdx + dir + _photos.length) % _photos.length;
     dpShowPhoto(_photoIdx);
+  };
+
+  // ---- SKIRTUKAI (v1.76.0, Nr. 20)
+  // `dpTab` buvo iskviecama septyniuose `onclick` ir dviejose nuorodose, bet
+  // paties apibrezimo faile NEBUVO - dingo per v1.43.0 perdarymus. Naudotojui
+  // tai atrode taip, tarsi skirtukai butu negyvi: kiekvienas paspaudimas metė
+  // `ReferenceError: dpTab is not defined`, o matomas likdavo tik `dp-pane-ai`.
+  // Visi kiti skydeliai buvo uzpildomi duomenimis ir niekada nerodomi.
+  window.dpTab = function (key, btn) {
+    var p = document.getElementById('dp-pane-' + key);
+    if (!p) return;
+    document.querySelectorAll('.dp-pane').forEach(function (x) { x.classList.remove('active'); });
+    document.querySelectorAll('.dp-tab').forEach(function (b) { b.classList.remove('active'); });
+    p.classList.add('active');
+    if (btn) btn.classList.add('active');
   };
 
   // ---- LIGHTBOX: nuotrauku didinimas (klavisai ←/→/Esc, braukimas telefone)
