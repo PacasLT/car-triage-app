@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.72.0', data: '2026-09-18', pavadinimas: 'Lizingo įmoka atpažįstama pagal formą, ne pagal sumą',
+    pakeitimai: [
+      'ISTAISYTA: skelbimai, kur vietoj kainos rodoma „739 € / mėn.", nebuvo pažymimi, jei suma didesnė už ribą',
+      'Dabar žiūrima, ar prie pačios kainos stovi „/ mėn." – suma nebesvarbi',
+      'Skelbimai, kurie rodo tikrą kainą, o šalia siūlo lizingą, nežymimi – patikrinta aštuoniais atvejais',
+    ],
+  },
+  {
     versija: '1.71.0', data: '2026-09-18', pavadinimas: 'Širdelė nebeslepia savęs',
     pakeitimai: [
       'Užvedus pelę mėgstamiausių sąrašas atsidaro kaip anksčiau – spausti nereikia',

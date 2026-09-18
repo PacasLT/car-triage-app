@@ -383,6 +383,12 @@ nors jau ištaisytas, ir kitą kartą prie jo grįžama be reikalo.
 3. kas laukia dizainerio → `atideta`, nurodant, kurio paketo;
 4. kas pradėtas → `tvarkoma`.
 
+**Kiekviena `laukia-patikros` pastaba baigiasi eilute `KA PATIKRINTI:`** –
+konkrečiai, ka Lukas turi pažiūrėti, kur ir kokiame plotyje. „Ar veikia" nėra
+užduotis. Jei reikia jo pagalbos ar gilesnio patikrinimo (duomenų, kurių nematau,
+konkretaus skelbimo, tikro įrenginio) – tai pasakoma toje pačioje pastaboje,
+o ne tik pokalbyje, nes pokalbis dingsta, o pastaba lieka prie pranešimo.
+
 **Ir Lukui atsakyme parodoma suvestinė** – kiek kurioje būsenoje ir kurie
 numeriai laukia jo patikros. Push'inėdamas jis turi matyti ne tik versiją, bet
 ir kur esame kartu.

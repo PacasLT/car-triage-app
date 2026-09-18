@@ -706,7 +706,31 @@ const SENAS_METAI = new Date().getFullYear() - 10;
 const SENAS_RIDA = 200000;
 
 function kainosPatikra(kaina, tekstas, lizingoSuma, meta) {
-  if (!kaina || kaina >= MIN_REALI_KAINA) return null;
+  if (!kaina) return null;
+
+  // v1.72.0 (pranesimas Nr.15). Tikras skelbimas, kuri atsiunte Lukas:
+  // autoplius.lt/.../bmw-x4-...-31741763 rodo „739 € / men." ir „4749 €",
+  // o AUTOMOBILIO kainos nerodo isvis. `.loan-information-container` ten nera,
+  // tad `lizingoSuma` - null. Riba nepadeda: 4749 >= 4500, tad iki siol sis
+  // skelbimas pro patikra praeidavo be jokios zymos.
+  //
+  // Todel svarbiausias pozymis yra ne DYDIS, o tai, kad pati kaina eina su
+  // „/ men." salia. Tikrinam pirma, nepriklausomai nuo sumos.
+  //
+  // Kodel ne bet koks „/men." bloke: daugelis skelbimu rodo tikra kaina, o
+  // salia siulo lizinga („nuo 429 €/men."). Tokie turi `turiLizingoOpcija`
+  // ir NETURI buti zymimi. Todel ieskom butent TOS PACIOS sumos su „/ men.".
+  if (tekstas) {
+    var sk = String(kaina);
+    var suTarpais = sk.replace(/\B(?=(\d{3})+(?!\d))/g, '[\\s ]?');
+    var re = new RegExp(suTarpais + '\\s*€\\s*/\\s*m[eė]n', 'i');
+    if (re.test(tekstas)) {
+      return { tipas: 'lizingo-imoka',
+        tekstas: `Rodoma ${kaina} € yra mėnesinė lizingo įmoka, ne automobilio kaina. Skelbime automobilio kaina nenurodyta – klauskite pardavėjo.` };
+    }
+  }
+
+  if (kaina >= MIN_REALI_KAINA) return null;
   // autoplius lizingo blokas (data-amount) rodo AUTOMOBILIO kaina, ne imoka - jei sutampa, kaina tikra
   if (lizingoSuma && Math.abs(lizingoSuma - kaina) / kaina < 0.05) return null;
   if (lizingoSuma && lizingoSuma > kaina * 3) {
