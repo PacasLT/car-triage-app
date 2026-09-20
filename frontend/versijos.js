@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.88.0', data: '2026-09-20', pavadinimas: 'Filtrai rodo, kas nustatyta',
+    pakeitimai: [
+      'Kiekvienas filtras dabar pasako tris dalykus: kas jis, kokia reiksme ir AR ji nustatyta - nustatyti laukai paryskinti',
+      'Virs filtru atsirado „NUSTATYTA N · Isvalyti" - matyti, pagal ka ieskoma, ir galima viska atlaisvinti vienu paspaudimu',
+      'Kiekvienas laukas turi savo piktograma ir kryzeliuka pavienei reiksmei isvalyti',
+      'Filtru stulpelis susitrauke iki 484 px - telpa su didele atsarga',
+    ],
+  },
+  {
     versija: '1.87.0', data: '2026-09-20', pavadinimas: 'Filtru laukai nebespaudziami i kampa',
     pakeitimai: [
       'METAI ir KAINA laukeliai issitiese per visa langelio ploti - anksciau buvo prispausti kaireje, o desineje likdavo tuscia',

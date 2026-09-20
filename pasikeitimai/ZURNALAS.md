@@ -2478,3 +2478,57 @@ nes tikrinau slinkimą, o klaida buvo aukštyje.
 
 **23 paketas dabar gali būti diegiamas** — abu markupo blokuotojai dingę,
 inline stilių laukuose nebeliko nė vieno.
+
+---
+
+## Z-37 · 2026-09-20 · Klaudijus → Dizaineriui · 23 PAKETAS ĮDIEGTAS · v1.88.0
+
+Visi vienuolika laukų perdaryti į `.ct-fld`, 12 piktogramų sprite'e, būsenos
+persijungia gyvai.
+
+```
+lauku                11     piktogramu sprite'e  12 (+19 senu)
+is-set / is-empty     3 / 8  (pradine bukle: MARKE, MODELIS, KURAS)
+ivedus reiksme       .ct-fld is-set, santrauka „NUSTATYTA 4"
+paspaudus ✕          .ct-fld is-empty, reiksme tuscia
+sonas po paieskos    472 px (390) · 484 px (1280 / 2364)   riba 599
+horizontalaus slinkimo 0 · puslapio 0 · JS klaidu 0
+```
+
+**Šonas 484 px, ne 584.** Jūsų prognozė buvo panelei su 12 laukų; pas mus
+vienuolika plius veiksmų langelis, ir `PAPILDOMAI` išėjo į „Daugiau filtrų".
+Atsarga dabar 115 px — nebe 15. Ta „plona riba", apie kurią įspėjot, kol kas
+atsileido.
+
+### Du dalykai, kuriuos reikėjo padaryti markupo pusėje
+
+**1. Tikri `<select>` ir `<input>` viduje.** Jūs rašėt: *„.ct-fld yra
+APVALKALAS. Jei laukas yra tikras `<select>`, jis lieka viduje su
+`appearance: none`."* `ct-priedai.css` **12 blokas**: vidiniai valdikliai
+atsisako savo fono, rėmelio ir užpildo, nes dėžutę piešia `.ct-fld-v`. Be to
+būtų buvusi dėžutė dėžutėje — tas pats, ko 27 pakete išvengėm.
+
+**2. Vienas paslėptas apvalkalas, kurio 27 paketas nepagavo.** `GALIA` turėjo
+dar vieną vidinį `<div style="display:flex; gap:6px">` — jis liko iš to laiko,
+kai lauke reikėjo savo eilutės. `.ct-fld-v` dabar pats yra ta eilutė, o senasis
+div neturėjo `min-width: 0`, tad nesitraukė:
+
+```
+sonas kyso:  138-162 px  (galiaIki 185 px, vidinis div 390 px)
+isemus div:           0 px
+```
+
+Jūsų 27 paketo trys punktai buvo teisingi, bet ketvirtas liko nepastebėtas —
+ir ne todėl, kad neieškojot: jis matomas tik **po** `.ct-fld` uždėjimo, nes iki
+tol tas div nieko nelaužė.
+
+### Ko dar nepadariau
+
+`.ct-fld-t` klasė uždėta ant pačių `<select>` / `<input>`, o ne ant atskiro
+`<span>`, kaip jūsų pavyzdyje. Priežastis: reikšmę piešia pats valdiklis, ir
+antras elementas reikštų dvi tiesos kopijas. Jei 34 sk. nuo to kur nors lūžta —
+sakykit, pakeisiu.
+
+30 sk. `.ct3-field` blokas dabar **negyvas** (markupas perėjo prie `.ct-fld`).
+Netryniau — tai jūsų failas, ir jūs sakėt, kad jį galima išimti. Palauksiu
+`SUJUNGTO` failo, kad viskas dingtų vienu ėjimu, o ne dviem.

@@ -133,4 +133,65 @@
     </symbol>
 
   </defs>
+
+<!-- 23 paketas: 12 filtru piktogramu. viewBox 24 (esami 16) - kiekvienas
+     <symbol> nesa savo viewBox, tad viename sprite'e jie gyvena be konflikto. -->
+<symbol> blokus i ESAMA sprite'a, salia 19 turimu. Naujo failo
+     kurti nereikia — vienas sprite'as yra teisinga vieta, ir DIZAINERIUI.md jau
+     sako, kad ct-ikonos.html yra „visos piktogramos vienoje vietoje".
+
+     KODEL viewBox 24, kai esami yra 16:
+     kiekvienas <symbol> nesa savo viewBox, tad viename sprite'e 16 ir 24 gyvena
+     be konflikto. 24 tinklelis pasirinktas samoningai — 1,8 storio linija 24
+     tinklelyje, sumazinta iki 13 px, atrodo tokio pat svorio kaip esamos 16
+     tinklelio piktogramos. Bręzę 16 tinklelyje, sios 12 butu storesnes uz
+     kaimynes.
+
+     STILIUS: stroke, ne fill · storis 1,8 · apvalios galunes ir sandūros ·
+     currentColor. Spalva ateina is teksto, tad laukas, etikete ir piktograma
+     visada sutampa.
+
+     NAUDOJIMAS, kaip esamu:
+       <svg class="ct-i"><use href="#i-f-marke"></use></svg>
+     ========================================================================= -->
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <defs>
+    <!-- Marke · automobilio siluetas -->
+    <symbol id="i-f-marke" viewBox="0 0 24 24">
+      <path d="M5 16.5h14M6.5 16.5l1.2-4.4a2 2 0 0 1 1.9-1.4h4.8a2 2 0 0 1 1.9 1.4l1.2 4.4M8 16.5v2M16 16.5v2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+<symbol id="i-f-modelis" viewBox="0 0 24 24">
+      <path d="M4.5 7.5h15M4.5 12h15M4.5 16.5h9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+<symbol id="i-f-metai" viewBox="0 0 24 24">
+      <path d="M4.5 6.5h15v13h-15zM8.5 4v5M15.5 4v5M4.5 11h15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+<symbol id="i-f-kaina" viewBox="0 0 24 24">
+      <path d="M15.5 7.5H10a2.8 2.8 0 0 0 0 5.6h5.5M6.5 9.8h7.5M6.5 12.6h7.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+<symbol id="i-f-rida" viewBox="0 0 24 24">
+      <path d="M20 16a8 8 0 1 0-16 0M12 16l4.2-3.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+<symbol id="i-f-kuras" viewBox="0 0 24 24">
+      <path d="M12 3.5c2.8 3.8 4.6 5.8 4.6 8.6a4.6 4.6 0 0 1-9.2 0c0-2.8 1.8-4.8 4.6-8.6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+<symbol id="i-f-pavaros" viewBox="0 0 24 24">
+      <path d="M6 5v14M12 5v14M18 5v14M6 5h12M6 12h12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+<symbol id="i-f-ratai" viewBox="0 0 24 24">
+      <path d="M7 9.2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6zM17 9.2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6zM9.8 12h4.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+<symbol id="i-f-galia" viewBox="0 0 24 24">
+      <path d="M13.2 3.5L6 13.2h5l-1.2 7.3L17 10.8h-5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+<symbol id="i-f-puslapiai" viewBox="0 0 24 24">
+      <path d="M12 3.8l8 3.8-8 3.8-8-3.8zM4 12l8 3.8L20 12M4 16.2l8 3.8 8-3.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+<symbol id="i-f-portalai" viewBox="0 0 24 24">
+      <path d="M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zM3.5 12h17M12 3.5c-2.8 3.8-2.8 13.2 0 17M12 3.5c2.8 3.8 2.8 13.2 0 17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+<symbol id="i-f-papildomai" viewBox="0 0 24 24">
+      <path d="M4.5 7.5h9M17.5 7.5h2M4.5 12h3M11.5 12h8M4.5 16.5h7M15.5 16.5h4M15 5.6v3.8M9 10.1v3.8M13 14.6v3.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
 </svg>

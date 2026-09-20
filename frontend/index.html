@@ -2487,11 +2487,12 @@
   <div class="ct3-search-panel">
     <div class="ct3-search-inner">
 
+      <div class="ct-fld-sum" id="ct-fld-sum"></div>
       <div class="ct3-fields">
-        <div class="ct3-field is-wide">
-          <label>MARKĖ</label>
-          <div class="ct3-select-wrap">
-            <select id="marke" onchange="updateModels ? updateModels() : null">
+        <div class="ct-fld is-empty is-inline" data-lauk="i-f-marke">
+          <span class="ct-fld-k"><svg class="ct-i"><use href="#i-f-marke"></use></svg>MARKĖ</span>
+          <div class="ct-fld-v"><svg class="ct-i"><use href="#i-f-marke"></use></svg><span class="ct-fld-inlabel">MARKĖ</span>
+            <select class="ct-fld-t" id="marke" onchange="updateModels ? updateModels() : null">
               <option value="">Visos markės</option>
               <option value="BMW" selected>BMW</option>
               <option>Mercedes-Benz</option>
@@ -2501,109 +2502,130 @@
               <option>Volvo</option>
               <option>Porsche</option>
             </select>
-            <svg class="ct3-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            <svg class="ct-i" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            <button type="button" class="ct-fld-x" tabindex="-1" aria-label="Išvalyti">✕</button>
           </div>
         </div>
-        <div class="ct3-field is-wide">
-          <label>MODELIS</label>
-          <div class="ct3-select-wrap">
-            <select id="modelis">
+
+        <div class="ct-fld is-empty is-inline" data-lauk="i-f-modelis">
+          <span class="ct-fld-k"><svg class="ct-i"><use href="#i-f-modelis"></use></svg>MODELIS</span>
+          <div class="ct-fld-v"><svg class="ct-i"><use href="#i-f-modelis"></use></svg><span class="ct-fld-inlabel">MODELIS</span>
+            <select class="ct-fld-t" id="modelis">
               <option value="">Visi modeliai</option>
               <option value="X5" selected>X5</option>
             </select>
-            <svg class="ct3-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            <svg class="ct-i" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            <button type="button" class="ct-fld-x" tabindex="-1" aria-label="Išvalyti">✕</button>
           </div>
-        </div>
-        <div class="ct3-field">
-          <label>METAI</label>
-          <div class="ct3-range-wrap">
-            <input id="metaiNuo" type="number" placeholder="2018" min="1990" max="2025">
-            <span>–</span>
-            <input id="metaiIki" type="number" placeholder="2024" min="1990" max="2025">
-            <svg class="ct3-range-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-          </div>
-        </div>
-        <div class="ct3-field">
-          <label>KAINA</label>
-          <div class="ct3-range-wrap">
-            <input id="kainaNuo" type="number" placeholder="€ Min">
-            <span>–</span>
-            <input id="kainaIki" type="number" placeholder="Max">
-          </div>
-        </div>
-        <div class="ct3-field">
-          <label>RIDA IKI (KM)</label>
-          <input id="ridaIki" type="number" min="0" step="10000" placeholder="pvz. 200000" oninput="ctUpdateMoreBadge()"
-                 class="ct3-inp">
         </div>
 
-        <div class="ct3-field">
-          <label>KURAS</label>
-          <div class="ct3-select-wrap">
-            <select id="fuel">
+        <div class="ct-fld is-empty" data-lauk="i-f-metai">
+          <span class="ct-fld-k"><svg class="ct-i"><use href="#i-f-metai"></use></svg>METAI</span>
+          <div class="ct-fld-v">
+            <input class="ct-fld-t" id="metaiNuo" type="number" placeholder="2018" min="1990" max="2025">
+            <span>–</span>
+            <input class="ct-fld-t" id="metaiIki" type="number" placeholder="2024" min="1990" max="2025">
+            <svg class="ct-i" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            <button type="button" class="ct-fld-x" tabindex="-1" aria-label="Išvalyti">✕</button>
+          </div>
+        </div>
+
+        <div class="ct-fld is-empty" data-lauk="i-f-kaina">
+          <span class="ct-fld-k"><svg class="ct-i"><use href="#i-f-kaina"></use></svg>KAINA</span>
+          <div class="ct-fld-v">
+            <input class="ct-fld-t" id="kainaNuo" type="number" placeholder="€ Min">
+            <span>–</span>
+            <input class="ct-fld-t" id="kainaIki" type="number" placeholder="Max">
+            <button type="button" class="ct-fld-x" tabindex="-1" aria-label="Išvalyti">✕</button>
+          </div>
+        </div>
+
+        <div class="ct-fld is-empty" data-lauk="i-f-rida">
+          <span class="ct-fld-k"><svg class="ct-i"><use href="#i-f-rida"></use></svg>RIDA IKI (KM)</span>
+          <div class="ct-fld-v">
+          <input class="ct-fld-t" id="ridaIki" type="number" min="0" step="10000" placeholder="pvz. 200000" oninput="ctUpdateMoreBadge()">
+            <button type="button" class="ct-fld-x" tabindex="-1" aria-label="Išvalyti">✕</button>
+          </div>
+        </div>
+
+
+        <div class="ct-fld is-empty" data-lauk="i-f-kuras">
+          <span class="ct-fld-k"><svg class="ct-i"><use href="#i-f-kuras"></use></svg>KURAS</span>
+          <div class="ct-fld-v">
+            <select class="ct-fld-t" id="fuel">
               <option value="">Visi</option>
               <option value="dyzelis" selected>Dyzelinas</option>
               <option value="benzinas">Benzinas</option>
               <option value="hibridas">Hibridas</option>
               <option value="elektra">Elektrinis</option>
             </select>
-            <svg class="ct3-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            <svg class="ct-i" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            <button type="button" class="ct-fld-x" tabindex="-1" aria-label="Išvalyti">✕</button>
           </div>
         </div>
-        <div class="ct3-field">
-          <label>PAVARŲ DĖŽĖ</label>
-          <div class="ct3-select-wrap">
-            <select id="pavaru_deze">
+
+        <div class="ct-fld is-empty" data-lauk="i-f-pavaros">
+          <span class="ct-fld-k"><svg class="ct-i"><use href="#i-f-pavaros"></use></svg>PAVARŲ DĖŽĖ</span>
+          <div class="ct-fld-v">
+            <select class="ct-fld-t" id="pavaru_deze">
               <option value="" selected>Visi</option>
               <option value="Automatinė">Automatinė</option>
               <option value="Mechaninė">Mechaninė</option>
             </select>
-            <svg class="ct3-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            <svg class="ct-i" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            <button type="button" class="ct-fld-x" tabindex="-1" aria-label="Išvalyti">✕</button>
           </div>
         </div>
+
         <!-- v1.25.0: varantieji ratai ir galia - pagrindiniai vertinimo kriterijai, todel cia, ne "Daugiau filtru" -->
-        <div class="ct3-field">
-          <label>VARANTIEJI RATAI</label>
-          <div class="ct3-select-wrap">
-            <select id="varantieji">
+        <div class="ct-fld is-empty" data-lauk="i-f-ratai">
+          <span class="ct-fld-k"><svg class="ct-i"><use href="#i-f-ratai"></use></svg>VARANTIEJI RATAI</span>
+          <div class="ct-fld-v">
+            <select class="ct-fld-t" id="varantieji">
               <option value="" selected>Visi</option>
               <!-- v1.82.0: „(4x4)" isimtas - siaurame langelyje tekstui reikejo 112 px, o vietos 99. -->
               <option value="visi">Visi varantys</option>
               <option value="priekiniai">Priekiniai</option>
               <option value="galiniai">Galiniai</option>
             </select>
-            <svg class="ct3-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            <svg class="ct-i" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            <button type="button" class="ct-fld-x" tabindex="-1" aria-label="Išvalyti">✕</button>
           </div>
         </div>
-        <div class="ct3-field">
-          <label>GALIA (KW)</label>
-          <div style="display:flex; gap:6px; align-items:center;">
-            <input id="galiaNuo" type="number" min="0" step="10" placeholder="nuo"
-                   class="ct3-inp">
+
+        <div class="ct-fld is-empty" data-lauk="i-f-galia">
+          <span class="ct-fld-k"><svg class="ct-i"><use href="#i-f-galia"></use></svg>GALIA (KW)</span>
+          <div class="ct-fld-v">
+            <input class="ct-fld-t" id="galiaNuo" type="number" min="0" step="10" placeholder="nuo">
             <span style="color:var(--text-dim)">–</span>
-            <input id="galiaIki" type="number" min="0" step="10" placeholder="iki"
-                   class="ct3-inp">
+            <input class="ct-fld-t" id="galiaIki" type="number" min="0" step="10" placeholder="iki">
+          
+            <button type="button" class="ct-fld-x" tabindex="-1" aria-label="Išvalyti">✕</button>
           </div>
         </div>
+
 
         <!-- v1.82.0 (20 paketas): keturi langeliai atkelti is „Daugiau filtru".
              Sesios eiles po 6 - 12 langeliu telpa i tas pacias dvi eiles,
              tad keturi nauji filtrai kainuoja 0 px aukscio. -->
 
-        <div class="ct3-field">
-          <label>PUSLAPIŲ KIEKIS</label>
-          <div class="ct3-select-wrap">
-            <select id="maxPages" onchange="ctUpdateMoreBadge()">
+        <div class="ct-fld is-empty" data-lauk="i-f-puslapiai">
+          <span class="ct-fld-k"><svg class="ct-i"><use href="#i-f-puslapiai"></use></svg>PUSLAPIŲ KIEKIS</span>
+          <div class="ct-fld-v">
+            <select class="ct-fld-t" id="maxPages" onchange="ctUpdateMoreBadge()">
               <option value="1">1 (greičiausia)</option>
               <option value="2">2</option>
               <option value="3" selected>3 (numatyta)</option>
               <option value="5">5 (lėčiausia)</option>
             </select>
+            <button type="button" class="ct-fld-x" tabindex="-1" aria-label="Išvalyti">✕</button>
           </div>
         </div>
 
-        <div class="ct3-field">
-          <label>PORTALAI</label>
+
+        <div class="ct-fld is-empty" data-lauk="i-f-portalai">
+          <span class="ct-fld-k"><svg class="ct-i"><use href="#i-f-portalai"></use></svg>PORTALAI</span>
+          <div class="ct-fld-v">
           <div class="ct3-portal-wrap">
             <button class="ct3-marketplaces-btn ct-btn ct-btn-sm ct-btn-quiet" id="portal-toggle-btn" onclick="ctTogglePortals()">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M2 12h20M12 2c-3 4-3 12 0 16M12 2c3 4 3 12 0 16"/></svg>
@@ -2619,7 +2641,11 @@
               <label class="ct3-portal-row"><input type="checkbox" id="portal-otomoto" onchange="ctUpdatePortalBtn()"><svg viewBox="0 0 32 32" width="22" height="22" style="flex:none;border-radius:5px"><rect width="32" height="32" rx="7" fill="#C0392B"/><text x="16" y="22" font-family="system-ui,sans-serif" font-weight="900" font-size="15" fill="#fff" text-anchor="middle">OT</text></svg><span class="ct3-portal-name">otomoto.pl</span><span class="ct3-portal-flag">🇵🇱</span></label>
               <button type="button" class="ct3-portal-done" onclick="ctTogglePortals()">Gerai</button>
             </div>
-          </div>        </div>
+          </div>
+            <button type="button" class="ct-fld-x" tabindex="-1" aria-label="Išvalyti">✕</button>
+          </div>
+        </div>
+
 
 
         <!-- v1.84.0 (Nr. 34, Nr. 35): 12-asis langelis. Vienuolika langeliu
@@ -4317,6 +4343,50 @@ let currentData = null;
 })();
 
 // ---- "Daugiau filtrų" panelė ----
+// v1.88.0 (23 paketas, 34 sk.): busenos `is-set` / `is-empty` persijungia GYVAI.
+// Tai vienintelis dalykas, kuriam skyriui reikia JS, ir be jo visa jo prasme
+// dingtu: „BMW" ir tuscias „nuo - iki" vel atrodytu vienodai.
+//
+// Kas laikoma NUSTATYTA: bet kuris vidinis <select>/<input> su nenuline
+// reiksme. <select> pirma <option value=""> yra „visi", t.y. NE pasirinkimas.
+window.ctFldBusenos = function () {
+  var n = 0;
+  document.querySelectorAll('.ct-fld').forEach(function (f) {
+    var yra = false;
+    f.querySelectorAll('select.ct-fld-t, input.ct-fld-t').forEach(function (e) {
+      if (e.tagName === 'SELECT') { if (e.value !== '' && e.selectedIndex > 0) yra = true; }
+      else if (String(e.value).trim() !== '') yra = true;
+    });
+    f.classList.toggle('is-set', yra);
+    f.classList.toggle('is-empty', !yra);
+    if (yra) n++;
+  });
+  var sum = document.getElementById('ct-fld-sum');
+  if (sum) {
+    sum.innerHTML = n
+      ? '<b>NUSTATYTA ' + n + '</b><button type="button" onclick="ctFldValyti()">I\u0161valyti</button>'
+      : '';
+  }
+};
+window.ctFldValyti = function (f) {
+  var sar = f ? [f] : [].slice.call(document.querySelectorAll('.ct-fld'));
+  sar.forEach(function (x) {
+    x.querySelectorAll('select.ct-fld-t').forEach(function (e) { e.selectedIndex = 0; });
+    x.querySelectorAll('input.ct-fld-t').forEach(function (e) { e.value = ''; });
+  });
+  window.ctFldBusenos();
+};
+document.addEventListener('input', function (e) { if (e.target.closest && e.target.closest('.ct-fld')) window.ctFldBusenos(); });
+document.addEventListener('change', function (e) { if (e.target.closest && e.target.closest('.ct-fld')) window.ctFldBusenos(); });
+document.addEventListener('click', function (e) {
+  var x = e.target.closest && e.target.closest('.ct-fld-x');
+  if (!x) return;
+  e.preventDefault(); e.stopPropagation();
+  window.ctFldValyti(x.closest('.ct-fld'));
+});
+document.addEventListener('DOMContentLoaded', function () { window.ctFldBusenos(); });
+if (document.readyState !== 'loading') window.ctFldBusenos();
+
 window.ctToggleMoreFilters = function () {
   const el = document.getElementById('more-filters');
   if (!el) return;

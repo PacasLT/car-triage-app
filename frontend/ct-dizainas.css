@@ -2576,3 +2576,157 @@ textarea.ct-field {
   .ct3-stat-item { flex: 1 1 45%; }
   .ct3-stat-div { display: none; }
 }
+
+
+/* ============================================================================
+   23 paketas · 34 sk. NAUJAS · filtro laukas
+   ----------------------------------------------------------------------------
+   Priklauso nuo ct-ikonos-filtrai.html (12 nauju piktogramu).
+   30 sk. lieka — jis sprendzia TINKLELI (kiek stulpeliu, kas platus).
+   34 sk. sprendzia PATI LAUKA (kaip jis atrodo ir ka apie save sako).
+   ========================================================================== */
+
+
+/* ============================================================================
+   34. FILTRO LAUKAS · .ct-fld
+   ----------------------------------------------------------------------------
+   Vienas principas: filtras turi pasakyti tris dalykus vienu metu — KAS jis,
+   KOKIA jo reiksme, ir AR ji nustatyta. Iki siol sone sake tik pirmus du, ir
+   todel atrodė kaip sarasas, o ne kaip valdiklis.
+
+   Trecias yra svarbiausias ir jo truko labiausiai: „BMW" ir tuscias
+   „nuo – iki" atrodė vienodai, nors vienas yra zmogaus sprendimas, o kitas —
+   tuscias laukas. Po paieskos sono darbas ir yra parodyti, PAGAL KA
+   filtruojama, ir leisti tai atlaisvinti.
+
+   ── TRYS BUSENOS ──────────────────────────────────────────────────────────
+   numatyta  remelis, prislopinta reiksme, rodykle      — „cia galima rinktis"
+   nustatyta akcento fonas, soti reiksme, ✕             — „tai TAVO pasirinkimas"
+   uzvesta   stipresnis remelis                          — „tai paspaudziama"
+
+   ── DU PLOCIAI, DU ISDESTYMAI ─────────────────────────────────────────────
+   platus (per abu stulpelius)  etikete VIDUJE, vienoje eileje su reiksme
+   siauras (pusė)               etikete VIRS lauko
+
+   Priezastis ne grozis: 119 px langelyje etiketė ir reiksme vienoje eileje
+   netelpa — „PAVARŲ DĖŽĖ" + „Automatinė" reikia apie 150 px.
+
+   ── PIKTOGRAMOS KAINUOJA NULI, IR TAI NE ATSITIKTINUMAS ───────────────────
+   Pamatuota: panele su piktogramomis ir be ju — abi 584 px.
+
+   Taip yra tik todel, kad .ct-fld-k turi FIKSUOTA auksti. Be jo 12 px
+   piktograma pakelia 9 px etiketes eilute iki 12, ir kiekvienas siauras laukas
+   kainuoja +3 px — is viso +15. Su fiksuotu auksciu piktograma iesikiša i jau
+   esanti tarpa.
+
+   Tad jei kada keisit etiketes dydi, keiskit ir height — kitaip piktogramos
+   tyliai taps mokamos.
+
+   NEPERIMA: tinklelio (30 sk.), panelės fono ir remelio, „Daugiau filtru"
+   mygtuko, paieskos mygtuko.
+   NEPERIMA: pacio <select> elgesio — .ct-fld yra APVALKALAS. Jei laukas yra
+   tikras <select>, jis lieka viduje su appearance: none. */
+
+
+/* ── Laukas ───────────────────────────────────────────────────────────────── */
+.ct-fld { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+
+/* Etikete virs lauko (siaurasis isdestymas).
+   height BUTINAS — zr. komentara virsuje. */
+.ct-fld-k {
+  display: flex; align-items: center; gap: 5px;
+  height: 10px;
+  font: var(--fw-bold) 9px/1 var(--font-mono);
+  letter-spacing: .13em;
+  color: var(--text-dim);
+  white-space: nowrap; overflow: hidden;
+}
+.ct-fld-k .ct-i { flex: none; width: 10px; height: 10px; }
+
+/* Pats valdiklis */
+.ct-fld-v {
+  display: flex; align-items: center; gap: 7px;
+  height: 36px; padding: 0 10px;
+  background: rgba(255, 255, 255, .04);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  min-width: 0; cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+.ct-fld:hover .ct-fld-v { border-color: var(--border-strong); background: rgba(255, 255, 255, .06); }
+.ct-fld-v:focus-within { outline: none; border-color: var(--accent-border); box-shadow: 0 0 0 3px var(--accent-dim); }
+
+/* Reiksme */
+.ct-fld-t {
+  flex: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font: var(--fw-medium) 13.5px var(--font); color: var(--text-primary);
+}
+.ct-fld-v > .ct-i { flex: none; color: var(--text-muted); width: 13px; height: 13px; }
+
+/* Busena: NENUSTATYTA — reiksme tyli, nes tai ne pasirinkimas, o numatytoji */
+.ct-fld.is-empty .ct-fld-t { color: var(--text-dim); font-weight: var(--fw-regular); }
+
+/* Busena: NUSTATYTA — akcentas. Ne spalvos del grozio: tai vienintelis
+   budas per sekunde perskaityti, pagal ka filtruojama. */
+.ct-fld.is-set .ct-fld-v { background: var(--accent-dim); border-color: var(--accent-border); }
+.ct-fld.is-set .ct-fld-t { color: var(--text-primary); font-weight: var(--fw-semi); }
+
+/* Isvalyti viena filtra */
+.ct-fld-x {
+  flex: none; width: 17px; height: 17px;
+  border: none; padding: 0;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  background: rgba(10, 12, 18, .4);
+  color: var(--accent-light);
+  font: var(--fw-bold) 9px/1 var(--font-mono);
+  cursor: pointer;
+}
+.ct-fld-x:hover { background: rgba(10, 12, 18, .65); color: var(--text-primary); }
+
+
+/* ── Platusis isdestymas · etikete viduje ─────────────────────────────────── */
+.ct-fld.is-inline > .ct-fld-k { display: none; }
+.ct-fld.is-inline > .ct-fld-v { height: 42px; padding: 0 11px; }
+.ct-fld-inlabel {
+  flex: none;
+  font: var(--fw-bold) 9px/1 var(--font-mono);
+  letter-spacing: .13em; color: var(--text-dim);
+}
+/* Siaurame isdestyme vidine etikete ir vidine piktograma nerodomos */
+.ct-fld:not(.is-inline) > .ct-fld-v > .ct-fld-inlabel { display: none; }
+.ct-fld:not(.is-inline) > .ct-fld-v > .ct-i:first-child { display: none; }
+
+
+/* ── Siauras + nustatytas: ✕ atima 24 px is reiksmes ─────────────────────────
+   Todel jis rodomas tik ant uzvedimo, o iprastai stovi rodykle. Pamatuota:
+   be sito „2018 – 2024" nusikerpa 119 px langelyje. */
+.ct-fld:not(.is-inline).is-set .ct-fld-x { display: none; }
+.ct-fld:not(.is-inline).is-set:hover .ct-fld-x { display: grid; }
+.ct-fld:not(.is-inline).is-set:hover > .ct-fld-v > .ct-i:last-child { display: none; }
+
+
+/* ── „Nustatyta N · Isvalyti" eilute ──────────────────────────────────────── */
+.ct-fld-sum { display: flex; align-items: center; gap: 7px; padding: 10px var(--s-3) 0; }
+.ct-fld-sum > b {
+  font: var(--fw-bold) 8.5px/1 var(--font-mono);
+  letter-spacing: .14em; color: var(--text-dim);
+  white-space: nowrap;
+}
+.ct-fld-sum > button {
+  margin-left: auto; border: none; background: transparent; padding: 0;
+  font: var(--fw-medium) 11px var(--font); color: var(--accent-light); cursor: pointer;
+}
+.ct-fld-sum > button:hover { color: var(--text-primary); }
+.ct-fld-sum:empty { display: none; }
+
+
+/* ── Lieciamas ekranas ────────────────────────────────────────────────────── */
+@media (pointer: coarse) {
+  .ct-fld-v { min-height: var(--tap-min); height: auto; }
+  .ct-fld.is-inline > .ct-fld-v { min-height: var(--tap-min); height: auto; }
+  /* Uzvedimo telefone nera, tad ✕ turi buti matomas visada */
+  .ct-fld:not(.is-inline).is-set .ct-fld-x { display: grid; }
+  .ct-fld-x { width: 22px; height: 22px; }
+}
