@@ -3171,3 +3171,23 @@ etiketė virš lauko siaurame variante; ✕ tik ties `:hover`/`is-set`;
 | `K-25` | `#portal-selector` niekada nebuvo dizaino sistemoje (Nr. 37) |
 | `K-24` | Nr. 38 — Lukas nori „Daugiau filtrų" prie „Ieškoti"; griauna `.ct-fld-act` |
 | `A-11` | `--focus-offset` — pasilikot sau kartu su `PT-02` |
+
+### Z-45 priedas · klaidų būsenos po 32 paketo
+
+```
+#39  tvarkoma   ikonos v1.92.0 + markė/modelis v1.94.0 (antroji sakinio dalis)
+#30  tvarkoma   avataras v1.93.0
+#33  tvarkoma   mėgstamiausių atnaujinimo mygtukas v1.85.0
+#24  tvarkoma   GRĄŽINTAS SAU iš laukia-patikros
+#36 #35 #34 #28 #23   laukia-patikros — Luko ėjimas
+```
+
+`#24` vertas paaiškinimo. Jis stovėjo `laukia-patikros` su mano pastaba
+„patikrinkit šoną SU rezultatais". Būtent ten ką tik radau, kad `MARKĖ` ir
+`MODELIS` buvo 0 px ir nepaspaudžiami. Būčiau siuntęs Luką tikrinti juostos,
+kurioje trūksta dviejų filtrų — ir jis būtų arba to nepastebėjęs, arba parašęs
+naują pranešimą apie tai, ką jau turėjau žinoti.
+
+**Taisyklė iš to:** prieš siunčiant pranešimą į `laukia-patikros`, pamatuoti
+tai, ko prašau patikrinti. Prašymas patikrinti yra pažadas, kad iš mano pusės
+baigta; jei nepamatavau, tai ne pažadas, o spėjimas.

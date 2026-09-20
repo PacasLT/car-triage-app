@@ -17,6 +17,8 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 | D-03 | Skelbimo puslapio 3 dalis | **Lukas** | Ar grąžinam šešis skydelius? Iš 27 pranešimų nė vienas nebuvo apie jų turinį. |
 | K-17 | Nr. 29 · prioriteto spalvos | **Dizaineris** | `.ct-flag` (21 sk.) be spalvų – taškas prieš užrašą `ct-priedai.css` 10 bloke. |
 | K-16 | Nr. 28 · antraštės dešinė | **Dizaineris** | `.ct3-header-right` sulipęs prie logotipo, ne prie krašto (239×42 ties 893,27). |
+| Nr. 39, 30, 33, 24 | Laukia push'o | **Klaudijus** | Visi keturi ištaisyti v1.92.0–v1.94.0, bet dar neišsiųsti. **Nr. 24 sąmoningai grąžintas sau**: prašiau patikrinti šoną, o ten trūko dviejų filtrų. |
+| Nr. 36, 35, 34, 28, 23 | Laukia jūsų patikros | **Lukas** | Gyva produkcijoje nuo v1.80.0–v1.84.0. |
 | Nr. 20, 21 | dpTab ir FAB | **Lukas** | v1.76.0 gyva — patikrinti. |
 | Nr. 25, 26 | Dekoracija ir portalų sąrašas | **Lukas** | Ištaisyta v1.77.0 — patikrinti po push'o. |
 | Nr. 19, 2, 16, 15 | Seni pranešimai | **Lukas / Klaudijus** | Nr. 15 laukia Luko sumos; Nr. 16 laukia dizainerio mobile varianto. |
