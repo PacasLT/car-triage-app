@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.97.0', data: '2026-09-21', pavadinimas: 'Filtru juosta nebeslenka i sona',
+    pakeitimai: [
+      'Sonine filtru juosta turejo paslepta horizontalu slinkima - dalis turinio buvo uz kraso',
+      'Priezastis nebuvo „Kiti skelbimai": tas mygtukas tik pailgina puslapi tiek, kad juosta tampa matoma',
+      'Portalu mygtukas platesniuose ekranuose isejo 56 px uz juostos; dabar uzrasas trumpinamas, o zenklai lieka',
+      'Siauresniuose ekranuose ta pati dare statistikos juosta - 182 px',
+    ],
+  },
+  {
     versija: '1.96.0', data: '2026-09-21', pavadinimas: 'Pasibaigusi sesija pagaliau pasisako',
     pakeitimai: [
       'Anksciau pasibaigus prisijungimui puslapis atrode veikiantis, o viskas tyliai nustodavo veikti',

@@ -3486,3 +3486,116 @@ nes tai trečias kartas per savaitę: **matavimo priemonė irgi yra prielaida.**
 `A-4` (el. pašto registras), `A-5` („Prisiminti mane"), `A-6` (atšaukimas
 serveryje), `A-8`, `C-1` (prisijungimo bandymų riba), `C-3` (`helmet`), `C-4`,
 `C-5`, `B-1` (28 tokenai dviejuose šaltiniuose — dizainerio), `B-7`.
+
+---
+
+## Z-48 · 2026-09-21 · Klaudijus → Dizaineriui · Nr. 40 · K-22 UŽDARYTAS · v1.97.0
+
+Naujas Luko pranešimas:
+
+> „Paspaudus Kiti like skelbimai pabega dizainas. suspaudzia i kaire puse"
+
+### 1. Pranešimas teisingas, bet priežastis ne ta, kurią jis įvardijo
+
+Paspaudimas **nieko nesugadina**. Pamatuota prieš ir po paspaudimo, trijuose
+pločiuose — šono horizontalus srautas **vienodas 56 px abiem atvejais**. Kinta
+tik puslapio aukštis (2821 → 3940 px).
+
+Tad mygtukas ne priežastis, o **proga**: jis pailgina puslapį tiek, kad
+nusileidus pasimato šono apačia, o su ja — slinkties juosta, kurios Lukas
+anksčiau nematė. Klaida buvo visą laiką.
+
+Tai `K-22`, kurį pats užrašiau prieš savaitę kaip „20 px, nediagnozuota".
+Dabar diagnozuotas — ir jų du, nesusiję.
+
+### 2. Pirmas kaltininkas (≥ 1180 px): `#portal-toggle-btn`, 56 px
+
+Grandinė, matuota 1280 px, `is-split`:
+
+```
+.ct-fld  PORTALAI            119 px
+  .ct3-portal-wrap            97 px   flex:1 1 0, min-width:0   teisingai
+    #portal-toggle-btn       177 px   min-width:AUTO, nowrap    netelpa
+      #portal-btn-label      139 px   flex:0 0 auto             NESITRAUKIA
+```
+
+**Du sluoksniai, ir antras svarbesnis.** Uždėjus `min-width: 0` vien mygtukui
+srautas krinta 56 → **37**, ne 0 — nes etiketė turi `flex-shrink: 0`, ir
+jokia `min-width` jai nieko nereiškia. Tai buvo vieta, kurioje vos
+nesustojau: 37 atrodo kaip „beveik".
+
+Ir dar viena tyli: leidus trauktis tik etiketei, rodyklė susispaudžia
+**12 → 4 px**. Todėl piktogramoms `flex: none` — traukiasi **tekstas**, ne
+ženklai.
+
+```
+                        1180   1280   1680
+kaip yra                 56     56     44
+tik mygtukui min-width    37     37      ?
++ etiketei flex-shrink     0      0      0     rodyklė 4 px
++ piktogramoms flex:none   0      0      0     rodyklė 12 px
+```
+
+`ct-priedai.css` **13 blokas**.
+
+### 3. Antras kaltininkas (< 1180 px): statistikos juosta, 182 px
+
+Tikrinant pirmą, paaiškėjo, kad žemiau slenksčio srautą daro visai kas kita —
+`.ct3-stats-driven`, ir daugiau: **182 px** ties 1024.
+
+**Tai mano skola.** 25 sk. diegimo metu aš pats perkėliau `.ct3-stats-bar` į
+`.ct-shell-side` po panele. Plačiame variante teisinga, siaurame niekas
+nepertikrino.
+
+```
+1024 px   182 -> 20
+1100 px   106 -> 20
+1179 px    27 -> 20
+1280 px     0 ->  0
+ 390 px     0 ->  0
+```
+
+Likę 20 px **nėra klaida**: tai 7 bloko pilno pločio triukas
+(`.ct3-search-panel` tyčia platesnė už tėvą). Ten ir sustojau.
+`ct-priedai.css` **14 blokas**.
+
+### 4. Penktoji forma, du kartus iš eilės
+
+Abu kaltininkai yra ta pati forma — **buvo teisinga, kol aplinka pasikeitė**:
+
+- 30 sk. deda `min-width: 0` panelei, vidui ir apačios eilutėms. Portalų
+  mygtukas tada dar nebuvo `.ct-fld` langelyje — 23 paketas jį ten perkėlė.
+- Statistikos juosta buvo po panele per visą plotį, kol 25 sk. nepadarė
+  šono.
+
+Abiem atvejais sena taisyklė liko teisinga ir toliau — tiesiog nebedengia tos
+vietos, kur elementas atsidūrė.
+
+### 5. Ko šis pranešimas išmokė apie matavimą
+
+Pirmas mano bėgimas rodė, kad viskas tvarkoje: `wrap` 1240, kortelės 1240,
+srautas 0. Matavau **apvalkalą**, o lūžo **antraštės mygtukas** ir **šonas**.
+Pamačiau tik atsidaręs Luko ekranvaizdį — apačioje kairėje stovėjo slinkties
+juosta.
+
+Jau trečias kartas, kai atsakymas yra „matavai ne tą elementą". Todėl
+patikros skriptas dabar nebeklausia „ar yra srautas", o surenka **visus
+elementus, kurių dešinysis kraštas išeina už tėvo**, ir rikiuoja pagal tai,
+kiek išėjo. Kaltininkas turi turėti vardą, ne tik skaičių.
+
+### 6. Pamatuota po taisymo
+
+```
+390  700  1024  1100  1179  1180  1280  1366  1680  2364
+  0    0    20    20    20     0     0     0     0     0     šono srautas
+  0    0     0     0     0     0     0     0     0     0     puslapio srautas
+```
+
+Su **išskleistu** „Kiti skelbimai". Penki puslapiai, 390 ir 1280: JS klaidų 0,
+piktogramų trūksta 0, avataras 38×38 / 44×44.
+
+### Klausimas jums · `K-27`
+
+13 ir 14 blokai yra **atsvaros**, ne sprendimas. `.ct3-marketplaces-btn` ir
+`.ct3-stats-*` yra jūsų. Jei perimsit į 30 arba 34 sk., abu blokus ištrinsiu,
+kaip darėm su 9 ir 12.
