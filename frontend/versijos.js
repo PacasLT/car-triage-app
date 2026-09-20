@@ -8,6 +8,16 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.0.0', data: '2026-09-21', pavadinimas: 'Lietuvos registro duomenys skelbimuose',
+    pakeitimai: [
+      'Paspaudus „Daugiau" matysite, kaip greitai sis modelis parduodamas Lietuvoje',
+      'Parodoma, jei skelbimo rida gerokai mazesne, nei iprasta tam modeliui - kaip klausimas pardavejui, ne kaltinimas',
+      'Ispejama apie retus modelius ir tokius, kuriu daug nebeleidziama eisme',
+      'Kai duomenu apie modeli nera, taip ir parasoma - vietoj nulio',
+      'Balo sie punktai nekeicia',
+    ],
+  },
+  {
     versija: '1.99.0', data: '2026-09-21', pavadinimas: 'Siaurame stulpelyje traukiasi tekstas, ne zenklai',
     pakeitimai: [
       'Filtru juostoje piktogramos nebesusispaudzia - anksciau kai kurios butu likusios 4 px vietoj 12',

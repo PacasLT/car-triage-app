@@ -3819,3 +3819,127 @@ Penki puslapiai: `hSrautas=0`, JS klaidų 0, piktogramų trūksta 0.
 `23b` ir `30b` atsidūrė gale, nes diegiu priduriant. Numeracija nebeatitinka
 tvarkos jau seniai (`I-01`), ir tai vis dar tik nepatogumas, ne klaida — bet
 jei kada siųsit failą perrikiuotą, įdiegsiu vienu ėjimu.
+
+---
+
+## Z-51 · 2026-09-21 · Klaudijus · REGITROS INTEGRACIJA · v2.0.0
+
+`docs/UZDUOTIS-regitra-integracija.md` įgyvendinta. Nauji failai:
+`backend/regitra.js`, `backend/testai/regitra.test.js`.
+
+### 1. Produkto sprendimas · 4 skyrius
+
+Lukas neatsakė, tad imtas **numatytasis 1 variantas**: Regitros punktai eina
+tik į **trečią lygį** (`.ct-l3`) ir į skelbimo puslapį. Kortelė nesikeičia,
+`whyReasons` trys slotai nepaliesti.
+
+Grįžti atgal pigu: `index.html` `regHtml` kintamasis ir viena eilutė
+`.ct-l3` viduje. Jei pasirinks 2 variantą, likvidumas keliauja į
+`computeTriageScore` `why` masyvą serveryje.
+
+### 2. Specifikacijoje yra 0,1 procentinio punkto prieštaravimas
+
+Riba abiejose vietose parašyta **„žemiau 12 %"**. Bet specifikacijos 4.1
+lentelėje **BMW 530 (12,1 %)** pateiktas kaip kanoninis „lėto" pavyzdys —
+paryškintas būtent dėl to.
+
+12,1 % į „žemiau 12 %" nepatenka. Kodas laikosi **ribos, ne pavyzdžio**, ir
+tai užrašyta testu:
+
+```
+ok   VW Passat (11,4 %)  → 🟡 lėtas
+ok   BMW 530 (12,1 %)    → likvidumo punkto NĖRA (riba griežta: < 12)
+ok   lygiai 12,0 %       → punkto nėra (riba neįskaitoma)
+```
+
+Jei ketinta atvirkščiai, keičiamas vienas skaičius — `RIBOS.apyvLetas`. Testas
+tada pasakys, kad elgsena pasikeitė, o ne tyliai praleis.
+
+**Tai buvo mano paties testo klaida**, ne kodo: laukiamą reikšmę rašiau iš
+lentelės pavyzdžio, o kodą — iš ribos. Pagavo tik paleidimas.
+
+### 3. Kur punktai skaičiuojami ir kodėl ne sąsajoje
+
+Skaičiuoja **serveris** (`regitra.punktai()`), o `index.html` ir `detail.html`
+tik piešia. Priežastis tiesiai iš `CLAUDE.md` lentelės: `detail.html` turėjo
+savą `ctScore()`, ir tas pats automobilis rodė 7.8 kortelėje ir 5.8 skelbimo
+puslapyje. Ta pati logika dviejuose frontenduose išsiskiria visada — klausimas
+tik kada.
+
+Kontekstas prisegamas ten, kur formuojami kandidatai, tad abu puslapiai jį
+gauna be papildomos užklausos:
+
+```js
+l.regitra = regitra.kontekstas(l.marke, l.modelis) || null;
+l.regitraPunktai = regitra.punktai(l);
+```
+
+**Spąstai, į kuriuos vos neįkritau:** `allListingsBase` pjauna skelbimus į
+konkretų laukų sąrašą. Neįdėjus laukų ten, jie iki sąsajos nebūtų nukeliavę —
+nors `enriched` juos turėtų. Tyli forma: objektas turi lauką, sąsaja negauna.
+
+### 4. Uždrausti žodžiai — dviejose vietose sąmoningai
+
+`nuotrauku-analize.js` sąrašas praplėstas (`atsukt*`, `sukt* rid*`,
+`suklastot*`, `neatitinka tikrov*`), bet `regitra.js` turi **savo** kopiją, ir
+tai ne dublikatas: ten tekstus rašo modelis, o čia — mes patys. Todėl
+`regitra.js` tikrina **gamybos vietoje**: kiekvienas punktas praeina
+`tikrintiTeksta()`, ir jei kas nors kada nors įrašytų draudžiamą žodį,
+punktas nutildomas, o į žurnalą įrašoma priežastis.
+
+Testas tikrina abi puses: kad draudžiami tekstai pagaunami ir kad
+„Paklauskite pardavėjo dėl serviso istorijos" praeina.
+
+### 5. Trūkstamų duomenų elgsena
+
+| Būklė | Elgsena |
+|---|---|
+| Modelio lentelėje nėra / nuasmenintas | **vienas** ⚪, ne trys tokie patys |
+| `rida_n < 20` | ⚪ „per mažai registracijų", ne tyla |
+| Nėra metų arba ridos | ⚪ „nepakanka duomenų" |
+| Rida įprasta | punkto **nėra** — „rida normali" nėra žinia |
+| `apyv_pct` 12–20 % | punkto **nėra** — intervalas nieko nesako |
+| JSON failo nėra | **tyla** + klaida žurnale, ne melagingas ⚪ |
+
+Paskutinė eilutė svarbi: kai duomenų nėra iš viso, ⚪ meluotų — jis sako „apie
+šį modelį nežinome", o tiesa būtų „nežinome apie nieką".
+
+### 6. Amžius — iš pirmos registracijos
+
+`GAMYBOS_METAI` užpildyta 5 %, todėl neimamas niekada. Amžius =
+`dabartiniai metai − c.metai`.
+
+### 7. Pamatuota
+
+```
+regitra.test.js      46/46      (tikri skaičiai iš 2026-07-03 failo)
+dizainas.test.js     26/26
+onclick-patikra.py   švarus
+```
+
+Sąsaja, `?demo=1`, trečias lygis atidarytas:
+
+```
+1400x900   7 blokai, 13 punktų, visi trys lygiai, išėjusių 0, hSrautas 0, klaidų 0
+ 390x800   tas pats, ženklas ir tekstas vienas po kito (stulpeliu)
+detail     1 sekcija, 2 punktai, hSrautas 0, klaidų 0
+```
+
+Penki puslapiai 390 / 1280: `hSrautas=0`, JS klaidų 0, piktogramų trūksta 0.
+
+**Stendas vėl vos nemelavo.** Pirmas skelbimo puslapio matavimas rodė
+**0 sekcijų**, ir tai atrodė kaip mano kodo klaida. Priežastis buvo fikstūra:
+`DETALES_AUTO` neturėjo `regitraPunktai`. Papildžius — 1 sekcija, 2 punktai.
+Antras kartas per dvi dienas, kai stendas sako „neveikia" apie veikiantį kodą.
+
+### 8. Ko dar nepatikrinau
+
+`GET /admin/atsarga` laukas `regitra.sugeneruota` matomas tik produkcijoje:
+`backend/node_modules` repozitorijoje nėra, serverio vietoje paleisti
+neįmanoma. Patikrinsiu iš karto po push'o — tai 7 skyriaus 5 punktas, ir jis
+lieka atviras iki tol.
+
+### Klausimas Lukui
+
+`K-28` · likvidumo riba: `< 12` (kaip parašyta) ar `<= 12.1` (kad BMW 530,
+specifikacijos pavyzdys, gautų 🟡)?

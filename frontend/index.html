@@ -6203,7 +6203,26 @@ function ctNavTab(tab) {
       // po antrašte „VISI SKELBIMO ZENKLIUKAI". `l3Kiek` jau skaiciavo teisingai
       // (`length - 6`), tad kodas ZINOJO, kad naujas tik likutis, bet piese visus.
       var chipsLiko = chipsVisi.slice(6);
-      var l3Kiek = chipsLiko.length + faktai.length;
+
+      // ── LT registro punktai · 1 VARIANTAS (UZDUOTIS 4 sk.) ──────────────
+      // Luko atsakymo nebuvo, tad imamas numatytasis: punktai eina TIK i treti
+      // lygi ir i skelbimo puslapi. Kortele nesikeicia, `whyReasons` trys
+      // slotai lieka nepaliesti. Grizti atgal - istrinti sitas eilutes.
+      //
+      // Punktus suskaiciavo serveris (`backend/regitra.js`), ne sis failas:
+      // ta pati logika dviejuose frontenduose butu tas pats dublikatas, del
+      // kurio jau buvo `ctScore()`.
+      var regK = { confirmed: 'ct-k-confirmed', signal: 'ct-k-signal', unknown: 'ct-k-unknown' };
+      var regPunktai = (c.regitraPunktai || []);
+      var regHtml = regPunktai.length
+        ? '<span class="ct-l3-h">LIETUVOS REGISTRAS</span>'
+          + '<div class="ct-regitra">' + regPunktai.map(function (r) {
+              return '<div class="ct-regitra-p"><span class="ct-k ' + (regK[r.lygis] || regK.unknown)
+                + '"><i></i>' + esc(r.k) + '</span><span class="ct-regitra-t">' + esc(r.tekstas) + '</span></div>';
+            }).join('') + '</div>'
+        : '';
+
+      var l3Kiek = chipsLiko.length + faktai.length + regPunktai.length;
 
       // ── surinkimas ──
       return (c.filteredOut ? '<div class="ct-reject"><span>ATMESTA</span><span>'
@@ -6260,6 +6279,7 @@ function ctNavTab(tab) {
                     + '<div class="ct-l3-chips">' + chipsLiko.map(chip).join('') + '</div>'
                   : '')
         +       '<div class="ct-facts">' + faktaiHtml + '</div>'
+        +       regHtml
         +     '</div>'
         +     '<div class="ct-actions">'
         +       '<a class="detail-btn ct-btn ct-btn-go ct-btn-tight" href="' + c.url + '" target="_blank" rel="noopener" aria-label="Skelbimas">'

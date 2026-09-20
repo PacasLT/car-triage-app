@@ -21,6 +21,11 @@ const cache = require('./cache');
 const autopliusIds = require('./autoplius-ids');
 const vinTikrinimas = require('./vin-tikrinimas');
 const nuotrAnalize = require('./nuotrauku-analize');
+// Regitros parko suvestine (docs/regitra-panaudojimas.md). Ikeliama KARTA
+// paleidziant - 237 KB atmintyje, be SQLite: tai ketvirtinis statinis duomuo,
+// keliaujantis su deploy'umi, ne kintanti busena.
+const regitra = require('./regitra');
+regitra.ikelti();
 const komplektacija = require('./komplektacija');
 const { requireAuth, handleRegister, handleLogin, handleMe, planai, duomenys, verifyToken } = require('./auth');
 
@@ -474,6 +479,8 @@ app.get('/admin/atsarga', klaiduPrieiga, (req, res) => {
   const p = ATSARGA.puppeteer;
   res.json(Object.assign({ saugykla: saugykla() }, {
     nuoPaleidimoVal: val,
+    // `null` cia reiskia, kad JSON neikeltas - butent tai ir norim matyti.
+    regitra: regitra.meta(),
     paieskosPuslapiai: ATSARGA.paieska,
     skelbimuPuslapiai: ATSARGA.skelbimas,
     puppeteer: p,
@@ -2616,6 +2623,13 @@ async function runSearchJob(jobId, filters) {
         l.whyReasons = ['⚠ ' + l.itariamaZala.tekstas].concat(l.whyReasons || []).slice(0, 5);
       }
       if (searchMode === 'reseller') l.resaleMath = computeResaleMath(l);
+
+      // LT registro kontekstas. Prisegamas CIA, o ne atskiru marsrutu: tada ir
+      // kortele, ir skelbimo puslapis ji gauna nemokamai, be papildomos
+      // uzklausos. Balo NEKEICIA - `computeTriageScore` jau ivykdytas auksciau
+      // ir apie si lauka nezino.
+      l.regitra = regitra.kontekstas(l.marke, l.modelis) || null;
+      l.regitraPunktai = regitra.punktai(l);
     });
 
     let candidates = enriched.slice().sort((a, b) => b.qualityScore - a.qualityScore);
@@ -2788,6 +2802,9 @@ async function runSearchJob(jobId, filters) {
       dienosRinkoje: dienosNuo(l.ikeltaLaikas),
       pirmaRegistracija: l.pirmaRegistracija || null, miestas: l.miestas || null, kebulas: l.kebulas || null,
       kainosPastaba: l.kainosPastaba || null, kainosIspejimas: l.kainosIspejimas || null,
+      // LT registro kontekstas. `kandidatai` pjaunami i konkretu lauku sarasa,
+      // tad neidejus cia jie iki sasajos nenukeliautu - nors `enriched` juos turi.
+      regitra: l.regitra || null, regitraPunktai: l.regitraPunktai || [],
     }));
 
     // Skelbimai, kuriuos atmete kietasis filtras (kaina/metai/rida/deze/kuras).

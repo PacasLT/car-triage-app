@@ -1160,6 +1160,16 @@ window.ctApi = function (kelias, params) {
       + '<div class="ct-bars">' + juostos + '</div>'
       + '<div class="dp-panel-sec"><span class="dp-panel-sec-h">K\u0104 B\u016aTINA PATIKRINTI</span>'
       +   '<div class="dp-checks">' + patikros + '</div></div>'
+      // LT registro kontekstas. Punktus suskaiciavo serveris - cia tik piesiam,
+      // kad ta pati logika negyventu dviejuose frontenduose (`ctScore()` pamoka).
+      + ((c.regitraPunktai && c.regitraPunktai.length)
+          ? '<div class="dp-panel-sec"><span class="dp-panel-sec-h">LIETUVOS REGISTRAS</span>'
+            + '<div class="ct-regitra">' + c.regitraPunktai.map(function (r) {
+                var k = { confirmed: 'ct-k-confirmed', signal: 'ct-k-signal', unknown: 'ct-k-unknown' };
+                return '<div class="ct-regitra-p"><span class="ct-k ' + (k[r.lygis] || k.unknown)
+                  + '"><i></i>' + ctEsc(r.k) + '</span><span class="ct-regitra-t">' + ctEsc(r.tekstas) + '</span></div>';
+              }).join('') + '</div></div>'
+          : '')
       + '<div class="dp-panel-act ct-actions">' + cta
       +   '<a class="dp-act ct-btn ct-btn-go" href="' + ctEsc(c.url || '#') + '" target="_blank" rel="noopener"><i><svg class="ct-i"><use href="#i-skelbimas"></use></svg></i><span>Skelbimas</span></a>'
       +   '<button class="dp-act ct-btn" onclick="dpToggleSave()"><i><svg class="ct-i"><use href="#i-issaugoti"></use></svg></i><span>I\u0161saugoti</span></button>'

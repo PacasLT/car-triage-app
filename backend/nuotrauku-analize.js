@@ -43,7 +43,12 @@ function nuasmeninti(t) { return String(t || '').replace(/[ąčęėįšųūžĄ�
 const DRAUDZIAMA = [
   { re: /\bne\s?dauztas\b|\bnedauztas\b|\bbuvo dauztas\b|\bdauztas\b|\bdauzta\b/i, kodel: 'avarijos faktas iš nuotraukos nenustatomas' },
   { re: /\bbe avariju\b|\bneavarin\w*/i, kodel: 'avarijų nebuvimas iš nuotraukos nenustatomas' },
-  { re: /\brida\s+atsukta\b|\batsukta\s+rida\b|\bsukta\s+rida\b|\bsuklastota\s+rida\b/i, kodel: 'ridos klastojimas iš nuotraukos nenustatomas' },
+  // v2.0.0: praplesta. Regitros ridos punktas yra KLAUSIMAS pardavejui, ne
+  // verdiktas, ir tos pacios formuluotes negali atsirasti nei cia, nei ten.
+  // `backend/regitra.js` turi SAVA saraso kopija - jo tekstus rasom mes patys,
+  // tad tikrinam juos gamybos vietoje, ne cia.
+  { re: /\batsukt\w*\b|\bsukt\w*\s+rid\w*\b|\brid\w*\s+sukt\w*\b|\bsuklastot\w*\b/i, kodel: 'ridos klastojimas iš nuotraukos nenustatomas' },
+  { re: /\bneatitinka\s+tikrov\w*\b/i, kodel: 'nuotrauka nezino, kas yra tikrove' },
   { re: /\bvariklis\s+(tvarkingas|sveikas|geros bukles)\b/i, kodel: 'variklio būklė iš nuotraukos nenustatoma' },
   { re: /\boriginali?\s+komplektacija\b|\bgamyklin\w*\s+(versija|komplektacija)\b/i, kodel: 'gamyklinė komplektacija patvirtinama tik pagal VIN' },
   { re: /\bpatvirtina\b|\bpatvirtinta\b|\birodo\b|\bgarantuoja\b/i, kodel: 'nuotrauka nieko nepatvirtina' },

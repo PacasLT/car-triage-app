@@ -228,3 +228,47 @@
                            plius `flex: none` zenklams.
 
    Markupe liko `.ct-ell` ant `#portal-btn-label` ir `.ct3-stats-driven`.     */
+
+
+/* ----------------------------------------------------------------------------
+   15 BLOKAS · Lietuvos registro punktai treciame lygyje · v2.0.0
+
+   Trys Regitros punktai rodomi ZINOJIMO LYGIU sistemoje - ne nauja, o ta pati:
+   zenkliukas naudoja `.ct-k` su `ct-k-confirmed` / `ct-k-signal` /
+   `ct-k-unknown`, kaip „Rizika" ir „Duomenys %". Cia tik eiluciu isdestymas.
+
+   Vardas `ct-regitra-*`, o NE `ct-reg-*`: `ct-reg-email`, `ct-reg-pass`,
+   `ct-reg-invite` jau priklauso registracijos formai. Tai ta pati bendro vardo
+   klaida, kaip `.ct-table` ir `.ct-kv` (CLAUDE.md lentele), tad vardas
+   pasirinktas ilgesnis samoningai.
+
+   MUSU, netrinti - kol dizaineris neperims i savo faila.  */
+
+.ct-regitra {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin-top: var(--s-2);
+}
+
+.ct-regitra-p {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  min-width: 0;
+}
+
+/* Zenkliukas nesitraukia - traukiasi tekstas salia jo (30b sk. principas). */
+.ct-regitra-p > .ct-k { flex: none; }
+
+.ct-regitra-t {
+  min-width: 0;
+  font: 400 12px/1.45 var(--font);
+  color: var(--text-secondary);
+}
+
+@media (max-width: 640px) {
+  /* Siaurame ekrane zenkliukas ir tekstas vienas po kito - salia ju
+     tekstui liktu ~150 px, o sie sakiniai yra sakiniai, ne etiketes. */
+  .ct-regitra-p { flex-direction: column; gap: 4px; }
+}
