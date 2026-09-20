@@ -8,6 +8,23 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.91.0', data: '2026-09-20', pavadinimas: 'Klaidu sarase matyti, kas svarbiausia',
+    pakeitimai: [
+      'Kiekvienas pranesimas gavo prioriteta: trys taskai ir vardas - Svarbu, Vidutinis, Zemas',
+      'Prioritetas surenkamas is to, kas jau irasyta: svarba, pasikartojimai ir kiek dienu kabo neuzdarytas',
+      'Penkis kartus pasikartojes pranesimas nebeatrodo taip pat kaip parasytas viena karta',
+    ],
+  },
+  {
+    versija: '1.90.0', data: '2026-09-20', pavadinimas: 'Hero juosta vienoje vietoje, klaidu prioritetas',
+    pakeitimai: [
+      'Hero juostos aukstis dabar aprasytas vienoje vietoje - anksciau buvo dvi kopijos, ir senoji negyva',
+      'Istrintos 27 negyvos taisykles, likusios nuimus hero teksta - tarp ju ta, kuri butu tyliai grazinusi 600 px juosta',
+      'Administravime klaidos gauna prioriteto zenkla: trys taskai pagal svarba ir pasikartojimus',
+      'Portalu skydelis sone gavo teisinga ploti',
+    ],
+  },
+  {
     versija: '1.89.0', data: '2026-09-20', pavadinimas: 'Filtru lauku vidus perimtas i dizaino sistema',
     pakeitimai: [
       'Laukeliu vidines dezutes tvarkomos vienoje vietoje, o ne atskirais irasais - isvaizda nepasikeite nė vienu pikseliu',

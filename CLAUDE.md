@@ -271,6 +271,8 @@ Grandinė `fetchSearchPage`: **talpykla → ScraperAPI → tiesioginis axios →
 
 **`onclick` klaida yra TYLI.** Atributas nieko nesako, kol nepaspaudi; paspaudus `ReferenceError` nukrenta į konsolę, kurios niekas nežiūri. Naudotojui atrodo, kad mygtukas tiesiog negyvas – Lukas tai aprašė kaip „paspaudžiu, niekas nesikeičia“ (Nr. 20). Todėl po kiekvieno didesnio perdarymo: `cd frontend && python3 ../tools/onclick-patikra.py`.
 
+**Penktoji forma – buvo teisinga, kol aplinka buvo kitokia.** Pirmos keturios (negyvas tokenas, negyva klasė, gyvas vardas be aprašymo, `onclick` be funkcijos) buvo klaidingos visą laiką ir laukė, kol kas nors pažiūrės. `GALIA` vidinis `div` buvo teisingas, kol `.ct-fld` neperėmė lauko. **Negyvus randam klausdami „kas dar to nenaudoja“; šituos – tik klausdami „kas rėmėsi tuo, ką ką tik pakeičiau“.** Po kiekvieno skyriaus, kuris PERIMA elementą iš kito valdymo, peržiūrėti ne naują kodą, o seną, kuris tam elementui tarnavo.
+
 **Taisyklė: kai kas nors ištaisoma, iškart paieškoti to paties raginio visame kode.** Dizainerio klausimas prieš 3 dalį („skalė greičiausiai turi savo medianą") pasitvirtino ne visai taip, kaip jis spėjo – mediana ta pati, bet **ženklas priešingas**: tas pats automobilis viršuje rodė „−12 %" žaliai, o rinkos skiltyje „+12 %" raudonai.
 
 ## Administravimo puslapis (v1.53.0, lentelės v1.54.0)

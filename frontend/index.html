@@ -779,49 +779,23 @@
   background: linear-gradient(to bottom, transparent, rgba(10,12,18,.9));
   pointer-events: none;
 }
-.ct3-hero-content {
-  position: relative; z-index: 10;
-  display: flex; align-items: flex-end; justify-content: space-between;
-  max-width: 1440px; margin: 0 auto;
-  padding: 140px 48px 36px;
-  min-height: 600px;
-}
-.ct3-hero-left { max-width: 540px; }
-.ct3-hero-eyebrow {
-  font: 600 10px/1 var(--font-mono); letter-spacing: .18em; text-transform: uppercase;
-  color: var(--text-dim); margin-bottom: 18px;
-}
-.ct3-hero-title {
-  margin: 0 0 18px; font-size: 52px; font-weight: 700; line-height: 1.08;
-  letter-spacing: -.03em; color: var(--text-primary);
-  text-wrap: balance;
-}
-.ct3-hero-title em { font-style: normal; color: var(--accent-light); }
-.ct3-hero-sub {
-  margin: 0 0 28px; font-size: 15px; line-height: 1.6;
-  color: var(--text-secondary); max-width: 440px; text-wrap: pretty;
-}
-.ct3-hero-feats { display: flex; gap: 28px; flex-wrap: wrap; }
+
+
+
+
+
+
+
 .ct3-feat { display: flex; align-items: flex-start; gap: 10px; color: var(--text-secondary); }
 .ct3-feat svg { flex: none; margin-top: 2px; color: var(--accent-light); }
 .ct3-feat span { font-size: 13px; line-height: 1.4; }
 
 /* right side */
-.ct3-hero-right-stats {
-  display: flex; flex-direction: column; align-items: flex-end; gap: 32px;
-  text-align: right; flex: none;
-  position: absolute; right: 0; bottom: 36px;
-  width: 200px;
-  padding-right: 48px;
-  pointer-events: none;
-}
-.ct3-hero-taglines { display: flex; flex-direction: column; gap: 4px; }
-.ct3-hero-taglines > div {
-  font: 600 10px/1.4 var(--font-mono); letter-spacing: .18em; text-transform: uppercase;
-  color: rgba(255,255,255,.3);
-}
-.ct3-hero-taglines .ct3-hl { color: var(--text-secondary); }
-.ct3-hl-line { width: 40px; height: 2px; background: var(--accent); margin-top: 6px; margin-left: auto; border-radius: 1px; }
+
+
+
+
+
 .ct3-car-watermark {
   display: flex; align-items: center; gap: 6px;
   font: 600 10px/1 var(--font-mono); letter-spacing: .12em; color: var(--text-dim);
@@ -997,8 +971,8 @@
 /* ---- RESPONSIVE ---- */
 @media (max-width: 1100px) {
   .ct3-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .ct3-hero-title { font-size: 40px; }
-  .ct3-hero-right-stats { display: none; }
+
+
 }
 @media (max-width: 768px) {
   .ct3-header-inner { padding: 14px 20px; }
@@ -1010,9 +984,9 @@
   .ct3-search-panel { margin: 0 12px; border-radius: 14px; }
   .ct3-stats-bar { margin: 8px 12px 0; border-radius: 0 0 12px 12px; }
   .ct3-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .ct3-hero-content { padding: 110px 20px 40px; }
-  .ct3-hero-title { font-size: 32px; }
-  .ct3-hero-sub { font-size: 14px; }
+
+
+
   .ct3-search-bottom { flex-direction: column; align-items: stretch; }
   .ct3-search-bottom-left, .ct3-search-bottom-right { justify-content: space-between; }
   .ct3-save-btn { flex: 1; justify-content: center; }
@@ -1027,8 +1001,8 @@
 }
 @media (max-width: 480px) {
   .ct3-fields { grid-template-columns: 1fr 1fr; }
-  .ct3-hero-title { font-size: 26px; }
-  .ct3-hero-feats { gap: 16px; }
+
+
   .ct3-portals-row { display: none; }
   .ct3-search-tabs { overflow-x: auto; }
   .ct3-stab { font-size: 12px; padding: 0 12px; }
@@ -1430,12 +1404,12 @@
   /* Hero */
   /* v1.83.0 (K-20): `min-height` nuimtas ir telefone - 26 sk. duoda 180 px. */
   .ct3-hero { margin-top: 0 !important; }
-  .ct3-hero-content { min-height: 340px !important; padding: 60px 16px 24px !important; }
-  .ct3-hero-title { font-size: 26px !important; margin-bottom: 12px !important; }
-  .ct3-hero-sub { font-size: 13px !important; margin-bottom: 16px !important; max-width: 100% !important; }
-  .ct3-hero-feats { gap: 14px; }
+
+
+
+
   .ct3-feat span { font-size: 12px; }
-  .ct3-hero-right-stats { display: none; }
+
 
   /* Search panel */
   .ct3-search-panel { margin: 0 10px !important; border-radius: 16px !important; }
@@ -1547,9 +1521,9 @@
 /* TELEFONAS 480px */
 @media (max-width: 480px) {
   .container { padding: 0 12px 40px; }
-  .ct3-hero-title { font-size: 22px !important; }
-  .ct3-hero-sub { display: none; }
-  .ct3-hero-feats { gap: 10px; }
+
+
+
   .ct3-fields { grid-template-columns: 1fr 1fr !important; }
   .std-photo-col { display: none !important; }
   .std-card-inner { border-left: none !important; }

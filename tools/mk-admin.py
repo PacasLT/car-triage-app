@@ -282,7 +282,7 @@ BODY = u'''
       }
 
       h += '<div class="ct-table-w"><table class="ct-table is-dense"><thead><tr>'
-        + '<th class="is-num">NR.</th><th>KATEGORIJA</th><th>KLAIDA</th>'
+        + '<th class="is-num">NR.</th><th class="is-prio">PRIORITETAS</th><th>KATEGORIJA</th><th>KLAIDA</th>'
         + '<th class="is-time">KADA</th><th>VERSIJA</th><th>B\u016aSENA</th><th class="is-act"></th>'
         + '</tr></thead><tbody>'
         + d.irasai.map(eilute).join('')
@@ -304,6 +304,7 @@ BODY = u'''
       // tampa kortele, ir etikete ateina is sio atributo. Be jo kortelėje butu
       // reiksme be vardo - blogiau uz suspausta lentele (17 paketas, 2.3).
       + '<td class="is-num" data-stulpelis="NR.">' + k.nr + '</td>'
+      + '<td class="is-prio" data-stulpelis="PRIORITETAS">' + prioZenklas(k) + '</td>'
       + '<td data-stulpelis="KATEGORIJA">' + esc(KAT[k.kategorija] || k.kategorija || '\u2014')
       +   (k.kartojasi ? ' <span class="chip">kartojasi</span>' : '') + '</td>'
       + '<td class="is-text" data-stulpelis="KLAIDA"><span class="ct-clamp">' + esc(k.tekstas) + '</span></td>'
@@ -317,7 +318,7 @@ BODY = u'''
     if (_isskleista !== k.nr) return eil;
 
     var ek = dg.ekranas || {};
-    return eil + '<tr class="ad-detales"><td colspan="7">'
+    return eil + '<tr class="ad-detales"><td colspan="8">'
       + '<div class="ad-meta ad-kelias">' + esc(k.kas || 'neprisijung\u0119s')
       +   (dg.puslapis ? ' \u00B7 ' + esc(dg.puslapis) : '')
       +   (dg.versija ? ' \u00B7 v' + esc(dg.versija) : '')
@@ -377,6 +378,37 @@ BODY = u'''
       + '<span class="ad-irankiu-zinia" id="ad-kz-' + k.nr + '"></span>'
       + '</div></div>';
     return h;
+  }
+
+  // v1.91.0 (18 paketas, 33 sk.): PRIORITETAS.
+  //
+  // Dizainerio klausimas buvo tikslus: pranesimas su 5 pasikartojimais ir
+  // parasytas viena karta sarase atrodo vienodai. Prioritetas surenkamas is to,
+  // kas JAU irasyta - naujo lauko nereikia:
+  //
+  //   svarba       blokuoja / trukdo / smulkme   (Luko pasirinkimas pranesant)
+  //   kartojasi    kiek kartu tas pats atsitiko
+  //   amzius       kiek dienu kabo neuzdarytas
+  //
+  // Taskai, ne spalvos - ir tai dizainerio sprendimas, kuri verta uzrasyti:
+  // klaidu sarase zalia JAU reiskia „istaisyta", tad raudona/geltona/zalia
+  // duotu vienoje eiluteje dvi skirtingas zalios prasmes.
+  function prioritetas(k) {
+    var b = 0;
+    if (k.svarba === 'blokuoja') b += 3;
+    else if (k.svarba === 'trukdo') b += 2;
+    else b += 1;
+    var kart = parseInt(k.kartojasi, 10) || 0;
+    if (kart >= 5) b += 2; else if (kart >= 2) b += 1;
+    var dienos = (Date.now() - (k.laikas || Date.now())) / 86400000;
+    if (dienos >= 7) b += 1;
+    return b >= 5 ? 3 : (b >= 3 ? 2 : 1);
+  }
+  var PRIO_T = { 1: '\u017Demas', 2: 'Vidutinis', 3: 'Svarbu' };
+  function prioZenklas(k) {
+    var lyg = prioritetas(k);
+    return '<span class="ct-prio is-' + lyg + '"><i></i><i></i><i></i></span>'
+      + '<span class="ct-prio-t">' + PRIO_T[lyg] + '</span>';
   }
 
   // v1.65.0: prie kiekvieno pranesimo - versija, KURIOJE jis parasytas, ir ar ji

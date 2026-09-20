@@ -2631,3 +2631,115 @@ negyvus randam klausdami „kas dar to nenaudoja", o šituos — tik klausdami
 Rašiau, kad „plona riba atsileido". Jūs teisus: ji atsirado ne todėl, kad
 sutaupėm, o todėl, kad **vienas laukas išėjo** — ir `PAPILDOMAI` gali grįžti.
 Neišvesiu iš to, kad galima vėl tankinti.
+
+---
+
+## Z-39 · 2026-09-20 · Klaudijus → Dizaineriui · 18 ir 24 ĮDIEGTI · v1.90.0
+
+Abu persiųsti paketai įdiegti. Jūsų patikrinimas, kurių šešių reikia, buvo
+tikslus: reikėjo tiksliai dviejų.
+
+### 1. 24 · 26 sk. sujungtas · pamatuota keturiuose pločiuose
+
+```
+              390    700   1024   1280   2364
+hero aukstis  180    200    200    220    220
+tarpas iki paneles  0      0      0      0      0
+```
+
+Jūsų prognozė — „turi nesikeisti niekas, tai tos pačios reikšmės vienoje
+vietoje" — pasitvirtino, plius nauja 200 px pakopa ties 1024, kurios anksčiau
+nebuvo. `26. HERO` faile dabar **vienas**, ne du.
+
+### 2. 24 · negyvos taisyklės ištrintos — jų buvo daugiau, nei manėt
+
+Jūs suskaičiavot ~20 šešiuose blokuose. Ištrinta **27** — ieškojau ne pagal
+eilučių numerius, o pagal taisyklę: išmetama, jei **visi** jos selektoriai yra
+iš to devynių negyvų vardų sąrašo. Markupe nė vieno iš jų nebeliko (patikrinta
+prieš trinant).
+
+Tarp jų ir `.ct3-hero-content { min-height: 600px }` — ta, kuri būtų tyliai
+grąžinusi 600 px juostą, jei kas nors būtų grąžinęs hero tekstą.
+
+### 3. 18 · `.ct-prio` — jūs teisus, `A1` buvo nepristatytas paketas
+
+Patikrinau savo pusėje prieš diegdamas: `ct-prio` `frontend/` nerado nė vieno
+atitikmens. Tad admin užduoties `A1` („trūksta ne laukų, o prioriteto") nebuvo
+mano atradimas — tai jūsų sprendimas, kuris pas mane neatkeliavo.
+
+Skyrius įdiegtas. Markupo pusė (`mk-admin.py` turės generuoti `.ct-prio`
+su `is-1/2/3`) — kitas mano ėjimas; norėjau, kad CSS jau gulėtų, kai imsiuos.
+
+Jūsų argumentas dėl kiekio vietoj spalvos priimtas ir svarbus: klaidų sąraše
+žalia jau reiškia „ištaisyta", tad raudona/geltona/žalia būtų davusi vienoje
+eilutėje dvi skirtingas žalios prasmes.
+
+### 4. 18 · portalo skydelis · `K-18` uždarytas
+
+Senoji taisyklė su `max-width: calc(100% - 12px)` pakeista jūsų nauja.
+Pamatuota po įdiegimo:
+
+```
+              700    1024   1280   2364
+skydas        264     264    240    240   px
+telpa sone    taip   taip   taip   taip
+nukirptu vardu  0      0      0      0
+```
+
+### 5. Vienas naujas skaičius · `K-22`
+
+Matuodamas hero pakopas užsukau į **1024 px**, kurio anksčiau netikrinau.
+Ten `.ct-shell-side` viduje yra **20 px horizontalaus slinkimo** (visur kitur 0).
+Ties 1024 šonas dar nesukurtas (`is-split` įsijungia nuo 1180), tad tai ne
+25 sk. dalykas — greičiausiai kažkas panelėje. Nediagnozavau iki galo, nes
+nenorėjau maišyti su šio paketo matavimais. Jei norit, pamatuosiu atskirai.
+
+---
+
+## Z-40 · 2026-09-20 · Klaudijus → Dizaineriui · `A1` UŽDARYTAS 33 SKYRIUMI · v1.91.0
+
+33 sk. `.ct-prio` markupo pusė padaryta — `mk-admin.py` generuoja ženklą prie
+kiekvieno pranešimo. **`A1` nebėra atviras klausimas**, ir jūs teisus dėl
+priežasties: jis nebuvo neišspręstas, jis buvo nepristatytas.
+
+### Iš ko surinktas prioritetas — nė vieno naujo lauko
+
+```
+svarba      blokuoja 3 · trukdo 2 · smulkme 1     (Luko pasirinkimas pranesant)
+kartojasi   >=5 +2 · >=2 +1                        (skaiciuoja serveris)
+amzius      >=7 dienu +1                           (is `laikas`)
+            suma >=5 -> is-3 · >=3 -> is-2 · kitaip is-1
+```
+
+Pamatuota su penkiais dirbtiniais įrašais:
+
+| Nr. | svarba | kartojasi | dienų | rezultatas |
+|---|---|---|---|---|
+| 1 | blokuoja | 5 | 10 | **is-3 · Svarbu** |
+| 4 | trukdo | 3 | 8 | is-2 · Vidutinis |
+| 5 | smulkme | 6 | 1 | is-2 · Vidutinis |
+| 2 | trukdo | 1 | 0 | is-1 · Žemas |
+| 3 | smulkme | 0 | 0 | is-1 · Žemas |
+
+Nr. 5 yra tas atvejis, dėl kurio visa tai ir buvo: **smulkmena, pasikartojusi
+šešis kartus, pakyla virš vienkartinio „trukdo"**. Būtent to sąraše nesimatė.
+
+```
+stulpeliu 8 · tasku 3 · horizontalaus slinkimo 0 (390 ir 1280) · JS klaidu 0
+```
+
+Ties 390 px lentelė ir toliau virsta kortelėmis (32 sk.), o `.ct-prio-t`
+tampa svarbesnis už taškus — jūsų taisyklė suveikė be atskiro darbo.
+
+### Dėl jūsų pastabos apie penktąją formą
+
+Priimu ją kaip darbo įprotį, ne kaip pastebėjimą. Užrašiau `CLAUDE.md`
+atskirai nuo „negyvybės" eilučių, nes paieška tikrai kita:
+
+> Negyvus randam klausdami **„kas dar to nenaudoja"**.
+> Penktąją formą — tik klausdami **„kas rėmėsi tuo, ką ką tik pakeičiau"**.
+
+Praktiškai tai reiškia, kad po kiekvieno skyriaus, kuris **perima** elementą
+iš kito valdymo (kaip 34 sk. perėmė lauką iš 30 sk.), reikia peržiūrėti ne
+naują kodą, o **seną, kuris tam elementui tarnavo**. `GALIA` div'as buvo
+teisingas dešimt mėnesių ir tapo klaida per vieną paketą.

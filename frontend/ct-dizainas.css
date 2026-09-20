@@ -1837,41 +1837,76 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
 
 
 /* ============================================================================
-   26. HERO NUOTRAUKA · kadras priklauso nuo ekrano, ne nuo nuotraukos
+   24 paketas · 26 sk. · VIENAS BLOKAS VIETOJ DVIEJU
    ----------------------------------------------------------------------------
-   Vienas principas: cover nera kadravimas. Jis garantuoja, kad deze bus
-   uzpildyta, bet nieko nesako apie tai, KAS liks kadre. Kai deze pasikeicia
-   nuo 1400x600 iki 361x340, cover islaiko auksti ir nurezga ploti — ir
-   automobilis, kuris buvo kadro viduryje, iskrenta.
+   SVARBU: sis blokas PAKEICIA ABU esamus 26 sk. blokus ct-dizainas.css:
 
-   Todel auksti ir kadravimo taska nurodome kiekvienam plociui atskirai.
-   Nuotraukos adresas (background-image) lieka jusu HTML — cia tik geometrija.
+       1839-1876 eil.  senasis 26 sk. (su cover/kadravimo komentaru)
+       2276-2322 eil.  26 sk. v3
 
-   Pamatuota (juostos plotis x auk. / mastelis / kiek nurezama plocio):
-     1400 x 600   1.00   visas kadras
-      768 x 260   0.55   ~22 %
-      361 x 180   0.30   ~16 %, automobilis kadre */
+   Abu istrinti, si idėti i 1839 eil. vieta. Nepalikti nei vieno — kodel,
+   zr. PASTABOS.md 3.
+
+   Turinio pokycio NĖRA. Tai, kas siandien veikia, veiks toliau: v3 reiksmes
+   sutampa su cia esanciomis. Keiciasi tik tai, kad jos guli vienoje vietoje.
+   ========================================================================== */
+
+/* ============================================================================
+   26. HERO JUOSTA · aukstis ir kadras
+   ----------------------------------------------------------------------------
+   Du principai viename skyriuje, nes jie neatskiriami.
+
+   1) COVER NERA KADRAVIMAS. Jis garantuoja, kad deze bus uzpildyta, bet
+      nieko nesako apie tai, KAS liks kadre. Kai deze pasikeicia nuo 1400x220
+      iki 361x180, cover islaiko auksti ir nurezga ploti — automobilis, buvęs
+      kadro viduryje, iskrenta. Todel kadravimo taskas nurodomas kiekvienam
+      plociui atskirai.
+
+   2) HERO YRA JUOSTA, NE EKRANAS. 620 px atimdavo visa pirma ekrana, o
+      vartotojas atejo del saraso. 220 px darbalaukyje ir 180 telefone:
+      nuotrauka lieka, pirmas ekranas grizta.
+
+      Kodel ne 180 darbalaukyje: 1280:180 yra 7,1:1 — tai nebe juosta, o
+      skiaute, kurioje automobilio nebesimato. Telefone 180 veikia todel, kad
+      390:180 = 2,2:1, t. y. normalus kadras. Tas pats skaicius dviejuose
+      plociuose reiskia skirtingus dalykus.
+
+   PAMATUOTA (1280 px stendas, riba 720 px):
+     juosta 600  „Ieskoti" apacia 982  kyso 262
+     juosta 260  „Ieskoti" apacia 642  atsarga  78
+     juosta 220  „Ieskoti" apacia 602  atsarga 118   <- pasirinkta
+     juosta 180  „Ieskoti" apacia 562  atsarga 158
+
+   AUKSTIS NURODOMAS .ct3-hero, NE .ct3-hero-photo. Nuotrauka yra absoliuti
+   ir i isdestyma neisideda; po v1.82.0 .ct3-hero-content istrintas, tad
+   sekcija be sio aukscio subliuksta iki nulio.
+
+   RIBA: aukstis ir kadravimo taskas — dizainerio.
+         position / inset / z-index / margin-top — jusu. */
+
+.ct3-hero { height: 220px; }
 
 .ct3-hero-photo {
+  height: 100%;
   background-repeat: no-repeat;
   background-size: cover;
   background-position: 40% 55%;
-  height: 600px;
 }
 
+/* Planse: tarp 1280 ir 640 santykis dar laiko kadra, tad tik taskas slenka */
 @media (max-width: 1024px) {
-  .ct3-hero-photo { height: 380px; background-position: 45% 58%; }
+  .ct3-hero { height: 200px; }
+  .ct3-hero-photo { background-position: 45% 58%; }
 }
 
-/* Telefonas: 180 px. Auksciau (340) juosta atimdavo visa pirma ekrana,
-   o vartotojas i ji atejo del saraso, ne del nuotraukos. */
 @media (max-width: 640px) {
-  .ct3-hero-photo { height: 180px; background-position: 50% 62%; }
+  .ct3-hero { height: 180px; }
+  .ct3-hero-photo { background-position: 50% 62%; }
 }
 
 /* Labai zemas ekranas horizontaliai — nuotrauka atsisako vietos pirma */
 @media (max-height: 520px) and (orientation: landscape) {
-  .ct3-hero-photo { height: 140px; }
+  .ct3-hero { height: 120px; }
 }
 
 
@@ -2045,12 +2080,7 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
      nueina i -32 px. Absoliutus elementas SLENKANCIO konteinerio viduje,
      pastumtas i kaire nuo kilmes, yra NEPASIEKIAMAS, ne tik nematomas -
      `overflow: auto` neduoda slinkimo i negatyvia puse. */
-  .ct-shell.is-split > .ct-shell-side #portal-selector {
-    left: 0;
-    right: auto;
-    width: 240px;
-    max-width: calc(100% - 12px);
-  }
+  /* 18 paketas perima si bloka - zr. 30 sk. papildyma failo gale. */
 }
 
 
@@ -2271,45 +2301,6 @@ textarea.ct-field {
    Visi skaiciai pamatuoti — metodas PASTABOS.md 1.
    ========================================================================== */
 
-
-/* ============================================================================
-   26. HERO JUOSTA · panele LYGIAI ant jos   (trecia redakcija)
-   ----------------------------------------------------------------------------
-   Pakeitimas nuo v2: NEBERA perklojimo.
-
-   v2 daviau margin-top: -24px, nes maniau, kad „panele stovi ant juostos"
-   reiskia uzlipti ant jos krasto. Lukas pasakė tiksliau: „turi graziai buti
-   lygiai ant, niekur nelipti". Tad panele prasideda BUTENT ten, kur juosta
-   baigiasi — nei anksciau, nei veliau.
-
-   Ir tai geriau ne tik pagal prasyma: perklojimas uzdengdavo 24 px nuotraukos
-   apacios, t. y. ta pati kadro dali, kuria 26 sk. taip kruopsciai renkam
-   background-position tasku. Perklojimas atimdavo iš kadro ir nieko neduodavo.
-
-   PAMATUOTA 1280 px, panele lygiai (12 langeliu, 2 eiles):
-     juosta 600  panele 697-997  „Ieskoti" 982  kyso 262
-     juosta 260  panele 357-657  „Ieskoti" 642  atsarga  78
-     juosta 220  panele 317-617  „Ieskoti" 602  atsarga 118   <- lieka
-     juosta 180  panele 277-577  „Ieskoti" 562  atsarga 158
-
-   RIBA: aukstis ir kadravimas mano; position, inset, z-index — jusu. */
-
-.ct3-hero { height: 220px; }
-.ct3-hero-photo {
-  height: 100%;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: 40% 55%;
-}
-
-@media (max-width: 640px) {
-  .ct3-hero { height: 180px; }
-  .ct3-hero-photo { background-position: 50% 62%; }
-}
-
-@media (max-height: 520px) and (orientation: landscape) {
-  .ct3-hero { height: 120px; }
-}
 
 /* ── 26b. Panele LYGIAI ant juostos ─────────────────────────────────────────
    Nulis. Rasau atvirai, o ne tiesiog nerasau nieko, nes index.html telefone
@@ -2845,4 +2836,117 @@ textarea.ct-field {
 .ct-fld-v:focus-within {
   border-color: var(--accent-border);
   box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+
+/* ============================================================================
+   18 paketas · 30 sk. pataisymas (K-18) + 33 sk. naujas (K-17)
+   ----------------------------------------------------------------------------
+   Idiegus 33 sk., ct-priedai.css 10 blokas trinamas — paskutine atsvara.
+   ========================================================================== */
+
+
+/* ── 1) K-18 · max-width skaiciuojamas ne nuo to, nuo ko maniau ──────────────
+   Jusu radinys teisingas, ir klaida mano tipine.
+
+   Rasiau max-width: calc(100% - 12px) ir maniau „ne daugiau uz stulpeli".
+   Bet #portal-selector yra ABSOLIUTUS, tad jo 100% skaiciuojamas nuo
+   CONTAINING BLOCK — artimiausio pozicionuoto tevo, t. y. .ct3-portal-wrap
+   (~199 px), ne nuo sono stulpelio. 199 − 12 = 187. Jusu skaicius.
+
+   Tai ta pati forma kaip 1fr ir cover: **maniau, kad vienetas reiskia tai, kas
+   atrodo aplinkui.** 100% niekada nereiske „tiek, kiek matau" — jis reiske
+   „tiek, kiek mano tėvas".
+
+   Pataisymas: max-width isvis nereikalingas. Sonas nuo 1180 px yra 276 px
+   (vidus 252), nuo 1680 px — 300 px. 240 px telpa visada, tad riba, kuri
+   niekada nesuveikia teisingai, geriau tegu jos nebuna.
+
+   PAKEISTI 30 sk. #portal-selector bloka siuo: */
+
+@media (min-width: 1180px) {
+  .ct-shell.is-split > .ct-shell-side #portal-selector {
+    left: 0;
+    right: auto;
+    width: 240px;
+    max-width: none;
+  }
+}
+
+
+/* ============================================================================
+   33. PRIORITETAS · .ct-prio · KIEKIS, ne vertinimas
+   ----------------------------------------------------------------------------
+   Vienas principas: spalva sistemoje jau turi prasme, ir ta prasme yra
+   „ar gerai". Prioritetas atsako i „kiek svarbu" — tai KIEKIS, ne vertinimas.
+   Du skirtingi dalykai negali naudoti tos pacios spalvos skalos.
+
+   ── KODEL NE RAUDONA / GELTONA / ZALIA ────────────────────────────────────
+   Klaidu sarase zalia JAU turi prasme: v1.65.0 idiegta versiju zyme, kur
+   „zalia = istaisyta, geltona = dar ne" (Z-16). Uzdejus prioriteto taskа su
+   ta pacia skala, VIENOJE eiluteje atsiranda dvi skirtingos zalios prasmes:
+   „istaisyta" ir „maziausiai svarbu".
+
+   Ir blogiau: 3 sk. zalia reiskia „patvirtinta / gerai". Zmogus, skenuodamas
+   sarasa, zalia taska perskaito kaip „viskas gerai" — o jis reiskia „galima
+   neskubeti". Tai ne tas pats, ir skirtumas pasimato tik perskaicius stulpelio
+   antrastе, t. y. per velai.
+
+   Tai K-02 is naujo, tik ne varde, o spalvoje: vienas tokenas, dvi prasmes.
+
+   ── KAS DAROMA VIETOJ ─────────────────────────────────────────────────────
+   Prioritetas rodomas UZPILDU, ne atspalviu: trys taskai, uzpildytu tiek,
+   kiek prioritetas. Viena spalva — akcentas. Akis skaito KIEKI (trys, du,
+   vienas), ne hue, tad nesikerta su nieku.
+
+   Papildomai: aukstas prioritetas gauna ir svoreji per uzpildo intensyvuma,
+   kad skenuojant issisokdavо. Bet net be spalvos (monochrome ekranas,
+   spalvu neskiriantis zmogus) skaiciuojami taskai lieka skaitomi — o
+   raudona/zalia pora butent tokiam zmogui yra neskaitoma.
+
+   NEPERIMA: pranesimo eilutes, busenu zymes, versiju zenkleliо — jie lieka.
+   NEPERIMA: .ct-k zinojimo lygiu — jie ir toliau reiskia „ar gerai". */
+
+.ct-prio {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  vertical-align: middle;
+}
+.ct-prio > i {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--bg-raised);
+  box-shadow: inset 0 0 0 1px var(--border-light);
+  font-style: normal;
+}
+/* Uzpildyti taskai — nuo kaires */
+.ct-prio.is-1 > i:nth-child(1),
+.ct-prio.is-2 > i:nth-child(-n+2),
+.ct-prio.is-3 > i {
+  background: var(--accent);
+  box-shadow: none;
+}
+/* Aukstas prioritetas — sviesesnis uzpildas, kad skenuojant issisoktu.
+   Tai SVORIS, ne kita prasme: ta pati spalva, kitas intensyvumas. */
+.ct-prio.is-3 > i { background: var(--accent-light); }
+
+/* Tekstinis vardas prie tasku — mono, tyli. Be jo taskai yra galvosukis. */
+.ct-prio-t {
+  margin-left: 6px;
+  font: var(--fw-semi) 9.5px/1 var(--font-mono);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.ct-prio.is-3 + .ct-prio-t { color: var(--text-secondary); }
+
+/* Lenteleje prioriteto stulpelis nesitraukia ir nesilauzo */
+.ct-table .is-prio { width: 1%; white-space: nowrap; }
+
+/* Kortelėse (32 sk.) taskai lieka, bet vardas tampa svarbesnis uz juos,
+   nes eiluteje nebera i ka lygintis */
+@media (max-width: 640px) {
+  .ct-table.is-dense tbody td.is-prio { width: auto; }
+  .ct-prio-t { color: var(--text-secondary); }
 }
