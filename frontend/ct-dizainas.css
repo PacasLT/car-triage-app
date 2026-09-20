@@ -2457,3 +2457,122 @@ textarea.ct-field {
 @media (pointer: coarse) {
   .ct-fld-act-in .ct-btn { min-height: var(--tap-min); height: auto; }
 }
+
+
+/* ============================================================================
+   26 paketas - ERRATA 3 prie 25 - .ct-fld-act-in taisykles
+   ----------------------------------------------------------------------------
+   PAKEICIA 25 paketo mygtuku taisykles. Kitos 34c dalys (isdestymas, 14 px
+   parastė, sono stulpelis) lieka kaip yra - keiciasi TIK tai, KAM taikoma.
+
+   Kodel: 25 pakete rasiau `.ct-fld-act-in .ct-btn`. Ta taisykle suveikia tik
+   tada, jei markupas atsimena uzdeti `ct-btn`. Istorijos mygtukas jo neturejo,
+   ir taisykle ji tyliai praleido - 49 px slinkimo.
+
+   Tai pazeidzia A-08: "taisykle, kuria reikia atskirai uzdeti, kas nors
+   pamirs". Rasiau ta taisykle pats ir pats ja sulauziau.
+
+   Todel dabar taikoma STRUKTURISKAI - viskam, kas yra veiksmu langelyje.
+   Langelis turi viena darba, tad viskas jo viduje elgiasi vienodai,
+   nesvarbu, kokias klases neša.
+   ========================================================================== */
+
+/* Visi valdikliai langelyje - nesvarbu, ar .ct-btn, ar .ct-tab, ar niekas */
+.ct-fld-act-in > button,
+.ct-fld-act-in > div > button {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 30px;
+  min-height: 0;          /* BUTINA - zr. komentara zemiau */
+  padding: 0 10px;
+  font-size: 12px;
+  white-space: nowrap;
+  border-bottom-width: 1px;
+}
+
+/* ----------------------------------------------------------------------------
+   `min-height: 0` cia nera perteklius.
+
+   Istorijos mygtukas nesa `.ct-tab` (ct-mygtukai.css 328), o ten yra
+   `min-height: 44px`. `min-height` visada nugali `height`, tad be sios
+   eilutes mygtukas liktu 44 px auksčio, o "Daugiau filtru" - 30 px.
+   Jie stovi greta, tad skirtumas matomas plika akimi.
+
+   Tai TRECIAS kartas, kai ta pati saveika mus gaudo:
+     11 paketas  .ct-btn-sm `height` nugalejo mano `min-height`
+     K-20        `.ct3-hero` `min-height: 620` nugalejo mano `height: 220`
+     cia         `.ct-tab` `min-height: 44` nugali mano `height: 30`
+
+   Todel nuo siol, kai skyrius nurodo `height` elementui, kuris gali neseti
+   svetimu klasiu, jis nurodo ir `min-height`. Viena savybe be kitos yra
+   pusiau perimta, o pusiau perimta yra bloga.
+   -------------------------------------------------------------------------- */
+
+/* Sone - per visa plotį, irgi strukturiskai */
+@media (min-width: 1180px) {
+  .ct-shell.is-split > .ct-shell-side .ct-fld-act-in > button,
+  .ct-shell.is-split > .ct-shell-side .ct-fld-act-in > div > button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (pointer: coarse) {
+  .ct-fld-act-in > button,
+  .ct-fld-act-in > div > button {
+    min-height: var(--tap-min);
+    height: auto;
+  }
+}
+
+
+/* ============================================================================
+   26 paketas - 35 sk. NAUJAS - statistikos juosta
+   ----------------------------------------------------------------------------
+   Priklauso nuo markupo eiles pakeitimo (jusu puse):
+   .ct3-stats-bar perkeliama PO .ct3-search-panel, buvusi vieta tarp hero ir
+   paneles atlaisvinama.
+   ========================================================================== */
+
+/* ============================================================================
+   35. STATISTIKOS JUOSTA - pasitikejimo eilute
+   ----------------------------------------------------------------------------
+   Vienas principas: pasitikejimo zenklas stovi salia to, ka jis ramina.
+
+   "12 480 skelbimu analizuojama per diena" atsako i klausima "ar verta cia
+   ieskoti?". Tas klausimas kyla ZIURINT i paieskos laukus, ne pries juos.
+   Todel juosta eina po panele, o ne pries ja.
+
+   Ir antra: po paieskos ji dingsta. Kai ekrane yra 40 tikru skelbimu,
+   "8 Europos platformu" nebeitikina - rezultatai itikina geriau nei pazadas
+   apie rezultatus. Tai ne dekoracijos nuemimas, o teiginio pakeitimas
+   irodymu.
+
+   Salutinis, bet ne mazesnis: hero ir panele tampa kaimynemis, tad 26b
+   (`margin-top: 0`) pagaliau ima veikti taip, kaip parasyta. Tie -81 px
+   dingsta be jokios naujos taisykles.
+
+   NEPERIMA: juostos turinio, piktogramu, `.ct3-stats-inner` vidaus.
+   Cia tik vieta ir matomumas. */
+
+.ct3-stats-bar {
+  margin-top: 10px;
+  border-radius: var(--radius-lg);
+  border-top: 1px solid var(--border);
+}
+
+/* Po paieskos - dingsta. Rezultatai kalba uz save. */
+.ct-shell.is-split .ct3-stats-bar,
+.ct-shell.is-split ~ .ct3-stats-bar { display: none; }
+
+/* Telefone juosta lauzosi i dvi eiles ir atima pusę ekrano.
+   Pamatuota: 5 punktai x ~49 px = 245 px prie 390 px ploscio. */
+@media (max-width: 640px) {
+  .ct3-stats-bar { margin-top: 8px; }
+  .ct3-stats-inner { flex-wrap: wrap; gap: 10px 0; padding: 12px 16px; }
+  .ct3-stat-item { flex: 1 1 45%; }
+  .ct3-stat-div { display: none; }
+}

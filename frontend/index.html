@@ -2464,37 +2464,6 @@
 </section>
 
 <!-- SEARCH PANEL -->
-<!-- STATS BAR (perkelta virs saraso maketo - ji full-bleed ir i tinkleli neitelpa) -->
-<div class="ct3-stats-bar">
-  <div class="ct3-stats-inner">
-    <div class="ct3-stat-item">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/><circle cx="12" cy="12" r="1"/></svg>
-      <div><b>12 480</b><span>skelbimų analizuojama per dieną</span></div>
-    </div>
-    <div class="ct3-stat-div"></div>
-    <div class="ct3-stat-item">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
-      <div><b>1 200+</b><span>geriausių pasiūlymų per mėnesį</span></div>
-    </div>
-    <div class="ct3-stat-div"></div>
-    <div class="ct3-stat-item">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h18M3 9h12M3 15h9"/></svg>
-      <div><b>8 Europos</b><span>platformų</span></div>
-    </div>
-    <div class="ct3-stat-div"></div>
-    <div class="ct3-stat-item">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      <div><b>Taupykite laiką</b><span>su AI triažu</span></div>
-    </div>
-    <div class="ct3-stat-div"></div>
-    <div class="ct3-stat-item">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-      <div><b>Geresnės sandoriai</b><span>su realiais rinkos duomenimis</span></div>
-    </div>
-    <div class="ct3-stats-driven">VALDOMA <b>DUOMENŲ</b></div>
-  </div>
-</div>
-
 <!-- v1.75.0: 25 sk. .ct-shell - filtrai i sona nuo 1180 px -->
 <div class="ct-shell">
   <div class="ct-shell-side">
@@ -2649,6 +2618,10 @@
             <span class="ct3-badge" id="more-filters-badge" style="display:none;">0</span>
           </button>
           <div style="position:relative">
+            <!-- v1.86.0: `.ct-tab` nuimta. Ji nese `min-height: 44px`, kuris nugalejo
+                 34 sk. `height: 30px` - height NEIVEIKIA min-height (trecias kartas
+                 ta pati saveika). Mygtukai buvo 30 ir 44 px; slinkimo tai nesukele,
+                 tad matavimas prazuvo. Ir vardas negyvas: skirtuku juostos nebera. -->
             <button class="ct-btn ct-btn-ghost ct3-stab" id="ct-hist-tab-btn" onclick="ctSearchTabSwitch('history',this)">🕘 Paskutinės paieškos</button>
             <div id="ct-history-dropdown" style="display:none;">
               <div class="ct-hist-head">
@@ -2707,6 +2680,42 @@
       </div>
     </div>
   </div>
+
+  <!-- v1.86.0 (35 sk.): statistikos juosta stovi PO paieskos panele, o po
+       paieskos dingsta. Pasitikejimo zenklas turi buti salia to, ka jis ramina:
+       „12 480 skelbimu per diena" atsako i klausima, kuris kyla ziurint i laukus,
+       ne pries juos. Kai ekrane 40 tikru skelbimu, pazadas apie rezultatus
+       nebeitikina. Tuo paciu hero ir panele tampa kaimynemis. -->
+<!-- STATS BAR (perkelta virs saraso maketo - ji full-bleed ir i tinkleli neitelpa) -->
+<div class="ct3-stats-bar">
+  <div class="ct3-stats-inner">
+    <div class="ct3-stat-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/><circle cx="12" cy="12" r="1"/></svg>
+      <div><b>12 480</b><span>skelbimų analizuojama per dieną</span></div>
+    </div>
+    <div class="ct3-stat-div"></div>
+    <div class="ct3-stat-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
+      <div><b>1 200+</b><span>geriausių pasiūlymų per mėnesį</span></div>
+    </div>
+    <div class="ct3-stat-div"></div>
+    <div class="ct3-stat-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h18M3 9h12M3 15h9"/></svg>
+      <div><b>8 Europos</b><span>platformų</span></div>
+    </div>
+    <div class="ct3-stat-div"></div>
+    <div class="ct3-stat-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <div><b>Taupykite laiką</b><span>su AI triažu</span></div>
+    </div>
+    <div class="ct3-stat-div"></div>
+    <div class="ct3-stat-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      <div><b>Geresnės sandoriai</b><span>su realiais rinkos duomenimis</span></div>
+    </div>
+    <div class="ct3-stats-driven">VALDOMA <b>DUOMENŲ</b></div>
+  </div>
+</div>
   </div>
   <div class="ct-shell-main">
 

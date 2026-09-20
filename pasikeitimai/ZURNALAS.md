@@ -2370,3 +2370,63 @@ lieka, atsiųsiu matavimą.
 Nedariau antros tos pačios realizacijos: `ctMegstami` gavo viešą
 `atnaujintiVisus(btn)`, o puslapis — savo mygtuką, kuris kviečia tą pačią
 funkciją. Viena logika, dvi vietos.
+
+---
+
+## Z-35 · 2026-09-20 · Klaudijus → Dizaineriui · 26 PAKETAS ĮDIEGTAS · v1.86.0
+
+**`ERRATA-3` ir 35 sk. įdiegti, `.ct-tab` nuimta markupe.** Visi trys jūsų
+punktai pasitvirtino matavimu.
+
+### 1. `.ct-tab` · jūs teisus, ir matavimas to nepagavo
+
+```
+pries:  „Daugiau filtru" 30 px  ·  „Paskutines paieskos" 44 px
+po:     30 px  ·  30 px
+```
+
+`.ct-tab` nešė `min-height: 44px`, kuris nugalėjo jūsų `height: 30px`.
+**Trečias kartas ta pati `height` / `min-height` sąveika** — ir jūs teisingai
+pastebėjot, kad slinkimo tai nesukelia, todėl mano patikra praėjo. Įrašiau
+`CLAUDE.md`: **0 px slinkimo nereiškia, kad dydis teisingas** — reikia matuoti
+ir patį dydį, ne tik ar telpa.
+
+Vardas buvo ir negyvas: skirtukų juostos nebėra nuo Nr. 35, tad `.ct-tab` ant
+to mygtuko nebeturėjo ką reikšti — tik kenkė.
+
+### 2. Statistikos juosta · jūsų sprendimas įdiegtas, ir tie −81 px dingo
+
+Juosta perkelta **po paieškos laukais**, `.ct-shell.is-split` būsenoje
+slepiama. Pamatuota:
+
+```
+                     390 px      1280 px     2364 px
+hero aukstis          180         220         220
+tarpas iki paneles      0           0           0      <- buvo -81
+statistika po panele    6 px       10 px       10 px
+po paieskos          nematoma    nematoma    nematoma
+sonas po paieskos      571         561         551     prie ribos 599
+horizontalaus slinkimo 0 · JS klaidu 0
+```
+
+**Jūsų prognozė pasitvirtino tiksliai:** hero ir panelė tapo kaimynėmis, ir
+tarpas dingo **be jokios naujos taisyklės** — jo niekada ir nebuvo, buvo
+elementas tarp jų. Mano „panelė lygiai ant juostos" negalėjo suveikti iš
+principo, ir jūs tai pasakėt anksčiau už mane.
+
+### 3. Dėl `A-08` — dalinuosi kalte, bet jūsų analizė tikslesnė
+
+Jūs rašot, kad didesnė dalis jūsų, nes `A-08` taisyklę užrašėt pats ir pats ją
+pažeidėt. Sutinku dėl mechanizmo, bet markupą perkėliau aš, ir aš nepažiūrėjau,
+kokias klases neša mygtukas. **Struktūrinis selektorius (`> button`) yra
+teisingas sprendimas** — po jo markupas nebegali „pamiršti".
+
+### 4. Kas liko iš jūsų sąrašo
+
+Dar **neįdiegta**: 26 sk. `SUJUNGTAS` (dvi kopijos faile) ir ~20 negyvų
+`.ct3-hero-content` taisyklių, tarp jų `min-height: 600px`. Laukiu to failo —
+neliečiu, kad neatsirastų trečia kopija.
+
+Ir **23 paketas** (`.ct-fld`, trys būsenos, 12 piktogramų) tebelaukia: jis
+didžiausias ir liečia visus vienuolika laukų. Diegsiu jį kaip visumą, kai
+sutvarkysim smulkmenas.

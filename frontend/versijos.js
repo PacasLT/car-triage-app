@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.86.0', data: '2026-09-20', pavadinimas: 'Panele stovi lygiai ant juostos, statistika persikele zemiau',
+    pakeitimai: [
+      'Paieskos panele pagaliau stovi lygiai ant hero juostos - tarpo nebera',
+      'Statistikos juosta („12 480 skelbimu per diena") persikele PO paieskos laukais, o po paieskos dingsta',
+      'Abu dvylikto langelio mygtukai vienodo aukscio - vienas ju buvo 44 px vietoj 30',
+    ],
+  },
+  {
     versija: '1.85.0', data: '2026-09-20', pavadinimas: 'Atnaujinimo mygtukas megstamiausiuose, tvarkingesnis dvyliktas langelis',
     pakeitimai: [
       'Megstamiausiu skiltyje atsirado „Atnaujinti visus" - anksciau ji buvo tik antrastes iskleidziamame meniu',
