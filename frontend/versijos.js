@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.95.0', data: '2026-09-20', pavadinimas: 'Metu, kainos ir galios laukai sone tapo iskaitomi',
+    pakeitimai: [
+      'Ivedus „15000" buvo matyti tik dalis skaitmenu - dabar visi seši laukai rodo iverta reiksme',
+      'Trys diapazonai sone dabar uzima visa eilute; juosta del to paaugo iki 644 px',
+      'Siaurame ekrane (1280x720) juosta del to slenka 45 px - dizaineriui perduota, ar taip paliekam',
+      'Valymo kryzelis nebeatima vietos tuscioje dezuteje',
+    ],
+  },
+  {
     versija: '1.94.0', data: '2026-09-20', pavadinimas: 'Markes ir modelio laukai sone pagaliau matosi',
     pakeitimai: [
       'Siauroje filtru juostoje markes ir modelio pasirinkimai buvo 0 px plocio - ju paprasciausiai nebuvo',

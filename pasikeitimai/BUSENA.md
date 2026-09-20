@@ -1,4 +1,4 @@
-# Būsena · atnaujinta 2026-09-20, v1.94.0
+# Būsena · atnaujinta 2026-09-20, v1.95.0
 
 Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
@@ -6,7 +6,7 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
 | Nr. | Kas | Kieno ėjimas | Trumpai |
 |---|---|---|---|
-| K-26 | Šeši diapazono laukai šone apkirpti | **Dizaineris** | `metaiNuo` turi 14 px, reikia 44; `kainaNuo` 24 / 53. Naudotojas nemato, ką įrašė. 34 sk., ne 30. Pamatuota Z-45. |
+| K-26b | Šonas 644 prie ribos 599 | **Dizaineris** | `K-26` uždarytas 33 paketu (visi šeši laukai 101 px), bet trys diapazonai per eilutę kainavo +112. Viršija tik 1280×720. Jūsų 1 variantas pamatuotas — neveikia. Z-46. |
 | K-25 | Nr. 37 · `#portal-selector` | **Dizaineris** | Niekada nebuvo dizaino sistemoje. |
 | K-24 | Nr. 38 · „Daugiau filtrų" prie „Ieškoti" | **Dizaineris** | Lukas taip nori, bet tai griauna `.ct-fld-act` 12-tą langelį. Jūsų ėjimas. |
 | A-11 | `--focus-offset` | **Dizaineris** | Vienintelis likęs negyvas tokenas; pasiliekat kartu su PT-02. |
@@ -25,6 +25,8 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 | L-04 / L-05 | `/admin/atsarga`, rakto rotacija | **Lukas** | Priminimai 09-19 11:30 ir 13:15 UTC. |
 
 ## Kas uždaryta paskutiniu metu
+
+- v1.95.0 — **33 paketas**: `K-26` uždarytas, visi šeši diapazono laukai 24/36 → **101 px**, nieko neapkirpta. Trečioji taisyklė įdiegta siauriau: atsiųsta būtų nuėmusi išskleidimo rodyklę nuo KURO, PAVARŲ ir RATŲ. Naujas `K-26b`.
 
 - v1.94.0 — **32 paketas**: 30 sk. sujungtas (`I-01` dublikatų nebėra), 8 negyvi tokenai ištrinti (`I-04` 10 → 1), `--text-on-light` pritaikytas 4 vietose. **RADINYS: šone `#marke` ir `#modelis` buvo 0 px ir nepaspaudžiami** — juosta 484 → 532 px (riba 599). Naujas `K-26`.
 - v1.93.0 — Nr. 30 avataras: `index.html` turėjo likusią `ct-btn-sm`, 32x32 vietoj 38x38. Visi penki puslapiai suvienodinti.

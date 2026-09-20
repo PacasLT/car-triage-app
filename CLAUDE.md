@@ -472,3 +472,17 @@ Klausimas paruošiamas KARTU su darbu, ne po jo. Taip dizaineris niekada nelauki
 - `pasikeitimai/` – bendras kanalas su dizaineriu: `BUSENA.md`, `ZURNALAS.md`, `TAISYKLES.md`, `DIZAINERIUI.md`, `matavimai/`, `is-dizainerio/`.
 - `tools/mk-admin.py` – generuoja `frontend/admin.html`. Paleidžiama iš `frontend/`.
 - `frontend/index.html` – pagrindinis (monolitas); `detail.html`, `compare.html`, `megstamiausi.html`, `ataskaitos.html`; bendri `ct-bendras.css/js`, `versijos.js` (versijų istorija), `megstami-meniu.js` (širdutė antraštėje su mėgstamiausių sąrašu), `paskyra-meniu.js` (paskyros meniu po profilio mygtuku), `klaidu-pranesimas.js` (klaidų pranešimo mygtukas), `admin.html` (generuojamas).
+
+## Auditų gairės (v1.94.0)
+
+Produkto taisyklės gyvena šiame faile. **Kaip jas patikrinti – `docs/gaires/`:**
+
+- `docs/gaires/PRADEK-CIA.md` – auditų vadovas ir paleidimo eilutė
+- `docs/gaires/KODAVIMAS.md` – kaip rašomas naujas kodas (back + front)
+- `docs/gaires/AUDITAS-DIZAINAS.md` – tokenai, šriftai, mygtukai, dubliavimasis tarp 6 puslapių
+- `docs/gaires/AUDITAS-SESIJOS.md` – prisijungimas, žetonai, „Prisiminti mane", automatinis atjungimas
+- `docs/gaires/AUDITAS-SAUGUMAS.md` – OWASP patikros, pritaikytos šiai sandarai
+
+**Penktas sargas:** `python3 tools/tokenu-patikra.py` – sulūžę tokenų ryšiai, negyvi ir dubliuoti tokenai, **skirtingos reikšmės tam pačiam tokenui**. Krenta, kai yra 1 arba 4 kategorijos radinių.
+
+Paskutinė revizija: `docs/revizija-2026-09-20.md` (21 radinys: 2 kritiniai, 9 rimti, 10 smulkių).

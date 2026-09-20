@@ -2926,3 +2926,63 @@ textarea.ct-field {
   .ct-table.is-dense tbody td.is-prio { width: auto; }
   .ct-prio-t { color: var(--text-secondary); }
 }
+
+
+/* ============================================================================
+   34d. DIAPAZONO LAUKAS SONE
+   ----------------------------------------------------------------------------
+   Vienas principas: laukas, kuriame vartotojas RASO, negali buti siauresnis
+   uz tai, ka jis rašo.
+
+   Pasirinkimo laukas (select) gali buti apkarpytas - reiksme vis tiek
+   pasirenkama is saraso, ir apkarpyta „Automatine" lieka atpazistama.
+   Ivesties laukas negali: zmogus turi matyti, ka ka tik surinko. Tai ne
+   grozio, o patikrinimo klausimas — be jo neaisku, ar 15000 nuejo i ta lauka.
+
+   ── KODEL NE „TRUPUTI DAUGIAU VIETOS" ─────────────────────────────────────
+   Dezuteje 120 px langelyje stovi: piktograma 13, laukas, bruksnys ~9,
+   laukas, ✕ 17, plius keturi 7 px tarpai ir 2x10 uzpildas. Laukams lieka
+   apie 33 px DVIEM, t. y. po ~16.
+
+   Nuemus ✕ nenustatytam laukui atsiranda +24, nuemus vidine piktograma dar
+   +20 — is viso po ~38. Bet „15000" reikia 39. Tad kelias, kuris atrodo
+   pakankamas, pralaimi VIENU pikseliu, ir pralaimi tik tada, kai zmogus
+   iveda penkiazenkli skaiciu, t. y. beveik visada.
+
+   Todel diapazonas eina per abu stulpelius. Ten laukams lieka po ~82 px —
+   ne „vos telpa", o telpa su atsarga, ir „200000" irgi.
+
+   ── KAINA, KURIA REIKIA PASAKYTI ──────────────────────────────────────────
+   Trys diapazonai (METAI, KAINA, GALIA) uzims po visa eilute vietoj puses.
+   Tai prideda eiliu. Z-37 sonas buvo 484 px prie ribos 599 — atsargos 115.
+   Jei pridetos eilutes ja virsys, sakykit skaiciu: tada arba KAINA lieka
+   plati, o METAI ir GALIA grizta siauros (jose telpa keturzenkliai), arba
+   grazinam B varianta kaip kompromisa.
+
+   PRIRISTA prie: .ct-shell.is-split — tik sonas. Placiame variante langelis
+   yra 231 px ir problemos nera.                                            */
+
+@media (min-width: 1180px) {
+
+  /* 1) Diapazonas per abu stulpelius */
+  .ct-shell.is-split > .ct-shell-side .ct-fld.is-range { grid-column: 1 / -1; }
+
+  /* 2) ✕ tik tada, kai yra ka valyti.
+     Nenustatytame lauke jis nieko nedaro - tik atima 24 px is to, kas
+     matoma. Tai galioja VISIEMS siauriems laukams, ne tik diapazonams. */
+  .ct-shell.is-split > .ct-shell-side .ct-fld:not(.is-set) .ct-fld-x { display: none; }
+
+  /* 3) ĮDIEGTA SIAURIAU, NEI ATSIUSTA - zr. Z-46. Atsiusta buvo
+     `.ct-fld:not(.is-inline) > .ct-fld-v > .ct-i`, su paaiskinimu, kad ji
+     kartoja etiketes piktograma. Pamatavau: SIAURAME langelyje vidines
+     piktogramos NERA is viso - vienintelis `.ct-fld-v > .ct-i` ten yra
+     SELEKTORIAUS RODYKLE. Tad atsiusta taisykle nuimdavo isskleidimo
+     rodykle nuo KURO, PAVARU ir RATU (ir laimedavo jiems 20 px, kuriu jiems
+     nereikia: 77 px uzteko „Elektrinis").
+
+     Lieka tik diapazonams: ten rodykle yra kopijavimo liekana - skaiciu
+     laukas nieko neisskleidzia. */
+  .ct-shell.is-split > .ct-shell-side .ct-fld.is-range:not(.is-inline) > .ct-fld-v > .ct-i { display: none; }
+}
+
+/* Telefone dezute ir taip per visa ploti — cia nieko nereikia. */

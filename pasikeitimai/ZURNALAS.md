@@ -3191,3 +3191,131 @@ naują pranešimą apie tai, ką jau turėjau žinoti.
 **Taisyklė iš to:** prieš siunčiant pranešimą į `laukia-patikros`, pamatuoti
 tai, ko prašau patikrinti. Prašymas patikrinti yra pažadas, kad iš mano pusės
 baigta; jei nepamatavau, tai ne pažadas, o spėjimas.
+
+---
+
+## Z-46 · 2026-09-20 · Klaudijus → Dizaineriui · 33 ĮDIEGTAS · K-26 UŽDARYTAS · v1.95.0
+
+Pirma — dėl stendo, kurio neatsiuntėt. **Tai teisingas sprendimas, ir jis
+jau apsimokėjo šiame pakete.** Stendas, rodantis 252 px vietoj 120, būtų
+davęs aritmetiką, kuri atrodo pamatuota. Jūs atsiuntėt aritmetiką, pažymėtą
+kaip aritmetika — ir todėl žemiau galiu pasakyti, kur ji nesutapo, o ne
+ginčytis, kieno skaičius teisingesnis.
+
+### 1. `K-26` uždarytas. Visi šeši laukai
+
+```
+metaiNuo  „2018"    36 -> 101 px    reikia 45    OK
+metaiIki  „2024"    36 -> 101 px    reikia 45    OK
+kainaNuo  „15000"   24 -> 101 px    reikia 53    OK
+kainaIki  „200000"  24 -> 101 px    reikia 61    OK
+galiaNuo  „150"     24 -> 101 px    reikia 38    OK
+galiaIki  „400"     24 -> 101 px    reikia 38    OK
+```
+
+Matuota teksto pločiu (`scrollWidth` su įvesta reikšme), kaip prašėt.
+
+### 2. Riba pramušta. Skaičius — **644**
+
+```
+1280x720   aukštis 644   riba 599   VIRŠIJA 45
+1366x768   aukštis 644   riba 647   telpa su 3 px
+1440x800   aukštis 644   riba 679   telpa su 35
+1920x1080  aukštis 644   riba 959   telpa su 315
+```
+
+Tik 720 px aukščio ekranas. Ir atkreipiu dėmesį į antrą eilutę: **1366×768
+telpa su 3 px atsarga** — pagal jūsų pačių kriterijų tai ne „telpa".
+
+### 3. Jūsų 4 dalies 1 variantas NEVEIKIA — ir tai pamatuota
+
+Siūlėt: jei pramuš, palikti plačią tik `KAINA`, nes `METAI` (31 px) ir
+`GALIA` (23 px) su `B`+`D` gaus ~38. Išbandžiau visus tris kelius:
+
+| Variantas | Aukštis | Viršija | Apkirpta |
+|---|---|---|---|
+| **A** visi trys platūs (kaip atsiųsta) | 644 | 45 | **nėra** |
+| **B** `KAINA` + `METAI` platūs | 588 | 0 | `galiaNuo/Iki` 36 / 38 |
+| **C** tik `KAINA` plati (jūsų 1 var.) | 588 | 0 | `metai` 36/45, `galia` 36/38 |
+
+Jūsų įvertinimas „`2018` = 31 px" buvo mažas — **tikras plotis 45 px**.
+Šriftas 13.5 px monospace duoda ~11 px skaitmeniui, ne ~8. Tad `C`
+neuždaro `K-26`, o tik perkelia apkirpimą nuo kainos prie metų.
+
+`B` pralaimi **dviem pikseliais** ties `GALIA`. Dėžutės anatomija, jei
+norėsit tuos du atkovoti:
+
+```
+langelis 119 = užpildas 2x10  +  laukas 36  +  tarpas 7  +  „–" 12  +  tarpas 7  +  laukas 36
+```
+
+Užpildas 10 → 8 duoda lygiai +4, t. y. po 38. Bet tai vėl nulinė atsarga,
+o jūs ką tik parašėt, kodėl to nedarom.
+
+**Palikau `A`** — tą, kurį atsiuntėt. Argumentas: 45 px vidinio slinkimo
+viename ekrano aukštyje yra mažesnė žala nei laukas, kurio reikšmės
+neįskaitomos **visuose**. Šonas ir taip turi `overflow-y: auto`. Bet tai
+jūsų skyrius, ir jei sakysit `B` + užpildo 4 px, pakeisiu per minutę.
+
+### 4. Trečioji taisyklė įdiegta siauriau, nei atsiųsta
+
+Atsiuntėt:
+
+```css
+.ct-fld:not(.is-inline) > .ct-fld-v > .ct-i { display: none; }
+```
+
+su paaiškinimu: *„ji kartoja tą pačią piktogramą, kuri jau stovi etiketėje
+virš lauko"*.
+
+**Siaurame langelyje tos piktogramos nėra.** Patikrinau visų vienuolikos
+langelių `.ct-fld-v` vidų: piktograma dėžutėje yra **tik** `is-inline`
+langeliuose (`MARKĖ`, `MODELIS`). Siauruose vienintelis
+`.ct-fld-v > .ct-i` yra **selektoriaus rodyklė**.
+
+Tad taisyklė darė ne tai, ką rašėt:
+
+```
+KURAS      laukas 77 -> 97,  rodyklė dingo
+PAVAROS    laukas 77 -> 97,  rodyklė dingo
+RATAI      laukas 77 -> 97,  rodyklė dingo
+```
+
+Trys išskleidžiamieji laukai neteko išskleidimo ženklo, ir gavo po 20 px,
+kurių jiems nereikia — 77 px pakako ilgiausiam „Elektrinis".
+
+Susiaurinau iki `.ct-fld.is-range:not(.is-inline)`. Ten rodyklė **tikrai**
+yra liekana: skaičių laukas nieko neišskleidžia. `METAI` ją turėjo (kopijavimo
+pėdsakas), `KAINA` ir `GALIA` — ne. Po pataisymo: rodyklės grįžo trims
+selektoriams, `METAI` liko be jos.
+
+**Ir jūsų aritmetika vis tiek buvo teisinga** — „piktograma 13" atitiko tą
+pačią 14 px rodyklę. Sutapo skaičius, nesutapo elementas. Tai tiksliai tas
+pats, kas man nutiko `Z-42`: pamatavau teisingą skaičių apie neteisingą
+dalyką.
+
+### 5. Antroji taisyklė susitinka su jūsų pačių 34 sk.
+
+`✕ tik nustatytam` įdiegta kaip yra, bet turit žinoti, kad `34 sk.` 2672–73
+eil. jau turi **priešingą** pusę:
+
+```css
+.ct-fld:not(.is-inline).is-set .ct-fld-x       { display: none; }
+.ct-fld:not(.is-inline).is-set:hover .ct-fld-x { display: grid; }
+```
+
+Kartu tai reiškia: ✕ nebeima vietos **niekada**, ir pasirodo tik užvedus.
+Pamatuota: nustatytame `KAINA` be hover `none`, su hover `grid`. Elgsena
+nuosekli, bet jūsų „`B` = +24 px" skaičiavimas rėmėsi tuo, kad nustatytame
+lauke ✕ stovi — o `34 sk.` jį ten jau buvo nuėmęs.
+
+### 6. Regresija švari
+
+Penki puslapiai, 390 ir 1280: `hSrautas=0`, JS klaidų `0`, piktogramų
+trūksta `0`, avataras `38x38` / `44x44`. Plačiame variante (1280, 2364) be
+paieškos niekas nepasikeitė.
+
+### Klausimas grįžta jums
+
+`K-26b` · **644 prie 599.** `A` (kaip yra, slenka 45 px viename aukštyje),
+ar `B` + keturi pikseliai užpildo (nulinė atsarga `GALIA`)?
