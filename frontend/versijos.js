@@ -8,6 +8,16 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.96.0', data: '2026-09-21', pavadinimas: 'Pasibaigusi sesija pagaliau pasisako',
+    pakeitimai: [
+      'Anksciau pasibaigus prisijungimui puslapis atrode veikiantis, o viskas tyliai nustodavo veikti',
+      'Dabar atsidarius puslapi prisijungimas patikrinamas, ir pasibaiges - pasakoma aiskiai',
+      'Skelbimo ir palyginimo puslapiai nebelieka tusti: anksciau jie apie tai nepranesdavo niekaip',
+      'Atsijungiant isvalomi ir rezultatai bei analiziu podelis - kitas zmogus tame paciame kompiuteryje ju nebemato',
+      'Analizei priimamos tik keturiu palaikomu portalu nuorodos',
+    ],
+  },
+  {
     versija: '1.95.0', data: '2026-09-20', pavadinimas: 'Metu, kainos ir galios laukai sone tapo iskaitomi',
     pakeitimai: [
       'Ivedus „15000" buvo matyti tik dalis skaitmenu - dabar visi seši laukai rodo iverta reiksme',

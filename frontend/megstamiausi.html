@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mėgstamiausi — CarTriige</title>
+<script src="ct-sesija.js"></script>
+<!-- ct-sesija.js: vienintelis zetono ir sesijos saltinis (revizija A-1..A-3, A-7).
+     Deti PIRMA: jis apvynioja fetch, tad turi buti anksciau uz bet ka, kas kviecia API. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -218,7 +221,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 </header>
 
 <div class="pg">
-  <div class="pg-head"><h1>Mėgstamiausi</h1><span class="kiek" id="kiek">–</span><button type="button" class="ct-btn ct-btn-sm" id="mg-atn" style="margin-left:auto" onclick="if(window.ctMegstami&&ctMegstami.atnaujintiVisus)ctMegstami.atnaujintiVisus(this)" title="Iš naujo patikriname kiekvieno išsaugoto skelbimo kainą ir būseną portale. 1 kreditas už visą sąrašą (kartą per parą)."><span>↻ Atnaujinti visus · 1 kr</span></button><span id="mg-atn-busena" style="flex:1 1 100%; font:500 12px var(--font); color:var(--text-dim)"></span></div>
+  <div class="pg-head"><h1>Mėgstamiausi</h1><span class="kiek" id="kiek">–</span><button type="button" class="ct-btn ct-btn-sm" id="mg-atn" style="margin-left:auto" onclick="if(window.ctMegstami&&ctMegstami.atnaujintiVisus)ctMegstami.atnaujintiVisus(this)" title="Iš naujo patikriname kiekvieno išsaugoto skelbimo kainą ir būseną portale. 1 kreditas už visą sąrašą (kartą per parą)."><span>↻ Atnaujinti visus · 1 kr</span></button><span id="mg-atn-busena" class="mg-atn-busena"></span></div>
   <p class="pg-sub">Skelbimai, kuriuos pažymėjote ♥. Saugomi prie paskyros – matysite iš bet kurio įrenginio. Kasdien tikriname, ar pasikeitė kaina ir ar skelbimas dar aktyvus.</p>
   <div id="sarasas"><div class="pg-tuscia">Kraunama…</div></div>
 </div>

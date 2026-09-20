@@ -3319,3 +3319,170 @@ paieškos niekas nepasikeitė.
 
 `K-26b` · **644 prie 599.** `A` (kaip yra, slenka 45 px viename aukštyje),
 ar `B` + keturi pikseliai užpildo (nulinė atsarga `GALIA`)?
+
+### Z-46 priedas · v1.95.0 gyva · matavimas produkcijoje
+
+Ne stende — `car-triage-app-production.up.railway.app`, 1280×720:
+
+```
+MARKĖ    0 px nepasiekiamas  ->  114 px pasiekiamas
+MODELIS  0 px nepasiekiamas  ->  125 px pasiekiamas
+šeši diapazonai  24-36 px  ->  97 px, „200000" telpa
+rodyklės  KURAS / PAVAROS / RATAI  block   METAI  none (liekana nuimta)
+piktogramų trūksta 0 iš 43     hSrautas 0     avataras 38x38 / 44x44
+šonas 643 prie ribos 599  ->  slenka 54 px TIK 1280x720
+```
+
+Devyni pranešimai perėjo į `laukia-patikros`. Atvirų 19, Luko ėjimo laukia 9.
+
+### `JWT_SECRET` patikrintas matavimu, ne spėjimu
+
+`docs/revizija-2026-09-20.md` `A-1` nurodė blogiausią šaką: jei Railway
+nenustatytas `JWT_SECRET`, `auth.js:22` generuoja atsitiktinį, ir **kiekvienas
+deploy'as atjungia visus**. Tai ne 200 eilučių darbas, o viena aplinkos
+eilutė — tad reikėjo patikrinti pirma.
+
+Matavimas: žetonas išduotas **09-18 13:35**, deploy'as įvyko **09-20 20:4x**,
+`GET /auth/me` po jo grąžino **200**. Žetonas, pasirašytas prieš deploy'ą,
+tebegalioja — vadinasi, paslaptis pastovi ir `JWT_SECRET` **nustatytas**.
+
+**Tad `A-1` lieka, bet jo priežastis siauresnė:** ne deploy'ai, o 72 h
+galiojimas. Šis žetonas baigsis **09-21 13:35**, ir sąsaja to nesužinos, nes
+`/auth/me` frontende nekviečiamas nė karto (patikrinta: 0 kvietimų visuose
+failuose). Simptomas kartosis maždaug kas tris paras.
+
+---
+
+## Z-47 · 2026-09-21 · Klaudijus · REVIZIJOS 1 IR 4 EILĖ · v1.96.0
+
+`docs/revizija-2026-09-20.md` D dalies 1 eilė (`A-1`, `A-2`, `A-3`) ir iš 4
+eilės `C-2`. Prie jų prisidėjo `A-7`, `B-2` ir `B-3`, nes buvo pakeliui.
+
+Naujas failas: **`frontend/ct-sesija.js`**, įdėtas pirmas visuose šešiuose
+puslapiuose.
+
+### 1. Pirma — kur revizija klydo
+
+Ji rašė, kad `auth_frontend.js` prideda `Authorization` tik `/api`,
+`/analyze` ir `/scrape`, ir kad dėl to `/auth/me` eitų be antraštės.
+
+Tikrovė kita ir platesnė:
+
+```js
+const API_BASE = window.API_BASE || '';        // niekur nenustatytas -> ''
+url.startsWith(API_BASE)                        // '' -> VISADA true
+```
+
+Pirmoji sąlyga visada teisinga, tad antraštė kabinta prie **kiekvieno**
+fetch'o su tekstiniu adresu, įskaitant svetimus. Šiandien svetimų kvietimų
+kode nėra, tad žala buvo tik galima — bet tai ne apsauga, o sutapimas.
+Pamatuota po pakeitimo: užklausa į `https://pavyzdys.lt/` gauna
+`authorization: null`, o savas `/api/planas` — lygiai vieną antraštę.
+
+### 2. `A-1` · kodėl „pakibimas" kartojosi
+
+`/auth/me` sąsajoje nebuvo kviečiamas **nė karto** (patikrinta: 0 kvietimų
+visuose failuose). „Prisijungęs" reiškė tik tai, kad `localStorage` yra
+raktas.
+
+Vakar dar patikrinau blogiausią šaką ir ji nepasitvirtino: žetonas išduotas
+09-18 13:35 po deploy'o grąžino `/auth/me` **200**, vadinasi `JWT_SECRET`
+Railway nustatytas ir deploy'ai nieko neatjungia. Lieka 72 h galiojimas — tad
+simptomas kartojasi maždaug kas tris paras, o ne po kiekvieno išsiuntimo.
+
+Dabar paleidžiant fone kviečiamas `/auth/me`. **Tinklo klaida nėra pasibaigusi
+sesija** — be interneto neatjungiam; atjungia tik 401/403.
+
+### 3. `A-2` · vienas kelias vietoj keturių ir dviejų tuščių
+
+| Puslapis | Buvo | Dabar |
+|---|---|---|
+| `index.html` | modalas (tik paieškos sraute) | savas modalas, per `ctSesija` |
+| `ataskaitos.html`, `megstamiausi.html` | savas tekstas | bendra uždanga |
+| `admin.html` | **„Reikia administratoriaus teisių"** — melas | 401 ≠ 403, atskirti |
+| `detail.html`, `compare.html` | **nieko** | bendra uždanga |
+
+`admin.html` eilutė buvo įdomiausia: vienas pranešimas dviem skirtingiems
+dalykams, ir pasibaigusi sesija atrodė kaip teisių trūkumas. Taisyta
+`tools/mk-admin.py` šablone, ne faile.
+
+**Ko tyčia NEgaudau:** `/auth/login` ir `/auth/register` grąžina 401, kai
+slaptažodis neteisingas. Jei tai laikytume pasibaigusia sesija, kiekvienas
+apsirikimas rašant slaptažodį išvalytų saugyklą. Pamatuota:
+`loginStatus 401`, `žetonas po = liko`, uždangos nėra.
+
+### 4. `A-7` · tai, ko revizija neužrašė kaip svarbaus
+
+Atsijungiant buvo valomi tik `ct_token` ir `ct_email`. Likdavo `ct_last_results`,
+`ct_detail`, `ct_compare_*`, `carTriageAnalysisCache`, `carTriageSearchHistory`
+— **kitas žmogus tame pačiame kompiuteryje matydavo svetimus rezultatus.**
+Dabar valomi visi dešimt, pagal ranka rašytą sąrašą (`localStorage.clear()`
+nuvalytų ir tai, kas ne mūsų).
+
+### 5. `C-2` · sargas ne ten, kur nurodė revizija
+
+Ji sakė taisyti `server.js:3498` (`/api/analyze-single`). Bet
+`scrapeSingleListing` pasiekiamas keturiais keliais (analizė, VIN, pardavėjas,
+palyginimas), ir visi eina pro **`fetchListingPage`**. Sargas įdėtas ten —
+vienos vietos taisymas būtų buvęs pusė darbo.
+
+Keturiolika bandymų, visi praėjo:
+
+```
+https://autoplius.lt/...            leidžiama
+https://m.autogidas.lt/x            leidžiama
+https://AUTOPLIUS.LT./x             leidžiama (taškas gale)
+http://169.254.169.254/...          BLOKUOJAMA (debesies metaduomenys)
+http://localhost:3000/admin         BLOKUOJAMA
+https://autoplius.lt.blogas.lt/x    BLOKUOJAMA (priesaga, ne domenas)
+https://user@autoplius.lt.evil.io/  BLOKUOJAMA (userinfo triukas)
+file:///etc/passwd                  BLOKUOJAMA
+```
+
+`/api/analyze-single` papildomai atsako 400 su priežastimi, kad naudotojas
+gautų paaiškinimą, o ne 500.
+
+### 6. `B-2`, `B-3` · sargai pradėjo dirbti pilnai
+
+`dizainas.test.js` buvo **23/24**: `megstamiausi.html` turėjo vieną inline
+stilių su spalva ir šriftu prie riboš 0. Perkelta į `ct-priedai.css` **12
+bloką**. Spalva ir šriftas pamatuoti po pakeitimo — nepakito.
+
+Be to, sargas pats jau seniai rašė „sumažėjo, nuleiskite ribą", ir niekas to
+nedarė: `index.html` riba buvo 204 prie tikrų 197, `detail.html` 233 prie 231.
+**Laisvesnė už tikrovę riba nieko nesaugo** — nauja skola būtų praėjusi
+nepastebėta. Užveržta.
+
+`B-3`: `admin.html` sąraše nebuvo, tad jo skola buvo nematoma iš principo.
+Pridėtas (2 inline, 0 `:root`).
+
+```
+buvo  23/24        dabar  26/26
+```
+
+### 7. Kas pamatuota
+
+- Trys sesijos scenarijai × šeši puslapiai: be žetono, su geru, su blogu.
+  Blogas — žetonas nuvalytas, likučiai nuvalyti, uždanga parodyta penkiuose,
+  modalas `index`; JS klaidų **0** visur.
+- Neteisingas slaptažodis sesijos nenutraukia.
+- Svetimas adresas antraštės negauna; savas gauna vieną.
+- Dizaino regresija: penki puslapiai, 390 ir 1280 — `hSrautas=0`, klaidų `0`,
+  piktogramų trūksta `0`.
+- `onclick-patikra.py` — visos funkcijos apibrėžtos.
+
+### Stendas vos nemelavo
+
+Pirmas sesijos bėgimas rodė, kad blogas žetonas **neišvalomas** — atrodė, kad
+ką tik parašytas modulis neveikia. Priežastis buvo stende: `?demo=1` pats
+įrašo `ct_token='demo'` ir perrašydavo mano scenarijaus žetoną. Tad testas
+tikrino gerą žetoną tris kartus ir vadino tai trimis scenarijais.
+
+Pataisyta stende (`if(!localStorage.getItem('ct_token'))`). Vertas įrašo,
+nes tai trečias kartas per savaitę: **matavimo priemonė irgi yra prielaida.**
+
+### Kas lieka revizijoje
+
+`A-4` (el. pašto registras), `A-5` („Prisiminti mane"), `A-6` (atšaukimas
+serveryje), `A-8`, `C-1` (prisijungimo bandymų riba), `C-3` (`helmet`), `C-4`,
+`C-5`, `B-1` (28 tokenai dviejuose šaltiniuose — dizainerio), `B-7`.

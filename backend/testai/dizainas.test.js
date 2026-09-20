@@ -16,9 +16,16 @@ const FE = path.join(__dirname, '..', '..', 'frontend');
 const F = (n) => fs.readFileSync(path.join(FE, n), 'utf8');
 
 // ── Bazė: kiek dizaino skolos yra ŠIANDIEN. Tik mažinti. ────────────────────
+// Ribos tik MAZEJA. v1.96.0: 204->197 ir 233->231 (sargas pats parase
+// „sumazejo, nuleiskite riba", o niekas to nepadare - tad riba buvo laisvesne
+// uz tikrove ir nauja skola butu praejusi nepastebeta).
+// `admin.html` (revizija B-3) iki siol sarase NEBUVO, tad jo skola nebuvo
+// matoma is principo. Jis generuojamas `tools/mk-admin.py` - riba taisoma
+// SABLONE, ne faile.
 const RIBOS = {
-  'index.html':  { vaizdinisInline: 204, rootBlokai: 2 },
-  'detail.html': { vaizdinisInline: 233, rootBlokai: 1 },
+  'index.html':  { vaizdinisInline: 197, rootBlokai: 2 },
+  'detail.html': { vaizdinisInline: 231, rootBlokai: 1 },
+  'admin.html':  { vaizdinisInline: 2,   rootBlokai: 0 },
   'compare.html':      { vaizdinisInline: 17, rootBlokai: 2 },
   'ataskaitos.html':   { vaizdinisInline: 9,  rootBlokai: 0 },
   'megstamiausi.html': { vaizdinisInline: 0,  rootBlokai: 0 },

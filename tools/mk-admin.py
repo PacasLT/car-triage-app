@@ -116,7 +116,11 @@ BODY = u'''
   function zetonas() { try { return localStorage.getItem('ct_token') || ''; } catch (e) { return ''; } }
   function imti(kelias) {
     return fetch(kelias, { headers: { Authorization: 'Bearer ' + zetonas() } }).then(function (r) {
-      if (r.status === 401 || r.status === 403) throw new Error('Reikia administratoriaus teisių');
+      // Revizija A-2: cia buvo VIENAS pranesimas abiem atvejams, ir jis melavo -
+      // pasibaigusi sesija atrode kaip teisiu trukumas. 401 tvarko ct-sesija.js
+      // (isvalo ir parodo „Sesija baigesi"), o 403 is tikruju yra teisiu klausimas.
+      if (r.status === 401) throw new Error('Sesija baigėsi — prisijunkite iš naujo');
+      if (r.status === 403) throw new Error('Reikia administratoriaus teisių');
       return r.json();
     });
   }
@@ -827,6 +831,7 @@ BODY = u'''
 out = (u'<!DOCTYPE html>\n<html lang="lt">\n<head>\n<meta charset="UTF-8">\n'
        u'<meta name="viewport" content="width=device-width, initial-scale=1.0">\n'
        u'<title>Administravimas — CarTriige</title>\n'
+       u'<script src="ct-sesija.js"></script>\n'
        u'<link rel="preconnect" href="https://fonts.googleapis.com">\n'
        u'<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'
        u'<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">\n'

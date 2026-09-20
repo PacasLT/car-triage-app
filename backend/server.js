@@ -620,9 +620,41 @@ async function fetchSearchPage(url) {
   return html;
 }
 
+// ── C-2 (revizija 2026-09-20): leidziamu portalu sarasas ──────────────────
+// Iki siol `/api/analyze-single` (ir kiti keliai, einantys per
+// scrapeSingleListing) imdavo `url` is kuno be jokios patikros ir perduodavo ji
+// skaitytuvui. Prisijunges naudotojas galejo priversti serveri kreiptis i
+// vidinius Railway adresus, o turinys grizdavo AI analizeje.
+//
+// Sargas dedamas NE i viena marsruta, o i `fetchListingPage` - pro ji eina
+// VISI keliai (analyze-single, vin, pardavejas, palyginimas). Vienos vietos
+// taisymas cia butu buves pusė darbo.
+//
+// Vidines uzklausos (buildAutopliusUrl ir kt.) eina per `fetchSearchPage` ir
+// sio sargo neliecia.
+const LEIDZIAMI_PORTALAI = [
+  'autoplius.lt', 'autogidas.lt', 'autoscout24.com', 'otomoto.pl',
+];
+
+function portalasLeidziamas(url) {
+  let h;
+  try { h = new URL(String(url)).hostname.toLowerCase(); } catch (e) { return false; }
+  if (h.charAt(h.length - 1) === '.') h = h.slice(0, -1);
+  return LEIDZIAMI_PORTALAI.some((p) => h === p || h.endsWith('.' + p));
+}
+
 // Specialiai skelbimo puslapiui - naudoja render=true, kad gautume JS-renderinta HTML
 // (galeriją, lazy-loaded nuotraukų src). Brangiau ScraperAPI kreditais, bet tik TOP 5.
 async function fetchListingPage(url) {
+  // C-2: pirma - ar adresas is leidziamo portalo. Tik protokolas http(s):
+  // `file:`, `gopher:` ir panasus cia neturi ko veikti.
+  const proto = (() => { try { return new URL(String(url)).protocol; } catch (e) { return null; } })();
+  if ((proto !== 'http:' && proto !== 'https:') || !portalasLeidziamas(url)) {
+    const e = new Error('Neleistinas portalas');
+    e.kodas = 'PORTALAS_NELEIDZIAMAS';
+    throw e;
+  }
+
   // PATAISYTA: fetchSearchPage rase i ta pati rakta neatvaizduota HTML, todel
   // giliai analizei kartais atitekdavo puslapis be galerijos ir nuotrauku nebudavo.
   const cached = cache.getCached('pages', 'full:' + url, cache.PAGE_TTL_MS);
@@ -3497,6 +3529,14 @@ app.post('/api/analyze-single', requireAuth, kreditaiPagalLygi, async (req, res)
   try {
     const { url, force, kaina, marketMedian, marketCount, diffPct, modelis, pardavejas: knownPardavejas, galia, variklioTuris } = req.body;
     if (!url) return res.status(400).json({ error: 'Trūksta URL' });
+    // C-2: atsakom anksti ir aiskiai, kad naudotojas gautu priezasti, o ne 500.
+    // Kreditai dar nenurasyti - kreditaiPagalLygi juos ima po sekmingo atsakymo.
+    if (!portalasLeidziamas(url)) {
+      return res.status(400).json({
+        error: 'Nuoroda ne is palaikomo portalo',
+        leidziami: LEIDZIAMI_PORTALAI,
+      });
+    }
     const pilna = req.body.lygis !== 'greita';
     const podelioRaktas = pilna ? url : url + '#greita';
 

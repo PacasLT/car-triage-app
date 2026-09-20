@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Administravimas — CarTriige</title>
+<script src="ct-sesija.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -262,7 +263,11 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
   function zetonas() { try { return localStorage.getItem('ct_token') || ''; } catch (e) { return ''; } }
   function imti(kelias) {
     return fetch(kelias, { headers: { Authorization: 'Bearer ' + zetonas() } }).then(function (r) {
-      if (r.status === 401 || r.status === 403) throw new Error('Reikia administratoriaus teisių');
+      // Revizija A-2: cia buvo VIENAS pranesimas abiem atvejams, ir jis melavo -
+      // pasibaigusi sesija atrode kaip teisiu trukumas. 401 tvarko ct-sesija.js
+      // (isvalo ir parodo „Sesija baigesi"), o 403 is tikruju yra teisiu klausimas.
+      if (r.status === 401) throw new Error('Sesija baigėsi — prisijunkite iš naujo');
+      if (r.status === 403) throw new Error('Reikia administratoriaus teisių');
       return r.json();
     });
   }

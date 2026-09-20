@@ -1,4 +1,4 @@
-# Būsena · atnaujinta 2026-09-20, v1.95.0
+# Būsena · atnaujinta 2026-09-21, v1.96.0 (v1.95.0 gyva produkcijoje)
 
 Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
@@ -17,14 +17,15 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 | D-03 | Skelbimo puslapio 3 dalis | **Lukas** | Ar grąžinam šešis skydelius? Iš 27 pranešimų nė vienas nebuvo apie jų turinį. |
 | K-17 | Nr. 29 · prioriteto spalvos | **Dizaineris** | `.ct-flag` (21 sk.) be spalvų – taškas prieš užrašą `ct-priedai.css` 10 bloke. |
 | K-16 | Nr. 28 · antraštės dešinė | **Dizaineris** | `.ct3-header-right` sulipęs prie logotipo, ne prie krašto (239×42 ties 893,27). |
-| Nr. 39, 30, 33, 24 | Laukia push'o | **Klaudijus** | Visi keturi ištaisyti v1.92.0–v1.94.0, bet dar neišsiųsti. **Nr. 24 sąmoningai grąžintas sau**: prašiau patikrinti šoną, o ten trūko dviejų filtrų. |
-| Nr. 36, 35, 34, 28, 23 | Laukia jūsų patikros | **Lukas** | Gyva produkcijoje nuo v1.80.0–v1.84.0. |
+| Nr. 39, 30, 33, 24 + 36, 35, 34, 28, 23 | Laukia jūsų patikros | **Lukas** | **Devyni**. v1.95.0 gyva; pamatuota tiesiai produkcijoje 1280×720. |
 | Nr. 20, 21 | dpTab ir FAB | **Lukas** | v1.76.0 gyva — patikrinti. |
 | Nr. 25, 26 | Dekoracija ir portalų sąrašas | **Lukas** | Ištaisyta v1.77.0 — patikrinti po push'o. |
 | Nr. 19, 2, 16, 15 | Seni pranešimai | **Lukas / Klaudijus** | Nr. 15 laukia Luko sumos; Nr. 16 laukia dizainerio mobile varianto. |
 | L-04 / L-05 | `/admin/atsarga`, rakto rotacija | **Lukas** | Priminimai 09-19 11:30 ir 13:15 UTC. |
 
 ## Kas uždaryta paskutiniu metu
+
+- v1.96.0 — **revizijos 1 eilė**: naujas `frontend/ct-sesija.js`, vienas žetono ir 401 šaltinis visuose šešiuose puslapiuose (`A-1`, `A-2`, `A-3`, `A-7`). `C-2` sargas įdėtas į `fetchListingPage`, ne į vieną maršrutą — 14 bandymų. Sargai `23/24 → 26/26` (`B-2`, `B-3`). **Laukia push'o.**
 
 - v1.95.0 — **33 paketas**: `K-26` uždarytas, visi šeši diapazono laukai 24/36 → **101 px**, nieko neapkirpta. Trečioji taisyklė įdiegta siauriau: atsiųsta būtų nuėmusi išskleidimo rodyklę nuo KURO, PAVARŲ ir RATŲ. Naujas `K-26b`.
 

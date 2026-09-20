@@ -1,24 +1,31 @@
 /* ── auth_frontend.js ─────────────────────────────────────────────────────
-   Įdėti į index.html prieš </body> arba į atskirą <script> bloką.
-   Veikia kartu su auth modalau (kurį sukuria design Claude).
+   Prisijungimo ir registracijos kvietimai. Žetono laikymas, antraštės ir 401
+   NEBEGYVENA čia — jie perkelti į `ct-sesija.js` (revizija A-3: žetoną skaitė
+   23 vietos dešimtyje failų).
+
+   Kas iš čia išėjo ir kodėl:
+
+   - `ctGetToken` / `ctSetToken` / `ctClearToken` / `ctGetEmail` liko kaip
+     plonos nuorodos į `ctSesija`, nes jų vardais naudojasi senas kodas.
+   - `fetch` apvalkalas IŠTRINTAS. Jis tikrino
+     `url.startsWith(API_BASE) || url.startsWith('/api') || ...`, o
+     `API_BASE` yra tuščia eilutė — tad pirmoji sąlyga visada teisinga ir
+     `Authorization` keliaudavo su KIEKVIENU fetch'u, įskaitant svetimus
+     adresus. `ct-sesija.js` deda antraštę tik savo kilmei.
+   - `DOMContentLoaded` blokas neteko savo pirmos pusės: „ar prisijungęs"
+     dabar sprendžia `ctSesija.patikra()` per `/auth/me`, o ne raktas
+     `localStorage`.
    ──────────────────────────────────────────────────────────────────────── */
 
-const API_BASE = window.API_BASE || '';   // jei reikia, pakeisk į Railway URL
+const API_BASE = window.API_BASE || '';
 
-/* ── Token valdymas ────────────────────────────────────────────────────── */
-const CT_TOKEN_KEY = 'ct_token';
-const CT_EMAIL_KEY = 'ct_email';
+/* ── Žetonas: vienas šaltinis yra ct-sesija.js ─────────────────────────── */
+function ctGetToken() { return window.ctSesija ? window.ctSesija.zetonas() : null; }
+function ctSetToken(t, email) { if (window.ctSesija) window.ctSesija.nustatyti(t, email); }
+function ctClearToken() { if (window.ctSesija) window.ctSesija.isvalyti(); }
+function ctGetEmail() { return window.ctSesija ? window.ctSesija.elPastas() : null; }
 
-function ctGetToken()  { try { return localStorage.getItem(CT_TOKEN_KEY); } catch(e) { return null; } }
-function ctSetToken(t, email) {
-  try { localStorage.setItem(CT_TOKEN_KEY, t); localStorage.setItem(CT_EMAIL_KEY, email); } catch(e) {}
-}
-function ctClearToken() {
-  try { localStorage.removeItem(CT_TOKEN_KEY); localStorage.removeItem(CT_EMAIL_KEY); } catch(e) {}
-}
-function ctGetEmail()  { try { return localStorage.getItem(CT_EMAIL_KEY); } catch(e) { return null; } }
-
-/* ── API skambučiai (naudoja design Claude modal) ──────────────────────── */
+/* ── API skambučiai ────────────────────────────────────────────────────── */
 window.authAPI = {
   async login(email, password) {
     const r = await fetch(`${API_BASE}/auth/login`, {
@@ -45,36 +52,22 @@ window.authAPI = {
   },
 
   logout() {
+    if (window.ctSesija) { window.ctSesija.atsijungti(); return; }
     ctClearToken();
     window.location.reload();
   },
 
   isLoggedIn() { return !!ctGetToken(); },
-  getEmail()   { return ctGetEmail(); }
+  getEmail() { return ctGetEmail(); }
 };
 
-/* ── Auth header visiem fetch'ams ──────────────────────────────────────── */
-// Pataisyti esamus API skambučius — pridėti token header
-const _origFetch = window.fetch.bind(window);
-window.fetch = function(url, opts = {}) {
-  const token = ctGetToken();
-  if (token && typeof url === 'string' && (url.startsWith(API_BASE) || url.startsWith('/api') || url.startsWith('/analyze') || url.startsWith('/scrape'))) {
-    opts.headers = { ...(opts.headers || {}), 'Authorization': `Bearer ${token}` };
-  }
-  return _origFetch(url, opts);
-};
-
-/* ── Puslapio apsauga ──────────────────────────────────────────────────── */
+/* ── Puslapio paruošimas ───────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   if (!authAPI.isLoggedIn()) {
-    // Rodyti auth modalą — design Claude sukuria `window.showAuthModal()`
-    if (typeof window.showAuthModal === 'function') {
-      window.showAuthModal();
-    }
+    if (typeof window.showAuthModal === 'function') window.showAuthModal();
     return;
   }
 
-  // Vartotojas prisijungęs — rodyti email header'e
   const emailEl = document.getElementById('ct-user-email');
   if (emailEl) emailEl.textContent = authAPI.getEmail();
 

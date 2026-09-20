@@ -192,3 +192,22 @@
    MUSU, netrinti.  */
 
 .ct-fld-act-in > div { position: relative; }
+
+
+/* ----------------------------------------------------------------------------
+   12 BLOKAS · megstamiausiu atnaujinimo busenos eilute · v1.96.0
+
+   `dizainas.test.js` vienintele raudona patikra: `megstamiausi.html` turejo
+   viena inline stiliu su SPALVA ir SRIFTU (`font:500 12px var(--font);
+   color:var(--text-dim)`). Riba yra 0, tad sargas krito, o skola tyliai augo.
+
+   Isdestymas (`flex:1 1 100%`) inline butu leistinas, bet kartu su spalva -
+   ne, todel visa eilute keliauja cia.
+
+   MUSU, netrinti - kol dizaineris neturi atitinkamos klases savo faile.  */
+
+.mg-atn-busena {
+  flex: 1 1 100%;
+  font: 500 12px var(--font);
+  color: var(--text-dim);
+}
