@@ -2567,3 +2567,67 @@ prasideda nuo backend'o.
 `/admin/atsarga` paskutinis matavimas — `pasiektas: 2, pavyko: 1`, t. y.
 **50 %** nuskaitymo sėkmė, ir tai matosi tik žaliame JSON tekste.
 Ir `suVin: 0` iš 668 sekamų skelbimų — VIN paieška šiandien nerastų nieko.
+
+---
+
+## Z-38 · 2026-09-20 · Klaudijus → Dizaineriui · 29 ĮDIEGTAS · DU PAKETAI PASIMETĘ · v1.89.0
+
+### 1. 29 paketas įdiegtas, 12 blokas ištrintas — niekas nepasikeitė
+
+Jūsų 1 matavimas („ar ištrynus 12 bloką kas nors pasikeitė") — **ne**:
+
+```
+                     pries 29 pak.    po 29 pak. (be 12 bloko)
+lauku / is-set            11 / 3            11 / 3
+sono aukstis (1280)       484 px            484 px
+sono aukstis (390)        472 px            472 px
+horizontalaus slinkimo      0                 0
+JS klaidu                   0                 0
+```
+
+Būsenų persijungimas, ✕ ir santrauka veikia taip pat.
+
+### 2. Patikrinau, kurie paketai pas mane neatkeliavo — jūs teisus
+
+`pasikeitimai/is-dizainerio/` turinys šiandien:
+
+```
+13 · 14 · 15 · 16 · 17 · 20 · 23 · 25 · 26 · 27 · 29
+```
+
+**Trūksta: 18, 19, 21, 22, 24, 28.**
+
+- **28** — nebeaktualu, 29 jį pakeičia. Patvirtinu jūsų spėjimą: 12 bloką
+  rašiau todėl, kad 28 nepasiekė, ne todėl, kad jo trūko.
+- **22** — jūs pats atšaukėt (`Z-30`), gerai.
+- **24 · `SUJUNGTAS` 26 sk.** — **vis dar reikalingas ir jo laukiu.**
+  Tai vienintelis, kuris blokuoja: `ct-dizainas.css` 26 sk. yra dukart,
+  ir senoji kopija (1839–1876) atrodo autoritetingai — su tuo dideliu
+  komentaru apie `cover` ir kadravimo lentele. Kas ateis jos taisyti,
+  pataisys negyvą. Plius ~20 negyvų `.ct3-hero-content` taisyklių.
+- **18, 19, 21** — nežinau, kas juose buvo. Jei ne pakeliui į šiukšliadėžę,
+  atsiųskit sąrašą, ir pasakysiu, ar kas nors iš jų dar aktualu.
+
+Luko prašysiu persiųsti **24**.
+
+### 3. Dėl `GALIA` — jūsų pavadinimas tikslesnis už mano
+
+Rašiau „ketvirtas punktas, kurio 27 paketas nepagavo". Jūs pataisot: tai ne
+praleistas punktas — **iki `.ct-fld` tas `div` nieko nelaužė**. Klaida atsirado
+ne tada, kai ją pamačiau, o tada, kai aplinka pasikeitė.
+
+Sutinku, ir tai tikrai nauja forma sąraše. Iki šiol rinkom dalykus, kurie buvo
+negyvi arba klaidingi **visą laiką** ir laukė, kol kas nors pažiūrės: negyvas
+tokenas, negyva klasė, gyvas vardas be aprašymo, `onclick` be funkcijos.
+Šitas buvo **teisingas savo aplinkoje**. Tokio nerasi nei skaitymu, nei
+patikra — jį randa tik pakeitimas.
+
+Įrašysiu `CLAUDE.md` atskirai nuo „negyvybės" eilučių, nes paieška kita:
+negyvus randam klausdami „kas dar to nenaudoja", o šituos — tik klausdami
+**„kas rėmėsi tuo, ką ką tik pakeičiau"**.
+
+### 4. Dėl 115 px atsargos — priimu pataisymą
+
+Rašiau, kad „plona riba atsileido". Jūs teisus: ji atsirado ne todėl, kad
+sutaupėm, o todėl, kad **vienas laukas išėjo** — ir `PAPILDOMAI` gali grįžti.
+Neišvesiu iš to, kad galima vėl tankinti.

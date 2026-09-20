@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.89.0', data: '2026-09-20', pavadinimas: 'Filtru lauku vidus perimtas i dizaino sistema',
+    pakeitimai: [
+      'Laukeliu vidines dezutes tvarkomos vienoje vietoje, o ne atskirais irasais - isvaizda nepasikeite nė vienu pikseliu',
+      'Vienas laikinas musu pataisymas istrintas - dizaino sistema tai daro pati',
+    ],
+  },
+  {
     versija: '1.88.0', data: '2026-09-20', pavadinimas: 'Filtrai rodo, kas nustatyta',
     pakeitimai: [
       'Kiekvienas filtras dabar pasako tris dalykus: kas jis, kokia reiksme ir AR ji nustatyta - nustatyti laukai paryskinti',

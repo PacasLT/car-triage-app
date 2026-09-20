@@ -2730,3 +2730,119 @@ textarea.ct-field {
   .ct-fld:not(.is-inline).is-set .ct-fld-x { display: grid; }
   .ct-fld-x { width: 22px; height: 22px; }
 }
+
+
+/* ============================================================================
+   29 paketas - 34b sk. ANTRA REDAKCIJA
+   ----------------------------------------------------------------------------
+   SIS FAILAS PAKEICIA 28 paketo `ct-dizainas-34b-sk.css` VISISKAI.
+   Jei 28 dar neidiegtas - imkit tik si. Jei idiegtas - pakeiskit.
+
+   Idiegus si, `ct-priedai.css` 12 BLOKAS ISTRINAMAS - jis daro ta pati,
+   tik siauriau.
+
+   Pokytis nuo pirmos redakcijos: pridėta APVALKALU taisykle (3 dalis).
+   Ja padiktavo jusu GALIA radinys - zr. PASTABOS.md 2.
+   ========================================================================== */
+
+/* ============================================================================
+   34b. VALDIKLIS DEZES VIDUJE
+   ----------------------------------------------------------------------------
+   Vienas principas: deze yra viena, ir ji priklauso .ct-fld-v.
+   Viskas, kas ideta i vidu, atsisako savo remelio, fono, padding ir radiuso.
+   Du remeliai vienas kitame skaitosi kaip du atskiri laukai, ir zmogus
+   nebezino, kuri spaudzia.
+
+   SPECIFIKA CIA NEPADEDA. `.ct-fld-v` yra TEVAS, `.ct3-inp` - VAIKAS.
+   Tevas vaiko savybiu nenugali jokia specifika: specifika lygina taisykles,
+   taikomas TAM PACIAM elementui. Tevas ir vaikas sudedasi, ne konkuruoja.
+   Todel vaikas nurodomas atskirai.
+   -------------------------------------------------------------------------- */
+
+/* ── 1) Patys valdikliai ─────────────────────────────────────────────────── */
+.ct-fld-v input,
+.ct-fld-v select,
+.ct-fld-v .ct3-inp {
+  flex: 1 1 0;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  outline: none;
+  color: inherit;
+  font: var(--fw-medium) 13.5px var(--font);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* ── 2) Busenos · galioja ir tikriems valdikliams ────────────────────────── */
+.ct-fld.is-set .ct-fld-v input,
+.ct-fld.is-set .ct-fld-v select,
+.ct-fld.is-set .ct-fld-v .ct3-inp {
+  color: var(--text-primary);
+  font-weight: var(--fw-semi);
+}
+.ct-fld.is-empty .ct-fld-v input,
+.ct-fld.is-empty .ct-fld-v select,
+.ct-fld.is-empty .ct-fld-v .ct3-inp {
+  color: var(--text-dim);
+  font-weight: var(--fw-regular);
+}
+/* Vietazenklis niekada nera pasirinkimas - net nustatytame langelyje */
+.ct-fld-v input::placeholder { color: var(--text-dim); opacity: 1; font-weight: var(--fw-regular); }
+
+/* ── 3) APVALKALAI · nauja siame redakcijoje ─────────────────────────────────
+   Tarp dezes ir valdiklio beveik visada stovi treciasis elementas:
+   .ct3-select-wrap, .ct3-range-wrap arba paprastas <div> is senu laiku.
+
+   Jie buvo EILUTE - laikydavo lauka ir bruksni greta. Bet .ct-fld-v PATS yra
+   ta eilute, tad apvalkalas tapo eilute eileje. Kol jis turi savo plotį ir
+   neturi min-width: 0, jis nesitraukia ir isstumia turini uz krasto.
+
+   Butent tai radot su GALIA: vidinis div 390 px, sonas kyso 138-162 px.
+   Jus ta viena div isemėt, ir teisingai. Bet APVALKALU yra daugiau, tad cia
+   ne vieno salinimas, o taisykle visiems: apvalkalas dezes viduje yra
+   permatomas tarpiklis, kuris niekada nediktuoja plocio.
+
+   Taip pat apsaugo nuo tu, kurie atsiras ateity: taisykle nereikalauja
+   atsiminti nieko uzdeti (A-08). */
+
+.ct-fld-v > div,
+.ct-fld-v > .ct3-select-wrap,
+.ct-fld-v > .ct3-range-wrap {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+
+/* Bruksnys tarp dvieju diapazono lauku - ne laukas, plocio nediktuoja */
+.ct-fld-v span:not([class]),
+.ct-fld-v .ct-fld-dash {
+  flex: none;
+  padding: 0 2px;
+  color: var(--text-dim);
+}
+
+/* Sena rodykle slepiama: deze jau turi savo.
+   Dvi rodykles viename lauke - tas pats "du remeliai", tik mazesniu mastu. */
+.ct-fld-v .ct3-arrow { display: none; }
+
+/* ── 4) Fokusas ─────────────────────────────────────────────────────────────
+   Vidinis outline nuimtas 1 dalyje, tad be sitos eilutes fokusas dingtu
+   visai. Tai prieinamumo dalykas, ne kosmetika. */
+.ct-fld-v:focus-within {
+  border-color: var(--accent-border);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}

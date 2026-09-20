@@ -192,37 +192,3 @@
    MUSU, netrinti.  */
 
 .ct-fld-act-in > div { position: relative; }
-
-
-/* ----------------------------------------------------------------------------
-   12 BLOKAS · tikri valdikliai .ct-fld viduje · v1.88.0 (23 paketas)
-
-   34 sk. sako aiskiai: „.ct-fld yra APVALKALAS. Jei laukas yra tikras <select>,
-   jis lieka viduje su appearance: none." Tai musu darbas, ne jo - dezute piesia
-   `.ct-fld-v`, tad vidinis valdiklis turi nustoti piesti savaja.
-
-   Be sito butu dezute dezuteje - lygiai tai, ko 27 pakete isvengem isimdami
-   inline `border` nuo `#ridaIki` ir `#galia*`.
-
-   MUSU, netrinti: tai markupo atrama (turim tikrus <select>/<input>), ne
-   dizainerio taisykles atsvara.  */
-
-.ct-fld-v > select.ct-fld-t,
-.ct-fld-v > input.ct-fld-t {
-  appearance: none;
-  -webkit-appearance: none;
-  background: transparent;
-  border: 0;
-  padding: 0;
-  margin: 0;
-  height: auto;
-  box-shadow: none;
-  outline: none;
-  color: inherit;
-  font: inherit;
-}
-.ct-fld-v > select.ct-fld-t option { background: var(--bg-elevated); color: var(--text-primary); }
-.ct-fld-v > input.ct-fld-t::placeholder { color: var(--text-dim); }
-/* Ruozo laukai (METAI, KAINA, GALIA) dalijasi eilute po lygiai */
-.ct-fld-v > input.ct-fld-t { flex: 1 1 0; min-width: 0; }
-.ct-fld-v > span:not([class]) { flex: none; color: var(--text-dim); }
