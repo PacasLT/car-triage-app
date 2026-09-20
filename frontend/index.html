@@ -742,7 +742,12 @@
   position: relative;
   background: var(--bg-base);
   overflow: visible;
-  margin-top: -96px;
+  /* v1.85.0: cia buvo `margin-top: -96px`, bet ji NIEKADA nesuveike - 1311 eil.
+     `.ct3-hero { margin-top: 0 !important }` ja nugalejo. Z-30 parasiau, kad
+     palikau ja samoningai ir kad -96 su +97 susibalansuoja; tai buvo klaida -
+     juosta 220 px ne del balanso, o del to, kad minusas nepritaikomas.
+     Dvi deklaracijos kartu buvo spastai: istrynus `!important` kaip
+     nereikalinga, juosta butu tyliai nusokusi 96 px po antraste. */
 }
 .ct3-hero-photo {
   /* v1.64.1 KLAIDA (pranesimai Nr.7, Nr.8): diegdamas 26 sk. istryniau visa
@@ -2636,16 +2641,15 @@
              nera filtro laukai: „Daugiau filtru" ir „Istorija". Skirtuku juosta
              po panele pasalinta - ji atrode nuo paneles atplysusi. Istorija
              PERKELTA, ne paslepta (K-06). -->
-        <div class="ct3-field ct3-field-veiksmai">
-          <label>DAUGIAU</label>
-          <div class="ct3-fld-veiksmai">
+        <div class="ct-fld-act">
+          <div class="ct-fld-act-in">
           <button class="ct3-more-btn ct-btn ct-btn-toggle" type="button" onclick="ctToggleMoreFilters()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M7 12h10M10 18h4"/></svg>
             Daugiau filtrų
             <span class="ct3-badge" id="more-filters-badge" style="display:none;">0</span>
           </button>
           <div style="position:relative">
-            <button class="ct3-stab ct-tab" id="ct-hist-tab-btn" onclick="ctSearchTabSwitch('history',this)">🕘 Paskutinės paieškos</button>
+            <button class="ct-btn ct-btn-ghost ct3-stab" id="ct-hist-tab-btn" onclick="ctSearchTabSwitch('history',this)">🕘 Paskutinės paieškos</button>
             <div id="ct-history-dropdown" style="display:none;">
               <div class="ct-hist-head">
                 <div class="ct-hist-head-title"><div class="ct-hist-head-dot"></div>Paskutinės paieškos<span class="ct-hist-head-count" id="ct-hist-count" style="display:none"></span></div>

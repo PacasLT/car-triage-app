@@ -2301,3 +2301,72 @@ krašto (mygtukas 148 px, stulpelio vidus 132). `ct-priedai.css` 11 blokas.
 **23 paketas dar neįdiegtas** — jis perrašo patį lauką (`.ct-fld`), o šitie
 pakeitimai liečia tik tinklelio narystę. Diegsiu jį kaip visumą, ir tada
 11 blokas greičiausiai dings, nes 34 sk. duos savo lauko vidų.
+
+---
+
+## Z-32 · 2026-09-20 · Klaudijus → Dizaineriui · KLYDAU `Z-30`, IR JŪS TEISUS · v1.85.0
+
+**Mano paaiškinimas buvo neteisingas.** Rašiau, kad `margin-top: -96px` palikau
+sąmoningai ir kad −96 su +97 susibalansuoja. Patikrinau jūsų nurodytą vietą:
+
+```
+index.html  745 eil.   margin-top: -96px;
+index.html 1311 eil.   .ct3-hero { margin-top: 0 !important; }   /* „no negative margin since header is sticky" */
+```
+
+Jūs teisus: ta deklaracija **niekada nesuveikė**. Juosta yra 220 px ne dėl
+balanso, o dėl to, kad minusas nepritaikomas. Rezultatas sutapo, priežastis ne —
+ir tai blogiau nei klaidingas skaičius, nes klaidingą priežastį kitas skaitys
+kaip taisyklę.
+
+**Spąstus išėmiau:** 745 eilutės `-96px` ištrintas, vietoje jo — komentaras,
+kodėl jo nebėra. Dabar liko viena deklaracija, ir ji sako tiesą. Jūsų
+pastebėjimas, kad „abi kartu yra spąstai", buvo tikslus: ištrynus `!important`
+kaip nereikalingą, juosta būtų tyliai nušokusi 96 px po antrašte.
+
+**Ir mudu abu praleidom tą patį `!important`, tik priešingomis kryptimis** —
+jūs manėt, kad reikia `calc(220px + var(--header-h))`, aš maniau, kad minusas
+veikia. Abu skaitėm 745 eilutę ir nė vienas nepatikrino, kas ją nugali.
+
+---
+
+## Z-33 · 2026-09-20 · Klaudijus → Dizaineriui · 25 PAKETAS ĮDIEGTAS
+
+`.ct-fld-act` markupe, `.ct3-field ct3-field-veiksmai` pakeista. Jūsų
+sprendimas neduoti rėmelio yra teisingas ir pamatuojamas ne skaičiais:
+vienuolika rėmelių dabar skaitosi kaip „čia renkiesi", dvyliktas — „čia darai".
+
+**Vienas dalykas iš markupo pusės, kurio paketas neapėmė.** Jūsų `.ct-fld-act-in
+.ct-btn` taisyklės nepasiekė istorijos mygtuko, nes jis turėjo
+`class="ct3-stab ct-tab"` — **be `ct-btn`**. Rezultatas pamatuotas:
+
+```
+po 25 paketo idiegimo:        sonas kyso  49 px (1280/1494), 37 px (2364)
+pridejus `ct-btn ct-btn-ghost`:            0 px visur
+sonas 561 px prie ribos 599   telpa, atsarga 38
+```
+
+Jūsų pastabose markupas parašytas teisingai (`class="ct-btn ct-btn-ghost
+ct3-stab"`) — tai aš jį perkėliau iš senos juostos nepažiūrėjęs, kokias klases
+neša. Ta pati forma kaip visada: perkėliau elementą ir nepatikrinau, ką jis
+neša su savimi.
+
+**`ct-priedai.css` 11 blokas sutrauktas iki vienos eilutės**, kaip prognozavot:
+liko tik `.ct-fld-act-in > div { position: relative }`, nes tą reikalauja
+markupas (istorijos iškleidžiamam langui reikia konteksto), o ne dizainas.
+
+**Dėl statistikos juostos** — jūsų klausimas lieka atviras, ir jūs teisus, kad
+Nr. 35 jos nelietė. Ji tebestovi tarp hero ir panelės. Kai Lukas pasakys, ar ji
+lieka, atsiųsiu matavimą.
+
+---
+
+## Z-34 · 2026-09-20 · Klaudijus · Nr. 33 · v1.85.0
+
+„Atnaujinti visus" gyveno **tik** antraštės išskleidžiamame meniu
+(`megstami-meniu.js` 163 eil., renderinamas į `#ct-meg-dd`). Mėgstamiausių
+**puslapyje** jo nebuvo — patikrinta: `#ct-meg-atn` puslapyje `false`.
+
+Nedariau antros tos pačios realizacijos: `ctMegstami` gavo viešą
+`atnaujintiVisus(btn)`, o puslapis — savo mygtuką, kuris kviečia tą pačią
+funkciją. Viena logika, dvi vietos.

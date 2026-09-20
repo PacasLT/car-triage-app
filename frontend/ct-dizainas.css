@@ -2366,3 +2366,94 @@ textarea.ct-field {
   .ct-shell.is-split > .ct-shell-side .ct3-range-wrap { display: flex; align-items: center; gap: 6px; }
   .ct-shell.is-split > .ct-shell-side .ct3-range-wrap > input { flex: 1 1 0; min-width: 0; max-width: none; }
 }
+
+
+/* ============================================================================
+   25 paketas - 34 sk. PRIEDAS - dvyliktas langelis
+   ----------------------------------------------------------------------------
+   Diegti KARTU su 23 paketu, ne atskirai. Be sito .ct-fld uzsidėtu ant
+   dvylikto langelio, kuriame nera filtro lauko, ir jis atrodytu kaip laukas,
+   kurio negalima nustatyti.
+   ========================================================================== */
+
+
+/* ============================================================================
+   34c. VEIKSMU LANGELIS - .ct-fld-act
+   ----------------------------------------------------------------------------
+   Dvyliktame langelyje stovi "Daugiau filtru" ir "Paskutines paieskos". Jie
+   dalijasi tinkleliu su vienuolika lauku, bet NEturi nei reiksmes, nei
+   nustatytos busenos.
+
+   Todel jiems NEGALIMA duoti .ct-fld. Tai butu dar vienas "vardas be
+   vaidmens" atvejis: deze, kuri atrodo kaip laukas, bet neturi to, ka laukas
+   zada - spragteli ir nieko nesirenka.
+
+   Sprendimas priesingas: veiksmu langelis SAMONINGAI neturi remelio. Tada
+   vienuolika remeliu skaitosi kaip "cia renkiesi", o dvyliktas - kaip "cia
+   darai". Skirtumas matomas is karto, be jokio uzraso.
+
+   AUKSTIS
+   Laukas: 10 (etikete) + 4 (tarpas) + 36 (deze) = 50 px.
+   Mygtukai 30 px, tad jie lygiuojami PRIE DEZES eilutes, ne prie langelio -
+   kitaip antra eile atrodo pakelta.
+
+   Tai daroma tuscia 14 px virsutine parastė (10 + 4), t. y. tiksliai tiek,
+   kiek uzima etikete. Ne magiskas skaicius: jei keisis etiketes aukstis
+   34 sk., cia reikes to paties skaiciaus.
+
+   KAIP JIS ISTIRPDO 11 ATSVARA
+   ct-priedai.css 11 blokas taisė du dalykus: kad sone mygtukai stovetu
+   stulpeliu ir kad beplotis <div style="position:relative"> neiskystu 16 px
+   uz krasto. Abu cia sprendziami saknyje - width: 100% duodamas VISIEMS
+   vaikams, ne tik mygtukams, tad tarpinis <div> irgi paklusta.
+
+   Ko ISTIRPDYTI NEGALIU: paties position: relative (207 eil.). Jis reikia
+   iskleidziamam istorijos sarasui pozicionuoti, ateina is markupo ir lieka
+   jusu. */
+
+.ct-fld-act {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-width: 0;
+  padding-top: 14px;            /* = .ct-fld-k aukstis (10) + tarpas (4) */
+}
+
+.ct-fld-act-in {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-height: 36px;             /* = .ct-fld-v aukstis, kad eile nepakiltu */
+  min-width: 0;
+}
+.ct-fld-act-in > * { min-width: 0; }
+
+/* Mygtukai cia zemesni uz iprastus: jie stovi salia lauku, ne tarp ju */
+.ct-fld-act-in .ct-btn {
+  height: 30px;
+  padding: 0 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* Sone: du mygtukai i 119 px netelpa, tad stulpeliu per visa plotį */
+@media (min-width: 1180px) {
+  .ct-shell.is-split > .ct-shell-side .ct-fld-act-in {
+    flex-direction: column;
+    align-items: stretch;
+    flex-wrap: nowrap;
+  }
+  /* VISIEMS vaikams, ne tik mygtukams - beplotis tarpinis <div> yra
+     butent tai, ko nepagavo pirmas bandymas (zr. 11 atsvara) */
+  .ct-shell.is-split > .ct-shell-side .ct-fld-act-in > * { width: 100%; }
+  .ct-shell.is-split > .ct-shell-side .ct-fld-act-in .ct-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Lieciamas ekranas */
+@media (pointer: coarse) {
+  .ct-fld-act-in .ct-btn { min-height: var(--tap-min); height: auto; }
+}

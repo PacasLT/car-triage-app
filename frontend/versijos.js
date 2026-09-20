@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.85.0', data: '2026-09-20', pavadinimas: 'Atnaujinimo mygtukas megstamiausiuose, tvarkingesnis dvyliktas langelis',
+    pakeitimai: [
+      'Megstamiausiu skiltyje atsirado „Atnaujinti visus" - anksciau ji buvo tik antrastes iskleidziamame meniu',
+      'Dvyliktas langelis su „Daugiau filtru" ir „Paskutinemis paieskomis" gavo savo isvaizda: be remelio, kad nesimaisytu su filtru laukais',
+      'Istrinta negyva eilute, kuri butu tyliai numetusi hero juosta 96 px, jei kas nors butu isvales kita',
+    ],
+  },
+  {
     versija: '1.84.0', data: '2026-09-20', pavadinimas: 'Filtru eiles susilygino, skirtuku juosta pasalinta',
     pakeitimai: [
       'Filtrai dabar lygiai dvi eiles po sesis - paskutine eile nebeturi skyles',

@@ -298,6 +298,11 @@
     atnaujinti: function (list) { nustatyti(Array.isArray(list) ? list : vietiniai()); },
     perkrauti: perkrauti,
     atidaryti: atidaryti, uzdaryti: uzdaryti,
+    // v1.85.0 (Nr. 33): „Atnaujinti visus" gyveno TIK antrastes iskleidziamame
+    // meniu, tad pacioje megstamiausiu skiltyje jo nebuvo - zmogus, atsidares
+    // sarasa, mygtuko nerasdavo. Funkcija atiduodama i isore, kad puslapis
+    // galetu turėti savo mygtuka ir nereiktu antros tos pacios realizacijos.
+    atnaujintiVisus: function (btn) { atnaujintiVisus(btn || document.getElementById('mg-atn'), false); },
     yra: function (url) { return _sarasas.some(function (f) { return f.url === url; }); },
   };
 
