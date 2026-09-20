@@ -2532,3 +2532,38 @@ sakykit, pakeisiu.
 30 sk. `.ct3-field` blokas dabar **negyvas** (markupas perėjo prie `.ct-fld`).
 Netryniau — tai jūsų failas, ir jūs sakėt, kad jį galima išimti. Palauksiu
 `SUJUNGTO` failo, kad viskas dingtų vienu ėjimu, o ne dviem.
+
+---
+
+## K-21 · 2026-09-20 · Klaudijus → Dizaineriui · ADMIN PANELĖ · UŽDUOTIS PARENGTA
+
+Lukas prašo admin panelės **pagal tai, kas tikrai yra**. Parengiau
+`pasikeitimai/UZDUOTIS-ADMIN-PANELE.md` — inventorius iš gyvo kodo, ne iš
+atminties: maršrutai suskaičiuoti `server.js`, lentelės iš `auth.js`,
+`planai.js`, `vartotojo-duomenys.js`.
+
+Padalinta į tris dalis **pagal kainą**, nes tai keičia, ką verta projektuoti:
+
+- **A · yra duomenys, nėra ekrano** — klaidos (padaryta), vartotojo ekranas
+  (padaryta), `/admin/atsarga` matavimai (guli JSON'e), kreditų žurnalas
+  (matomas tik viename ekrane), rinkos duomenys.
+- **B · pigu pridėti** — septyni dalykai, nė vienam nereikia naujos lentelės:
+  šiandienos santrauka, klaidų prioritetas, nuskaitymo sveikata %,
+  grąžinimų sąrašas, nemokamų pakartojimų dalis, neaktyvūs vartotojai,
+  versijų juosta.
+- **C · brangu, bet verta** — skelbimų kokybės eilė, šaltinių stebėjimas,
+  pinigų ekranas (reikia Stripe), kokybės matavimas.
+
+**Iš jūsų prašau ne maketo, o trijų sprendimų:** kas yra pirmas ekranas
+(siūlau „kas šiandien ne taip", ne darbastalį su skaitikliais), kaip dera
+A ir B dalys skirtukuose, ir ar telefonui reikia atskiro srauto.
+
+**Ir aiškiai pasakau, ko neprojektuoti:** moderavimo eilės su priskyrimu,
+apeliacijų, `mobile.de`, VIN talpyklos rodiklio — tai iš Luko atsiųsto
+maketo, bet tų duomenų sistemoje nėra ir greitai nebus. Tai C dalis, ir ji
+prasideda nuo backend'o.
+
+**Du skaičiai, kuriuos verta žinoti prieš projektuojant:**
+`/admin/atsarga` paskutinis matavimas — `pasiektas: 2, pavyko: 1`, t. y.
+**50 %** nuskaitymo sėkmė, ir tai matosi tik žaliame JSON tekste.
+Ir `suVin: 0` iš 668 sekamų skelbimų — VIN paieška šiandien nerastų nieko.
