@@ -1,4 +1,4 @@
-# Būsena · atnaujinta 2026-09-21, v1.97.0 (v1.96.0 gyva produkcijoje)
+# Būsena · atnaujinta 2026-09-21, v1.99.0 (v1.97.0 gyva produkcijoje)
 
 Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
@@ -6,7 +6,7 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
 | Nr. | Kas | Kieno ėjimas | Trumpai |
 |---|---|---|---|
-| K-27 | Nr. 40 · portalų mygtukas ir statistikos juosta | **Dizaineris** | `K-22` diagnozuotas: du nesusiję kaltininkai, 56 px (≥1180) ir 182 px (<1180). Atsvaros `ct-priedai.css` 13 ir 14 blokuose — perimkit, ir ištrinsiu. Z-48. |
+| ~~K-27~~ | ~~Nr. 40 · portalų mygtukas ir statistikos juosta~~ | **Uždarytas 34 paketu** | `K-22` diagnozuotas: du nesusiję kaltininkai, 56 px (≥1180) ir 182 px (<1180). Atsvaros `ct-priedai.css` 13 ir 14 blokuose — perimkit, ir ištrinsiu. Z-48. |
 | K-26b | Šonas 644 prie ribos 599 | **Dizaineris** | `K-26` uždarytas 33 paketu (visi šeši laukai 101 px), bet trys diapazonai per eilutę kainavo +112. Viršija tik 1280×720. Jūsų 1 variantas pamatuotas — neveikia. Z-46. |
 | K-25 | Nr. 37 · `#portal-selector` | **Dizaineris** | Niekada nebuvo dizaino sistemoje. |
 | K-24 | Nr. 38 · „Daugiau filtrų" prie „Ieškoti" | **Dizaineris** | Lukas taip nori, bet tai griauna `.ct-fld-act` 12-tą langelį. Jūsų ėjimas. |
@@ -25,6 +25,9 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 | L-04 / L-05 | `/admin/atsarga`, rakto rotacija | **Lukas** | Priminimai 09-19 11:30 ir 13:15 UTC. |
 
 ## Kas uždaryta paskutiniu metu
+
+- v1.99.0 — **34 paketas**: `K-27` uždarytas viena taisykle vietoj dviejų atsvarų. Naujas `23b` (`.ct-ell` — vienaeilio apkarpymo sistemoje nebuvo) ir `30b` (`min-width: 0` visam stulpeliui, `flex: none` ženklams). `ct-priedai.css` 13 ir 14 blokai **ištrinti**. Pakeliui pataisytos piktogramos, kurių niekas neieškojo: 4→14 px ties 1280, 10→14 telefone, 0→12 ties 1179.
+- v1.98.0 — **revizijos 2 eilė**: `A-4` (el. pašto registras + migracija su saugikliu), `C-1` (bandymų riba `ip` ir `ip+elpaštas` — be paskyros užrakinimo), `C-4` (laiko kanalas + maišos perrašymas prisijungus). Nauji sargai `sesija.test.js`, `migracija.test.js`. **Laukia push'o.**
 
 - v1.97.0 — **Nr. 40 / `K-22`**: šonas turėjo paslėptą horizontalų slinkimą su **dviem nesusijusiais** kaltininkais — `#portal-toggle-btn` 56 px (≥1180) ir `.ct3-stats-driven` 182 px (<1180, mano skola nuo 25 sk.). Abu uždaryti, liko 20 px sąmoningo 7 bloko triuko. **Laukia push'o.**
 

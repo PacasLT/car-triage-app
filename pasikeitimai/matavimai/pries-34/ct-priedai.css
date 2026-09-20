@@ -214,17 +214,89 @@
 
 
 /* ----------------------------------------------------------------------------
-   13 ir 14 BLOKAI ISTRINTI · v1.99.0
+   13 BLOKAS · portalu mygtukas sone · K-22 / Nr. 40 · v1.97.0
 
-   Abu perimti 34 paketu, bet ne kaip du pataisymai:
+   Lukas: „Paspaudus Kiti like skelbimai pabega dizainas, suspaudzia i kaire."
+   Pamatuota: spaudimas ne priezastis - jis tik pailgina puslapi tiek, kad
+   nusileidus pasimato sonas. Sonas turejo 56 px horizontalaus srauto VISADA.
 
-     23b sk.  `.ct-ell`  - vienaeilis apkarpymas, kurio sistemoje NEBUVO.
-                           Abu mano blokai rase ta pati trejeta ranka
-                           (`overflow/text-overflow/white-space`) skirtingais
-                           vardais. Dizaineris tai pamate is pasikartojimo, ne
-                           is skripto - patikrinti nebuvo ko, nes trukstamo
-                           dalyko nerandi ieskodamas.
-     30b sk.  `.ct-shell-side * { min-width: 0 }` vietoj penkiu vardu saraso,
-                           plius `flex: none` zenklams.
+   Kaltininkas ivardytas: `#portal-toggle-btn` 177 px sone, kuris pats yra
+   276 px, ir isejo 56 px uz kraso.
 
-   Markupe liko `.ct-ell` ant `#portal-btn-label` ir `.ct3-stats-driven`.     */
+   GRANDINE (matuota 1280 px, is-split):
+     .ct-fld  PORTALAI       119 px
+       .ct3-portal-wrap       97 px   flex:1 1 0, min-width:0  (teisingai)
+         #portal-toggle-btn  177 px   min-width:AUTO, nowrap   <- netelpa
+           #portal-btn-label 139 px   flex:0 0 auto            <- NESITRAUKIA
+
+   Du sluoksniai, ir antrasis svarbesnis: `min-width:0` mygtukui vienas
+   nepadeda, nes etikete turi `flex-shrink:0`. Su ja 56 -> 37, o ne 0.
+
+   Ir dar viena tyli vieta: nuemus tik `flex-shrink`, rodykle susispaudzia is
+   12 px i 4. Todel piktogramoms `flex:none` - jos tureti savo dydi, o
+   trauktis turi TEKSTAS.
+
+   PENKTOJI FORMA. 30 sk. teisingai deda `min-width:0` panelei, vidui ir
+   apacios eilutems - bet portalu mygtukas tada dar nebuvo `.ct-fld` langelyje.
+   23 paketas ji ten perkele, ir sena taisykle liko teisinga, tik nebeuzdengia
+   naujos vietos.
+
+   MUSU, netrinti - kol dizaineris neperims i 30 arba 34 sk. (K-22 / K-27).  */
+
+@media (min-width: 1180px) {
+  .ct-shell.is-split > .ct-shell-side #portal-toggle-btn { min-width: 0; }
+
+  .ct-shell.is-split > .ct-shell-side #portal-btn-label {
+    min-width: 0;
+    flex: 0 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Traukiasi tekstas, ne zenklai. */
+  .ct-shell.is-split > .ct-shell-side #portal-toggle-btn > svg { flex: none; }
+}
+
+
+/* ----------------------------------------------------------------------------
+   14 BLOKAS · statistikos juosta sone zemiau 1180 px · K-22 · v1.97.0
+
+   Tikrinant Nr. 40 paaiskejo, kad sono srautas turi DU nesusijusius
+   kaltininkus, ir 13 blokas uzdaro tik virsutini:
+
+     >= 1180  #portal-toggle-btn        56 px   -> 13 BLOKAS
+     <  1180  .ct3-stats-driven     182 px      -> sitas
+
+   Zemiau 1180 sonas yra per visa ploti, ir statistikos juosta jame netelpa.
+   Tai MANO skola: 25 sk. diegimo metu as pats perkeliau `.ct3-stats-bar` i
+   `.ct-shell-side` po panele. Placiame variante ji buvo teisinga, siaurame
+   niekas jos nepertikrino - ta pati penktoji forma, tik siskart mano.
+
+   Matuota (sono horizontalus srautas):
+       1024 px   182 -> 20
+       1100 px   106 -> 20
+       1179 px    27 -> 20
+       1280 px     0 ->  0   (nepakito)
+        390 px     0 ->  0   (nepakito)
+
+   Likę 20 px NERA klaida: tai 7 bloko pilno plocio triukas
+   (`.ct3-search-panel` tycia platesne uz teva). Todel cia sustojama.
+
+   Tekstas nenukenteje: „VALDOMA DUOMENŲ" 145 px ir toliau rodomas visas.
+
+   MUSU, netrinti.  */
+
+.ct-shell > .ct-shell-side .ct3-stats-bar,
+.ct-shell > .ct-shell-side .ct3-stats-inner { min-width: 0; max-width: 100%; }
+
+.ct-shell:not(.is-split) > .ct-shell-side .ct3-stats-inner { flex-wrap: wrap; }
+
+.ct-shell > .ct-shell-side .ct3-stat-item { min-width: 0; }
+
+/* Traukiasi, o nebetilpes - trumpinamas, ne isstumia juosta. */
+.ct-shell > .ct-shell-side .ct3-stats-driven {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

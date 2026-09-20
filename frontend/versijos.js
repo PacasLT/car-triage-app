@@ -8,6 +8,25 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.99.0', data: '2026-09-21', pavadinimas: 'Siaurame stulpelyje traukiasi tekstas, ne zenklai',
+    pakeitimai: [
+      'Filtru juostoje piktogramos nebesusispaudzia - anksciau kai kurios butu likusios 4 px vietoj 12',
+      'Telefone kelios piktogramos buvo 10 px vietoj 14 - irgi sutvarkyta',
+      'Ilgi uzrasai siauroje vietoje dabar trumpinami trimis taskais, o ne stumia turini',
+      'Dvi musu laikinos atsvaros pakeistos viena dizaino sistemos taisykle',
+    ],
+  },
+  {
+    versija: '1.98.0', data: '2026-09-21', pavadinimas: 'Prisijungimas: didziosios raides ir bandymu riba',
+    pakeitimai: [
+      'Prisijungiant nebesvarbu, ar rasote Vardas@ ar vardas@ - anksciau tai buvo dvi skirtingos paskyros',
+      'Esami el. pastai sutvarkomi automatiskai; jei kas nors turi dvi panasias paskyras, nieko neliecia ir praneša',
+      'Penki nepavyke bandymai is to paties kompiuterio - ir prisijungimas stabdomas 15 minuciu',
+      'Svetimos paskyros uzrakinti neimanoma: riba galioja bandziusiam, ne savininkui',
+      'Slaptazodziu apsauga sustiprinta, ir senos paskyros perkeliamos automatiskai prisijungus',
+    ],
+  },
+  {
     versija: '1.97.0', data: '2026-09-21', pavadinimas: 'Filtru juosta nebeslenka i sona',
     pakeitimai: [
       'Sonine filtru juosta turejo paslepta horizontalu slinkima - dalis turinio buvo uz kraso',

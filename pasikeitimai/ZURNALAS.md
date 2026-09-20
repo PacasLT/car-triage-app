@@ -3599,3 +3599,223 @@ piktogramų trūksta 0, avataras 38×38 / 44×44.
 13 ir 14 blokai yra **atsvaros**, ne sprendimas. `.ct3-marketplaces-btn` ir
 `.ct3-stats-*` yra jūsų. Jei perimsit į 30 arba 34 sk., abu blokus ištrinsiu,
 kaip darėm su 9 ir 12.
+
+---
+
+## Z-49 · 2026-09-21 · Klaudijus · REVIZIJOS 2 EILĖ · v1.98.0
+
+`A-4` (el. pašto registras) ir `C-1` (prisijungimo bandymų riba). Prie jų
+prisidėjo `C-4` — jis gyvena toje pačioje funkcijoje, ir be jo `C-1` būtų
+padaręs žalos.
+
+Nauji sargai: `backend/testai/sesija.test.js`, `backend/testai/migracija.test.js`.
+
+### 1. Du kartus testas pagavo mano paties klaidą
+
+Šitas įrašas daugiausia apie tai, nes abu kartus kodas atrodė teisingas.
+
+**Pirmas · `C-1` raktas leido užrakinti svetimą paskyrą.**
+Pirmoji redakcija skaičiavo bandymus dviem raktais: `ip` ir `el. paštas`.
+Skamba teisingai — antrasis turėjo gaudyti ataką iš daugelio IP. Testas parodė
+kitą pusę:
+
+```
+BLOGAI  po 4 klaidu teisingas slaptazodis praeina   [429]
+```
+
+Kadangi el. pašto skaitliukas globalus, **bet kas, žinantis svetimą adresą,
+penkiais klaidingais bandymais užrakintų savininką 15 minučių.** Tai ne
+apsauga, o paruoštas būdas kenkti.
+
+Raktas pakeistas į `ip` ir `ip+elpaštas`. Naujas testas tikrina būtent tai:
+
+```
+ok  SVARBIAUSIA: uzblokavus is 5.5.5.5, savininkas is kito IP prisijungia [200]
+```
+
+Ką tai palieka atvira, sakau atvirai: paskirstyta ataka iš daugelio IP po
+kelis bandymus šio sargo neužklius. Alternatyvos — paskyros užraktas (grįžta
+kenkimo kelias) arba auganti delsa. Registracija uždaryta pakvietimo kodu, tad
+realiausia grėsmė yra vieno šaltinio bandymai, ir juos riba stabdo.
+
+**Antras · mano `C-1` pataisymas PABLOGINO `C-4`.**
+Revizija siūlė kelti bcrypt raundus 10 → 12. Padariau — naujoms registracijoms.
+Fiktyvią maišą (`C-4` laiko kanalo užkaišymas) palikau su 10. bcrypt kaina
+dvigubėja su kiekvienu raundu, tad:
+
+```
+esamas 310.3 ms   nesamas 77.8 ms   skirtumas 74.9 %
+```
+
+**Laiko kanalas ne dingo, o pasidarė ryškesnis — ir būtent dėl taisymo, kuris
+jį turėjo uždaryti.** Du pakeitimai vienoje funkcijoje, kiekvienas teisingas
+atskirai.
+
+Sutvarkyta: vienas `BCRYPT_RAUNDAI = 12` abiem vietoms, plius **maišos
+perrašymas sėkmingai prisijungus**. Be jo seni 10 raundų vartotojai liktų
+greitesni už fiktyvią, ir kanalas atsirastų atvirkščias — „greitas atsakymas =
+registruotas".
+
+```
+                      esamas    nesamas   skirtumas
+naujas (12 raundu)    310.3 ms  309.6 ms    0.2 %
+senas (10), pries     78.4 ms   311.8 ms   74.8 %
+senas (10), po        312.0 ms  311.8 ms    0.1 %
+```
+
+Vidurinė eilutė lieka kaip yra ir aš jos neslepiu: kol žmogus nė karto
+neprisijungė, jo adresą galima atskirti pagal laiką. Langas užsidaro per vieną
+prisijungimą.
+
+### 2. `A-4` · migracija, kuri gali nieko nedaryti
+
+`email TEXT UNIQUE` SQLite'e yra **registrui jautrus**, o `planai.js:54`
+administratorių tikrino per `toLowerCase()` — viena pusė normalizuota, kita ne.
+
+Padaryta: `normEmail()` prie visų įėjimų, `WHERE email = ? COLLATE NOCASE`,
+unikalus indeksas `users(email COLLATE NOCASE)`, ir vienkartinė migracija.
+
+**Migracijos saugiklis svarbesnis už pačią migraciją.** Jei duomenų bazėje yra
+dvi paskyros, kurios skiriasi tik registru, sulieti jų negalima — tai arba du
+žmonės, arba du kreditų likučiai. Tada **nedaroma nieko**, indeksas
+nekuriamas, o į žurnalą rašomas įspėjimas. Ji suveiks prieš tikrą bazę per
+artimiausią deploy'ą, todėl turi savo testą:
+
+```
+-- Pavojingas atvejis: dvi paskyros skiriasi TIK registru --
+  ok   serveris NENUKRENTA
+  ok   NE VIENAS irasas nepakeistas
+  ok   abi paskyros islikusios (niekas nedingo)
+  ok   indeksas NESUKURTAS (butu sunaikines viena)
+  ok   i zurnala irasytas ispejimas
+```
+
+Kitos lentelės (`megstamiausi`, `ataskaitos`, `kreditu_zurnalas`) raktuojamos
+`user_id`, ne el. paštu — patikrinta prieš rašant, todėl normalizavimas
+duomenų nepameta.
+
+### 3. Kodėl testai gyvena ne ten, kur įprasta
+
+`backend/node_modules` repozitorijoje nėra — serveris sukasi tik Railway, ir
+vietoje jo paleisti neįmanoma. `dizainas.test.js` veikia todėl, kad tik skaito
+failus. Šie du reikalauja `bcryptjs` ir `better-sqlite3`, tad paleidimo eilutė
+surašyta failų viršuje. Bėgioti juos teko konteineryje.
+
+### 4. Pamatuota
+
+`sesija.test.js` 20 patikrų, `migracija.test.js` 8 — visos žalios.
+`dizainas.test.js` 26/26. `onclick-patikra.py` švarus.
+
+Produkcijoje patikrintas ir vakarykštis `v1.97.0`: šono horizontalus srautas
+**0**, išėjusių elementų **0**, portalų mygtukas 92 px, užrašas trumpinamas,
+rodyklė 12 px.
+
+### Kas lieka revizijoje
+
+`A-5` („Prisiminti mane"), `A-6` (atšaukimas serveryje), `A-8`, `B-1`
+(28 tokenai — dizainerio), `B-4`, `B-6`, `B-7`, `C-3` (`helmet`), `C-5`
+(`users.db` kopijos).
+
+---
+
+## Z-50 · 2026-09-21 · Klaudijus → Dizaineriui · 34 ĮDIEGTAS · 13 ir 14 IŠTRINTI · v1.99.0
+
+Įdiegta, 13 ir 14 blokai ištrinti. `.ct-ell` uždėtas ant `#portal-btn-label`
+(2656 eil.) ir `.ct3-stats-driven` (2783 eil.).
+
+### 1. Jūsų 5 punktas — atsakymas ilgesnis už „nieko"
+
+Prašėt ieškoti elemento, kuris susitraukė labiau, nei turėtų. Palyginau
+**visus 280 šoninio stulpelio elementų** prieš ir po, trijuose pločiuose.
+Skirtumų yra, bet nė vienas nėra susitraukimas — visi trys yra **atvirkščiai**:
+
+**1280 px · du skirtumai, abu jūsų naudai**
+
+```
+svg    4x4  ->  14x14
+path   3x2  ->  11x7
+```
+
+Tai piktograma, kurią **mano 13 blokas spaudė** ir ko aš nepastebėjau. Rašiau
+jums apie rodyklę, kuri iš 12 tapo 4 — pasirodo, ji ten buvo ne vienintelė.
+
+**390 px · telefone irgi**
+
+```
+svg     10x10  ->  14x14
+circle   7x7   ->  11x11
+#portal-chevron  8x8  ->  12x12
+```
+
+Šitas man buvo netikėtas. Mano blokai gyveno `@media (min-width: 1180px)`, tad
+telefono net neliečiau — bet piktogramos ten buvo spaudžiamos **jau anksčiau**,
+kitos priežasties. Jūsų 30b be media užklausos tai uždarė pakeliui.
+
+**1179 px · vieta, kuri buvo tarp dviejų taisyklių**
+
+```
+rodyklė  0 px  ->  12 px
+```
+
+Ties 1179 mano taisyklė nebegaliojo (`min-width: 1180`), o `is-split` dar
+nebuvo. Rodyklė ten buvo **nulio pločio**. Jūsų argumentas „tas pats stulpelis,
+du elgesiai" pasitvirtino skaičiumi, kurio nė vienas iš mūsų neieškojo.
+
+**Statistikos juosta atgavo savo plotį**
+
+```
+1024 px   984 -> 1024
+1179 px  1139 -> 1179
+```
+
+Mano 14 blokas jai buvo uždėjęs `max-width: 100%` ir taip **atėmęs pilno
+pločio triuką**, kurį ji turi turėti. Aukščiai nepakitę (40 px visiems
+penkiems), už juostos neišeina niekas.
+
+### 2. Vos nepranešiau klaidos, kurios nėra
+
+Tikrindamas statistikos juostą pamačiau, kad po paketo `scrollWidth >
+clientWidth` galioja **dešimčiai** elementų vietoj keturių, ir jau rašiau tai
+kaip „pablogėjo". Patikrinau toliau: `overflow` ten yra `visible`, elementų
+aukščiai nepakitę, o **už juostos neišeina nė vienas**.
+
+`scrollWidth > clientWidth` ant `overflow: visible` nieko nereiškia. Tai ta
+pati priemonės klaida kaip `A-33` ir `Z-42`, tik trečia veislė: matas
+teisingas, bet atsako į kitą klausimą, nei aš jam uždaviau.
+
+### 3. Dėl jūsų „trūkstamo dalyko" formos
+
+Sutinku, kad tai nauja forma, ir noriu pridėti vieną dalį.
+
+Rašot, kad jos neras joks skriptas, nes tikrinti nėra ko. Tiesa. Bet
+**pasikartojimą skriptas rasti gali** — ne sistemoje, o atsvarose. `I-07` jau
+skaičiuoja ranka įrašytus hex'us; tas pats principas tinka ir savybių
+trejetams. Jei `ct-priedai.css` du skirtingi blokai rašo tą patį deklaracijų
+rinkinį skirtingiems selektoriams, tai signalas, kad sistemoje trūksta vardo.
+
+Tad taisyklė, kurią iš to pasiimu: **pasikartojanti atsvara yra ne skola, o
+matavimas.** Antrą kartą rašydamas tą patį į `ct-priedai.css`, nerašau —
+klausiu jūsų, ar tam neturi būti klasės.
+
+### 4. Pamatuota
+
+```
+390  700  1024  1100  1179  1180  1280  1366  1680  2364
+  0    0    20    20    20     0     0     0     0     0   šono srautas
+ 12   12    12    12    12    12    12    12    12    12   rodyklė (px)
+```
+
+Su išskleistu „Kiti skelbimai". Likę 20 px — 7 bloko triukas, kaip ir buvo.
+Penki puslapiai: `hSrautas=0`, JS klaidų 0, piktogramų trūksta 0.
+`dizainas.test.js` **26/26**, `onclick-patikra.py` švarus.
+`I-01` dublikatų nėra, `I-04` negyvas tokenas vienas (`--focus-offset`, jūsų).
+
+### Skyrių eilė
+
+```
+1 2 10..18 20 22..27 30 31 32 34c 35 34 34b 33 34d 23b 30b
+```
+
+`23b` ir `30b` atsidūrė gale, nes diegiu priduriant. Numeracija nebeatitinka
+tvarkos jau seniai (`I-01`), ir tai vis dar tik nepatogumas, ne klaida — bet
+jei kada siųsit failą perrikiuotą, įdiegsiu vienu ėjimu.

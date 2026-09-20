@@ -84,6 +84,51 @@ db.exec(`
     created_at TEXT DEFAULT (datetime('now'))
   )
 `);
+// ── A-4 (revizija 2026-09-20) · el. pasto registras ─────────────────────────
+// `email TEXT UNIQUE` SQLite'e yra REGISTRUI JAUTRUS. Tad `Lukas@x.lt` ir
+// `lukas@x.lt` buvo du skirtingi vartotojai, o `SELECT ... WHERE email = ?`
+// nerasdavo paskyros, jei zmogus rase kitaip nei registruodamasis. Simptomas:
+// „Neteisingas el. pastas arba slaptazodis" su TEISINGU slaptazodziu.
+//
+// `planai.js:54` administratoriu tikrino per `toLowerCase()` - t.y. viena
+// puse jau buvo normalizuota, kita ne. Kaip visada, nesutampa ten, kur du
+// saltiniai.
+function normEmail(e) {
+  return String(e == null ? '' : e).trim().toLowerCase();
+}
+
+// Vienkartine migracija: esamus irasus i mazasias raides.
+// SAUGIKLIS: jei dvi paskyros skiriasi TIK registru, sulieti ju negalim - tai
+// du skirtingi zmones arba du skirtingi kreditu likuciai. Tada nedarom nieko
+// ir rekiam i zurnala, kad butu matoma.
+(function migruotiElPastus() {
+  try {
+    const dubliai = db.prepare(
+      'SELECT LOWER(email) AS maz, COUNT(*) AS n FROM users GROUP BY LOWER(email) HAVING n > 1'
+    ).all();
+    if (dubliai.length) {
+      console.error('');
+      console.error('  [A-4] NEMIGRUOTA: rasti el. pastai, kurie skiriasi tik registru:');
+      dubliai.forEach((d) => console.error('        ' + d.maz + ' - ' + d.n + ' paskyros'));
+      console.error('        Sulieti automatiskai negalima. Sutvarkykite rankomis.');
+      console.error('');
+      return;
+    }
+    const r = db.prepare("UPDATE users SET email = LOWER(TRIM(email)) WHERE email <> LOWER(TRIM(email))").run();
+    if (r.changes) console.log('[A-4] El. pastu normalizuota:', r.changes);
+  } catch (e) {
+    console.error('[A-4] migracija nepavyko:', e.message);
+  }
+})();
+
+// Unikalumas nuo siol NEPRIKLAUSO nuo registro. Jei indeksas nesusikuria,
+// vadinasi virsuje buvo dubliu - klaida jau isspausdinta, o darbas tesiasi.
+try {
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS users_email_nocase ON users(email COLLATE NOCASE)');
+} catch (e) {
+  console.error('[A-4] users_email_nocase indeksas nesukurtas:', e.message);
+}
+
 // Planai ir kreditai – atskiras modulis, dirba su ta pačia DB
 const planai = require('./planai');
 planai.prijungti(db);
@@ -91,11 +136,13 @@ const duomenys = require('./vartotojo-duomenys');
 duomenys.prijungti(db);
 
 function getUserByEmail(email) {
-  return db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+  // COLLATE NOCASE - kad rastu ir tuos irasus, kurie i migracija nepateko
+  // (pvz. jei ji buvo praleista del dubliu).
+  return db.prepare('SELECT * FROM users WHERE email = ? COLLATE NOCASE').get(normEmail(email));
 }
 
 function createUser(email, hashedPassword) {
-  db.prepare('INSERT INTO users (email, hashed_password) VALUES (?, ?)').run(email, hashedPassword);
+  db.prepare('INSERT INTO users (email, hashed_password) VALUES (?, ?)').run(normEmail(email), hashedPassword);
   console.log('[DB] Sukurtas vartotojas:', email, '| is viso:', vartotojuSkaicius());
 }
 
@@ -135,6 +182,74 @@ function requireAuth(req, res, next) {
   next();
 }
 
+// ── C-1 (revizija) · prisijungimo bandymu riba ──────────────────────────────
+// `POST /auth/login` prieme NERIBOTA bandymu skaiciu. Vienintele riba visame
+// serveryje buvo `/api/klaida` (5 / 10 min). Registracija uzdaryta pakvietimo
+// kodu - tai mazina rizika, bet neapsaugo JAU EGZISTUOJANCIU paskyru.
+//
+// Skaiciuojami TIK NEPAVYKE bandymai. Sekmingas prisijungimas skaitliuka
+// israso - kad zmogus, kuris tiesiog apsiriko, nebutu baudziamas iki lango
+// pabaigos.
+//
+// RAKTAI: `ip` ir `ip+elpastas`. Rakto „vien el. pastas" NERA, ir tai
+// samoningas sprendimas: su juo bet kas, zinantis svetima adresa, penkiais
+// klaidingais bandymais uzrakintu tos paskyros savininka 15 minuciu. Tai butu
+// ne apsauga, o paruostas budas kenkti. Pamatuota testuose: pirmoji redakcija
+// turejo bent el. pasto rakta, ir tada TEISINGAS slaptazodis is svaraus IP
+// grizdavo 429.
+//
+// Ka tai palieka atvira, sakau atvirai: paskirstyta ataka is daugelio IP po
+// kelis bandymus i ta pacia paskyra sio sargo neuzklius. Tam reiketu arba
+// paskyros uzrakto (tada grizta kenkimo kelias), arba delsos, kuri auga su
+// kiekvienu bandymu. Registracija uzdaryta pakvietimo kodu, tad realiausia
+// grėsmė yra vieno saltinio bandymai - juos si riba sustabdo.
+const PRISIJUNGIMO_RIBA = { kiek: 5, langasMs: 15 * 60 * 1000 };
+const _prisijungimoBandymai = new Map();
+
+function ipIsUzklausos(req) {
+  return String(req.headers['x-forwarded-for'] || req.ip || '').split(',')[0].trim() || 'nezinomas';
+}
+
+function bandymuLikutis(raktas, dabar) {
+  const laikai = (_prisijungimoBandymai.get(raktas) || []).filter((t) => dabar - t < PRISIJUNGIMO_RIBA.langasMs);
+  if (laikai.length) _prisijungimoBandymai.set(raktas, laikai); else _prisijungimoBandymai.delete(raktas);
+  return laikai;
+}
+
+function zymetiNepavykusi(raktai, dabar) {
+  raktai.forEach((r) => {
+    const laikai = bandymuLikutis(r, dabar);
+    laikai.push(dabar);
+    _prisijungimoBandymai.set(r, laikai);
+  });
+}
+
+function isvalytiBandymus(raktai) {
+  raktai.forEach((r) => _prisijungimoBandymai.delete(r));
+}
+
+// Zemelapis auga tik nuo nepavykusiu bandymu, bet be valymo jis butu amzinas.
+setInterval(() => {
+  const dabar = Date.now();
+  for (const [r, laikai] of _prisijungimoBandymai) {
+    const gyvi = laikai.filter((t) => dabar - t < PRISIJUNGIMO_RIBA.langasMs);
+    if (gyvi.length) _prisijungimoBandymai.set(r, gyvi); else _prisijungimoBandymai.delete(r);
+  }
+}, 10 * 60 * 1000).unref();
+
+// C-4 · laiko kanalas. Neegzistuojanciam el. pastui atsakymas grizdavo IS
+// KARTO, egzistuojanciam - po `bcrypt.compare`. Skirtumas ismatuojamas, ir jis
+// pasako, kurie adresai registruoti. Lyginam su fiktyvia maisa, kad abu keliai
+// truktu panasiai.
+//
+// RAUNDAI: fiktyvi maisa TURI buti to paties brangumo, kaip saugomos. Pirmoji
+// sio pakeitimo redakcija to nepadare - naujoms registracijoms pakeliau i 12,
+// o fiktyvia palikau 10, ir bcrypt kaina auga dvigubai su kiekvienu raundu.
+// Testas parode 310 ms prie 78 ms: laiko kanalas ne dingo, o PASIDARE
+// RYSKESNIS, ir butent del taisymo, kuris ta kanala turejo uzdaryti.
+const BCRYPT_RAUNDAI = 12;
+const TUSCIA_MAISA = bcrypt.hashSync('tusciaslaptazodis', BCRYPT_RAUNDAI);
+
 // ── Route handler'iai ──────────────────────────────────────────────────────
 async function handleRegister(req, res) {
   const { email, password, invite_code } = req.body || {};
@@ -146,37 +261,78 @@ async function handleRegister(req, res) {
   if (!INVITE_CODES.has(invite_code.toUpperCase()))
     return res.status(403).json({ detail: 'Neteisingas invite kodas' });
 
-  if (getUserByEmail(email))
+  // A-4: nuo cia visur tik normalizuotas adresas - ir patikroje, ir zetone,
+  // ir atsakyme. Anksciau zetonas nesdavo tai, ka zmogus iraso.
+  const elPastas = normEmail(email);
+  if (!elPastas.includes('@'))
+    return res.status(400).json({ detail: 'Netinkamas el. pašto adresas' });
+
+  if (getUserByEmail(elPastas))
     return res.status(400).json({ detail: 'Šis el. paštas jau užregistruotas' });
 
   if (password.length < 8)
     return res.status(400).json({ detail: 'Slaptažodis turi būti bent 8 simboliai' });
 
-  const hashedPassword = await bcrypt.hash(password, 10);
-  try { createUser(email, hashedPassword); }
+  const hashedPassword = await bcrypt.hash(password, BCRYPT_RAUNDAI);
+  try { createUser(elPastas, hashedPassword); }
   catch (e) {
     if (/UNIQUE/i.test(String(e.message))) return res.status(400).json({ detail: 'Šis el. paštas jau užregistruotas' });
     throw e;
   }
 
-  const token = createToken(email);
-  res.json({ access_token: token, token_type: 'bearer', email });
+  const token = createToken(elPastas);
+  res.json({ access_token: token, token_type: 'bearer', email: elPastas });
 }
 
 async function handleLogin(req, res) {
-  const { email, password } = req.body;
+  const { email, password } = req.body || {};
   if (!email || !password)
     return res.status(400).json({ detail: 'Trūksta laukų' });
 
-  const user = getUserByEmail(email);
-  if (!user || !(await bcrypt.compare(password, user.hashed_password)))
+  const elPastas = normEmail(email);          // A-4
+  const dabar = Date.now();
+  const ip = ipIsUzklausos(req);
+  const raktai = ['ip:' + ip, 'ip+el:' + ip + '|' + elPastas];
+
+  // C-1: tikrinam PRIES bcrypt - kitaip riba kainuotu tiek pat, kiek bandymas.
+  const virsijo = raktai.find((r) => bandymuLikutis(r, dabar).length >= PRISIJUNGIMO_RIBA.kiek);
+  if (virsijo) {
+    return res.status(429).json({
+      detail: 'Per daug nepavykusių bandymų. Pabandykite po 15 minučių.',
+    });
+  }
+
+  const user = getUserByEmail(elPastas);
+
+  // C-4: lyginam visada - ir tada, kai vartotojo nera. Be sito atsakymo laikas
+  // pasako, ar adresas registruotas.
+  const sutampa = await bcrypt.compare(password, user ? user.hashed_password : TUSCIA_MAISA);
+
+  if (!user || !sutampa) {
+    zymetiNepavykusi(raktai, dabar);
     return res.status(401).json({ detail: 'Neteisingas el. paštas arba slaptažodis' });
+  }
 
   if (!user.is_active)
     return res.status(403).json({ detail: 'Paskyra užblokuota' });
 
-  const token = createToken(email);
-  res.json({ access_token: token, token_type: 'bearer', email });
+  isvalytiBandymus(raktai);
+
+  // Seni slaptazodziai issaugoti su 10 raundu. Be perrasymo jie tokie ir liktu
+  // amzinai, O SVARBIAU - ju patikra truktu trumpiau uz fiktyvia, ir laiko
+  // kanalas atsirastu atvirkscias: „greitas atsakymas = registruotas".
+  // Perrasom TIK prisijungus teisingai, nes tik tada turim atvira slaptazodi.
+  try {
+    if (bcrypt.getRounds(user.hashed_password) < BCRYPT_RAUNDAI) {
+      const nauja = await bcrypt.hash(password, BCRYPT_RAUNDAI);
+      db.prepare('UPDATE users SET hashed_password = ? WHERE id = ?').run(nauja, user.id);
+    }
+  } catch (e) {
+    console.error('[C-4] maisos perrasymas nepavyko:', e.message);
+  }
+
+  const token = createToken(user.email);
+  res.json({ access_token: token, token_type: 'bearer', email: user.email });
 }
 
 function handleMe(req, res) {
