@@ -4126,3 +4126,83 @@ suvestinė. Lukas nori, kad tai būtų filtrų lentelės **pavadinimas**. Tai
 atskiras sprendimas nuo pirmojo ir liečia `.ct-fld-sum` vietą, ne `.ct-fld`.
 
 Abu — 34 sk., tad jūsų. Matavimo skriptas: `scratchpad/testas/nr41.js`.
+
+## Z-54 · 2026-09-21 · Klaudijus · SKELBIMŲ ARCHYVAS · v2.2.0
+
+Luko prašymas: „suziurim kad duomenu baze butu tvarkingai saugoma, kiek ten
+jau yra info, ir bandomasis BMW nuo 2019 autoplius ir autogido".
+
+### Kas jau buvo produkcijoje (pamatuota per `/admin/atsarga` ir Railway logus)
+
+```
+/data (Volume 500 MB, persistentinis)
+  users.db                 200 KB · 1 vartotojas
+  listing-lifecycle.json   1 027 skelbimai (805 gyvi, 222 dingę, 0 su VIN)
+  listing-timeline.json    1 027 kainų linijos
+  market-history.json      94 modeliai (iki 1 000 įrašų modeliui)
+  klaidu-zurnalas.json     105 KB · 41 pranešimas
+  sekama kasdien           300 skelbimų (≈300 kreditų per dieną)
+```
+
+Tai kaupėsi **tik iš vartotojų paieškų** — ne sistemingai, ir JSON failuose,
+kurie visi laikomi atmintyje ir visi perrašomi.
+
+### Rasta: tylus viso archyvo praradimas
+
+`fs.writeFileSync` pirma nukerpa failą iki nulio. Nutrūkus procesui rašymo
+metu diske lieka pusė JSON → kitas paleidimas `JSON.parse` krenta → `catch`
+grąžina `{}` → pirmas `save` tuščią objektą užrašo ant visko. Niekas nerėkia.
+Ištaisyta: `cache.rasytiSaugiai()` (`.tmp` + `rename`, atominis tame pačiame
+diske), pritaikyta visiems 6 JSON failams.
+
+### Naujas archyvas — `backend/rinka.js`, `/data/rinka.db`
+
+- **SQLite, atskiras failas.** Ne `users.db`: jei rinkos DB tektų trinti,
+  vartotojai nenukenčia. Ne JSON: 2 500 skelbimų × dienos stebėjimai.
+- **Tapatybė** = portalas + skelbimo numeris iš adreso (`autogidas:137877215`,
+  priekiniai nuliai nuimami). Adreso pavadinimo dalis gali keistis, numeris ne.
+- **`stebejimai`** — eilutė tik kai kaina ar rida PASIKEITĖ (ir pirmą kartą).
+- **Dingimas** — tik po **dviejų iš eilės pilnų** skenavimų be skelbimo.
+  Rikiuojant „naujausi viršuje", skenavimo metu įkelti skelbimai stumia
+  sąrašą, ir vienas kitas praslysta tarp puslapių. Nepilnas skenavimas
+  (klaida, riba, pirmas puslapis tuščias) dingimo nežymi niekada.
+- **Aprėptis** — dingimas skaičiuojamas tik tame pačiame portale, markėje ir
+  `metai >= metaiNuo`. 2012 m. skelbimas „nuo 2019" skenavime neliečiamas.
+- **Nesaugoma:** `turiLizingoOpcija` (visada true — portalo valdiklis),
+  `rawText`, `photos`, `ikeltaTekstas`. Priežastys kode (`NESAUGOMA`) ir
+  suvestinėje.
+- Autogido `ikeltaLaikas` yra **atnaujinimo** laikas, ne įkėlimo — pažymėta
+  stulpelio komentare.
+
+`fetchAllPages` gavo `onPage` (puslapis įrašomas iš karto — nutrūkus 60-ame,
+59 jau išsaugoti) ir `pabaiga`: `galas` / `riba` / `klaida: …` /
+`pirmas puslapis tuščias`. Senas kvietimas nepakito.
+
+### Maršrutai
+
+- `GET /admin/rinka` — suvestinė, `/data` failų dydžiai, `?paskyra=1` —
+  ScraperAPI `/account` (kredito nekainuoja): panaudota/riba prieš ir po.
+- `POST /admin/rinka/skenuoti {portalas, marke, metaiNuo, maxPuslapiu}` —
+  tik du portalai, fiksuoti adresai; riba privaloma (numatyta 150, max 400);
+  vienu metu vienas; 202 iš karto, dirba fone. Perkrovus serverį „vyksta"
+  skenavimas pažymimas „nutraukta".
+
+### Patikrinta
+
+- `rinka.test.js` **24/24**: tapatybė, nedubliavimas, stebėjimas tik
+  pasikeitus, vieno praleidimo neužtenka, nepilnas nežymi, antras pilnas
+  žymi, sugrįžęs atgyja, aprėptis, perkrovimas.
+- Vietinis serveris: maršrutai atsako, be rakto 401, svetimas portalas 400.
+  Tinklo klaidos kelias: skenavimas `nutraukta`, dingimas nežymimas
+  (debesyje portalai blokuoja tiesioginį axios — tikras puslapis tik
+  produkcijoje).
+- Kiti sargai nepakito: regitra 70/70, autogidas 29, dizainas 26/26.
+  `migracija`, `sesija`, `mygtukai` krenta **taip pat ir be šio pakeitimo**
+  (šios aplinkos modulių kelias / žinomi telefono šriftai).
+
+### Planas po push'o
+
+1. Po 1 puslapį kiekvienam portalui (2 kreditai) — ar įrašyta, užpildymas.
+2. Pilnas BMW nuo 2019: sąmata ~2 300 skelbimų ÷ 20 ≈ **~115 kreditų**.
+   Tikslų skaičių pasakys `/admin/rinka?paskyra=1` prieš ir po.
+

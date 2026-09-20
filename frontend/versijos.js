@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.2.0', data: '2026-09-21', pavadinimas: 'Skelbimu archyvas',
+    pakeitimai: [
+      'Pradedame kaupti skelbimu istorija: kada skelbimas atsirado, kaip keitesi kaina, kada dingo',
+      'Duomenys saugomi atskiroje duomenu bazeje, kuri islieka po atnaujinimu',
+      'Sukaupti duomenys nebegali dingti, jei serveris sustoja rasymo metu',
+    ],
+  },
+  {
     versija: '2.1.0', data: '2026-09-21', pavadinimas: 'Registro skaiciai pataisyti ir patikslinti',
     pakeitimai: [
       'Ankstesnes versijos skaiciai buvo per mazi: 12 menesiu langas realiai denge 9,3 menesio',

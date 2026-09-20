@@ -1,4 +1,4 @@
-# Būsena · atnaujinta 2026-09-21, v2.1.0 (GYVA produkcijoje)
+# Būsena · atnaujinta 2026-09-21, v2.2.0 (v2.1.0 GYVA produkcijoje)
 
 Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
@@ -30,6 +30,8 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 | L-04 / L-05 | `/admin/atsarga`, rakto rotacija | **Lukas** | Priminimai 09-19 11:30 ir 13:15 UTC. |
 
 ## Kas uždaryta paskutiniu metu
+
+- v2.2.0 — **Skelbimų archyvas** (Z-54): `backend/rinka.js`, `/data/rinka.db` (SQLite, atskirai nuo `users.db`). `GET /admin/rinka` (suvestinė, disko failai, `?paskyra=1` — ScraperAPI likutis nemokamai), `POST /admin/rinka/skenuoti` (tik autoplius/autogidas, riba privaloma). Dingimas — tik po dviejų pilnų skenavimų. `turiLizingoOpcija` nesaugomas. Pakeliui: **atominis JSON įrašymas** (6 failai) — anksčiau nutrūkus rašymui visas archyvas tyliai virsdavo `{}`. Sargas `rinka.test.js` **24/24**. **Laukia push'o, tada bandomasis BMW nuo 2019.**
 
 - v2.1.0 — **Regitros duomenys v2**: analitikas rado 12 mėn. lango klaidą (dengė 9,3 mėn.), tad v2.0.0 produkcijoje rodė **per mažus** skaičius. Įdiegta: ribos prie kvartilių (26/13), nurašymai tik 15+ pjūvyje, ridos percentilis, kuro punktas. **Du nurodymai pakeisti po matavimo** — `kmmet_kv` vietoj `rida_kv` ir riba 50 vietoj 30. Pridėti amžiaus vartai. Sargas **70/70**. Nauji `K-29`, `K-30`. **Laukia push'o.**
 

@@ -26,6 +26,10 @@ const nuotrAnalize = require('./nuotrauku-analize');
 // keliaujantis su deploy'umi, ne kintanti busena.
 const regitra = require('./regitra');
 regitra.ikelti();
+// v2.2.0: skelbimu archyvas. Jei nepavyksta - serveris vis tiek pakyla,
+// o /admin/rinka tai parodo (ikelta:false), ne tyliai.
+const rinka = require('./rinka');
+try { rinka.ikelti(cache.DATA_DIR); } catch (e) { console.error('[RINKA] NEPAVYKO ikelti:', e.message); }
 const komplektacija = require('./komplektacija');
 const { requireAuth, handleRegister, handleLogin, handleMe, planai, duomenys, verifyToken } = require('./auth');
 
@@ -198,7 +202,7 @@ let _klaidos = (() => {
 try { fs.mkdirSync(KLAIDU_FOTO_KAT, { recursive: true }); } catch (e) {}
 
 function issaugotiKlaidas() {
-  try { fs.writeFileSync(KLAIDU_FAILAS, JSON.stringify(_klaidos)); }
+  try { cache.rasytiSaugiai(KLAIDU_FAILAS, JSON.stringify(_klaidos)); }
   catch (e) { console.error('[KLAIDOS] nepavyko issaugoti:', e.message); }
 }
 
@@ -542,6 +546,92 @@ app.get('/admin/pavyzdys', klaiduPrieiga, async (req, res) => {
     });
   } catch (e) {
     console.error('[PAVYZDYS]', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── Skelbimų archyvas (v2.2.0) ───────────────────────────────────────────────
+// ScraperAPI paskyros būsena. Šis kvietimas NEKAINUOJA kredito (ScraperAPI
+// dokumentacija: /account neskaičiuojamas). Naudojam kreditams matuoti prieš
+// ir po skenavimo - ATSARGA skaičiuoja tik šio proceso užklausas, o paskyra
+// mato ir kitus (kasdienį sekimą).
+async function scraperPaskyra() {
+  const k = process.env.SCRAPER_API_KEY;
+  if (!k) return null;
+  try {
+    const r = await axios.get('http://api.scraperapi.com/account?api_key=' + k, { timeout: 15000 });
+    const d = r.data || {};
+    return { panaudota: d.requestCount, riba: d.requestLimit, lygiagreciai: d.concurrencyLimit };
+  } catch (e) { return { klaida: e.message }; }
+}
+
+// Tik du portalai, fiksuoti adresai - joks naudotojo URL čia nepatenka.
+const RINKOS_PORTALAI = {
+  autoplius: (f) => buildAutopliusUrl(f),
+  autogidas: (f) => buildAutogidasUrl(f),
+};
+
+async function vykdytiSkenavima(skId, portalas, url, maxPuslapiu, marke) {
+  const pries = ATSARGA.paieska.scraperapi;
+  let klaida = null, pabaiga = null;
+  try {
+    const r = await fetchAllPages(url, maxPuslapiu, null, (sarasas) => {
+      try { rinka.irasytiPuslapi(skId, portalas, marke, sarasas); }
+      catch (e) { console.error('[RINKA] puslapio irasymas:', e.message); throw e; }
+    });
+    pabaiga = r.pabaiga;
+  } catch (e) { klaida = e.message; }
+  const kreditu = ATSARGA.paieska.scraperapi - pries;
+  const s = rinka.baigti(skId, {
+    pilnas: !klaida && pabaiga === 'galas',
+    priezastis: klaida || pabaiga,
+    busena: klaida ? 'klaida' : undefined,
+    kreditu,
+  });
+  console.log('[RINKA] skenavimas #' + skId + ' ' + portalas + ': ' + (s && s.busena)
+    + ' · puslapiu ' + (s && s.puslapiu) + ' · skelbimu ' + (s && s.skelbimu)
+    + ' · nauju ' + (s && s.nauju) + ' · dingo ' + (s && s.dingo) + ' · kreditu ' + kreditu + ' · ' + (klaida || pabaiga));
+}
+
+// Suvestinė: kiek sukaupta, kur guli, kiek užima. GET, nemokamas.
+app.get('/admin/rinka', klaiduPrieiga, async (req, res) => {
+  const failai = {};
+  try {
+    for (const f of fs.readdirSync(cache.DATA_DIR)) {
+      try { const st = fs.statSync(path.join(cache.DATA_DIR, f)); failai[f] = st.isFile() ? +(st.size / 1048576).toFixed(2) : 'katalogas'; } catch (e) {}
+    }
+  } catch (e) {}
+  res.json({
+    archyvas: rinka.suvestine(),
+    vykstantis: rinka.vykstantis ? (function () { try { return rinka.vykstantis(); } catch (e) { return null; } })() : null,
+    diskas: { katalogas: cache.DATA_DIR, persistentinis: cache.DATA_PERSISTENTINIS, failaiMb: failai },
+    scraperapi: req.query.paskyra === '1' ? await scraperPaskyra() : undefined,
+  });
+});
+
+// Paleisti skenavimą. POST, nes KAINUOJA kreditus: ~1 kreditas puslapiui
+// (render=false), 20 skelbimų puslapyje. Atsako iš karto (202), dirba fone;
+// eigą rodo GET /admin/rinka. Vienu metu - tik vienas skenavimas.
+app.post('/admin/rinka/skenuoti', klaiduPrieiga, (req, res) => {
+  try {
+    const b = req.body || {};
+    const portalas = String(b.portalas || '');
+    if (!RINKOS_PORTALAI[portalas]) return res.status(400).json({ error: 'portalas: autoplius | autogidas' });
+    const marke = String(b.marke || 'BMW').slice(0, 40);
+    const metaiNuo = parseInt(b.metaiNuo, 10) || null;
+    if (metaiNuo && (metaiNuo < 1990 || metaiNuo > new Date().getFullYear())) return res.status(400).json({ error: 'metaiNuo' });
+    // Riba privaloma: be jos klaida analizatoriuje (kas puslapį „nauji" skelbimai)
+    // suvalgytų kreditus iki paskyros galo.
+    const maxPuslapiu = Math.min(Math.max(parseInt(b.maxPuslapiu, 10) || 150, 1), 400);
+    const v = rinka.vykstantis();
+    if (v) return res.status(409).json({ error: 'Jau vyksta skenavimas #' + v.id, vykstantis: v });
+    const url = RINKOS_PORTALAI[portalas]({ marke, metaiNuo, rikiavimas: 'naujausi' });
+    const skId = rinka.pradeti({ portalas, marke, metaiNuo, url });
+    console.log('[RINKA] skenavimas #' + skId + ' pradetas: ' + portalas + ' ' + marke + ' nuo ' + (metaiNuo || '-') + ' · riba ' + maxPuslapiu + ' psl.');
+    vykdytiSkenavima(skId, portalas, url, maxPuslapiu, marke);
+    res.status(202).json({ skenavimas: skId, portalas, marke, metaiNuo, maxPuslapiu, url });
+  } catch (e) {
+    console.error('[RINKA]', e.message);
     res.status(500).json({ error: e.message });
   }
 });
@@ -1311,8 +1401,12 @@ function extractAutogidasListings(html, originUrl) {
   return results;
 }
 
-async function fetchAllPages(baseUrl, maxPages, onProgress) {
+// `onPage(naujiSkelbimai, puslapis)` - v2.2.0, archyvui: kiekvienas puslapis
+// irasomas IS KARTO. `pabaiga` pasako, KODEL sustota - tik 'galas' reiskia,
+// kad sarasas perziuretas visas (archyvas tik tada zymi dingusius).
+async function fetchAllPages(baseUrl, maxPages, onProgress, onPage) {
   let autopliusStruktura = false;
+  let pabaiga = 'riba';
   const allListings = [];
   const seenUrls = new Set();
   const isAutogidas = baseUrl.includes('autogidas.lt');
@@ -1327,6 +1421,7 @@ async function fetchAllPages(baseUrl, maxPages, onProgress) {
       html = await fetchSearchPage(pageUrl);
     } catch (err) {
       if (resolveStep) resolveStep();
+      pabaiga = 'klaida: ' + String(err && err.message || err).slice(0, 120);
       break;
     }
     let newItems;
@@ -1341,12 +1436,18 @@ async function fetchAllPages(baseUrl, maxPages, onProgress) {
     }
     const filtered = newItems.filter((b) => !seenUrls.has(b.url));
     if (resolveStep) resolveStep();
-    if (filtered.length === 0) break;
+    if (filtered.length === 0) {
+      // Pirmas puslapis tuscias - tai ne „galas", o itartina (pasikeite
+      // isdestymas, blokavimas). Archyvas tokio skenavimo nelaiko pilnu.
+      pabaiga = page === 1 ? 'pirmas puslapis tuscias' : 'galas';
+      break;
+    }
     filtered.forEach((b) => seenUrls.add(b.url));
     allListings.push(...filtered);
+    if (onPage) onPage(filtered, page);
   }
   const format = (isAutogidas || isAutoscout || isOtomoto || autopliusStruktura) ? 'parsed' : 'raw';
-  return { listings: allListings, format };
+  return { listings: allListings, format, pabaiga };
 }
 
 // Tas pats pardavejas gali ikelti TA PATI automobili i abu portalus.

@@ -23,6 +23,18 @@ try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) {}
 
 const CACHE_FILE = path.join(DATA_DIR, 'cache.json');
 
+// v2.2.0: ATOMINIS irasymas. `writeFileSync` pirma nukerpa faila iki nulio ir
+// tik tada raso. Jei procesas mirsta per viduri (OOM, Railway perkrovimas be
+// SIGTERM), diske lieka puse JSON; kito paleidimo `JSON.parse` krenta, catch
+// grazina `{}` - ir pirmas `save` tuscia objekta uzraso ant viso archyvo.
+// Tylus visu sukauptu duomenu praradimas. Rasom i .tmp ir pervadinam:
+// pervadinimas tame paciame diske yra atominis - failas arba senas, arba naujas.
+function rasytiSaugiai(failas, turinys) {
+  const tmp = failas + '.tmp';
+  fs.writeFileSync(tmp, turinys);
+  fs.renameSync(tmp, failas);
+}
+
 const PAGE_TTL_MS = 120 * 60 * 1000;       // 2 val - puslapiu nuskaitymas
 const ANALYSIS_TTL_MS = 24 * 60 * 60 * 1000; // 24 val - detali analize
 const SEARCH_TTL_MS = 20 * 60 * 1000;       // 20 min - tos pacios filtru paieskos talpykla
@@ -83,7 +95,7 @@ function saveCacheNow() {
   if (_cacheTimer) { clearTimeout(_cacheTimer); _cacheTimer = null; }
   try {
     valytiPasenusius();
-    fs.writeFileSync(CACHE_FILE, JSON.stringify(_cache));
+    rasytiSaugiai(CACHE_FILE, JSON.stringify(_cache));
   } catch (err) { console.error('Nepavyko issaugoti talpyklos:', err.message); }
 }
 
@@ -175,7 +187,7 @@ let _history = (() => {
 })();
 
 function saveHistory() {
-  try { fs.writeFileSync(HISTORY_FILE, JSON.stringify(_history)); }
+  try { rasytiSaugiai(HISTORY_FILE, JSON.stringify(_history)); }
   catch (err) { console.error('Nepavyko issaugoti istorijos:', err.message); }
 }
 
@@ -217,7 +229,7 @@ function saveListingTimeline(iskart) {
   if (!iskart) { _timelineDirty = true; return; }
   if (!_timelineDirty) return;
   try {
-    fs.writeFileSync(LISTING_TIMELINE_FILE, JSON.stringify(_listingTimeline));
+    rasytiSaugiai(LISTING_TIMELINE_FILE, JSON.stringify(_listingTimeline));
     _timelineDirty = false;
   } catch (err) { console.error('Nepavyko išsaugoti timeline:', err.message); }
 }
@@ -278,7 +290,7 @@ function saveLifecycle() {
   // kiekvieno ciklo, tad atskiro kvietimo prideti nereikia ir pamirsti negalima.
   saveListingTimeline(true);
   if (!_lifecycleDirty) return;
-  try { fs.writeFileSync(LIFECYCLE_FILE, JSON.stringify(_lifecycle)); _lifecycleDirty = false; }
+  try { rasytiSaugiai(LIFECYCLE_FILE, JSON.stringify(_lifecycle)); _lifecycleDirty = false; }
   catch (err) { console.error('Nepavyko issaugoti gyvavimo ciklo:', err.message); }
 }
 
@@ -486,7 +498,7 @@ let _watch = (() => {
 })();
 
 function saveWatch() {
-  try { fs.writeFileSync(WATCH_FILE, JSON.stringify(_watch)); }
+  try { rasytiSaugiai(WATCH_FILE, JSON.stringify(_watch)); }
   catch (err) { console.error('Nepavyko issaugoti sekimo saraso:', err.message); }
 }
 
@@ -605,5 +617,5 @@ module.exports = {
   modelioTendencijos,
   pridetiSekimui, sekamiUrlai, zymetiPatikrinta, valytiSekimoSarasa,
   valytiSenusIrasus,
-  DATA_DIR,
+  DATA_DIR, rasytiSaugiai,
 };
