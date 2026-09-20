@@ -2630,6 +2630,32 @@
             </div>
           </div>        </div>
 
+
+        <!-- v1.84.0 (Nr. 34, Nr. 35): 12-asis langelis. Vienuolika langeliu
+             palikdavo skyle antros eiles gale. Cia stovi du valdikliai, kurie
+             nera filtro laukai: „Daugiau filtru" ir „Istorija". Skirtuku juosta
+             po panele pasalinta - ji atrode nuo paneles atplysusi. Istorija
+             PERKELTA, ne paslepta (K-06). -->
+        <div class="ct3-field ct3-field-veiksmai">
+          <label>DAUGIAU</label>
+          <div class="ct3-fld-veiksmai">
+          <button class="ct3-more-btn ct-btn ct-btn-toggle" type="button" onclick="ctToggleMoreFilters()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M7 12h10M10 18h4"/></svg>
+            Daugiau filtrų
+            <span class="ct3-badge" id="more-filters-badge" style="display:none;">0</span>
+          </button>
+          <div style="position:relative">
+            <button class="ct3-stab ct-tab" id="ct-hist-tab-btn" onclick="ctSearchTabSwitch('history',this)">🕘 Paskutinės paieškos</button>
+            <div id="ct-history-dropdown" style="display:none;">
+              <div class="ct-hist-head">
+                <div class="ct-hist-head-title"><div class="ct-hist-head-dot"></div>Paskutinės paieškos<span class="ct-hist-head-count" id="ct-hist-count" style="display:none"></span></div>
+                <button class="ct-hist-clear-all" onclick="event.stopPropagation();clearSearchHistory()">Valyti</button>
+              </div>
+              <div class="ct-hist-list" id="search-history-chips"></div>
+            </div>
+          </div>
+          </div>
+        </div>
       </div>
 
 
@@ -2666,11 +2692,7 @@
 
       <div class="ct3-search-bottom">
         <div class="ct3-search-bottom-left">
-          <button class="ct3-more-btn ct-btn ct-btn-toggle" type="button" onclick="ctToggleMoreFilters()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M7 12h10M10 18h4"/></svg>
-            Daugiau filtrų
-            <span class="ct3-badge" id="more-filters-badge" style="display:none;">0</span>
-          </button>
+
 
         </div>
         <!-- PASALINTA: "Naršyti viską" režimas. Liko tik CarTriige analizė, todėl režimų pasirinkiklio nebereikia. -->
@@ -2684,24 +2706,7 @@
   </div>
   <div class="ct-shell-main">
 
-  <!-- v1.76.0: 14 paketas - skirtukai persikele is filtru paneles i rezultatu stulpeli.
-       "Ieskoti / Istorija" nera filtras: tai du rodiniai, ir jie perjungia butent tai,
-       kas rodoma cia. Sone jie ateme 45 px ir lauzesi i tris eilutes. -->
-      <div class="ct3-search-top">
-        <div class="ct3-search-tabs">
-          <button class="ct3-stab active ct-tab" onclick="ctSearchTabSwitch('search',this)">Ieškoti automobilių</button>
-          <div style="position:relative">
-            <button class="ct3-stab ct-tab" id="ct-hist-tab-btn" onclick="ctSearchTabSwitch('history',this)">🕘 Paskutinės paieškos</button>
-            <div id="ct-history-dropdown" style="display:none;">
-              <div class="ct-hist-head">
-                <div class="ct-hist-head-title"><div class="ct-hist-head-dot"></div>Paskutinės paieškos<span class="ct-hist-head-count" id="ct-hist-count" style="display:none"></span></div>
-                <button class="ct-hist-clear-all" onclick="event.stopPropagation();clearSearchHistory()">Valyti</button>
-              </div>
-              <div class="ct-hist-list" id="search-history-chips"></div>
-            </div>
-          </div>
-        </div>
-      </div>
+
 
 
 

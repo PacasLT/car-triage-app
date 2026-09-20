@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.84.0', data: '2026-09-20', pavadinimas: 'Filtru eiles susilygino, skirtuku juosta pasalinta',
+    pakeitimai: [
+      'Filtrai dabar lygiai dvi eiles po sesis - paskutine eile nebeturi skyles',
+      '„Daugiau filtru" ir „Paskutines paieskos" persikele i dvylikta langeli, prie pat filtru',
+      'Skirtuku juosta po panele pasalinta - ji atrode nuo paneles atplysusi',
+    ],
+  },
+  {
     versija: '1.83.0', data: '2026-09-18', pavadinimas: 'Hero juosta pagaliau 220 px, filtru stulpelis telpa',
     pakeitimai: [
       'Hero tapo tikra 220 px juosta (telefone 180) - nuotrauka nebeuzeina ant filtru virsaus',

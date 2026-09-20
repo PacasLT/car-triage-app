@@ -2246,3 +2246,58 @@ pilkas) ir juostos pašalinimo (Nr. 35). Perdaryti tą patį markupą dukart bū
 švaistymas, tad darysiu viską vienu ėjimu. Jūsų rekomendaciją pereiti prie
 `.ct-fld` iškart ir ištrinti 30 sk. `.ct3-field` bloką priimu — `K-02` iš
 naujo tikrai nereikia.
+
+---
+
+## Z-30 · 2026-09-20 · Klaudijus → Dizaineriui · 22 PAKETO NEREIKIA · v1.84.0
+
+**Atsakymas į jūsų klausimą prieš siunčiant 22 paketą: `K-20` išspręstas, jūsų
+v4 nereikalingas.** Sprendimas kitoks, nei planavot, tad rašau tiksliai, kad
+galėtumėt patikrinti.
+
+Jūs siūlot `calc(220px + var(--header-h))`. Aš `min-height` tiesiog **nuėmiau** —
+`index.html` 736 eil. ir 1404 eil. (telefono `!important`). Tada jūsų
+26 sk. v3 `height: 220px` galioja be jokio priedo.
+
+```
+hero 1280 px:  620 -> 220      hero 390 px:  340 -> 180
+tarpas iki paneles: 81 px
+```
+
+`margin-top: -96px` palikau sąmoningai: juosta ir turi prasidėti po antrašte,
+o ne po ja slinkti — antraštė 97 px, juosta 220 px, matoma dalis 220.
+Jei jūsų v4 būtų įdiegtas kartu, `calc(220px + 97px)` duotų 317 px juostą, t. y.
+**dukart pataisytą tą pačią klaidą**. Todėl 22 paketo nesiųskit — arba
+atsiųskit tik tada, jei matavimas pas jus rodo kitaip.
+
+---
+
+## Z-31 · 2026-09-20 · Klaudijus → Dizaineriui · LUKO PASTABOS DĖL EILIŲ · v1.84.0
+
+Lukas atsiuntė du ekranvaizdžius: pilno pločio panelė „blogai nesusidėjo", o
+siaurasis variantas „visai nieko, tik užeina viršus".
+
+**Priežastis pirmame — vienuolika.** Antra eilė turėjo penkis langelius ir
+skylę gale. Dvyliktas langelis dabar yra, ir jame stovi **du valdikliai, kurie
+nėra filtro laukai**: „Daugiau filtrų" ir „Paskutinės paieškos".
+
+Tuo pačiu **pašalinta skirtukų juosta** (Nr. 35). Ji nuo 14 paketo gyveno
+rezultatų stulpelyje ir atrodė nuo panelės atplyšusi. `Istorija` **perkelta,
+ne paslėpta** — jūsų `K-06` taisyklė laikosi: mygtukas matomas ir veikia
+visuose pločiuose (patikrinta 390 / 1280 / 1494 px).
+
+```
+langeliu 12        eiles 6 + 6 (buvo 6 + 5)
+sonas 1280x720     577 px prie ribos 599   telpa
+sonas 2364         567 px                  telpa
+horizontalaus slinkimo 0  ·  JS klaidu 0
+sticky virsus      109 px, antraste baigiasi 97 -> tarpas 12, virsus nenukerpamas
+```
+
+**Vienas radinys pakeliui:** istorijos mygtuką laiko `<div style="position:relative">`
+be pločio. Stulpelyje jis likdavo savo turinio dydžio ir kyšodavo **16 px** už
+krašto (mygtukas 148 px, stulpelio vidus 132). `ct-priedai.css` 11 blokas.
+
+**23 paketas dar neįdiegtas** — jis perrašo patį lauką (`.ct-fld`), o šitie
+pakeitimai liečia tik tinklelio narystę. Diegsiu jį kaip visumą, ir tada
+11 blokas greičiausiai dings, nes 34 sk. duos savo lauko vidų.

@@ -178,3 +178,49 @@
 #kp-svarba .ct-flag[data-k="blokuoja"]::before { background: var(--danger); }
 #kp-svarba .ct-flag[data-k="trukdo"]::before   { background: var(--warning); }
 #kp-svarba .ct-flag[data-k="smulkme"]::before  { background: var(--success); }
+
+
+/* ----------------------------------------------------------------------------
+   11 BLOKAS · 12-ojo langelio vidus · v1.84.0 (Nr. 34, Nr. 35)
+
+   Langelis tinklelyje yra filtro lauko dydzio, o jame stovi du mygtukai.
+   Be sio bloko jie issitemptu per visa auksti arba isliptu uz krasto.
+
+   MUSU, netrinti: tai markupo atrama, ne dizainerio taisykles atsvara.
+   Jei 34 sk. (23 paketas) duos savo varianta, blokas dings.  */
+
+.ct3-fld-veiksmai {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.ct3-fld-veiksmai > * { min-width: 0; }
+.ct3-fld-veiksmai .ct3-more-btn,
+.ct3-fld-veiksmai .ct3-stab {
+  height: 30px;
+  padding: 0 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.ct3-field-veiksmai .ct3-fld-veiksmai > div { position: relative; }
+
+@media (min-width: 1180px) {
+  /* Sone 276 px stulpelyje du mygtukai i viena eile netelpa - pamatuota
+     16 px horizontalaus slinkimo. Sone jie stovi vienas po kitu. */
+  .ct-shell.is-split > .ct-shell-side .ct3-fld-veiksmai {
+    flex-direction: column;
+    align-items: stretch;
+    flex-wrap: nowrap;
+  }
+  /* Istorijos mygtuka laiko <div style="position:relative"> - jis neturi ploto,
+     tad stulpelyje lieka savo turinio dydzio ir kyso 16 px uz krasto.
+     Pamatuota: mygtukas 148 px, stulpelio vidus 132. */
+  .ct-shell.is-split > .ct-shell-side .ct3-fld-veiksmai > * { width: 100%; }
+  .ct-shell.is-split > .ct-shell-side .ct3-fld-veiksmai .ct3-more-btn,
+  .ct-shell.is-split > .ct-shell-side .ct3-fld-veiksmai .ct3-stab {
+    width: 100%;
+    justify-content: center;
+  }
+}
