@@ -8,6 +8,31 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.94.0', data: '2026-09-20', pavadinimas: 'Markes ir modelio laukai sone pagaliau matosi',
+    pakeitimai: [
+      'Siauroje filtru juostoje markes ir modelio pasirinkimai buvo 0 px plocio - ju paprasciausiai nebuvo',
+      'Juostos aukstis del to uzaugo 484 -> 532 px, bet vis tiek telpa (riba 599)',
+      'Filtru juostos aprasymas buvo dviejose vietose; sujungtas i viena, ir paaiskejo, kad pusė jo negyva',
+      'Istrinti astuoni spalvu ir dydziu vardai, kuriu niekas nenaudojo nuo ju parasymo',
+    ],
+  },
+  {
+    versija: '1.93.0', data: '2026-09-20', pavadinimas: 'Avataro mygtukas visur vienodas',
+    pakeitimai: [
+      'Paieskos puslapio avataro mygtukas buvo 32x32, o skelbimo puslapyje - 38x38',
+      'Priezastis: index.html buvo likusi viena papildoma klase `ct-btn-sm`, nuimta ne visur',
+      'Dabar visi penki puslapiai nesa tas pacias avataro klases ir ta pati 38x38 dydi',
+    ],
+  },
+  {
+    versija: '1.92.0', data: '2026-09-20', pavadinimas: 'Filtru piktogramos pagaliau matosi',
+    pakeitimai: [
+      'Filtru piktogramos atsirado ekrane - iki siol ju vietoje buvo tuscia vieta',
+      'Priezastis: piktogramos buvo idetos tik i saltinio faila, o kiekvienas puslapis nesa savo kopija',
+      'Pridėta patikra, kuri neleis tam pasikartoti: tikrina, ar kiekviena naudojama piktograma yra to puslapio rinkinyje',
+    ],
+  },
+  {
     versija: '1.91.0', data: '2026-09-20', pavadinimas: 'Klaidu sarase matyti, kas svarbiausia',
     pakeitimai: [
       'Kiekvienas pranesimas gavo prioriteta: trys taskai ir vardas - Svarbu, Vidutinis, Zemas',

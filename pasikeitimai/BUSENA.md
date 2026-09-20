@@ -1,4 +1,4 @@
-# Būsena · atnaujinta 2026-09-18, v1.81.0
+# Būsena · atnaujinta 2026-09-20, v1.94.0
 
 Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
@@ -6,6 +6,10 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
 | Nr. | Kas | Kieno ėjimas | Trumpai |
 |---|---|---|---|
+| K-26 | Šeši diapazono laukai šone apkirpti | **Dizaineris** | `metaiNuo` turi 14 px, reikia 44; `kainaNuo` 24 / 53. Naudotojas nemato, ką įrašė. 34 sk., ne 30. Pamatuota Z-45. |
+| K-25 | Nr. 37 · `#portal-selector` | **Dizaineris** | Niekada nebuvo dizaino sistemoje. |
+| K-24 | Nr. 38 · „Daugiau filtrų" prie „Ieškoti" | **Dizaineris** | Lukas taip nori, bet tai griauna `.ct-fld-act` 12-tą langelį. Jūsų ėjimas. |
+| A-11 | `--focus-offset` | **Dizaineris** | Vienintelis likęs negyvas tokenas; pasiliekat kartu su PT-02. |
 | K-18 | Portalu skydas 187 px vietoj 240 | **Dizaineris** | `max-width: calc(100% - 12px)` skaičiuojamas nuo `.ct3-portal-wrap`, ne nuo stulpelio. Veikia, bet siauriau nei rašėte. |
 | K-14 | Nr. 24 · šoninės panelės dizainas | **Dizaineris** | Be detalių; galiu atsiųsti matavimus ir ekranvaizdžius. |
 | K-15 | Nr. 27 · hero tekstas | **Dizaineris** | Lukas prašo pašalinti `.ct3-hero-content`. 26 sk. dalis — neliečiu be atsakymo. |
@@ -19,6 +23,9 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 | L-04 / L-05 | `/admin/atsarga`, rakto rotacija | **Lukas** | Priminimai 09-19 11:30 ir 13:15 UTC. |
 
 ## Kas uždaryta paskutiniu metu
+
+- v1.94.0 — **32 paketas**: 30 sk. sujungtas (`I-01` dublikatų nebėra), 8 negyvi tokenai ištrinti (`I-04` 10 → 1), `--text-on-light` pritaikytas 4 vietose. **RADINYS: šone `#marke` ir `#modelis` buvo 0 px ir nepaspaudžiami** — juosta 484 → 532 px (riba 599). Naujas `K-26`.
+- v1.93.0 — Nr. 30 avataras: `index.html` turėjo likusią `ct-btn-sm`, 32x32 vietoj 38x38. Visi penki puslapiai suvienodinti.
 
 - v1.81.0 — **D-16 padarytas**: vartotojo ekranas, patvirtinimo kortelė pamatuota visais 9 perėjimais; `created_at` ir `PLANAI` jau buvo
 - v1.80.0 — komentarai prie pranešimų (būsena keičiasi pati); `K-16` antraštės tarpiklis (Nr. 28, 30); 32 sk. kortelės telefone (Nr. 16); Nr. 14 pamatuota

@@ -2825,3 +2825,349 @@ sukurta failo, kuris turėtų nuo jų saugoti.
 
 Tas pats galioja ir spalvoms: jei atlase paletė įrašyta HEX'ais, o ne
 `var(--...)`, ji nudreifuos per pirmą temos pakeitimą.
+
+---
+
+## Z-42 · 2026-09-20 · Klaudijus → Dizaineriui · Nr. 39 · PIKTOGRAMOS NESIMATĖ · v1.92.0
+
+Lukas parašė, kad filtruose nesimato piktogramų. **Jis teisus, ir mano
+matavimas buvo klaidingas** — tiksliai ta pati forma, apie kurią įspėjot
+`A-33` 6 punkte.
+
+### Kas buvo
+
+23 pakete 12 piktogramų įdėjau į `ct-ikonos.html`, kaip jūs ir rašėt
+(„dedamos į esamą sprite'ą"). Bet **kiekvienas puslapis neša to sprite'o
+KOPIJĄ savo viduje** — `index.html` 2281 eil. prasideda jo paties
+`<symbol id="i-skelbimas">` sąrašas. Patikrinta:
+
+```
+symbol id="i-f-..."   ct-ikonos.html: 12     index.html: 0
+href="#i-f-..."       index.html:     22 panaudojimai
+sprite'o kopiju:      6 HTML failai + saltinis
+```
+
+Tad `<use href="#i-f-marke">` nerado nieko ir piešė tuščią dėžutę.
+
+### Kodėl mano matavimas to nepagavo
+
+`Z-37` rašiau „piktogramų 13". Skaičiavau **`<use>` elementus ir jų CSS
+plotį**. `<svg>` su neišsprendžiamu `use` vis tiek turi savo `width: 13px` —
+tad „13 px" reiškė „elementas yra", o ne „piktograma matosi".
+
+Tai jūsų taisyklė iš `A-33`: **tikrinau įrankiu, kuris visada sako „telpa".**
+Teisingas matavimas — ar `use` nuoroda randa `<symbol>` ir ar tas `<symbol>`
+turi bent vieną `path`:
+
+```
+pries: use 13 · rasta simboliu  0 · su piesiniu  0
+po:    use 13 · rasta simboliu 13 · su piesiniu 13
+```
+
+### Kas padaryta
+
+12 simbolių įterpta ir į `index.html` sprite'ą (tik jis juos naudoja).
+Ir pridėjau patikrą į `tools/dizaino-auditas.py`: **kiekvienas
+`href="#i-..."` turi turėti `<symbol id>` TAME PAČIAME faile.** Dabar rodo
+„visos naudojamos yra savo puslapio sprite".
+
+### Ką tai reiškia jums
+
+Sprite'o kopijos yra septinta „dviejų kopijų" forma mūsų sąraše, ir ji
+nemaloni tuo, kad **šaltinis teisingas**. Jūs padarėte viską teisingai —
+įdėjot į `ct-ikonos.html`. Tiesiog šiandien tas failas yra ne vienintelė
+vieta, o šablonas, kurio kopijos gyvena savo gyvenimą.
+
+Jei kada norėsit, kad sprite'as būtų tikrai vienas, tai mūsų pusės darbas
+(įkėlimas per `fetch` arba generavimas). Kol kas patikra bent neleis to
+pakartoti tyliai.
+
+---
+
+## Z-43 · 2026-09-20 · Klaudijus → Dizaineriui · VISOS SISTEMOS INSPEKCIJA
+
+Lukas paprašė ir mano pusės patikros. Pasidariau `tools/dizaino-inspekcija.py` —
+septyni patikrinimai, kiekvienas skaičius iš `grep`, ne iš atminties. Rezultatai
+žemiau; keli sutampa su jūsų `Patikra`, keli ne.
+
+### `I-01` · Skyrių numeracija
+
+```
+skyriu 27    tvarka: 1 2 10..18 20 22..27 30 31 32 30 34c 35 34 34b 33
+DUBLIKATAI: 30            surikiuota: NE
+```
+
+Patvirtinu jūsų radinį. Ir pridedu: **trūksta 3–9, 19, 21, 28, 29** — numeriai
+skirti, bet skyrių faile nėra. Tad ieškant „kur 28 sk." atsakymas yra „niekur",
+ir tai matosi tik perskaičius visą failą.
+
+### `I-02` · `!important` — jūsų `PT-01` patvirtintas, bet skaičiai kitokie
+
+```
+ct-mygtukai.css      0        <- jusu failas svarus
+ct-dizainas.css     51
+ct-bendras.css      76
+detail.html         25
+compare.html       185
+index.html         396        <- cia tikroji istorija
+```
+
+Jūs rašėt „`ct-bendras.css` ~70" — tiksliai 76. Bet didžiausias skaičius
+ne ten: **`index.html` turi 396**, t. y. daugiau nei visi CSS failai kartu.
+
+Jūsų išvada („`!important` telkiasi ten, kur sistemos nėra") teisinga, bet
+adresas kitas: tai ne `ct-bendras.css` problema, o **`index.html`, kuris
+pats sau yra dizaino sistema**.
+
+### `I-03` · Inline `style=` — ta pati istorija, ta pati vieta
+
+```
+detail.html   288     index.html  257     compare.html 19
+ataskaitos     14     admin        6      megstamiausi  3
+```
+
+Kiekvienas iš tų 545 atributų nugali bet kurį jūsų selektorių be `!important`.
+Būtent jie sulaužė 23 paketą (27 paketo 1–2 punktai) ir `GALIA` (29 paketas).
+**Tai ne baigtinis sąrašas problemų, o baigtinis sąrašas vietų, kur jūsų
+skyriai neveiks, kol markupo nepataisysim.**
+
+### `I-04` · Negyvi tokenai — dešimt
+
+```
+--accent-hover   --accent-strong-hover   --bg-card       --dur-base
+--focus-offset   --fs-700                --shadow-1      --shadow-panel
+--text-on-accent --text-on-light
+```
+
+`--focus-offset` ir `--text-on-light` jūs pats radot `A-11` ir sakėt
+„pritaikyti". Iki šiol nepritaikyti — tad tai ne naujas radinys, o
+**neuždarytas jūsų pačių**.
+
+### `I-05` · `height` + `min-height` tame pačiame selektoriuje · 20 vietų
+
+Ta pati sąveika mus pagavo tris kartus (`--header-h`, `.ct-tab` 44 px,
+hero 620). Dabar žinau, kur ji dar gali suveikti:
+
+```
+ct-dizainas.css   .ct-fld-v · .ct-fld.is-inline > .ct-fld-v · .ct-fld-act-in .ct-btn
+                  .ct-btn.ct-report-fab · .ct-media > .ct-photo
+ct-mygtukai.css   .ct-btn-sm · .ct-tab · .ct-btn-xl · .ct-btn-over.ct-btn-icon
+ct-bendras.css    .std-photo-col img
+```
+
+Daugumoje jų tai sąmoninga (`height: auto` + `min-height: var(--tap-min)`).
+Bet sąrašas vertas turėti: kitą kartą, kai skaičius nepaklus, pirmiausia
+žiūrėsiu čia.
+
+### `I-06` · Klasių vardai, aprašyti 2+ failuose · 397
+
+Tai `K-02` (`.ct-table`) masteliu. Ryškiausi: `.active` — **šešiuose**
+failuose, `.card`, `.app-header*`, `.at-btn`. `index.html` ir `compare.html`
+turi beveik identišką savo antraštės komplektą.
+
+### `I-07` · Ranka įrašytos HEX spalvos
+
+```
+ct-bendras.css  20   ct-dizainas.css 12   ct-mygtukai.css 5
+```
+
+`#0A0C12` keturis kartus `ct-dizainas.css` — tai `--text-on-light` reikšmė,
+apie kurią rašėt `A-11`. Ratas užsidaro: tokenas negyvas, o jo reikšmė
+įrašyta ranka.
+
+---
+
+### Ką iš to siūlau daryti — ir ko nesiūlau
+
+**Nesiūlau** pulti trinti 87 klasių ar 397 dublikatų. Dauguma jų nieko
+nelaužia šiandien.
+
+**Siūlau tris dalykus, iš kurių kiekvienas turi aiškią pabaigą:**
+
+1. **`30 sk.` sujungimas** — lygiai kaip 26. Vienintelis dalykas sąraše,
+   kuris jau yra aktyvi klaida, ne rizika.
+2. **Dešimt negyvų tokenų** — arba pritaikyti (`--text-on-light` turi penkias
+   ranka įrašytas kopijas), arba ištrinti. Jūsų pusė, ir jūs pats tai pradėjot.
+3. **`index.html` 396 `!important` + 257 inline** — tai mano darbas ir jis
+   didžiausias. Bet jis neturi būti vienas ėjimas: siūlau taisyti **tik tas
+   vietas, kurias liečia įdiegiamas paketas**, kaip darėm 27 ir 29.
+
+Ir viena pastaba apie jūsų „parašiau 87 klases, kurių niekas neužsakė":
+mano skriptas jų neatskiria nuo tų, kurios **laukia** (`dp-scale-*`,
+`dp-cell-*` — visa skelbimo puslapio 3 dalis, `D-03`). Tad 87 yra viršutinė
+riba, ne kaltinimas. Kai `D-03` bus padarytas, skaičius kris pats.
+
+---
+
+## Z-44 · 2026-09-20 · Klaudijus → Dizaineriui · Nr. 30 · AVATARAS · v1.93.0
+
+Lukas paliko komentarą prie Nr. 30, ne naują pranešimą — mechanizmas iš
+`Z-41` suveikė taip, kaip turėjo:
+
+> „Neteisingai padaryti mygtukai ne pagal dizaina. Turi buti kaip detais
+> puslapyje nidentiskai"
+
+Komentaras tikslus, ir jis nurodė etaloną. Nematavau iš karto — pirma
+palyginau abiejų puslapių `.ct3-header-right` vaikus:
+
+```
+index.html   ct3-avatar.ct-btn.ct-btn-sm.ct-btn-icon.ct-btn-round   32x32
+detail.html  ct3-avatar.ct-btn.ct-btn-icon.ct-btn-round             38x38
+```
+
+Skirtumas vienas žodis: `ct-btn-sm`. Nuimtas. Po to abu **38x38**.
+
+### Kur dar yra tas pats?
+
+`v1.66.0` nuėmė `ct-btn-sm` nuo avataro — bet ne visuose failuose. Tai
+tiksliai ta pati forma kaip `Nr. 39` piktogramos: **taisymas, kuris
+nepasiekė visų kopijų**. Todėl po taisymo patikrinau visus penkis puslapius
+— dabar avataro klasių eilutė identiška visur.
+
+### Ką tai reiškia dėl matavimo
+
+Šito nebūtų pagavęs nė vienas mano esamas matas: horizontalaus srauto
+nėra, JS klaidų nėra, `scrollWidth` lygus `clientWidth`. **32 px mygtukas
+yra visiškai tvarkingas mygtukas** — tiesiog ne tas. Vienintelis būdas tai
+pamatyti buvo palyginti du puslapius tarpusavyje, o tai padarė Lukas akimis.
+
+Tai jau antras kartas šiame cikle, kai matas praleidžia tai, ką mato akis
+(`.ct-tab` 44 px — irgi be srauto). Įsirašau į `CLAUDE.md`: **kai tas pats
+elementas yra keliuose puslapiuose, matas turi būti palyginimas, ne
+absoliutus skaičius.**
+
+### Klaidų būsenos atnaujintos
+
+```
+#39  tvarkoma   piktogramos — v1.92.0 laukia push
+#30  tvarkoma   avataras — v1.93.0, čia aprašyta
+#38  atidėta    K-24, jūsų sprendimas (griauna .ct-fld-act 12-tą langelį)
+#37  atidėta    K-25, #portal-selector niekada nebuvo dizaino sistemoje
+```
+
+Naujų pranešimų virš #39 nėra. Viso 39, atvirų 19.
+
+---
+
+## Z-45 · 2026-09-20 · Klaudijus → Dizaineriui · 32 ĮDIEGTAS · 30 sk. SUJUNGTAS · v1.94.0
+
+Įdiegta. `I-01` dublikatų nebėra, `I-04` negyvų tokenų **10 → 1** (liko
+`--focus-offset`, kurį pats pasilikot). Bet sujungimas atidengė daugiau, nei
+tikėjotės, ir dėl to šis įrašas ilgesnis už paketą.
+
+### 1. Jūsų patikros punktas Nr. 1 nepraėjo — ir gerai, kad nepraėjo
+
+Rašėt: *„šonas turi likti 484 px; jei pasikeitė, kažkas iš v3 buvo gyva, o aš
+to nepastebėjau."* Pamatavau abi būsenas to paties serverio dviem prievadais
+(`matavimai/pries-32/`):
+
+```
+1280x720, is-split     PRIES 484 px      PO 532 px      +48
+```
+
+Bet priežastis atvirkštinė nei spėjot. Ne „kažkas iš v3 buvo gyva" — **kažkas
+iš v3 buvo NEGYVA, ir sujungimas tai atgaivino.**
+
+v3 ir v4 abi turėjo `.ct3-field.is-wide { grid-column: 1 / -1 }`. Markupas nuo
+23 paketo yra `.ct-fld ... is-inline`. Tad taisyklė, kurios **visas argumentas
+buvo „du platūs vietoj keturių"**, niekada nė karto nesuveikė. Jūsų sujungtame
+bloke ji perrašyta į `.ct-fld.is-inline` — ir pirmą kartą pradėjo veikti.
+
+### 2. Ką tos dvi eilutės laikė paslėpę
+
+Štai kodėl 484 buvo „gražus" skaičius. Pamatavau visus vienuolika langelių
+prieš sujungimą:
+
+```
+MARKĖ    select #marke      0 x 40 px   elementFromPoint -> DIV.ct-fld-v
+MODELIS  select #modelis    0 x 40 px   elementFromPoint -> DIV.ct-fld-v
+```
+
+**Nulio pločio, ir centre gulintis taškas grąžina ne juos.** Tai ne „siauras" —
+tai nepaspaudžiamas. Dvi iš vienuolikos filtro eilučių šone neturėjo valdiklio
+apskritai. Po sujungimo: langelis 250 px, `#marke` **122 px**, `#modelis`
+**109 px**, abu pasiekiami.
+
+Tad 484 px buvo juostos, kurioje trūksta dviejų laukų, aukštis. 532 yra
+pilnos juostos aukštis, ir jis **telpa su 67 px atsarga** (riba 599) — geriau
+nei jūsų `v4` prognozuoti 585 su 14 px, nes `.ct-fld` kompaktiškesnis už
+`.ct3-field`.
+
+**Ir vėl tas pats instrumentas.** `sideScrollH` 484, `hSrautas` 0, JS klaidų 0
+— visos mano lemputės žalios, o du filtrai nematomi. Tai `A-33` `scrollWidth`
+ir `Z-42` „13 px reiškia elementas yra" trečias kartas. Įsirašiau:
+**nulinis matmuo yra matmuo; matuoti ne tik ar telpa, bet ir ar yra.**
+
+### 3. Dvi pataisos pačiam paketui
+
+Tokenų bloką įdiegiau kitaip, nei atsiuntėt, ir turiu tai pasakyti:
+
+**a) `.ct-medal` selektorius neteisingas.** Atsiuntėt
+`.ct-medal { background: var(--bg-raised); color: var(--text-on-light); }`,
+bet hex'as yra **741 eil. ant `.ct-medal > i`** — ženkliuko apskritimo, ne
+viso ženklelio. Taisyklė būtų nudažiusi išorinį elementą ir nepakeitusi to,
+kurį taiko.
+
+**b) `#2A3040` nėra `--bg-raised`.** `--bg-raised` yra `#1F2431`. Skirtingos
+spalvos. `#2A3040` visoje sistemoje naudojamas **vieną kartą** — tad tai ne
+kopija, o vienkartinė reikšmė; jei ji turi tapti tokenu, tai jūsų sprendimas
+ir naujas vardas. Palikau. Ranka įrašytų hex'ų `ct-dizainas.css`: **12 → 9**,
+ne 8.
+
+**c) Ir pats bloko įdiegimo būdas.** Keturios taisyklės failo gale būtų
+palikusios hex'ą savo vietoje ir pastačiusios šalia antrą to paties kopiją —
+lygiai tą formą, kurią ką tik uždarėm 30 sk. Pakeičiau **pačiose eilutėse**
+(741, 781, 864, 1607). Spalvos pamatuotos: `.ct-medal > i` ir `.ct-risk > i`
+po pakeitimo `rgb(10, 12, 18)` — nepakito, kaip ir norėjot patikrinti.
+
+### 4. Jūsų `index.html` 1572 punktas — ten buvo keturios, ne viena
+
+Nurodėt `.ct3-field, .ct3-select-wrap, .ct3-range-wrap { min-width: 0 }`.
+Žemiau, 1573–74, stovėjo `.ct3-field select, .ct3-field input { ... }` — ta
+pati mirusi šaknis, dar trys `!important`. Nuimtos visos keturios.
+`index.html`: **399 → 395**.
+
+Pamatuota ir tai, ko klausėt: nieko nepasikeitė. Pilnas bėgimas per penkis
+puslapius, 390 ir 1280: `hSrautas=0`, JS klaidų `0`, piktogramų trūksta `0`,
+avataras `38x38` / `44x44` visur.
+
+### 5. Trys tokenai, kurių neištryniau taip, kaip siūlėt
+
+Aštuonis ištryniau — sutinku su principu: *tokenas, nepanaudotas nė karto nuo
+parašymo, yra ne tokenas, o pasiūlymas*. `--dur-base` teko trinti dviejose
+vietose: jis buvo dar ir `prefers-reduced-motion` bloke, kur nustatinėjamas į
+`0s`. Tokena, kurio nėra, nustatyti į nulį — aštuntoji negyvybės forma, jei
+skaičiuotume.
+
+### 6. NAUJAS KLAUSIMAS `K-26` · šeši diapazono laukai šone apkirpti
+
+Radau tai, ko neieškojau, kai tikrinau markę ir modelį. 1280 px, `is-split`,
+įrašius realias reikšmes:
+
+```
+metaiNuo  „2018"   turi 14 px, reikia 44   apkirpta
+metaiIki  „2024"   turi 14 px, reikia 44   apkirpta
+kainaNuo  „15000"  turi 24 px, reikia 53   apkirpta
+kainaIki  „15000"  turi 24 px, reikia 53   apkirpta
+galiaNuo  „150"    turi 24 px, reikia 38   apkirpta
+galiaIki  „150"    turi 24 px, reikia 38   apkirpta
+```
+
+Naudotojas **negali perskaityti to, ką ką tik įrašė**. Tai buvo ir prieš 32
+paketą — sujungimas nieko nepablogino. Įtariu, kad būtent tai Lukas matė
+savo ekranvaizdyje („pirmas filtras blogai nesusidėjo gražiai").
+
+Priežastis ne 30 sk., o `.ct-fld-v` vidaus dalyba: 119 px langelyje telpa
+piktograma 13 + etiketė 33 + rodyklė 13 + ✕ 17 = 76 px, ir laukui lieka 14–24.
+Tai **34 sk.**, jūsų pusė. Trys keliai, kurių nė vieno nesirinkau už jus:
+etiketė virš lauko siaurame variante; ✕ tik ties `:hover`/`is-set`;
+`is-inline` ir diapazonams.
+
+### Ką grąžinu jums
+
+| Nr. | Klausimas |
+|---|---|
+| `K-26` | Šeši diapazono laukai šone apkirpti (aukščiau) — **34 sk.** |
+| `K-25` | `#portal-selector` niekada nebuvo dizaino sistemoje (Nr. 37) |
+| `K-24` | Nr. 38 — Lukas nori „Daugiau filtrų" prie „Ieškoti"; griauna `.ct-fld-act` |
+| `A-11` | `--focus-offset` — pasilikot sau kartu su `PT-02` |

@@ -1569,10 +1569,9 @@
     aspect-ratio: 16 / 10; max-height: 215px !important;
   }
   .ct3-fields { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-  /* 32 paketas: `.ct3-field`, `.ct3-select-wrap`, `.ct3-range-wrap` markupe
-     nebeegzistuoja nuo 23 paketo (laukas yra `.ct-fld`). Cia buvo KETURIOS
-     negyvos svarbumo (important) eilutes, ne viena - nurode 1572, bet 1573-74
-     yra ta pati klaida. `.ct3-fields` (tinklelis) lieka - jis gyvas. */
+  .ct3-field, .ct3-select-wrap, .ct3-range-wrap { min-width: 0 !important; }
+  .ct3-field select,
+  .ct3-field input { min-width: 0 !important; width: 100% !important; max-width: 100% !important; }
   .ct3-search-inner { padding: 0 12px !important; }
   .ct3-stats-inner { padding: 14px 12px !important; }
   .ct3-stats-inner { flex-wrap: wrap; }

@@ -28,7 +28,32 @@ def skaityti(sar):
             t += io.open(f, encoding='utf-8').read()
     return t
 
+def piktogramos():
+    """Ar kiekviena `use href="#i-..."` turi `<symbol id>` TAME PACIAME faile.
+
+    v1.92.0 (Nr. 39): sprite'as yra ct-ikonos.html, bet kiekvienas puslapis nesa
+    jo KOPIJA. Idejus piktograma tik i saltini, `use` nieko neranda ir piesia
+    tuscia deze - o matavimas rodo, kad elementas yra ir turi ploti.
+    """
+    blogai = 0
+    for f in MARKUPAS:
+        if not os.path.exists(f) or f == 'ct-ikonos.html':
+            continue
+        t = io.open(f, encoding='utf-8').read()
+        naudoja = set(re.findall(r'href="#(i-[\w-]+)"', t))
+        turi = set(re.findall(r'<symbol id="(i-[\w-]+)"', t))
+        truksta = sorted(naudoja - turi)
+        if truksta:
+            blogai += len(truksta)
+            print('\n  ' + f + ': ' + str(len(truksta)) + ' piktogramu naudojama, bet sprite nera')
+            for k in truksta:
+                print('      #' + k)
+    if not blogai:
+        print('\n  Piktogramos: visos naudojamos yra savo puslapio sprite.')
+    return blogai
+
 def main():
+    piktogramos()
     turinys = skaityti(MARKUPAS) + skaityti(JS) + skaityti(KITI)
     blogai = 0
     for failas in CSS:

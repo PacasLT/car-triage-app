@@ -50,6 +50,7 @@
   --bg-surface:     #11141C;
   --bg-elevated:    #171B25;
   --bg-raised:      #1F2431;
+  --bg-card:        var(--bg-surface);   /* suderinamumui su detail.html */
   --bg-sunken:      #070910;             /* log'ai, kodo blokai, įdubos */
   --bg-scrim:       rgba(5, 6, 10, .72); /* modalų fonas */
   /* BŪTINI aliasai. detail.html JS naudoja var(--card) 18 vietose ir var(--bg) —
@@ -72,28 +73,19 @@
      Pašviesinta iki 4,7:1 ant --bg-elevated ir 5,2:1 ant --bg-base, tad tinka ir
      11 px tekstui. Vis tiek matomai blankesnė už --text-muted (5,9:1). */
   --text-dim:       #7E8699;
-  --text-on-light:  #0A0C12;
-
-  /* 32 paketas · IŠTRINTI AŠTUONI NEGYVI TOKENAI (I-04). Tokenas, nepanaudotas
-     nė karto nuo parašymo, yra ne tokenas, o pasiūlymas — jis atrodo kaip
-     sprendimas, bet nieko nesprendžia, ir kitas skaitytojas negali atskirti,
-     ar jo nenaudoja dėl aplaidumo, ar dėl to, kad taip nuspręsta.
-       --accent-hover, --accent-strong-hover  mygtukai naudoja filter: brightness
-       --bg-card                              --bg-surface užima jo vietą
-       --dur-base                             perėjimai rašo .14s tiesiogiai
-       --fs-700                               nėra nė vieno tokio dydžio teksto
-       --shadow-1, --shadow-panel             sistemoje sąmoningai nėra šešėlių
-       --text-on-accent                       keturios vietos rašo #fff aiškiau
-     LIEKA --focus-offset: dizaineris jį pritaikys kartu su PT-02. */   /* tekstas ant šviesaus žalio/geltono užpildo */
+  --text-on-accent: #FFFFFF;
+  --text-on-light:  #0A0C12;   /* tekstas ant šviesaus žalio/geltono užpildo */
 
   /* ── 3. SEMANTINĖS SPALVOS · turi prasmę, dekoracijai NENAUDOJAMOS ────────
      žalia = patvirtinta / gerai        geltona = galimas signalas / dėmesio
      raudona = rimta rizika             pilka  = neįvertinta
      violetinė = veiksmas ir „mūsų" AI */
   --accent:         #7C5CFF;
+  --accent-hover:   #8B6FFF;
   /* Tekstą nešančiam užpildui: #fff ant --accent duoda 4,35:1 — nepraeina AA.
      --accent-strong duoda 4,66:1, hover 5,6:1. Mygtukams su tekstu VISADA šie. */
   --accent-strong:  #7856F7;
+  --accent-strong-hover: #6A45EE;
   --accent-light:   #A78BFA;
   --accent-dim:     rgba(124, 92, 255, .14);
   --accent-border:  rgba(124, 92, 255, .30);
@@ -139,6 +131,7 @@
   --fs-400: 16px;    /* kortelės pavadinimas, sekcijos antraštė */
   --fs-500: 20px;    /* puslapio poskyris */
   --fs-600: 26px;    /* kaina kortelėje, puslapio H1 */
+  --fs-700: 34px;    /* balas 0–10, didysis skaičius */
 
   --lh-tight: 1.2;
   --lh-snug:  1.4;
@@ -169,9 +162,11 @@
   --radius-pill: 999px;
 
   /* ── 8. ŠEŠĖLIAI · tik pakylėjimui, ne dekoracijai ────────────────────────*/
+  --shadow-1:    0 1px 2px rgba(0, 0, 0, .35);
   --shadow-2:    0 4px 16px rgba(0, 0, 0, .40);
   --shadow-3:    0 16px 48px rgba(0, 0, 0, .55);
   --shadow-card: var(--shadow-2);   /* suderinamumui su index.html */
+  --shadow-panel: 0 18px 40px -24px rgba(0, 0, 0, .8);   /* iškrentantys meniu, modalai */
   --shadow-glow:  0 8px 22px -12px rgba(124, 92, 255, .9); /* TIK pirminis CTA */
 
   /* ── 9. FOKUSAS · matomas visur, hover niekada nėra vienintelis būdas ─────*/
@@ -186,6 +181,7 @@
 
   /* ── 11. JUDĖJIMAS ────────────────────────────────────────────────────────*/
   --dur-fast: .12s;
+  --dur-base: .2s;
   --dur-slow: .35s;
   --ease:     cubic-bezier(.32, .72, 0, 1);
 }
@@ -197,7 +193,7 @@
 @media (max-width: 400px) { :root { --header-h: 65px; } }
 
 @media (prefers-reduced-motion: reduce) {
-  :root { --dur-fast: 0s; --dur-slow: 0s; }
+  :root { --dur-fast: 0s; --dur-base: 0s; --dur-slow: 0s; }
   *, *::before, *::after { animation-duration: .001s !important; transition-duration: .001s !important; }
 }
 
@@ -742,7 +738,7 @@ img, svg, video, canvas { max-width: 100%; }
 .ct-medal > i {
   flex: none; width: 21px; height: 21px; border-radius: 50%;
   display: grid; place-items: center;
-  background: #2A3040; color: var(--text-on-light);
+  background: #2A3040; color: #0A0C12;
   box-shadow: inset 0 -2px 3px rgba(0, 0, 0, .28);
   font: var(--fw-bold) 11px/1 var(--font-mono); font-style: normal;
 }
@@ -782,7 +778,7 @@ img, svg, video, canvas { max-width: 100%; }
 
 /* Rizikos blokas: pastebimas, bet kortele lieka skaitoma */
 .ct-risk { display: flex; gap: 11px; align-items: flex-start; padding: 11px 14px; border-left: 3px solid var(--danger); border-radius: 0 var(--radius-md) var(--radius-md) 0; background: var(--danger-dim); }
-.ct-risk > i { flex: none; width: 21px; height: 21px; margin-top: 1px; border-radius: 50%; display: grid; place-items: center; background: var(--danger); color: var(--text-on-light); font: var(--fw-bold) 13px/1 var(--font-mono); font-style: normal; }
+.ct-risk > i { flex: none; width: 21px; height: 21px; margin-top: 1px; border-radius: 50%; display: grid; place-items: center; background: var(--danger); color: #0A0C12; font: var(--fw-bold) 13px/1 var(--font-mono); font-style: normal; }
 .ct-risk-t { font: var(--fw-bold) var(--fs-200)/1.3 var(--font); letter-spacing: .05em; color: var(--danger); }
 .ct-risk-d { font-size: var(--fs-200); line-height: var(--lh-snug); color: var(--text-secondary); }
 .card.ct-card.has-risk { border-color: var(--danger-border); }
@@ -865,7 +861,7 @@ img, svg, video, canvas { max-width: 100%; }
   background: transparent; color: var(--text-secondary);
   font: var(--fw-medium) var(--fs-200)/1 var(--font); cursor: pointer;
 }
-.ct-flag > i { flex: none; width: 13px; height: 13px; border-radius: 4px; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.28); color: var(--text-on-light); font: var(--fw-bold) 10px/13px var(--font-mono); font-style: normal; text-align: center; }
+.ct-flag > i { flex: none; width: 13px; height: 13px; border-radius: 4px; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.28); color: #0A0C12; font: var(--fw-bold) 10px/13px var(--font-mono); font-style: normal; text-align: center; }
 .ct-flag.is-on { border-color: var(--accent-border); background: var(--accent-dim); color: var(--text-primary); }
 .ct-flag.is-on > i { background: var(--accent); box-shadow: none; }
 @media (max-width: 640px) { .ct-flag { min-height: var(--tap-min); } }
@@ -1608,7 +1604,7 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
   box-shadow: inset 0 0 0 1.5px var(--border-light);
   color: transparent; font: var(--fw-bold) 11px/1 var(--font-mono); font-style: normal;
 }
-.ct-check > input:checked + i { background: var(--accent); box-shadow: none; color: var(--text-on-light); }
+.ct-check > input:checked + i { background: var(--accent); box-shadow: none; color: #0A0C12; }
 .ct-check > input:focus-visible + i { box-shadow: 0 0 0 3px var(--accent-dim); }
 /* Etikete prie langelio yra TEKSTAS, ne mono etikete — ja reikia perskaityti,
    ne nuskenuoti. Mono didziosiomis prie pazymejimo atrodo kaip antrastė. */
@@ -1981,48 +1977,45 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
 
 
 /* ============================================================================
-   30. FILTRAI SONE
+   30. FILTRAI SONE · visa panele, ne tik laukai   (trecia redakcija)
    ----------------------------------------------------------------------------
-   Vienas principas: siauras variantas nera „tas pats, tik suspaustas". Tai tas
-   pats turinys kitame skaitymo bude.
+   Vienas principas nepakito: siauras variantas nera „tas pats, tik suspaustas".
+   Tai tas pats turinys kitame skaitymo bude.
 
-   Panele turi keturias dalis, ir tik viena is ju yra laukai. Kitos trys buvo
-   suprojektuotos per visa ekrana ir 276 px stulpelyje neturi ka veikti:
+   Kas pakito — apimtis. Panele turi keturias dalis, ir tik viena is ju yra
+   laukai. Kitos trys buvo suprojektuotos per visa ekrana ir 276 px stulpelyje
+   neturi ka veikti:
 
-     .ct3-search-inner      padding 0 48px  - is 276 px lieka 178
-     .ct3-search-bottom-*   188 px teve 154 - kyso 34
-     .ct3-more-panel        eile              - sone stulpelis
+     .ct3-search-inner      padding 0 48px  — is 276 px lieka 178
+     .ct3-search-tabs       nowrap, 340 px  — kyso 125
+     .ct3-portals-row       nesilauzo       — kyso 386
+     .ct3-search-bottom-*   188 px tėve 154 — kyso 34
 
-   PRIRISTA prie: min-width 1180px - to paties slenkscio, kuriame 25 sk.
+   Du is ju sprendziami CSS (uzpildas, laužymas). Du — MARKUPU, nes tai ne
+   dydzio, o vietos klausimas: skirtukai ir portalai sone neturi buti visai.
+   Zr. PASTABOS.md 2.
+
+   PRIRISTA prie: min-width 1180px — to paties slenkscio, kuriame 25 sk.
    sukuria sona.
 
-   ── KAS ISNYKO SUJUNGIANT, IR KODEL ────────────────────────────────────────
-   Abi redakcijos turėjo `.ct3-field`, `.ct3-select-wrap`, `.ct3-range-wrap`
-   taisykles - is viso apie penkiolika. Visos jos NEGYVOS nuo 23 paketo:
-   markupas perejo prie `.ct-fld`, ir 34 / 34b skyriai dabar aprašo lauka
-   patys.
-
-   Tad sujungimas ne tik panaikina dublikata - jis panaikina ir ta dali, del
-   kurios dublikatas atrodė reikalingas. Ketvirtoji redakcija buvo parasyta
-   BUTENT del tu lauku (du platus vietoj keturiu), o tos eilutes siandien
-   nieko nevaldo.
-
-   Lieka viena tikra ketvirtosios redakcijos reiksme: `gap: 6px`, ne
-   `var(--s-2)`. Ji ir perkelta zemiau.
-
-   NEPERIMA: .ct3-search-panel fono, remelio, radiuso. NEPERIMA lauko vidaus
-   (34 ir 34b sk.). NEPERIMA .ct3-search-inner uzpildo PLACIAME variante. */
+   NEPERIMA: .ct3-search-panel fono, remelio, radiuso — jie teisingi abiejose
+   vietose. NEPERIMA lauku vidaus (select, input, ju aukscio). NEPERIMA
+   „Daugiau filtru" mygtuko logikos. NEPERIMA .ct3-search-inner uzpildо
+   PLACIAME variante — 0 48px ten teisinga reiksme ir lieka jusu faile. */
 
 @media (min-width: 1180px) {
 
-  /* Panele: uzpildas pagal stulpeli, ne pagal ekrana */
+  /* ── Panele: uzpildas pagal stulpeli, ne pagal ekrana ────────────────────
+     48 px per visa ekrana yra teisinga. 276 px stulpelyje tai 23 % plocio ir
+     laukai lieka po 71 px. Sone uzpildas ateina is tokenų. */
   .ct-shell.is-split > .ct-shell-side .ct3-search-inner {
     max-width: none;
     padding: 0;
   }
 
-  /* Viskas, kas lanksti, turi leisti sau susitraukti.
-     Be min-width: 0 flex vaikas nesitraukia zemiau savo turinio. */
+  /* ── Viskas, kas lanksti, turi leisti sau susitraukti ────────────────────
+     Be min-width: 0 flex vaikas nesitraukia zemiau savo turinio — ta pati
+     savybe, del kurios <select> ispute grida v2 matavime. */
   .ct-shell.is-split > .ct-shell-side .ct3-search-panel,
   .ct-shell.is-split > .ct-shell-side .ct3-search-inner,
   .ct-shell.is-split > .ct-shell-side .ct3-search-bottom,
@@ -2040,70 +2033,56 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
     flex: 1 1 100%;
     justify-content: flex-start;
   }
-  /* K-10: flex-wrap NEPERSIDUODA vaikams - ji reikia kiekvienam lygiui */
+
+  /* 15 paketas (K-10): kaires VIDUS irgi turi lauztis. v3 dave flex-wrap
+     paciai .ct3-search-bottom, tad kaire ir desine krenta i atskiras eiles,
+     bet kaireje liko du mygtukai vienoje eiluteje (283 px prie 252 px).
+     flex-wrap NEPERSIDUODA vaikams - ji reikia kiekvienam lygiui. */
   .ct-shell.is-split > .ct-shell-side .ct3-search-bottom-left { flex-wrap: wrap; }
 
-  /* Lauku tinklelis. Tik tinklelis - patys laukai yra 34 sk.
-     gap 6px (ne --s-2): 12 langeliu sone reikia tankesnio zingsnio. */
+  /* ── Laukai: du tankio zingsniai (nepakito nuo v2) ───────────────────────
+     Zingsnis 1 — kortele nuo lauko. Zingsnis 2 — semantiniai broliai poromis. */
   .ct-shell.is-split > .ct-shell-side .ct3-fields {
     grid-template-columns: 1fr 1fr;
-    gap: 6px var(--s-3);
+    gap: var(--s-2) var(--s-3);
     padding: var(--s-3);
   }
-  /* Platus langelis per abu stulpelius - TIK MARKE ir MODELIS.
-     Ju pasirinkimo tekstas ilgiausias, ir jie keiciami dazniausiai. */
-  .ct-shell.is-split > .ct-shell-side .ct-fld.is-inline { grid-column: 1 / -1; }
+  .ct-shell.is-split > .ct-shell-side .ct3-field {
+    gap: 5px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    min-width: 0;
+  }
+  .ct-shell.is-split > .ct-shell-side .ct3-field.is-wide { grid-column: 1 / -1; }
 
-  /* „Daugiau filtru" skydas */
+  .ct-shell.is-split > .ct-shell-side .ct3-select-wrap { padding-right: 20px; }
+  .ct-shell.is-split > .ct-shell-side .ct3-select-wrap select,
+  .ct-shell.is-split > .ct-shell-side .ct3-range-wrap input { font-size: 13.5px; }
+  .ct-shell.is-split > .ct-shell-side .ct3-range-wrap { display: flex; align-items: center; gap: 6px; }
+  .ct-shell.is-split > .ct-shell-side .ct3-range-wrap > input { flex: 1 1 0; min-width: 0; max-width: none; }
+
+  /* ── „Daugiau filtru" skydas ─────────────────────────────────────────────
+     .ct3-more-panel yra jusu klase (8 blokas) — cia tik jos uzpildas sone. */
   .ct-shell.is-split > .ct-shell-side .ct3-more-panel { padding: var(--s-3); }
   .ct-shell.is-split > .ct-shell-side .ct3-more-row { flex-direction: column; gap: var(--s-3); align-items: stretch; }
   .ct-shell.is-split > .ct-shell-side .ct3-more-row > div { width: 100%; }
 
+  /* v1.77.0: .ct3-portals-row istrinta (Nr. 25) - ji buvo dekoracija be nė
+     vieno valdiklio, ne filtras. Taisykle palikta be elemento nieko nedaro,
+     tad isimta. Zr. Z-21. */
+
   .ct-shell.is-split > .ct-shell-side .ct3-search-btn { width: 100%; justify-content: center; }
 
-  /* Portalu skydas - K-12 / K-18. Prisegamas prie to krasto, kur yra vietos;
-     ribos nera, nes 100% cia skaiciuojamas nuo .ct3-portal-wrap (~199 px),
-     ne nuo sono, ir duotu 187 px vietoj 240. */
-  .ct-shell.is-split > .ct-shell-side #portal-selector {
-    left: 0;
-    right: auto;
-    width: 240px;
-    max-width: none;
-  }
+  /* 16 paketas (K-12): portalu skydas prisegamas prie to krasto, kur yra
+     vietos. `right: 0` buvo teisinga placioje juostoje, kur mygtukas stovi
+     desineje; 276 px stulpelyje mygtukas prie kairio krasto, tad 264 px skydas
+     nueina i -32 px. Absoliutus elementas SLENKANCIO konteinerio viduje,
+     pastumtas i kaire nuo kilmes, yra NEPASIEKIAMAS, ne tik nematomas -
+     `overflow: auto` neduoda slinkimo i negatyvia puse. */
+  /* 18 paketas perima si bloka - zr. 30 sk. papildyma failo gale. */
 }
 
-
-/* ============================================================================
-   TOKENU UZDARYMAS · A-11 skola
-   ----------------------------------------------------------------------------
-   `I-04` radot desimt negyvu tokenu, ir du is ju - `--text-on-light` bei
-   `--focus-offset` - as pats pasiuliau `A-11` ir pasakiau „pritaikyti".
-   Nepritaikiau. Tai ne naujas radinys, o mano neuzdarytas.
-
-   Blogiausia dalis: `--text-on-light` reiksme (#0A0C12) tuo tarpu irasyta
-   RANKA keturiose vietose. Tad tokenas negyvas, o jo darba dirba keturios
-   kopijos - lygiai ta pati forma, del kurios visa tai ir rasom.
-
-   ĮDIEGTA KITAIP, NEI ATSIUSTA - zr. Z-45. Paketas siule keturias taisykles
-   CIA, failo gale. Bet tada hex'as butu likes savo vietoje, o salia atsirastu
-   antra to paties kopija - lygiai ta pati forma, kuria ka tik uzdarem 30 sk.
-   Todel pakeista PACIOSE eilutese:
-
-       781 eil.  .ct-risk > i                     color: var(--text-on-light)
-       864 eil.  .ct-flag > i                     color: var(--text-on-light)
-      1607 eil.  .ct-check > input:checked + i    color: var(--text-on-light)
-       741 eil.  .ct-medal > i                    color: var(--text-on-light)
-
-   DVI PATAISOS PAKETUI:
-   -- Selektorius buvo `.ct-medal`, o hex'as yra ant `.ct-medal > i`. Isorinis
-      elementas nera zenkliukas; taisykle butu nudazius ne ta dalyka ir
-      nepakeitus tos, kuria taiko.
-   -- `background: #2A3040` NEPAKEISTA. `--bg-raised` yra `#1F2431` - tai
-      kita spalva, ne tas pats tokenas kitu vardu. #2A3040 visoje sistemoje
-      naudojamas VIENA karta, tad tai ne kopija, o vienkartine reiksme; jei ji
-      turi tapti tokenu, tai jusu sprendimas ir naujas vardas.
-
-   Ranka irasytu hex'u `ct-dizainas.css`: 12 -> 9 (ne 8: #2A3040 liko).        */
 
 /* ============================================================================
    31. FORMOS LAUKAS · .ct-field   (Z-15)
@@ -2332,6 +2311,51 @@ textarea.ct-field {
 
 @media (max-width: 640px) {
   .ct3-search-panel { margin-top: 0; }
+}
+
+
+/* ============================================================================
+   30. FILTRAI SONE · 12 langeliu   (ketvirta redakcija)
+   ----------------------------------------------------------------------------
+   Pakeitimas nuo v3: TIK DU platus langeliai, ne keturi.
+
+   Priezastis pamatuota. 12 langeliu sone:
+     4 platus (v3 sarasas)  ->  8 eiles  ->  laukai 539, panele 701  NETELPA
+     2 platus (MARKE, MODELIS) -> 7 eiles -> laukai 423, panele 585  TELPA
+
+   Riba ties 1280x720 yra 599, tad 585 telpa su 14 px. Tai plona, ir sakau
+   atvirai: jei panelėje kas nors dar pridės eilute, 30 sk. teks matuoti is
+   naujo. Alternatyva — leisti sonui slinkti (701 px) — irgi veikia, tik
+   prarandamas argumentas, del kurio 25 sk. ir buvo daromas.
+
+   VARANTIEJI RATAI ir GALIA tampa siauri. GALIA telpa, VARANTIEJI — NE:
+   „Visi varantys (4x4)" reikia 112 px, o vietos 99. Reikia trumpesnio uzraso,
+   zr. PASTABOS.md 3. CSS to neispres.
+
+   PRIRISTA prie: .ct-shell.is-split — sonas egzistuoja tik po paieskos. */
+
+@media (min-width: 1180px) {
+  .ct-shell.is-split > .ct-shell-side .ct3-fields {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px var(--s-3);
+    padding: var(--s-3);
+  }
+  .ct-shell.is-split > .ct-shell-side .ct3-field {
+    gap: 5px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    min-width: 0;
+  }
+  /* TIK du platus — MARKE ir MODELIS. Ju pasirinkimo tekstas ilgiausias
+     („Mercedes-Benz", „Visi modeliai"), ir jie keiciami dazniausiai. */
+  .ct-shell.is-split > .ct-shell-side .ct3-field.is-wide { grid-column: 1 / -1; }
+
+  .ct-shell.is-split > .ct-shell-side .ct3-select-wrap { padding-right: 20px; }
+  .ct-shell.is-split > .ct-shell-side .ct3-select-wrap select,
+  .ct-shell.is-split > .ct-shell-side .ct3-range-wrap input { font-size: 13.5px; }
+  .ct-shell.is-split > .ct-shell-side .ct3-range-wrap { display: flex; align-items: center; gap: 6px; }
+  .ct-shell.is-split > .ct-shell-side .ct3-range-wrap > input { flex: 1 1 0; min-width: 0; max-width: none; }
 }
 
 
