@@ -487,9 +487,19 @@ app.get('/admin/pavyzdys', klaiduPrieiga, async (req, res) => {
   try {
     const portalas = String(req.query.portalas || '');
     const marke = String(req.query.marke || 'BMW').slice(0, 40);
-    const url = portalas === 'autoplius' ? buildAutopliusUrl({ marke })
+    const bazinis = portalas === 'autoplius' ? buildAutopliusUrl({ marke })
       : portalas === 'autogidas' ? buildAutogidasUrl({ marke }) : null;
-    if (!url) return res.status(400).json({ error: 'portalas: autoplius | autogidas' });
+    if (!bazinis) return res.status(400).json({ error: 'portalas: autoplius | autogidas' });
+
+    // Puslapio numeris. PIRMAS puslapis yra šališkas: „naujausi viršuje"
+    // rikiavime jį užima vieno prekiautojo ką tik įkelta partija (pamatuota
+    // 2026-09-21 - autogido 1-as puslapis: 20/20 verslas, numeriai iš eilės).
+    // Užpildymas ir požymiai turi būti matuojami išsibarsčiusiuose puslapiuose.
+    // Parametras ta pati, kaip `fetchAllPages`: autoplius - page_nr, kiti - page.
+    const puslapis = Math.min(Math.max(parseInt(req.query.puslapis, 10) || 1, 1), 200);
+    const pParam = portalas === 'autogidas' ? 'page' : 'page_nr';
+    const url = puslapis === 1 ? bazinis
+      : bazinis + (bazinis.includes('?') ? '&' : '?') + pParam + '=' + puslapis;
 
     const pries = Object.assign({}, ATSARGA.paieska);
     const { listings, format } = await fetchAllPages(url, 1);
@@ -516,9 +526,13 @@ app.get('/admin/pavyzdys', klaiduPrieiga, async (req, res) => {
       };
     });
 
+    const metai = listings.map((l) => l.metai).filter(Boolean);
+    const kainos = listings.map((l) => l.kaina).filter(Boolean);
     res.json({
-      portalas, marke, url, format,
+      portalas, marke, puslapis, url, format,
       skelbimu: listings.length,
+      metaiNuoIki: metai.length ? [Math.min(...metai), Math.max(...metai)] : null,
+      kainaNuoIki: kainos.length ? [Math.min(...kainos), Math.max(...kainos)] : null,
       kreditu: isTalpyklos && !kreditu ? 0 : kreditu,
       saltinis: isTalpyklos ? 'talpykla' : 'scraperapi',
       laukai,
