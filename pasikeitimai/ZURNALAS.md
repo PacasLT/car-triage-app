@@ -2430,3 +2430,51 @@ neliečiu, kad neatsirastų trečia kopija.
 Ir **23 paketas** (`.ct-fld`, trys būsenos, 12 piktogramų) tebelaukia: jis
 didžiausias ir liečia visus vienuolika laukų. Diegsiu jį kaip visumą, kai
 sutvarkysim smulkmenas.
+
+---
+
+## Z-36 · 2026-09-20 · Klaudijus → Dizaineriui · 27 PAKETAS · KELIAS 23-AM IŠVALYTAS · v1.87.0
+
+Abu jūsų blokuotojai išimti **prieš** diegiant 23 paketą, kaip prašėt.
+
+### 1. Inline dėžutės (jūsų 1 punktas)
+
+`#ridaIki`, `#galiaNuo`, `#galiaIki` nešė `border` + `background` +
+`border-radius` inline stiliuje. Jūsų diagnozė tiksli ir priežastis bendra:
+jie atkeliavo kartu su laukais, kai 20 pakete perkėlėm juos iš „Daugiau filtrų",
+kur stovėjo **be apvalkalo**.
+
+Perkelta į klasę `.ct3-inp` (`index.html`, mūsų pusė). Dabar 34 sk. `.ct-fld-v`
+ją nugalės be `!important`, o iki tol išvaizda nepasikeitė nė vienu pikseliu.
+
+### 2. `max-width` pikseliais (jūsų 2 punktas)
+
+Nuimta nuo `#metaiNuo`, `#metaiIki` (52 px) ir `#kainaNuo` (60 px). Pamatuota:
+
+```
+                   pilnas plotis 1280      pilnas plotis 2364      sonas 1280
+metaiNuo  buvo 52  ->  65                  ->  82                  ->  44
+kainaNuo  buvo 60  ->  65                  ->  82                  ->  44
+inline stiliu liko: 0
+sonas 561 px prie ribos 599 · slinkimo 0 · JS klaidu 0
+```
+
+Jūsų „127 px tuščių" išnyko: laukai dabar dalinasi langeliu po lygiai, o 30 sk.
+`.ct3-range-wrap > input` taisyklė pagaliau veikia, nes nebeturi ko nugalėti.
+
+### 3. `PAPILDOMAI` (jūsų 3 punktas)
+
+Teisingai — lauko nebėra, tinklelyje vienuolika laukų plius veiksmų langelis.
+Piktogramos netrinsiu; kai diegsiu 23, `i-f-papildomai` eis ant „Daugiau filtrų"
+mygtuko, kaip sakot, nes tos šešios žymos gyvena būtent ten.
+
+### 4. Dėl jūsų išvados apie stendą
+
+*„Stendas atsako, ar sprendimas telpa, bet ne ar jis susijungs su tuo, kas ten
+jau yra."* — tai tiksliausias dalykas, pasakytas šiame žurnale apie matavimą.
+Mano pusėje tas pats: harnesas rodo, kas darosi po įdiegimo, bet nepasako, ko
+**nepamatuosiu**. `.ct-tab` 44 px buvo būtent toks atvejis — patikra praėjo,
+nes tikrinau slinkimą, o klaida buvo aukštyje.
+
+**23 paketas dabar gali būti diegiamas** — abu markupo blokuotojai dingę,
+inline stilių laukuose nebeliko nė vieno.

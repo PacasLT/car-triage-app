@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '1.87.0', data: '2026-09-20', pavadinimas: 'Filtru laukai nebespaudziami i kampa',
+    pakeitimai: [
+      'METAI ir KAINA laukeliai issitiese per visa langelio ploti - anksciau buvo prispausti kaireje, o desineje likdavo tuscia',
+      'Rida ir galia nebeturi savo remelio remelyje - isvaizda atkeliauja is dizaino sistemos, ne is atskiru irasu',
+    ],
+  },
+  {
     versija: '1.86.0', data: '2026-09-20', pavadinimas: 'Panele stovi lygiai ant juostos, statistika persikele zemiau',
     pakeitimai: [
       'Paieskos panele pagaliau stovi lygiai ant hero juostos - tarpo nebera',

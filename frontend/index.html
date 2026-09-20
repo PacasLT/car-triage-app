@@ -877,6 +877,23 @@
   gap: 8px; padding: 12px;
   border-bottom: 1px solid rgba(255,255,255,.06);
 }
+/* v1.87.0 (27 paketas, 1-2 p.): `#ridaIki`, `#galiaNuo`, `#galiaIki` nese savo
+   remeli, fona ir radiusa INLINE stiliuje - jie atkeliavo kartu su laukais, kai
+   20 pakete perkelem juos is „Daugiau filtru", kur jie stovejo be apvalkalo.
+   Su 34 sk. `.ct-fld-v` butu gavesi dezute dezuteje, o inline stiliaus joks
+   selektorius nenugali. Tas pats su `max-width: 52px` ir `60px` ties METAI ir
+   KAINA: 30 sk. jau turi teisinga taisykle, tik inline ja nugalejo.
+   Dabar tai klase, kuria dizainerio failas gali perimti arba pakeisti. */
+.ct3-inp {
+  width: 100%; min-width: 0;
+  padding: 10px 12px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font: 500 13px/1 var(--font);
+}
+
 .ct3-field {
   display: flex; flex-direction: column; gap: 7px;
   padding: 10px 14px;
@@ -2500,16 +2517,16 @@
         <div class="ct3-field">
           <label>METAI</label>
           <div class="ct3-range-wrap">
-            <input id="metaiNuo" type="number" placeholder="2018" min="1990" max="2025" style="max-width:52px">
+            <input id="metaiNuo" type="number" placeholder="2018" min="1990" max="2025">
             <span>–</span>
-            <input id="metaiIki" type="number" placeholder="2024" min="1990" max="2025" style="max-width:52px">
+            <input id="metaiIki" type="number" placeholder="2024" min="1990" max="2025">
             <svg class="ct3-range-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
           </div>
         </div>
         <div class="ct3-field">
           <label>KAINA</label>
           <div class="ct3-range-wrap">
-            <input id="kainaNuo" type="number" placeholder="€ Min" style="max-width:60px">
+            <input id="kainaNuo" type="number" placeholder="€ Min">
             <span>–</span>
             <input id="kainaIki" type="number" placeholder="Max">
           </div>
@@ -2517,7 +2534,7 @@
         <div class="ct3-field">
           <label>RIDA IKI (KM)</label>
           <input id="ridaIki" type="number" min="0" step="10000" placeholder="pvz. 200000" oninput="ctUpdateMoreBadge()"
-                 style="width:100%; min-width:0; padding:10px 12px; background:var(--bg-base); border:1px solid var(--border-light); border-radius:8px; color:var(--text-primary); font:500 13px/1 var(--font);">
+                 class="ct3-inp">
         </div>
 
         <div class="ct3-field">
@@ -2562,10 +2579,10 @@
           <label>GALIA (KW)</label>
           <div style="display:flex; gap:6px; align-items:center;">
             <input id="galiaNuo" type="number" min="0" step="10" placeholder="nuo"
-                   style="width:100%; min-width:0; padding:10px 12px; background:var(--bg-base); border:1px solid var(--border-light); border-radius:8px; color:var(--text-primary); font:500 13px/1 var(--font);">
+                   class="ct3-inp">
             <span style="color:var(--text-dim)">–</span>
             <input id="galiaIki" type="number" min="0" step="10" placeholder="iki"
-                   style="width:100%; min-width:0; padding:10px 12px; background:var(--bg-base); border:1px solid var(--border-light); border-radius:8px; color:var(--text-primary); font:500 13px/1 var(--font);">
+                   class="ct3-inp">
           </div>
         </div>
 
