@@ -172,3 +172,95 @@ Nauji failo lygio: `versija: 2`, `duomenu_pabaiga`, `langas_12men`, `menesiu_asi
 6. `regitra.test.js` fiktūros atsinaujina (skaičiai pasikeitė dėl 12 mėn. lango pataisymo) — **tai laukiamas kritimas, ne regresija**.
 
 Normalizavimas nekeistas, tad `modelis_dalys()` ↔ `baziniModelis()` pora lieka sutampanti.
+
+---
+
+# A-29 · Nurašymų riba: 40, bet klausimas ne tas
+
+`neleid15_pct` pasiskirstymas (393 modeliai, `senu_n ≥ 30`, parkas ≥ 300):
+
+| P10 | P25 | P50 | P75 | P80 | P90 |
+|---|---|---|---|---|---|
+| 5,9 % | 13,1 % | 27,9 % | **45,5 %** | 50,8 % | 66,1 % |
+
+| Riba | Suveiktų modelių |
+|---|---|
+| 30 % | 184 (46,8 %) |
+| **40 %** | **124 (31,6 %)** |
+| 50 % | 81 (20,6 %) |
+| 60 % | 51 (13,0 %) |
+
+**Trumpas atsakymas: 40.** Bet svarbesnis dalykas yra tai, kad riba viena pati klausimo neišsprendžia.
+
+Štai kas suveiktų **tik** nuleidus iki 40:
+
+| Modelis | Parkas | 15+ m. dalis | `neleid15_pct` |
+|---|---|---|---|
+| Ford Focus | 17 729 | 73,3 % | 42,6 % |
+| VW Sharan | 14 742 | 89,6 % | 41,7 % |
+| Ford Galaxy | 12 950 | 93,1 % | 41,5 % |
+| Opel Zafira-A | 7 411 | 99,9 % | 46,2 % |
+| Peugeot 307 | 6 852 | 99,5 % | 41,8 % |
+| Mazda 6 | 4 729 | 69,7 % | 46,2 % |
+| BMW 525 | 4 118 | 93,4 % | 48,7 % |
+| Renault Clio | 3 569 | 56,9 % | 47,0 % |
+| BMW 530 | 3 403 | 92,6 % | 43,5 % |
+
+Nė vienas nėra triukšmas: kas antras jų 15+ metų egzempliorius realiai nebevažiuoja. Žmogui, žiūrinčiam 2008 m. Ford Focus, tai tikra informacija.
+
+**Bet 31,6 % modelių reiškia, kad ženklelį gautų maždaug kas trečias skelbimas** – o įspėjimas, kuris rodomas trečdaliui, nustoja būti įspėjimu. Tai ta pati logika, dėl kurios administravime atsisakyta raudono fono skuboms.
+
+**Todėl riba turi eiti kartu su antra sąlyga: punktas rodomas tik kai PATS skelbimo automobilis yra senas** (siūlau ≥ 12 metų). Kitaip 2021 m. Škodai rodytume, kaip laikosi 15+ metų Škodos – atsakymą į klausimą, kurio niekas neuždavė.
+
+Su ta sąlyga 40 nėra triukšmingas, nes auditorija jau susiaurinta iki tų, kam tai aktualu. Be jos net 50 būtų triukšmas jauniems automobiliams.
+
+Jei norima ribą rišti prie imties, kaip padaryta su likvidumu, tikslus P75 yra **45,5 %** – tada visos trys produkto ribos būtų kvartilinės ir savaime paaiškinamos. Man 40 + amžiaus vartai atrodo geriau, nes riba apvalesnė, o atranką daro vartai.
+
+---
+
+# A-30 · `rida_kv` konkrečiam skelbimui NETINKA
+
+**Atsakymas: tik parkui aprašyti.** Konkrečiam skelbimui vertinti sudėti procentiliai duoda **atvirkščią** verdiktą jauniems automobiliams.
+
+Įrodymas – BMW X5 (n = 1 717):
+
+| Amžius | n | Rida P10 | P50 | P90 | km/metus P10 | P50 | P90 |
+|---|---|---|---|---|---|---|---|
+| 0–3 m. | 63 | 7 859 | 64 740 | **107 483** | 6 393 | 21 851 | 31 627 |
+| 4–6 m. | 173 | 46 416 | 120 706 | 206 832 | 8 573 | 23 440 | 34 685 |
+| 7–9 m. | 222 | 82 627 | 197 304 | 278 754 | 10 018 | 22 493 | 31 164 |
+| 10–12 m. | 310 | 154 333 | 227 161 | 287 074 | 13 374 | 19 308 | 25 475 |
+| 13–15 m. | 446 | 188 555 | 254 331 | 323 390 | 13 080 | 17 395 | 22 333 |
+| 16–20 m. | 409 | 191 085 | 263 871 | 344 094 | 10 259 | 14 669 | 19 418 |
+| 21+ m. | 94 | 218 692 | 275 298 | 348 356 | 9 894 | **12 430** | 16 419 |
+| **SUDĖTI** | 1 717 | **104 569** | 236 186 | 317 000 | 11 132 | 17 323 | 26 373 |
+
+Trejų metų X5 su 100 000 km pagal sudėtus procentilius patenka **žemiau P10** (104 569) – t. y. gautų 🟡 „rida įtartinai maža". Savo amžiaus juostoje tas pats automobilis yra **ties P90** (107 483), t. y. tarp daugiausiai važiavusių. Verdiktas apsiverčia į priešingą.
+
+**Ir `kmmet_kv` sudėti irgi netinka**, nors atrodo saugesni: km per metus krinta monotoniškai su amžiumi – X5 nuo 21 851 (0–3 m.) iki 12 430 (21+ m.), −43 %. VW Passat dar ryškiau: 46 774 → 11 333, keturgubas skirtumas.
+
+**Ar užtenka vieno bendro amžiaus koeficiento?** Patikrinau: bendra kreivė (visi M1, n = 283 903) padauginta iš modelio bendros medianos duoda ±2–8 % tikslumą 7+ metų juostoms, bet lūžta jaunoms: VW Passat 0–3 m. **−49 %**, Audi A6 **−20 %**, Volvo XC60 sistemingai +18–22 % visose senose juostose (nes jo parkas jaunas, tad bendra mediana per aukšta). Vienas koeficientas netinka.
+
+## Kas padaryta
+
+Įrankis v2 dabar rašo `kmmet_juostos` – **vienintelį pjūvį, tinkamą konkrečiam skelbimui**:
+
+```json
+"kmmet_juostos": { "10-12": [310, 13374, 16732, 19308, 22721, 25475] }
+//                          n    P10    P25    P50    P75    P90
+```
+
+Juosta įrašoma tik turint **≥ 50 įrašų**; kitaip jos nėra ir sąsajoje rodom ⚪, ne spėjimą. Dangos matavimas: juostas turi 254 modeliai iš 1 343, **bet tai 84,8 % viso parko** – ilgoji uodega yra reti modeliai, kurių ir taip nevertintume. Failas 680 → **741 KB**.
+
+## Kaip naudoti
+
+1. Amžius = skelbimo metai − pirmos registracijos metai.
+2. Juosta pagal amžių → `kmmet_juostos[juosta]`. Nėra juostos → ⚪, punkto nerodom.
+3. `skelbimo_rida / amžius` lyginam su tos juostos P10/P25.
+4. Žemiau P10 → 🟡 klausimas pardavėjui. Tarp P10 ir P25 – punkto nėra.
+
+## Riba, kurią būtina įrašyti į dokumentą
+
+Šis skaičius yra rida **registracijos operacijos metu**, o Lietuvoje tai dažniausiai įvežimo momentas – tiksliai tas momentas, prieš kurį rida ir yra atsukama. Vadinasi lyginame įtartiną skelbimą su populiacija, kurioje irgi yra atsuktų ridų.
+
+Tai daro testą **konservatyvų**: tikra atsukta rida gali atrodyti normali, nes „norma" pati patempta žemyn. Klaidingų kaltinimų kryptimi jis neklysta – tik praleidžia dalį tikrų atvejų. Būtent tokios krypties klaidą ir norim, bet pasakyti tai reikia atvirai, o ne leisti galvoti, kad P10 yra švarus etalonas.

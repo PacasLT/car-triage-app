@@ -474,6 +474,64 @@ const saugykla = () => {
       : 'DUOMENYS KONTEINERIO VIDUJE - kiekvienas deploy juos istrina. Reikia Railway Volume ties /data arba DATA_DIR kintamojo.',
   };
 };
+// ── Bandinys prieš skenavimą (2026-09-21) ─────────────────────────────────────
+// Klausimas buvo ne „kiek kainuos", o „ką gausim": analizatorius BANDO ištraukti
+// ~35 laukų, bet kiek iš jų realiai užpildyti - kodas nežino. Todėl prieš
+// įsipareigojant ~529 kreditams per dieną - VIENAS puslapis per TĄ PAČIĄ
+// grandinę (`fetchAllPages` -> `fetchSearchPage` -> tas pats analizatorius),
+// kaip tikras skenavimas. Kitaip bandinys matuotų ne tai, ką pirksim.
+//
+// Kaina: 1 kreditas portalui (render=false), arba 0, jei puslapis dar
+// talpykloje. Portalai - tik du, fiksuoti: joks naudotojo URL čia nepatenka.
+app.get('/admin/pavyzdys', klaiduPrieiga, async (req, res) => {
+  try {
+    const portalas = String(req.query.portalas || '');
+    const marke = String(req.query.marke || 'BMW').slice(0, 40);
+    const url = portalas === 'autoplius' ? buildAutopliusUrl({ marke })
+      : portalas === 'autogidas' ? buildAutogidasUrl({ marke }) : null;
+    if (!url) return res.status(400).json({ error: 'portalas: autoplius | autogidas' });
+
+    const pries = Object.assign({}, ATSARGA.paieska);
+    const { listings, format } = await fetchAllPages(url, 1);
+    const po = ATSARGA.paieska;
+    const kreditu = po.scraperapi - pries.scraperapi;
+    const isTalpyklos = po.talpykla > pries.talpykla;
+
+    // Laukų sąrašą diktuoja ANALIZATORIUS, ne šis maršrutas: imam visus raktus,
+    // kurie pasirodė bent viename skelbime. Taip nepraleisim to, ko nežinojom.
+    const raktai = new Set();
+    listings.forEach((l) => Object.keys(l).forEach((k) => { if (k !== 'rawText') raktai.add(k); }));
+    const yra = (v) => v !== null && v !== undefined && v !== ''
+      && !(typeof v === 'number' && Number.isNaN(v)) && !(Array.isArray(v) && !v.length);
+    const laukai = [...raktai].sort().map((k) => {
+      const reiksmes = listings.map((l) => l[k]);
+      const uzp = reiksmes.filter(yra).length;
+      const bool = reiksmes.every((v) => typeof v === 'boolean' || v == null);
+      return {
+        laukas: k,
+        uzpildyta: uzp,
+        proc: listings.length ? Math.round(uzp / listings.length * 100) : 0,
+        // boolean laukui „užpildyta" visada 100 % - naudingiau, kiek TRUE
+        tiesa: bool ? reiksmes.filter((v) => v === true).length : undefined,
+      };
+    });
+
+    res.json({
+      portalas, marke, url, format,
+      skelbimu: listings.length,
+      kreditu: isTalpyklos && !kreditu ? 0 : kreditu,
+      saltinis: isTalpyklos ? 'talpykla' : 'scraperapi',
+      laukai,
+      pavyzdziai: listings.slice(0, 2).map((l) => {
+        const o = Object.assign({}, l); delete o.rawText; delete o.photos; return o;
+      }),
+    });
+  } catch (e) {
+    console.error('[PAVYZDYS]', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 app.get('/admin/atsarga', klaiduPrieiga, (req, res) => {
   const val = Math.round((Date.now() - ATSARGA.nuo) / 3600000 * 10) / 10;
   const p = ATSARGA.puppeteer;

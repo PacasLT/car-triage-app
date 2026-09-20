@@ -4061,3 +4061,68 @@ triukšmingas.
 `K-30` · Ar `rida_kv` apskritai kur nors naudotinas? Po 2 punkto matavimo man
 atrodo, kad jis tinka tik parko aprašymui („kiek nuvažiavę šio modelio
 automobiliai Lietuvoje"), bet niekada — konkrečiam skelbimui vertinti.
+
+---
+
+## Z-53 · 2026-09-21 · Klaudijus → Dizaineriui · `K-31` · Nr. 41
+
+Naujas Luko pranešimas:
+
+> „Markė ir Modelis turi būti iškeltas iš filtro box paties, kaip metai ir
+> kaina. O NUSTATYTA 4 turėtų būti Pavadinimas lentelės filtrų."
+
+### Pasitvirtino, ir priežastis yra mano 33 paketas
+
+Pamatuota, 1280 px, `is-split`:
+
+```
+laukas       plotis  per visą eilutę  etiketė VIRŠ  etiketė VIDUJE
+marke          250        taip            ne            TAIP
+modelis        250        taip            ne            TAIP
+metai          250        taip           taip            ne
+kaina          250        taip           taip            ne
+galia          250        taip           taip            ne
+rida           119         ne            taip            ne
+kuras          119         ne            taip            ne
+```
+
+**Penki langeliai eina per visą eilutę, ir tik du iš jų neša etiketę viduje.**
+
+Iki 33 paketo per visą eilutę ėjo **tik** `MARKĖ` ir `MODELIS`. Tada
+„platus ⇒ etiketė dėžutės viduje" buvo nuosekli taisyklė, ir `is-inline`
+vardas ją tiksliai apibūdino. Padarius diapazonus plačius (`K-26`), taisyklė
+nustojo galioti, o vardas liko.
+
+### Telefone dar aiškiau
+
+```
+390 px: NĖ VIENAS langelis nėra platus (visi 151 px),
+        bet marke ir modelis vis tiek turi etiketę viduje.
+```
+
+Čia `is-inline` vardas jau tiesiog neteisingas: jis nieko nesako apie plotį,
+nors buvo pavadintas pagal plotį. Tai nauja mūsų sąrašo forma — **vardas,
+kuris paseno kartu su savo priežastimi**. Giminiška penktajai formai, bet
+lūžta ne elgsena, o žodis: klasė daro tai, ką darė, tik jos vardas
+nebepaaiškina kodėl.
+
+### Trys keliai, ir nė vieno nesirinkau už jus
+
+1. `MARKĖ` ir `MODELIS` gauna etiketę virš dėžutės, kaip visi kiti —
+   `is-inline` dingsta visai. Lukas prašo būtent to.
+2. `is-inline` lieka, bet taikomas **visiems** plačiems langeliams,
+   įskaitant diapazonus — tada taisyklė vėl nuosekli, tik priešinga kryptimi.
+3. Vardas keičiamas į tokį, kuris sako, ką klasė daro (`has-inline-label`),
+   o elgsena nekeičiama — tvarkom žodį, ne vaizdą.
+
+Mano nuomonė, jei ji ką nors sveria: **1**, nes Lukas mato tai kaip
+nenuoseklumą, o ne kaip sprendimą, ir telefone antrasis kelias nieko
+neišsprendžia (ten platumo iš viso nėra).
+
+### Antra Luko pastaba
+
+`NUSTATYTA 3 · Išvalyti` dabar gyvena `.ct3-search-inner` viduje kaip
+suvestinė. Lukas nori, kad tai būtų filtrų lentelės **pavadinimas**. Tai
+atskiras sprendimas nuo pirmojo ir liečia `.ct-fld-sum` vietą, ne `.ct-fld`.
+
+Abu — 34 sk., tad jūsų. Matavimo skriptas: `scratchpad/testas/nr41.js`.

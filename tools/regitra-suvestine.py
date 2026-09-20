@@ -38,6 +38,13 @@ MIN_PARKAS = 30          # mazesni modeliai i suvestine nepatenka
 MIN_MEDIANAI = 20        # tiek ridos irasu reikia medianai
 MIN_SENU = 30            # tiek 15+ metu automobiliu reikia amziaus pjuviui
 MIN_MENESIAMS = 300      # menesine importo eilute tik stambesniems modeliams
+MIN_JUOSTAI = 50         # tiek irasu reikia amziaus juostos procentiliams
+
+# Amziaus juostos ridai. IŠMATUOTA 2026-09-21: km per metus MAZEJA su amziumi
+# (BMW X5: 0-3 m. mediana 21 851, 21+ m. - 12 430, t. y. −43 %). Todel SUDETI
+# procentiliai konkreciam skelbimui vertinti NETINKA - juos galima naudoti tik
+# parkui aprasyti. Detaliai: docs/ATSAKYMAI-regitra-2026-09-21.md, K-30.
+JUOSTOS = [(0, 3), (4, 6), (7, 9), (10, 12), (13, 15), (16, 20), (21, 40)]
 SENAS_METAI = 15         # kiek metu = „senas"
 MENESIU = 36
 
@@ -103,7 +110,8 @@ def main():
                 'degalai': collections.Counter(), 'deze': collections.Counter(),
                 'kebulas': collections.Counter(),
                 'imp_men': collections.Counter(), 'apyv_men': collections.Counter(),
-                'kilme_men': collections.Counter()}
+                'kilme_men': collections.Counter(),
+                'juostos': collections.defaultdict(list)}
 
     BAZ = collections.defaultdict(naujas)
     zf = zipfile.ZipFile(zip_kelias)
@@ -181,6 +189,10 @@ def main():
                     amz = (d_pask - d_p).days / 365.25
                     if 0.5 < amz < 30:
                         s['kmmet'].append(v / amz)
+                    if 0.5 < amz < 40:
+                        j = next((x for x in JUOSTOS if x[0] <= amz <= x[1] + 0.999), None)
+                        if j:
+                            s['juostos']['%d-%d' % j].append(v / amz)
 
     # Duomenu pabaiga rasta. Paskutinis menuo faile beveik visada DALINIS
     # (failas sugeneruotas menesio viduryje ar pabaigoje), tad i 12 men. langa
@@ -237,6 +249,13 @@ def main():
             'kmmet_med': kvantilis(kmmet, 50) if pakanka_km else None,
             'kmmet_kv': ([kvantilis(kmmet, p) for p in (10, 25, 50, 75, 90)]
                          if pakanka_km else None),
+            # Vienintelis pjuvis, tinkamas KONKRECIAM skelbimui vertinti.
+            # Formatas: {"10-12": [n, P10, P25, P50, P75, P90]}. Juosta be
+            # MIN_JUOSTAI irasu neirasoma - tada sasajoje ⚪, ne spejimas.
+            'kmmet_juostos': {
+                jv: [len(sar)] + [kvantilis(sorted(sar), p) for p in (10, 25, 50, 75, 90)]
+                for jv, sar in s['juostos'].items() if len(sar) >= MIN_JUOSTAI
+            },
             'kilme': kilme.most_common(3),
             'degalai': deg, 'degalai_n': deg_n,
             'deze': dez, 'deze_n': dez_n,

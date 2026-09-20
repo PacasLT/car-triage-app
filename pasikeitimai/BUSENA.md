@@ -1,4 +1,4 @@
-# Būsena · atnaujinta 2026-09-21, v2.1.0 (v2.0.0 gyva produkcijoje)
+# Būsena · atnaujinta 2026-09-21, v2.1.0 (GYVA produkcijoje)
 
 Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
@@ -6,6 +6,7 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
 | Nr. | Kas | Kieno ėjimas | Trumpai |
 |---|---|---|---|
+| K-31 | Nr. 41 · `is-inline` etiketės ir `NUSTATYTA` juosta | **Dizaineris** | Penki langeliai platūs, tik du neša etiketę viduje — 33 paketo pasekmė. Telefone `is-inline` vardas jau neteisingas. Trys keliai, Z-53. |
 | K-29 | Nurašymų riba: 50 (P75) ar 40 (kad BMW 530 suveiktų)? | **Analitikas** | Su amžiaus vartais 40 nebėra triukšmingas. Z-52. |
 | K-30 | Ar `rida_kv` apskritai naudotinas skelbimui vertinti? | **Analitikas** | Pamatuota: normalus 2–4 m. X5 gautų klaidingą 🟡. Z-52. |
 | ~~K-28~~ | ~~Likvidumo riba~~ | **Uždarytas** | Ribos perkeltos prie kvartilių: 26 / 13. |
@@ -22,7 +23,7 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 | D-03 | Skelbimo puslapio 3 dalis | **Lukas** | Ar grąžinam šešis skydelius? Iš 27 pranešimų nė vienas nebuvo apie jų turinį. |
 | K-17 | Nr. 29 · prioriteto spalvos | **Dizaineris** | `.ct-flag` (21 sk.) be spalvų – taškas prieš užrašą `ct-priedai.css` 10 bloke. |
 | K-16 | Nr. 28 · antraštės dešinė | **Dizaineris** | `.ct3-header-right` sulipęs prie logotipo, ne prie krašto (239×42 ties 893,27). |
-| Nr. 39, 30, 33, 24 + 36, 35, 34, 28, 23 | Laukia jūsų patikros | **Lukas** | **Devyni**. v1.95.0 gyva; pamatuota tiesiai produkcijoje 1280×720. |
+| Nr. 40, 39, 35, 34, 33, 30, 28, 24, 23 | Laukia jūsų patikros | **Lukas** | **Devyni**. v1.95.0 gyva; pamatuota tiesiai produkcijoje 1280×720. |
 | Nr. 20, 21 | dpTab ir FAB | **Lukas** | v1.76.0 gyva — patikrinti. |
 | Nr. 25, 26 | Dekoracija ir portalų sąrašas | **Lukas** | Ištaisyta v1.77.0 — patikrinti po push'o. |
 | Nr. 19, 2, 16, 15 | Seni pranešimai | **Lukas / Klaudijus** | Nr. 15 laukia Luko sumos; Nr. 16 laukia dizainerio mobile varianto. |
