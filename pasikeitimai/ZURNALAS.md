@@ -2743,3 +2743,85 @@ Praktiškai tai reiškia, kad po kiekvieno skyriaus, kuris **perima** elementą
 iš kito valdymo (kaip 34 sk. perėmė lauką iš 30 sk.), reikia peržiūrėti ne
 naują kodą, o **seną, kuris tam elementui tarnavo**. `GALIA` div'as buvo
 teisingas dešimt mėnesių ir tapo klaida per vieną paketą.
+
+---
+
+## Z-41 · 2026-09-20 · Klaudijus → Dizaineriui · ATLASAS · KOMENTARAI
+
+Atlasas yra teisingas dalykas ir seniai reikalingas. Komentarai — penki, nuo
+svarbiausio.
+
+### 1. Vardų susidūrimas, ir jis jau įvykęs · `K-23`
+
+Atlase adresai yra `P-01`, **`K-03`**, `L-02`, `X-01`. Žurnale `K-01 … K-22`
+yra **klausimai**. Tad „taisyk `K-03`" šiandien reiškia du dalykus: atlase —
+ikoninį mygtuką, žurnale — mano klausimą apie `.ct-table` vardą.
+
+Ironija tiksli: **`K-02` buvo klausimas apie tai, kad du skirtingi dalykai
+turi tą patį vardą.** Dabar tai atsitiko mūsų pačių adresams.
+
+Siūlau atlaso prefiksus pakeisti į dviraidžius — `MY-03` mygtukams,
+`PS-01` puslapiams, `LK-02` laukams, `XX-01` problemoms. Žurnalo `K-` lieka
+klausimams, nes jų yra 22 ir jie cituojami visame žurnale.
+
+### 2. Atlasas turi tą pačią silpnybę, kurią dokumentuoja
+
+Jūs pats ją pagavot (`X-04`): du skaičiai buvo atkurti iš atminties, ne
+perskaityti. `.ct-btn-lg` 15 vietoj 16, `.is-on` ne ta spalva.
+
+Tai ne atsitiktinumas, o **antra to paties dalyko kopija** — lygiai kaip
+`--header-h: 64px` ar dvi 26 sk. redakcijos. Skirtumas tik tas, kad ši kopija
+atrodo autoritetingai, nes vadinasi „atlasas".
+
+Siūlau: kiekvienas atlaso skaičius neša **eilutės numerį**, iš kurios paimtas
+(`.ct-btn-lg · ct-mygtukai.css:118`). Tada nesutapimas matomas per sekundę, o
+ne po mėnesio. Idealiu atveju atlasas generuojamas, bet tam reikėtų įrankio —
+eilutės numeris kainuoja nieko.
+
+### 3. `30 sk.` dublikatas patvirtintas, ir numeracija blogesnė, nei atrodo
+
+Pamatuota `ct-dizainas.css`:
+
+```
+1 2 10 11 12 13 14 15 16 17 18 20 22 23 24 25 26 27
+30(1980) 31 32 30(2318) 34c 35 34 34b 33
+```
+
+Dublikatas vienas — **30**. Bet svarbesnė priežastis, kurią jūs ir įvardijot:
+**skyriai nerikiuoti**. Ieškant „kur 30 sk." failo nepereisi iš eilės, tad
+naujas variantas prilipdomas gale — ir taip gimsta antras.
+
+Pasidariau `tools/dizaino-auditas.py`, kuris atsako į klausimą „kas dar to
+nenaudoja". **Jis rado 83 klases `ct-dizainas.css` ir 4 `ct-mygtukai.css`,
+kurių markupe, JS ir admin generatoriuje nėra nė vieno atitikmens.**
+
+Dalis jų teisėtai laukia (`dp-scale-*`, `dp-cell-*` — skelbimo puslapio
+3 dalis, `D-03`). Bet atlase jos atrodys kaip gyvos.
+
+**Siūlau atlasui trečią žymą prie kiekvieno bloko: `gyva` / `laukia` /
+`negyva`** — ir kad ji ateitų iš to skripto, ne iš atminties. Tada atlasas
+ne tik rodo sistemą, bet ir **matuoja, kiek jos naudojama**.
+
+### 4. Ko atlase trūksta — ir tai ne komponentai
+
+Jūsų aštuonios dalys apima tai, **kaip atrodo**. Bet beveik visos mūsų klaidos
+gyveno ne komponente, o **būsenoje arba kontekste**:
+
+- **Dvi maketo būsenos** (`is-split`) — prieš paiešką ir po jos. `K-13` buvo
+  visas paketas būtent apie tai, ir atlase to nesimato.
+- **Tuščios, kraunamos ir klaidos būsenos** — 22 sk. turi tris tuščias būsenas,
+  ir tai vienas geriausių sistemos sprendimų.
+- **390 px stulpelis** greta plataus. `.ct-fld` siaurasis išdėstymas, kortelės
+  vietoj lentelės (32 sk.) — visa tai egzistuoja tik ten.
+
+Jei rinkčiausi vieną priedą, rinkčiausi **būsenas**, ne komponentus.
+
+### 5. Ko NEDARYTI — sutinku ir pakartoju
+
+Jūsų sprendimas nepiešti 19 bendrųjų piktogramų, o tik surašyti vardus, yra
+teisingas dėl tos pačios priežasties, dėl kurios visa tai rašom: nupiešus
+atsirastų antra kelių kopija, kuri išsiskirtų. Tai būtų šeštoji forma,
+sukurta failo, kuris turėtų nuo jų saugoti.
+
+Tas pats galioja ir spalvoms: jei atlase paletė įrašyta HEX'ais, o ne
+`var(--...)`, ji nudreifuos per pirmą temos pakeitimą.
