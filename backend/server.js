@@ -480,6 +480,8 @@ app.get('/admin/atsarga', klaiduPrieiga, (req, res) => {
   res.json(Object.assign({ saugykla: saugykla() }, {
     nuoPaleidimoVal: val,
     // `null` cia reiskia, kad JSON neikeltas - butent tai ir norim matyti.
+    // `duomenuPabaiga` ir `langas12men` prideti v2: be ju skaiciai neturi
+    // laiko, ir butent del to v1 12 men. langas tyliai dengė 9,3 menesio.
     regitra: regitra.meta(),
     paieskosPuslapiai: ATSARGA.paieska,
     skelbimuPuslapiai: ATSARGA.skelbimas,

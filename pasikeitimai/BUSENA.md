@@ -1,4 +1,4 @@
-# Būsena · atnaujinta 2026-09-21, v2.0.0 (v1.97.0 gyva produkcijoje)
+# Būsena · atnaujinta 2026-09-21, v2.1.0 (v2.0.0 gyva produkcijoje)
 
 Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
@@ -6,7 +6,10 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
 | Nr. | Kas | Kieno ėjimas | Trumpai |
 |---|---|---|---|
-| K-28 | Likvidumo riba: `< 12` ar `<= 12,1`? | **Lukas** | Specifikacijoje riba „žemiau 12 %", bet BMW 530 (12,1 %) pateiktas kaip „lėto" pavyzdys. Kodas laikosi ribos. Z-51. |
+| K-29 | Nurašymų riba: 50 (P75) ar 40 (kad BMW 530 suveiktų)? | **Analitikas** | Su amžiaus vartais 40 nebėra triukšmingas. Z-52. |
+| K-30 | Ar `rida_kv` apskritai naudotinas skelbimui vertinti? | **Analitikas** | Pamatuota: normalus 2–4 m. X5 gautų klaidingą 🟡. Z-52. |
+| ~~K-28~~ | ~~Likvidumo riba~~ | **Uždarytas** | Ribos perkeltos prie kvartilių: 26 / 13. |
+| K-28-senas | Likvidumo riba: `< 12` ar `<= 12,1`? | **Lukas** | Specifikacijoje riba „žemiau 12 %", bet BMW 530 (12,1 %) pateiktas kaip „lėto" pavyzdys. Kodas laikosi ribos. Z-51. |
 | ~~K-27~~ | ~~Nr. 40 · portalų mygtukas ir statistikos juosta~~ | **Uždarytas 34 paketu** | `K-22` diagnozuotas: du nesusiję kaltininkai, 56 px (≥1180) ir 182 px (<1180). Atsvaros `ct-priedai.css` 13 ir 14 blokuose — perimkit, ir ištrinsiu. Z-48. |
 | K-26b | Šonas 644 prie ribos 599 | **Dizaineris** | `K-26` uždarytas 33 paketu (visi šeši laukai 101 px), bet trys diapazonai per eilutę kainavo +112. Viršija tik 1280×720. Jūsų 1 variantas pamatuotas — neveikia. Z-46. |
 | K-25 | Nr. 37 · `#portal-selector` | **Dizaineris** | Niekada nebuvo dizaino sistemoje. |
@@ -26,6 +29,8 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 | L-04 / L-05 | `/admin/atsarga`, rakto rotacija | **Lukas** | Priminimai 09-19 11:30 ir 13:15 UTC. |
 
 ## Kas uždaryta paskutiniu metu
+
+- v2.1.0 — **Regitros duomenys v2**: analitikas rado 12 mėn. lango klaidą (dengė 9,3 mėn.), tad v2.0.0 produkcijoje rodė **per mažus** skaičius. Įdiegta: ribos prie kvartilių (26/13), nurašymai tik 15+ pjūvyje, ridos percentilis, kuro punktas. **Du nurodymai pakeisti po matavimo** — `kmmet_kv` vietoj `rida_kv` ir riba 50 vietoj 30. Pridėti amžiaus vartai. Sargas **70/70**. Nauji `K-29`, `K-30`. **Laukia push'o.**
 
 - v2.0.0 — **Regitros integracija**: `backend/regitra.js` (1 343 modeliai atmintyje), kontekstas prisegamas prie kandidatų, trys punktai žinojimo lygių sistemoje, `regitra.test.js` **46/46**. Produkto klausimas (4 sk.) — imtas numatytasis **1 variantas** (tik trečias lygis ir skelbimo puslapis). Naujas `K-28`. **Laukia push'o.**
 

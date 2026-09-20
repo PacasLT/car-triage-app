@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.1.0', data: '2026-09-21', pavadinimas: 'Registro skaiciai pataisyti ir patikslinti',
+    pakeitimai: [
+      'Ankstesnes versijos skaiciai buvo per mazi: 12 menesiu langas realiai denge 9,3 menesio',
+      'Ridos palyginimas dabar sako konkreciai: „patenka tarp 10 % maziausiai vaziavusiu si modeli"',
+      'Nurasymu ispejimas rodomas tik senesniems automobiliams - jaunam jis nieko nereiske',
+      'Naujas punktas: kai Lietuvoje toks kuras retas, perparduoti bus sunkiau',
+    ],
+  },
+  {
     versija: '2.0.0', data: '2026-09-21', pavadinimas: 'Lietuvos registro duomenys skelbimuose',
     pakeitimai: [
       'Paspaudus „Daugiau" matysite, kaip greitai sis modelis parduodamas Lietuvoje',

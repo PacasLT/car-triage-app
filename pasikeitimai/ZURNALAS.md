@@ -3943,3 +3943,121 @@ lieka atviras iki tol.
 
 `K-28` · likvidumo riba: `< 12` (kaip parašyta) ar `<= 12.1` (kad BMW 530,
 specifikacijos pavyzdys, gautų 🟡)?
+
+---
+
+## Z-52 · 2026-09-21 · Klaudijus → Analitikui · DUOMENYS v2 ĮDIEGTI · v2.1.0
+
+Visi šeši pakeitimai iš `ATSAKYMAI` pabaigos padaryti. Sargas **70/70**.
+Bet du iš jų įdiegti kitaip, nei nurodyta, ir vieną dalyką pridėjau savo.
+
+### 1. Svarbiausia · produkcijoje buvo per maži skaičiai
+
+12 mėn. lango klaida reiškė, kad `v2.0.0` naudotojams rodė sumažintus
+rodiklius apie **visus** modelius. Tai ne kosmetika: `X5` 22,1 → 25,8 %,
+Cayenne 27,0 → 31,7 %. Su senomis ribomis (20/12) dalis modelių pateko į
+neteisingą pusę.
+
+Gerai, kad radot patys. Bloga žinia man: **mano sargas to nebūtų pagavęs** —
+jis tikrino, ar skaičius sutampa su duomenimis, o ne ar duomenys teisingi.
+Todėl v2 teste pridėjau `duomenuPabaiga` ir `langas12men` patikras: dabar
+failas be laiko ribų testo nepraeina.
+
+### 2. Ridos percentilis · `kmmet_kv`, NE `rida_kv`
+
+Nurodyta buvo „percentilis iš `rida_kv`". Įdiegiau iš **`kmmet_kv`**, ir štai
+kodėl — pamatuota BMW X5 (mediana 17 323 km/metus):
+
+```
+amžius   rida (tiksliai mediana)   rida_kv      kmmet_kv
+ 2 m.               34 646          <P10  🟡     P50-P75  ✓
+ 3 m.               51 969          <P10  🟡     P50-P75  ✓
+ 4 m.               69 292          <P10  🟡     P50-P75  ✓
+ 5 m.               86 615        P10-P25 ✓      P50-P75  ✓
+10 m.              173 230        P25-P50 ✓      P50-P75  ✓
+```
+
+Su `rida_kv` **kiekvienas jaunesnis nei ~4,5 metų X5, važiavęs visiškai
+normaliai, gautų 🟡** ir klausimą apie serviso istoriją. Priežastis ta pati,
+kurią pats aprašėt specifikacijos 2 sk.: absoliuti rida užfiksuota
+registracijos metu, tad jos pasiskirstyme guli ir ką tik įvežti jauni
+automobiliai.
+
+Su `kmmet_kv` tikrai mažai važiavęs (3 m., 20 000 km → 6 667 km/met) vis tiek
+krenta žemiau P10. Testas tikrina abu galus.
+
+### 3. Nurašymų riba · 50 (P75), ne 30
+
+Riba 30 % dabar yra **mediana** (29,6 % iš 851 modelio su `senu_n ≥ 30`).
+Ji suveiktų **49 % modelių** — tai ne signalas, o moneta.
+
+Pritaikiau jūsų pačių kvartilių principą iš 8 sk.: P75 = 52,5 % → riba **50**,
+suveikia 232 modeliams (27 %, viršutinis ketvirtis).
+
+**Bet tada 8 sk. lūkestis nepasitvirtina:** rašot „BMW 530 lėtumą rodo
+nurašymai... jam turi suveikti 4.4 punktas". Su riba 50 jis nesuveikia —
+43,5 % yra žemiau. O su riba 30 suveiktų ir pusei visų modelių. Jūsų
+sprendimas, kuris svarbiau.
+
+### 4. Amžiaus vartai · pridėjau savo, nebuvo nei specifikacijoje, nei atsakymuose
+
+Statistika apie **15+ metų** automobilius nieko nesako apie trejų metų mašiną.
+Rodyti „83 % šio modelio 15+ metų automobilių nebeleidžiami eisme" 2023 m.
+Mazda pirkėjui reikštų atsakyti į klausimą, kurio jis neuždavė, ir dar prasta
+naujiena apie svetimą automobilį.
+
+Todėl punktas suveikia tik kai **pačiam skelbimui 10+ metų**. Tai taip pat
+reiškia, kad riba galėtų būti žemesnė nei P75 be triukšmo — jei norėsit, kad
+530 suveiktų, dabar tai kainuoja mažiau nei anksčiau.
+
+### 5. Likvidumas · 26 / 13 įdiegta kaip nurodyta
+
+Ir čia **antrą kartą ta pati forma**: 8 sk. BMW 530 vėl pateiktas kaip lėtojo
+pavyzdys, bet jo 13,2 % į ribą `≤ 13` nepatenka. Pirmą kartą tai buvo 12,1 %
+prie ribos 12. Skaičiai pasikeitė, atstumas liko.
+
+Kodas laikosi ribos. Testas tai fiksuoja atskirai, kad kitą kartą nebūtų
+ginčo, ką jis daro.
+
+### 6. Kuro punktas · naujas
+
+Suveikia, kai skelbimo kuras Lietuvoje sudaro **≤ 15 %** to modelio
+(`X5` benzininis – 14 %). Vardų suvedimas buvo tylus rizikos taškas:
+skaitytuvas gamina „Benzinas / elektra" ir „Hibridas", Regitra — „Benzinas/
+Elektra". Be `kuroRaktas()` punktas niekada nebūtų suveikęs, ir **niekas to
+nepastebėtų**. Todėl testas tikrina visą mūsų žodyną, ne vieną pavyzdį.
+
+Kai kuro nėra tarp trijų didžiausių, grąžinam `null`, ne `0` — nežinom dalies,
+tad ir nesakom.
+
+### 7. `KEB_KODAS` pastaba — įsirašau
+
+„100 % užpildyta nereiškia, kad turi turinį" (`---` daugumoje eilučių). Tai
+nauja forma mūsų sąraše, ir ji giminiška tam, ką radau vakar: `scrollWidth`
+ant `overflow: visible` irgi grąžina skaičių, kuris nieko nereiškia. Abu
+atvejai — **matas veikia, o atsako į kitą klausimą**.
+
+### 8. Pamatuota
+
+```
+regitra.test.js     70/70    (v1 buvo 46 — pridėti percentiliai, kuras, vartai)
+dizainas.test.js    26/26
+onclick-patikra.py  švarus
+```
+
+Sąsaja `?demo=1`, trečias lygis atidarytas: 1400 ir 390 px — 13 punktų, visi
+trys lygiai, išėjusių 0, `hSrautas` 0, JS klaidų 0. Skelbimo puslapis —
+1 sekcija, 2 punktai, klaidų 0. Penki puslapiai švarūs.
+
+`/admin/atsarga` dabar neš `duomenuPabaiga` ir `langas12men` — patikrinsiu
+produkcijoje po push'o.
+
+### Klausimai jums
+
+`K-29` · Nurašymų riba: **50** (P75, kaip kvartilių principas) ar **40**
+(kad BMW 530 suveiktų, kaip 8 sk. lūkestis)? Su amžiaus vartais 40 nebėra
+triukšmingas.
+
+`K-30` · Ar `rida_kv` apskritai kur nors naudotinas? Po 2 punkto matavimo man
+atrodo, kad jis tinka tik parko aprašymui („kiek nuvažiavę šio modelio
+automobiliai Lietuvoje"), bet niekada — konkrečiam skelbimui vertinti.

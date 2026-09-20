@@ -42,11 +42,22 @@ Specifikacija. Visi skaičiai čia – **išmatuoti**, ne spėti.
 | `KILMES_SALIS` | 65,5 % | naudojam **tik kaip dalį**, ne kaip skaičių |
 | `KEB_PAVADINIMAS` | 45,5 % | per reta |
 | `PAVARU_DEZES_TIPAS` | 37,4 % | per reta |
-| `RIDA` | 14,6 % | **naudojam** – žr. žemiau |
+| `RIDA` | 17,1 % (M1) | **naudojam** – žr. žemiau |
 | `TERSALU_LYGIS` | 10,9 % | per reta |
 | `MODELIO_METAI` / `GAMYBOS_METAI` | 6,1 / 5,0 % | **negyva** – metus imam iš `PIRM_REG_DATA` |
 
-**`RIDA` 14,6 % skamba mažai, bet tai 274 000 įrašų.** Populiariems modeliams to visiškai pakanka: BMW X5 – 2 218 įrašų, Audi Q5 – 2 414, VW Touareg – 1 159. Riba medianai: **20 įrašų**; mažiau – rodom ⚪ „per mažai duomenų".
+**`RIDA` užpildymas priklauso nuo to, ką skaičiuoji** (išmatuota 2026-09-21, visas failas):
+
+| Aibė | Su rida | Viso | Dalis |
+|---|---|---|---|
+| Visos eilutės | 359 219 | 2 468 363 | 14,6 % |
+| **Tik M1** | **321 584** | **1 876 309** | **17,1 %** |
+| M1, ne nuasmeninti, 1 000–1,5 mln. km | 303 651 | 1 827 324 | 16,6 % |
+| Patenka į suvestinę (modeliai ≥ 30 vnt.) | **300 544** | | |
+
+Suvestinės skaičius **300 544 yra teisingas**. Ankstesnė „~274 000" prognozė buvo klaidinga: visų eilučių užpildymo rodiklis (14,6 %) buvo padaugintas iš M1 kiekio, t. y. skaitiklis ir vardiklis iš skirtingų aibių. Lengviesiems rida pildoma geriau nei sunkvežimiams ir priekaboms.
+
+Populiariems modeliams duomenų su kaupu: BMW X5 – 2 218 įrašų, Audi Q5 – 2 414, VW Passat – 11 844. Riba medianai: **20 įrašų**; mažiau – ⚪ „per mažai duomenų".
 
 **Svarbi `RIDA` savybė:** tai rida **registracijos operacijos metu**, ne šiandien. Todėl absoliuti mediana šališka (Porsche Macan – 32 693 km, nes tai neseniai atvežti automobiliai). Patikimas rodiklis yra **km per metus** = `RIDA / (PASKUTINES_REG_DATA − PIRM_REG_DATA)`, nes jis dalijamas iš amžiaus.
 
@@ -79,18 +90,29 @@ Pastaba: senoji rašyba koreliuoja su registracijos epocha (`VW PASSAT` – 31 %
 
 `apyv_pct` = kiek procentų viso LT parko per 12 mėn. turėjo registracijos operaciją.
 
-| Modelis | Parkas | Apyvartumas | Neleidžiami eisme |
-|---|---|---|---|
-| BMW X4 | 2 000 | 29,1 % | 2,8 % |
-| Porsche Cayenne | 3 310 | 27,0 % | 8,7 % |
-| Mercedes GLE | 2 326 | 26,8 % | 2,6 % |
-| BMW X3 | 8 666 | 23,7 % | 3,9 % |
-| Audi Q7 | 6 422 | 22,7 % | 7,3 % |
-| BMW X5 | 11 878 | 22,1 % | 11,6 % |
-| VW Touareg | 5 661 | 18,6 % | 13,5 % |
-| BMW 530 | 3 403 | **12,1 %** | **41,9 %** |
+**Ribos remiasi išmatuotu pasiskirstymu** (512 modelių, parkas ≥ 300, v2 duomenys):
 
-Kortelėje – vienas punktas: „Šio modelio LT rinkoje 22 % per metus keičia savininką – judrus". Žemiau 12 % → 🟡 „lėtas".
+| P5 | P10 | P25 | P50 | P75 | P90 | P95 |
+|---|---|---|---|---|---|---|
+| 4,0 % | 7,6 % | **12,9 %** | 18,4 % | **26,4 %** | 34,9 % | 40,0 % |
+
+| Reikšmė | Lygis | Reikšmė žmogui |
+|---|---|---|
+| ≥ 26 % (viršutinis ketvirtis) | 🟢 | judrus modelis |
+| 13–26 % | – | punkto nėra |
+| ≤ 13 % (apatinis ketvirtis) | 🟡 | lėtas pardavimas |
+
+| Modelis | Parkas | Apyvartumas |
+|---|---|---|
+| Porsche Cayenne | 3 310 | 31,7 % 🟢 |
+| Škoda Karoq | 3 601 | 29,2 % 🟢 |
+| BMW X5 | 11 878 | 25,8 % |
+| Volvo XC60 | 21 917 | 22,7 % |
+| VW Passat | 81 447 | 13,8 % |
+| BMW 530 | 3 403 | 13,2 % |
+| Opel Sintra | 348 | 0,6 % 🟡 |
+
+**Pastaba dėl BMW 530:** ankstesnėje versijoje jis buvo pateiktas kaip kanoninis „lėto" pavyzdys, nors su 13,2 % į ribą nepatenka. Tai buvo dokumento klaida, ne kodo – kodas laikėsi ribos teisingai. 530 lėtumą rodo ne apyvartumas, o **nurašymai** (41,9 % neleidžiami eisme). Tikri lėtieji yra Opel Sintra, Mazda MPV, Citroën Xantia – t. y. 25+ metų modeliai.
 
 ### 4.2 Ridos norma — klausimas, ne kaltinimas
 
@@ -115,7 +137,22 @@ Modelio lygiu tai atsako į klausimą „iš kur perka tie, kurie perka tą pat�
 ### 4.4 Retumas ir nurašymai
 
 `parkas < 300` → 🟡 „Lietuvoje registruoti tik N – siauras pirkėjų ratas, ilgesnis pardavimas".
-`neleid_pct > 30 %` → 🟡 „Trečdalis šio modelio Lietuvoje nebeleidžiami eisme" (Audi 80 – 68,3 %, BMW 530 – 41,9 %).
+
+**`neleid15_pct > 30 %`** → 🟡 „N % šio modelio, kuriems 15+ metų, nebeleidžiami eisme". Rodom tik kai `senu_n ≥ 30`; kitaip ⚪.
+
+**`neleid_pct` vienas yra AMŽIAUS, ne patvarumo matas – sąsajoje nenaudoti.** Išmatuota:
+
+| Modelis | 15+ m. dalis | Bendras `neleid_pct` | **Tarp 15+ metų** |
+|---|---|---|---|
+| Škoda Karoq | 0,0 % | 1,0 % | – (senų nėra) |
+| Volvo XC60 | 34,4 % | 2,4 % | **2,5 %** |
+| Toyota Corolla | 65,0 % | 9,5 % | **13,3 %** |
+| BMW X5 | 40,6 % | 11,6 % | **16,7 %** |
+| Porsche Cayenne | 16,9 % | 8,7 % | **18,3 %** |
+| VW Golf | 75,1 % | 30,3 % | **36,7 %** |
+| Mazda 323 | 92,1 % | 82,1 % | **83,3 %** |
+
+Amžiaus pjūvis apverčia išvadą: pagal bendrą skaičių Cayenne (8,7 %) atrodo patvaresnis už X5 (11,6 %), o tarp 15+ metų mašinų yra atvirkščiai – 18,3 % prieš 16,7 %. Karoq 1,0 % nereiškia nieko: tokio amžiaus Karoq tiesiog dar nėra.
 
 ---
 
