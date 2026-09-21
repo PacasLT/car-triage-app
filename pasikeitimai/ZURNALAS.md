@@ -5668,7 +5668,7 @@ portalų automobiliai atrodė brangūs. filtrai.test 9 skyrius (5 patikros).
 ECB = 4,3530; buvo kietai 4,25 → otomoto kainos eurais +2,4 %. Nepavykus —
 lieka paskutinis gautas (pradžioje 4,25).
 
-### 3. Errata 5 (D-37) įdiegta + viena mūsų paraštė
+### 3. Errata 5 (D-36) įdiegta + viena mūsų paraštė
 Po Erratos: pločiai sutapo (šone 250/250, 274/274; telefone 304/304), kairieji
 centrai 511/511, bet „Ieškoti" dar 514. Priežastis — **mūsų** index.html 174 eil.
 `button#search-btn { … margin-top: 6px }` (iš laikų, kai mygtukas buvo tinklelyje):
@@ -5680,3 +5680,29 @@ ID selektorius nugali `.ct3-search-bottom-right > * { margin-top: 0 }`. Nuimta.
 šonas         573 px (riba 599, atsarga 26)   ← K-14 nuo 573, ne 578
 ```
 
+
+## Z-79 · 2026-09-21 · Klaudijus · v2.5.2 · KLAIDŲ PERŽIŪRA: Nr. 44, 40, 42, 33
+
+**Nr. 44 ir Nr. 40 („Cannot read properties of undefined (reading 'length')")** —
+viena priežastis, mano. Serverio žurnale ši `TypeError` yra TIK v2.4.1–v2.4.5
+(14:46–16:56): 15:02, 15:03, 16:50, 16:51. v2.4.0 ir nuo v2.4.6 — nė vienos.
+Tai Z-74 klaidos pasekmė: autogidą skaitė autoplius tekstinis skaitytuvas,
+skelbimai atkeliaudavo be `galimiDefektai`, ir `l.galimiDefektai.length`
+numesdavo visą paiešką ties 94 %. Z-74 pataisė priežastį; dabar pridėta ir
+apsauga: `runSearchJob` vienoje vietoje suvienodina `galimiDefektai` → `[]`.
+
+**Nr. 42 (Rūšiuoti neatsidaro)** — Lukas tikrino 15:00, kai paieška lūždavo.
+Dabar produkcijoje (v2.5.1, 1280 px, tikras paspaudimas): meniu atsidaro,
+4 pasirinkimai, niekuo neuždengtas; „Pigiausi" ir „Brangiausi" perrikiuoja ir
+viršų, ir „Kiti skelbimai". Neatkartota → laukia patikros.
+
+**Nr. 33 (Mėgstamiausiuose „Atnaujinti" nieko nedaro)** — TIKRA klaida.
+`atnaujintiVisus` patvirtinimą rašė į `#ct-meg-busena`, kuris egzistuoja tik
+antraštės išskleistame meniu. Mėgstamiausių puslapyje (meniu uždarytas) →
+`if (!bus) return;` — tyliai. Dabar puslapis turi savo `#mg-busena`, o jei
+elemento nėra visai — `confirm()`. Patikrinta Playwright: patvirtinimas →
+„Taip" → 1 POST → „Patikrinta 2 skelbimai • BMW X5: 40000 € → 38000 €".
+
+**Otomoto / AutoScout24 skelbimo puslapis — render nereikalingas.** Naršyklėje
+be JS abu grąžina pilną HTML su __NEXT_DATA__ ir nuotraukomis. `visadaRender`
+išjungtas → TOP-8 praturtinimas šiems portalams 1 kr. vietoj 10.

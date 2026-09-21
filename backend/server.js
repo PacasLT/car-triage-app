@@ -1130,7 +1130,12 @@ async function fetchListingPage(url) {
   };
 
   if (SCRAPER_KEY) {
-    const visadaRender = /otomoto\.pl|autoscout24\./i.test(url);
+    // v2.5.1 (Z-79): otomoto ir autoscout24 skelbimo puslapiai NEBE visada su
+    // render. Patikrinta naršyklėje be JS: otomoto 600 KB HTML su __NEXT_DATA__,
+    // 109 nuotraukų adresais, įranga ir VIN; autoscout24 560 KB, 89 nuotraukos,
+    // įranga, aprašymas. Render (10 kr.) liko tik atsarginis - jei pigiame
+    // HTML nuotraukų pėdsakų nerasta.
+    const visadaRender = false;
     if (!visadaRender) {
       try {
         const pigus = await traukti('false');
@@ -2989,7 +2994,13 @@ async function runSearchJob(jobId, filters) {
           logJob(jobId, `\u26a0 ${site}: modelio filtras portale nesuveikė \u2013 is ${pries} skelbimų tik ${sutampa.length} yra „${filters.modelis}". Atfiltravom patys.`);
         }
       }
-      siteParsed.forEach((l) => (l.source = site));
+      // v2.5.1 (Nr. 44): vienoje vietoje suvienodinam masyvo laukus. v2.4.1–2.4.5
+      // skaitytuvo klaida atnešdavo skelbimus be `galimiDefektai`, ir
+      // `l.galimiDefektai.length` numesdavo VISĄ paiešką ties 94 %.
+      siteParsed.forEach((l) => {
+        l.source = site;
+        if (!Array.isArray(l.galimiDefektai)) l.galimiDefektai = [];
+      });
       resolveSite(`✅ ${site}: rasta ${siteParsed.length} skelbimų.`);
       return siteParsed;
     }));

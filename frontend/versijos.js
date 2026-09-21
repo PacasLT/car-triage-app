@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.5.2', data: '2026-09-21', pavadinimas: 'Mėgstamiausių atnaujinimas ir stabilesnė paieška',
+    pakeitimai: [
+      'Mėgstamiausių puslapyje „Atnaujinti visus" vėl veikia - rodo patvirtinimą ir rezultatą',
+      'Paieška nebenutrūksta ties 94 % dėl netvarkingo skelbimo duomenų',
+      'Otomoto ir AutoScout24 skelbimų gili analizė pigesnė (1 kreditas vietoj 10)',
+    ],
+  },
+  {
     versija: '2.5.1', data: '2026-09-21', pavadinimas: 'Visi portalai skaitomi nuo naujausio',
     pakeitimai: [
       'AutoScout24, Otomoto ir mobile.de dabar skaitomi nuo naujausio skelbimo, kaip autoplius ir autogidas - rinkos vidurkis nebeiškreiptas',

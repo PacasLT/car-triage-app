@@ -197,9 +197,12 @@
   // v1.25.0: patvirtinimas rodomas PACIAME lange (narsykles „says" langas atrode svetimas)
   function atnaujintiVisus(btn, patvirtinta) {
     if (!token()) { if (typeof window.showAuthModal === 'function') window.showAuthModal(); return; }
-    var bus = document.getElementById('ct-meg-busena');
+    // v2.5.1 (Nr. 33): puslapio mygtukas (#mg-atn) rašo į puslapio #mg-busena;
+    // meniu mygtukas - į meniu #ct-meg-busena. Anksčiau abu ieškojo tik meniu
+    // elemento, o jo puslapyje nėra, kol meniu uždarytas → `return` be jokio ženklo.
+    var bus = (btn && btn.id === 'mg-atn' && document.getElementById('mg-busena')) || document.getElementById('ct-meg-busena');
     if (!patvirtinta) {
-      if (!bus) return;
+      if (!bus) { if (window.confirm('Patikrinti visų išsaugotų skelbimų kainą ir būseną? 1 kreditas už visą sąrašą.')) atnaujintiVisus(btn, true); return; }
       bus.style.display = '';
       bus.innerHTML = '<div style="color:var(--text-secondary,#c9cbd3)">Patikrinsime visų išsaugotų skelbimų kainą ir būseną portale.</div>'
         + '<div style="margin-top:4px;color:var(--text-dim,#777)">1 kreditas už visą sąrašą · kartą per parą, kitos patikros tą pačią dieną nemokamos.</div>'
