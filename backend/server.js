@@ -1386,6 +1386,14 @@ function extractAutopliusStructured(html) {
       kainosPastaba = `Skelbime matoma ${kaina} € mėnesinė įmoka – naudojama reali kaina ${lizingoSuma} €`;
       kaina = lizingoSuma; ispejimas = null;
     }
+    // v2.4.7 (Z-76): „PARDUOTA!" kortelėje - automobilio nebėra, o kaina dažnai
+    // simbolinė (2024 m. X5 280 kW „23 000 €", be ridos). Ne į vidurkį, ne į TOP.
+    // Tikra kortelė: <a class="announcement-item ... is-sold is-inactive"> ir
+    // <div class="announcement-badge badge-sold">Parduota!</div> (didžiosios - tik CSS).
+    const parduota = el.hasClass('is-sold') || el.find('.badge-sold').length > 0;
+    if (parduota) {
+      ispejimas = { tipas: 'parduota', tekstas: 'Skelbime pažymėta „PARDUOTA“ – automobilio nebėra, kaina į rinkos vidurkį neįtraukiama.' };
+    }
 
     listings.push({
       url, photo, photos, modelis: modelis || 'Nezinomas',
@@ -1397,6 +1405,7 @@ function extractAutopliusStructured(html) {
       turiVin, turiIstorijosAtaskaita, turiGarantija, garantijosTipas, yraVerslas,
       reitingas, atsiliepimuSkaicius, galimiDefektai,
       galimasJavImportas: /\bJAV\b/.test(visasTekstas) || /aukcion/i.test(visasTekstas),
+      parduota,
       rawText: visasTekstas.slice(0, 200),
     });
   });
@@ -1570,6 +1579,11 @@ function extractAutoscout24Listings(html) {
       kuras, pavarai, turiVin: false, galimasJavImportas: false,
       turiIstorijosAtaskaita: false, turiGarantija: false, garantijosTipas: null, yraVerslas, pardavejas,
       galia, variklioTuris,
+      // v2.4.7 (Z-76): vieta buvo 0 % - yra location.city/countryCode.
+      miestas: (item.location && item.location.city) || null,
+      salis: (item.location && item.location.countryCode) || null,
+      vieta: item.location ? [item.location.city, item.location.countryCode].filter(Boolean).join(', ') || null : null,
+      portaloKainosVertinimas: (item.tracking && item.tracking.priceLabel) || null,
       reitingas, atsiliepimuSkaicius,
       rawText, url, photo, photos,
     };
@@ -1706,11 +1720,20 @@ function extractAutogidasListings(html, originUrl) {
     // kortelės rodo "NN €/mėn." finansavimo skaičiuoklę, todėl tą tekstą pašalinam - kitaip
     // kiekvienas pigus skelbimas būtų palaikytas lizingo įmoka. Tikra kaina ateina data-price.
     const svarusTekstas = cardText.replace(/\d[\d\s]*\s*€\s*\/\s*mėn\.?/gi, ' ');
-    const kainosIspejimas = kainosPatikra(kaina, svarusTekstas, null, { metai, rida });
+    let kainosIspejimas = kainosPatikra(kaina, svarusTekstas, null, { metai, rida });
+    // v2.4.7 (Z-76): „Aukcionas" ženklas (.auction-badge, pvz. AUTO4SALE) - rodoma
+    // PRADINĖ aukciono kaina (2021 m. X5 už 7 000 €). Pamatuota: 9 iš 20 X5
+    // skelbimų 2-ame puslapyje. Anksčiau jie ėjo į rinkos vidurkį ir į TOP kaip
+    // „pigūs". Dabar - į „Kiti skelbimai" su paaiškinimu, vidurkio neliečia.
+    const aukcionas = el.find('.auction-badge').length > 0 || /(^|\s)Aukcionas(\s|$)/.test(cardText);
+    if (aukcionas && !kainosIspejimas) {
+      kainosIspejimas = { tipas: 'aukcionas',
+        tekstas: 'Aukciono skelbimas – rodoma pradinė aukciono kaina, ne galutinė. Prie jos prisidės aukciono mokesčiai, pervežimas, muitas ir dažnai remontas. Į rinkos vidurkį neįtraukiama.' };
+    }
 
     results.push({
       kaina, kainaBaze, pvmPastaba, kainaBePvm: null, turiLizingoOpcija, rida, metai, menuo, modelis,
-      galimiDefektai: [], galimasJavImportas, kainosIspejimas: kainosIspejimas || null,
+      galimiDefektai: [], galimasJavImportas: galimasJavImportas || aukcionas, aukcionas, kainosIspejimas: kainosIspejimas || null,
       kuras, pavarai, turiVin, galia, variklioTuris, miestas, vieta, uzsienyje,
       turiIstorijosAtaskaita: turiVin, turiGarantija,
       garantijosTipas: turiGarantija ? 'nenurodyta_kokia' : null, yraVerslas,
@@ -2131,6 +2154,9 @@ function extractOtomotoListings(html) {
 
       const params = item.parameters || [];
       const getParam = (id) => { const p = params.find((x) => x.key === id); return p ? p.value : null; };
+      // v2.4.7 (Z-76): `value` - raktas mažosiomis („bmw", „x5", „seria-3"),
+      // `displayValue` - kaip rodoma („BMW", „X5", „Seria 3").
+      const getDisp = (id) => { const p = params.find((x) => x.key === id); return p ? (p.displayValue || p.value) : null; };
 
       const metai = getParam('year') ? parseInt(getParam('year'), 10) : null;
       const ridaStr = getParam('mileage');
@@ -2141,13 +2167,15 @@ function extractOtomotoListings(html) {
       const pavarai = GEAR_MAP[gearRaw] || null;
       const ccStr = getParam('engine_capacity');
       const variklioTuris = ccStr ? Math.round(parseInt(ccStr.replace(/\D/g, ''), 10) / 100) / 10 : null;
-      const powerStr = getParam('engine_power');
-      const powerMatch = powerStr && powerStr.match(/(\d+)\s*KM/i);
+      // v2.4.7 (Z-76): `value` yra „340" BE „KM" (KM tik displayValue) - reguliarioji
+      // išraiška su „KM" niekada nesutapdavo, galia buvo 0 % skelbimų.
+      const powerStr = getParam('engine_power') || getDisp('engine_power');
+      const powerMatch = powerStr && String(powerStr).match(/(\d+)/);
       // Lenkijoje galia KM (arklio jegos) -> kW (1 KM ≈ 0.7355 kW)
       const galia = powerMatch ? Math.round(parseInt(powerMatch[1], 10) * 0.7355) : null;
 
-      const make = getParam('make') || '';
-      const model = getParam('model') || '';
+      const make = getDisp('make') || '';
+      const model = getDisp('model') || '';
       const modelis = `${make} ${model}`.trim() || (item.title || '').trim();
       const url = item.url ? (item.url.startsWith('http') ? item.url : `https://www.otomoto.pl${item.url}`) : null;
       const photo = (item.thumbnail && (item.thumbnail.x2 || item.thumbnail.x1)) || null;
@@ -2162,6 +2190,10 @@ function extractOtomotoListings(html) {
         turiIstorijosAtaskaita: false, turiGarantija: false, garantijosTipas: null,
         yraVerslas: false, pardavejas: null,
         galia, variklioTuris,
+        // v2.4.7 (Z-76): vieta buvo 0 % - yra location.city/region.
+        miestas: (item.location && item.location.city && item.location.city.name) || null,
+        vieta: [item.location && item.location.city && item.location.city.name, item.location && item.location.region && item.location.region.name, 'Lenkija'].filter(Boolean).join(', ') || null,
+        kilmesSalis: getDisp('country_origin') || null,
         reitingas: null, atsiliepimuSkaicius: null,
         rawText: `${modelis} ${kaina}€ (${kainaPlN} PLN) ${metai || ''} ${rida || ''} km`.trim().slice(0, 200),
         url, photo, photos,

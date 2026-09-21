@@ -5516,3 +5516,39 @@ scrapeSingleListing kelias kaip gili analizė.
 
 Portalų sąraše mobile.de ženklas — klase `.ct3-portal-ico` (ct-priedai.css),
 ne inline: kitaip dizainas.test inline riba 197 → 198.
+
+## Z-76 · 2026-09-21 · Klaudijus · VISŲ 5 PORTALŲ PATIKRA SU PORTALU · v2.4.7
+
+Metodas: `/admin/patikra` (tikras paieškos kelias) BMW X5 nuo 2019, 2 puslapis,
+kiekvienas skelbimas palygintas su TUO PAČIU puslapiu naršyklėje. Kaina: ~24 kr.
+
+| Portalas | Skelbimų | Sutapo su portalu | Rasta |
+|---|---|---|---|
+| autoplius | 20 | 20/20 (kaina, rida, metai, kuras, kW, miestas) | „Parduota!" kortelė 23 000 € be ridos → ėjo kaip pigi |
+| autogidas | 20 | 20/20 | **9/20 „Aukcionas"** (AUTO4SALE, 2021 X5 už 7 000 €) — ženklas nematomas |
+| autoscout24 | 20 | 20/20, ta pati tvarka | miestas/šalis 0 % |
+| otomoto | 32 | 8/8 patikrintų (PLN→EUR teisinga) | galia 0 %, miestas 0 %, modelis „bmw x5" |
+| mobile.de | 20 | 1 sutapęs + 1 skelbimo puslapis* | kuras toks, kokį įvedė pardavėjas |
+
+\* mobile.de „standartinis" rikiavimas naršyklėje ir serveryje skiriasi
+(personalizuotas) — sutapo tik vienas skelbimas, jis teisingas; kitas
+(45e kaip „Benzin") patikrintas skelbimo puslapyje: taip įvedė pardavėjas.
+
+**Pataisyta (visa su TIKROMIS kortelėmis, `testai/portalai.test.js` 19/19;
+senas kodas — 11 klaidų):**
+- autogidas `.auction-badge` → `aukcionas:true`, `kainosIspejimas: aukcionas` —
+  į „Kiti skelbimai" su paaiškinimu, vidurkio neliečia.
+- autoplius `is-sold` / `.badge-sold` → `parduota:true`, `kainosIspejimas: parduota`.
+  (Tekstas kortelėje „Parduota!" — didžiosios tik per CSS.)
+- otomoto: `engine_power.value` yra „340" be „KM" — reguliarioji išraiška
+  laukė „KM" ir niekada nesutapo; modelis iš `displayValue` („BMW X5");
+  `location.city/region`.
+- autoscout24: `location.city/countryCode`, `tracking.priceLabel`.
+
+**Ne pataisyta, žinoma:** otomoto „hybrid" lieka „Hibridas" (portalas
+neskiria benzino/dyzelino hibrido); PLN kursas 4,25 kietai įrašytas;
+autoscout24 ir mobile.de pardavėjo įvestas kuras gali būti klaidingas.
+
+**mobile.de skelbimo puslapis per ScraperAPI — PRAEINA standartiniu būdu,
+1 kr.:** 31 parametras, 63 įrangos punktai, 15 nuotraukų, aprašymas 3 807
+simb., pardavėjas su reitingu, kainų ribos, įkėlimo data (Z-75 kelias gyvas).

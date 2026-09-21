@@ -11,6 +11,8 @@ window.CT_VERSIJOS = [
     versija: '2.4.7', data: '2026-09-21', pavadinimas: 'mobile.de skelbimų gili analizė',
     pakeitimai: [
       'mobile.de skelbimams renkama įranga, nuotraukos, aprašymas, pardavėjo reitingas ir mobile.de kainų ribos - kaip kituose portaluose',
+      'Autogido aukciono skelbimai (pradinė aukciono kaina) ir autoplius „Parduota!" skelbimai nebeiškreipia rinkos kainos ir nerodomi kaip pigūs pasiūlymai',
+      'Otomoto: rodoma galia ir miestas, modelio pavadinimas toks pat kaip kituose portaluose; AutoScout24: miestas ir šalis',
     ],
   },
   {
