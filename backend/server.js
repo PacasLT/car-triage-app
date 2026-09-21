@@ -1564,6 +1564,8 @@ function extractAutoscout24Listings(html) {
     const photos = (item.images || []).slice(0, 12);
     const photo = photos[0] || null;
     const yraVerslas = !!(item.seller && item.seller.type === 'Dealer');
+    // v2.5.3 (Z-81): AutoScout24 pats žymi `vehicle.isCurrentlyDamaged`.
+    const dauztas = !!(item.vehicle && item.vehicle.isCurrentlyDamaged);
     const pardavejas = (item.seller && item.seller.companyName) || null;
     const reitingas = (item.ratings && item.ratings.ratingsStars) || null;
     const atsiliepimuSkaicius = (item.ratings && item.ratings.ratingsCount) || null;
@@ -1581,7 +1583,7 @@ function extractAutoscout24Listings(html) {
 
     return {
       kaina, kainaBaze: null, pvmPastaba: null, kainaBePvm: null, turiLizingoOpcija: false,
-      rida, metai, modelis, galimiDefektai: [],
+      rida, metai, modelis, galimiDefektai: dauztas ? ['daužtas'] : [],
       kuras, pavarai, turiVin: false, galimasJavImportas: false,
       turiIstorijosAtaskaita: false, turiGarantija: false, garantijosTipas: null, yraVerslas, pardavejas,
       galia, variklioTuris,
@@ -2100,6 +2102,10 @@ function buildAutoscout24Url(filters) {
   if (filters.pavaru_deze === 'Automatinė') params.push('gear=A,S');   // S = pusiau automatinė
   if (filters.pavaru_deze === 'Mechaninė') params.push('gear=M');
   if (filters.ridaIki) params.push(`kmto=${filters.ridaIki}`);
+  // v2.5.3 (Z-81): „Be defektų". AutoScout24 be `ustate` jau rodo tik N,U (be
+  // avarijos A) - pamatuota 6 360 vs 6 422 su A. Rašom aiškiai, kad nepriklausytų
+  // nuo portalo numatytosios reikšmės.
+  if (filters.beDefektu) params.push('ustate=N,U');
   return `${url}?${params.join('&')}`;
 }
 
@@ -2142,6 +2148,9 @@ function buildOtomotoUrl(filters) {
   if (filters.metaiNuo) params.push(`search[filter_float_year:from]=${filters.metaiNuo}`);
   if (filters.metaiIki) params.push(`search[filter_float_year:to]=${filters.metaiIki}`);
   if (filters.ridaIki) params.push(`search[filter_float_mileage:to]=${filters.ridaIki}`);
+  // v2.5.3 (Z-81): „Be defektų" = tik pažymėti „Uszkodzony: Nie" (977 → 586 X5;
+  // 371 be nurodytos būklės iškrenta - Luko pasirinktas variantas, Z-80).
+  if (filters.beDefektu) params.push('search[filter_enum_damaged]=0');
   if (filters.pavaru_deze) {
     const g = filters.pavaru_deze === 'Automatinė' ? 'automatic' : filters.pavaru_deze === 'Mechaninė' ? 'manual' : null;
     if (g) params.push(`search[filter_enum_gearbox][0]=${g}`);

@@ -5706,3 +5706,37 @@ elemento nėra visai — `confirm()`. Patikrinta Playwright: patvirtinimas →
 **Otomoto / AutoScout24 skelbimo puslapis — render nereikalingas.** Naršyklėje
 be JS abu grąžina pilną HTML su __NEXT_DATA__ ir nuotraukomis. `visadaRender`
 išjungtas → TOP-8 praturtinimas šiems portalams 1 kr. vietoj 10.
+
+## Z-80 · 2026-09-21 · Klaudijus · DAUŽTŲ FILTRAS: matavimas visuose portaluose (be kodo)
+
+BMW X5 nuo 2019, naujausi viršuje, naršyklėje (0 kr.). Kiekvienas skaičius —
+portalo paties rezultatų skaičius su tuo parametru.
+
+| Portalas | Visi | „Be defektų" | Daužti | Nenurodyta | Parametras | Dabar |
+|---|---|---|---|---|---|---|
+| autoplius | 189 | 183 | 6 | 0 | `has_damaged_id[10924]` | veikia (pf-beDefektu) |
+| autogidas | 49 | 27 | 11 (visi 11 — aukcionai) | **11** | `f_46=Be defektų` (masyvo forma `f_46[0]` ignoruojama) | veikia (pf-beDefektu) |
+| autoscout24 | 6 422 | 6 360 | 62 | 0 | `ustate=N,U` (A = avarijos) | **numatyta jau be daužtų** |
+| otomoto | 977 | 586 | 20 | **371** | `filter_enum_damaged=0` | neperduodama |
+| mobile.de | 4 504 | 4 470 | 34 | 0 | `dam=false` | **visada įjungta** |
+
+Sumos sutampa visur (pvz. 183 + 6 = 189; 4 470 + 34 = 4 504; 6 360 + 62 = 6 422).
+
+**Esmė:** autogide ir otomoto „Be defektų" = „tik tie, kurie PAŽYMĖTI be
+defektų" — kartu išmeta ir nenurodžiusius (autogidas 11 iš 49, otomoto 371
+iš 977 = 38 %). Alternatyva — „nerodyti daužtų": atskira užklausa „tik
+daužti" (otomoto +1 kr., autogidas +10 kr.) ir jų išmetimas iš sąrašo.
+Laukia Luko sprendimo.
+
+## Z-81 · 2026-09-21 · Klaudijus · v2.5.3 · „Be defektų" visuose portaluose (Luko variantas 1)
+
+Lukas pasirinko variantą 1 — „tik pažymėti be defektų" (Z-80 lentelė).
+- otomoto: `search[filter_enum_damaged]=0` (977 → 586 X5 nuo 2019).
+- autoscout24: `ustate=N,U` aiškiai (numatyta ir taip; 6 422 → 6 360).
+- mobile.de: `dam=false` kaip buvo (visada).
+- autoplius, autogidas — nepakito.
+- autoscout24 `vehicle.isCurrentlyDamaged` → `galimiDefektai: ['daužtas']`
+  (jei kada ateitų be filtro — AI ir balas tai mato).
+- Užrašas po portalų filtrais: „„Be defektų" veikia visuose portaluose. Kiti –
+  autoplius.lt ir autogidas.lt." (buvo „Kol kas veikia autoplius.lt").
+filtrai.test 10 skyrius (5 patikros), 48/48.

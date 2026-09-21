@@ -111,5 +111,16 @@ console.log('\n9. RIKIAVIMAS: visur naujausi viršuje (Z-78, patikrinta portaluo
   t('mobile.de sb=doc&od=down be jokio parametro', d(MD.buildMobileDeUrl(f)).includes('sb=doc&od=down'), MD.buildMobileDeUrl(f));
 }
 
+console.log('\n10. „BE DEFEKTŲ" pasiekia kiekvieną portalą (Z-80/Z-81, skaičiai iš portalų) ─');
+{
+  const MD = require(path.join(__dirname, '..', 'mobilede.js'));
+  const su = { marke: 'BMW', metaiNuo: 2019, beDefektu: true }, be = { marke: 'BMW', metaiNuo: 2019 };
+  t('autoplius has_damaged_id[10924] (189 → 183)', d(F.buildAutopliusUrl(su)).includes('has_damaged_id[10924]=10924') && !d(F.buildAutopliusUrl(be)).includes('has_damaged_id'), F.buildAutopliusUrl(su));
+  t('autogidas f_46=Be defektų, ne masyvo forma (49 → 27)', d(F.buildAutogidasUrl(su)).includes('f_46=Be defektų') && !d(F.buildAutogidasUrl(su)).includes('f_46['), F.buildAutogidasUrl(su));
+  t('autoscout24 ustate=N,U (6 422 → 6 360)', d(F.buildAutoscout24Url(su)).includes('ustate=N,U') && !d(F.buildAutoscout24Url(be)).includes('ustate'), F.buildAutoscout24Url(su));
+  t('otomoto filter_enum_damaged=0 (977 → 586)', d(F.buildOtomotoUrl(su)).includes('search[filter_enum_damaged]=0') && !d(F.buildOtomotoUrl(be)).includes('damaged'), F.buildOtomotoUrl(su));
+  t('mobile.de dam=false visada (4 504 → 4 470)', d(MD.buildMobileDeUrl(su)).includes('dam=false') && d(MD.buildMobileDeUrl(be)).includes('dam=false'), MD.buildMobileDeUrl(su));
+}
+
 console.log('\n' + (bl ? '✗ ' + bl + ' klaidos, ' + ok + ' praėjo' : '✓ ' + ok + '/' + ok + ' patikrų praėjo'));
 process.exit(bl ? 1 : 0);

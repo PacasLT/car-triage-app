@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.5.3', data: '2026-09-21', pavadinimas: 'Filtras „Be defektų" visuose portaluose',
+    pakeitimai: [
+      'Pažymėjus „Be defektų", daužti automobiliai nerodomi ir Otomoto, AutoScout24 bei mobile.de (anksčiau - tik autoplius ir autogidas)',
+      'Autogide ir Otomoto rodomi tik skelbimai, kuriuose pardavėjas nurodė „be defektų"',
+    ],
+  },
+  {
     versija: '2.5.2', data: '2026-09-21', pavadinimas: 'Mėgstamiausių atnaujinimas ir stabilesnė paieška',
     pakeitimai: [
       'Mėgstamiausių puslapyje „Atnaujinti visus" vėl veikia - rodo patvirtinimą ir rezultatą',
