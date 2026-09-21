@@ -1,4 +1,4 @@
-# Būsena · atnaujinta 2026-09-21, v2.3.0 (v2.2.1 GYVA produkcijoje)
+# Būsena · atnaujinta 2026-09-21, v2.3.1 (v2.3.0 GYVA produkcijoje)
 
 Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
@@ -6,8 +6,9 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
 | Nr. | Kas | Kieno ėjimas | Trumpai |
 |---|---|---|---|
-| K-34 | Nr. 40 · `.ct3-stats-bar` šone | **Dizaineris · pasirinko 1 kelią** | PERMATUOTA `is-split` būsenoje (Z-59): šonas 276/300 px, juosta 1280/1920 px, `margin-left` -502/-810, kairysis kraštas x = -482/-630. Z-57 skaičiai buvo iš ne tos būsenos. Prašau taisyklės visiems trims - tada trinam `ct-priedai.css` 7 bloką. |
-| Nr. 39 | Filtruose nerodo piktogramų | **Dizaineris** | Ta pati `K-31` priežastis: `.ct-fld.is-inline > .ct-fld-k { display:none }` slepia ir piktogramą. 41 ir 39 uždaromi vienu ėjimu. Z-57. |
+| K-35 | Nr. 40 · pilno pločio juosta PRIEŠ paiešką | **Dizaineris** | 35b taisyklė be sąlygos: juosta prarado full-bleed ir plačiajame variante (1280 px: 1280 → 1240; 1920: 1920 → 1560). Pataisa su `.is-split` pamatuota ir veikia. Z-62. |
+| K-26b | Šonas 660 px prie ribos 599 | **Dizaineris** | ATSAKYTA skaičiumi (Z-62): po 33 diapazonų ir 34e turinys 660, viršija **61 px**. Jūsų siūlymas — grąžinti diapazonus prie `B+D`. |
+| ~~K-31~~, ~~K-34~~ | ~~Nr. 41, 39, 40~~ | **Uždaryti 35 paketu** | 34e: visos 11 piktogramų 10 px (buvo 0). 35b: juosta šone 276/300 px, slinktis 0. `ct-priedai.css` 7 blokas ištrintas. Laukia Luko patikros. |
 | ~~K-32~~ | ~~Amžiaus juostos danga~~ | **Uždarytas** | `A-32`: atsarga tik 7–15 m. lange, `kmmet_n ≥ 100`. Įdiegta, sargas 88/88. Mūsų archyve uždengia 3 % (skelbimai jauni). Z-58. |
 | K-33 | Registro raktų logika (`SERIE`, `REIHE`, neapibrėžti) | **Analitikas** | `A-33`: jungti pagal (šeima, kuras); `BMW SERIE` = trys serijos viename rakte. Laukiu `modelis_dalys()` + pergeneruoto failo — diegiam VIENU commit'u. Z-58. |
 | K-31 | Nr. 41 · `is-inline` etiketės ir `NUSTATYTA` juosta | **Dizaineris** | Penki langeliai platūs, tik du neša etiketę viduje — 33 paketo pasekmė. Telefone `is-inline` vardas jau neteisingas. Trys keliai, Z-53. |

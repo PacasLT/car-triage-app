@@ -4686,3 +4686,146 @@ Prašau atsiųsti **35 paketą** (`ct-dizainas.css` + `PASTABOS.md` +
 Jei 35 paketą jau siuntėt anksčiau — jis pas mus neatkeliavo; į aplanką
 atėjo tik ZIP su `36-zurnalo-irasas`.
 
+## D-32 · 2026-09-21 · Dizaineris → Klaudijui · K-31 + K-34 · 35 PAKETAS
+
+Trys pranešimai, du skyriai, **viena bendra forma: vardas, valdantis daugiau,
+nei sako.**
+
+### 1. `K-31` — renkuosi „etiketė virš dėžutės visiems"
+
+Jūsų radinys svarbesnis už patį pranešimą. `is-inline` valdė **tris**
+dalykus: langelio plotį, etiketės vietą ir — netyčia — **piktogramos
+matomumą**, nes 2657 eil. slepia visą raktą, o piktograma gyvena rakte.
+
+**Pataisyti būtų galima viena eilute.** Bet tada `is-inline` toliau
+valdytų du dalykus, ir kitas žmogus, norintis plataus langelio, vėl gautų
+kitokią etiketę **kaip priedą prie pločio, kurio prašė**.
+
+Todėl vardą dalinu: plotis lieka `is-inline`, o etiketės vieta nustoja
+būti kintamuoju.
+
+**Ir noriu pasakyti, kieno tai klaida.** `is-inline` sugalvojau aš
+23 pakete, ir tada pats parašiau pagrindimą: „119 px langelyje etiketė ir
+reikšmė vienoje eilutėje netelpa". Tai buvo argumentas **siauram** laukui —
+o aš iš jo padariau **platųjį** išdėstymą. Vienas matavimas, dvi išvados, ir
+antroji nebuvo pamatuota.
+
+Kaina: platus laukas 42 → **50 px**, du platūs šone **+16**.
+
+### 2. `K-34` — renkuosi 1 kelią
+
+`index.html` 1293 eil. triukas `width: 100vw` taikomas trims
+vardams, tarp jų `.ct3-stats-bar`. Jis teisingas, **kol elementas yra
+puslapio sraute** — ten „per visą langą" ir „per visą plotį" sutampa.
+Stulpelyje nustoja, o `100vw` apie tai nežino.
+
+**Penktoji forma**, ir grynesnio pavyzdžio dar neturėjom: 25 sk. sukūrė šoną
+**po to**, kai triukas jau egzistavo. Niekas nesuklydo — pasikeitė aplinka.
+
+Taisau šone, ne prie triuko: ištrinti negalima, o `:not()` reikštų, kad
+kiekvienas naujas konteineris reikalauja atsiminti atnaujinti sąrašą.
+**Šonas pats atšaukia triuką viskam, kas į jį pateko** — taisyklė nemini nė
+vieno vardo.
+
+**Vieną dalyką radau pakeliui:** `.ct3-search-panel` yra tame pačiame
+triuko sąraše ir šone **irgi turėtų išlįsti**. Jūsų matavimas rodo, kad
+neišlenda. Vadinasi, kažkas ją jau atsveria — verta sužinoti kas, nes tai gali
+būti dar viena tyli atsvara.
+
+### 3. Dėl `.ct-sort` — tik iš dalies jūsų
+
+Jei taisyklė negyva, o rūšiavimas egzistuoja, tai reiškia, kad jis **neturi
+dizaino** — tik veikimą. Sutvarkę JS pasakykit, ir parašysiu skyrių; kitaip
+liks nesistemintas elementas, o iš tokių ir atsiranda `!important`.
+
+### 4. Ir dėl to, ką padarėt su užduočių failu
+
+Perrašėt jį **iš gyvo sąrašo**, ne iš ankstesnės versijos. Tai tas pats
+perėjimas, kurį dariau su atlasu: nustoti perrašinėti tiesą ir pradėti ją
+skaityti iš ten, kur ji gyvena.
+
+Tad dabar abu mūsų dokumentai turi tą pačią savybę — **jie negali pasenti
+tyliai.** Per šias tris savaites tai pasirodė vertingiau už bet kurį atskirą
+pataisymą.
+
+**Failai:** `pasikeitimai/is-dizainerio/35-K-31-ir-K-34/`
+
+## Z-62 · 2026-09-21 · Klaudijus · 35 PAKETAS ĮDIEGTAS · v2.3.1 · `K-35`
+
+Įdiegta: 34e ir 35b prikabinti prie `ct-dizainas.css` galo, ištrintos dvi
+jūsų nurodytos eilutės (faile jos buvo **2657 ir 2665**, ne 2664 — radau pagal
+turinį, ne numerį), `ct-priedai.css` **7 blokas ištrintas**.
+
+### 1. Piktogramos — 11 iš 11 po 10 px
+
+```
+1280 px:  visi vienuolika .ct-fld  ->  piktograma 10 px
+1920 px:  tas pats
+ 390 px:  tas pats
+JS klaidų: 0
+```
+
+Prieš įdiegimą marke ir modelis turėjo **0 px**. Nr. 39 ir Nr. 41 uždaryti.
+(Jūs rašėt „13 piktogramų" — puslapyje jų vienuolika; visos patikrintos.)
+
+### 2. Šonas · `K-26b` atsakymas: **660 px, riba 599, viršija 61 px**
+
+Matuota `is-split` būsenoje, 1280x720, po ABIEJŲ (33 diapazonai + 34e), kaip
+prašėt:
+
+```
+šono turinys (tik filtrai)          660 px      riba 599   VIRŠIJA +61
+  iš jų 34e kaina                    +16 px     (644 -> 660, sutampa su jūsų skaičiavimu)
+matomas šono aukštis                 599 px     (max-height: 100vh - header)
+šono horizontali slinktis        276 / 276      = 0  ✔
+1920x1080: turinys 660, šonas 660, slinktis 300 / 300 = 0  ✔
+```
+
+Jūsų pasiūlymas buvo: jei viršija — grąžinat diapazonus prie `B+D` varianto.
+**Skaičius: 61 px.** Sprendimas jūsų; kol negrįžta, filtrai šone slenka
+vertikaliai (`overflow-y: auto` veikia, nieko neapkerpa).
+
+### 3. Statistikos juosta šone — sutvarkyta
+
+```
+1280:  juosta 276 px = šono plotis,  margin-left 0,  flex-wrap: wrap, aukštis 326
+1920:  juosta 300 px = šono plotis,  margin-left 0,                   aukštis 284
+už šono ribų neišeina niekas (0 elementų), doc scrollWidth = lango plotis
+```
+
+Prieš įdiegimą: 1280/1920 px pločio juosta su `margin-left: -502/-810`.
+
+### 4. `K-35` · jūsų 5-as punktas NEPASITVIRTINO
+
+Prašėt patikrinti, ar „plačiajame variante niekas nepasikeitė — juosta per
+visą plotį, kaip buvo". Pamatuota:
+
+```
+                              PRIEŠ 35b        PO 35b
+1280 px, prieš paiešką     x=0   w=1280      x=20   w=1240
+1920 px, prieš paiešką     x=0   w=1920      x=180  w=1560
+```
+
+Pilno pločio triuko nebeliko **ir plačiajame variante**. Priežastis mechaniška:
+`.ct-shell-side` yra tas pats elementas abiejose būsenose — `is-split` klasė
+kabinama tik paleidus paiešką (`index.html`, `runSearch`). Jūsų taisyklė
+sąlygos neturi, tad galioja ir tada, kai šonas dar nėra stulpelis.
+
+Patikrinau ir siūlomą pataisą — ta pati taisyklė su `.ct-shell.is-split`:
+
+```
+prieš paiešką:  x=0   w=1920   (triukas veikia, kaip anksčiau)
+po paieškos:    x=180 w=300    = šono plotis, slinktis 300/300 = 0
+```
+
+Abu tikslai laikosi. **Bet tai jūsų sprendimas:** gal juosta prieš paiešką
+ir turi baigtis ties konteineriu. Jei taip — pasakykit, ir užrašau kaip
+sąmoningą pakeitimą; jei ne, atsiųskit `35c` su `.is-split` sąlyga.
+Pats jūsų failo neliečiu.
+
+### 5. Ko nepamatavau
+
+Gyvos produkcijos su tikra paieška — tai kainuotų kreditų (~10 už puslapį),
+o stendas naudoja tuos pačius CSS failus. Luko patikrai Nr. 39, 41, 40
+keliauja į `laukia-patikros`.
+

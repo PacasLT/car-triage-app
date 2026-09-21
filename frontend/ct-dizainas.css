@@ -2654,7 +2654,6 @@ textarea.ct-field {
 
 
 /* ── Platusis isdestymas · etikete viduje ─────────────────────────────────── */
-.ct-fld.is-inline > .ct-fld-k { display: none; }
 .ct-fld.is-inline > .ct-fld-v { height: 42px; padding: 0 11px; }
 .ct-fld-inlabel {
   flex: none;
@@ -2662,7 +2661,6 @@ textarea.ct-field {
   letter-spacing: .13em; color: var(--text-dim);
 }
 /* Siaurame isdestyme vidine etikete ir vidine piktograma nerodomos */
-.ct-fld:not(.is-inline) > .ct-fld-v > .ct-fld-inlabel { display: none; }
 .ct-fld:not(.is-inline) > .ct-fld-v > .ct-i:first-child { display: none; }
 
 
@@ -3072,3 +3070,126 @@ textarea.ct-field {
 
 /* 3) Statistikos juosta siaurame stulpelyje lauzosi, o ne stumia */
 .ct-shell:not(.is-split) > .ct-shell-side .ct3-stats-inner { flex-wrap: wrap; }
+
+
+/* ============================================================================
+   35 paketas - 34e sk. (K-31, Nr. 39, Nr. 41) + 35b sk. (K-34)
+   ----------------------------------------------------------------------------
+   Trys pranesimai, du skyriai, viena bendra forma: VARDAS, VALDANTIS
+   DAUGIAU, NEI SAKO.
+
+   Sis failas PRIDEDAMAS. Nieko trinti nereikia, isskyrus dvi eilutes,
+   ivardytas 34e pradzioje.
+   ========================================================================== */
+
+
+/* ============================================================================
+   34e. ETIKETE VISADA VIRS DEZUTES   ·   K-31 atsakymas
+   ----------------------------------------------------------------------------
+   ISTRINTI dvi eilutes ct-dizainas.css:
+
+     2657:  .ct-fld.is-inline > .ct-fld-k { display: none; }
+     2664:  .ct-fld:not(.is-inline) > .ct-fld-v > .ct-fld-inlabel { display: none; }
+
+   ── KODEL SIS SPRENDIMAS, O NE PATAISYMAS ─────────────────────────────────
+   Klausiat, ka daryti su markes ir modelio etiketemis. Atsakymas: etikete
+   stovi VIRS dezutes visur, o vidines etiketes nebelieka is viso.
+
+   Priezastis ne skonis. `is-inline` valde TRIS dalykus vienu metu:
+
+     1) langelio ploti  (grid-column: 1 / -1)
+     2) etiketes vieta  (viduje vietoj virsaus)
+     3) piktogramos matomuma  (per .ct-fld-k, netycia)
+
+   Trecias niekada nebuvo sprendimas - jis ateina is to, kad 2657 eil. slepia
+   VISA rakta, o piktograma gyvena rakte. Butent todel markes ir modelio
+   piktogramos yra 0 px, o kitu vienuolikos - 10 px.
+
+   Pataisyti butu galima viena eilute. Bet tada `is-inline` toliau valdytu du
+   dalykus, ir kitas zmogus, norintis plataus langelio, vel gautu kitokia
+   etikete kaip priedą prie plocio, kurio prasė.
+
+   Todel vardas padalijamas: PLOTIS lieka `is-inline`, o etiketes vieta
+   nustoja buti kintamuoju. Vienas isdestymas vietoj dvieju.
+
+   ── KAINA, PAMATUOTA ──────────────────────────────────────────────────────
+   Platus laukas buvo 42 px (etikete viduje). Dabar 10 + 4 + 36 = 50 px.
+   Du platus laukai sone = +16 px. Z-37 sonas buvo 484 prie ribos 599, tad
+   atsargos pakanka - bet 33 paketo diapazonai jos irgi prašė, todel
+   pamatuokit abu kartu (zr. PASTABOS.md 4).
+
+   Placiajame variante kaina nulis: ten eile ir taip auksta.
+
+   ── KA TAI DUODA ──────────────────────────────────────────────────────────
+   Nr. 39 ir Nr. 41 uzsidaro kartu, be atsvaru. Ir dezuteje atsilaisvina
+   vieta reiksmei: „Mercedes-Benz" plaeiame lauke turejo dalintis eilute su
+   etikete, dabar turi ja visa.                                            */
+
+/* Etikete rodoma VISUR - ir plaeiame, ir siaurame */
+.ct-fld > .ct-fld-k { display: flex; }
+
+/* Vidines etiketes nebelieka niekur. Elementa markupe galima palikti -
+   jis nieko nedaro; galima ir isimti. */
+.ct-fld > .ct-fld-v > .ct-fld-inlabel { display: none; }
+
+/* Dezute vienoda abiem plociams. Buvo 42 tik plaeiam, nes ten gyveno
+   etikete; dabar etiketes ten nera. */
+.ct-fld.is-inline > .ct-fld-v { height: 36px; padding: 0 10px; }
+
+/* Vidine piktograma nebereikalinga niekur - ji kartojo ta pacia, kuri stovi
+   etiketeje. 33 pakete (34d) ta pati padaryta sonui; cia baigiama visur. */
+.ct-fld > .ct-fld-v > .ct-i:first-child { display: none; }
+
+
+/* ============================================================================
+   35b. PILNO PLOCIO TRIUKAS TURI SALYGA   ·   K-34 atsakymas
+   ----------------------------------------------------------------------------
+   Renkuosi jusu 1 kelia: juosta lieka sone, plotis risamas prie stulpelio.
+
+   ── KAS IS TIKRUJU ATSITIKO ───────────────────────────────────────────────
+   index.html 1293 eil. yra pilno plocio triukas:
+
+     .ct3-hero, .ct3-stats-bar, .ct3-search-panel {
+       width: 100vw; max-width: 100vw;
+       margin-left: calc((100% - 100vw) / 2);
+     }
+
+   Jis teisingas, kol elementas yra PUSLAPIO sraute: ten „per visa langa" ir
+   „per visa plotį" sutampa. Perkelus elementa i 1560 px stulpeli jie nustoja
+   sutapti, o triukas apie tai nezino - `100vw` matuojasi nuo lango visada.
+
+   Tai penktoji musu saraso forma: sprendimas, buves teisingas savo
+   aplinkoje, tapo klaidingas, kai aplinka pasikeite. 25 sk. sukure sona po
+   to, kai sis triukas jau egzistavo.
+
+   ── KODEL TAISOMA CIA, O NE TEN ───────────────────────────────────────────
+   Triuko istrinti negalima - placiajame variante jis reikalingas. Pridėti
+   jam `:not()` irgi ne: tada kiekvienas naujas konteineris reikalautu
+   atsiminti atnaujinti sarasa (A-08).
+
+   Vietoj to sona pats atsaukia triuka VISKAM, kas i ji pateko. Taisykle
+   neminí ne vieno is triju vardu - tad ir rytoj ideti elementai bus
+   sutvarkyti automatiskai.
+
+   PRIRISTA prie: .ct-shell-side - bet kuriame plotyje, be @media, nes zemiau
+   1180 px tas pats stulpelis vis dar egzistuoja (30b pamoka).            */
+
+.ct-shell > .ct-shell-side > *,
+.ct-shell > .ct-shell-side .ct3-stats-bar,
+.ct-shell > .ct-shell-side .ct3-hero,
+.ct-shell > .ct-shell-side .ct3-search-panel {
+  width: auto;
+  max-width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Juostos vidus sone: 1440 px riba ir 24 px uzpildas suprojektuoti visam
+   ekranui. Stulpelyje jie duoda tris elementus, stumiancius vienas kita. */
+.ct-shell > .ct-shell-side .ct3-stats-inner {
+  max-width: none;
+  padding: 12px 14px;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+.ct-shell > .ct-shell-side .ct3-stat-item { flex: 1 1 auto; min-width: 0; }

@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.3.1', data: '2026-09-21', pavadinimas: '35 paketas: filtru etiketes ir statistikos juosta sone',
+    pakeitimai: [
+      'Markes ir modelio filtruose vel matomos piktogramos, o etikete visur stovi virs laukelio',
+      'Statistikos juosta soniniame stulpelyje nebeislenda uz krasto',
+    ],
+  },
+  {
     versija: '2.3.0', data: '2026-09-21', pavadinimas: 'Ridos palyginimas pagal automobilio amziu',
     pakeitimai: [
       'Rida lyginama tik su TOKIO PAT amziaus to modelio automobiliais - anksciau jauni automobiliai gaudavo klaidinga ispejima',

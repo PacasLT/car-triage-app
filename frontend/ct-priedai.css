@@ -79,34 +79,14 @@
    ją pats, tame pačiame faile."                                             */
 
 
-/* ── 7. Filtrų panelė šone – „full-bleed" atšaukimas ───────────────────────
-   Būtina 25 sk. įdiegimui, ir 25/30 sk. to neapima, nes tai MŪSŲ savybė.
+/* ── 7. Filtrų panelė šone – „full-bleed" atšaukimas · IŠTRINTA v2.3.1 ─────
+   Perimta dizainerio 35b skyriumi (`.ct-shell > .ct-shell-side > *` ir trys
+   vardai) – jo taisyklė platesnė abiem ašimis: palikuonis vietoj tiesioginio
+   vaiko ir be `@media (min-width: 1180px)`. Pamatuota po įdiegimo, Z-62.
 
-   `index.html` 1286 eil. `.ct3-search-panel` turi „full-bleed" triuką:
-
-     width: 100vw; max-width: 100vw;
-     margin-left: calc((100% - 100vw) / 2);
-
-   Jis skirtas iššokti iš `.container` pločio ir nusidažyti per visą ekraną.
-   Įdėjus panelę į 276 px šoninį stulpelį, `100vw` reikštų, kad ji bando būti
-   viso lango pločio – tinklelis lūžtų, o neigiama kraštinė ją nustumtų kairėn
-   už ekrano ribų.
-
-   Šone triukas nebereikalingas: ten panelė turi užimti tiek, kiek duoda
-   stulpelis. Todėl grąžinam ją į normalų srautą.
-
-   ATŠAUKIMAS: netrinti, kol `.ct3-search-panel` turi „full-bleed". Tai ne
-   dizainerio taisyklės atsvara, o mūsų pačių savybės suderinimas su jo 25 sk.  */
-
-@media (min-width: 1180px) {
-  .ct-shell-side > .ct3-search-panel {
-    width: auto;
-    max-width: none;
-    margin-left: 0;
-    margin-right: 0;
-  }
-}
-
+   Ši atsvara buvo antra tos pačios priežasties atsvara, parašyta po mėnesio
+   nuo pirmos ir niekada su ja nematyta kartu – „pasikartojanti LAIKE"
+   (dizainerio žodis, `D-33`).                                              */
 
 /* ----------------------------------------------------------------------------
    8 BLOKAS · `#more-filters` iseina is inline stiliaus · v1.75.0
