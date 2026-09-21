@@ -6232,3 +6232,60 @@ Buvo atvira nuo Z-76: otomoto skelbimas AI analizei ėjo tik kaip „pilnas pusl
 beveik balti. Filtrų `select` yra `.ct-fld-t` – nei ct-dizainas.css 2163 (`select.ct-field
 option`), nei index.html 890 (`.ct3-select-wrap`) jų nepasiekia. ct-priedai.css 19 blokas:
 `select { color-scheme: dark }` + `option` fonas/spalva tokenais. Dizaineriui – į 34 sk.
+
+---
+
+## D-41 · 2026-09-22 · Dizaineris → Klaudijui · 19 BLOKO PERĖMIMAS
+
+### 1. Skylė buvo ta pati, kaip vakar
+
+Išskleistą `<select>` sąrašą piešia naršyklė, ir sistemoje tai buvo
+aprašyta **vienoje vietoje** — 2163 eil. `select.ct-field option`. Filtrų
+laukai tos klasės neturi, tad jiems tema negaliojo: baltas sąrašas su
+beveik baltu tekstu.
+
+**Tas pats, kas `#search-btn` vakar:** taisyklė egzistavo, bet buvo pririšta
+prie vieno iš **dviejų** laukų komponentų. Du komponentai, viena tema,
+aprašyta viename. Per dvi dienas tai trečias kartas, kai skylę dengė ne
+sistema, o jūsų blokas arba ID.
+
+`color-scheme` keliu į `:root`: ji lemia ne tik sąrašą, bet ir slinkties
+juostas, datos parinkiklius, `checkbox`, autofill — **visa, ko mes
+nepiešiame patys.** Tai dokumento, ne lauko savybė; prie lauko ji taptų
+trečiu sąrašu, kurį reikia atsiminti papildyti.
+
+### 2. Ko į sistemą dar neimu
+
+`.dp-desine` (18 blokas) — **naujas išdėstymo vardas, gyvenantis tik
+`ct-priedai.css`.** Skaičiai geri, sprendimas teisingas, ir Luko leidimas
+daryti be paketo irgi. Bet į sistemą iš aprašymo jo neimsiu: **tiksliai taip
+atsirado viskas, ką šias savaites valėm.**
+
+Paprašiau dviejų dalykų: ar `.dp-score-section` markupą galima **ištrinti**,
+o ne slėpti (paslėptas markupas kitam žmogui atrodo kaip turinys), ir
+ekranvaizdžio ties 1440 ir 385.
+
+### 3. Trys benamiai vardai
+
+`.ct-sort`, `.ct-std-card`, `.dp-desine` — visi veikia, nė vienas neturi
+skyriaus, visi trys `ct-priedai.css`. **Vienas paketas, kai `#search-btn`
+bus uždarytas.**
+
+Verta pasakyti, kas tada atsitiks: `ct-priedai.css` nebeturės nė vieno
+bloko, kuris dengtų sistemos skylę. Rugsėjo pradžioje ten gyveno pusė
+produkto išvaizdos.
+
+**Failai:** `pasikeitimai/is-dizainerio/45-natyvus-valdikliai/`
+
+---
+
+## Z-96 · 2026-09-22 · Klaudijus · v2.7.1 · 45 paketas + `.dp-score-section` ištrinta
+
+- 45 pk. įdiegtas: `:root { color-scheme: dark }`, `.ct-fld-v select option` (+ `:disabled`).
+  ct-priedai.css 19 blokas ištrintas. (Mūsų `option:checked` akcentas nepaimtas – lieka naršyklės.)
+- Atsakymas D-? §3.1: **taip, ištrinta, ne paslėpta.** `.dp-score-section` markupas (žiedas,
+  verdiktas, 5 juostos, „Kaip vertiname?"), JS (`dp-ring`, `dp-score-verdict*`, juostų ciklas)
+  ir 31 CSS eilutė detail.html. Vienintelis unikalus turinys buvo „Kaip vertiname?" sakinys
+  („CarTriige Score parodo bendrą galimybę, remiantis kaina, rida, įranga, istorija ir rinkos
+  potencialu") – #dp-panel jo neturi. Jei reikia – tai skydelio `title`/užuominos klausimas tau.
+  ct-priedai.css `.dp-sbar-val.is-na` ir `.dp-score-section[hidden]` ištrinti (negyvi).

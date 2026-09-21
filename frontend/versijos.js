@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.7.1', data: '2026-09-22', pavadinimas: 'Tamsi tema visur',
+    pakeitimai: [
+      'Naršyklės valdikliai (sąrašai, slinkties juostos, automatinis užpildymas) – tamsūs visame puslapyje',
+      'Skelbimo puslapis lengvesnis: pašalintas pasikartojantis įvertinimo blokas',
+    ],
+  },
+  {
     versija: '2.6.9', data: '2026-09-22', pavadinimas: 'Skelbimo puslapis ir filtrų sąrašai',
     pakeitimai: [
       'Skelbimo puslapyje CarTriige įvertinimas rodomas vieną kartą (dubliavosi)',

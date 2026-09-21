@@ -255,8 +255,6 @@
    tada kortelė elgiasi kaip TOP (`display:block`) be !important.           */
 .ct-std-card.ct-card > * { flex: 1 1 100%; min-width: 0; }
 
-/* v2.6.5 (Nr. 45): neįvertintas komponentas skelbimo puslapyje - brūkšnys, ne 0. */
-.dp-sbar-val.is-na { color: var(--text-dim); }
 
 
 /* ----------------------------------------------------------------------------
@@ -264,28 +262,13 @@
 
    Lukas: „dubliuojasi įvertinimai – palik vieną; pardavėjo info – į viršų dešinėje".
    Tas pats CarTriige įvertis buvo dukart: skydelyje prie galerijos (#dp-panel) ir
-   atskiroje `.dp-score-section` po pardavėju. Paliktas skydelis (jis ir sisteminis),
-   `.dp-score-section` paslėpta (`hidden`; jos `display:grid` nugalėtų atributą).
+   atskiroje `.dp-score-section`. v2.7.1: sekcija IŠTRINTA (markupas, JS, CSS).
    Pardavėjo kortelė iš `.dp-main-sell` (po galerija, kairėje) perkelta į naują
    dešinį stulpelį `.dp-desine` po skydeliu. Stulpelis perima `.dp-panel` flex dydį
    (ct-dizainas.css 1095: flex 1 1 320px, min 280). Dizaineriui - D-03 („3 dalis").  */
-.dp-score-section[hidden] { display: none; }
 .dp-desine { flex: 1 1 320px; min-width: 280px; display: flex; flex-direction: column; gap: 16px; }
 .dp-desine > .dp-panel { flex: none; min-width: 0; }
 
 
-/* ----------------------------------------------------------------------------
-   19 BLOKAS · išskleidžiami filtrų sąrašai balti, tekstas beveik baltas · v2.6.9 (Z-95)
-
-   Luko ekranvaizdis: MARKĖ sąrašas - baltas fonas, „Mercedes-Benz", „Audi"...
-   vos matomi. Filtrų `<select>` nuo 32 paketo turi klasę `.ct-fld-t` (ne
-   `.ct-field` / `.ct3-select-wrap`), tad nei ct-dizainas.css 2163, nei
-   index.html 890 `option` taisyklė jų nepasiekia: `<option>` paveldi šviesią
-   teksto spalvą, o fonas lieka sistemos baltas.
-   `color-scheme: dark` - naršyklė pati piešia tamsų sąrašą (ir slinkties juostą);
-   `option` spalvos - ten, kur naršyklė jų paiso (Windows Chrome/Edge).
-   Dizaineriui: galima perkelti į `.ct-fld` skyrių (34 sk.).                */
-select { color-scheme: dark; }
-select option,
-select optgroup { background-color: var(--bg-elevated); color: var(--text-primary); }
-select option:checked { background-color: var(--accent-strong); color: var(--text-primary); }
+/* 19 BLOKAS · IŠTRINTAS v2.7.1 (45 paketas): šaknies `color-scheme: dark` ir
+   `.ct-fld-v select option` dabar ct-dizainas.css. */

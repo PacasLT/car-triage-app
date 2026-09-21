@@ -3538,3 +3538,69 @@ textarea.ct-field {
 
 /* Telefone ir placiajame variante nieko - `display: contents` jau padare
    viska, ko reikia: grupiu ten tiesiog nera. */
+
+
+/* ============================================================================
+   45 paketas - natyviu valdikliu spalvos   ·   19 bloko perėmimas
+   ----------------------------------------------------------------------------
+   Perimu jusu 19 bloka i sistema ir isplecia ji viena eilute. Po idiegimo
+   19 blokas TRINAMAS.
+
+   Versija - siulau v2.7.1.
+   ========================================================================== */
+
+
+/* ── KUR BUVO SKYLE ────────────────────────────────────────────────────────
+   Issklestas <select> sarasas piesiamas NE musu. Ji piesia narsykle, ir
+   vienintelis budas jai pasakyti, kokia tema - `color-scheme` arba `option`
+   spalvos ant PACIO <select>.
+
+   Sistemoje tai buvo parasyta VIENA vieta: 2163 eil. `select.ct-field
+   option`. Filtru laukai `.ct-field` klases neturi - jie yra `.ct-fld-v`
+   viduje. Tad sarasas likdavo baltas su beveik baltu tekstu.
+
+   Ta pati forma kaip vakar su `#search-btn`: taisykle buvo, bet prirista
+   prie vieno is dvieju lauku komponentu. Du komponentai, viena tema, ir
+   tema aprasyta tik viename.
+
+
+   ── KODEL `color-scheme` EINA I `:root`, O NE PRIE LAUKO ──────────────────
+   `color-scheme: dark` galioja ne tik <select> sarasui. Ji lemia natyviu
+   slinkties juostu, datos parinkikliu, `<input type=checkbox/radio>`,
+   autofill fono ir formu valdikliu tema - visa, ko mes nepiesiame patys.
+
+   Produktas yra tamsus visose vietose be isimciu, tad tai yra dokumento,
+   ne lauko savybe. Uzrasyta prie lauko, ji butu treciasis sarasas, kuri
+   reikia atsiminti papildyti (A-08).
+
+   PATIKRINKIT SLINKTIES JUOSTAS. 1823 eil. sonui jau duotas
+   `scrollbar-color`, tad ten nieko neturetu pakisti, bet kitur natyvios
+   juostos gali tapti tamsios - to ir norim, tik noriu, kad tai butu
+   pamatyta, o ne atrasta.
+
+   ct-dizainas.css, i 1 sk. (`:root` blokas, po 174 eil.) arba salia jo: */
+
+:root { color-scheme: dark; }
+
+
+/* ── OPTION SPALVOS · abiem komponentams ───────────────────────────────────
+   `color-scheme` duoda tema, bet ne musu tokenus. Sarasas turi buti tokios
+   pat spalvos kaip iskrentantys meniu - `--bg-elevated`, ne narsykles
+   numatytoji pilka.
+
+   2163 eil. taisykle `.ct-field` lieka. Cia - antroji pusė, 34b sk.: */
+
+.ct-fld-v select option,
+.ct-fld-v .ct3-inp option {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+/* Isjungtas pasirinkimas sarase - ta pati logika kaip `.ct-btn:disabled`:
+   matomas, bet nespaudziamas. Be sios eilutes narsykle piesia ji beveik
+   nematoma ant tamsaus fono. */
+.ct-fld-v select option:disabled,
+.ct-fld-v .ct3-inp option:disabled { color: var(--text-dim); }
+
+
+/* Po idiegimo: ct-priedai.css 19 blokas trinamas. */

@@ -140,27 +140,6 @@ button{font-family:inherit;cursor:pointer}
 .dp-seller-loc-val{display:flex;align-items:center;gap:6px;font:500 13px var(--font);color:var(--text-secondary)}
 
 /* ── SCORE SECTION ── */
-.dp-score-section{margin-top:24px;padding:18px 20px;background:var(--bg-surface);border:1px solid var(--border);border-radius:14px;display:grid;grid-template-columns:auto 1fr 200px;gap:20px;align-items:center}
-@media(max-width:900px){.dp-score-section{grid-template-columns:1fr}}
-.dp-score-title{font:600 11px/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:14px}
-.dp-score-left{display:flex;align-items:center;gap:18px}
-.dp-ring-lg{flex:none;width:84px;height:84px;border-radius:50%;background:conic-gradient(var(--score-color,var(--warning)) calc(var(--pct,70)*1%),var(--bg-raised) 0);display:grid;place-items:center;position:relative}
-.dp-ring-lg::before{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--bg-surface)}
-.dp-ring-lg>div{position:relative;text-align:center}
-.dp-ring-lg b{display:block;font:700 22px/1 var(--font-mono)}
-.dp-ring-lg small{font:500 10px/1 var(--font-mono);color:var(--text-dim)}
-.dp-score-verdict{max-width:200px}
-.dp-score-verdict p{font-size:13px;line-height:1.5;color:var(--text-secondary)}
-.dp-score-bars{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;flex:1}
-@media(max-width:600px){.dp-score-bars{grid-template-columns:repeat(3,minmax(0,1fr))}}
-.dp-sbar{display:flex;flex-direction:column;gap:8px}
-.dp-sbar-label{font:700 8px/1 var(--font-mono);letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim)}
-.dp-sbar-val{font:700 18px/1 var(--font-mono)}
-.dp-sbar-track{height:4px;border-radius:2px;background:var(--bg-raised);overflow:hidden}
-.dp-sbar-fill{height:100%;border-radius:2px}
-.dp-score-info{padding:14px 16px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);align-self:stretch;display:flex;flex-direction:column;justify-content:space-between}
-.dp-score-info-h{display:flex;align-items:center;gap:7px;font:600 12px var(--font);color:var(--text-secondary);margin-bottom:8px}
-.dp-score-info p{font-size:11.5px;line-height:1.55;color:var(--text-muted)}
 
 /* ── PROFIT/RISK BLOCKS ── */
 .dp-pr-blocks{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
@@ -383,13 +362,6 @@ button{font-family:inherit;cursor:pointer}
   .dp-actions { display: none; }
 
   /* Score sekcija */
-  .dp-score-section { padding: 14px !important; gap: 12px !important; }
-  .dp-ring-lg { width: 72px !important; height: 72px !important; }
-  .dp-ring-lg b { font-size: 18px !important; }
-  .dp-ring-lg small { font-size: 9px !important; }
-  .dp-score-verdict { max-width: 100%; }
-  .dp-score-info { display: none; }
-  .dp-score-bars { grid-template-columns: repeat(3, minmax(0,1fr)) !important; gap: 10px !important; }
 
   /* Pelnas / rizika */
   .dp-pr-blocks { gap: 8px; }
@@ -416,15 +388,12 @@ button{font-family:inherit;cursor:pointer}
 @media (max-width: 600px) {
   .dp-title { font-size: 20px; }
   .dp-price { font-size: 20px !important; }
-  .dp-score-bars { grid-template-columns: repeat(3, minmax(0,1fr)) !important; }
-  .dp-score-left { gap: 10px; }
 }
 
 @media (max-width: 480px) {
   .dp-title { font-size: 18px; }
   .dp-price { font-size: 18px !important; }
   .dp-diff-badge { height: 24px; font-size: 12px; }
-  .dp-score-bars { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
   .dp-tab { padding: 0 10px; font-size: 12px; height: 40px; }
   .dp-bc-btn { padding: 0 8px; font-size: 11px; }
   .dp-spec { font-size: 11px; height: 25px; padding: 0 7px; }
@@ -707,32 +676,8 @@ button{font-family:inherit;cursor:pointer}
     </div>
   </section>
 
-  <!-- SCORE SECTION · v2.6.9 (Nr. 10): paslėpta - tas pats CarTriige įvertis jau yra
-       skydelyje (#dp-panel). Lieka DOM'e, nes load() rašo į jo ID. -->
-  <div class="dp-score-section" hidden>
-    <div>
-      <div class="dp-score-title">CarTriige Score</div>
-      <div class="dp-score-left">
-        <div class="dp-ring-lg" id="dp-ring">
-          <div><b id="dp-ring-val" style="color:var(--warning)">—</b><small>/10</small></div>
-        </div>
-        <div class="dp-score-verdict">
-          <p id="dp-score-verdict" style="font-weight:600;color:var(--text-primary);margin-bottom:4px"></p>
-          <p id="dp-score-verdict2" style="color:var(--text-secondary);font-size:12px;line-height:1.5"></p>
-        </div>
-      </div>
-    </div>
-    <div class="dp-score-bars" id="dp-score-bars"></div>
-    <div class="dp-score-info">
-      <div>
-        <div class="dp-score-info-h">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
-          Kaip vertiname?
-        </div>
-        <p>CarTriige Score parodo bendrą galimybę, remiantis kaina, rida, įranga, istorija ir rinkos potencialu.</p>
-      </div>
-    </div>
-  </div>
+  <!-- v2.7.1 (Nr. 10, 45 pk.): `.dp-score-section` IŠTRINTA - tas pats CarTriige
+       įvertis, verdiktas ir juostos yra #dp-panel. -->
 
   <!-- PROFIT / RISK BLOCKS -->
   <div class="dp-pr-blocks">
@@ -1700,43 +1645,9 @@ window.ctApi = function (kelias, params) {
     updateSaveBtn(dpArIssaugotas());
 
     var sc = ctScore(c, a);
-    var pct = Math.round(sc.total * 10);
-    var col = scoreColor(sc.total);
-    var ring = document.getElementById('dp-ring');
-    ring.style.setProperty('--pct', pct);
-    ring.style.setProperty('--score-color', col);
-    var rv = document.getElementById('dp-ring-val');
-    rv.textContent = sc.total.toFixed(1);
-    rv.style.color = col;
-    var verd = scoreVerdict(sc.total);
-    document.getElementById('dp-score-verdict').textContent = verd[0];
-    document.getElementById('dp-score-verdict2').textContent = verd[1];
-
     // v1.48.0, DALIS 2: ivercio skydelis salia galerijos. Tie patys skaiciai
     // kaip ziede - `ctScore(c, a)` kvieciamas VIENA karta ir perduodamas.
     try { dpPiestiSkydeli(c, a, sc); } catch (e) { console.error('[SKYDELIS]', e.message); }
-
-    var barsEl = document.getElementById('dp-score-bars');
-    barsEl.innerHTML = '';
-    var barLabels = ['Kaina', 'Rida', 'Įranga', 'Istorija', 'Potencialas'];
-    sc.parts.forEach(function(p, i) {
-      // v2.6.5 (Nr. 45): `null` = komponentas neivertintas (pvz. otomoto be
-      // rinkos imties). Buvo val.toFixed -> TypeError, ir visas load() nutrukdavo:
-      // nei analizes, nei nuotrauku. Neivertinta rodoma bruksniu, ne nuliu.
-      var val = p[1];
-      if (val == null || isNaN(val)) {
-        var d0 = document.createElement('div');
-        d0.className = 'dp-sbar';
-        d0.innerHTML = '<div class="dp-sbar-label">' + barLabels[i].toUpperCase() + '</div><div class="dp-sbar-val is-na">–</div><div class="dp-sbar-track"></div>';
-        barsEl.appendChild(d0);
-        return;
-      }
-      var barCol = scoreColor(val);
-      var div = document.createElement('div');
-      div.className = 'dp-sbar';
-      div.innerHTML = '<div class="dp-sbar-label">' + barLabels[i].toUpperCase() + '</div><div class="dp-sbar-val" style="color:' + barCol + '">' + val.toFixed(1) + '</div><div class="dp-sbar-track"><div class="dp-sbar-fill" style="width:' + (val * 10) + '%;background:' + barCol + '"></div></div>';
-      barsEl.appendChild(div);
-    });
 
     window.__dpAnalysis = a || null;
     var pr = a && a.perikupo_radaras;
