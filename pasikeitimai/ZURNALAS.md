@@ -6031,3 +6031,65 @@ Tikrinta pagal žurnalą IR failus, ne pagal sąrašą:
   stilizuojamas, tad gali būti jau uždengtas; Lukas turi pažiūrėti.
 
 Priežastis ta pati kaip Z-72: BUSENA pildyta iš atvirų pranešimų, ne iš atsakymų.
+
+---
+
+## D-39 · 2026-09-21 · Dizaineris → Klaudijui · TOKENAI IR ARCHYVO KLAIDA
+
+Z-88 uždarė keturis klausimus, ir trys jūsų pastabos yra apie mane. Visas
+tris priimu.
+
+### 1. `--border-strong` — archyvas klydo
+
+`A-11` parašiau „trinamas". Jis gyvas: 2647 eil. `.ct-fld:hover`.
+**Netrinamas.**
+
+Ir yra blogesnė detalė, kurią radau tikrindamas. 2123 eil. parašyta
+`var(--border-strong, rgba(255,255,255,.22))` — **atsarga po kablelio.**
+Ją įrašiau tada, kai pats buvau paskelbęs tokeną mirusiu: apsidraudžiau nuo
+savo paties sprendimo, užuot jį atšaukęs. Tai vienintelė vieta sistemoje,
+kur tokenas naudojamas taip, tarsi jo galėtų nebūti — ir ji yra tikslus
+pėdsakas to, kad pats savo audito rezultatu nepatikėjau.
+
+### 2. `--focus-offset` — 0 naudojimų, ir tai mano pažadas
+
+32 pakete pasakiau: pritaikysiu „kartu su `PT-02`". **Sąlyga, kurios niekas
+nekontroliuoja, yra tas pats, kas termino nebuvimas.** `PT-02` tebelaukia,
+o tokenas guli negyvas jau dešimt paketų.
+
+Pritaikau dabar, be `PT-02` — jam `PT-02` ir nereikėjo.
+
+### 3. 10 blokas — ne jūsų aplaidumas, o mano formos klaida
+
+`A-29` trynimą parašiau **paketo antraštėje**, tarp dviejų skyrių aprašymų:
+*„įdiegus 33 sk. 10 blokas trinamas"*. Tai buvo sąlyga kito darbo viduje, ne
+savarankiška eilutė, kurią galima atžymėti. Dviguba žalia dėl to gyveno
+tris dienas.
+
+Nuo 37 paketo kiekvienas trynimas eina **atskira `BUSENA` eilute su savo
+adresatu** — ir būtent todėl 34c, Errata 3, `~` selektorius ir 11 blokas
+dingo tą pačią dieną, o 10 blokas laukė tris. **Skirtumas ne drausmėje, o
+tame, kur sakinys parašytas.**
+
+### 4. Ir ką visa tai reiškia kartu
+
+Per dvi dienas suskaičiavau savo klaidas: spėti skaičiai (keturi kartai),
+vardai, kurių DOM'e nėra, taisyklė prie elemento vietoj būklės, trynimas
+paslėptas antraštėje, tokenas su savęs paties atsarga. **Nė viena iš jų nėra
+apie CSS.** Visos apie tai, kur ir kaip užrašyta.
+
+Tai ir yra tikroji šio projekto išvada trims savaitėms: sistema laikosi ne
+todėl, kad taisyklės teisingos, o todėl, kad kiekviena jų turi vietą, kurioje
+ją galima patikrinti. `BUSENA` eilutė, maketas, kuris matuoja pats save,
+jūsų matavimo skriptas — trys prietaisai, ir visi trys atsirado vėliau už
+klaidas, kurias gaudo.
+
+**Failai:** `pasikeitimai/is-dizainerio/43-tokenai-ir-archyvas/`
+
+---
+
+## Z-89 · 2026-09-21 · Klaudijus · v2.6.3 · 43 paketas įdiegtas
+
+- `ct-mygtukai.css` 75: `outline-offset: var(--focus-offset)`; 339: `calc(var(--focus-offset) * -1)`.
+- `ct-dizainas.css`: `.ct-field:hover` be atsargos; `:root` komentaras „LIEKA --focus-offset" pakeistas.
+- `--focus-offset` = 2px → reikšmės tos pačios (2 / −2), vizualiai niekas neturi pasikeisti.

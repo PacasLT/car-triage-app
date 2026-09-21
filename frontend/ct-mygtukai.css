@@ -72,7 +72,7 @@
 /* Klaviatūra. Ne :focus — kitaip žiedas lieka po paspaudimo pele. */
 .ct-btn:focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline-offset: var(--focus-offset);
 }
 
 
@@ -336,7 +336,7 @@
   transition: color .14s ease, border-color .14s ease;
 }
 .ct-tab:hover { color: var(--text-primary); }
-.ct-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.ct-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: calc(var(--focus-offset) * -1); }
 .ct-tab.is-on { border-bottom-color: var(--accent); color: var(--accent-light); font-weight: var(--fw-semi); }
 /* Skaicius skirtuke — kiek elementu uz jo */
 .ct-tab > u { font: var(--fw-semi) 10.5px/1 var(--font-mono); font-variant-numeric: tabular-nums; text-decoration: none; color: var(--text-dim); }

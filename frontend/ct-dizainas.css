@@ -84,7 +84,7 @@
        --fs-700                               nėra nė vieno tokio dydžio teksto
        --shadow-1, --shadow-panel             sistemoje sąmoningai nėra šešėlių
        --text-on-accent                       keturios vietos rašo #fff aiškiau
-     LIEKA --focus-offset: dizaineris jį pritaikys kartu su PT-02. */   /* tekstas ant šviesaus žalio/geltono užpildo */
+     --focus-offset pritaikytas 43 pakete (ct-mygtukai.css .ct-btn / .ct-tab). */   /* tekstas ant šviesaus žalio/geltono užpildo */
 
   /* ── 3. SEMANTINĖS SPALVOS · turi prasmę, dekoracijai NENAUDOJAMOS ────────
      žalia = patvirtinta / gerai        geltona = galimas signalas / dėmesio
@@ -2141,7 +2141,7 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
   transition: border-color var(--dur-fast) var(--ease);
 }
 .ct-field::placeholder { color: var(--text-dim); }
-.ct-field:hover { border-color: var(--border-strong, rgba(255,255,255,.22)); }
+.ct-field:hover { border-color: var(--border-strong); }
 .ct-field:focus-visible {
   outline: none;
   border-color: var(--accent-border);

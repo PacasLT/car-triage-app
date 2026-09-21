@@ -8,6 +8,12 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.6.3', data: '2026-09-21', pavadinimas: 'Dizaino sistemos tvarka',
+    pakeitimai: [
+      'Mygtukų fokuso žiedas (Tab klavišu) valdomas vienu dizaino nustatymu - išvaizda nepasikeitė',
+    ],
+  },
+  {
     versija: '2.6.2', data: '2026-09-21', pavadinimas: 'Klaidų pranešimo langas',
     pakeitimai: [
       'Pranešimo lange prioriteto pasirinkimas be raudonos/geltonos/žalios - žalia sistemoje reiškia „ištaisyta"',
