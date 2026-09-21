@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.3.2', data: '2026-09-21', pavadinimas: 'Svarus isjungimas atnaujinant',
+    pakeitimai: [
+      'Atnaujinant programa serveris isjungiamas tvarkingai ir issaugo sukauptus duomenis',
+      'Railway nebesiuncia klaidingo pranesimo apie kritima po kiekvieno atnaujinimo',
+    ],
+  },
+  {
     versija: '2.3.1', data: '2026-09-21', pavadinimas: '35 paketas: filtru etiketes ir statistikos juosta sone',
     pakeitimai: [
       'Markes ir modelio filtruose vel matomos piktogramos, o etikete visur stovi virs laukelio',

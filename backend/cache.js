@@ -106,7 +106,21 @@ function saveCache() {
 }
 
 process.on('beforeExit', () => { if (_cacheDirty) saveCacheNow(); if (typeof saveLifecycle === 'function') saveLifecycle(); });
-process.on('SIGTERM', () => { if (_cacheDirty) saveCacheNow(); if (typeof saveLifecycle === 'function') saveLifecycle(); process.exit(0); });
+// v2.3.2: SIGINT sutvarkomas taip pat, kaip SIGTERM. Railway siuncia SIGTERM
+// keiciant konteineri; jei procesas isiaugo per `npm start`, SIGTERM gauna
+// npm, uzmusa vaika ir pats baigia NE NULIU - is to gimdavo laiskas
+// „Deploy Crashed" po kiekvieno push'o, nors serveris sustodavo tvarkingai.
+// Startas dabar tiesiai i `node` (railway.json), o cia - abu signalai.
+function svarusIsejimas(signalas) {
+  return () => {
+    console.log('[BAIGIAM] gautas ' + signalas + ' - issaugom ir isjungiam svariai');
+    try { if (_cacheDirty) saveCacheNow(); } catch (e) {}
+    try { if (typeof saveLifecycle === 'function') saveLifecycle(); } catch (e) {}
+    process.exit(0);
+  };
+}
+process.on('SIGTERM', svarusIsejimas('SIGTERM'));
+process.on('SIGINT', svarusIsejimas('SIGINT'));
 
 valytiPasenusius();
 // Jei is failo ismetem HTML puslapius, perrasom ji NEDELSIANT - kitaip senas

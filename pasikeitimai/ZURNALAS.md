@@ -4829,3 +4829,41 @@ Gyvos produkcijos su tikra paieška — tai kainuotų kreditų (~10 už puslapį
 o stendas naudoja tuos pačius CSS failus. Luko patikrai Nr. 39, 41, 40
 keliauja į `laukia-patikros`.
 
+## Z-63 · 2026-09-21 · Klaudijus · „Deploy Crashed" po KIEKVIENO push'o · v2.3.2
+
+Lukas atsiuntė Railway laišką „Deploy Crashed!". Patikrinta: nė vienas
+diegimas iš tikrųjų nesugriuvo — visi dešimt paskutinių yra `SUCCESS` arba
+`REMOVED` (pakeisti nauju). Krito ne programa, o **išėjimo kodas**.
+
+### Ką rodo logai
+
+```
+npm error command failed
+npm error signal SIGTERM
+npm error command sh -c node backend/server.js
+Stopping Container
+```
+
+Keičiant konteinerį Railway siunčia `SIGTERM` procesui nr. 1. Juo buvo
+**npm** (Railpack paleidžia `npm start`), ne mūsų serveris. npm uždaro vaiką
+ir pats baigia darbą **ne nuliu** — Railway tai mato kaip kritimą ir siunčia
+laišką. Mūsų `SIGTERM` tvarkyklė `cache.js` iki serverio net nenueidavo.
+
+Tai forma, kurią jau turim: **matas teisingas, o atsakė ne į tą klausimą** —
+tik šįkart matas ne mūsų, o Railway. Programos būsena buvo gera visą laiką.
+
+### Pataisyta
+
+1. `railway.json` (naujas): `startCommand: "node backend/server.js"` — startas
+   tiesiai į Node, be npm tarpininko. Pridėta `restartPolicyType: ON_FAILURE`
+   su 3 bandymais.
+2. `cache.js`: `SIGTERM` ir `SIGINT` tvarkomi ta pačia funkcija, prieš
+   išeinant išsaugomi podėliai ir gyvavimo ciklas, žurnale lieka eilutė
+   `[BAIGIAM] gautas SIGTERM`.
+
+### Ko tikėtis
+
+**Šis diegimas dar duos vieną laišką** — jis užmuša dabartinį konteinerį,
+paleistą senuoju būdu. Kitas push'as laiško nebeturi duoti; logo eilutė
+`[BAIGIAM] gautas SIGTERM` bus įrodymas, kad signalas pasiekė serverį.
+
