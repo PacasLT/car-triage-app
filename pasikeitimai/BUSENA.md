@@ -1,4 +1,4 @@
-# Būsena · atnaujinta 2026-09-21, v2.2.0 (v2.1.0 GYVA produkcijoje)
+# Būsena · atnaujinta 2026-09-21, v2.2.1 (v2.2.0 GYVA produkcijoje)
 
 Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
@@ -30,6 +30,8 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 | L-04 / L-05 | `/admin/atsarga`, rakto rotacija | **Lukas** | Priminimai 09-19 11:30 ir 13:15 UTC. |
 
 ## Kas uždaryta paskutiniu metu
+
+- v2.2.1 — **Automatinis sekimas IŠJUNGTAS** (Z-55). ScraperAPI nurašo ~10 kreditų už autoplius/autogido puslapį, ne 1; sekimas (~300 skelbimų) = ~3 000 kreditų ir buvo paleidžiamas po KIEKVIENO deploy'aus. Liko ~14 500 iš 100 000. Įjungti: `SEKIMAS_AUTO=1`. **Kol kodas nesutvarkytas iki galo — jokių pilnų skenavimų.**
 
 - v2.2.0 — **Skelbimų archyvas** (Z-54): `backend/rinka.js`, `/data/rinka.db` (SQLite, atskirai nuo `users.db`). `GET /admin/rinka` (suvestinė, disko failai, `?paskyra=1` — ScraperAPI likutis nemokamai), `POST /admin/rinka/skenuoti` (tik autoplius/autogidas, riba privaloma). Dingimas — tik po dviejų pilnų skenavimų. `turiLizingoOpcija` nesaugomas. Pakeliui: **atominis JSON įrašymas** (6 failai) — anksčiau nutrūkus rašymui visas archyvas tyliai virsdavo `{}`. Sargas `rinka.test.js` **24/24**. **Laukia push'o, tada bandomasis BMW nuo 2019.**
 

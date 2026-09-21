@@ -4317,14 +4317,26 @@ async function patikrintiViena(url) {
   }
 }
 
-// Paleidziam kas 24 val. Pirmas tikrinimas - po 10 min nuo starto, kad netrukdytu paleidimui.
+// v2.2.1: AUTOMATINIS SEKIMAS ISJUNGTAS (Luko sprendimas 2026-09-21).
+// Pamatuota: ScraperAPI autoplius/autogidas puslapiui nuraso ~10 kreditu, ne 1.
+// Sekimas tikrina ~300 skelbimu po VIENA puslapi - ~3 000 kreditu per karta.
+// Ir jis buvo paleidziamas 10 min po KIEKVIENO starto, t.y. po kiekvieno
+// push'o, nepaisant to, kad ta diena jau buvo paleistas. Kelios dienos su
+// keliais push'ais suvalge ~48 000 kreditu.
+// Ijungti atgal: Railway kintamasis SEKIMAS_AUTO=1. Planas - pakeisti ji
+// archyvo skenavimu (paieskos puslapis = 20 skelbimu uz ta pacia kaina).
+// Rankinis paleidimas (/api/run-tracking) lieka.
 const SEKIMO_INTERVALAS_MS = 24 * 60 * 60 * 1000;
-setTimeout(() => {
-  tikrintiSekamus().catch((e) => console.error('[SEKIMAS] klaida:', e.message));
-  setInterval(() => {
+if (process.env.SEKIMAS_AUTO === '1') {
+  setTimeout(() => {
     tikrintiSekamus().catch((e) => console.error('[SEKIMAS] klaida:', e.message));
-  }, SEKIMO_INTERVALAS_MS);
-}, 10 * 60 * 1000);
+    setInterval(() => {
+      tikrintiSekamus().catch((e) => console.error('[SEKIMAS] klaida:', e.message));
+    }, SEKIMO_INTERVALAS_MS);
+  }, 10 * 60 * 1000);
+} else {
+  console.log('[SEKIMAS] automatinis kasdienis tikrinimas ISJUNGTAS (SEKIMAS_AUTO != 1) - kreditai taupomi');
+}
 
 // Rankinis paleidimas (naudinga testuojant)
 app.post('/api/run-tracking', requireAuth, (req, res) => {

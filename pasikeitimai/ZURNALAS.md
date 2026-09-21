@@ -4206,3 +4206,53 @@ diske), pritaikyta visiems 6 JSON failams.
 2. Pilnas BMW nuo 2019: sąmata ~2 300 skelbimų ÷ 20 ≈ **~115 kreditų**.
    Tikslų skaičių pasakys `/admin/rinka?paskyra=1` prieš ir po.
 
+## Z-55 · 2026-09-21 · Klaudijus · KREDITAI: sąmata buvo 10× per maža · v2.2.1
+
+### Bandomasis skenavimas (v2.2.0) — pavyko
+
+```
+portalas   puslapių  skelbimų  pabaiga
+autoplius     79      1 576    galas (pilnas)
+autogidas     46        908    galas (pilnas)
+viso                  2 484    rinka.db 5,5 MB
+```
+
+Užpildymas: kaina/rida/metai/kuras/variklis/miestas 99–100 %, galia 94 %,
+kėbulas tik autoplius. Du duomenų trūkumai: 27 skelbimai < 2019 (portalas
+grąžina nepaisydamas filtro) ir vienas X5 su absurdiška kaina (X5 vidurkis
+386 mln. €) — archyvo vidurkiai turi atmesti `kainos_ispejimas` ir išskirtis.
+
+### Rasta: ~10 kreditų už užklausą, ne 1
+
+```
+nuo deploy'aus: 218 ScraperAPI užklausų (ATSARGA)
+paskyra /account: 83 266 → 85 506 = 2 240 kreditų
+                  ≈ 10,3 kredito užklausai
+```
+
+render=false, puppeteer/axios nemokami. Visos ankstesnės sąmatos (mano
+„~115 kreditų skenavimui") klaidingos 10 kartų — skenavimas kainavo ~1 250.
+Tikslią domeno kainą verta patvirtinti ScraperAPI Dashboard'e.
+
+### Rasta: sekimas po kiekvieno deploy'aus
+
+`setTimeout(tikrintiSekamus, 10 min)` paleidžiamas kiekvieno starto metu,
+be jokios „ar šiandien jau buvo" patikros. ~300 skelbimų × 1 puslapis ×
+~10 kreditų = **~3 000 kreditų per push'ą**. 34 846 → 83 266 per kelias
+dienas atitinka.
+
+Luko sprendimas: **automatinį sekimą išjungti**, kol kodas sutvarkytas iki
+galo, tada paleisti visų portalų skenavimą. Įjungiama `SEKIMAS_AUTO=1`.
+Rankinis `/api/run-tracking` liko.
+
+### Prieš pilną visų portalų skenavimą (priminimas nustatytas)
+
+1. Sekimą pakeisti archyvo skenavimu: paieškos puslapis = 20 skelbimų už
+   ~10 kreditų; sekimas = 1 skelbimas už ~10.
+2. Archyvo vidurkiai be `kainos_ispejimas` ir išskirčių; < metaiNuo atmesti.
+3. Kreditų sargas: skenavimas sustoja, jei paskyroje lieka < N.
+4. `autoplius-ids` atnaujinimas kiekvieno starto metu kol „FinnCart nerastas"
+   (1 užklausa per deploy'ų).
+5. Sąmata iš naujo su 10 kreditų/puslapį: visi LT skelbimai (~67 800) ≈
+   3 400 puslapių ≈ **~34 000 kreditų** vienam pilnam perėjimui.
+

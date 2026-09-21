@@ -8,6 +8,12 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.2.1', data: '2026-09-21', pavadinimas: 'Automatinis sekimas laikinai isjungtas',
+    pakeitimai: [
+      'Kasdienis sekamu skelbimu tikrinimas laikinai sustabdytas, kol pertvarkomas skenavimas',
+    ],
+  },
+  {
     versija: '2.2.0', data: '2026-09-21', pavadinimas: 'Skelbimu archyvas',
     pakeitimai: [
       'Pradedame kaupti skelbimu istorija: kada skelbimas atsirado, kaip keitesi kaina, kada dingo',
