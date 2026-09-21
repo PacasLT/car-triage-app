@@ -272,3 +272,20 @@
 
 /* 19 BLOKAS · IŠTRINTAS v2.7.1 (45 paketas): šaknies `color-scheme: dark` ir
    `.ct-fld-v select option` dabar ct-dizainas.css. */
+
+
+/* ----------------------------------------------------------------------------
+   20 BLOKAS · papildomi filtrai „Daugiau filtrų" skydelyje · v2.7.2 (Z-97)
+
+   Luko užduotis: filtrai pagal autoplius / mobile.de. Laukai - sistemos
+   `select.ct-field` (ct-dizainas.css, su `option` spalvomis 2163), čia tik
+   išdėstymas: etiketė virš lauko, tinklelis, kuris siaurame stulpelyje
+   (šonas 276 px, telefonas) krenta į vieną stulpelį. Dizaineriui - į
+   `.ct3-more-panel` skyrių.                                                   */
+.ct-papf { margin-top: var(--s-3); padding-top: var(--s-3); border-top: 1px solid var(--border); }
+.ct-papf-h { font: var(--fw-semi) 10px/1 var(--font-mono); letter-spacing: .08em; color: var(--text-dim); margin: 0 0 var(--s-2); }
+.ct-papf-g { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: var(--s-2) var(--s-3); margin-bottom: var(--s-3); }
+.ct-papf-l { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.ct-papf-l > span { font-size: 12px; color: var(--text-muted); }
+.ct-papf-l > .ct-field { width: 100%; min-width: 0; }
+.ct-papf-n { font-size: 11px; color: var(--text-dim); }

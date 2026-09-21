@@ -2046,6 +2046,39 @@ const AUTOPLIUS_FUEL_IDS = {
   elektra: [35],                // Elektra
 };
 
+// v2.7.2 (Z-97): nauji filtrai - pardavejas, ideta per N d., kebulo tipas.
+// VISI kodai patikrinti gyvai portaluose 2026-09-22 (BMW X5 nuo 2019):
+//   autoplius  is_partner 0/1: 53+134=187 OK; older_not 1/7/14: 62/123/144; body_type_id[7]: 183
+//   autogidas  f_521 0/1: 4+45=49 OK; f_3[4]=Visureigis / Krosoveris: 48, f_3[1]=Sedanas: 0
+//   as24       custtype P/D: 597+5751=6348 OK; adage 1/7: 115/670; body 4/5/6: 6285/35/6
+//   otomoto    search[private_business] private/business: 278+706=984 OK; body suv 873
+//   mobile.de  st FSBO/DEALER: 127+4328 (is 4479); doc 1/7: 133/697; c=OffRoad 4346
+// otomoto ir autogidas "ideta per" neturi - filtruojam patys pagal skelbimo data.
+const PAPILDOMI_FILTRAI = {
+  kebulas: {
+    //            autoplius  autogidas f_3[i]=tekstas            as24  otomoto     mobile.de
+    sedanas:     { ap: 4, ag: [1, 'Sedanas'],                   as: 6,  oto: 'sedan',   md: 'Limousine' },
+    hecbekas:    { ap: 2, ag: [2, 'Hečbekas'],                  as: 1,  oto: 'compact', md: 'SmallCar' },
+    universalas: { ap: 5, ag: [3, 'Universalas'],               as: 5,  oto: 'combi',   md: 'EstateCar' },
+    visureigis:  { ap: 7, ag: [4, 'Visureigis / Krosoveris'],   as: 4,  oto: 'suv',     md: 'OffRoad' },
+    vienaturis:  { ap: 6, ag: [5, 'Vienatūris'],                as: 12, oto: 'minivan', md: 'Van' },
+    kupe:        { ap: 1, ag: [6, 'Coupe'],                     as: 3,  oto: 'coupe',   md: 'SportsCar' },
+    kabrioletas: { ap: 3, ag: [7, 'Kabrioletas'],               as: 2,  oto: 'cabrio',  md: 'Cabrio' },
+  },
+  pardavejas: {
+    privatus: { ap: 0, ag: 0, as: 'P', oto: 'private',  md: 'FSBO' },
+    verslas:  { ap: 1, ag: 1, as: 'D', oto: 'business', md: 'DEALER' },
+  },
+  idetaDienos: [1, 3, 7, 14],
+};
+function papFiltras(filters) {
+  const kb = PAPILDOMI_FILTRAI.kebulas[filters.kebulas] || null;
+  const pr = PAPILDOMI_FILTRAI.pardavejas[filters.pardavejas] || null;
+  const d = parseInt(filters.idetaDienos, 10);
+  const dienos = PAPILDOMI_FILTRAI.idetaDienos.includes(d) ? d : null;
+  return { kb, pr, dienos };
+}
+
 function buildAutopliusUrl(filters) {
   let url = `https://autoplius.lt/skelbimai/naudoti-automobiliai?category_id=2`;
   // PAKEISTA: markė/modelis per tikrus autoplius ID (make_id[97]=1308) vietoj teksto paieškos.
@@ -2080,6 +2113,10 @@ function buildAutopliusUrl(filters) {
   if (filters.beDefektu) url += `&${P.beDefektu}`;
   if (filters.beVairoDesineje) url += `&${P.beVairoDesineje}`;
   if (filters.tikLietuvoje) url += `&${P.tikLietuvoje}`;
+  { const pf = papFiltras(filters);
+    if (pf.kb) url += `&body_type_id%5B${pf.kb.ap}%5D=${pf.kb.ap}`;
+    if (pf.pr) url += `&is_partner=${pf.pr.ap}`;
+    if (pf.dienos) url += `&older_not=${pf.dienos}`; }
   // PRIDETA: skaitom nuo NAUJAUSIO skelbimo. Numatytasis autoplius rikiavimas ("Aktualiausi")
   // i virsu kelia MOKAMAI iskeltus skelbimus, todel svieziausi pasiulymai nukrenta i 3-4 puslapi.
   url += `&${autopliusIds.PARAMETRAI.rikiavimas[filters.rikiavimas] || autopliusIds.PARAMETRAI.rikiavimas.naujausi}`;
@@ -2127,6 +2164,9 @@ function buildAutogidasUrl(filters) {
   if (filters.tikSuVin) params.push('ac_3=1');
   if (filters.tikLietuvoje) params.push('ac_4=1');
   if (filters.beJav) params.push('ac_5=1');            // slepti is aukcionu (JAV importas)
+  { const pf = papFiltras(filters);
+    if (pf.kb) params.push(`f_3[${pf.kb.ag[0]}]=${encodeURIComponent(pf.kb.ag[1])}`);
+    if (pf.pr) params.push(`f_521=${pf.pr.ag}`); }
   params.push(AUTOGIDAS_PARAM.rikiavimas[filters.rikiavimas] || AUTOGIDAS_PARAM.rikiavimas.naujausi);
   return `https://autogidas.lt/skelbimai/automobiliai/?${params.join('&')}`;
 }
@@ -2155,6 +2195,10 @@ function buildAutoscout24Url(filters) {
   // avarijos A) - pamatuota 6 360 vs 6 422 su A. Rašom aiškiai, kad nepriklausytų
   // nuo portalo numatytosios reikšmės.
   if (filters.beDefektu) params.push('ustate=N,U');
+  { const pf = papFiltras(filters);
+    if (pf.kb) params.push(`body=${pf.kb.as}`);
+    if (pf.pr) params.push(`custtype=${pf.pr.as}`);
+    if (pf.dienos) params.push(`adage=${pf.dienos}`); }
   return `${url}?${params.join('&')}`;
 }
 
@@ -2206,6 +2250,9 @@ function buildOtomotoUrl(filters) {
   }
   // v2.4.3: kuras - iki siol otomoto jo negaudavo.
   (KURO_FILTRAS.otomoto[filters.kuras] || []).forEach((v, i) => params.push(`search[filter_enum_fuel_type][${i}]=${v}`));
+  { const pf = papFiltras(filters);
+    if (pf.kb) params.push(`search[filter_enum_body_type][0]=${pf.kb.oto}`);
+    if (pf.pr) params.push(`search[private_business]=${pf.pr.oto}`); }
   return `${url}?${params.join('&')}`;
 }
 
@@ -2281,6 +2328,8 @@ function extractOtomotoListings(html) {
         miestas: (item.location && item.location.city && item.location.city.name) || null,
         vieta: [item.location && item.location.city && item.location.city.name, item.location && item.location.region && item.location.region.name, 'Lenkija'].filter(Boolean).join(', ') || null,
         kilmesSalis: getDisp('country_origin') || null,
+        // v2.7.2: ideta per N d. - otomoto portale tokio filtro nera, filtruojam patys.
+        ikeltaLaikas: item.createdAt ? (Date.parse(item.createdAt) || null) : null,
         reitingas: null, atsiliepimuSkaicius: null,
         rawText: `${modelis} ${kaina}€ (${kainaPlN} PLN) ${metai || ''} ${rida || ''} km`.trim().slice(0, 200),
         url, photo, photos,
@@ -3092,6 +3141,13 @@ async function runSearchJob(jobId, filters) {
       const galiaNuo = parseInt(filters.galiaNuo, 10), galiaIki = parseInt(filters.galiaIki, 10);
       if (galiaNuo && l.galia && l.galia < galiaNuo) why.push('Galia ' + l.galia + ' kW < ' + galiaNuo + ' kW');
       if (galiaIki && l.galia && l.galia > galiaIki) why.push('Galia ' + l.galia + ' kW > ' + galiaIki + ' kW');
+      // v2.7.2 (Z-97): ideta per N d. Portale tai padaro autoplius, as24, mobile.de;
+      // otomoto ir autogidas - tik cia (autogide data yra ATNAUJINIMO, tad sios salygos
+      // atnaujinti seni skelbimai praeina). Skelbimai be datos nemetami.
+      const idetaD = papFiltras(filters).dienos;
+      if (idetaD && l.ikeltaLaikas && Date.now() - l.ikeltaLaikas > idetaD * 86400000) {
+        why.push('Įdėtas prieš ' + Math.floor((Date.now() - l.ikeltaLaikas) / 86400000) + ' d., reikia ne senesnio nei ' + idetaD + ' d.');
+      }
       if (why.length) { l.hardRejectReasons = why; hardRejected.push(l); return false; }
       return true;
     });
@@ -3332,6 +3388,27 @@ async function runSearchJob(jobId, filters) {
     });
 
     let candidates = enriched.slice().sort((a, b) => b.qualityScore - a.qualityScore);
+    // v2.7.2 (Z-97): rezultatu filtrai - be kreditu, po triazo. Neatitike nedingsta:
+    // jie lieka „Kiti skelbimai" su priezastimi (explainRejection skaito `papAtmesta`).
+    const zemiauRinkos = parseInt(filters.zemiauRinkos, 10) || 0;
+    const minBalas = parseFloat(filters.minBalas) || 0;
+    if (zemiauRinkos || minBalas) {
+      const pries = candidates.length;
+      candidates = candidates.filter((c) => {
+        const why = [];
+        if (zemiauRinkos && !(c.diffPct != null && c.marketCount >= 3 && c.diffPct >= zemiauRinkos)) {
+          why.push(c.diffPct == null || !(c.marketCount >= 3)
+            ? 'nėra patikimo rinkos palyginimo, o prašyta bent ' + zemiauRinkos + ' % žemiau rinkos'
+            : (c.diffPct >= 0 ? c.diffPct + ' % žemiau' : Math.abs(c.diffPct) + ' % virš') + ' rinkos, prašyta bent ' + zemiauRinkos + ' % žemiau');
+        }
+        if (minBalas && !(c.qualityScore >= minBalas * 10)) {
+          why.push('CarTriige balas ' + (c.qualityScore != null ? (c.qualityScore / 10).toFixed(1) : '–') + ', prašyta bent ' + minBalas);
+        }
+        if (why.length) { c.papAtmesta = 'Neatitinka jūsų rezultatų filtro: ' + why.join('; ') + '.'; return false; }
+        return true;
+      });
+      logJob(jobId, '\u{1F50D} Rezultatų filtras (' + [zemiauRinkos ? '≥' + zemiauRinkos + ' % žemiau rinkos' : '', minBalas ? 'balas ≥' + minBalas : ''].filter(Boolean).join(', ') + '): ' + candidates.length + ' iš ' + pries);
+    }
     candidates = candidates.slice(0, MAX_CANDIDATES);
 
     const pagalLygi = {};
@@ -3341,6 +3418,7 @@ async function runSearchJob(jobId, filters) {
 
     function explainRejection(l) {
       const reasons = [];
+      if (l.papAtmesta) reasons.push(l.papAtmesta);
       if (!l.kaina) {
         reasons.push('Skelbime nenurodyta aiški kaina – negalima patikimai palyginti su rinka.');
       } else if (l.marketCount < 3) {

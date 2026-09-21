@@ -28,6 +28,8 @@ const kodas = [
   blokas(/const AUTOGIDAS_PARAM = \{[\s\S]*?\n\};/),
   blokas(/const PLN_EUR_RATE = [^;]+;/),
   blokas(/const PLN_KURSAS = \{[^\n]*\};/),
+  blokas(/const PAPILDOMI_FILTRAI = \{[\s\S]*?\n\};/),
+  imk('papFiltras'),
   ...['kurasAtitinka', 'buildAutopliusUrl', 'buildAutogidasUrl', 'buildAutoscout24Url', 'buildOtomotoUrl'].map(imk),
   'return { kurasAtitinka, buildAutopliusUrl, buildAutogidasUrl, buildAutoscout24Url, buildOtomotoUrl };',
 ].join('\n');
@@ -120,6 +122,33 @@ console.log('\n10. „BE DEFEKTŲ" pasiekia kiekvieną portalą (Z-80/Z-81, skai
   t('autoscout24 ustate=N,U (6 422 → 6 360)', d(F.buildAutoscout24Url(su)).includes('ustate=N,U') && !d(F.buildAutoscout24Url(be)).includes('ustate'), F.buildAutoscout24Url(su));
   t('otomoto filter_enum_damaged=0 (977 → 586)', d(F.buildOtomotoUrl(su)).includes('search[filter_enum_damaged]=0') && !d(F.buildOtomotoUrl(be)).includes('damaged'), F.buildOtomotoUrl(su));
   t('mobile.de dam=false visada (4 504 → 4 470)', d(MD.buildMobileDeUrl(su)).includes('dam=false') && d(MD.buildMobileDeUrl(be)).includes('dam=false'), MD.buildMobileDeUrl(su));
+}
+
+console.log('\n11. KĖBULAS, PARDAVĖJAS, ĮDĖTA PER (Z-97, skaičiai iš portalų 2026-09-22) ─');
+{
+  const MD = require(path.join(__dirname, '..', 'mobilede.js'));
+  const f = { marke: 'BMW', modelis: 'X5', metaiNuo: 2019, kebulas: 'visureigis', pardavejas: 'privatus', idetaDienos: '7' };
+  const be = { marke: 'BMW', modelis: 'X5', metaiNuo: 2019 };
+  const ap = d(F.buildAutopliusUrl(f)), ag = d(F.buildAutogidasUrl(f)), as = d(F.buildAutoscout24Url(f)), ot = d(F.buildOtomotoUrl(f)), md = d(MD.buildMobileDeUrl(f));
+  t('autoplius body_type_id[7], is_partner=0, older_not=7', ap.includes('body_type_id[7]=7') && ap.includes('is_partner=0') && ap.includes('older_not=7'), ap);
+  t('autogidas f_3[4]=Visureigis / Krosoveris, f_521=0', ag.includes('f_3[4]=Visureigis / Krosoveris') && ag.includes('f_521=0'), ag);
+  t('autoscout24 body=4, custtype=P, adage=7', as.includes('body=4') && as.includes('custtype=P') && as.includes('adage=7'), as);
+  t('otomoto body suv, private_business=private', ot.includes('search[filter_enum_body_type][0]=suv') && ot.includes('search[private_business]=private'), ot);
+  t('mobile.de c=OffRoad, st=FSBO, doc=7', md.includes('c=OffRoad') && md.includes('st=FSBO') && md.includes('doc=7'), md);
+  const v = { ...be, pardavejas: 'verslas' };
+  t('verslas: ap 1, ag 1, as D, oto business, md DEALER',
+    d(F.buildAutopliusUrl(v)).includes('is_partner=1') && d(F.buildAutogidasUrl(v)).includes('f_521=1') && d(F.buildAutoscout24Url(v)).includes('custtype=D')
+    && d(F.buildOtomotoUrl(v)).includes('private_business]=business') && d(MD.buildMobileDeUrl(v)).includes('st=DEALER'));
+  const visi = [F.buildAutopliusUrl(be), F.buildAutogidasUrl(be), F.buildAutoscout24Url(be), F.buildOtomotoUrl(be), MD.buildMobileDeUrl(be)].map(d).join(' ');
+  t('be filtrų - nė vieno naujo parametro', !/body_type_id|is_partner|older_not|f_3\[|f_521|[?&]body=|custtype|adage|body_type\]|private_business|[?&](c|st|doc)=/.test(visi), visi);
+  const blogi = { ...be, kebulas: 'traktorius', pardavejas: 'x', idetaDienos: '5' };
+  const bv = [F.buildAutopliusUrl(blogi), F.buildAutoscout24Url(blogi), MD.buildMobileDeUrl(blogi)].map(d).join(' ');
+  t('nežinomos reikšmės nepatenka (5 d. nėra portaluose)', !/older_not|adage|[?&]doc=|body|is_partner|custtype|[?&]st=/.test(bv), bv);
+  // Visi 7 kėbulai turi visus 5 kodus
+  const K = ['sedanas', 'hecbekas', 'universalas', 'visureigis', 'vienaturis', 'kupe', 'kabrioletas'];
+  t('7 kėbulai × 5 portalai', K.every((k) => { const x = { ...be, kebulas: k };
+    return /body_type_id\[\d+\]/.test(d(F.buildAutopliusUrl(x))) && /f_3\[\d+\]=/.test(d(F.buildAutogidasUrl(x))) && /body=\d+/.test(d(F.buildAutoscout24Url(x)))
+      && /filter_enum_body_type\]\[0\]=[a-z-]+/.test(d(F.buildOtomotoUrl(x))) && /c=[A-Za-z]+/.test(d(MD.buildMobileDeUrl(x))); }));
 }
 
 console.log('\n' + (bl ? '✗ ' + bl + ' klaidos, ' + ok + ' praėjo' : '✓ ' + ok + '/' + ok + ' patikrų praėjo'));

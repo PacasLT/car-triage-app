@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.7.2', data: '2026-09-22', pavadinimas: 'Nauji filtrai',
+    pakeitimai: [
+      '„Daugiau filtrų": kėbulo tipas, pardavėjas (privatus / įmonė), įdėta per 1–14 dienų – taikomi visuose 5 portaluose',
+      'Rezultatų filtrai be kreditų: kaina bent X % žemiau rinkos, CarTriige balas nuo 6/7/8',
+      'Neatitikę rezultatų filtro nedingsta – rodomi „Kiti skelbimai" su priežastimi',
+    ],
+  },
+  {
     versija: '2.7.1', data: '2026-09-22', pavadinimas: 'Tamsi tema visur',
     pakeitimai: [
       'Naršyklės valdikliai (sąrašai, slinkties juostos, automatinis užpildymas) – tamsūs visame puslapyje',

@@ -138,6 +138,13 @@ function buildMobileDeUrl(filters, puslapis, opts) {
   (MOBILEDE_KURAS[filters.kuras] || []).forEach((k) => params.push(`ft=${k}`));
   if (filters.pavaru_deze === 'Automatinė') params.push('tr=AUTOMATIC_GEAR', 'tr=SEMIAUTOMATIC_GEAR');
   if (filters.pavaru_deze === 'Mechaninė') params.push('tr=MANUAL_GEAR');
+  // v2.7.2 (Z-97): patikrinta portale - st FSBO/DEALER, doc=N d., c=kebulas.
+  const MD_KEBULAS = { sedanas: 'Limousine', hecbekas: 'SmallCar', universalas: 'EstateCar', visureigis: 'OffRoad',
+    vienaturis: 'Van', kupe: 'SportsCar', kabrioletas: 'Cabrio' };
+  if (MD_KEBULAS[filters.kebulas]) params.push(`c=${MD_KEBULAS[filters.kebulas]}`);
+  if (filters.pardavejas === 'privatus') params.push('st=FSBO');
+  if (filters.pardavejas === 'verslas') params.push('st=DEALER');
+  if ([1, 3, 7, 14].includes(parseInt(filters.idetaDienos, 10))) params.push(`doc=${parseInt(filters.idetaDienos, 10)}`);
   // v2.5.1 (Z-78): VISADA naujausi viršuje („Inserate (neueste zuerst)",
   // patikrinta portale), kaip kituose portaluose. Numatytasis mobile.de
   // „Standard-Sortierung" yra personalizuotas - serveris ir naršyklė tame

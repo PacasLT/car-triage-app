@@ -6289,3 +6289,29 @@ produkto išvaizdos.
   („CarTriige Score parodo bendrą galimybę, remiantis kaina, rida, įranga, istorija ir rinkos
   potencialu") – #dp-panel jo neturi. Jei reikia – tai skydelio `title`/užuominos klausimas tau.
   ct-priedai.css `.dp-sbar-val.is-na` ir `.dp-score-section[hidden]` ištrinti (negyvi).
+
+---
+
+## Z-97 · 2026-09-22 · Klaudijus · v2.7.2 · Nauji filtrai (Luko užduotis + pasirinkimas)
+
+Palyginimas su autoplius (171 formos laukas) ir mobile.de (270): `pasikeitimai/FILTRAI-PASIULYMAS.md`.
+Lukas pasirinko: pardavėjas + įdėta per N d., kėbulo tipas, kaina žemiau rinkos + min. balas.
+
+**Portalų parametrai – kiekvienas patikrintas gyvai (BMW X5 nuo 2019, skaičiai sumuojasi):**
+
+| | autoplius | autogidas | autoscout24 | otomoto | mobile.de |
+|---|---|---|---|---|---|
+| pardavėjas | `is_partner` 0/1 (53+134=187) | `f_521` 0/1 (4+45=49) | `custtype` P/D (597+5751=6348) | `search[private_business]` (278+706=984) | `st` FSBO/DEALER (127+4328) |
+| įdėta per | `older_not` 1/3/7/14 | – (patys, ATNAUJINIMO data) | `adage` | – (patys, `createdAt`) | `doc` |
+| kėbulas | `body_type_id[N]` | `f_3[N]=tekstas` | `body` | `filter_enum_body_type` | `c` |
+
+Kėbulų lentelė `PAPILDOMI_FILTRAI` (server.js) + `MD_KEBULAS` (mobilede.js). otomoto
+`hatchback` neegzistuoja (0) – hečbekas = `compact`.
+
+**Rezultatų filtrai (be kreditų):** po triažo, prieš TOP. Neatitikę → „Kiti skelbimai" su
+priežastimi (`papAtmesta` → `explainRejection`). Kaina žemiau rinkos reikalauja
+`marketCount ≥ 3`, kitaip – „nėra patikimo rinkos palyginimo".
+
+Sąsaja: „Daugiau filtrų" skydelyje, `select.ct-field` (sistemos laukas), išdėstymas
+ct-priedai.css 20 blokas. URL parametrai (`kebulas`, `pardavejas`, `ideta`, `zemiau`, `balas`),
+ženkliukas ir „Išvalyti" juos skaičiuoja. filtrai.test +8 (11 skyrius) → 57/57.

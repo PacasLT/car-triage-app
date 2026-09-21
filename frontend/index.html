@@ -2680,6 +2680,59 @@
              Tinklelyje jos buvo ne laukas, o sesios eilutes - siaurame stulpelyje
              krisdavo viena po kita ir pridedavo ~208 px: sonas isejo 728 px prie
              ribos 599 (K-19). Cia jos nieko nekainuoja. -->
+        <!-- v2.7.2 (Z-97, Luko pasirinkimas): kebulas, pardavejas, ideta per N d. - siunciami
+             portalams (patikrinta gyvai visuose 5); kaina zemiau rinkos ir min. balas - rezultatu
+             filtras be kreditu. `.ct-field` - sistemos laukas (ct-dizainas.css), isdestymas -
+             ct-priedai.css 20 blokas. -->
+        <div class="ct-papf">
+          <div class="ct-papf-h">AUTOMOBILIS IR SKELBIMAS</div>
+          <div class="ct-papf-g">
+            <label class="ct-papf-l"><span>Kėbulas</span>
+              <select class="ct-field" id="pf-kebulas" onchange="ctUpdateMoreBadge()">
+                <option value="">Visi</option>
+                <option value="visureigis">Visureigis / krosoveris</option>
+                <option value="universalas">Universalas</option>
+                <option value="sedanas">Sedanas</option>
+                <option value="hecbekas">Hečbekas</option>
+                <option value="vienaturis">Vienatūris</option>
+                <option value="kupe">Kupė</option>
+                <option value="kabrioletas">Kabrioletas</option>
+              </select></label>
+            <label class="ct-papf-l"><span>Pardavėjas</span>
+              <select class="ct-field" id="pf-pardavejas" onchange="ctUpdateMoreBadge()">
+                <option value="">Visi</option>
+                <option value="privatus">Privatus</option>
+                <option value="verslas">Įmonė</option>
+              </select></label>
+            <label class="ct-papf-l"><span>Įdėta per</span>
+              <select class="ct-field" id="pf-ideta" onchange="ctUpdateMoreBadge()">
+                <option value="">Bet kada</option>
+                <option value="1">1 dieną</option>
+                <option value="3">3 dienas</option>
+                <option value="7">7 dienas</option>
+                <option value="14">14 dienų</option>
+              </select></label>
+          </div>
+          <div class="ct-papf-h">REZULTATAI (BE KREDITŲ)</div>
+          <div class="ct-papf-g">
+            <label class="ct-papf-l"><span>Kaina žemiau rinkos</span>
+              <select class="ct-field" id="pf-zemiau" onchange="ctUpdateMoreBadge()">
+                <option value="">Nesvarbu</option>
+                <option value="5">bent 5 %</option>
+                <option value="10">bent 10 %</option>
+                <option value="15">bent 15 %</option>
+                <option value="20">bent 20 %</option>
+              </select></label>
+            <label class="ct-papf-l"><span>CarTriige balas</span>
+              <select class="ct-field" id="pf-balas" onchange="ctUpdateMoreBadge()">
+                <option value="">Bet koks</option>
+                <option value="6">nuo 6</option>
+                <option value="7">nuo 7</option>
+                <option value="8">nuo 8</option>
+              </select></label>
+          </div>
+          <div class="ct-papf-n">Neatitikę rezultatų filtro nedingsta – juos rasite „Kiti skelbimai“ su priežastimi.</div>
+        </div>
         <!-- PRIDETA: filtrai, kuriuos pritaiko PATS portalas - taip nuskaitom maziau nereikalingu skelbimu -->
         <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--border);">
           <div style="font:600 10px/1 var(--font-mono); letter-spacing:.08em; color:var(--text-dim); margin-bottom:9px;">PORTALO FILTRAI (TAIKOMI DAR PRIEŠ NUSKAITYMĄ)</div>
@@ -3683,6 +3736,11 @@ async function runSearch() {
     beDefektu: !!(document.getElementById('pf-beDefektu') || {}).checked,
     beVairoDesineje: !!(document.getElementById('pf-beVairoDesineje') || {}).checked,
     tikLietuvoje: !!(document.getElementById('pf-tikLietuvoje') || {}).checked,
+    kebulas: (document.getElementById('pf-kebulas') || {}).value || '',
+    pardavejas: (document.getElementById('pf-pardavejas') || {}).value || '',
+    idetaDienos: (document.getElementById('pf-ideta') || {}).value || '',
+    zemiauRinkos: (document.getElementById('pf-zemiau') || {}).value || '',
+    minBalas: (document.getElementById('pf-balas') || {}).value || '',
     searchMode: _ctSearchMode || 'default',
     portals: [
       document.getElementById('portal-autoplius').checked ? 'autoplius' : null,
@@ -3855,6 +3913,9 @@ const CT_URL_LAUKAI = [
   ['fuel', 'kuras'], ['metaiNuo', 'metai_nuo'], ['metaiIki', 'metai_iki'],
   ['ridaIki', 'rida_iki'], ['kainaNuo', 'kaina_nuo'], ['kainaIki', 'kaina_iki'],
   ['maxPages', 'psl'],
+  // v2.7.2: papildomi filtrai
+  ['pf-kebulas', 'kebulas'], ['pf-pardavejas', 'pardavejas'], ['pf-ideta', 'ideta'],
+  ['pf-zemiau', 'zemiau'], ['pf-balas', 'balas'],
 ];
 const CT_PORTALAI = ['autoplius', 'autogidas', 'autoscout24', 'otomoto', 'mobilede'];
 
@@ -4414,6 +4475,7 @@ window.ctUpdateMoreBadge = function () {
   if (pages && pages.value !== '3') n++;
   const vr = document.getElementById('varantieji'); if (vr && vr.value) n++;
   document.querySelectorAll('.ct-pfiltrai input:checked').forEach(function () { n++; });
+  document.querySelectorAll('.ct-papf select').forEach(function (x) { if (x.value) n++; });
   badge.textContent = n;
   badge.style.display = n > 0 ? '' : 'none';
 };
@@ -4425,6 +4487,7 @@ window.ctResetMoreFilters = function () {
   if (pages) pages.value = '3';
   const vr = document.getElementById('varantieji'); if (vr) vr.value = '';
   document.querySelectorAll('.ct-pfiltrai input').forEach(function (c) { c.checked = false; });
+  document.querySelectorAll('.ct-papf select').forEach(function (x) { x.value = ''; });
   window.ctUpdateMoreBadge();
 };
 
