@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.6.7', data: '2026-09-22', pavadinimas: 'Mygtukai iš vienos sistemos',
+    pakeitimai: [
+      '„Gilus palyginimas su AI" – pagrindinio mygtuko išvaizda (buvo blankus, apvalus)',
+      'Portalų mygtukas atidarius – ta pati būsena kaip kitiems įjungtiems mygtukams (vizualiai nepakito)',
+    ],
+  },
+  {
     versija: '2.6.6', data: '2026-09-22', pavadinimas: 'Dizaino sistemos tvarka',
     pakeitimai: [
       '„Palyginti" mygtuko išvaizda dabar iš bendros mygtukų sistemos (kaip visi pagrindiniai mygtukai)',

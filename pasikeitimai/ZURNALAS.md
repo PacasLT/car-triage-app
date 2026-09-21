@@ -6161,3 +6161,44 @@ Pamatuota produkcijoje (1440, `#compare-bar.visible`) prieš → po (simuliuota 
 Skiriasi tik šriftas (12,5 → 14) ir padding – t. y. tai, ką sistema sako. Kitas: `#portal-toggle-btn`.
 
 Taip pat: index.html telefone `.ct3-logo` gap 8 → 14 (Nr. 30, kaip detail.html).
+
+---
+
+## Z-93 · 2026-09-22 · Klaudijus → Dizaineriui · v2.6.7 · ID planas 2–4 iš 5 (+ 5-as tau)
+
+Pamatuota produkcijoje, `transition:none` (paslėptoje naršyklėje perėjimai stovi – be to
+matavimai melavo), „po" – CSSOM ištrynus ID taisykles:
+
+**2. `#portal-toggle-btn`** – `.active` su 3 `!important` → sistemos `.ct-btn.is-on`
+(JS perjungia `is-on`). Atidarytas: fonas/spalva/rėmelis **identiški** (0.14 / #a78bfa / 0.3).
+
+**3. `#deep-compare-btn`** – 3 taisyklės, **12 `!important`**, index + compare.html (ten negyvos).
+Markupas visada sakė `ct-btn ct-btn-primary`, ID darė jį blankiu:
+
+| | prieš | po |
+|---|---|---|
+| fonas | accent-dim 0.14 | #7856f7 (accent-strong) |
+| spalva | #a78bfa | #fff |
+| radius | 18 (piliulė) | 10 |
+| šriftas | 600 13 | 600 14 |
+| dydis | 224×44 | 234×44 |
+
+Matomas pokytis – mokamas veiksmas tampa pirminiu. Jei norėjai antrinio – markupe bus `ct-btn`.
+
+**4. `#ct-planas-btn`** – `gap: 7px !important` (= `.ct-btn-sm` gap 7) ir telefono
+padding/aukštis/svg ištrinti: mygtukas ≤900 px paslėptas (Nr. 30). Liko tik `.ct-pl-kr`
+(komponento vidus, ne mygtuko išvaizda) ir `display:none` ≤900. Du `!important` mirė.
+
+**5. `#search-btn` – NEDARIAU, tavo sprendimas.** Nuėmus ID pagrindinis CTA keičiasi labiausiai:
+
+| | prieš (ID) | po (`.ct-btn-primary .ct-btn-lg`) |
+|---|---|---|
+| fonas | gradientas accent → accent-light | vientisas #7856f7 |
+| švytėjimas | 0 4 14 rgba(124,111,247,.35) | nėra |
+| šriftas | 600 15 / +0.2 | 600 16 |
+| plotis | 183 | 200 |
+| :disabled | #171b25 / #8c93a6 | **nesiskiria nuo įjungto** |
+
+Tavo `:root` sako `--shadow-glow` – „TIK pirminis CTA", bet jo niekas nenaudoja šiam
+mygtukui. Klausimas: ar `.ct3-search-btn` gauna gradientą/švytėjimą ir `:disabled` sistemoje,
+ar CTA tampa vientisas? Kai atsakysi – nuimsiu ID.

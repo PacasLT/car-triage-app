@@ -1652,15 +1652,8 @@
 .dc-error { padding: 14px 16px; border-radius: 12px; background: var(--danger-dim); border: 1px solid var(--danger-border); font: 400 12.5px/1.6 var(--font); color: oklch(.8 .1 25); display: flex; align-items: flex-start; gap: 10px; }
 .dc-error svg { flex: none; color: var(--danger); margin-top: 2px; }
 
-/* Deep compare btn */
-#deep-compare-btn {
-  display: inline-flex !important; align-items: center !important; gap: 7px !important;
-  height: 36px !important; padding: 0 16px !important; border-radius: 18px !important; border: 1px solid var(--accent-border) !important;
-  background: var(--accent-dim) !important; color: var(--accent-light) !important;
-  font: 600 13px var(--font) !important; cursor: pointer !important; transition: background .15s !important;
-}
-#deep-compare-btn:hover { background: var(--accent) !important; color: #fff !important; border-color: var(--accent) !important; }
-#deep-compare-btn:disabled { opacity: .6 !important; cursor: not-allowed !important; }
+/* v2.6.6 (ID planas 3/5): #deep-compare-btn 3 taisykles su 12 !important istrintos -
+   isvaizda is markupo klasiu `.ct-btn .ct-btn-primary`, :disabled - ct-mygtukai.css. */
 
 
 /* ── Ataskaitos puslapis ─────────────────────────────────────────────── */

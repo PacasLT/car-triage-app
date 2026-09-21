@@ -1386,8 +1386,6 @@
   /* v1.65.0 (pranesimas Nr.4): 32 px telefone yra zemiau lieciamo taikinio
      minimumo - dizainerio taisykle sako 44 px. Butent del to antraste atrodo
      susispaudusi, ir vartotojas tai apraso kaip „nesimato meniu juostos". */
-  .ct3-premium-btn#ct-planas-btn { padding: 0 10px !important; height: 44px; font-size: 11px; gap: 5px !important; }
-  #ct-planas-btn .ct-pl-kr { padding: 2px 5px; font-size: 10px; }
 }
 @media (max-width: 400px) {
   /* v2.6.5 (Nr. 30): cia buvo index-only antrastes suspaudimas (10 px, 17 px,
@@ -1723,15 +1721,8 @@
 .dc-error { padding: 14px 16px; border-radius: 12px; background: var(--danger-dim); border: 1px solid var(--danger-border); font: 400 12.5px/1.6 var(--font); color: oklch(.8 .1 25); display: flex; align-items: flex-start; gap: 10px; }
 .dc-error svg { flex: none; color: var(--danger); margin-top: 2px; }
 
-/* Deep compare btn */
-#deep-compare-btn {
-  display: inline-flex !important; align-items: center !important; gap: 7px !important;
-  height: 36px !important; padding: 0 16px !important; border-radius: 18px !important; border: 1px solid var(--accent-border) !important;
-  background: var(--accent-dim) !important; color: var(--accent-light) !important;
-  font: 600 13px var(--font) !important; cursor: pointer !important; transition: background .15s !important;
-}
-#deep-compare-btn:hover { background: var(--accent) !important; color: #fff !important; border-color: var(--accent) !important; }
-#deep-compare-btn:disabled { opacity: .6 !important; cursor: not-allowed !important; }
+/* v2.6.6 (ID planas 3/5): #deep-compare-btn 3 taisykles su 12 !important istrintos -
+   isvaizda is markupo klasiu `.ct-btn .ct-btn-primary`, :disabled - ct-mygtukai.css. */
 
 /* ═══════════ TOP KORTELES PERSILAUZIMO RIBOS ═══════════ */
 /* PATAISYTA: nuotrauka nusileisdavo i virsu jau ties 768 px, nors iki ~560 px
@@ -1802,10 +1793,8 @@
 
 /* ═══════════ PORTALU PASIRINKIMAS — naujas dizainas ═══════════ */
 .ct3-portal-wrap { position: relative; }
-#portal-toggle-btn.active {
-  background: var(--accent-dim) !important; color: var(--accent-light) !important;
-  border-color: var(--accent-border) !important;
-}
+/* v2.6.6 (ID planas 2/5): `#portal-toggle-btn.active` su !important istrinta -
+   atidaryta busena dabar sistemos `.ct-btn.is-on` (ct-mygtukai.css). Identiska. */
 
 /* fonas — tik telefone */
 #portal-backdrop { display: none; }
@@ -5606,7 +5595,7 @@ function ctTogglePortals() {
   // ekrano. Telefone ji perkeliame tiesiai i <body>.
   ctPortalVieta(open);
   if (bd) bd.classList.toggle('open', open);
-  if (btn) btn.classList.toggle('active', open);
+  if (btn) btn.classList.toggle('is-on', open);
   if (chev) chev.style.transform = open ? 'rotate(180deg)' : '';
   document.body.style.overflow = (open && window.innerWidth <= 640) ? 'hidden' : '';
 }
@@ -5660,7 +5649,7 @@ document.addEventListener('click', function(e) {
   if (!btn.contains(e.target) && !sel.contains(e.target)) {
     sel.classList.remove('open');
     var bd = document.getElementById('portal-backdrop'); if (bd) bd.classList.remove('open');
-    btn.classList.remove('active');
+    btn.classList.remove('is-on');
     document.body.style.overflow = '';
     if (typeof ctPortalVieta === 'function') ctPortalVieta(false);
     var chev = document.getElementById('portal-chevron');
@@ -6851,7 +6840,6 @@ function ctNavTab(tab) {
 <!-- ═══ PLANAI IR KREDITAI ═══ -->
 <style id="ct-planai-css">
 /* ═══════════ PLANAI IR KREDITAI ═══════════ */
-#ct-planas-btn { gap: 7px !important; }
 #ct-planas-btn .ct-pl-kr { font: 700 11px/1 var(--font-mono); padding: 3px 7px; border-radius: 6px;
   background: var(--accent-dim); color: var(--accent-light); border: 1px solid var(--accent-border); }
 #ct-planas-btn .ct-pl-kr.maza { background: var(--warning-dim); color: var(--warning); border-color: var(--warning-border); }
@@ -6863,7 +6851,8 @@ function ctNavTab(tab) {
   /* v2.6.5 (Nr. 30): kaip detail.html - telefone/plansetėje plano mygtukas
      slepiamas (jis yra paskyros meniu). Kitaip antraste netelpa: 376 > 370. */
   .ct3-premium-btn#ct-planas-btn { display: none !important; }
-  #ct-planas-btn > svg { display: none; }
+  /* v2.6.6 (ID planas 4/5): gap 7 !important (= .ct-btn-sm), telefono padding/aukstis
+     ir svg slepimas istrinti - mygtukas <=900 px paslėptas, o gap sistema duoda pati. */
 }
 
 #ct-pl-modal { display: none; position: fixed; inset: 0; z-index: 1600; background: rgba(0,0,0,.85); overflow-y: auto; padding: 20px; }
