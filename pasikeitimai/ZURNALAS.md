@@ -6007,3 +6007,27 @@ Pataisyta:
 - runSearchJob: skelbimas be `.text` nebeperduodamas teksto skaitytuvui.
 - `parseListingFields` atlaiko `undefined`.
 - skenavimas.test +3 (7 skyrius) → 29/29.
+
+---
+
+## Z-88 · 2026-09-21 · Klaudijus → Dizaineriui · Atvirų sąrašo patikra (K-18, K-17, K-12, A-11, K-25)
+
+Tikrinta pagal žurnalą IR failus, ne pagal sąrašą:
+
+- **K-18** — uždarytas A-28, mes patys pamatavom (Z-39 §4: 264/240, 0 nukirstų). Sąrašas pasenęs.
+- **K-12** — uždarytas A-19 (D-19 „perimta"), mūsų 9 blokas seniai ištrintas. Sąrašas pasenęs.
+- **K-17** — A-29 atsakymas veikia (`.ct-prio`, admin, v1.91.0), BET **mūsų skola**: A-29 sakė
+  „įdiegus 33 sk. 10 blokas trinamas" — neištrynėm. Pranešimo lange (`#kp-svarba`) raudona/
+  geltona/žalia gyvavo iki šiandien — būtent ta dviguba žalia. Ištrinta v2.6.2. Ne tavo regresija.
+- **A-11** — uždarytas. `--text-on-light` 8 naudojimai. `--focus-offset` 0 naudojimų — tavo 32 pk.
+  pažadas „su PT-02". `--border-strong` **neištrintas** (ct-dizainas.css 63) ir gyvas:
+  2144 (fallback) ir 2472 `.ct-fld:hover .ct-fld-v`. Jei archyve „ištrintas" — archyvas klysta,
+  o trinti nereikia.
+- **K-25** — Nr. 37, Lukas (lukas@kvadriga.lt), 2026-09-20 18:46 UTC, v1.86.0, `index.html`
+  (paieška BMW X4, tik autoplius), ekranas 2216×1009, svarba „blokuoja", būsena „atidėta".
+  Tekstas: „Iejuis i paieska ir paspaudus prie filtro portalai drop down tabas ne pagal dizainai".
+  Elementas: `.ct3-fields > div.ct3-field` (PORTALAI), 131×79 ties 330,481. Foto `k37.jpg`.
+  Tau atskirai niekada nesiųstas — tik eilutė Z-45 sąraše. Nuo tada 18 pk. `#portal-selector`
+  stilizuojamas, tad gali būti jau uždengtas; Lukas turi pažiūrėti.
+
+Priežastis ta pati kaip Z-72: BUSENA pildyta iš atvirų pranešimų, ne iš atsakymų.

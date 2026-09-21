@@ -125,39 +125,10 @@
 
 
 /* ----------------------------------------------------------------------------
-   10 BLOKAS · prioriteto spalvos pranesimo lange · v1.78.0 (Nr. 29)
-
-   Lukas paprase, kad „kiek trukdo" taptu prioritetu su spalvomis:
-   svarbu raudonas, vidutinis geltonas, maziausiai svarbu zalias.
-
-   `.ct-flag` yra 21 sk., ir jame spalvos nera - zenkliukas visada neutralus,
-   o pasirinkima rodo tik fonas ir remelis. Tai teisinga bendram komponentui:
-   jei kiekvienas zenkliuku rinkinys nusidazytu savaip, aktyvumo zenklas
-   nustotu but zenklu.
-
-   Todel spalva cia ne ant paties zenkliuko, o TASKAS pries uzrasa, ir tik
-   viename konkreciame rinkinyje (`#kp-svarba`). Nesuvienodinu su busena:
-   busena yra `.ct-k` zinojimo lygiai, o cia - prioritetas, kita asis.
-
-   Spalvos - esami tokenai, nauju nekuriu.
-
-   LAIKINA: klausimas `K-17`. Jei 21 sk. nori savo varianto (pvz. `.ct-flag`
-   modifikatoriaus), blokas dingsta.  */
-
-#kp-svarba .ct-flag::before {
-  content: '';
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  margin-right: 7px;
-  vertical-align: baseline;
-  background: var(--text-dim);
-}
-
-#kp-svarba .ct-flag[data-k="blokuoja"]::before { background: var(--danger); }
-#kp-svarba .ct-flag[data-k="trukdo"]::before   { background: var(--warning); }
-#kp-svarba .ct-flag[data-k="smulkme"]::before  { background: var(--success); }
+   10 BLOKAS · IŠTRINTAS v2.6.2 (Z-88). Prioriteto spalvos raudona/geltona/
+   žalia pranešimo lange kirtosi su „žalia = ištaisyta" (A-29). Prioritetas
+   rodomas 33 sk. `.ct-prio` (kiekis, ne atspalvis); čia ženkliukai neutralūs.
+   Trinti turėjom 09-20 kartu su 33 sk. - pamiršta.                          */
 
 
 /* ----------------------------------------------------------------------------

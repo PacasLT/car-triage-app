@@ -17,20 +17,20 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 | ~~K-28~~ | ~~Likvidumo riba~~ | **Uždarytas** | Ribos perkeltos prie kvartilių: 26 / 13. |
 | K-28-senas | Likvidumo riba: `< 12` ar `<= 12,1`? | **Lukas** | Specifikacijoje riba „žemiau 12 %", bet BMW 530 (12,1 %) pateiktas kaip „lėto" pavyzdys. Kodas laikosi ribos. Z-51. |
 | ~~K-27~~ | ~~Nr. 40 · portalų mygtukas ir statistikos juosta~~ | **Uždarytas 34 paketu** | `K-22` diagnozuotas: du nesusiję kaltininkai, 56 px (≥1180) ir 182 px (<1180). Atsvaros `ct-priedai.css` 13 ir 14 blokuose — perimkit, ir ištrinsiu. Z-48. |
-| K-25 | Nr. 37 · `#portal-selector` | **Dizaineris** | Niekada nebuvo dizaino sistemoje. |
-| K-24 | Nr. 38 · „Daugiau filtrų" prie „Ieškoti" | **Dizaineris** | Lukas taip nori, bet tai griauna `.ct-fld-act` 12-tą langelį. Jūsų ėjimas. |
-| A-11 | `--focus-offset` | **Dizaineris** | Vienintelis likęs negyvas tokenas; pasiliekat kartu su PT-02. |
-| K-18 | Portalu skydas 187 px vietoj 240 | **Dizaineris** | `max-width: calc(100% - 12px)` skaičiuojamas nuo `.ct3-portal-wrap`, ne nuo stulpelio. Veikia, bet siauriau nei rašėte. |
+| K-25 | Nr. 37 · portalų išskleidžiamasis „ne pagal dizainą" | **Dizaineris** | Tekstas, autorius, data — Z-88. Klausimas niekada nebuvo išsiųstas atskirai; nuo tada `#portal-selector` stilizuoja 18 pk. (K-18) — gali būti uždengtas. |
+| ~~K-24~~ | ~~Nr. 38 · „Daugiau filtrų" prie „Ieškoti"~~ | **Uždarytas 39 paketu** | v2.5.0, Z-77. |
+| ~~A-11~~ | ~~tokenai~~ | **Uždarytas 32 paketu** | `--text-on-light` naudojamas 8 k. Liko tik `--focus-offset` (0 naudojimų) — dizainerio paties pažadas su PT-02, ne regresija. `--border-strong` NEištrintas, bet gyvas (2 naudojimai, `.ct-fld:hover`) — skolos nėra. |
+| ~~K-18~~ | ~~Portalu skydas~~ | **Uždarytas A-28** | 18 paketas; pamatuota 264/240, Z-39 §4. BUSENA buvo pasenusi. |
 | K-14 | Nr. 24 · šoninės panelės dizainas | **Klaudijus** | B įdiegtas v2.6.0 (42 paketas, 37 sk.). Laukia matavimų: šonas ~583, platusis 6×2 133 px. Z-86. |
 | Regitra | Registro punktai skelbimams | **Klaudijus** | Nuo v2.0.0 niekada neveikė (skelbimai be `marke`). Ištaisyta v2.6.0, Z-85. K-33 lieka analitikui. |
 | ID mygtukai | ID = vieta, `.ct-btn-*` = išvaizda | **Klaudijus** | Planas priimtas (42 pk.). Po vieną, pradžia `#compare-btn`. `#sort-*`, `#portal-selector` — dizaineris. |
 | ~~K-37~~ | ~~šono mygtukų plotis~~ | **Uždarytas v2.5.1** | 250/250, 304/304, centrai y 508. Z-78. |
 | ID sąrašas | D-37 §3 | **Dizaineris** | `matavimai/ID-SELEKTORIAI-2026-09-21.md`: 5 mygtukai muša sistemą. Z-84. |
 | K-15 | Nr. 27 · hero tekstas | **Dizaineris** | Lukas prašo pašalinti `.ct3-hero-content`. 26 sk. dalis — neliečiu be atsakymo. |
-| K-12 | Nr. 26 · portalų sąrašas šone | **Dizaineris** | `right: 0` siaurame stulpelyje duoda −32 px. Atsvara `ct-priedai.css` 9 bloke, pamatuota. |
+| ~~K-12~~ | ~~Nr. 26 · portalų sąrašas šone~~ | **Uždarytas A-19** | 16 paketas perimtas (D-19); 9 blokas seniai ištrintas. BUSENA buvo pasenusi. |
 | D-03 | Skelbimo puslapio 3 dalis | **Lukas** | Ar grąžinam šešis skydelius? Iš 27 pranešimų nė vienas nebuvo apie jų turinį. |
-| K-17 | Nr. 29 · prioriteto spalvos | **Dizaineris** | `.ct-flag` (21 sk.) be spalvų – taškas prieš užrašą `ct-priedai.css` 10 bloke. |
-| K-16 | Nr. 28 · antraštės dešinė | **Dizaineris** | `.ct3-header-right` sulipęs prie logotipo, ne prie krašto (239×42 ties 893,27). |
+| ~~K-17~~ | ~~Nr. 29 · prioriteto spalvos~~ | **Uždarytas A-29** | `.ct-prio` admin sąraše nuo v1.91.0. Mūsų skola: 10 blokas liko pranešimo lange — ištrintas v2.6.2 (Z-88). |
+| ~~K-16~~ | ~~Nr. 28 · antraštės dešinė~~ | **Uždarytas A-25** | Z-72. |
 | Nr. 40, 39, 35, 34, 33, 30, 28, 24, 23 | Laukia jūsų patikros | **Lukas** | **Devyni**. v1.95.0 gyva; pamatuota tiesiai produkcijoje 1280×720. |
 | Nr. 20, 21 | dpTab ir FAB | **Lukas** | v1.76.0 gyva — patikrinti. |
 | Nr. 25, 26 | Dekoracija ir portalų sąrašas | **Lukas** | Ištaisyta v1.77.0 — patikrinti po push'o. |

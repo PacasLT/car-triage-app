@@ -8,6 +8,12 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.6.2', data: '2026-09-21', pavadinimas: 'Klaidų pranešimo langas',
+    pakeitimai: [
+      'Pranešimo lange prioriteto pasirinkimas be raudonos/geltonos/žalios - žalia sistemoje reiškia „ištaisyta"',
+    ],
+  },
+  {
     versija: '2.6.1', data: '2026-09-21', pavadinimas: 'Paieškos klaidos pataisymas',
     pakeitimai: [
       'Paieška nebenutrūksta su klaida „Cannot read properties of undefined (reading \'match\')“, kai autoplius paskutiniame puslapyje rodo panašius skelbimus',
