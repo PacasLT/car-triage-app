@@ -1383,10 +1383,11 @@
   /* Header — naujas (ct3) */
   .ct3-header { position: sticky; top: 0; z-index: 200;
     background: rgba(10,12,18,0.94); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,.07); }
-  .ct3-header-inner { padding: 12px 12px !important; gap: 6px; }
+  /* v2.6.5 (Nr. 30): antraste telefone = detail.html (12px 16px, 34, 18). */
+  .ct3-header-inner { padding: 12px 16px !important; gap: 6px; }
   .ct3-logo { gap: 8px !important; min-width: 0; }
-  .ct3-logo-icon { width: 32px !important; height: 32px !important; }
-  .ct3-logo-text > span { font-size: 19px !important; }
+  .ct3-logo-icon { width: 34px !important; height: 34px !important; }
+  .ct3-logo-text > span { font-size: 18px !important; }
   .ct3-header-right { gap: 6px !important; }
   /* v1.65.0 (pranesimas Nr.4): 32 px telefone yra zemiau lieciamo taikinio
      minimumo - dizainerio taisykle sako 44 px. Butent del to antraste atrodo
@@ -1395,11 +1396,8 @@
   #ct-planas-btn .ct-pl-kr { padding: 2px 5px; font-size: 10px; }
 }
 @media (max-width: 400px) {
-  .ct3-header-inner { padding: 10px 10px !important; gap: 4px; }
-  .ct3-logo-text > span { font-size: 17px !important; }
-  .ct-ver-btn { margin-left: 4px !important; padding: 0 4px !important; font-size: 8px !important; }
-  .ct3-premium-btn#ct-planas-btn { padding: 0 8px !important; font-size: 10px; height: 44px; }
-  .ct3-header-right { gap: 4px !important; }
+  /* v2.6.5 (Nr. 30): cia buvo index-only antrastes suspaudimas (10 px, 17 px,
+     versija 8 px) - del jo antraste skyresi nuo detail.html. Isimta. */
   .ct-meg-btn, .ct3-avatar { width: 44px !important; height: 44px !important; }
   .ct3-logo-text small { display: none; }
   .ct3-premium-btn { display: none !important; }
@@ -6869,7 +6867,9 @@ function ctNavTab(tab) {
   /* v1.65.0: cia buvo `height: 34px`, ir si eilute nugalejo 1381 eil. 44 px,
      nes ta pati specifika, o si faile YRA VELIAU. Ta pati klaida, kaip su
      `.ct-table` ir `.ct-kv` - taisykle dviejose vietose. */
-  .ct3-premium-btn#ct-planas-btn { display: inline-flex !important; padding: 0 10px !important; height: 44px; font-size: 12px; }
+  /* v2.6.5 (Nr. 30): kaip detail.html - telefone/plansetėje plano mygtukas
+     slepiamas (jis yra paskyros meniu). Kitaip antraste netelpa: 376 > 370. */
+  .ct3-premium-btn#ct-planas-btn { display: none !important; }
   #ct-planas-btn > svg { display: none; }
 }
 

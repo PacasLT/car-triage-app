@@ -6112,3 +6112,27 @@ nors laukė dizainerio arba Luko.
 - Prie būsenos — kieno ėjimas; sąraše viršuje visi Luko ėjimai, ne tik patikros.
 - Nr. 42, 35, 30 grąžinti į `patvirtinta`. Nr. 10 → `laukia-sprendimo`.
 - CLAUDE.md būsenų lentelė atnaujinta.
+
+---
+
+## Z-91 · 2026-09-22 · Klaudijus · v2.6.5 · Nr. 42, 40, 45, 30, 46
+
+- **Nr. 42** (iPhone RŪŠIUOTI): meniu atsidarydavo, bet nematomas. ct-dizainas.css 5 sk.
+  ≤640 px uždeda `#sort-bar` `mask-image` – kaukė nukerpa viską už elemento ribų, taip pat
+  žemyn atsidarantį absoliutų meniu. Pamatuota 385 px: elementFromPoint meniu vietoje =
+  `.container`. ct-priedai.css **16 blokas** nuima kaukę `#sort-bar`. Po: meniu matomas.
+  Dizaineriui: `.ct-sort` skyrius tai perims.
+- **Nr. 40** („Kiti skelbimai" subyra): `.ct-std-card` iš senų laikų `display:flex;
+  flex-wrap:wrap` (index.html 1343/1546/2173 !important, ct-bendras). Viduje dabar
+  `ctKortele()` → `.ct-l1` susitraukia iki turinio: 1920 px **938 vietoj 1235**, atmestose
+  `.ct-reject` atsistoja šalia (264). ct-priedai.css **17 blokas**: vaikams `flex:1 1 100%`.
+  Po: 1235/1235, reject juosta viršuje per visą plotį; 385 px – 361/361.
+- **Nr. 45** (otomoto pilna apžvalga tuščia): diagnostikoje `TypeError null.toFixed`
+  detail.html 1726 – `sc.parts` komponentas `null` (neįvertintas) nutraukdavo visą `load()`.
+  Neįvertinta dabar rodoma „–".
+- **Nr. 30** (antraštė): desktop'e index = detail (pamatuota 1440/2364, visi 3 mygtukai
+  identiški). Telefone skyrėsi: index turėjo savo suspaudimą (≤400: 10 px, logo 17,
+  versija 8 px) ir rodė plano mygtuką, kurio detail neturi → 376 > 370, antraštė netilpo.
+  Index telefone = detail (12/16, 34, 18, plano mygtukas ≤900 slepiamas – jis paskyros meniu).
+  megstamiausi.html telefone vis dar kitokia (rodo planą, slepia logotipo tekstą) – neliesta.
+- **Nr. 46** (Regitra): `pasikeitimai/REGITRA-GALIMYBES.md` – kas rodoma, kas ne, klausimas Lukui.

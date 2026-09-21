@@ -1719,7 +1719,17 @@ window.ctApi = function (kelias, params) {
     barsEl.innerHTML = '';
     var barLabels = ['Kaina', 'Rida', 'Įranga', 'Istorija', 'Potencialas'];
     sc.parts.forEach(function(p, i) {
+      // v2.6.5 (Nr. 45): `null` = komponentas neivertintas (pvz. otomoto be
+      // rinkos imties). Buvo val.toFixed -> TypeError, ir visas load() nutrukdavo:
+      // nei analizes, nei nuotrauku. Neivertinta rodoma bruksniu, ne nuliu.
       var val = p[1];
+      if (val == null || isNaN(val)) {
+        var d0 = document.createElement('div');
+        d0.className = 'dp-sbar';
+        d0.innerHTML = '<div class="dp-sbar-label">' + barLabels[i].toUpperCase() + '</div><div class="dp-sbar-val is-na">–</div><div class="dp-sbar-track"></div>';
+        barsEl.appendChild(d0);
+        return;
+      }
       var barCol = scoreColor(val);
       var div = document.createElement('div');
       div.className = 'dp-sbar';

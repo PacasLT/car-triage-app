@@ -221,3 +221,39 @@
    nešasi inline; penktoji - klase, kad nedidintų inline ribos (dizainas.test).
    Dizaineriui: galima perkelti visoms penkioms ir inline pašalinti. */
 .ct3-portal-ico { flex: none; border-radius: 5px; }
+
+
+/* ----------------------------------------------------------------------------
+   16 BLOKAS · Nr. 42 · RŪŠIUOTI meniu telefone nematomas · v2.6.5 (Z-91)
+
+   ct-dizainas.css 5 sk. (≤640 px) uždeda `#sort-bar` kaukę (mask-image),
+   kad juosta „tęstųsi". Kaukė KERPA VISKĄ, kas išeina už elemento ribų -
+   ir absoliutų `#ct-sort-menu`, kuris atsidaro ŽEMYN už juostos. Meniu
+   atsidarydavo (rodyklė apsiversdavo), bet buvo nupieštas nematomas.
+   Todėl web'e veikė, telefone - ne. Pamatuota 385 px: meniu 12,683 248x214,
+   elementFromPoint jo vietoje grąžino `.container`.
+
+   `#sort-bar` nėra slenkanti juosta (flex-wrap), tad uzuomina čia nereikalinga.
+   LAIKINA: dizaineriui - `.ct-sort` skyrius (jo skola) šį bloką panaikins.  */
+@media (max-width: 640px) {
+  #sort-bar { -webkit-mask-image: none; mask-image: none; }
+}
+
+
+/* ----------------------------------------------------------------------------
+   17 BLOKAS · Nr. 40 · „Kiti skelbimai" kortelės suspaustos · v2.6.5 (Z-91)
+
+   „Kiti skelbimai" kortelės turi seną klasę `.ct-std-card`, o jai index.html
+   (1343, 1546, 2173 - pastaroji su !important) ir ct-bendras.css duoda
+   `display:flex; flex-wrap:wrap` - iš laikų, kai eilutė buvo kitokia.
+   Dabar viduje tas pats `ctKortele()` kaip TOP kortelėse, ir flex eilutėje
+   `.ct-l1` susitraukia iki turinio: pamatuota 1920 px - 938 px vietoj 1235,
+   o atmestose `.ct-reject` juosta atsistoja ŠALIA (264 px), ne viršuje.
+   Todėl „mygtukai subyra" ir „ne per visą ekraną".
+
+   Senų taisyklių neliečiu (index.html 1545 „nekeisti"). Vaikams - visa eilutė,
+   tada kortelė elgiasi kaip TOP (`display:block`) be !important.           */
+.ct-std-card.ct-card > * { flex: 1 1 100%; min-width: 0; }
+
+/* v2.6.5 (Nr. 45): neįvertintas komponentas skelbimo puslapyje - brūkšnys, ne 0. */
+.dp-sbar-val.is-na { color: var(--text-dim); }

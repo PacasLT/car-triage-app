@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.6.5', data: '2026-09-22', pavadinimas: 'Telefono ir „Kitų skelbimų" pataisymai',
+    pakeitimai: [
+      'Telefone vėl atsidaro „Rūšiuoti" meniu (buvo atsidaręs, bet nematomas)',
+      '„Kiti skelbimai" kortelės per visą plotį, mygtukai savo vietose – kaip viršutinėse',
+      'Pilna apžvalga nebenutrūksta, kai trūksta dalies įvertinimo (pvz. Otomoto) – rodoma analizė ir nuotraukos',
+      'Pagrindinio puslapio antraštė telefone tokia pati kaip skelbimo puslapyje; planas ir kreditai – paskyros meniu',
+    ],
+  },
+  {
     versija: '2.6.4', data: '2026-09-21', pavadinimas: 'Klaidų būsenos aiškesnės',
     pakeitimai: [
       'Tikrinant pataisymą – du mygtukai: „Veikia" (uždaro) ir „Neveikia" (grąžina į darbą)',
