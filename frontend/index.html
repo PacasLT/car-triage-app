@@ -306,12 +306,8 @@
   }
   .compare-bar-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .compare-bar-chip button { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; padding: 0; flex-shrink: 0; }
-  #compare-btn {
-    background: linear-gradient(135deg, var(--accent), var(--accent-light)); color: #fff;
-    border: none; padding: 9px 16px; border-radius: 10px; font-size: 13px;
-    font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0;
-    box-shadow: 0 4px 14px rgba(124,111,247,0.35);
-  }
+  /* v2.6.6 (ID planas, 42 pk.): ID = tik vieta. Išvaizda - `.ct-btn-primary`. */
+  #compare-btn { white-space: nowrap; flex-shrink: 0; }
   #compare-clear {
     background: none; border: 1px solid var(--border); color: var(--text-muted);
     width: 30px; height: 30px; border-radius: 9px; cursor: pointer; flex-shrink: 0;
@@ -348,7 +344,6 @@
   @media (max-width: 640px) {
     #compare-bar { padding: 9px 10px; bottom: 12px; max-width: calc(100vw - 20px); }
     .compare-bar-chip { max-width: 100px; font-size: 11px; }
-    #compare-btn { font-size: 13px; padding: 8px 14px; }
     #compare-modal { padding: 10px; }
     #compare-modal-inner { padding: 14px; }
     .compare-col img { height: 110px; }
@@ -1107,7 +1102,6 @@
 /* ===== COMPARE ===== */
 #compare-bar { background: rgba(17,20,28,.92); backdrop-filter: blur(16px); border: 1px solid var(--border-light); border-radius: 16px; box-shadow: 0 12px 34px rgba(0,0,0,.55); padding: 10px 12px 10px 14px; }
 .compare-bar-chip { background: var(--bg-elevated); border-radius: var(--radius-md); }
-#compare-btn { background: var(--accent); border-radius: var(--radius-md); font-size: 12.5px; box-shadow: none; height: 36px; padding: 0 18px; }
 #compare-modal-inner { border-radius: var(--radius-xl); }
 .compare-col { border-radius: var(--radius-lg); }
 .compare-col-price { color: var(--text-primary); font: 600 18px/1 var(--font-mono); }
@@ -1385,7 +1379,7 @@
     background: rgba(10,12,18,0.94); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,.07); }
   /* v2.6.5 (Nr. 30): antraste telefone = detail.html (12px 16px, 34, 18). */
   .ct3-header-inner { padding: 12px 16px !important; gap: 6px; }
-  .ct3-logo { gap: 8px !important; min-width: 0; }
+  .ct3-logo { gap: 14px !important; min-width: 0; }
   .ct3-logo-icon { width: 34px !important; height: 34px !important; }
   .ct3-logo-text > span { font-size: 18px !important; }
   .ct3-header-right { gap: 6px !important; }
@@ -1487,7 +1481,6 @@
   /* Palyginimas */
   #compare-bar { padding: 10px 12px; }
   .compare-bar-chip { max-width: 100px; font-size: 11px; }
-  #compare-btn { font-size: 13px; padding: 8px 14px; }
   #compare-modal { padding: 10px; }
   #compare-modal-inner { padding: 14px; border-radius: var(--radius-xl); }
   .compare-col img { height: 110px; }
@@ -2860,7 +2853,7 @@
 <div id="compare-bar">
   <span id="compare-bar-label">PALYGINIMUI</span>
   <div id="compare-bar-items"></div>
-  <button id="compare-btn" onclick="openCompareModal()" class="ct-btn">⚖️ Palyginti</button>
+  <button id="compare-btn" onclick="openCompareModal()" class="ct-btn ct-btn-primary">⚖️ Palyginti</button>
   <button id="compare-clear" onclick="clearCompare()" title="Išvalyti sąrašą" aria-label="Išvalyti">✕</button>
 </div>
 

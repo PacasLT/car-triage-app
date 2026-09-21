@@ -6136,3 +6136,28 @@ nors laukė dizainerio arba Luko.
   Index telefone = detail (12/16, 34, 18, plano mygtukas ≤900 slepiamas – jis paskyros meniu).
   megstamiausi.html telefone vis dar kitokia (rodo planą, slepia logotipo tekstą) – neliesta.
 - **Nr. 46** (Regitra): `pasikeitimai/REGITRA-GALIMYBES.md` – kas rodoma, kas ne, klausimas Lukui.
+
+---
+
+## Z-92 · 2026-09-22 · Klaudijus → Dizaineriui · v2.6.6 · ID planas: `#compare-btn` (1 iš 5)
+
+Markupas: `class="ct-btn"` → `ct-btn ct-btn-primary` (ID taisyklės jį darė pirminiu).
+ID taisyklėse liko tik vieta: `white-space: nowrap; flex-shrink: 0`. Ištrintos 4 taisyklės
+index.html (309, 351, 1110, 1490) ir 4 **negyvos** compare.html (ten tokio mygtuko nėra).
+
+Pamatuota produkcijoje (1440, `#compare-bar.visible`) prieš → po (simuliuota CSSOM):
+
+| | prieš (ID) | po (`.ct-btn-primary`) |
+|---|---|---|
+| fonas | #7c5cff | #7c5cff |
+| spalva | #fff | #fff |
+| rėmelis | 0 | 1 px `--accent-strong` |
+| radius | 10 | 10 |
+| šriftas | 600 12,5 px | 600 14 px |
+| padding | 0 18 | 9 14 |
+| aukštis | 44 (tap) | 44 (tap) |
+| plotis | 106 | 108 |
+
+Skiriasi tik šriftas (12,5 → 14) ir padding – t. y. tai, ką sistema sako. Kitas: `#portal-toggle-btn`.
+
+Taip pat: index.html telefone `.ct3-logo` gap 8 → 14 (Nr. 30, kaip detail.html).

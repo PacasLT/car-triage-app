@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.6.6', data: '2026-09-22', pavadinimas: 'Dizaino sistemos tvarka',
+    pakeitimai: [
+      '„Palyginti" mygtuko išvaizda dabar iš bendros mygtukų sistemos (kaip visi pagrindiniai mygtukai)',
+      'Pagrindinio puslapio logotipas telefone – tas pats tarpas kaip skelbimo puslapyje',
+    ],
+  },
+  {
     versija: '2.6.5', data: '2026-09-22', pavadinimas: 'Telefono ir „Kitų skelbimų" pataisymai',
     pakeitimai: [
       'Telefone vėl atsidaro „Rūšiuoti" meniu (buvo atsidaręs, bet nematomas)',
