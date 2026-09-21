@@ -359,7 +359,7 @@ app.get('/admin/klaidos', klaiduPrieiga, (req, res) => {
   res.json({
     viso: _klaidos.length,
     atviru: _klaidos.filter((k) => !arUzdaryta(k)).length,
-    lauksiaJusu: _klaidos.filter((k) => k.busena === 'laukia-patikros').length,
+    lauksiaJusu: _klaidos.filter((k) => (KLAIDU_BUSENOS[k.busena] || {}).ejimas === 'lukas').length,
     // v2.6.4: kieno ejimas - Luko ejimas yra ne tik patikra, bet ir sprendimai.
     pagalEjima: _klaidos.reduce((a, k) => { const e = (KLAIDU_BUSENOS[k.busena] || {}).ejimas; if (e) a[e] = (a[e] || 0) + 1; return a; }, {}),
     busenuEjimai: Object.fromEntries(Object.entries(KLAIDU_BUSENOS).map(([b, v]) => [b, v.ejimas])),

@@ -263,7 +263,7 @@ BODY = u'''
       _irasai = d.irasai || [];
       sub.textContent = 'I\u0161 viso ' + d.viso + ' \u00B7 atvir\u0173 ' + d.atviru + ' \u00B7 laukia j\u016Bs\u0173 ' + d.lauksiaJusu;
       var h = '<div class="ad-sant">'
-        + '<div class="ad-plyt' + (d.lauksiaJusu ? ' svarbu' : '') + '"><b>' + d.lauksiaJusu + '</b><span>laukia j\u016Bs\u0173 patikros</span></div>'
+        + '<div class="ad-plyt' + (d.lauksiaJusu ? ' svarbu' : '') + '"><b>' + d.lauksiaJusu + '</b><span>laukia j\u016Bs\u0173</span></div>'
         + '<div class="ad-plyt"><b>' + d.atviru + '</b><span>atvir\u0173</span></div>'
         + '<div class="ad-plyt"><b>' + d.viso + '</b><span>i\u0161 viso</span></div>'
         + '</div>'
