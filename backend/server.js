@@ -2083,7 +2083,9 @@ function buildAutoscout24Url(filters) {
   const modelis = (filters.modelis || '').toLowerCase().trim().replace(/\s+/g, '-');
   let url = `https://www.autoscout24.com/lst/${marke}`;
   if (modelis) url += `/${modelis}`;
-  const params = ['sort=standard', 'desc=0', 'atype=C', 'cy=D,A,B,E,F,I,L,NL'];
+  // v2.5.1 (Z-78): „Latest offers first" (sort=age&desc=1) - patikrinta portale.
+  // Buvo `sort=standard` (portalo „Best results" - reklaminis, nenuspejamas).
+  const params = ['sort=age', 'desc=1', 'atype=C', 'cy=D,A,B,E,F,I,L,NL'];
   if (filters.metaiNuo) params.push(`fregfrom=${filters.metaiNuo}`);
   if (filters.metaiIki) params.push(`fregto=${filters.metaiIki}`);
   if (filters.kainaNuo) params.push(`pricefrom=${filters.kainaNuo}`);
@@ -2099,7 +2101,24 @@ function buildAutoscout24Url(filters) {
 // ============ OTOMOTO.PL (Lenkija) ============
 // Lenkijos populiariausias automobiliu portalas. Kainos PLN, automatiskai konvertuojamos i EUR.
 // Duomenys saugomi __NEXT_DATA__ JSON bloke (Next.js SSR), viduje urqlState raktu kaip JSON eilute.
-const PLN_EUR_RATE = 4.25; // apytiksis kursas, atnaujinkite jei reikia
+const PLN_EUR_RATE = 4.25; // ATSARGINIS - naudojamas tik kol ECB kursas negautas
+// v2.5.1 (Z-78): kursas imamas is ECB kasdien. 2026-09-21 ECB = 4,3530, o
+// kietai irasytas 4,25 visas otomoto kainas eurais padidindavo ~2,4 %.
+const PLN_KURSAS = { verte: PLN_EUR_RATE, saltinis: 'numatytas', data: null };
+async function atnaujintiPlnKursa() {
+  try {
+    const r = await axios.get('https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', { timeout: 15000, responseType: 'text' });
+    const m = String(r.data).match(/currency='PLN'\s+rate='([\d.]+)'/);
+    const d = String(r.data).match(/time='(\d{4}-\d{2}-\d{2})'/);
+    const v = m ? parseFloat(m[1]) : NaN;
+    if (v > 3 && v < 6) {
+      PLN_KURSAS.verte = v; PLN_KURSAS.saltinis = 'ECB'; PLN_KURSAS.data = d ? d[1] : null;
+      console.log('[PLN] ECB kursas ' + v + ' (' + PLN_KURSAS.data + ')');
+    }
+  } catch (e) { console.log('[PLN] ECB kurso gauti nepavyko, lieka ' + PLN_KURSAS.verte + ': ' + e.message); }
+}
+atnaujintiPlnKursa();
+setInterval(atnaujintiPlnKursa, 6 * 3600 * 1000).unref();
 
 function buildOtomotoUrl(filters) {
   const marke = (filters.marke || '').toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
@@ -2107,10 +2126,14 @@ function buildOtomotoUrl(filters) {
   let url = `https://www.otomoto.pl/osobowe`;
   if (marke) url += `/${marke}`;
   if (marke && modelis) url += `/${modelis}`;
-  const params = ['search[order]=filter_float_price:asc'];
+  // v2.5.1 (Z-78): naujausi virsuje (created_at_first:desc - patikrinta: datos
+  // mazeja). Buvo PIGIAUSI virsuje: skaitant 3 puslapius vidurkis buvo
+  // skaiciuojamas tik is pigiausiu ~100 skelbimu, ir kitu portalu automobiliai
+  // atrode brangus.
+  const params = ['search[order]=created_at_first:desc'];
   // Kaina EUR -> PLN konversija
-  if (filters.kainaNuo) params.push(`search[filter_float_price:from]=${Math.floor(parseInt(filters.kainaNuo, 10) * PLN_EUR_RATE)}`);
-  if (filters.kainaIki) params.push(`search[filter_float_price:to]=${Math.ceil(parseInt(filters.kainaIki, 10) * PLN_EUR_RATE)}`);
+  if (filters.kainaNuo) params.push(`search[filter_float_price:from]=${Math.floor(parseInt(filters.kainaNuo, 10) * PLN_KURSAS.verte)}`);
+  if (filters.kainaIki) params.push(`search[filter_float_price:to]=${Math.ceil(parseInt(filters.kainaIki, 10) * PLN_KURSAS.verte)}`);
   if (filters.metaiNuo) params.push(`search[filter_float_year:from]=${filters.metaiNuo}`);
   if (filters.metaiIki) params.push(`search[filter_float_year:to]=${filters.metaiIki}`);
   if (filters.ridaIki) params.push(`search[filter_float_mileage:to]=${filters.ridaIki}`);
@@ -2151,7 +2174,7 @@ function extractOtomotoListings(html) {
       if (!item) return null;
       const priceRaw = item.price && item.price.amount && item.price.amount.units;
       const kainaPlN = priceRaw ? parseInt(priceRaw, 10) : null;
-      const kaina = kainaPlN ? Math.round(kainaPlN / PLN_EUR_RATE) : null;
+      const kaina = kainaPlN ? Math.round(kainaPlN / PLN_KURSAS.verte) : null;
 
       const params = item.parameters || [];
       const getParam = (id) => { const p = params.find((x) => x.key === id); return p ? p.value : null; };

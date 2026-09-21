@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.5.1', data: '2026-09-21', pavadinimas: 'Visi portalai skaitomi nuo naujausio',
+    pakeitimai: [
+      'AutoScout24, Otomoto ir mobile.de dabar skaitomi nuo naujausio skelbimo, kaip autoplius ir autogidas - rinkos vidurkis nebeiškreiptas',
+      'Otomoto kainos eurais skaičiuojamos pagal šios dienos ECB kursą (buvo pastovus 4,25)',
+      'Paieškos mygtukai vienodo pločio ir sulygiuoti vienoje linijoje',
+    ],
+  },
+  {
     versija: '2.5.0', data: '2026-09-21', pavadinimas: 'Veiksmų mygtukai šalia paieškos',
     pakeitimai: [
       '„Daugiau filtrų" ir „Paskutinės paieškos" perkelti į apatinę eilę šalia „Ieškoti ir analizuoti"',

@@ -29,7 +29,7 @@ function imk(vardas) {
   }
 }
 const ribos = 'const MIN_REALI_KAINA = 4500; const SENAS_METAI = new Date().getFullYear() - 10; const SENAS_RIDA = 200000;';
-const konst = [(src.match(/const AUTOGIDAS_PARAM = \{[\s\S]*?\n\};/) || [''])[0], (src.match(/const PLN_EUR_RATE = [^;]+;/) || [''])[0]].join('\n');
+const konst = [(src.match(/const AUTOGIDAS_PARAM = \{[\s\S]*?\n\};/) || [''])[0], (src.match(/const PLN_EUR_RATE = [^;]+;/) || [''])[0], (src.match(/const PLN_KURSAS = \{[^\n]*\};/) || [''])[0]].join('\n');
 const kodas = ribos + konst + ['extractField', 'kainosPatikra', 'autopliusAmzius', 'extractAutopliusStructured', 'extractAutogidasListings',
   'extractOtomotoListings', 'extractAutoscout24Listings'].map(imk).join('\n')
   + '\nreturn { extractAutopliusStructured, extractAutogidasListings, extractOtomotoListings, extractAutoscout24Listings };';

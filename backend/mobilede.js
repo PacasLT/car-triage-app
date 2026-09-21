@@ -138,9 +138,12 @@ function buildMobileDeUrl(filters, puslapis, opts) {
   (MOBILEDE_KURAS[filters.kuras] || []).forEach((k) => params.push(`ft=${k}`));
   if (filters.pavaru_deze === 'Automatinė') params.push('tr=AUTOMATIC_GEAR', 'tr=SEMIAUTOMATIC_GEAR');
   if (filters.pavaru_deze === 'Mechaninė') params.push('tr=MANUAL_GEAR');
+  // v2.5.1 (Z-78): VISADA naujausi viršuje („Inserate (neueste zuerst)",
+  // patikrinta portale), kaip kituose portaluose. Numatytasis mobile.de
+  // „Standard-Sortierung" yra personalizuotas - serveris ir naršyklė tame
+  // pačiame puslapyje matė skirtingus skelbimus (Z-76).
   if (filters.rikiuoti === 'pigiausi') params.push('sb=p', 'od=up');
-  // Archyvo skenavimams (RINKOS_PORTALAI): naujausi viršuje - kaip kituose portaluose.
-  if (filters.rikiavimas === 'naujausi') params.push('sb=doc', 'od=down');
+  else params.push('sb=doc', 'od=down');
   if (puslapis && puslapis > 1) params.push(`pageNumber=${puslapis}`);
   const url = `https://suchen.mobile.de/fahrzeuge/search.html?${params.join('&')}`;
   return opts && opts.info ? { url, modelisNerastas } : url;

@@ -27,6 +27,7 @@ const kodas = [
   blokas(/const AUTOPLIUS_FUEL_IDS = \{[\s\S]*?\n\};/),
   blokas(/const AUTOGIDAS_PARAM = \{[\s\S]*?\n\};/),
   blokas(/const PLN_EUR_RATE = [^;]+;/),
+  blokas(/const PLN_KURSAS = \{[^\n]*\};/),
   ...['kurasAtitinka', 'buildAutopliusUrl', 'buildAutogidasUrl', 'buildAutoscout24Url', 'buildOtomotoUrl'].map(imk),
   'return { kurasAtitinka, buildAutopliusUrl, buildAutogidasUrl, buildAutoscout24Url, buildOtomotoUrl };',
 ].join('\n');
@@ -94,6 +95,20 @@ if (process.argv.includes('--adresai')) {
     console.log('\n### ' + pav);
     for (const [p, fn] of Object.entries(kurti)) console.log('- ' + p + ': ' + fn(f));
   }
+}
+
+console.log('\n9. RIKIAVIMAS: visur naujausi viršuje (Z-78, patikrinta portaluose) ─');
+{
+  const MD = require(path.join(__dirname, '..', 'mobilede.js'));
+  const f = { marke: 'BMW', metaiNuo: 2019 };
+  // Kiekviena reikšmė patikrinta portalo rikiavimo sąraše 2026-09-21:
+  // autoplius „Naujausi viršuje", autogidas „Naujausi viršuje", autoscout24
+  // „Latest offers first", otomoto (createdAt mažėja), mobile.de „Inserate (neueste zuerst)".
+  t('autoplius order_by=3 DESC', d(F.buildAutopliusUrl(f)).includes('order_by=3&order_direction=DESC'), F.buildAutopliusUrl(f));
+  t('autogidas f_50=naujausi_asc', d(F.buildAutogidasUrl(f)).includes('f_50=naujausi_asc'), F.buildAutogidasUrl(f));
+  t('autoscout24 sort=age&desc=1 (ne standard)', d(F.buildAutoscout24Url(f)).includes('sort=age&desc=1') && !d(F.buildAutoscout24Url(f)).includes('sort=standard'), F.buildAutoscout24Url(f));
+  t('otomoto created_at_first:desc (ne pigiausi)', d(F.buildOtomotoUrl(f)).includes('search[order]=created_at_first:desc') && !d(F.buildOtomotoUrl(f)).includes('price:asc'), F.buildOtomotoUrl(f));
+  t('mobile.de sb=doc&od=down be jokio parametro', d(MD.buildMobileDeUrl(f)).includes('sb=doc&od=down'), MD.buildMobileDeUrl(f));
 }
 
 console.log('\n' + (bl ? '✗ ' + bl + ' klaidos, ' + ok + ' praėjo' : '✓ ' + ok + '/' + ok + ' patikrų praėjo'));

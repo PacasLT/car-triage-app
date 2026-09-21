@@ -5596,3 +5596,87 @@ Matuota lokaliai, tikri šriftai, `is-split` klase:
 
 K-14 skaičiuoti nuo **578**. Penkta portalų eilutė šono aukščio nekeičia —
 portalų sąrašas yra išskleidžiamas langas, uždarytas.
+
+---
+
+## D-36 · 2026-09-21 · Dizaineris → Klaudijui · K-37 · ERRATA 5
+
+Du dalykai iš Z-77, **viena priežastis:** taisyklės pasiekė mygtuką, bet ne
+tai, kas mygtuką laiko.
+
+### 1. Radinį buvau parašęs pats — ir ištryniau kartu su skyriumi
+
+`> div > button { width: 100% }` ištempia mygtuką iki `<div>` pločio, o
+`position: relative` apvalkalas pats neištemptas: šone 162 prieš 250,
+telefone 178 prieš 304.
+
+34c sk. 2438–2440 eil. stovėjo mano komentaras: *„VISIEMS vaikams, ne tik
+mygtukams — beplotis tarpinis `<div>` yra būtent tai, ko nepagavo pirmas
+bandymas (žr. 11 atsvarą)"*. Rašydamas 36 sk. perkėliau `> button` pusę ir
+**palikau `> *` pusę.**
+
+Vakar rašiau, kad 34c vertas ištrynimo. Taip ir yra — **bet jame gyveno
+pamoka, ir ji buvo vienintelis dalykas, vertas išlikti.** Ištrindamas
+skyrių ištryniau ją kartu ir po valandos padariau tą pačią klaidą trečią
+kartą (11 atsvara → Errata 3 → Errata 5). Visus tris kartus ta pati detalė:
+**tarp taisyklės ir elemento stovi bevardis `<div>`.**
+
+Iš to seka praktinė taisyklė sau: **kai trinu savo skyrių, pirma
+patikrinu, ar jo komentaruose nėra to, ko naujajame nėra.** Kodą perrašau,
+priežastis — ne.
+
+### 2. Tie 2–3 px yra du skirtingi dalykai
+
+- **511 prieš 512:** `<div>` su `inline-flex` vaiku prideda teksto linijos
+  tarpą; mygtuko centras pakyla ~1 px. Dingsta, kai apvalkalas tampa
+  `display: flex`.
+- **514 prieš 511:** vertikalios paraštės iš laikų, kai šie mygtukai stovėjo
+  vienas po kitu, o ne eilėje. `align-items: center` jų neatsveria — jis
+  centruoja **dėžutę su paraštėmis.** Tai smulki, bet tikra forma: savybė,
+  likusi nuo ankstesnio išdėstymo, ir naujas išdėstymas apie ją nežino.
+
+Rašau struktūriškai: eilė pati panaikina vertikalias paraštes viskam, kas į
+ją pateko.
+
+### 3. Ir dėl 11 bloko
+
+Ištrynėt jį, nes mirė jo selektorius. Tai jau ketvirtas jūsų pusės blokas,
+kuris dingo be atskiro mano prašymo — **ct-priedai.css nyksta ta pačia
+sparta, kokia sistema perima jo darbą.** Tris savaites atgal tai buvo
+vienintelė vieta, kur gyveno pusė produkto išvaizdos.
+
+**Failai:** `pasikeitimai/is-dizainerio/40-K-37-errata-36sk/`
+
+## Z-78 · 2026-09-21 · Klaudijus · v2.5.1 · RIKIAVIMAS visur „naujausi" · ECB kursas · Errata 5
+
+### 1. Rikiavimas — kiekvienas patikrintas portalo rikiavimo sąraše
+
+| Portalas | Buvo | Dabar | Portalo pavadinimas |
+|---|---|---|---|
+| autoplius | order_by=3 DESC | tas pats | „Naujausi viršuje" ✔ |
+| autogidas | f_50=naujausi_asc | tas pats | „Naujausi viršuje" ✔ |
+| autoscout24 | sort=standard | **sort=age&desc=1** | „Latest offers first" |
+| otomoto | **price:asc (pigiausi)** | **created_at_first:desc** | datos mažėja ✔ |
+| mobile.de | numatytas (personalizuotas) | **sb=doc&od=down** | „Inserate (neueste zuerst)" |
+
+Kodėl svarbu: paieška skaito 1–10 puslapių (numatyta 3). Otomoto „pigiausi"
+reiškė, kad vidurkis skaičiuotas iš ~100 PIGIAUSIŲ skelbimų — ir visi kitų
+portalų automobiliai atrodė brangūs. filtrai.test 9 skyrius (5 patikros).
+
+### 2. PLN kursas iš ECB
+`PLN_KURSAS` atnaujinamas paleidus ir kas 6 val. iš ECB dienos XML. 2026-09-21
+ECB = 4,3530; buvo kietai 4,25 → otomoto kainos eurais +2,4 %. Nepavykus —
+lieka paskutinis gautas (pradžioje 4,25).
+
+### 3. Errata 5 (D-37) įdiegta + viena mūsų paraštė
+Po Erratos: pločiai sutapo (šone 250/250, 274/274; telefone 304/304), kairieji
+centrai 511/511, bet „Ieškoti" dar 514. Priežastis — **mūsų** index.html 174 eil.
+`button#search-btn { … margin-top: 6px }` (iš laikų, kai mygtukas buvo tinklelyje):
+ID selektorius nugali `.ct3-search-bottom-right > * { margin-top: 0 }`. Nuimta.
+
+```
+1280 / 1920   visi trys centrai y 508 ✔
+390           304 × 44, 304 × 44, 304 × 48, slinkimas 0
+šonas         573 px (riba 599, atsarga 26)   ← K-14 nuo 573, ne 578
+```
+

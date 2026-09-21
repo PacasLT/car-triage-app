@@ -62,7 +62,7 @@ const gauti = async (url, opts) => {
 const ADRESAI = {
   autoplius: 'https://autoplius.lt/skelbimai/naudoti-automobiliai?category_id=2',
   autogidas: 'https://autogidas.lt/skelbimai/automobiliai/?f_1[0]=BMW',
-  autoscout24: 'https://www.autoscout24.com/lst/bmw?sort=standard',
+  autoscout24: 'https://www.autoscout24.com/lst/bmw?sort=age&desc=1',
   otomoto: 'https://www.otomoto.pl/osobowe/bmw?search[order]=x',
   mobilede: 'https://suchen.mobile.de/fahrzeuge/search.html?isSearchRequest=true&ms=3500',
 };

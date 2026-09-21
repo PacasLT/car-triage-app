@@ -3354,3 +3354,79 @@ textarea.ct-field {
    vieta, kur tas vardas paaiskintas, tad su juo dingsta ir jis.
 
    Jei kur nors liks .ct-fld-act markupe - sakykit, netrinsiu akiai.       */
+
+
+/* ============================================================================
+   40 paketas - ERRATA 5 prie 36 sk. - apvalkalai ir lygiavimas   ·   K-37
+   ----------------------------------------------------------------------------
+   PRIDEDAMA prie 36 sk. Nieko trinti nereikia.
+
+   Du dalykai, viena priezastis: taisykles pasieke MYGTUKA, bet ne tai, kas
+   mygtuka laiko.
+   ========================================================================== */
+
+
+/* ── 1) APVALKALAS · jusu radinys ───────────────────────────────────────────
+   `> div > button { width: 100% }` istempia mygtuka iki DIV plocio, o div su
+   position: relative pats neistemptas. Todel sone „Paskutines paieskos" 162,
+   o kaimynas 250; telefone 178 pries 304.
+
+   IR SITA AS BUVAU PARASES. 34c, 2438-2440 eil., mano komentaras:
+
+     „VISIEMS vaikams, ne tik mygtukams - beplotis tarpinis <div> yra
+      butent tai, ko nepagavo pirmas bandymas (zr. 11 atsvara)"
+
+   Rasydamas 36 sk. is 34c perkeliau `> button` puse ir palikau `> *` puse.
+   Istrindamas skyriu istryniau ir pamoka, kuri jame gyveno - o pamoka buvo
+   vienintelis dalykas tame skyriuje, vertas islikti.
+
+   Todel cia taisoma ne mygtuko eilute, o APVALKALAS. Mygtukas lieka toks,
+   koks buvo.                                                              */
+
+/* Apvalkalas nustoja buti eilute tekste: be to, kas zemiau, <div> su
+   inline-flex vaiku prideda linijos tarpa, ir mygtuko centras pakyla ~1 px.
+   Tai ir buvo tie 511 pries 512. */
+.ct3-search-bottom-left > div,
+.ct3-search-bottom-right > div {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+
+/* ── 2) LYGIAVIMAS · 2-3 px ─────────────────────────────────────────────────
+   Likusi dali (514 pries 511) nesa vertikalios parastes, atejusios is laiku,
+   kai sie mygtukai stovejo vienas po kitu, o ne eileje. `align-items: center`
+   ju neatsveria - jis centruoja DEZUTE SU PARASTEMIS.
+
+   Rasoma struktūriskai: eile pati panaikina vertikalias parastes viskam, kas
+   i ja pateko. Naujas mygtukas rytoj bus sulygiuotas be nieko pridedant. */
+.ct3-search-bottom > *,
+.ct3-search-bottom-left > *,
+.ct3-search-bottom-right > *,
+.ct3-search-bottom-left > div > button,
+.ct3-search-bottom-right > div > button {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+
+/* ── 3) SONAS · apvalkalas irgi per visa ploti ──────────────────────────── */
+@media (min-width: 1180px) {
+  .ct-shell.is-split > .ct-shell-side .ct3-search-bottom-left > div,
+  .ct-shell.is-split > .ct-shell-side .ct3-search-bottom-right > div {
+    width: 100%;
+  }
+}
+
+
+/* ── 4) TELEFONAS · apvalkalas dalijasi eile lygiai su mygtuku ───────────── */
+@media (max-width: 640px) {
+  .ct3-search-bottom-left > div,
+  .ct3-search-bottom-right > div { flex: 1 1 auto; }
+
+  .ct3-search-bottom-left > div > button,
+  .ct3-search-bottom-right > div > button { width: 100%; }
+}
+
+/* Laukiu: sone abu 250, telefone abu 304, visi trys centrai viename y. */

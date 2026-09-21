@@ -171,7 +171,8 @@
   .ct-mode-btn.active span { color: var(--text-muted); }
   .ct-mode-ic { font-size: 16px; margin-bottom: 2px; }
   @media (max-width: 600px) { .ct-mode-selector { flex-direction: column; } }
-  button#search-btn { grid-column: 1 / -1; padding: 13px; background: linear-gradient(135deg, var(--accent), var(--accent-light)); color: white; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 6px; letter-spacing: 0.2px; box-shadow: 0 4px 14px rgba(124,111,247,0.35); transition: opacity 0.15s, transform 0.15s; }
+  /* v2.5.1 (Z-78): `margin-top: 6px` nuimta - is laiku, kai mygtukas stovejo tinklelyje po laukais. ID selektorius nugalejo Errata 5 `.ct3-search-bottom-right > * { margin-top: 0 }` ir numuse centra 3 px. */
+  button#search-btn { grid-column: 1 / -1; padding: 13px; background: linear-gradient(135deg, var(--accent), var(--accent-light)); color: white; border: none; border-radius: var(--radius-md); font-size: 15px; font-weight: 600; cursor: pointer; letter-spacing: 0.2px; box-shadow: 0 4px 14px rgba(124,111,247,0.35); transition: opacity 0.15s, transform 0.15s; }
   button#search-btn:hover { opacity: 0.9; transform: translateY(-1px); }
   button#search-btn:disabled { background: var(--bg-elevated); color: var(--text-muted); cursor: not-allowed; box-shadow: none; transform: none; }
   #status { color: var(--text-muted); font-size: 14px; margin-bottom: 16px; min-height: 20px; }
