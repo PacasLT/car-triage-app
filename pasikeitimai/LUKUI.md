@@ -6,14 +6,11 @@ Viskas, ko laukia tavęs. Kiekvienas punktas ≤ 1 min. Perrašo Klaudijus po ki
 - Nieko nelaukia. A fazė išsiųsta 2026-09-22 (deploy SUCCESS).
 
 ## Perdavimai
-- [ ] Claude Design → „+" → **Link local** → `Downloads\cartriige-dizaineriui` – jei dar nepadaryta. Dizainerio testas: 291 eil. + „# Būsena · 2026-09-22 · v2.7.2 gyva".
-- [x] Fazė C: dizaineris, Plėtra, Finansininkas – praėjo. Analitikas – jo failai jau commit'inti (v2.1.0), `regitra.test` 101/101.
-- [ ] Finansininko `SAVIKAINA.md` ir Plėtros `PLETRA.md` tekstą įklijuoti Klaudijui – jie projekto rašyti negali, įrašys Klaudijus.
-- [ ] Plėtros rinkos duomenų specifikaciją (daryta Claude Code) persiųsti Klaudijui – sutikrins su Regitros darbu.
-- [ ] Finansininkui: ScraperAPI plano kaina + atsinaujinimo data; ar esi PVM mokėtojas.
+- [x] Fazė C praėjo visi. `PLETRA.md` projekte (įrašė Klaudijus), `SAVIKAINA.md` – Finansininkas pats.
+- [ ] Finansininkui: Q-4–Q-7 atsakyta `SAVIKAINA-DUOMENYS.md` §6. Plano kaina, PVM – iš tavęs.
 
 ## ⚠ Skubu
-- **ScraperAPI: panaudota 87 741 iš 100 000 (88 %).** Liko ~12 000 kr. ≈ 85–200 LT paieškų. Jei ciklas atsinaujina negreit – nepaleisti didelių skenavimų ir apsvarstyti papildymą.
+- **ScraperAPI: panaudota 87 741 iš 100 000 (88 %).** Liko ~12 000 kr. ≈ 85–200 LT paieškų. ScraperAPI paskyroje pažiūrėk: (1) **kada ciklas atsinaujina**, (2) plano pavadinimas/kaina, (3) Usage grafikas per 2–4 sav. – persiųsk Klaudijui. Iki tol – jokių skenavimų.
 
 ## Sprendimai (vienu žodžiu)
 | Nr. | Klausimas | Variantai |
@@ -23,6 +20,12 @@ Viskas, ko laukia tavęs. Kiekvienas punktas ≤ 1 min. Perrašo Klaudijus po ki
 | F-1 | Verslo planas „neribota“ → riba (pvz. 600 paieškų/mėn.) arba LT paieška skaičiuojama už 2 | riba / už 2 / palikti |
 | F-2 | Pro 100 → 60 paieškų, arba LT paieška už 2 | 60 / už 2 / palikti |
 | F-3 | Įspėjimas tau, kai ScraperAPI fondo lieka < 20 % (dabar jau 12 %) | taip / ne |
+| F-3+ | Sargas + paros ScraperAPI žurnalas diske (kiek kr. per dieną ir iš kur). Kodo darbas ~1 leidimas, 0 kr. | taip / ne |
+| R-1 | Kainos istorija kortelėje: „↓ 1 500 € per 9 d.“ + mini grafikas. Duomenys jau renkami, 0 ScraperAPI kr. | taip / vėliau |
+| R-2 | Ridos atsukimo žyma pagal VIN (tas pats VIN vėliau su mažesne rida). Duomenys yra, trūksta VIN indekso | taip / vėliau |
+| P-1 | Plėtros tikslinės grupės A perpardavėjai (prioritetas), B pirkėjai, C vienkartiniai | taip / keisti |
+| P-2 | Verslo planą kol kas duoti ne daugiau kaip 1–2 klientams (kol F-1 neišspręstas) | taip / ne |
+| P-3 | Paprašyti carVertical / autoDNA B2B kainų (tik užklausa, jokio kodo) | taip / ne |
 | Data plugin | Įjungti Analitiko sesijoje (be BigQuery/Snowflake)? Naudos nedaug. | taip / ne |
 
 ## Patikra produkcijoje
