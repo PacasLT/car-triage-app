@@ -1121,10 +1121,17 @@ async function fetchListingPage(url) {
   const turiNuotrauku = (h) => !!h && (
     /"contentUrl"|"image"\s*:|data-src=|og:image|thumbnail/i.test(h.slice(0, 400000))
   );
+  // v2.5.4 (Z-82): 404 = skelbimas ištrintas. Iki šiol toks atsakymas buvo
+  // laikomas „nepavyko", ir grandinė eidavo į Puppeteer, kuris parsiųsdavo tą
+  // patį „nerastas" puslapį (~18 KB) ir buvo įskaitomas kaip SĖKMĖ: 17 iš 28
+  // Puppeteer „sėkmių" 09-18–09-20 buvo būtent tokios.
+  let nerasta404 = 0;
   const traukti = async (render) => {
     const scraperUrl = `https://api.scraperapi.com?api_key=${SCRAPER_KEY}&url=${encodeURIComponent(url)}&render=${render}`;
     console.log(`  ScraperAPI (render=${render}): ${url.slice(0, 60)}...`);
-    const response = await axios.get(scraperUrl, { timeout: render === 'true' ? 90000 : 45000 });
+    let response;
+    try { response = await axios.get(scraperUrl, { timeout: render === 'true' ? 90000 : 45000 }); }
+    catch (e) { if (e && e.response && e.response.status === 404) nerasta404++; throw e; }
     if (response.status === 200 && response.data && response.data.length > 500) return response.data;
     return null;
   };
@@ -1161,12 +1168,23 @@ async function fetchListingPage(url) {
 
   if (html) ATSARGA.skelbimas.scraperapi++;
 
+  if (!html && nerasta404 > 0) {
+    const e = new Error('Skelbimas portale nerastas (404) - greičiausiai ištrintas');
+    e.kodas = 'SKELBIMAS_NERASTAS';
+    throw e;
+  }
+
   // Atsarginis: Puppeteer (jei ScraperAPI neprieinamas)
-  // ZINOMA SPRAGA (rasta v1.47.0, netaisyta samoningai iki matavimo pabaigos):
+  // ZINOMA SPRAGA (rasta v1.47.0) - UŽDARYTA v2.5.4, žr. žemiau. Buvo:
   // jei fetchWithPuppeteer META klaida, ji keliauja auksciau ir zemiau esanti
   // "paskutine atsarga" NIEKADA nepasiekiama. T. y. eilute po sios veikia tik
   // tada, kai Puppeteer grazina tuscia - o ne tada, kai jis luzta.
-  if (!html) { html = await fetchWithPuppeteer(url); if (html) ATSARGA.skelbimas.puppeteer++; }
+  // v2.5.4: revizijos spraga uždaryta - Puppeteer klaida nebeužkerta kelio
+  // paskutinei atsargai (fetchWithPuppeteer pats ją suskaičiuoja ir įrašo).
+  if (!html) {
+    try { html = await fetchWithPuppeteer(url); if (html) ATSARGA.skelbimas.puppeteer++; }
+    catch (e) { /* jau įrašyta ATSARGA.puppeteer.klaidos; einam toliau */ }
+  }
   // Paskutinis atsarginis: paprasta uzklasa
   if (!html) { html = await fetchSearchPage(url); if (html) ATSARGA.skelbimas.atsarginis++; }
 
@@ -4276,8 +4294,13 @@ app.post('/api/analyze-single', requireAuth, kreditaiPagalLygi, async (req, res)
     issaugotiAnalizesAtaskaita(req, url, result);
     res.json({ ...result, cached: false });
   } catch (err) {
+    // v2.5.4: ištrintas skelbimas - ne serverio klaida. 410 + aiškus tekstas;
+    // kreditas grąžinamas (planai.js: grąžinimas ir esant 410, ne tik ≥500).
+    if (err && err.kodas === 'SKELBIMAS_NERASTAS') {
+      return res.status(410).json({ error: 'Šio skelbimo portale nebėra – greičiausiai automobilis parduotas arba skelbimas ištrintas.', kodas: err.kodas });
+    }
     console.error(err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message, kodas: (err && err.kodas) || null });
   }
 });
 

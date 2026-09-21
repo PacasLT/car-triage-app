@@ -267,7 +267,8 @@ function reikalautiKreditu(veiksmas, raktasFn) {
       res.setHeader('X-Kreditai-Likutis', String(likutis));
       // Grąžinam, jei nepavyko serverio pusėje
       res.on('finish', () => {
-        if (res.statusCode >= 500) {
+        // v2.5.4: 410 = skelbimas portale ištrintas - ne vartotojo kaltė, grąžinam.
+        if (res.statusCode >= 500 || res.statusCode === 410) {
           try { prideti(req.user.id, kaina, veiksmas + '-grazinta', raktas, 'serverio klaida ' + res.statusCode, false); }
           catch (e) { console.error('[PLANAI] grąžinimo klaida:', e.message); }
         }

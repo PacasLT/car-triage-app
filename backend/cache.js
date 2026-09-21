@@ -297,6 +297,26 @@ let _lifecycle = (() => {
   try { return JSON.parse(fs.readFileSync(LIFECYCLE_FILE, 'utf-8')); }
   catch { return {}; }
 })();
+
+// v2.5.4 (revizija 2026-09-18, 3 p.): antrinis indeksas raktas -> Set(url).
+// `rastiTaPatiAuto` anksčiau pereidavo VISĄ `_lifecycle` kiekvienam skelbimo
+// puslapio atidarymui (100 000 įrašų = 100 000 palyginimų). Indeksą keičia TIK
+// trys vietos: įkėlimas, `zymetiMatyta` (naujas įrašas / pasikeitęs raktas) ir
+// `valytiSenusIrasus` (trynimas). Kitur `raktas` nerašomas - patikrinta grep.
+const _pagalRakta = new Map();
+function _indeksuoti(url, senas, naujas) {
+  if (senas === naujas) return;
+  if (senas) {
+    const s = _pagalRakta.get(senas);
+    if (s) { s.delete(url); if (!s.size) _pagalRakta.delete(senas); }
+  }
+  if (naujas) {
+    let s = _pagalRakta.get(naujas);
+    if (!s) { s = new Set(); _pagalRakta.set(naujas, s); }
+    s.add(url);
+  }
+}
+for (const [u, e] of Object.entries(_lifecycle)) if (e && e.raktas) _indeksuoti(u, null, e.raktas);
 let _lifecycleDirty = false;
 
 function saveLifecycle() {
@@ -342,6 +362,7 @@ function zymetiMatyta(l, papildoma) {
       saltinis: l.source || null, dingo: null,
       vin: vin || null, pardavejas: pardavejas || null, raktas: raktas || null,
     };
+    _indeksuoti(l.url, null, raktas || null);
   } else {
     e.paskutinMatytas = now;
     e.kartuMatytas = (e.kartuMatytas || 0) + 1;
@@ -355,7 +376,7 @@ function zymetiMatyta(l, papildoma) {
     if (vin && !e.vin) e.vin = vin;
     if (pardavejas && !e.pardavejas) e.pardavejas = pardavejas;
     // VIN gali atsirasti veliau (pvz. nuskaicius is nuotraukos) - tada raktas tikslinamas
-    if (raktas && e.raktas !== raktas) e.raktas = raktas;
+    if (raktas && e.raktas !== raktas) { _indeksuoti(l.url, e.raktas, raktas); e.raktas = raktas; }
   }
   _lifecycleDirty = true;
 }
@@ -366,10 +387,10 @@ function rastiTaPatiAuto(url) {
   const sis = _lifecycle[url];
   if (!sis || !sis.raktas) return [];
   const kiti = [];
-  Object.keys(_lifecycle).forEach((u) => {
+  (_pagalRakta.get(sis.raktas) || new Set()).forEach((u) => {
     if (u === url) return;
     const e = _lifecycle[u];
-    if (!e || e.raktas !== sis.raktas) return;
+    if (!e || e.raktas !== sis.raktas) return;   // apsauga: indeksas ir įrašas turi sutapti
     kiti.push({
       url: u,
       modelis: e.modelis, pardavejas: e.pardavejas || null, saltinis: e.saltinis || null,
@@ -569,11 +590,11 @@ function valytiSenusIrasus() {
 
   for (const url of Object.keys(_lifecycle)) {
     const e = _lifecycle[url];
-    if (!e) { delete _lifecycle[url]; istrintaCiklu++; continue; }
+    if (!e) { delete _lifecycle[url]; istrintaCiklu++; continue; }  // be rakto - indekse nebuvo
     // Butinos abi salygos: pazymetas dinges IR seniai nematytas.
     const dinges = !!e.dingo;
     const seniai = (e.paskutinMatytas || e.pirmaMatytas || 0) < riba;
-    if (dinges && seniai) { delete _lifecycle[url]; istrintaCiklu++; }
+    if (dinges && seniai) { _indeksuoti(url, e.raktas, null); delete _lifecycle[url]; istrintaCiklu++; }
   }
 
   // Timeline be gyvavimo ciklo yra nasta be prasmes - jo niekas nebeperskaitys.
@@ -627,7 +648,7 @@ module.exports = {
   addToHistory, getHistoryForModel,
   recordListingSnapshot, getListingTimeline, buildListingTimelineText,
   zymetiMatyta, zymetiDingusi, gautiGyvavimoCikla, modelioPardavimoGreitis, saveLifecycle,
-  tapatybesRaktas, rastiTaPatiAuto,
+  tapatybesRaktas, rastiTaPatiAuto, _indeksoDydis: () => _pagalRakta.size,
   modelioTendencijos,
   pridetiSekimui, sekamiUrlai, zymetiPatikrinta, valytiSekimoSarasa,
   valytiSenusIrasus,

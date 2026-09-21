@@ -363,7 +363,7 @@ Pranešimo mygtukas buvo pusiau bevertis, kol sąrašą matė tik žmogus: per e
 
 - `ANTHROPIC_API_KEY`, `SCRAPER_API_KEY`, `JWT_SECRET`, `ADMIN_EMAILS`, `INVITE_CODES`, `KLAIDU_RAKTAS` – tik Railway Variables, **niekada į kodą ar GitHub**.
 - `backend/.env` – niekada į GitHub.
-- `git push origin main` vykdo **tik Lukas** PowerShell'e; Claude niekada nepushina.
+- `git push origin main` vykdo **Claude per Luko PowerShell'ą** (Windows-MCP), tik Lukui leidus; kiti niekada nepushina (atnaujinta 2026-09-21).
 - Windows PowerShell: `&&` neveikia – git komandos rašomos atskiromis eilutėmis.
 
 ## Darbo eiga
@@ -371,7 +371,7 @@ Pranešimo mygtukas buvo pusiau bevertis, kol sąrašą matė tik žmogus: per e
 - Prieš rašant į įrenginį – Playwright regresija (web 1400 px ir tel 390 px), 0 JS klaidų.
 - Į įrenginį rašoma per naują `/mnt/user-data/outputs/vN/` kelią, po įrašymo tikrinamas md5.
 - **Jokios `git` komandos iš `device_bash`** – ji sukuria `.git/index.lock`, kurio tas pats apvalkalas negali ištrinti. `git` vykdo TIK Lukas PowerShell'e, atskiromis eilutėmis (`&&` neveikia).
-- `git push origin main` vykdo **tik Lukas**. Claude niekada nepushina.
+- `git push origin main` vykdo **Claude per Luko PowerShell'ą**, tik Lukui leidus (atnaujinta 2026-09-21).
 - Serveryje niekada nekviesti mokamų maršrutų (analyze, vin, seller, compare) testavimui – tik GET.
 
 ## Bendras kanalas su dizaineriu (v1.54.0)

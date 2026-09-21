@@ -5740,3 +5740,46 @@ Lukas pasirinko variantą 1 — „tik pažymėti be defektų" (Z-80 lentelė).
 - Užrašas po portalų filtrais: „„Be defektų" veikia visuose portaluose. Kiti –
   autoplius.lt ir autogidas.lt." (buvo „Kol kas veikia autoplius.lt").
 filtrai.test 10 skyrius (5 patikros), 48/48.
+
+## Z-82 · 2026-09-21 · Klaudijus · v2.5.4 · Puppeteer sprendimas, revizijos 3 p. ir spraga
+
+### 1. `/admin/atsarga` — skaitliukai tušti, istorija iš Railway žurnalų
+`nuoPaleidimoVal: 0.1` (šiandien 15 deploy'ų) → skaitliukai 0. Laukti paros
+nereikėjo: `[ATSARGA]` eilutės išlieka Railway žurnaluose. Ilgiausias deploy'as
+v1.83.0 (09-18 18:11 → 09-20 17:27): **pasiektas 28, „pavyko" 28, nepavyko 0**.
+Nuo 09-20 17:27 (visi vėlesni deploy'ai) — 0.
+
+Bet „pavyko" melavo pusiau:
+- **17 autoplius** — ScraperAPI atsakė **404** (skelbimas ištrintas), Puppeteer
+  parsiuntė tą patį „nerastas" puslapį (visi 18 345–18 396 simb.; tikras autoplius
+  skelbimas 180–410 KB) ir įskaitė kaip sėkmę.
+- **11 otomoto** — TIKROS: ScraperAPI `render=true` grąžino **500**, Puppeteer
+  parsiuntė tikrą puslapį (385–923 KB).
+
+Pagal Luko taisyklę `pavyko > 0` → **NEIŠIMAM, atnaujinam**: `npm audit fix
+--force` → puppeteer 24.43 → **25.11.0**, `npm audit`: 0 spragų. Kitos
+priklausomybės nepakito (express, axios, cheerio, better-sqlite3, jsonwebtoken,
+bcryptjs, sdk, dotenv — tos pačios versijos). Patikrinta: v25 paleidžia naršyklę
+su MŪSŲ nustatymais (`headless:'new'`, `--no-sandbox`), vykdo JS, 3,2 s.
+Lock failas sugeneruotas `--ignore-scripts` (better-sqlite3 v9 nesikompiliuoja
+mūsų node 22 — Railway'jus turi prebuilt).
+
+Pastaba sprendimui ateičiai: nuo v2.5.2 otomoto skelbimas pirma bandomas pigiai
+(1 kr.), render — tik atsarginis; tad tos 11 situacijų turėtų tapti retos.
+
+### 2. fetchListingPage
+- **404 → nebe Puppeteer.** Jei ScraperAPI bent kartą atsakė 404 ir HTML nėra —
+  klaida `SKELBIMAS_NERASTAS`. `/api/analyze-single` → **410** su tekstu
+  „Šio skelbimo portale nebėra…". `planai.js` kreditą grąžina ir esant 410
+  (anksčiau tik ≥500 — vartotojas būtų apmokestintas už ištrintą skelbimą).
+- **Revizijos spraga uždaryta:** `fetchWithPuppeteer` klaida nebeužkerta kelio
+  paskutinei atsargai (`fetchSearchPage`) — apgaubta `try/catch`.
+
+### 3. Revizija 3 p. — `rastiTaPatiAuto` antrinis indeksas
+`cache.js`: `_pagalRakta` (raktas → Set(url)), keičiamas tik įkėlime,
+`zymetiMatyta` (naujas / pasikeitęs raktas) ir `valytiSenusIrasus`. Naujas
+`testai/indeksas.test.js` 10/10 — lygina indeksą su PILNU perėjimu visiems
+įrašams, po VIN rakto pakeitimo ir po valymo.
+
+CLAUDE.md: push taisyklė atnaujinta — pushina Claude per Luko PowerShell'ą,
+Lukui leidus (sutarta sesijoje).
