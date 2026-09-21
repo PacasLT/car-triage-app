@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.6.8', data: '2026-09-22', pavadinimas: 'Otomoto skelbimų analizė tikslesnė',
+    pakeitimai: [
+      'Otomoto skelbimo parametrai, įranga ir pardavėjo aprašymas AI analizei perduodami tvarkingai, ne kaip viso puslapio tekstas',
+      'Otomoto skelbime nurodytas VIN paimamas automatiškai',
+    ],
+  },
+  {
     versija: '2.6.7', data: '2026-09-22', pavadinimas: 'Mygtukai iš vienos sistemos',
     pakeitimai: [
       '„Gilus palyginimas su AI" – pagrindinio mygtuko išvaizda (buvo blankus, apvalus)',

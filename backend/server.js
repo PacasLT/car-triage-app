@@ -25,6 +25,7 @@ const nuotrAnalize = require('./nuotrauku-analize');
 // paleidziant - 237 KB atmintyje, be SQLite: tai ketvirtinis statinis duomuo,
 // keliaujantis su deploy'umi, ne kintanti busena.
 const regitra = require('./regitra');
+const otomotoSkelb = require('./otomoto');
 regitra.ikelti();
 // v2.2.0: skelbimu archyvas. Jei nepavyksta - serveris vis tiek pakyla,
 // o /admin/rinka tai parodo (ikelta:false), ne tyliai.
@@ -3663,7 +3664,10 @@ async function scrapeSingleListing(url) {
   }
   const $ = cheerio.load(html);
   // Strukturiniai laukai - PRIES isvalant script/nav, kad niekas nedingtu
-  const struk = /autoplius\.lt/i.test(url) ? autopliusSkelbimoLaukai($) : { pardavejoInfo: null, vinPilnas: null, vinPref: null, vinPaslėptas: false, istNuoroda: null, parametrai: {} };
+  // v2.6.8 (Z-94): otomoto - struktura is __NEXT_DATA__ (parametrai, iranga, aprasymas).
+  const struk = /autoplius\.lt/i.test(url) ? autopliusSkelbimoLaukai($)
+    : /otomoto\.pl/i.test(url) ? otomotoSkelb.otomotoSkelbimoLaukai(html)
+    : { pardavejoInfo: null, vinPilnas: null, vinPref: null, vinPaslėptas: false, istNuoroda: null, parametrai: {} };
 
   // Meta zymos (keywords/description) DAZNAI jau turi svaru, struktura faktu santrauka
   // (Pirma registracija, Rida, Variklis, Defektai ir t.t.) - be lizingo triuksmo.
@@ -3704,6 +3708,7 @@ async function scrapeSingleListing(url) {
   }
 
   const photosSet = new Set();
+  (struk.photos || []).forEach((u) => photosSet.add(String(u).split('?')[0]));
 
   // 1. img tagai - tikriname src, data-src, data-lazy-src, data-original, data-large-src
   const IMG_ATTRS = ['src', 'data-src', 'data-lazy-src', 'data-original', 'data-large-src', 'data-image', 'data-zoom-image', 'data-full', 'data-hi-res'];

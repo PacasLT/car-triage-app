@@ -6202,3 +6202,18 @@ padding/aukštis/svg ištrinti: mygtukas ≤900 px paslėptas (Nr. 30). Liko tik
 Tavo `:root` sako `--shadow-glow` – „TIK pirminis CTA", bet jo niekas nenaudoja šiam
 mygtukui. Klausimas: ar `.ct3-search-btn` gauna gradientą/švytėjimą ir `:disabled` sistemoje,
 ar CTA tampa vientisas? Kai atsakysi – nuimsiu ID.
+
+---
+
+## Z-94 · 2026-09-22 · Klaudijus · v2.6.8 · otomoto skelbimo struktūra
+
+Buvo atvira nuo Z-76: otomoto skelbimas AI analizei ėjo tik kaip „pilnas puslapio tekstas"
+(meniu, finansavimas, reklama kartu su parametrais). Patikrinta naršyklėje (skelbimas
+6150710642): `#__NEXT_DATA__` → `props.pageProps.advert` turi `details[]` (label/value),
+`equipment[]` (grupės), `description` (HTML), `seller` (type, name, location), `images.photos[]`.
+
+- `backend/otomoto.js` – `otomotoSkelbimoLaukai(html)`, ta pati forma kaip
+  `autopliusSkelbimoLaukai` (parametrai, iranga, aprasymas, vieta, pardavejoInfo, vinPilnas).
+  Aprašyme išmetamas paslėptas telefonas, brūkšnių linijos.
+- `scrapeSingleListing`: otomoto šaka + nuotraukos iš `advert.images` (buvo tik urqlState).
+- `testai/otomoto-skelbimas.test.js` 15/15. Be `__NEXT_DATA__` – tuščia forma, ne klaida.
