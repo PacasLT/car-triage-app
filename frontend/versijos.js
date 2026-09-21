@@ -8,6 +8,12 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.4.7', data: '2026-09-21', pavadinimas: 'mobile.de skelbimų gili analizė',
+    pakeitimai: [
+      'mobile.de skelbimams renkama įranga, nuotraukos, aprašymas, pardavėjo reitingas ir mobile.de kainų ribos - kaip kituose portaluose',
+    ],
+  },
+  {
     versija: '2.4.6', data: '2026-09-21', pavadinimas: 'mobile.de ir sutvarkyta paieška keliuose portaluose',
     pakeitimai: [
       'Naujas portalas: mobile.de (Vokietija) - pažymėkite jį portalų sąraše',

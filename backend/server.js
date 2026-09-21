@@ -488,6 +488,91 @@ const saugykla = () => {
 //
 // Kaina: 1 kreditas portalui (render=false), arba 0, jei puslapis dar
 // talpykloje. Portalai - tik du, fiksuoti: joks naudotojo URL čia nepatenka.
+// ── v2.4.7 · /admin/patikra - TIKRAS paieškos kelias, visi skelbimai ─────────
+// Skirtingai nei /admin/pavyzdys, eina tuo pačiu keliu kaip vartotojo paieška
+// (build*Url → fetchAllPages → skaitytuvas) ir grąžina KIEKVIENĄ skelbimą
+// glaustai, kad jį būtų galima palyginti su portalo puslapiu naršyklėje.
+// Kaina: 1 puslapis = autoplius/autogidas 10 kr., kiti 1 kr.
+const PATIKROS_URL = {
+  autoplius: (f) => buildAutopliusUrl(f), autogidas: (f) => buildAutogidasUrl(f),
+  autoscout24: (f) => buildAutoscout24Url(f), otomoto: (f) => buildOtomotoUrl(f),
+  mobilede: (f) => mobilede.buildMobileDeUrl(f),
+};
+function patikrosIspejimai(l) {
+  const e = [];
+  const metaiDabar = new Date().getFullYear();
+  if (!l.url) e.push('be url');
+  if (!l.kaina) e.push('be kainos'); else if (l.kaina < 500 || l.kaina > 1500000) e.push('kaina ' + l.kaina);
+  if (l.rida == null) e.push('be ridos'); else if (l.rida > 1000000) e.push('rida ' + l.rida);
+  if (!l.metai) e.push('be metų'); else if (l.metai < 1950 || l.metai > metaiDabar + 1) e.push('metai ' + l.metai);
+  if (!l.modelis) e.push('be modelio');
+  if (!l.kuras) e.push('be kuro');
+  if (l.variklioTuris != null && (l.variklioTuris < 0.6 || l.variklioTuris > 8.5)) e.push('tūris ' + l.variklioTuris);
+  if (l.galia != null && (l.galia < 20 || l.galia > 800)) e.push('galia ' + l.galia);
+  return e;
+}
+app.get('/admin/patikra', klaiduPrieiga, async (req, res) => {
+  try {
+    const portalas = String(req.query.portalas || '');
+    if (!PATIKROS_URL[portalas]) return res.status(400).json({ error: 'portalas: ' + Object.keys(PATIKROS_URL).join(' | ') });
+    const f = { marke: String(req.query.marke || 'BMW').slice(0, 40), modelis: String(req.query.modelis || '').slice(0, 40),
+      metaiNuo: parseInt(req.query.metaiNuo, 10) || 2019 };
+    if (req.query.kuras) f.kuras = String(req.query.kuras);
+    const psl = Math.min(Math.max(parseInt(req.query.puslapis, 10) || 1, 1), 100);
+    const bazinis = PATIKROS_URL[portalas](f);
+    if (!bazinis) return res.status(400).json({ error: 'adreso nepavyko sudaryti (nežinoma markė?)' });
+    const likutis = await kredituLikutis();
+    if (likutis == null || likutis < KREDITU_ATSARGA) return res.status(503).json({ error: 'kreditu sargas', likutis });
+    // Tas pats puslapio parametras kaip fetchAllPages - kad tikrintume tą patį adresą.
+    const url = psl === 1 ? bazinis : bazinis + (bazinis.includes('?') ? '&' : '?') + PUSLAPIO_PARAM[paieskosPortalas(bazinis)] + '=' + psl;
+    const pries = ATSARGA.paieska.scraperapi, priesT = ATSARGA.paieska.talpykla;
+    const { listings, format, pabaiga } = await fetchAllPages(url, 1);
+    const isTalpyklos = ATSARGA.paieska.talpykla > priesT;
+    const eil = listings.map((l) => {
+      const o = { url: l.url, modelis: l.modelis, metai: l.metai, kaina: l.kaina, rida: l.rida, kuras: l.kuras,
+        pavarai: l.pavarai, galia: l.galia, turis: l.variklioTuris, miestas: l.miestas || null, verslas: l.yraVerslas };
+      const isp = patikrosIspejimai(l);
+      if (isp.length) o.ispejimai = isp;
+      return o;
+    });
+    const uzp = (k) => Math.round(listings.filter((l) => l[k] != null && l[k] !== '').length / (listings.length || 1) * 100);
+    res.json({
+      portalas, url, puslapis: psl, format, pabaiga, uzklausu: ATSARGA.paieska.scraperapi - pries, isTalpyklos,
+      skelbimu: listings.length,
+      uzpildyta: Object.fromEntries(['kaina', 'rida', 'metai', 'modelis', 'kuras', 'pavarai', 'galia', 'variklioTuris', 'miestas', 'photo'].map((k) => [k, uzp(k)])),
+      suIspejimais: eil.filter((x) => x.ispejimai).length,
+      skelbimai: eil,
+    });
+  } catch (err) {
+    res.status(500).json({ error: String(err.message || err).slice(0, 300) });
+  }
+});
+
+// Skelbimo puslapis - TAS PATS kelias kaip TOP-8 praturtinimas ir gili analizė
+// (scrapeSingleListing). Grąžina santrauką, ne visą tekstą.
+app.get('/admin/patikra/skelbimas', klaiduPrieiga, async (req, res) => {
+  try {
+    const url = String(req.query.url || '');
+    if (!portalasLeidziamas(url)) return res.status(400).json({ error: 'portalas neleidžiamas', leidziami: LEIDZIAMI_PORTALAI });
+    const likutis = await kredituLikutis();
+    if (likutis == null || likutis < KREDITU_ATSARGA) return res.status(503).json({ error: 'kreditu sargas', likutis });
+    const t0 = Date.now();
+    const r = await scrapeSingleListing(url);
+    res.json({
+      url, sekundziu: Math.round((Date.now() - t0) / 100) / 10,
+      title: r.title, nuotrauku: (r.photos || []).length, nuotrauka: r.photo,
+      parametru: Object.keys(r.skelbimoParametrai || {}).length, parametrai: r.skelbimoParametrai,
+      irangos: (r.iranga || []).reduce((a, g) => a + (g.items || []).length, 0),
+      aprasymoIlgis: (r.aprasymas || '').length, aprasymoPradzia: (r.aprasymas || '').slice(0, 160),
+      vin: r.vin || null, vinPrefiksas: r.vinPrefiksas || null, pardavejas: r.pardavejas, pardavejoInfo: r.pardavejoInfo,
+      vieta: r.vieta || null, tekstoIlgis: (r.fullText || '').length, papildomai: r.mobilede || undefined,
+      mobiledeStat: /mobile\.de\//.test(url) ? { ...MOBILEDE_GILUS_STAT, budas: MOBILEDE_BUDO_ATMINTIS.budas } : undefined,
+    });
+  } catch (err) {
+    res.status(500).json({ error: String(err.message || err).slice(0, 300), kodas: err.kodas || null });
+  }
+});
+
 app.get('/admin/pavyzdys', klaiduPrieiga, async (req, res) => {
   try {
     const portalas = String(req.query.portalas || '');
@@ -936,6 +1021,7 @@ async function fetchSearchPage(url, opts) {
 // sio sargo neliecia.
 const LEIDZIAMI_PORTALAI = [
   'autoplius.lt', 'autogidas.lt', 'autoscout24.com', 'otomoto.pl',
+  'mobile.de',   // v2.4.7: suchen.mobile.de skelbimo puslapis (MOBILEDE_GILUS)
 ];
 
 function portalasLeidziamas(url) {
@@ -943,6 +1029,61 @@ function portalasLeidziamas(url) {
   try { h = new URL(String(url)).hostname.toLowerCase(); } catch (e) { return false; }
   if (h.charAt(h.length - 1) === '.') h = h.slice(0, -1);
   return LEIDZIAMI_PORTALAI.some((p) => h === p || h.endsWith('.' + p));
+}
+
+// ── v2.4.7 · mobile.de skelbimo puslapis ────────────────────────────────────
+// Be naršyklės grąžina 2,5 KB JS iššūkį (Z-74). Bandom pigiausiai, ir priimam
+// TIK tada, kai skaitytuvas randa skelbimą - iššūkio puslapio neišsaugom ir
+// Puppeteer/axios atsarginių nenaudojam (jie grąžintų tą patį iššūkį).
+// Budai eilės tvarka; kuris pavyko - įsimenam 6 val., kad kitą kartą
+// nemokėtume už žinomai nepraeinantį.
+// Išjungti: MOBILEDE_GILUS=0.
+const MOBILEDE_BUDAI = [
+  { vardas: 'standartinis', q: '&render=false' },
+  { vardas: 'render', q: '&render=true' },
+  { vardas: 'premium', q: '&premium=true&render=false' },
+];
+const MOBILEDE_BUDO_ATMINTIS = { budas: null, iki: 0, nepavykoIki: 0 };
+const MOBILEDE_GILUS_STAT = { bandyta: 0, pavyko: 0, pagalBuda: {}, kreditu: 0 };
+async function fetchMobileDeSkelbima(url) {
+  if (process.env.MOBILEDE_GILUS === '0') {
+    const e = new Error('mobile.de gili analize isjungta (MOBILEDE_GILUS=0)'); e.kodas = 'MOBILEDE_ISJUNGTA'; throw e;
+  }
+  const cached = cache.getCached('pages', 'full:' + url, cache.PAGE_TTL_MS);
+  if (cached) { ATSARGA.skelbimas.talpykla++; return cached; }
+  // Jei neseniai NEPAVYKO nė vienu būdu - nebandom 6 val.: kitaip kiekviena
+  // paieška su mobile.de TOP-8 sudegintų iki ~170 kreditų už nieką.
+  if (MOBILEDE_BUDO_ATMINTIS.nepavykoIki > Date.now()) {
+    const e = new Error('mobile.de skelbimo puslapis neprieinamas (patikrinta neseniai)'); e.kodas = 'MOBILEDE_NEPRIEINAMA'; throw e;
+  }
+  const KEY = process.env.SCRAPER_API_KEY;
+  if (!KEY) { const e = new Error('nera SCRAPER_API_KEY'); e.kodas = 'MOBILEDE_NEPRIEINAMA'; throw e; }
+  const zinomas = MOBILEDE_BUDO_ATMINTIS.iki > Date.now() ? MOBILEDE_BUDO_ATMINTIS.budas : null;
+  const eile = zinomas ? [MOBILEDE_BUDAI.find((b) => b.vardas === zinomas), ...MOBILEDE_BUDAI.filter((b) => b.vardas !== zinomas)] : MOBILEDE_BUDAI;
+  MOBILEDE_GILUS_STAT.bandyta++;
+  for (const b of eile) {
+    try {
+      const r = await axios.get(`https://api.scraperapi.com?api_key=${KEY}&url=${encodeURIComponent(url)}${b.q}`,
+        { timeout: b.vardas === 'render' ? 90000 : 60000, validateStatus: () => true, responseType: 'text' });
+      const kaina = parseInt(r.headers['sa-credit-cost'], 10) || 0;
+      MOBILEDE_GILUS_STAT.kreditu += kaina;
+      const html = typeof r.data === 'string' ? r.data : '';
+      const ok = r.status === 200 && mobilede.mobileDeSkelbimoPuslapis(html).rasta;
+      console.log(`  [MOBILEDE-SKELBIMAS] ${b.vardas} -> ${r.status} ${html.length} simb. kaina=${kaina} ${ok ? 'RASTA' : 'ne'}`);
+      if (ok) {
+        MOBILEDE_GILUS_STAT.pavyko++;
+        MOBILEDE_GILUS_STAT.pagalBuda[b.vardas] = (MOBILEDE_GILUS_STAT.pagalBuda[b.vardas] || 0) + 1;
+        MOBILEDE_BUDO_ATMINTIS.budas = b.vardas; MOBILEDE_BUDO_ATMINTIS.iki = Date.now() + 6 * 3600 * 1000;
+        ATSARGA.skelbimas.scraperapi++;
+        cache.setCached('pages', 'full:' + url, html);
+        return html;
+      }
+    } catch (err) {
+      console.log(`  [MOBILEDE-SKELBIMAS] ${b.vardas} klaida: ${String(err.message).replace(KEY, '***')}`);
+    }
+  }
+  MOBILEDE_BUDO_ATMINTIS.nepavykoIki = Date.now() + 6 * 3600 * 1000;
+  const e = new Error('mobile.de skelbimo puslapis neprieinamas (apsauga)'); e.kodas = 'MOBILEDE_NEPRIEINAMA'; throw e;
 }
 
 // Specialiai skelbimo puslapiui - naudoja render=true, kad gautume JS-renderinta HTML
@@ -956,6 +1097,8 @@ async function fetchListingPage(url) {
     e.kodas = 'PORTALAS_NELEIDZIAMAS';
     throw e;
   }
+
+  if (/(^|\.)mobile\.de$/i.test(new URL(String(url)).hostname)) return fetchMobileDeSkelbima(url);
 
   // PATAISYTA: fetchSearchPage rase i ta pati rakta neatvaizduota HTML, todel
   // giliai analizei kartais atitekdavo puslapis be galerijos ir nuotrauku nebudavo.
@@ -2990,9 +3133,8 @@ async function runSearchJob(jobId, filters) {
     // puslapius (tik nuskaitymas, jokio AI) ir uzpildom iranga, VIN, vieta, pardaveja.
     // Puslapiai kesuojami, todel kartotinei paieskai jie nieko nebekainuoja.
     const gilinti = enriched
-      // v2.4.6: mobile.de skelbimo puslapis saugomas (Akamai iššūkis net tikroje
-      // naršyklėje, Z-74) - jo neatidarom, kad nemokėtume už tuščią puslapį.
-      .filter((l) => l.url && !l.komplektacija && !l.kainosIspejimas && !/mobile\.de\//.test(l.url))
+      // v2.4.7: mobile.de atidarom tik kai gili analizė įjungta (MOBILEDE_GILUS!=0).
+      .filter((l) => l.url && !l.komplektacija && !l.kainosIspejimas && !(process.env.MOBILEDE_GILUS === '0' && /mobile\.de\//.test(l.url)))
       .sort((a, b) => (b.diffPct == null ? -999 : b.diffPct) - (a.diffPct == null ? -999 : a.diffPct))
       .slice(0, GILINTI_TOP);
     if (gilinti.length) {
@@ -3381,6 +3523,17 @@ function autopliusSkelbimoLaukai($) {
 
 async function scrapeSingleListing(url) {
   const html = await fetchListingPage(url);
+  // v2.4.7: mobile.de - struktūra iš RSC JSON, ne iš teksto.
+  if (/(^|\.)mobile\.de\//i.test(String(url).replace(/^https?:\/\//, ''))) {
+    const p = mobilede.mobileDeSkelbimoPuslapis(html);
+    return {
+      title: p.title, fullText: mobilede.mobileDeAnalizesTekstas(p), photo: p.photo, photos: p.photos,
+      vin: null, vinPrefiksas: null, pardavejas: p.pardavejoInfo ? p.pardavejoInfo.vardas : null,
+      pardavejoInfo: p.pardavejoInfo, vinPaslėptas: false, istorijosNuoroda: null,
+      skelbimoParametrai: p.parametrai, iranga: p.iranga, aprasymas: p.aprasymas, vieta: p.vieta,
+      mobilede: { ikelta: p.ikelta, kainosRibos: p.kainosRibos, kainosVertinimas: p.kainosVertinimas, busena: p.busena, tu: p.tu, carfax: p.carfax },
+    };
+  }
   const $ = cheerio.load(html);
   // Strukturiniai laukai - PRIES isvalant script/nav, kad niekas nedingtu
   const struk = /autoplius\.lt/i.test(url) ? autopliusSkelbimoLaukai($) : { pardavejoInfo: null, vinPilnas: null, vinPref: null, vinPaslėptas: false, istNuoroda: null, parametrai: {} };
@@ -3977,13 +4130,6 @@ app.post('/api/analyze-single', requireAuth, kreditaiPagalLygi, async (req, res)
     if (!url) return res.status(400).json({ error: 'Trūksta URL' });
     // C-2: atsakom anksti ir aiskiai, kad naudotojas gautu priezasti, o ne 500.
     // Kreditai dar nenurasyti - kreditaiPagalLygi juos ima po sekmingo atsakymo.
-    // v2.4.6: mobile.de paieška palaikoma, bet skelbimo puslapis saugomas
-    // (Akamai iššūkis net tikroje naršyklėje, Z-74) - sakom tiesiai, nemokam.
-    if (/(^|\.)mobile\.de\//i.test(String(url).replace(/^https?:\/\//, ''))) {
-      return res.status(400).json({
-        error: 'mobile.de skelbimo gilios analizės kol kas nedarome – puslapis apsaugotas. Kaina, rida, metai ir rinkos palyginimas jau yra iš paieškos; skelbimą atidarykite portale.',
-      });
-    }
     if (!portalasLeidziamas(url)) {
       return res.status(400).json({
         error: 'Nuoroda ne is palaikomo portalo',

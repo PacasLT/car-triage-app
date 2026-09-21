@@ -5491,3 +5491,28 @@ skaitymas 19, rinka 32, regitra 88, mediana 11, dizainas 26. Naršyklėje
 
 **Dizaineriui:** portalų sąraše pridėta viena eilutė tuo pačiu markupu kaip
 kitos keturios (MD, #1F4E8C) — nauja klasė nekurta.
+
+## Z-75 · 2026-09-21 · Klaudijus · v2.4.7 · mobile.de skelbimo puslapis · /admin/patikra
+
+**Skelbimo puslapis.** Tikroje naršyklėje (naršant, ne fetch) atsidaro; RSC'e
+yra `"eventScope":"page-vip","listing":{...}`: 31 atributas, 63 įrangos
+punktai, 28 nuotraukos, aprašymas (atskiras RSC gabalas `41:T<hex BAITŲ>,`),
+pardavėjas su reitingu, koordinatės, `created` (įkėlimo data), mobile.de
+kainų ribos (6 slenksčiai). Skaitytuvas `mobileDeSkelbimoPuslapis` + 27 testai
+(tikras skelbimas 461901295, sutrumpintas).
+
+**Gavimas** (`fetchMobileDeSkelbima`): standartinis → render → premium;
+priimam TIK jei skaitytuvas rado skelbimą (iššūkio puslapio netalpinam, jokio
+Puppeteer). Pavykęs būdas įsimenamas 6 val.; jei nepavyko nė vienas —
+6 val. nebandom (kitaip TOP-8 su mobile.de sudegintų iki ~170 kr./paiešką).
+Išjungti: `MOBILEDE_GILUS=0`. **Ar ScraperAPI praeina — dar nežinoma**, tikrinama
+po push'o per `/admin/patikra/skelbimas`.
+
+**`/admin/patikra?portalas=…`** — tikras paieškos kelias (build*Url →
+fetchAllPages → skaitytuvas), grąžina KIEKVIENĄ skelbimą glaustai + įspėjimus
+(be kainos/ridos/metų, nereali kaina, tūris, galia). Skirta palyginti su
+portalo puslapiu naršyklėje. `/admin/patikra/skelbimas?url=` — tas pats
+scrapeSingleListing kelias kaip gili analizė.
+
+Portalų sąraše mobile.de ženklas — klase `.ct3-portal-ico` (ct-priedai.css),
+ne inline: kitaip dizainas.test inline riba 197 → 198.

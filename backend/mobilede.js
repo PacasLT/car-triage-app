@@ -262,3 +262,114 @@ module.exports = {
   MOBILEDE_MARKES, MOBILEDE_MODELIAI, MOBILEDE_KURAS, MOBILEDE_PUSLAPIU_RIBA,
   buildMobileDeUrl, mobileDeModelis, extractMobileDe, mobileDePaieska, mobileDeSkelbimas,
 };
+
+// ── Skelbimo puslapis (v2.4.7) ─────────────────────────────────────────────
+// Pamatuota 2026-09-21 tikroje naršyklėje (details.html?id=461901295):
+// RSC eilutėje `"eventScope":"page-vip","listing":{...}` - attributes[]
+// (tag/label/value), features[] (įranga), images[] (uri be https), contact
+// (pardavėjas, reitingas, adresas, koordinatės), priceRating.thresholdLabels
+// (mobile.de kainų ribos), created (unix s), htmlDescription: "$41" - nuoroda į
+// atskirą RSC gabalą `41:T<hex baitų ilgis>,<html>`.
+//
+// Be naršyklės (fetch) tas pats adresas grąžina 2,5 KB JS iššūkį - jį
+// atpažįstam kaip `rasta:false`, ne kaip tuščią skelbimą.
+
+function rscTekstas(rsc, nuoroda) {
+  // "$41" → ieškom eilutės pradžios "41:T<hex>,"; ilgis - UTF-8 BAITAIS.
+  const m = /^\$([0-9a-z]+)$/i.exec(String(nuoroda || ''));
+  if (!m) return typeof nuoroda === 'string' ? nuoroda : null;
+  const re = new RegExp('(?:^|\\n)' + m[1] + ':T([0-9a-f]+),');
+  const r = re.exec(rsc);
+  if (!r) return null;
+  const pradzia = r.index + r[0].length;
+  const baitu = parseInt(r[1], 16);
+  const buf = Buffer.from(rsc.slice(pradzia, pradzia + baitu + 16), 'utf8');
+  return buf.slice(0, baitu).toString('utf8');
+}
+
+function htmlITeksta(h) {
+  if (!h) return '';
+  return String(h)
+    .replace(/<br\s*\/?>/gi, '\n').replace(/<\/(li|p|div|ul)>/gi, '\n').replace(/<li>/gi, '• ')
+    .replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&quot;/g, '"')
+    .replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+const nuotrauka = (uri) => (uri ? (uri.startsWith('http') ? uri : 'https://' + uri) + '?rule=mo-1024.jpg' : null);
+
+function mobileDeSkelbimoPuslapis(html) {
+  if (!html || typeof html !== 'string') return { rasta: false };
+  const rsc = mobileDeRsc(html);
+  const zyme = '"eventScope":"page-vip","listing":{';
+  const i = rsc.indexOf(zyme);
+  if (i < 0) return { rasta: false, issukis: html.length < 10000 };
+  const txt = objektasNuo(rsc, i + zyme.length - 1);
+  let L;
+  try { L = JSON.parse(txt); } catch (e) { return { rasta: false }; }
+
+  const parametrai = {};
+  (L.attributes || []).forEach((a) => {
+    if (!a || !a.label) return;
+    parametrai[a.label] = Array.isArray(a.value) ? a.value.join(', ') : String(a.value);
+  });
+  const pagalTag = {};
+  (L.attributes || []).forEach((a) => { if (a && a.tag) pagalTag[a.tag] = Array.isArray(a.value) ? a.value.join(', ') : String(a.value); });
+
+  const c = L.contact || {};
+  const privatus = c.enumType === 'PRIVATE' || c.enumType === 'FSBO';
+  const vieta = [c.address2, c.country].filter(Boolean).join(', ').replace(/^DE-/, '') || null;
+  const aprasymas = htmlITeksta(rscTekstas(rsc, L.htmlDescription));
+  const photos = (L.images || []).map((x) => nuotrauka(x && x.uri)).filter(Boolean).slice(0, 15);
+  const pr = L.priceRating || {};
+  const kainosRibos = (pr.thresholdLabels || []).map((s) => parseInt(String(s).replace(/[^\d]/g, ''), 10)).filter(Number.isFinite);
+
+  return {
+    rasta: true,
+    id: L.id != null ? String(L.id) : null,
+    title: L.title || null,
+    kaina: L.price && L.price.grs ? L.price.grs.amount : null,
+    parametrai,
+    iranga: (L.features || []).length ? [{ skiltis: 'Ausstattung', items: L.features.slice() }] : [],
+    aprasymas: aprasymas || null,
+    photos,
+    photo: photos[0] || null,
+    pardavejoInfo: {
+      privatus,
+      vardas: privatus ? null : (c.name || null),
+      lygis: c.rating && c.rating.score != null ? `${c.rating.score}/5 (${c.rating.totalCount || c.rating.count || 0} atsil.)` : null,
+      vieta,
+      nuo: c.withMobileSince || null,
+    },
+    vieta,
+    koordinates: c.latLong && c.latLong.lat != null ? { lat: c.latLong.lat, lon: c.latLong.lon } : null,
+    ikelta: L.created ? new Date(L.created * 1000).toISOString() : null,
+    atnaujinta: L.renewed ? new Date(L.renewed * 1000).toISOString() : null,
+    kainosVertinimas: pr.rating || null,
+    kainosRibos,
+    busena: pagalTag.damageCondition || null,          // „Gebrauchtfahrzeug" / „Unfallfahrzeug" ...
+    tu: pagalTag.hu || null,                             // HU (TA) - „Neu" arba mėn./metai
+    kba: L.kba || null,
+    carfax: !!L.carfaxEligible,
+  };
+}
+
+// Tekstas AI analizei - ta pati forma kaip scrapeSingleListing kitiems portalams.
+function mobileDeAnalizesTekstas(p) {
+  if (!p || !p.rasta) return '';
+  const par = Object.entries(p.parametrai).map(([k, v]) => `${k}: ${v}`).join('; ');
+  const ir = p.iranga.length ? p.iranga[0].items.join(', ') : '';
+  const pard = p.pardavejoInfo;
+  return [
+    par ? `[TECHNINIAI DUOMENYS IŠ SKELBIMO LENTELĖS (mobile.de, vokiškai)]: ${par}` : '',
+    ir ? `[ĮRANGA IR KOMPLEKTACIJA (pilnas sąrašas iš skelbimo)]: ${ir}` : '',
+    p.vieta ? `[AUTOMOBILIO VIETA]: ${p.vieta}` : '',
+    `[PARDAVĖJAS]: ${pard.privatus ? 'privatus asmuo' : (pard.vardas || 'nenurodytas')}${pard.lygis ? ' (' + pard.lygis + ')' : ''}${pard.nuo ? ', ' + pard.nuo : ''}`,
+    p.kainosRibos.length ? `[MOBILE.DE KAINŲ RIBOS ŠIAM AUTOMOBILIUI]: ${p.kainosRibos.join(' / ')} € (vertinimas: ${p.kainosVertinimas || '-'})` : '',
+    p.ikelta ? `[SKELBIMAS ĮKELTAS]: ${p.ikelta.slice(0, 10)}` : '',
+    p.aprasymas ? `[PARDAVĖJO APRAŠYMAS]: ${p.aprasymas}` : '',
+  ].filter(Boolean).join('\n\n');
+}
+
+module.exports.mobileDeSkelbimoPuslapis = mobileDeSkelbimoPuslapis;
+module.exports.mobileDeAnalizesTekstas = mobileDeAnalizesTekstas;
+module.exports.rscTekstas = rscTekstas;

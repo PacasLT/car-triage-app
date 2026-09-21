@@ -252,3 +252,9 @@
      tekstui liktu ~150 px, o sie sakiniai yra sakiniai, ne etiketes. */
   .ct-regitra-p { flex-direction: column; gap: 4px; }
 }
+
+
+/* v2.4.6 · mobile.de portalo ženklas (Z-74). Kitos keturios eilutės tą patį
+   nešasi inline; penktoji - klase, kad nedidintų inline ribos (dizainas.test).
+   Dizaineriui: galima perkelti visoms penkioms ir inline pašalinti. */
+.ct3-portal-ico { flex: none; border-radius: 5px; }
