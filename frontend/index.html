@@ -2676,34 +2676,6 @@
 
 
 
-        <!-- v1.84.0 (Nr. 34, Nr. 35): 12-asis langelis. Vienuolika langeliu
-             palikdavo skyle antros eiles gale. Cia stovi du valdikliai, kurie
-             nera filtro laukai: „Daugiau filtru" ir „Istorija". Skirtuku juosta
-             po panele pasalinta - ji atrode nuo paneles atplysusi. Istorija
-             PERKELTA, ne paslepta (K-06). -->
-        <div class="ct-fld-act">
-          <div class="ct-fld-act-in">
-          <button class="ct3-more-btn ct-btn ct-btn-toggle" type="button" onclick="ctToggleMoreFilters()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M7 12h10M10 18h4"/></svg>
-            Daugiau filtrų
-            <span class="ct3-badge" id="more-filters-badge" style="display:none;">0</span>
-          </button>
-          <div style="position:relative">
-            <!-- v1.86.0: `.ct-tab` nuimta. Ji nese `min-height: 44px`, kuris nugalejo
-                 34 sk. `height: 30px` - height NEIVEIKIA min-height (trecias kartas
-                 ta pati saveika). Mygtukai buvo 30 ir 44 px; slinkimo tai nesukele,
-                 tad matavimas prazuvo. Ir vardas negyvas: skirtuku juostos nebera. -->
-            <button class="ct-btn ct-btn-ghost ct3-stab" id="ct-hist-tab-btn" onclick="ctSearchTabSwitch('history',this)">🕘 Paskutinės paieškos</button>
-            <div id="ct-history-dropdown" style="display:none;">
-              <div class="ct-hist-head">
-                <div class="ct-hist-head-title"><div class="ct-hist-head-dot"></div>Paskutinės paieškos<span class="ct-hist-head-count" id="ct-hist-count" style="display:none"></span></div>
-                <button class="ct-hist-clear-all" onclick="event.stopPropagation();clearSearchHistory()">Valyti</button>
-              </div>
-              <div class="ct-hist-list" id="search-history-chips"></div>
-            </div>
-          </div>
-          </div>
-        </div>
       </div>
 
 
@@ -2740,8 +2712,27 @@
 
       <div class="ct3-search-bottom">
         <div class="ct3-search-bottom-left">
-
-
+          <!-- v2.5.0 (39 paketas, K-24 / Nr. 38): „Daugiau filtrų" ir „Paskutinės
+               paieškos" - veiksmai, ne filtrai: iš 12-ojo langelio čia. -->
+            <button class="ct3-more-btn ct-btn ct-btn-toggle" type="button" onclick="ctToggleMoreFilters()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M7 12h10M10 18h4"/></svg>
+              Daugiau filtrų
+              <span class="ct3-badge" id="more-filters-badge" style="display:none;">0</span>
+            </button>
+            <div style="position:relative">
+              <!-- v1.86.0: `.ct-tab` nuimta. Ji nese `min-height: 44px`, kuris nugalejo
+                   34 sk. `height: 30px` - height NEIVEIKIA min-height (trecias kartas
+                   ta pati saveika). Mygtukai buvo 30 ir 44 px; slinkimo tai nesukele,
+                   tad matavimas prazuvo. Ir vardas negyvas: skirtuku juostos nebera. -->
+              <button class="ct-btn ct-btn-ghost ct3-stab" id="ct-hist-tab-btn" onclick="ctSearchTabSwitch('history',this)">🕘 Paskutinės paieškos</button>
+              <div id="ct-history-dropdown" style="display:none;">
+                <div class="ct-hist-head">
+                  <div class="ct-hist-head-title"><div class="ct-hist-head-dot"></div>Paskutinės paieškos<span class="ct-hist-head-count" id="ct-hist-count" style="display:none"></span></div>
+                  <button class="ct-hist-clear-all" onclick="event.stopPropagation();clearSearchHistory()">Valyti</button>
+                </div>
+                <div class="ct-hist-list" id="search-history-chips"></div>
+              </div>
+            </div>
         </div>
         <!-- PASALINTA: "Naršyti viską" režimas. Liko tik CarTriige analizė, todėl režimų pasirinkiklio nebereikia. -->
         <div class="ct3-search-bottom-right">

@@ -161,17 +161,9 @@
 
 
 /* ----------------------------------------------------------------------------
-   11 BLOKAS · istorijos mygtuko apvalkalas · v1.85.0
-
-   Buvo platesnis, bet 25 paketas (34 sk. priedas) perėmė beveik viska:
-   `.ct-fld-act-in > * { width: 100% }` sone istirpdo ir musu `width`, ir
-   mygtuku aukscius. Liko viena eilute, kurios jo failas negali turėti, nes ji
-   ateina is MARKUPO: istorijos mygtuka gaubia `<div style="position:relative">`,
-   ir jam reikia pozicionavimo konteksto iskleidziamam langui.
-
-   MUSU, netrinti.  */
-
-.ct-fld-act-in > div { position: relative; }
+   11 BLOKAS · IŠTRINTAS v2.5.0 (39 paketas): `.ct-fld-act` langelio nebėra,
+   istorijos mygtukas perkeltas į `.ct3-search-bottom-left`. Pozicionavimo
+   kontekstą išskleidžiamam langui duoda markupo `style="position:relative"`. */
 
 
 /* ----------------------------------------------------------------------------

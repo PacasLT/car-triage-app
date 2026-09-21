@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.5.0', data: '2026-09-21', pavadinimas: 'Veiksmų mygtukai šalia paieškos',
+    pakeitimai: [
+      '„Daugiau filtrų" ir „Paskutinės paieškos" perkelti į apatinę eilę šalia „Ieškoti ir analizuoti"',
+      'Abi filtrų eilės vienodo aukščio - antra eilė nebeišsitempia',
+    ],
+  },
+  {
     versija: '2.4.7', data: '2026-09-21', pavadinimas: 'mobile.de skelbimų gili analizė',
     pakeitimai: [
       'mobile.de skelbimams renkama įranga, nuotraukos, aprašymas, pardavėjo reitingas ir mobile.de kainų ribos - kaip kituose portaluose',

@@ -530,7 +530,8 @@ app.get('/admin/patikra', klaiduPrieiga, async (req, res) => {
     const isTalpyklos = ATSARGA.paieska.talpykla > priesT;
     const eil = listings.map((l) => {
       const o = { url: l.url, modelis: l.modelis, metai: l.metai, kaina: l.kaina, rida: l.rida, kuras: l.kuras,
-        pavarai: l.pavarai, galia: l.galia, turis: l.variklioTuris, miestas: l.miestas || null, verslas: l.yraVerslas };
+        pavarai: l.pavarai, galia: l.galia, turis: l.variklioTuris, miestas: l.miestas || null, verslas: l.yraVerslas,
+        kainosIspejimas: l.kainosIspejimas ? l.kainosIspejimas.tipas : undefined };
       const isp = patikrosIspejimai(l);
       if (isp.length) o.ispejimai = isp;
       return o;

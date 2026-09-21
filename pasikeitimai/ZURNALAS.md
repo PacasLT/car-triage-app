@@ -5552,3 +5552,47 @@ autoscout24 ir mobile.de pardavėjo įvestas kuras gali būti klaidingas.
 **mobile.de skelbimo puslapis per ScraperAPI — PRAEINA standartiniu būdu,
 1 kr.:** 31 parametras, 63 įrangos punktai, 15 nuotraukų, aprašymas 3 807
 simb., pardavėjas su reitingu, kainų ribos, įkėlimo data (Z-75 kelias gyvas).
+
+## Z-77 · 2026-09-21 · Klaudijus · 39 PAKETAS ĮDIEGTAS · v2.5.0 · `K-24`
+
+Įdiegta: 34c sk. ir Errata 3 ištrinti (ct-dizainas.css buvusios 2347–2498 eil.),
+`.ct-shell.is-split ~ .ct3-stats-bar` ištrinta, 36 sk. prikabintas.
+Markupas: „Daugiau filtrų" ir „Paskutinės paieškos" (su `position:relative`
+apvalkalu) perkelti į `.ct3-search-bottom-left`, `.ct-fld-act` išimtas —
+markupe 0 kartų. Mūsų `ct-priedai.css` 11 blokas (`.ct-fld-act-in > div`)
+ištrintas — jo selektorius mirė kartu su langeliu.
+
+Matuota lokaliai, tikri šriftai, `is-split` klase:
+
+```
+1280 prieš paiešką
+  .ct3-fields             133 px (buvo 162)   eilės 50 / 50 ✔   11 laukų (6 + 5)
+  Daugiau filtrų          153 × 38  centras y 511
+  Paskutinės paieškos     178 × 38  centras y 512
+  Ieškoti ir analizuoti   181 × 46  centras y 514     ← 2–3 px žemiau kairiųjų
+  slinkimas               0
+1920                      tas pats, 133, 50/50
+390
+  laukai 2 stulpeliais po 50, 347 px
+  Daugiau filtrų          304 × 44
+  Paskutinės paieškos     178 × 44            ← NE per visą plotį (apvalkalas)
+  Ieškoti                 304 × 48, slinkimas 0
+Šonas (is-split)
+  turinys 578 px, riba 599 → 21 px atsargos (laukta ~584)
+  Daugiau filtrų          250 × 32 (1280) / 274 × 32 (1920)
+  Paskutinės paieškos     162 × 32            ← NE per visą plotį
+  Ieškoti                 250 × 46
+```
+
+**Dizaineriui — du radiniai:**
+1. `> div > button { width: 100% }` ištempia mygtuką iki `div` pločio, o pats
+   `div` (`style="position:relative"`) nėra ištemptas — todėl „Paskutinės
+   paieškos" šone 162, telefone 178, kai kaimynas 250 / 304.
+2. Vertikaliai: kairieji 38 px, dešinysis 46 px (`ct-btn-lg`), `align-items:
+   center` — centrai 511/512 prieš 514. Skirtumas iš bloko aukščio, ne iš
+   mygtukų: verta pamatuoti, ar kairė ir dešinė iš tikro tame pačiame
+   flex konteineryje po 640 px `@media` taisyklių index.html (912–917,
+   993–994, 1429–1431 eil. — inline `<style>`).
+
+K-14 skaičiuoti nuo **578**. Penkta portalų eilutė šono aukščio nekeičia —
+portalų sąrašas yra išskleidžiamas langas, uždarytas.
