@@ -1,96 +1,54 @@
-# Būsena · atnaujinta 2026-09-21, v2.4.3 (v2.4.0 GYVA produkcijoje)
+# Būsena · 2026-09-22 · v2.7.2 gyva
 
-Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
+Tik **atviri** punktai. Uždaryti — `ZURNALAS.md` / `archyvas/`. Kas laukia Luko — `LUKUI.md`.
+Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
 
-## Kieno dabar ėjimas
+## Klaudijus
 
-| Nr. | Kas | Kieno ėjimas | Trumpai |
-|---|---|---|---|
-| Klaidos 2026-09-22 | Nr. 40, 42, 45, 30 | **Lukas** | Ištaisyta v2.6.5 (Z-91) – laukia patikros. Nr. 46 (Regitra) ir Nr. 10 – laukia sprendimo. |
-| ~~K-35~~ | ~~pilno pločio juosta PRIEŠ paiešką~~ | **Uždarytas 37 paketu** | 35c pririšta prie `.is-split`: panelė prieš paiešką vėl 1280/1920. Z-69. |
-| ~~K-26b~~ | ~~Šonas 660 prie ribos 599~~ | **Uždarytas 37 paketu** | Diapazonai `B+D` + tarpai: šonas **536** (riba 599, atsargos 63). Z-69. |
-| ~~K-36~~ | ~~„15000" KAINOS lauke ties 1280~~ | **Uždarytas Errata 4** | Laukas 44 px, „15000" 39 px — telpa. Šonas 536. Z-71. Nr. 40 — klaidingas matavimas (Z-68). K-14 dizaineris skaičiuoja nuo 536. |
-| ~~K-32~~ | ~~Amžiaus juostos danga~~ | **Uždarytas** | `A-32`: atsarga tik 7–15 m. lange, `kmmet_n ≥ 100`. Įdiegta, sargas 88/88. Mūsų archyve uždengia 3 % (skelbimai jauni). Z-58. |
-| K-33 | Registro raktų logika (`SERIE`, `REIHE`, neapibrėžti) | **Analitikas** | `A-33`: jungti pagal (šeima, kuras); `BMW SERIE` = trys serijos viename rakte. Laukiu `modelis_dalys()` + pergeneruoto failo — diegiam VIENU commit'u. Z-58. |
-| K-31 | Nr. 41 · `is-inline` etiketės ir `NUSTATYTA` juosta | **Dizaineris** | Penki langeliai platūs, tik du neša etiketę viduje — 33 paketo pasekmė. Telefone `is-inline` vardas jau neteisingas. Trys keliai, Z-53. |
-| K-29 | Nurašymų riba: 50 (P75) ar 40 (kad BMW 530 suveiktų)? | **Analitikas** | Su amžiaus vartais 40 nebėra triukšmingas. Z-52. |
-| K-30 | Ar `rida_kv` apskritai naudotinas skelbimui vertinti? | **Analitikas** | Pamatuota: normalus 2–4 m. X5 gautų klaidingą 🟡. Z-52. |
-| ~~K-28~~ | ~~Likvidumo riba~~ | **Uždarytas** | Ribos perkeltos prie kvartilių: 26 / 13. |
-| K-28-senas | Likvidumo riba: `< 12` ar `<= 12,1`? | **Lukas** | Specifikacijoje riba „žemiau 12 %", bet BMW 530 (12,1 %) pateiktas kaip „lėto" pavyzdys. Kodas laikosi ribos. Z-51. |
-| ~~K-27~~ | ~~Nr. 40 · portalų mygtukas ir statistikos juosta~~ | **Uždarytas 34 paketu** | `K-22` diagnozuotas: du nesusiję kaltininkai, 56 px (≥1180) ir 182 px (<1180). Atsvaros `ct-priedai.css` 13 ir 14 blokuose — perimkit, ir ištrinsiu. Z-48. |
-| K-25 | Nr. 37 · portalų išskleidžiamasis „ne pagal dizainą" | **Dizaineris** | Tekstas, autorius, data — Z-88. Klausimas niekada nebuvo išsiųstas atskirai; nuo tada `#portal-selector` stilizuoja 18 pk. (K-18) — gali būti uždengtas. |
-| ~~K-24~~ | ~~Nr. 38 · „Daugiau filtrų" prie „Ieškoti"~~ | **Uždarytas 39 paketu** | v2.5.0, Z-77. |
-| ~~A-11~~ | ~~tokenai~~ | **Uždarytas 32 paketu** | `--text-on-light` naudojamas 8 k. Liko tik `--focus-offset` (0 naudojimų) — dizainerio paties pažadas su PT-02, ne regresija. `--border-strong` NEištrintas, bet gyvas (2 naudojimai, `.ct-fld:hover`) — skolos nėra. |
-| ~~K-18~~ | ~~Portalu skydas~~ | **Uždarytas A-28** | 18 paketas; pamatuota 264/240, Z-39 §4. BUSENA buvo pasenusi. |
-| K-14 | Nr. 24 · šoninės panelės dizainas | **Klaudijus** | B įdiegtas v2.6.0 (42 paketas, 37 sk.). Laukia matavimų: šonas ~583, platusis 6×2 133 px. Z-86. |
-| Regitra | Registro punktai skelbimams | **Klaudijus** | Nuo v2.0.0 niekada neveikė (skelbimai be `marke`). Ištaisyta v2.6.0, Z-85. K-33 lieka analitikui. |
-| ID mygtukai | ID = vieta, `.ct-btn-*` = išvaizda | **Dizaineris** | 4/5 padaryti (v2.6.6–2.6.7, Z-92/93). `#search-btn` – klausimas dizaineriui: gradientas/švytėjimas/:disabled sistemoje ar vientisas CTA? |
-| ~~K-37~~ | ~~šono mygtukų plotis~~ | **Uždarytas v2.5.1** | 250/250, 304/304, centrai y 508. Z-78. |
-| ID sąrašas | D-37 §3 | **Dizaineris** | `matavimai/ID-SELEKTORIAI-2026-09-21.md`: 5 mygtukai muša sistemą. Z-84. |
-| K-15 | Nr. 27 · hero tekstas | **Dizaineris** | Lukas prašo pašalinti `.ct3-hero-content`. 26 sk. dalis — neliečiu be atsakymo. |
-| ~~K-12~~ | ~~Nr. 26 · portalų sąrašas šone~~ | **Uždarytas A-19** | 16 paketas perimtas (D-19); 9 blokas seniai ištrintas. BUSENA buvo pasenusi. |
-| D-03 | Skelbimo puslapio 3 dalis | **Lukas** | Ar grąžinam šešis skydelius? Iš 27 pranešimų nė vienas nebuvo apie jų turinį. |
-| ~~K-17~~ | ~~Nr. 29 · prioriteto spalvos~~ | **Uždarytas A-29** | `.ct-prio` admin sąraše nuo v1.91.0. Mūsų skola: 10 blokas liko pranešimo lange — ištrintas v2.6.2 (Z-88). |
-| ~~K-16~~ | ~~Nr. 28 · antraštės dešinė~~ | **Uždarytas A-25** | Z-72. |
-| Nr. 40, 39, 35, 34, 33, 30, 28, 24, 23 | Laukia jūsų patikros | **Lukas** | **Devyni**. v1.95.0 gyva; pamatuota tiesiai produkcijoje 1280×720. |
-| Nr. 20, 21 | dpTab ir FAB | **Lukas** | v1.76.0 gyva — patikrinti. |
-| Nr. 25, 26 | Dekoracija ir portalų sąrašas | **Lukas** | Ištaisyta v1.77.0 — patikrinti po push'o. |
-| Nr. 19, 2, 16, 15 | Seni pranešimai | **Lukas / Klaudijus** | Nr. 15 laukia Luko sumos; Nr. 16 laukia dizainerio mobile varianto. |
-| L-04 / L-05 | `/admin/atsarga`, rakto rotacija | **Lukas** | Priminimai 09-19 11:30 ir 13:15 UTC. |
+| Nr. | Kas | Trumpai |
+|---|---|---|
+| Darbo sistema | DARBO-SISTEMA v2, fazė A | Vykdoma. Kol nebaigta — produkto darbai stovi (Luko sprendimas). |
+| TA integracija | `docs/UZDUOTIS-ta-integracija.md` | Analitiko paruošta užduotis (TA rida 99 % vs Regitra 17 %). Po fazės C. |
+| `.ct-std-card` matavimas | prieš 46b | `.ct-std-card` vs `.ct-top-card`: fonas, rėmelis, radiusas, paraštė (dizainerio prašymas, D-41). |
+| Nr. 42 pabaiga | `#sort-bar` iš ct-dizainas.css 609 ir 623 sąrašų | Dizaineris leido daryti Klaudijui. Kartu trinti 16 bloką. |
 
-## Kas uždaryta paskutiniu metu
+## Dizaineris
 
-- v2.4.3 — **Filtrai visuose portaluose** (Z-67): autogido kuro filtras niekada nepasiekdavo portalo; autoscout24 ir otomoto kuro/dėžės/ridos filtrų neturėjo; hibridai autoscout24/otomoto buvo atmetami. Visi kodai patikrinti gyvai. Sargas `filtrai.test.js` 38/38 (senas kodas krenta 14). Pavyzdžiai — `UZKLAUSU-PAVYZDZIAI.md`. **Laukia push'o su v2.4.1–2.**
+| Nr. | Kas | Trumpai |
+|---|---|---|
+| Prieiga | `Downloads\cartriige-dizaineriui` | Tikros kopijos (junction'ai neveikė). Patikra: `ct-priedai.css` eil. sk. + ši pirma eilutė. |
+| 46b | 4 benamiai vardai: `.ct-sort`, `.ct-std-card`, `.dp-desine`, `.ct-papf` + „Kaip vertiname?" eilutė `#dp-panel` | 46 atšauktas (D-41). **48 Errata 7 gautas, laukia 46b** — diegiami kartu. Įdiegus trinami priedų 16, 17, 18, 20 blokai ir senos `.ct-std-card` taisyklės (index 1337 tik 3 savybės, 1534 „BŪTINA", 2173, compare.html, **ct-bendras.css**; 2144–2151 neliesti). |
+| `#search-btn` | 5-as ID mygtukas | Gradientas / švytėjimas / `:disabled` sistemoje ar vientisas CTA? Z-93. |
+| Kiti vardai | `.ct-btn-accent` (priedų 5), `.ct-regitra` (15), `.mg-atn-busena` (12), `.ct3-portal-ico` | Dizaineris pažadėjo kitame pakete. |
+| Tab žiedas | `--focus-offset` (43 pk.) | Vizualiai nepatikrinta — laukia Luko. |
 
-- v2.4.2 — **Archyvo auditas** (Z-66): 8 radiniai, svarbiausias — **autoplius hibridų rida buvo elektrinis nuotolis** (260 skelbimų, 16 %, visoje programoje). Nuolaidos kaina, kuras su baterija, reklama vietoj modelio, tūris 0. Seni įrašai taisomi paleidžiant. Sargas `skaitymas.test.js` 19/19 (senas kodas krenta 10). **Laukia push'o kartu su v2.4.1.**
+## Analitikas
 
-- v2.4.1 — **otomoto / autoscout24 be render** (1 kreditas vietoj 10), su render atsarga tuščiam puslapiui. Pamatuota produkcijoje: 32 ir 20 skelbimų per ScraperAPI be render. Z-65.
+| Nr. | Kas | Trumpai |
+|---|---|---|
+| K-33 | Registro raktų logika (`BMW 5ER`, `530`, `SERIE`…) | `modelis_dalys()` + pergeneruotas `regitra-modeliai.json` — diegiam vienu commit'u. |
+| K-29 | Nurašymų riba 40 vs 50 | Su amžiaus vartais 40 nebėra triukšmingas. Z-52. |
+| K-30 | Ar `rida_kv` naudotinas skelbimui | Normalus 2–4 m. X5 gautų klaidingą 🟡. Z-52. |
 
-- v2.4.0 — **Nr. 43** atspari mediana (`rinkos-mediana.js`, 11/11), **Nr. 42** rūšiavimas visam sąrašui, **kreditų sargas** (atsarga 5 000, 503 jei likutis nežinomas), `autoplius-ids` nebekartojamas po nesėkmės, render bandymo maršrutas. Z-64.
+## Lukas
 
-- **Dizaineriui perduota Z-57** (09-21): `UZDUOTYS-DIZAINERIUI.md` perrašyta iš gyvo sąrašo, nauji `K-34` ir Nr. 39 diagnozė. Nuo 34 paketo jam nebuvo perduota nieko — dabar perduota.
+Žr. `LUKUI.md`.
 
-- v2.3.0 — **A-29 ir A-30 įdiegti** (Z-56): ridos norma tik amžiaus juostoje (`kmmet_juostos`), nurašymai 40 % + vartai 12 m. Sargas **80/80**. Pamatuota ant 1 827 tikrų BMW skelbimų: 🟡 258 → 112, bet ⚪ 266 → **1 203** (66 %) — jaunos juostos retai turi 50 įrašų. Nauji `K-32` (⚪ danga), `K-33` (`BMW 320` vs `320D` registro varduose). **Laukia push'o.**
+## `ct-priedai.css` blokai (laikini, laukia dizainerio)
 
-- v2.2.1 — **Automatinis sekimas IŠJUNGTAS** (Z-55). ScraperAPI nurašo ~10 kreditų už autoplius/autogido puslapį, ne 1; sekimas (~300 skelbimų) = ~3 000 kreditų ir buvo paleidžiamas po KIEKVIENO deploy'aus. Liko ~14 500 iš 100 000. Įjungti: `SEKIMAS_AUTO=1`. **Kol kodas nesutvarkytas iki galo — jokių pilnų skenavimų.**
-
-- v2.2.0 — **Skelbimų archyvas** (Z-54): `backend/rinka.js`, `/data/rinka.db` (SQLite, atskirai nuo `users.db`). `GET /admin/rinka` (suvestinė, disko failai, `?paskyra=1` — ScraperAPI likutis nemokamai), `POST /admin/rinka/skenuoti` (tik autoplius/autogidas, riba privaloma). Dingimas — tik po dviejų pilnų skenavimų. `turiLizingoOpcija` nesaugomas. Pakeliui: **atominis JSON įrašymas** (6 failai) — anksčiau nutrūkus rašymui visas archyvas tyliai virsdavo `{}`. Sargas `rinka.test.js` **24/24**. **Laukia push'o, tada bandomasis BMW nuo 2019.**
-
-- v2.1.0 — **Regitros duomenys v2**: analitikas rado 12 mėn. lango klaidą (dengė 9,3 mėn.), tad v2.0.0 produkcijoje rodė **per mažus** skaičius. Įdiegta: ribos prie kvartilių (26/13), nurašymai tik 15+ pjūvyje, ridos percentilis, kuro punktas. **Du nurodymai pakeisti po matavimo** — `kmmet_kv` vietoj `rida_kv` ir riba 50 vietoj 30. Pridėti amžiaus vartai. Sargas **70/70**. Nauji `K-29`, `K-30`. **Laukia push'o.**
-
-- v2.0.0 — **Regitros integracija**: `backend/regitra.js` (1 343 modeliai atmintyje), kontekstas prisegamas prie kandidatų, trys punktai žinojimo lygių sistemoje, `regitra.test.js` **46/46**. Produkto klausimas (4 sk.) — imtas numatytasis **1 variantas** (tik trečias lygis ir skelbimo puslapis). Naujas `K-28`. **Laukia push'o.**
-
-- v1.99.0 — **34 paketas**: `K-27` uždarytas viena taisykle vietoj dviejų atsvarų. Naujas `23b` (`.ct-ell` — vienaeilio apkarpymo sistemoje nebuvo) ir `30b` (`min-width: 0` visam stulpeliui, `flex: none` ženklams). `ct-priedai.css` 13 ir 14 blokai **ištrinti**. Pakeliui pataisytos piktogramos, kurių niekas neieškojo: 4→14 px ties 1280, 10→14 telefone, 0→12 ties 1179.
-- v1.98.0 — **revizijos 2 eilė**: `A-4` (el. pašto registras + migracija su saugikliu), `C-1` (bandymų riba `ip` ir `ip+elpaštas` — be paskyros užrakinimo), `C-4` (laiko kanalas + maišos perrašymas prisijungus). Nauji sargai `sesija.test.js`, `migracija.test.js`. **Laukia push'o.**
-
-- v1.97.0 — **Nr. 40 / `K-22`**: šonas turėjo paslėptą horizontalų slinkimą su **dviem nesusijusiais** kaltininkais — `#portal-toggle-btn` 56 px (≥1180) ir `.ct3-stats-driven` 182 px (<1180, mano skola nuo 25 sk.). Abu uždaryti, liko 20 px sąmoningo 7 bloko triuko. **Laukia push'o.**
-
-- v1.96.0 — **revizijos 1 eilė**: naujas `frontend/ct-sesija.js`, vienas žetono ir 401 šaltinis visuose šešiuose puslapiuose (`A-1`, `A-2`, `A-3`, `A-7`). `C-2` sargas įdėtas į `fetchListingPage`, ne į vieną maršrutą — 14 bandymų. Sargai `23/24 → 26/26` (`B-2`, `B-3`). **Laukia push'o.**
-
-- v1.95.0 — **33 paketas**: `K-26` uždarytas, visi šeši diapazono laukai 24/36 → **101 px**, nieko neapkirpta. Trečioji taisyklė įdiegta siauriau: atsiųsta būtų nuėmusi išskleidimo rodyklę nuo KURO, PAVARŲ ir RATŲ. Naujas `K-26b`.
-
-- v1.94.0 — **32 paketas**: 30 sk. sujungtas (`I-01` dublikatų nebėra), 8 negyvi tokenai ištrinti (`I-04` 10 → 1), `--text-on-light` pritaikytas 4 vietose. **RADINYS: šone `#marke` ir `#modelis` buvo 0 px ir nepaspaudžiami** — juosta 484 → 532 px (riba 599). Naujas `K-26`.
-- v1.93.0 — Nr. 30 avataras: `index.html` turėjo likusią `ct-btn-sm`, 32x32 vietoj 38x38. Visi penki puslapiai suvienodinti.
-
-- v1.81.0 — **D-16 padarytas**: vartotojo ekranas, patvirtinimo kortelė pamatuota visais 9 perėjimais; `created_at` ir `PLANAI` jau buvo
-- v1.80.0 — komentarai prie pranešimų (būsena keičiasi pati); `K-16` antraštės tarpiklis (Nr. 28, 30); 32 sk. kortelės telefone (Nr. 16); Nr. 14 pamatuota
-- v1.79.0 — `K-13` dvi būsenos: filtrai į šoną tik po paieškos; `K-12` perėjo į 30 sk.; `ct-priedai.css` 9 blokas ištrintas
-- v1.78.0 — Nr. 29 (prioritetas su spalvomis), Nr. 22 (admin sąrašas atsinaujina grįžus į skirtuką); nauja taisyklė: klaidų sąrašas → užduotys
-- v1.77.0 — Nr. 25 (dekoracinė „Search across Europe" juosta ištrinta), Nr. 26 (portalų sąrašas nebeiškrenta už stulpelio); `K-10` perimta į 30 sk.
-- v1.76.0 — Nr. 20 (`dpTab` grąžinta), Nr. 21 (FAB virš širdelės); 30 sk. v3, šonas 746 → 540 px
-- v1.75.0 — 25 sk. `.ct-shell`, `.container.is-wide`, `ERRATA-header-h`
-- **Radinys:** `.ct3-portals-row` buvo dekoracija (0 valdiklių), ne filtras — `A-14` 2.1 taikytas ne tam elementui
+| Blokas | Kas | Perims |
+|---|---|---|
+| 1, 2 | senos kortelės taisyklės, `.ct-istorija` trečiame lygyje | 46b (`.ct-std-card`) |
+| 5 | `.ct-btn-accent` | kitas paketas (dizainerio pažadėta atmaina) |
+| 8 | `#more-filters` iš inline | NETRINTI (mūsų) |
+| 12 | mėgstamiausių būsenos eilutė | kitas paketas (`.mg-atn-busena`) |
+| 15 | Regitros punktai | kitas paketas (`.ct-regitra`) |
+| 16 | `#sort-bar` kaukė | Nr. 42 pabaiga (Klaudijus) |
+| 17, 18, 20 | `.ct-std-card`, `.dp-desine`, `.ct-papf` | 46b |
 
 ## Kur kas guli
 
-- Dizainerio failai: `frontend/ct-dizainas.css`, `frontend/ct-mygtukai.css`
-- `frontend/ct-priedai.css` — **1, 2** (seni), **7, 8** (mūsų, NETRINTI),
-  **10** (`K-17`) – vienintelė laikina atsvara
-- Patikros: `tools/onclick-patikra.py`, `tools/klaidos.js`
-- Užduotys dizaineriui: `pasikeitimai/UZDUOTYS-DIZAINERIUI.md` (perrašoma iš gyvo sąrašo)
-- Versija: `frontend/versijos.js` — **vienintelė vieta**
-
-## Atviri matavimai
-
-1. **13 paketas** — patvirtinimo kortelė visiems trims planams; 390 px žurnalo lentelė.
-2. `--text-on-light` penkiose vietose — jokio vizualaus pokyčio neturi būti.
+- Taisyklės: `TAISYKLES.md` · Planas: projektas „Cartriide" → `claude/DARBO-SISTEMA.md`
+- Versija: `frontend/versijos.js` — vienintelė vieta
+- Dizainerio veidrodis: `tools/veidrodis-dizaineriui.ps1` (po kiekvieno commit'o)
+- Filtrų plėtra: `FILTRAI-PASIULYMAS.md` · Regitros galimybės: `REGITRA-GALIMYBES.md`
