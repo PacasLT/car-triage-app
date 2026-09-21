@@ -6093,3 +6093,22 @@ klaidas, kurias gaudo.
 - `ct-mygtukai.css` 75: `outline-offset: var(--focus-offset)`; 339: `calc(var(--focus-offset) * -1)`.
 - `ct-dizainas.css`: `.ct-field:hover` be atsargos; `:root` komentaras „LIEKA --focus-offset" pakeistas.
 - `--focus-offset` = 2px → reikšmės tos pačios (2 / −2), vizualiai niekas neturi pasikeisti.
+
+---
+
+## Z-90 · 2026-09-21 · Klaudijus · v2.6.4 · Klaidų būsenos (Luko sprendimas)
+
+Patikra parodė: `nepasitvirtino` Lukui reiškė ir „ne klaida", ir „pataisymas
+neveikia". Nr. 42 („WEB meta bet per iphone ne" → po 4 min. nepasitvirtino),
+Nr. 35 ir Nr. 30 (iš laukia-patikros) buvo uždaryti, nors klaida liko —
+Lukas patvirtino: „pataisymas neveikia". `atideta` turėjo ėjimą „claude",
+nors laukė dizainerio arba Luko.
+
+- `nepasitvirtino` → `neaktualu` (uždaryta). `atideta` → `laukia-sprendimo`
+  (Lukas) ir naujas `laukia-dizainerio`. Seni vardai priimami ir perrašomi
+  paleidžiant (istorija nekeičiama).
+- `laukia-patikros` išskleidus: **✓ Veikia** (→ sutvarkyta) / **✗ Neveikia**
+  (→ patvirtinta, priežastis iš komentaro lauko).
+- Prie būsenos — kieno ėjimas; sąraše viršuje visi Luko ėjimai, ne tik patikros.
+- Nr. 42, 35, 30 grąžinti į `patvirtinta`. Nr. 10 → `laukia-sprendimo`.
+- CLAUDE.md būsenų lentelė atnaujinta.

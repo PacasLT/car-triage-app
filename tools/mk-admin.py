@@ -14,6 +14,9 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 .pg { max-width: 1240px; margin: 0 auto; padding: 26px 16px 90px; }
 .pg-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px; flex-wrap: wrap; }
 .pg-head h1 { margin: 0; font: 700 22px/1.2 var(--font); }
+.ad-ejimas { margin-left: 6px; font: 500 10px/1 var(--font-mono); letter-spacing: .06em; color: var(--text-dim); }
+.ad-patikra { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+.ad-patikra > span { font-size: 13px; color: var(--text-muted); }
 .pg-sub { color: var(--text-muted); font-size: 13px; margin: 0 0 18px; }
 
 /* Skirtuku juosta - .ct-tab yra dizainerio, cia tik juosta */
@@ -90,15 +93,19 @@ BODY = u'''
 <script>
 (function () {
   'use strict';
+  // v2.6.4 (Z-90): `e` - kieno ejimas. „Nepasitvirtino" dingo (buvo dviprasmis),
+  // „Atideta" suskilo pagal tai, ko laukiama.
   var BUSENOS = [
-    { k: 'rasta',           t: 'Rasta' },
-    { k: 'patvirtinta',     t: 'Patvirtinta' },
-    { k: 'tvarkoma',        t: 'Tvarkoma' },
-    { k: 'laukia-patikros', t: 'Laukia patikros' },
-    { k: 'sutvarkyta',      t: 'Sutvarkyta' },
-    { k: 'nepasitvirtino',  t: 'Nepasitvirtino' },
-    { k: 'atideta',         t: 'Atidėta' }
+    { k: 'rasta',             t: 'Rasta',             e: 'claude' },
+    { k: 'patvirtinta',       t: 'Patvirtinta',       e: 'claude' },
+    { k: 'tvarkoma',          t: 'Tvarkoma',          e: 'claude' },
+    { k: 'laukia-patikros',   t: 'Laukia patikros',   e: 'lukas' },
+    { k: 'laukia-sprendimo',  t: 'Laukia sprendimo',  e: 'lukas' },
+    { k: 'laukia-dizainerio', t: 'Laukia dizainerio', e: 'dizaineris' },
+    { k: 'sutvarkyta',        t: 'Sutvarkyta',        e: null },
+    { k: 'neaktualu',         t: 'Neaktualu',         e: null }
   ];
+  var EJIMAS = { claude: 'Claude', lukas: 'J\u016bs', dizaineris: 'Dizaineris' };
   var KAT = {
     dizainas: 'Atrodo ne taip', negyvas: 'Nieko neįvyko', duomenys: 'Neteisingas skaičius',
     kreditai: 'Nusirašė kreditas', greitis: 'Užstringa', prisijungimas: 'Prisijungimas', kita: 'Kita'
@@ -160,11 +167,12 @@ BODY = u'''
 
   function busenosZenklas(b) {
     // Tie patys zinojimo lygiai, ne naujos spalvos.
-    var lygis = (b === 'sutvarkyta' || b === 'nepasitvirtino') ? 'ct-k-confirmed'
+    var lygis = (b === 'sutvarkyta' || b === 'neaktualu') ? 'ct-k-confirmed'
       : (b === 'tvarkoma' || b === 'patvirtinta' || b === 'laukia-patikros') ? 'ct-k-signal'
       : 'ct-k-unknown';
-    var t = (BUSENOS.filter(function (x) { return x.k === b; })[0] || {}).t || b;
-    return '<span class="ct-k ' + lygis + '"><i></i>' + esc(t) + '</span>';
+    var bb = BUSENOS.filter(function (x) { return x.k === b; })[0] || {};
+    return '<span class="ct-k ' + lygis + '"><i></i>' + esc(bb.t || b) + '</span>'
+      + (bb.e ? '<span class="ad-ejimas">' + esc(EJIMAS[bb.e]) + '</span>' : '');
   }
 
   // v1.57.0: visas sarasas PLOKSCIU TEKSTU. Kam: taisytojas puslapio nemato taip,
@@ -280,7 +288,7 @@ BODY = u'''
           : _visi
             ? tuscia('good', 'Tu\u0161\u010Dia', 'Nieko n\u0117ra rodyti.')
             : tuscia('good', 'Nauj\u0173 klaid\u0173 n\u0117ra',
-                'Visi ' + d.viso + ' prane\u0161imai u\u017Edaryti \u2013 sutvarkyti arba nepasitvirtino.',
+                'Visi ' + d.viso + ' prane\u0161imai u\u017Edaryti \u2013 sutvarkyti arba neaktual\u016bs.',
                 '<div class="ct-empty-n"><button type="button" class="ct-btn ct-btn-sm" onclick="adVisi(true)"><span>Rodyti visas</span></button></div>'));
         return;
       }
@@ -301,7 +309,7 @@ BODY = u'''
 
   function eilute(k) {
     var skubu = k.svarba === 'blokuoja';
-    var uzdaryta = k.busena === 'sutvarkyta' || k.busena === 'nepasitvirtino';
+    var uzdaryta = k.busena === 'sutvarkyta' || k.busena === 'neaktualu';
     var dg = k.diagnostika || {};
     var eil = '<tr class="ad-tr' + (skubu ? ' is-urgent' : '') + (uzdaryta ? ' is-done' : '') + '" onclick="adIsskleisti(' + k.nr + ')">'
       // v1.80.0 (32 sk.): kiekvienam <td> - data-stulpelis. Telefone eilute
@@ -350,6 +358,11 @@ BODY = u'''
       +     '<span>Kopijuoti</span></button>'
       +   '<span class="ad-irankiu-zinia" id="ad-iz-' + k.nr + '"></span>'
       + '</div>'
+      + (k.busena === 'laukia-patikros'
+          ? '<div class="ad-patikra"><span>Patikrinot?</span>'
+            + '<button type="button" class="ct-btn ct-btn-sm ct-btn-primary" onclick="event.stopPropagation();adPatikra(' + k.nr + ', true)"><span>\u2713 Veikia</span></button>'
+            + '<button type="button" class="ct-btn ct-btn-sm" onclick="event.stopPropagation();adPatikra(' + k.nr + ', false)"><span>\u2717 Neveikia</span></button>'
+            + '</div>' : '')
       + komentaruSritis(k)
       + '<div class="ad-veiksmai">'
       +   BUSENOS.map(function (b) {
@@ -569,6 +582,17 @@ BODY = u'''
     var v = null;
     try { v = (window.CT_VERSIJOS && window.CT_VERSIJOS[0] && window.CT_VERSIJOS[0].versija) || null; } catch (e) {}
     siusti('/admin/klaidos/' + nr + '/busena', { busena: b, versija: v }).then(piestiKlaidas);
+  };
+  // v2.6.4: „Neveikia" - ne busena, o grazinimas i darba su priezastimi is
+  // komentaro lauko (jei parasyta). „Veikia" - uzdaro kaip sutvarkyta.
+  window.adPatikra = function (nr, veikia) {
+    var v = null;
+    try { v = (window.CT_VERSIJOS && window.CT_VERSIJOS[0] && window.CT_VERSIJOS[0].versija) || null; } catch (e) {}
+    var laukas = document.getElementById('ad-kom-i-' + nr);
+    var t = laukas ? laukas.value.trim() : '';
+    siusti('/admin/klaidos/' + nr + '/busena', veikia
+      ? { busena: 'sutvarkyta', versija: v, pastaba: t || null }
+      : { busena: 'patvirtinta', versija: v, pastaba: 'Neveikia' + (t ? ': ' + t : '') }).then(piestiKlaidas);
   };
   window.adTrinti = function (nr) {
     if (!window.confirm('I\u0161trinti prane\u0161im\u0105 Nr. ' + nr + ' visi\u0161kai? \u0160ito at\u0161aukti nebus galima.')) return;

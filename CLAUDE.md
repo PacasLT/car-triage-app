@@ -307,18 +307,20 @@ Grandinė `fetchSearchPage`: **talpykla → ScraperAPI → tiesioginis axios →
 - **Ribos nuo pirmos dienos:** `/data/klaidu-zurnalas.json` laiko 200 naujausių; nuotraukos – atskirais failais `/data/klaidu-foto/`, trinamos kartu su įrašu. Į JSON nuotraukos NEDĖTI – žurnalas išsipustų.
 - **Kas pranešime, išskyrus tekstą (v1.50.0):** `kategorija` (dizainas / negyvas / duomenys / kreditai / greitis / prisijungimas), `svarba` (blokuoja / trukdo / smulkme), `kartojasi`, `turejoRodyti` (tik prie „duomenys"), ir **`diagnostika.veiksmai`** – paskutiniai 12 paspaudimų su selektoriumi ir tekstu. Pastarasis yra vertingiausias: puslapyje 63 mygtukai, ir be jo „paspaudžiau, nieko neįvyko" yra neatsakomas.
 - **Skaitymas:** `GET /admin/klaidos` rodo **tik nesutvarkytas**, surūkiuotas pagal svarbą. `?visi=1` – ir sutvarkytas, `?trumpai=1` – be diagnostikos, `?kategorija=` / `?svarba=` – filtrai. `GET /admin/klaidos/:nr/foto` – nuotrauka.
-- **Būsenos (v1.51.0)** – kiekviena atsako, KIENO dabar ėjimas:
+- **Būsenos (v2.6.4, Z-90)** – kiekviena atsako, KIENO dabar ėjimas:
 
   | Būsena | Reikšmė | Ėjimas |
   |---|---|---|
   | `rasta` | pranešta, dar nežiūrėta | Claude |
-  | `patvirtinta` | atkartota, matau tą patį | Claude |
-  | `nepasitvirtino` | neatsikartoja arba jau buvo ištaisyta | uždaryta |
+  | `patvirtinta` | atkartota / Lukas pasakė „Neveikia" | Claude |
   | `tvarkoma` | dirbama | Claude |
-  | `laukia-patikros` | pataisyta ir išleista | **Lukas** |
+  | `laukia-patikros` | pataisyta ir išleista; Lukas spaudžia **Veikia** (→ sutvarkyta) arba **Neveikia** (→ patvirtinta) | **Lukas** |
+  | `laukia-sprendimo` | reikia Luko produkto sprendimo | **Lukas** |
+  | `laukia-dizainerio` | laukia dizainerio paketo (pastaboje – kurio) | Dizaineris |
   | `sutvarkyta` | patvirtinta produkcijoje | uždaryta |
-  | `atideta` | tikra, bet ne dabar | Claude |
+  | `neaktualu` | ne klaida / neatsikartoja / nebeaktualu | uždaryta |
 
+- **Kodėl pakeista (v2.6.4):** senas `nepasitvirtino` buvo dviprasmis – Lukas jį rinkosi ir „pataisymas neveikia" prasme (Nr. 42, 35, 30 uždaryti, nors klaida liko). „Neveikia" dabar yra veiksmas, ne uždarymas. Senas `atideta` („ne dabar") nesakė, ko laukiam. Seni vardai serverio priimami ir perrašomi (`nepasitvirtino`→`neaktualu`, `atideta`→`laukia-sprendimo`).
 - **Kodėl ne dvi:** iš šešių dizainerio radinių **penki nepasitvirtino** – jie jau buvo sutvarkyti. Tokio radinio nei ištrinsi (pamirši, kad buvo tikrintas), nei pažymėsi sutvarkytu (melas). Ir „pataisyta" NEREIŠKIA „veikia produkcijoje" – todėl `laukia-patikros` iš sąrašo nedingsta, kol Lukas nepatvirtina.
 - **Keitimas:** `POST /admin/klaidos/:nr/busena` su `{ busena, pastaba, versija }`. Kiekvienas perjungimas įrašomas į `istorija` (kas, kada, versija, pastaba) – matosi visas kelias, ne tik galutinė buklė. Būtent to trūko, kai dizaineris klausė, ar jo radinys jau padarytas.
 - **`DELETE /admin/klaidos/:nr`** – visiškas ištrynimas su nuotrauka. Sutvarkytos dingsta pačios, tad trinti reikia tik testinius įrašus.
@@ -427,8 +429,8 @@ nors jau ištaisytas, ir kitą kartą prie jo grįžama be reikalo.
 **Taisyklė: pakėlus versiją, tuoj pat pereinama per atvirus pranešimus ir:**
 
 1. ką ši versija ištaiso → `laukia-patikros`, su pastaba ir versijos numeriu;
-2. kas pasirodė neatkartojamas → `nepasitvirtino`, su paaiškinimu kodėl;
-3. kas laukia dizainerio → `atideta`, nurodant, kurio paketo;
+2. kas pasirodė neatkartojamas → `neaktualu`, su paaiškinimu kodėl;
+3. kas laukia dizainerio → `laukia-dizainerio`, nurodant, kurio paketo; kas laukia Luko sprendimo → `laukia-sprendimo`, su klausimu;
 4. kas pradėtas → `tvarkoma`.
 
 **Kiekviena `laukia-patikros` pastaba baigiasi eilute `KA PATIKRINTI:`** –

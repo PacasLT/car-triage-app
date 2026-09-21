@@ -187,20 +187,34 @@ const _klaiduTempas = new Map();               // ip -> [laikai]
 // (pamirsi, kad buvo tikrintas), nei pazymesi sutvarkytu (melas).
 // Ir „pataisyta" NEREISKIA „veikia produkcijoje" - todel yra atskira
 // „laukia-patikros", kuri is saraso nedingsta, kol Lukas nepatvirtina.
+// v2.6.4 (Z-90, Luko sprendimas): „nepasitvirtino" buvo dviprasmis - Lukas ja
+// rinkosi ir „ne klaida", ir „pataisymas neveikia" (Nr. 42, 35, 30 uzdaryti,
+// nors klaida liko). Dabar uzdarymas vadinasi `neaktualu`, o „neveikia" yra
+// ne busena, o veiksmas: laukia-patikros -> patvirtinta. `atideta` suskilo
+// pagal tai, KIENO ejimas: dizainerio ar Luko sprendimo.
 const KLAIDU_BUSENOS = {
-  'rasta':            { uzdaryta: false, ejimas: 'claude' },
-  'patvirtinta':      { uzdaryta: false, ejimas: 'claude' },
-  'nepasitvirtino':   { uzdaryta: true,  ejimas: null },
-  'tvarkoma':         { uzdaryta: false, ejimas: 'claude' },
-  'laukia-patikros':  { uzdaryta: false, ejimas: 'lukas' },
-  'sutvarkyta':       { uzdaryta: true,  ejimas: null },
-  'atideta':          { uzdaryta: false, ejimas: 'claude' },
+  'rasta':              { uzdaryta: false, ejimas: 'claude' },
+  'patvirtinta':        { uzdaryta: false, ejimas: 'claude' },
+  'tvarkoma':           { uzdaryta: false, ejimas: 'claude' },
+  'laukia-patikros':    { uzdaryta: false, ejimas: 'lukas' },
+  'laukia-sprendimo':   { uzdaryta: false, ejimas: 'lukas' },
+  'laukia-dizainerio':  { uzdaryta: false, ejimas: 'dizaineris' },
+  'sutvarkyta':         { uzdaryta: true,  ejimas: null },
+  'neaktualu':          { uzdaryta: true,  ejimas: null },
 };
+// Seni vardai priimami (skriptai, senas puslapis narsykleje) ir perrasomi.
+const KLAIDU_SENI_VARDAI = { 'nepasitvirtino': 'neaktualu', 'atideta': 'laukia-sprendimo' };
 
 let _klaidos = (() => {
   try { return JSON.parse(fs.readFileSync(KLAIDU_FAILAS, 'utf-8')) || []; } catch { return []; }
 })();
 try { fs.mkdirSync(KLAIDU_FOTO_KAT, { recursive: true }); } catch (e) {}
+// v2.6.4: seni busenu vardai perrasomi vienakart, istorija lieka kokia buvo.
+{
+  let perrasyta = 0;
+  _klaidos.forEach((k) => { if (KLAIDU_SENI_VARDAI[k.busena]) { k.busena = KLAIDU_SENI_VARDAI[k.busena]; perrasyta++; } });
+  if (perrasyta) { console.log('[KLAIDOS] seni busenu vardai perrasyti:', perrasyta); issaugotiKlaidas(); }
+}
 
 function issaugotiKlaidas() {
   try { cache.rasytiSaugiai(KLAIDU_FAILAS, JSON.stringify(_klaidos)); }
@@ -334,8 +348,8 @@ app.get('/admin/klaidos', klaiduPrieiga, (req, res) => {
   // „laukia-patikros" visada virsuje: tai vienintele busena, kur laukiama Luko.
   const sv = { blokuoja: 0, trukdo: 1, smulkme: 2 };
   sar.sort((a, b) => {
-    const la = a.busena === 'laukia-patikros' ? 0 : 1;
-    const lb = b.busena === 'laukia-patikros' ? 0 : 1;
+    const la = (KLAIDU_BUSENOS[a.busena] || {}).ejimas === 'lukas' ? 0 : 1;
+    const lb = (KLAIDU_BUSENOS[b.busena] || {}).ejimas === 'lukas' ? 0 : 1;
     return (la - lb) || (sv[a.svarba] - sv[b.svarba]) || (b.laikas - a.laikas);
   });
 
@@ -346,6 +360,9 @@ app.get('/admin/klaidos', klaiduPrieiga, (req, res) => {
     viso: _klaidos.length,
     atviru: _klaidos.filter((k) => !arUzdaryta(k)).length,
     lauksiaJusu: _klaidos.filter((k) => k.busena === 'laukia-patikros').length,
+    // v2.6.4: kieno ejimas - Luko ejimas yra ne tik patikra, bet ir sprendimai.
+    pagalEjima: _klaidos.reduce((a, k) => { const e = (KLAIDU_BUSENOS[k.busena] || {}).ejimas; if (e) a[e] = (a[e] || 0) + 1; return a; }, {}),
+    busenuEjimai: Object.fromEntries(Object.entries(KLAIDU_BUSENOS).map(([b, v]) => [b, v.ejimas])),
     pagalBusena,
     galimosBusenos: Object.keys(KLAIDU_BUSENOS),
     riba: KLAIDU_RIBA,
@@ -363,7 +380,8 @@ app.get('/admin/klaidos', klaiduPrieiga, (req, res) => {
 app.post('/admin/klaidos/:nr/busena', klaiduPrieiga, (req, res) => {
   const k = _klaidos.find((x) => x.nr === parseInt(req.params.nr, 10));
   if (!k) return res.status(404).json({ error: 'Nera' });
-  const nauja = String((req.body && req.body.busena) || '').trim();
+  let nauja = String((req.body && req.body.busena) || '').trim();
+  nauja = KLAIDU_SENI_VARDAI[nauja] || nauja;
   if (!KLAIDU_BUSENOS[nauja]) {
     return res.status(400).json({ error: 'Nezinoma busena', galimos: Object.keys(KLAIDU_BUSENOS) });
   }

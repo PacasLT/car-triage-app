@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.6.4', data: '2026-09-21', pavadinimas: 'Klaidų būsenos aiškesnės',
+    pakeitimai: [
+      'Tikrinant pataisymą – du mygtukai: „Veikia" (uždaro) ir „Neveikia" (grąžina į darbą)',
+      '„Nepasitvirtino" pervadinta į „Neaktualu" – tik ne klaidoms ir nebeaktualiems pranešimams',
+      '„Atidėta" suskilo į „Laukia sprendimo" (jūsų) ir „Laukia dizainerio"',
+      'Prie būsenos rodoma, kieno ėjimas: Claude, Jūs ar Dizaineris',
+    ],
+  },
+  {
     versija: '2.6.3', data: '2026-09-21', pavadinimas: 'Dizaino sistemos tvarka',
     pakeitimai: [
       'Mygtukų fokuso žiedas (Tab klavišu) valdomas vienu dizaino nustatymu - išvaizda nepasikeitė',
