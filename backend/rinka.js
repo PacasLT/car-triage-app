@@ -263,7 +263,18 @@ function suvestine() {
   };
 }
 
+// Glaustos eilutes analizei (pvz. kaip Regitros punktai elgiasi ant tikru
+// skelbimu). Tik stulpeliai, be `kita` - kad atsakymas liktu mazas.
+function eilutes({ portalas, gyvi, riba } = {}) {
+  const r = Math.min(Math.max(parseInt(riba, 10) || 5000, 1), 20000);
+  return db.prepare(`SELECT id, portalas, marke, modelis, metai, menuo, kuras, pavarai, kebulas, galia,
+      variklio_turis, kaina, rida, verslas, kainos_ispejimas IS NOT NULL AS ispejimas,
+      pirma_matytas, paskut_matytas, dingo
+    FROM skelbimai WHERE (? IS NULL OR portalas=?) AND (? = 0 OR dingo IS NULL)
+    ORDER BY id LIMIT ?`).all(portalas || null, portalas || null, gyvi ? 1 : 0, r);
+}
+
 module.exports = {
-  ikelti, skelbimoId, pradeti, vykstantis, irasytiPuslapi, baigti, suvestine, NESAUGOMA,
+  ikelti, skelbimoId, pradeti, vykstantis, irasytiPuslapi, baigti, suvestine, eilutes, NESAUGOMA,
   _db: () => db,
 };

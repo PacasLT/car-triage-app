@@ -609,6 +609,14 @@ app.get('/admin/rinka', klaiduPrieiga, async (req, res) => {
   });
 });
 
+// Archyvo eilutės analizei. GET, nemokamas (skaito tik DB).
+app.get('/admin/rinka/eilutes', klaiduPrieiga, (req, res) => {
+  try {
+    const e = rinka.eilutes({ portalas: req.query.portalas, gyvi: req.query.gyvi === '1', riba: req.query.riba });
+    res.json({ kiek: e.length, eilutes: e });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // Paleisti skenavimą. POST, nes KAINUOJA kreditus: ~1 kreditas puslapiui
 // (render=false), 20 skelbimų puslapyje. Atsako iš karto (202), dirba fone;
 // eigą rodo GET /admin/rinka. Vienu metu - tik vienas skenavimas.
