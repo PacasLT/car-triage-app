@@ -630,6 +630,7 @@ async function scraperPaskyra() {
 const RINKOS_PORTALAI = {
   autoplius: (f) => buildAutopliusUrl(f),
   autogidas: (f) => buildAutogidasUrl(f),
+  mobilede: (f) => mobilede.buildMobileDeUrl(f),   // v2.4.6: 1 kr./psl., riba 100 psl. (2000 skelbimu)
 };
 
 // ── Kreditu sargas (v2.4.0) ──────────────────────────────────────────────────
@@ -642,6 +643,8 @@ const RINKOS_PORTALAI = {
 //     kredito nekainuoja), ir skenavimas sustoja, jei likutis nukrito zemiau.
 const KREDITU_ATSARGA = parseInt(process.env.KREDITU_ATSARGA || '5000', 10);
 const KREDITAI_PUSLAPIUI = 10;
+// v2.4.6: pamatuota is ScraperAPI `sa-credit-cost` (Z-73): mobile.de 1 kr./psl.
+const KREDITAI_PORTALUI = { autoplius: 10, autogidas: 10, mobilede: 1 };
 const SARGO_ZINGSNIS = 10;
 
 async function kredituLikutis() {
@@ -721,7 +724,7 @@ app.post('/admin/rinka/skenuoti', klaiduPrieiga, async (req, res) => {
   try {
     const b = req.body || {};
     const portalas = String(b.portalas || '');
-    if (!RINKOS_PORTALAI[portalas]) return res.status(400).json({ error: 'portalas: autoplius | autogidas' });
+    if (!RINKOS_PORTALAI[portalas]) return res.status(400).json({ error: 'portalas: ' + Object.keys(RINKOS_PORTALAI).join(' | ') });
     const marke = String(b.marke || 'BMW').slice(0, 40);
     const metaiNuo = parseInt(b.metaiNuo, 10) || null;
     if (metaiNuo && (metaiNuo < 1990 || metaiNuo > new Date().getFullYear())) return res.status(400).json({ error: 'metaiNuo' });
@@ -733,13 +736,15 @@ app.post('/admin/rinka/skenuoti', klaiduPrieiga, async (req, res) => {
     // Kreditu sargas pries pradedant. Jei paskyros patikrinti nepavyksta -
     // NEPRADEDAM: nezinomas likutis nera leidimas.
     const likutis = await kredituLikutis();
-    const samata = maxPuslapiu * KREDITAI_PUSLAPIUI;
+    const kPsl = KREDITAI_PORTALUI[portalas] || KREDITAI_PUSLAPIUI;
+    const samata = maxPuslapiu * kPsl;
     if (likutis == null) return res.status(503).json({ error: 'Nepavyko patikrinti ScraperAPI likucio - skenavimas nepradetas' });
     if (likutis - samata < KREDITU_ATSARGA) {
       return res.status(409).json({ error: 'Kreditu sargas: po skenavimo liktu maziau nei atsarga',
-        likutis, samata, atsarga: KREDITU_ATSARGA, daugiausiaPuslapiu: Math.max(0, Math.floor((likutis - KREDITU_ATSARGA) / KREDITAI_PUSLAPIUI)) });
+        likutis, samata, atsarga: KREDITU_ATSARGA, daugiausiaPuslapiu: Math.max(0, Math.floor((likutis - KREDITU_ATSARGA) / kPsl)) });
     }
     const url = RINKOS_PORTALAI[portalas]({ marke, metaiNuo, rikiavimas: 'naujausi' });
+    if (!url) return res.status(400).json({ error: 'marke nezinoma portalui ' + portalas });
     const skId = rinka.pradeti({ portalas, marke, metaiNuo, url });
     console.log('[RINKA] skenavimas #' + skId + ' pradetas: ' + portalas + ' ' + marke + ' nuo ' + (metaiNuo || '-') + ' · riba ' + maxPuslapiu + ' psl.');
     vykdytiSkenavima(skId, portalas, url, maxPuslapiu, marke, metaiNuo);
@@ -1575,51 +1580,74 @@ function extractAutogidasListings(html, originUrl) {
   return results;
 }
 
+// v2.4.6: portalas atpazistamas VIENOJE vietoje. Iki siol fetchAllPages turejo
+// if/else grandine, kurioje v2.4.1 (render bandymas) atsitiktinai prijunge
+// autoplius skaitytuva kaip `else` prie NAUJO if - ir jis perrasydavo autogido,
+// autoscout24 ir otomoto rezultatus autoplius skaitytuvo isvestimi (Z-74).
+function paieskosPortalas(url) {
+  const u = String(url || '');
+  if (u.includes('autogidas.lt')) return 'autogidas';
+  if (u.includes('autoscout24.com')) return 'autoscout24';
+  if (u.includes('otomoto.pl')) return 'otomoto';
+  if (u.includes('mobile.de')) return 'mobilede';
+  return 'autoplius';
+}
+const PUSLAPIO_PARAM = { autoplius: 'page_nr', autogidas: 'page', autoscout24: 'page', otomoto: 'page', mobilede: 'pageNumber' };
+// Portalo riba: mobile.de po 100-o puslapio grazina 0 (pamatuota 2026-09-21).
+const PUSLAPIU_RIBA = { mobilede: 100 };
+
+// Grazina { items, struktura } - struktura=false tik autoplius tekstiniam atsarginiam.
+function skaitytiPaieskosPuslapi(portalas, html, pageUrl) {
+  if (portalas === 'autogidas') return { items: extractAutogidasListings(html, pageUrl), struktura: true };
+  if (portalas === 'autoscout24') return { items: extractAutoscout24Listings(html), struktura: true };
+  if (portalas === 'otomoto') return { items: extractOtomotoListings(html), struktura: true };
+  if (portalas === 'mobilede') return { items: mobilede.extractMobileDe(html).skelbimai, struktura: true };
+  // autoplius: pirma strukturinis (tikslus laukai); jei isdestymas pasikeistu - senas tekstinis
+  const strukt = extractAutopliusStructured(html);
+  if (strukt.length) return { items: strukt, struktura: true };
+  const tekst = extractListingBlocksAutoplius(html);
+  if (tekst.length) console.log('  [AUTOPLIUS] strukturinis nuskaitymas nieko nerado - tekstinis atsarginis');
+  return { items: tekst, struktura: false };
+}
+
 // `onPage(naujiSkelbimai, puslapis)` - v2.2.0, archyvui: kiekvienas puslapis
 // irasomas IS KARTO. `pabaiga` pasako, KODEL sustota - tik 'galas' reiskia,
 // kad sarasas perziuretas visas (archyvas tik tada zymi dingusius).
-async function fetchAllPages(baseUrl, maxPages, onProgress, onPage) {
-  let autopliusStruktura = false;
+// `gauti` - tik testams (pakeicia fetchSearchPage).
+async function fetchAllPages(baseUrl, maxPages, onProgress, onPage, gauti) {
+  gauti = gauti || fetchSearchPage;
+  const portalas = paieskosPortalas(baseUrl);
+  const pageParam = PUSLAPIO_PARAM[portalas];
+  const riba = PUSLAPIU_RIBA[portalas] ? Math.min(maxPages, PUSLAPIU_RIBA[portalas]) : maxPages;
+  let visurStruktura = true;
   let pabaiga = 'riba';
   const allListings = [];
   const seenUrls = new Set();
-  const isAutogidas = baseUrl.includes('autogidas.lt');
-  const isAutoscout = baseUrl.includes('autoscout24.com');
-  const isOtomoto = baseUrl.includes('otomoto.pl');
-  const pageParam = (isAutogidas || isAutoscout || isOtomoto) ? 'page' : 'page_nr';
-  for (let page = 1; page <= maxPages; page++) {
+  for (let page = 1; page <= riba; page++) {
     const resolveStep = onProgress ? onProgress(page) : null;
     const pageUrl = page === 1 ? baseUrl : `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}${pageParam}=${page}`;
     let html;
     try {
-      html = await fetchSearchPage(pageUrl);
+      html = await gauti(pageUrl);
     } catch (err) {
       if (resolveStep) resolveStep();
       pabaiga = 'klaida: ' + String(err && err.message || err).slice(0, 120);
       break;
     }
-    let newItems;
-    if (isAutogidas) newItems = extractAutogidasListings(html, pageUrl);
-    else if (isAutoscout) newItems = extractAutoscout24Listings(html);
-    else if (isOtomoto) newItems = extractOtomotoListings(html);
+    let { items: newItems, struktura } = skaitytiPaieskosPuslapi(portalas, html, pageUrl);
     // v2.4.1: be render tuscias puslapis gali buti blokavimas, ne sarašo galas.
     // Tik tada - vienas bandymas su render (10 kreditu vietoj 1).
-    if ((isAutoscout || isOtomoto) && newItems && newItems.length === 0) {
+    if ((portalas === 'autoscout24' || portalas === 'otomoto') && newItems.length === 0) {
       try {
-        const html2 = await fetchSearchPage(pageUrl, { render: true });
-        const antri = isAutoscout ? extractAutoscout24Listings(html2) : extractOtomotoListings(html2);
+        const html2 = await gauti(pageUrl, { render: true });
+        const antri = skaitytiPaieskosPuslapi(portalas, html2, pageUrl).items;
         if (antri.length) {
           console.log('  [RENDER] be render tuscia, su render ' + antri.length + ' skelbimu: ' + pageUrl.slice(0, 60));
           newItems = antri;
         }
       } catch (e) { /* lieka tuscia - traktuojama kaip galas */ }
     }
-    else {
-      // Pirma bandom struktūrinį (tikslūs laukai); jei autoplius pakeistų išdėstymą - senas tekstinis
-      newItems = extractAutopliusStructured(html);
-      if (newItems.length) autopliusStruktura = true;
-      else { newItems = extractListingBlocksAutoplius(html); if (newItems.length) console.log('  [AUTOPLIUS] struktūrinis nuskaitymas nieko nerado - tekstinis atsarginis'); }
-    }
+    if (!struktura) visurStruktura = false;
     const filtered = newItems.filter((b) => !seenUrls.has(b.url));
     if (resolveStep) resolveStep();
     if (filtered.length === 0) {
@@ -1636,7 +1664,9 @@ async function fetchAllPages(baseUrl, maxPages, onProgress, onPage) {
       if (ats === 'stop') { pabaiga = 'sargas: kreditai'; break; }
     }
   }
-  const format = (isAutogidas || isAutoscout || isOtomoto || autopliusStruktura) ? 'parsed' : 'raw';
+  // mobile.de: pasiekta portalo riba - sarasas NEperziuretas visas.
+  if (pabaiga === 'riba' && PUSLAPIU_RIBA[portalas] && riba === PUSLAPIU_RIBA[portalas]) pabaiga = 'riba: portalas daugiau neduoda';
+  const format = visurStruktura ? 'parsed' : 'raw';
   return { listings: allListings, format, pabaiga };
 }
 
@@ -2046,6 +2076,12 @@ function extractTotalCount(html, isAutogidas) {
   return null;
 }
 
+// mobile.de bendras skaicius - is to paties searchResults JSON (tikslus).
+function mobiledeKiekis(html) {
+  const r = mobilede.extractMobileDe(html);
+  return typeof r.viso === 'number' ? { count: r.viso, exact: true } : null;
+}
+
 app.post('/api/quick-count', requireAuth, async (req, res) => {
   try {
     const filters = req.body;
@@ -2058,17 +2094,20 @@ app.post('/api/quick-count', requireAuth, async (req, res) => {
     const autogidasUrl = buildAutogidasUrl(filters);
     const autoscoutUrl = buildAutoscout24Url(filters);
     const otomotoUrl = buildOtomotoUrl(filters);
-    const [autopliusHtml, autogidasHtml, autoscoutHtml, otomotoHtml] = await Promise.all([
+    const mobiledeUrl = mobilede.buildMobileDeUrl(filters);
+    const [autopliusHtml, autogidasHtml, autoscoutHtml, otomotoHtml, mobiledeHtml] = await Promise.all([
       leisti.includes('autoplius') ? fetchSearchPage(autopliusUrl).catch(() => null) : tuscias,
       leisti.includes('autogidas') ? fetchSearchPage(autogidasUrl).catch(() => null) : tuscias,
       leisti.includes('autoscout24') ? fetchSearchPage(autoscoutUrl).catch(() => null) : tuscias,
       leisti.includes('otomoto') ? fetchSearchPage(otomotoUrl).catch(() => null) : tuscias,
+      leisti.includes('mobilede') ? fetchSearchPage(mobiledeUrl).catch(() => null) : tuscias,
     ]);
     res.json({
       autoplius: autopliusHtml ? extractTotalCount(autopliusHtml, false) : null,
       autogidas: autogidasHtml ? extractTotalCount(autogidasHtml, true) : null,
       autoscout24: autoscoutHtml ? extractAutoscout24TotalCount(autoscoutHtml) : null,
       otomoto: otomotoHtml ? extractOtomotoTotalCount(otomotoHtml) : null,
+      mobilede: mobiledeHtml ? mobiledeKiekis(mobiledeHtml) : null,
     });
   } catch (err) {
     console.error(err);
@@ -2109,6 +2148,10 @@ async function paieskosKiekis(filtraiIn) {
   if (portalai.includes('otomoto')) {
     uzklausos.push(fetchSearchPage(buildOtomotoUrl(filters))
       .then((h) => (h ? extractOtomotoTotalCount(h) : null)).catch(() => null));
+  }
+  if (portalai.includes('mobilede')) {
+    uzklausos.push(fetchSearchPage(mobilede.buildMobileDeUrl(filters))
+      .then((h) => (h ? mobiledeKiekis(h) : null)).catch(() => null));
   }
   if (!uzklausos.length) return null;
   // extract*TotalCount grazina { count, exact }, ne skaiciu - anksciau filtras
@@ -2697,8 +2740,13 @@ async function runSearchJob(jobId, filters) {
       { key: 'autogidas', url: buildAutogidasUrl(scanFilters), site: 'autogidas.lt' },
       { key: 'autoscout24', url: buildAutoscout24Url(scanFilters), site: 'autoscout24.com' },
       { key: 'otomoto', url: buildOtomotoUrl(scanFilters), site: 'otomoto.pl' },
+      { key: 'mobilede', url: mobilede.buildMobileDeUrl(scanFilters), site: 'mobile.de' },
     ];
-    const urls = allUrls.filter((u) => selectedPortals.includes(u.key));
+    // mobile.de be zinomos markes grazintu VISA Vokietijos rinka - tokio neskenuojam.
+    if (selectedPortals.includes('mobilede') && !allUrls.find((u) => u.key === 'mobilede').url) {
+      logJob(jobId, `⚠ mobile.de: markė „${filters.marke || '-'}" dar nežinoma šiam portalui – praleidžiam.`);
+    }
+    const urls = allUrls.filter((u) => selectedPortals.includes(u.key) && u.url);
 
     if (urls.length === 0) {
       logJob(jobId, '⚠ Nepasirinktas joks portalas.');
@@ -2942,7 +2990,9 @@ async function runSearchJob(jobId, filters) {
     // puslapius (tik nuskaitymas, jokio AI) ir uzpildom iranga, VIN, vieta, pardaveja.
     // Puslapiai kesuojami, todel kartotinei paieskai jie nieko nebekainuoja.
     const gilinti = enriched
-      .filter((l) => l.url && !l.komplektacija && !l.kainosIspejimas)
+      // v2.4.6: mobile.de skelbimo puslapis saugomas (Akamai iššūkis net tikroje
+      // naršyklėje, Z-74) - jo neatidarom, kad nemokėtume už tuščią puslapį.
+      .filter((l) => l.url && !l.komplektacija && !l.kainosIspejimas && !/mobile\.de\//.test(l.url))
       .sort((a, b) => (b.diffPct == null ? -999 : b.diffPct) - (a.diffPct == null ? -999 : a.diffPct))
       .slice(0, GILINTI_TOP);
     if (gilinti.length) {
@@ -3927,6 +3977,13 @@ app.post('/api/analyze-single', requireAuth, kreditaiPagalLygi, async (req, res)
     if (!url) return res.status(400).json({ error: 'Trūksta URL' });
     // C-2: atsakom anksti ir aiskiai, kad naudotojas gautu priezasti, o ne 500.
     // Kreditai dar nenurasyti - kreditaiPagalLygi juos ima po sekmingo atsakymo.
+    // v2.4.6: mobile.de paieška palaikoma, bet skelbimo puslapis saugomas
+    // (Akamai iššūkis net tikroje naršyklėje, Z-74) - sakom tiesiai, nemokam.
+    if (/(^|\.)mobile\.de\//i.test(String(url).replace(/^https?:\/\//, ''))) {
+      return res.status(400).json({
+        error: 'mobile.de skelbimo gilios analizės kol kas nedarome – puslapis apsaugotas. Kaina, rida, metai ir rinkos palyginimas jau yra iš paieškos; skelbimą atidarykite portale.',
+      });
+    }
     if (!portalasLeidziamas(url)) {
       return res.status(400).json({
         error: 'Nuoroda ne is palaikomo portalo',

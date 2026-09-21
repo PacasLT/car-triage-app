@@ -157,6 +157,9 @@ function taisytiSenusIrasus() {
 function skelbimoId(portalas, url) {
   const m = String(url || '').match(/-(\d{5,})\.html(?:[?#].*)?$/);
   if (m) return portalas + ':' + m[1].replace(/^0+/, '');
+  // v2.4.6: mobile.de - details.html?id=461901295
+  const q = String(url || '').match(/[?&]id=(\d{5,})(?:&|#|$)/);
+  if (q) return portalas + ':' + q[1];
   return url ? portalas + ':' + String(url) : null;
 }
 

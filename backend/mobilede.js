@@ -122,6 +122,9 @@ function buildMobileDeUrl(filters, puslapis, opts) {
   const params = ['isSearchRequest=true', 's=Car', 'vc=Car', 'dam=false'];
   let modelisNerastas = false;
   const markesId = MOBILEDE_MARKES[filters.marke];
+  // v2.4.6: nurodyta, bet nežinoma markė → null. Be `ms` mobile.de grąžintų
+  // VISĄ Vokietijos rinką (~1,4 mln.), ir mes mokėtume už svetimus skelbimus.
+  if (filters.marke && !markesId) return opts && opts.info ? { url: null, markeNezinoma: true } : null;
   if (markesId) {
     const mod = mobileDeModelis(filters.marke, filters.modelis);
     if (mod && mod.modelis) params.push(`ms=${markesId}%3B${mod.modelis}`);
@@ -136,6 +139,8 @@ function buildMobileDeUrl(filters, puslapis, opts) {
   if (filters.pavaru_deze === 'Automatinė') params.push('tr=AUTOMATIC_GEAR', 'tr=SEMIAUTOMATIC_GEAR');
   if (filters.pavaru_deze === 'Mechaninė') params.push('tr=MANUAL_GEAR');
   if (filters.rikiuoti === 'pigiausi') params.push('sb=p', 'od=up');
+  // Archyvo skenavimams (RINKOS_PORTALAI): naujausi viršuje - kaip kituose portaluose.
+  if (filters.rikiavimas === 'naujausi') params.push('sb=doc', 'od=down');
   if (puslapis && puslapis > 1) params.push(`pageNumber=${puslapis}`);
   const url = `https://suchen.mobile.de/fahrzeuge/search.html?${params.join('&')}`;
   return opts && opts.info ? { url, modelisNerastas } : url;

@@ -5409,3 +5409,85 @@ dabar platesnis („Verslas 100 kr").
 
 `UZDUOTYS-DIZAINERIUI.md` pataisytas: Nr. 28, 30, 39, 40, 41 išimti,
 `K-16`, `K-26b`, `K-31`, `K-34` perbraukti.
+
+## Z-73 · 2026-09-21 · Klaudijus · v2.4.4 GYVA · mobile.de PRAEINA už 1 kr. · K-15 skaičiai
+
+**Deploy** a629108a (241649c) — SUCCESS, versija puslapyje 2.4.4.
+
+### mobile.de per ScraperAPI — standartinis būdas veikia
+
+```
+užklausa                          būsena  kreditai  laikas  skelbimų  viso
+BMW X5 nuo 2019, 1 psl.            200       1       1,4 s     20     4 470
+BMW X5, 2 psl.                     200       1      13,1 s     20     4 470
+BMW X5, 50 psl.                    200       1         —       20        —
+VW Golf, 30 psl.                   200       1      13,8 s     20    25 942
+```
+
+Kaina iš ScraperAPI antraštės `sa-credit-cost`, ne spėjimas. Akamai puslapio
+nė karto. Premium/ultra NEBANDYTI — nebereikia (sutaupyta ~40 kr.). Iš viso
+bandymas kainavo ~5 kr. Pavyzdžiai skaitomi teisingai (modelis, metai, kaina,
+rida, kuras, dėžė, galia, miestas, adresas).
+
+### K-15 · dizainerio du skaičiai, 1280×720, prieš paiešką, gyva v2.4.4
+
+```
+.ct3-hero apačia            332,6
+.ct3-search-panel viršus    332,6   → tarpas 0 px  ✔
+.ct3-search-panel apačia    593,8
+.ct3-stats-bar viršus       603,8   → 10 px žemiau panelės (jos margin-top 10) ✔
+```
+
+Skaičiai tokie, kokių laukta, **bet grandinės vidurys neteisingas**: juosta NĖRA
+sesuo po `.ct-shell`. Ji yra `.ct-shell-side` VIDUJE, po panele
+(`.container > .ct-shell > .ct-shell-side > .ct3-stats-bar`, index.html 2760 —
+taip ir rašė Z-68). Todėl `is-split` būsenoje ją slepia **palikuonio**
+taisyklė `.ct-shell.is-split .ct3-stats-bar`, o `.ct-shell.is-split ~ .ct3-stats-bar`
+(sesers) šiandien nieko nepasiekia. Hero yra `.container` vaikas, panelė —
+`.ct-shell-side` vaikas: kaimynės vaizde, ne DOM'e.
+
+## Z-74 · 2026-09-21 · Klaudijus · v2.4.6 · KLAIDA: 3 portalai dingo iš paieškos · mobile.de prijungtas
+
+### 1. Klaida (mano, v2.4.1, gyva nuo 14:46 iki šio push'o)
+
+`fetchAllPages`: pridėdamas render bandymą (`if (autoscout||otomoto) && tuščia`)
+palikau po juo seną `else { autoplius skaitytuvas }`. Tas `else` prisikabino
+prie NAUJO `if` — ir autogido, autoscout24, otomoto rezultatai buvo
+perrašomi autoplius skaitytuvo išvestimi (autogidui — tekstiniu atsarginiu).
+
+Rasta skaitant kodą prieš jungiant mobile.de, patvirtinta dviem būdais:
+- produkcijos žurnalas 16:24: Luko paieška BMW X5 nuskaitė autogidą, bet
+  rezultatuose tik `✅ autoplius.lt …`, ir yra eilutė
+  `[AUTOPLIUS] struktūrinis nuskaitymas nieko nerado - tekstinis atsarginis`
+  (tai buvo autogido HTML);
+- senas kodas su žymėmis vietoj skaitytuvų: autogidas → autoplius,
+  autoscout24 → autoplius, otomoto → autoplius.
+
+Kodėl nepagavo testai: nė vienas nekvietė `fetchAllPages`. Z-67 filtrų
+testai tikrino ADRESUS, ne tai, kas iš jų grįžta.
+
+**Pataisymas:** portalas atpažįstamas vienoje vietoje (`paieskosPortalas`),
+skaitytuvas parenkamas vienoje (`skaitytiPaieskosPuslapi`) — jokios if/else
+grandinės. Naujas sargas `testai/skenavimas.test.js` (26 patikros): kiekvieną
+portalą skaito JO skaitytuvas, puslapio parametras, pabaigos priežastys,
+render tik autoscout24/otomoto ir tik tuščiam, kreditų sargo „stop".
+
+### 2. mobile.de — paieškoje ir archyve
+
+- Portalų sąraše penkta eilutė „mobile.de 🇩🇪" (MD), greitas skaičius, istorija,
+  šaltinio ženklas detalėje.
+- Paieška: 1 kr./psl., riba 100 psl. (portalas daugiau neduoda; archyvas tokio
+  skenavimo nelaiko pilnu — `pabaiga: 'riba: portalas daugiau neduoda'`).
+- Nežinoma markė → mobile.de praleidžiamas (kitaip — visa Vokietijos rinka).
+- Skelbimo puslapis saugomas net tikroje naršyklėje (2,5 KB iššūkis) —
+  TOP-8 praturtinimas mobile.de skelbimų NEatidaro, `/api/analyze-single`
+  aiškiai atsako, kodėl.
+- Archyvas: `/admin/rinka/skenuoti` priima `mobilede`, sąmata 1 kr./psl.;
+  tapatybė `mobilede:<id>` iš `?id=`.
+
+Testai: skenavimas 26/26, mobilede 47/47, filtrai 38, autogidas 29,
+skaitymas 19, rinka 32, regitra 88, mediana 11, dizainas 26. Naršyklėje
+(index, demo): 5 portalų eilutės, „AP · AG · MD", „Visi portalai", JS klaidų 0.
+
+**Dizaineriui:** portalų sąraše pridėta viena eilutė tuo pačiu markupu kaip
+kitos keturios (MD, #1F4E8C) — nauja klasė nekurta.

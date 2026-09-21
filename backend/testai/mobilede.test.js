@@ -118,6 +118,17 @@ T(turi(u({ marke: 'BMW', kainaNuo: 5000, kainaIki: 30000 }), 'p=5000%3A30000'), 
 T(turi(u({ marke: 'BMW' }, 3), 'pageNumber=3') && !u({ marke: 'BMW' }, 1).includes('pageNumber'), 'puslapis: 1-as be parametro');
 lygu((u({ marke: 'BMW', modelis: 'X5' }).match(/ms=/g) || []).length, 1, 'tik VIENAS ms (antrasis portale ignoruojamas)');
 lygu(MD.MOBILEDE_PUSLAPIU_RIBA, 100, 'puslapių riba 100 (101-as grąžina 0)');
+lygu(u({ marke: 'Nesama Markė' }), null, 'nežinoma markė → null (ne visa Vokietijos rinka)');
+T(!/ms=/.test(u({})), 'be markės - be ms (tik kai markė visai nenurodyta)');
+T(turi(u({ marke: 'BMW', rikiavimas: 'naujausi' }), 'sb=doc', 'od=down'), 'archyvui: naujausi viršuje (patikrinta naršyklėje)');
+
+console.log('\n── 6. Archyvo tapatybė ─────────────────────────────────────');
+{
+  const R = require(path.join(__dirname, '..', 'rinka.js'));
+  lygu(R.skelbimoId('mobilede', 'https://suchen.mobile.de/fahrzeuge/details.html?id=461901295'), 'mobilede:461901295', 'id iš ?id=');
+  lygu(R.skelbimoId('mobilede', 'https://suchen.mobile.de/fahrzeuge/details.html?id=44314758257856&x=1'), 'mobilede:44314758257856', 'ilgas id + kiti parametrai');
+  lygu(R.skelbimoId('autoplius', 'https://autoplius.lt/skelbimai/bmw-x5-28797115.html'), 'autoplius:28797115', 'autoplius nepakito');
+}
 
 console.log('\n' + (klaidu ? '✗ ' + klaidu + ' klaidos iš ' + patikru : '✓ ' + patikru + '/' + patikru + ' patikrų praėjo'));
 process.exit(klaidu ? 1 : 0);

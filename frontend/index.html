@@ -2666,6 +2666,7 @@
               <label class="ct3-portal-row"><input type="checkbox" id="portal-autogidas" checked onchange="ctUpdatePortalBtn()"><svg viewBox="0 0 32 32" width="22" height="22" style="flex:none;border-radius:5px"><rect width="32" height="32" rx="7" fill="#2D6FCA"/><text x="16" y="22" font-family="system-ui,sans-serif" font-weight="900" font-size="15" fill="#fff" text-anchor="middle">AG</text></svg><span class="ct3-portal-name">autogidas.lt</span><span class="ct3-portal-flag">🇱🇹</span></label>
               <label class="ct3-portal-row"><input type="checkbox" id="portal-autoscout24" onchange="ctUpdatePortalBtn()"><svg viewBox="0 0 32 32" width="22" height="22" style="flex:none;border-radius:5px"><rect width="32" height="32" rx="7" fill="#F06A00"/><text x="16" y="22" font-family="system-ui,sans-serif" font-weight="900" font-size="13" fill="#fff" text-anchor="middle">AS24</text></svg><span class="ct3-portal-name">autoscout24.com</span><span class="ct3-portal-flag">🇪🇺</span></label>
               <label class="ct3-portal-row"><input type="checkbox" id="portal-otomoto" onchange="ctUpdatePortalBtn()"><svg viewBox="0 0 32 32" width="22" height="22" style="flex:none;border-radius:5px"><rect width="32" height="32" rx="7" fill="#C0392B"/><text x="16" y="22" font-family="system-ui,sans-serif" font-weight="900" font-size="15" fill="#fff" text-anchor="middle">OT</text></svg><span class="ct3-portal-name">otomoto.pl</span><span class="ct3-portal-flag">🇵🇱</span></label>
+              <label class="ct3-portal-row"><input type="checkbox" id="portal-mobilede" onchange="ctUpdatePortalBtn()"><svg viewBox="0 0 32 32" width="22" height="22" style="flex:none;border-radius:5px"><rect width="32" height="32" rx="7" fill="#1F4E8C"/><text x="16" y="22" font-family="system-ui,sans-serif" font-weight="900" font-size="15" fill="#fff" text-anchor="middle">MD</text></svg><span class="ct3-portal-name">mobile.de</span><span class="ct3-portal-flag">🇩🇪</span></label>
               <button type="button" class="ct3-portal-done" onclick="ctTogglePortals()">Gerai</button>
             </div>
           </div>
@@ -3015,8 +3016,8 @@ function historyLabel(f) {
   const km  = f.ridaIki  ? `≤${Number(f.ridaIki).toLocaleString('lt-LT')} km` : '';
   const gearMap = {manual:'Mech.', automatic:'Automat.', '':''}; 
   const gear = gearMap[f.pavaru_deze||''] || (f.pavaru_deze ? f.pavaru_deze.charAt(0).toUpperCase()+f.pavaru_deze.slice(1) : '');
-  const portalAbbr = {autoplius:'AP', autogidas:'AG', autoscout24:'AS', otomoto:'OT'};
-  const portals = (f.portals && f.portals.length && f.portals.length < 4) ? f.portals.map(p=>portalAbbr[p]||p).join('+') : '';
+  const portalAbbr = {autoplius:'AP', autogidas:'AG', autoscout24:'AS', otomoto:'OT', mobilede:'MD'};
+  const portals = (f.portals && f.portals.length && f.portals.length < 5) ? f.portals.map(p=>portalAbbr[p]||p).join('+') : '';
   const chips = [parts||'Visi', years, priceRange, km, gear, portals].filter(Boolean);
   return chips.join(' · ') || 'Paieška';
 }
@@ -3033,8 +3034,8 @@ function historyLabelParts(f) {
   const km = f.ridaIki ? '≤'+Number(f.ridaIki).toLocaleString('lt-LT')+' km' : '';
   const gearMap = {manual:'Mechaninė', automatic:'Automatinė', '':''};
   const gear = gearMap[f.pavaru_deze||''] || '';
-  const portalNames = {autoplius:'autoplius.lt', autogidas:'autogidas.lt', autoscout24:'autoscout24', otomoto:'otomoto.pl'};
-  const portals = (f.portals && f.portals.length && f.portals.length < 4) ? f.portals.map(p=>portalNames[p]||p).join(', ') : (f.portals && f.portals.length >= 4 ? 'visi portalai' : '');
+  const portalNames = {autoplius:'autoplius.lt', autogidas:'autogidas.lt', autoscout24:'autoscout24', otomoto:'otomoto.pl', mobilede:'mobile.de'};
+  const portals = (f.portals && f.portals.length && f.portals.length < 5) ? f.portals.map(p=>portalNames[p]||p).join(', ') : (f.portals && f.portals.length >= 5 ? 'visi portalai' : '');
   const meta = [years, priceRange, km, gear, portals].filter(Boolean).join(' · ');
   return { pavadinimas, meta };
 }
@@ -3197,6 +3198,7 @@ function applyHistoryFilters(idx) {
   document.getElementById('portal-autogidas').checked = !f.portals || f.portals.includes('autogidas');
   document.getElementById('portal-autoscout24').checked = !!(f.portals && f.portals.includes('autoscout24'));
   document.getElementById('portal-otomoto').checked = !!(f.portals && f.portals.includes('otomoto'));
+  document.getElementById('portal-mobilede').checked = !!(f.portals && f.portals.includes('mobilede'));
   // PATAISYTA: kuras buvo praleistas; portalu etikete ir "Daugiau filtru" zenklelis neatsinaujindavo;
   // iskleidziamasis likdavo atidarytas.
   const fuelEl = document.getElementById('fuel'); if (fuelEl) fuelEl.value = f.kuras || '';
@@ -3648,6 +3650,9 @@ async function runQuickCount() {
     if (document.getElementById('portal-otomoto').checked) {
       parts.push(`otomoto.pl: ${fmt(data.otomoto)}`);
     }
+    if (document.getElementById('portal-mobilede').checked) {
+      parts.push(`mobile.de: ${fmt(data.mobilede)}`);
+    }
     resultEl.textContent = parts.join(' · ') + ' skelbimų atitinka';
   } catch (err) {
     resultEl.textContent = `Klaida: ${err.message}`;
@@ -3706,6 +3711,7 @@ async function runSearch() {
       document.getElementById('portal-autogidas').checked ? 'autogidas' : null,
       document.getElementById('portal-autoscout24').checked ? 'autoscout24' : null,
       document.getElementById('portal-otomoto').checked ? 'otomoto' : null,
+      document.getElementById('portal-mobilede').checked ? 'mobilede' : null,
     ].filter(Boolean),
   };
   saveSearchToHistory(filters);
@@ -3872,7 +3878,7 @@ const CT_URL_LAUKAI = [
   ['ridaIki', 'rida_iki'], ['kainaNuo', 'kaina_nuo'], ['kainaIki', 'kaina_iki'],
   ['maxPages', 'psl'],
 ];
-const CT_PORTALAI = ['autoplius', 'autogidas', 'autoscout24', 'otomoto'];
+const CT_PORTALAI = ['autoplius', 'autogidas', 'autoscout24', 'otomoto', 'mobilede'];
 
 function ctFiltraiIUrl() {
   try {
@@ -4244,7 +4250,7 @@ function startTinderRest() {
   tinderPhase = 'rest';
   tinderQueue = rest.map(l => ({
     ...l,
-    source: l.source || (l.url && l.url.includes('autoscout24') ? 'autoscout24.com' : l.url && l.url.includes('otomoto') ? 'otomoto.pl' : l.url && l.url.includes('autogidas') ? 'autogidas.lt' : 'autoplius.lt'),
+    source: l.source || (l.url && l.url.includes('mobile.de/') ? 'mobile.de' : l.url && l.url.includes('autoscout24') ? 'autoscout24.com' : l.url && l.url.includes('otomoto') ? 'otomoto.pl' : l.url && l.url.includes('autogidas') ? 'autogidas.lt' : 'autoplius.lt'),
     comment: l.comment || '',
     diffPct: l.diffPct || 0,
   }));
@@ -5633,20 +5639,20 @@ function ctPortalVieta(open) {
 }
 
 function ctPortalVisi() {
-  var names = ['autoplius','autogidas','autoscout24','otomoto'];
+  var names = ['autoplius','autogidas','autoscout24','otomoto','mobilede'];
   var els = names.map(function (n) { return document.getElementById('portal-' + n); }).filter(Boolean);
   var visiPazymeti = els.every(function (e) { return e.checked; });
   els.forEach(function (e) { e.checked = !visiPazymeti; });
   ctUpdatePortalBtn();
 }
 function ctUpdatePortalBtn() {
-  var names = ['autoplius','autogidas','autoscout24','otomoto'];
-  var labels = {'autoplius':'autoplius.lt','autogidas':'autogidas.lt','autoscout24':'autoscout24.com','otomoto':'otomoto.pl'};
+  var names = ['autoplius','autogidas','autoscout24','otomoto','mobilede'];
+  var labels = {'autoplius':'autoplius.lt','autogidas':'autogidas.lt','autoscout24':'autoscout24.com','otomoto':'otomoto.pl','mobilede':'mobile.de'};
   var checked = names.filter(function(n){ var el=document.getElementById('portal-'+n); return el && el.checked; });
   var lbl = document.getElementById('portal-btn-label');
   if (!lbl) return;
   // PAKEISTA: rodom, KURIE portalai pazymeti; kai netelpa - trumpiniais
-  var trump = {'autoplius':'AP','autogidas':'AG','autoscout24':'AS24','otomoto':'OTO'};
+  var trump = {'autoplius':'AP','autogidas':'AG','autoscout24':'AS24','otomoto':'OTO','mobilede':'MD'};
   if (checked.length === names.length) { lbl.textContent = 'Visi portalai'; }
   else if (checked.length === 0) { lbl.textContent = 'Pasirinkite portalą'; }
   else if (checked.length === 1) { lbl.textContent = labels[checked[0]]; }

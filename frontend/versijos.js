@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.4.6', data: '2026-09-21', pavadinimas: 'mobile.de ir sutvarkyta paieška keliuose portaluose',
+    pakeitimai: [
+      'Naujas portalas: mobile.de (Vokietija) - pažymėkite jį portalų sąraše',
+      'Pataisyta: nuo ankstesnio atnaujinimo autogidas, AutoScout24 ir Otomoto skelbimai paieškoje nebuvo rodomi - vėl rodomi',
+      'mobile.de skelbimai rodomi su kaina, rida, metais ir rinkos palyginimu; gilios skelbimo analizės jiems kol kas nėra',
+    ],
+  },
+  {
     versija: '2.4.4', data: '2026-09-21', pavadinimas: 'Kompaktiskesne filtru panele sone',
     pakeitimai: [
       'Metu, kainos ir galios diapazonai sone vel uzima po puse eiles - visi filtrai telpa be slinkimo',
