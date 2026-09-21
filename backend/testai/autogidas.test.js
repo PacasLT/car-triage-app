@@ -16,9 +16,11 @@ function imk(vardas) {
   throw new Error('Nepavyko iškirpti: ' + vardas);
 }
 const konst = (src.match(/const KURO_FILTRAS = \{[\s\S]*?\n\};/) || [''])[0]
-  + (src.match(/const AUTOGIDAS_PARAM = \{[\s\S]*?\n\};/) || [''])[0];
+  + (src.match(/const AUTOGIDAS_PARAM = \{[\s\S]*?\n\};/) || [''])[0]
+  // v2.7.2: buildAutogidasUrl kviecia papFiltras (kebulas, pardavejas) - be jo testas luzo (rado tools/sargai.sh).
+  + (src.match(/const PAPILDOMI_FILTRAI = \{[\s\S]*?\n\};/) || [''])[0];
 const ribos = 'const MIN_REALI_KAINA = 4000; const SENAS_METAI = new Date().getFullYear() - 10; const SENAS_RIDA = 200000;';
-const kodas = ribos + konst + ['extractField', 'kainosPatikra', 'extractAutogidasListings', 'buildAutogidasUrl'].map(imk).join('\n')
+const kodas = ribos + konst + ['extractField', 'kainosPatikra', 'papFiltras', 'extractAutogidasListings', 'buildAutogidasUrl'].map(imk).join('\n')
   + '\nreturn { extractAutogidasListings, buildAutogidasUrl };';
 const { extractAutogidasListings, buildAutogidasUrl } = new Function('cheerio', 'URL', kodas)(cheerio, URL);
 
