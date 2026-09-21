@@ -4946,3 +4946,169 @@ būtų melagingas atsakymas. Bandymo puslapis į talpyklą nededamas.
 `autogidas` 29. Vietinis serveris: sargas be ScraperAPI rakto grąžina 503,
 `pavyzdys` otomoto atsako su `saltinis`.
 
+## Z-65 · 2026-09-21 · Klaudijus · otomoto / autoscout24 BE render · v2.4.1
+
+v2.4.0 gyva. Du patvirtinimai iš produkcijos:
+
+1. **„Deploy Crashed" sutvarkytas** — senasis konteineris baigė darbą eilute
+   `[BAIGIAM] gautas SIGTERM - issaugom ir isjungiam svariai`, be jokios
+   `npm error` eilutės.
+2. **Render bandymas** (`/admin/pavyzdys`, 7 puslapis, `render=0`):
+
+```
+portalas      šaltinis     HTML       __NEXT_DATA__   skelbimų   pavyzdys
+otomoto       scraperapi   1,48 MB    taip            32         BMW seria-3, 2007, 366 000 km, 1 645 €
+autoscout24   scraperapi   0,85 MB    taip            20         BMW 116, 2013, 160 000 km, 5 500 €
+```
+
+Abu duomenis atidavė **per ScraperAPI, be Puppeteer** (`saltinis` tai
+patikrina), pilnais puslapiais (otomoto — 32 puslapyje, autoscout24 — 20).
+Kaina pagal ScraperAPI ataskaitą: 1 kreditas vietoj 10.
+
+### Įdiegta
+
+- `needsRender` nutylėjimas — `false` visiems portalams.
+- Atsarga: jei otomoto / autoscout24 puslapis be render grąžina **0**
+  skelbimų, `fetchAllPages` vieną kartą bando su render (10 kreditų). Tuščias
+  puslapis be render gali būti blokavimas, ne sąrašo galas. Log'e tada
+  `[RENDER] be render tuscia, su render N skelbimu`.
+
+Per savaitę (09-15 – 09-21) šie du portalai su render kainavo ~23 000
+kreditų. Tas pats srautas be render — ~2 300.
+
+### Ko dar nežinom
+
+Vienas puslapis kiekvienam portalui nėra įrodymas visam srautui. Pirmas
+tikras ženklas — `[RENDER]` eilučių skaičius log'e per kelias dienas: jei jų
+daug, portalai blokuoja be render ir sutaupymas mažesnis.
+
+## Z-66 · 2026-09-21 · Klaudijus · ARCHYVO AUDITAS: 4 nuskaitymo klaidos · v2.4.2
+
+Luko prašymas: „patikrinam autogido ir autopliuso nuskaitomą info — ar
+viskas gražiai grįžta pagal mūsų taisykles". Kreditų nekainavo: archyvas
+(2 484 eilutės) per `/admin/rinka/eilutes`, o įtartinos kortelės — tiesiai
+portaluose Luko naršyklėje (ne per ScraperAPI).
+
+### Užpildymas — geras
+
+```
+                 kaina metai rida kuras dėžė galia tūris modelis kėbulas mėnuo
+autoplius 1576    99%  100%  99%  100% 100%  98%  100%   100%    100%    88%
+autogidas  908   100%  100%  100% 100%  97%  88%  100%   100%      0%     0%
+```
+
+(kėbulo ir mėnesio autogido kortelėse nėra — portalo savybė, ne klaida.)
+Pirmas matavimas rodė **miestas 0 %** abiem portalams — patikrinau prieš
+rašydamas: `eilutes` užklausa tiesiog neima to stulpelio. Suvestinėje miestas
+99,8 %. Dar vienas „matavimas ne toje būsenoje" — šįkart užklausoje.
+
+### Rastos klaidos (visos patvirtintos tikra kortele)
+
+| # | Kas | Kiek | Priežastis |
+|---|---|---|---|
+| 1 | **Hibridų / EV rida = elektrinis nuotolis** | autoplius **260 (16 %)** | kortelėje DU „… km": rida ir nuotolis (PHEV „86 km", EV „679 km"); antrasis perrašydavo pirmąjį |
+| 2 | **Nuolaidos kaina suliejama su sena** | 1 (X5 = 92 000 117 843 €) | `<strong>` turi `.promo-price` ir `.strike`; visas tekstas be tarpų -> vienas skaičius |
+| 3 | **Kuras su baterija** | 18 variantų „Elektra, NN kWh" | autoplius prikabina talpą prie kuro |
+| 4 | **Reklama vietoj modelio** | autogidas 22 („BMW Kelio ženklų atpažinimo sistem") | prekeivio antraštė; adrese modelis teisingas |
+| 5 | **Variklio tūris 0 vietoj „nežinoma"** | 390 | MANO klaida `rinka.js`: `Number(null)` yra 0 |
+| 6 | **Metai už filtro** | autogidas 19 (2001–2018) | portalas grąžina iškeltus skelbimus nepaisydamas `f_41` |
+| 7 | „Užsienyje" laikomas miestu | autogidas | tai vietos požymis |
+| 8 | Kuro rašyba skiriasi tarp portalų | „Benzinas / elektra" vs „Benzinas/Elektra" | statistika skilo į dvi grupes |
+
+**1-oji svarbiausia ir liečia VISĄ programą, ne tik archyvą.** Tas pats
+analizatorius naudojamas kiekvienoje paieškoje: kiekvieno autoplius hibrido
+rida buvo 47–679 km. Tai klaidino balą („maža rida"), ridos medianą ir
+Regitros punktą „rida įtartinai maža".
+
+### Ko NElaikom klaida
+
+autogidas 113 skelbimų be galios, dalis su „Benzinas" prie i4. Atidariau
+vieną (0139369781): pats skelbimas rašo „Kuro tipas: Benzinas", „Daužtas",
+kaina 3 554 € — JAV aukciono perpardavėjo įrašas, pardavėjo duomenys
+klaidingi, o ne mūsų nuskaitymas. Nuo tokių kainų saugo v2.4.0 atspari
+mediana ir žalos sargas.
+
+### Pataisyta
+
+- `extractAutopliusStructured`: pirmas „… km" = rida, antras =
+  `elektrosNuotolis`; `.promo-price` = kaina, `.strike` = `senaKaina`;
+  kuras be baterijos + `baterijaKwh`.
+- `extractAutogidasListings`: modelis iš adreso, jei adreso modelio žodžio
+  antraštėje nėra (teisingos antraštės nepaliečiamos — patikrinta ir su
+  „Mercedes-Benz E 220"); „Užsienyje" -> `uzsienyje: true`.
+- `rinka.js`: `sk(null)` = null; `kuroNorm()` vienas žodynas; skenavimas
+  nerašo skelbimų, senesnių už `metaiNuo`.
+- **Seni įrašai pataisomi paleidžiant** (`taisytiSenusIrasus`, idempotentiška):
+  tūris 0 -> NULL, hibridų „rida" < 1000 -> NULL (**nežinoma, ne klaidinga**;
+  kitas skenavimas užpildys), kaina > 1,5 mln. -> NULL, kuras suvienodinamas,
+  autogido modelis iš adreso.
+
+Viena sąmoninga kaina: naujo hibrido tikra rida „10 km" irgi taps NULL —
+senuose įrašuose jos nuo nuotolio neatskirsim. Kitas skenavimas ją grąžins.
+
+### Patikrinta
+
+Naujas sargas `skaitymas.test.js` **19/19**. Kortelės sudarytos iš TIKROS
+autoplius struktūros ir tikrų parametrų (A32292708, A32314474, A32315368).
+**Su senu `server.js` tas pats sargas krenta 10 kartų** — tiksliai tose
+vietose, kurias rado auditas. `rinka` 32/32 (+8 senų įrašų taisymui),
+`mediana` 11/11, `regitra` 88/88, `autogidas` 29, `dizainas` 26/26.
+
+### Dar neišspręsta
+
+- otomoto modelis ateina kaip „bmw seria-3" — tarp portalų nepalyginamas su
+  „BMW 3xx". Reikia žodyno, kai imsimės tarpvalstybinio palyginimo.
+- otomoto PLN -> EUR kursas kode įrašytas ranka (4,25).
+
+## Z-67 · 2026-09-21 · Klaudijus · FILTRAI VISUOSE PORTALUOSE · v2.4.3
+
+Luko prašymas: patikrinti autoscout24 ir otomoto — ar visi filtrai veikia,
+ypač hibridas (benzinas/elektra IR dyzelinas/elektra); pasidaryti testus ir
+duoti užklausų pavyzdžius rankinei patikrai.
+
+### Kiekvienas kodas patikrintas GYVAI portale (Luko naršyklė, 0 kreditų)
+
+```
+autoplius   fuel_id 30/32/35/36/17378/31, gearbox 37/38, kilometrage_to   - visi veikia
+autogidas   f_2[N]=<TEKSTAS>             - veikia;  f_2[N]=N (kaip buvo kode) -> 0 rezultatų
+            f_10=Automatinė/Mechaninė, f_66 - veikia
+autoscout24 fuel=B|D|E|2|3|L (ir per kablelį), gear=A|M|S, kmto - visi veikia
+otomoto     fuel_type=petrol|diesel|electric|hybrid|plugin-hybrid, gearbox, mileage:to - veikia
+```
+
+Kiekvienam — pirmas puslapis grąžino **tik** tą kurą.
+
+### Rastos klaidos
+
+| # | Kas | Pasekmė |
+|---|---|---|
+| 1 | autogidas: raktai „Dyzelinas", sąsaja siunčia „dyzelis" -> kuras į adresą nepatekdavo | mokam už visų kurų puslapius |
+| 2 | autogidas: net pataikius formatas `f_2[1]=1` grąžina **0** | net „pataisius" raktą būtų tuščia |
+| 3 | autoscout24: kuro, dėžės, ridos filtrų **nebuvo visai** | 110 365 skelbimų vietoj 26 123 hibridų |
+| 4 | otomoto: kuro filtro **nebuvo** | |
+| 5 | autoscout24 hibridai ateina „Electric/Gasoline" — žodyne nebuvo | filtras „Hibridas" juos **atmesdavo** |
+| 6 | otomoto „plugin-hybrid" — žodyne nebuvo | tas pats |
+| 7 | autogidas „(Plug-in)" kuro tipai — sąraše nebuvo | plug-in kuras = null |
+| 8 | autoscout24 „Semi-automatic" — žodyne nebuvo | dėžė = null |
+
+### Įdiegta
+
+Vienas `KURO_FILTRAS` žodynas trims portalams (autoplius turi savo ID
+lentelę). Prasmė visur ta pati, kaip autoplius jau turėjo: **dyzelinas su
+dyzelino hibridais, benzinas su benzino hibridais ir dujomis, hibridas = visi
+hibridai, elektra = tik elektra**. otomoto dyzelino hibridų atskirai neturi.
+
+### Sargas `filtrai.test.js` — 38/38
+
+Tikrina **adresą**, ne rezultatą: ar kiekvienas filtras pasiekia kiekvieną
+portalą, ar hibridas neįtraukia gryno benzino, ar be filtro nededamas
+parametras, ir `kurasAtitinka` su visų portalų rašyba. **Su senu `server.js`
+krenta 14 kartų.** `--adresai` išspausdina pavyzdinius adresus rankinei
+patikrai — jie `pasikeitimai/UZKLAUSU-PAVYZDZIAI.md`.
+
+### Sprendimas Lukui
+
+Ar „Dyzelinas" turi apimti dyzelino hibridus? Dabar — taip (taip visada buvo
+autoplius). Jei ne — keičiasi viena `KURO_FILTRAS` eilutė ir autoplius
+`AUTOPLIUS_FUEL_IDS`.
+

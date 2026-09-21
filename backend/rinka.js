@@ -108,12 +108,49 @@ function ikelti(katalogas, failas) {
       kreditu     INTEGER
     );
   `);
+  taisytiSenusIrasus();
   // Skenavimas, kurį nutraukė perkrovimas, liktų „vyksta" amžinai.
   const pakibe = db.prepare(`UPDATE skenavimai SET busena='nutraukta', priezastis='serveris perkrautas', pabaiga=?
                              WHERE busena='vyksta'`).run(Date.now()).changes;
   const n = db.prepare('SELECT COUNT(*) c FROM skelbimai').get().c;
   console.log('[RINKA] ' + DB_KELIAS + ' · skelbimu: ' + n + (pakibe ? ' · nutrauktu skenavimu: ' + pakibe : ''));
   return { kelias: DB_KELIAS, skelbimu: n };
+}
+
+// ── v2.4.2 · įrašų, nuskaitytų su senomis klaidomis, taisymas ────────────────
+// Archyvo auditas (Z-66) rado keturias nuskaitymo klaidas. Nuskaitymas
+// pataisytas, bet 2 484 jau įrašytos eilutės liktų klaidingos iki kito
+// skenavimo. Užklausos IDEMPOTENTIŠKOS - antrą kartą nieko nekeičia, tad
+// leidžiamos kiekvieno starto metu, be jokios „migracijos versijos".
+//
+// Ko NEtaisom: tikros hibridų ridos atkurti negalim (įrašytas elektrinis
+// nuotolis, ridos nėra) - tokiai eilutei rida tampa NULL, t. y. „nežinoma",
+// o ne klaidinga. Kitas skenavimas ją užpildys (COALESCE).
+function taisytiSenusIrasus() {
+  const r = {};
+  r.turis0 = db.prepare('UPDATE skelbimai SET variklio_turis=NULL WHERE variklio_turis=0').run().changes;
+  r.nuotolisVietojRidos = db.prepare(`UPDATE skelbimai SET rida=NULL
+      WHERE portalas='autoplius' AND rida IS NOT NULL AND rida < 1000 AND lower(kuras) LIKE '%elektra%'`).run().changes;
+  r.nerealiKaina = db.prepare('UPDATE skelbimai SET kaina=NULL WHERE kaina > 1500000').run().changes;
+  // Kuras - vienas žodynas (autoplius „Benzinas / elektra", autogidas „Benzinas/Elektra", „Elektra, 84 kWh")
+  const kurai = db.prepare('SELECT DISTINCT kuras FROM skelbimai WHERE kuras IS NOT NULL').all().map((x) => x.kuras);
+  const upd = db.prepare('UPDATE skelbimai SET kuras=? WHERE kuras=?');
+  r.kuras = 0;
+  for (const k of kurai) { const n = kuroNorm(k); if (n !== k) r.kuras += upd.run(n, k).changes; }
+  // autogidas: reklama antraštėje - modelis iš adreso (ta pati taisyklė, kaip nuskaityme)
+  const blogi = db.prepare(`SELECT id, url, modelis FROM skelbimai WHERE portalas='autogidas'`).all();
+  const upM = db.prepare('UPDATE skelbimai SET modelis=? WHERE id=?');
+  r.modelis = 0;
+  for (const e of blogi) {
+    const sl = (String(e.url).match(/\/skelbimas\/([a-z0-9-]+?)-\d{4}-m-/i) || [])[1];
+    const pirmas = (String(e.modelis || '').split(' ')[0] || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    if (!sl || !pirmas || !sl.startsWith(pirmas + '-')) continue;
+    const mz = sl.slice(pirmas.length + 1).split('-')[0];
+    if (mz && !String(e.modelis).toLowerCase().includes(mz)) { upM.run(String(e.modelis).split(' ')[0] + ' ' + mz.toUpperCase(), e.id); r.modelis++; }
+  }
+  const viso = Object.values(r).reduce((a, b) => a + b, 0);
+  if (viso) console.log('[RINKA] pataisyti seni irasai:', JSON.stringify(r));
+  return r;
 }
 
 // ── Tapatybė ─────────────────────────────────────────────────────────────────
@@ -123,7 +160,18 @@ function skelbimoId(portalas, url) {
   return url ? portalas + ':' + String(url) : null;
 }
 
-const sk = (v) => { const n = Number(v); return Number.isFinite(n) ? n : null; };
+// v2.4.2: `Number(null)` yra 0, ne NaN - tad trūkstamas variklio tūris
+// elektromobiliams buvo įrašomas kaip 0 (archyve 390 eilučių). null lieka null.
+const sk = (v) => { if (v == null || v === '') return null; const n = Number(v); return Number.isFinite(n) ? n : null; };
+
+// v2.4.2: vienas kuro žodynas abiem portalams. autoplius rašo „Benzinas / elektra",
+// autogidas - „Benzinas/Elektra"; statistika skilo į dvi grupes. Plius
+// autoplius elektromobiliams prikabina bateriją („Elektra, 84 kWh").
+function kuroNorm(k) {
+  if (k == null || k === '') return null;
+  const t = String(k).split(',')[0].trim().toLowerCase().replace(/\s*\/\s*/g, ' / ');
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
 const sv = (v) => (v == null || Number.isNaN(v) ? null : Math.round(Number(v)) || null);
 const bl = (v) => (v === true ? 1 : v === false ? 0 : null);
 const tx = (v) => (v == null || v === '' ? null : String(v));
@@ -186,7 +234,7 @@ function irasytiPuslapi(skenavimoId, portalas, marke, listings) {
       if (!id) continue;
       const e = {
         id, portalas, url: l.url, marke: tx(marke), modelis: tx(l.modelis),
-        metai: sv(l.metai), menuo: sv(l.menuo), kuras: tx(l.kuras), pavarai: tx(l.pavarai), kebulas: tx(l.kebulas),
+        metai: sv(l.metai), menuo: sv(l.menuo), kuras: kuroNorm(l.kuras), pavarai: tx(l.pavarai), kebulas: tx(l.kebulas),
         galia: sv(l.galia), variklio_turis: sk(l.variklioTuris), miestas: tx(l.miestas),
         verslas: bl(l.yraVerslas), turi_vin: bl(l.turiVin), garantija: bl(l.turiGarantija),
         kaina: sv(l.kaina), rida: sv(l.rida),
@@ -277,6 +325,7 @@ function eilutes({ portalas, gyvi, riba } = {}) {
 }
 
 module.exports = {
+  kuroNorm, taisytiSenusIrasus,
   ikelti, skelbimoId, pradeti, vykstantis, irasytiPuslapi, baigti, suvestine, eilutes, NESAUGOMA,
   _db: () => db,
 };

@@ -15,7 +15,8 @@ function imk(vardas) {
   }
   throw new Error('Nepavyko iškirpti: ' + vardas);
 }
-const konst = (src.match(/const AUTOGIDAS_PARAM = \{[\s\S]*?\n\};/) || [''])[0];
+const konst = (src.match(/const KURO_FILTRAS = \{[\s\S]*?\n\};/) || [''])[0]
+  + (src.match(/const AUTOGIDAS_PARAM = \{[\s\S]*?\n\};/) || [''])[0];
 const ribos = 'const MIN_REALI_KAINA = 4000; const SENAS_METAI = new Date().getFullYear() - 10; const SENAS_RIDA = 200000;';
 const kodas = ribos + konst + ['extractField', 'kainosPatikra', 'extractAutogidasListings', 'buildAutogidasUrl'].map(imk).join('\n')
   + '\nreturn { extractAutogidasListings, buildAutogidasUrl };';
@@ -59,10 +60,14 @@ t('lizingo opcija pažymėta', r.every((x) => x.turiLizingoOpcija === true));
 
 console.log('4. PAIEŠKOS ADRESAS');
 const u = buildAutogidasUrl({ marke: 'BMW', modelis: 'X5', metaiNuo: 2018, kainaIki: 60000, ridaIki: 150000,
-  kuras: 'Dyzelinas', pavaru_deze: 'Automatinė', beDefektu: true, tikSuVin: true, tikLietuvoje: true, beJav: true });
+  kuras: 'dyzelis', pavaru_deze: 'Automatinė', beDefektu: true, tikSuVin: true, tikLietuvoje: true, beJav: true });
 t('markė ir modelis', /f_1\[0\]=BMW/.test(u) && /f_model_14\[0\]=X5/.test(u), u);
 t('metai, kaina, rida', /f_41=2018/.test(u) && /f_216=60000/.test(u) && /f_66=150000/.test(u));
-t('kuro filtras (f_2)', /f_2\[1\]=1/.test(u));
+// v2.4.3: sis testas anksciau TIKRINO KLAIDA - `kuras: 'Dyzelinas'` (sasaja
+// tokios reiksmes niekada nesiuncia, ji siuncia 'dyzelis') ir formata
+// `f_2[1]=1`, kuris gyvame autogide grazina 0 skelbimu. Testas buvo zalias, nes
+// tikrino kodo sutapima su savimi, o ne su portalu (Z-67).
+t('kuro filtras (f_2[1]=Dyzelinas, iš sąsajos reikšmės „dyzelis")', decodeURIComponent(u).includes('f_2[1]=Dyzelinas'), u);
 t('be defektų (f_46)', /f_46=Be%20defekt/.test(u));
 t('tik su VIN / tik Lietuvoje / be aukcionų', /ac_3=1/.test(u) && /ac_4=1/.test(u) && /ac_5=1/.test(u));
 t('rikiuojama nuo naujausių', /f_50=naujausi_asc/.test(u));

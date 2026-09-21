@@ -98,6 +98,28 @@ R.ikelti(kat);
 console.log = se;
 T(!R.vykstantis(), 'po perkrovimo „vyksta" nelieka (pažymėta nutraukta)');
 
+console.log('\n── 10. Senų įrašų taisymas (v2.4.2) ────────────────────────');
+{
+  const ins = db.prepare(`INSERT INTO skelbimai (id, portalas, url, marke, modelis, metai, kuras, kaina, rida, variklio_turis, pirma_matytas, paskut_matytas)
+                          VALUES (?, ?, ?, 'BMW', ?, 2021, ?, ?, ?, ?, 1, 1)`);
+  ins.run('autoplius:900001', 'autoplius', 'https://autoplius.lt/skelbimai/bmw-x5-900001.html', 'BMW X5', 'Benzinas / elektra', 43900, 86, 3);
+  ins.run('autoplius:900002', 'autoplius', 'https://autoplius.lt/skelbimai/bmw-i4-900002.html', 'BMW i4', 'Elektra, 84 kWh', 89900, 679, 0);
+  ins.run('autoplius:900003', 'autoplius', 'https://autoplius.lt/skelbimai/bmw-x5-900003.html', 'BMW X5', 'Dyzelinas / elektra', 92000117843, 10, 3);
+  ins.run('autogidas:900004', 'autogidas', 'https://autogidas.lt/skelbimas/bmw-x3-2020-m-visureigis-0900004.html', 'BMW Kelio ženklų atpažinimo sistem', 'Benzinas/Elektra', 32000, 84237, 2);
+  ins.run('autoplius:900005', 'autoplius', 'https://autoplius.lt/skelbimai/bmw-x5-900005.html', 'BMW X5', 'Dyzelinas', 60000, 10, 3);
+  const r1 = R.taisytiSenusIrasus();
+  const e = (id) => db.prepare('SELECT * FROM skelbimai WHERE id=?').get(id);
+  T(e('autoplius:900001').rida === null, 'PHEV su „rida" 86 → NULL (nežinoma, ne klaidinga)');
+  T(e('autoplius:900002').variklio_turis === null && e('autoplius:900002').kuras === 'Elektra', 'EV: tūris 0 → NULL, „Elektra, 84 kWh" → „Elektra"');
+  T(e('autoplius:900003').kaina === null && e('autoplius:900003').rida === null, '92 mlrd. kaina → NULL; naujo PHEV 10 km → NULL');
+  T(e('autogidas:900004').modelis === 'BMW X3' && e('autogidas:900004').kuras === 'Benzinas / elektra', 'autogidas: modelis iš adreso, kuras suvienodintas');
+  T(e('autoplius:900005').rida === 10, 'NE hibridas su 10 km (naujas automobilis) — nepaliestas');
+  const r2 = R.taisytiSenusIrasus();
+  T(Object.values(r2).every((v) => v === 0), 'antras paleidimas nieko nekeičia (idempotentiška)');
+  lygu(R.kuroNorm('Benzinas/Elektra'), 'Benzinas / elektra', 'kuroNorm autogido forma');
+  lygu(R.kuroNorm('Elektra, 84 kWh'), 'Elektra', 'kuroNorm baterija nuimama');
+}
+
 fs.rmSync(kat, { recursive: true, force: true });
 console.log('\n' + (klaidu ? '✗ ' + klaidu + ' klaidos iš ' + patikru : '✓ ' + patikru + '/' + patikru + ' patikrų praėjo'));
 process.exit(klaidu ? 1 : 0);

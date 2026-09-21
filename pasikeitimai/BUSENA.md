@@ -1,4 +1,4 @@
-# Būsena · atnaujinta 2026-09-21, v2.4.0 (v2.3.2 GYVA produkcijoje)
+# Būsena · atnaujinta 2026-09-21, v2.4.3 (v2.4.0 GYVA produkcijoje)
 
 Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
@@ -35,6 +35,12 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 | L-04 / L-05 | `/admin/atsarga`, rakto rotacija | **Lukas** | Priminimai 09-19 11:30 ir 13:15 UTC. |
 
 ## Kas uždaryta paskutiniu metu
+
+- v2.4.3 — **Filtrai visuose portaluose** (Z-67): autogido kuro filtras niekada nepasiekdavo portalo; autoscout24 ir otomoto kuro/dėžės/ridos filtrų neturėjo; hibridai autoscout24/otomoto buvo atmetami. Visi kodai patikrinti gyvai. Sargas `filtrai.test.js` 38/38 (senas kodas krenta 14). Pavyzdžiai — `UZKLAUSU-PAVYZDZIAI.md`. **Laukia push'o su v2.4.1–2.**
+
+- v2.4.2 — **Archyvo auditas** (Z-66): 8 radiniai, svarbiausias — **autoplius hibridų rida buvo elektrinis nuotolis** (260 skelbimų, 16 %, visoje programoje). Nuolaidos kaina, kuras su baterija, reklama vietoj modelio, tūris 0. Seni įrašai taisomi paleidžiant. Sargas `skaitymas.test.js` 19/19 (senas kodas krenta 10). **Laukia push'o kartu su v2.4.1.**
+
+- v2.4.1 — **otomoto / autoscout24 be render** (1 kreditas vietoj 10), su render atsarga tuščiam puslapiui. Pamatuota produkcijoje: 32 ir 20 skelbimų per ScraperAPI be render. Z-65.
 
 - v2.4.0 — **Nr. 43** atspari mediana (`rinkos-mediana.js`, 11/11), **Nr. 42** rūšiavimas visam sąrašui, **kreditų sargas** (atsarga 5 000, 503 jei likutis nežinomas), `autoplius-ids` nebekartojamas po nesėkmės, render bandymo maršrutas. Z-64.
 

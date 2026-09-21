@@ -8,6 +8,29 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.4.3', data: '2026-09-21', pavadinimas: 'Kuro filtras veikia visuose portaluose',
+    pakeitimai: [
+      'Autogide kuro filtras dabar tikrai perduodamas portalui - anksciau jis buvo ignoruojamas',
+      'AutoScout24 ir Otomoto dabar gauna kuro, pavaru dezes ir ridos filtrus',
+      'Hibridai visuose portaluose - ir benzino, ir dyzelino, iskaitant plug-in',
+    ],
+  },
+  {
+    versija: '2.4.2', data: '2026-09-21', pavadinimas: 'Tikslesnis skelbimu nuskaitymas',
+    pakeitimai: [
+      'Hibridu ir elektromobiliu rida nebesumaisoma su elektriniu nuotoliu (pvz. 160 000 km nebevirsta 86 km)',
+      'Kai skelbime kaina sumazinta, imama dabartine kaina, o sena parodoma atskirai',
+      'Elektromobiliu kuras nebeskaidomas pagal baterijos talpa',
+      'Autogido skelbimai su reklama antrasteje atpazistami pagal tikra modeli',
+    ],
+  },
+  {
+    versija: '2.4.1', data: '2026-09-21', pavadinimas: 'Pigesne paieska Lenkijos ir Europos portaluose',
+    pakeitimai: [
+      'Otomoto ir AutoScout24 skelbimai skaitomi pigesniu budu - paieska juose kainuoja apie 10 kartu maziau',
+    ],
+  },
+  {
     versija: '2.4.0', data: '2026-09-21', pavadinimas: 'Teisingesne rinkos kaina ir rusiavimas visam sarasui',
     pakeitimai: [
       'Rinkos kaina nebeiskreipiama lizingo imoku, daliu ir aiskiai netikru kainu - normalus skelbimai nebeatrodo brangesni, nei yra',

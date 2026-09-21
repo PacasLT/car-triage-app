@@ -610,11 +610,20 @@ async function kredituLikutis() {
   return p.riba - p.panaudota;
 }
 
-async function vykdytiSkenavima(skId, portalas, url, maxPuslapiu, marke) {
+async function vykdytiSkenavima(skId, portalas, url, maxPuslapiu, marke, metaiNuo) {
+  let uzAprepties = 0;
   const pries = ATSARGA.paieska.scraperapi;
   let klaida = null, pabaiga = null;
   try {
     const r = await fetchAllPages(url, maxPuslapiu, null, async (sarasas, puslapis) => {
+      // v2.4.2: autogidas grąžina ir iškeltus skelbimus, nepaisydamas metų
+      // filtro (archyve 19 skelbimų 2001–2018 „nuo 2019" skenavime). Jie ne
+      // šios aprėpties - į archyvą nerašomi, tik suskaičiuojami.
+      if (metaiNuo) {
+        const pries = sarasas.length;
+        sarasas = sarasas.filter((l) => !l.metai || l.metai >= metaiNuo);
+        uzAprepties += pries - sarasas.length;
+      }
       try { rinka.irasytiPuslapi(skId, portalas, marke, sarasas); }
       catch (e) { console.error('[RINKA] puslapio irasymas:', e.message); throw e; }
       if (puslapis % SARGO_ZINGSNIS === 0) {
@@ -637,7 +646,8 @@ async function vykdytiSkenavima(skId, portalas, url, maxPuslapiu, marke) {
   });
   console.log('[RINKA] skenavimas #' + skId + ' ' + portalas + ': ' + (s && s.busena)
     + ' · puslapiu ' + (s && s.puslapiu) + ' · skelbimu ' + (s && s.skelbimu)
-    + ' · nauju ' + (s && s.nauju) + ' · dingo ' + (s && s.dingo) + ' · kreditu ' + kreditu + ' · ' + (klaida || pabaiga));
+    + ' · nauju ' + (s && s.nauju) + ' · dingo ' + (s && s.dingo) + ' · kreditu ' + kreditu
+    + (uzAprepties ? ' · uz metu apreapties ' + uzAprepties : '') + ' · ' + (klaida || pabaiga));
 }
 
 // Suvestinė: kiek sukaupta, kur guli, kiek užima. GET, nemokamas.
@@ -692,7 +702,7 @@ app.post('/admin/rinka/skenuoti', klaiduPrieiga, async (req, res) => {
     const url = RINKOS_PORTALAI[portalas]({ marke, metaiNuo, rikiavimas: 'naujausi' });
     const skId = rinka.pradeti({ portalas, marke, metaiNuo, url });
     console.log('[RINKA] skenavimas #' + skId + ' pradetas: ' + portalas + ' ' + marke + ' nuo ' + (metaiNuo || '-') + ' · riba ' + maxPuslapiu + ' psl.');
-    vykdytiSkenavima(skId, portalas, url, maxPuslapiu, marke);
+    vykdytiSkenavima(skId, portalas, url, maxPuslapiu, marke, metaiNuo);
     res.status(202).json({ skenavimas: skId, portalas, marke, metaiNuo, maxPuslapiu, url });
   } catch (e) {
     console.error('[RINKA]', e.message);
@@ -815,7 +825,13 @@ async function fetchSearchPage(url, opts) {
   let html;
 
   // 1. ScraperAPI (jei raktas nurodytas)
-  const needsRender = opts.render !== undefined ? !!opts.render : /otomoto\.pl|autoscout24\./i.test(url);
+  // v2.4.1: otomoto ir autoscout24 NEBE render pagal nutylejima. Pamatuota
+  // produkcijoje 2026-09-21 (/admin/pavyzdys, 7 puslapis): be render abu
+  // grazino pilna puslapi per ScraperAPI - otomoto 32 skelbimai, autoscout24 20,
+  // su kaina, metais, rida. ScraperAPI ataskaita: be render 1 kreditas, su
+  // render 10. Per savaite siedu portalai suvalge ~23 000 kreditu.
+  // Jei be render puslapis tuscias - fetchAllPages pakartoja su render (zr. ten).
+  const needsRender = opts.render !== undefined ? !!opts.render : false;
   if (SCRAPER_KEY) {
     try {
       const renderParam = needsRender ? 'true' : 'false';
@@ -1098,10 +1114,26 @@ function extractAutopliusStructured(html) {
     // Antra eilute: kuras, deze, variklis, rida, miestas
     const apacia = el.find('.announcement-parameters-block .announcement-parameters span').map(function () { return $(this).text().replace(/\s+/g, ' ').trim(); }).get();
     let kuras = null, pavarai = null, variklioTuris = null, galia = null, rida = null, miestas = null;
+    let elektrosNuotolis = null, baterijaKwh = null;
     apacia.forEach((t) => {
-      if (/^(Dyzelinas|Benzinas|Elektra|Bioetanolis|Vandenilis)/i.test(t)) kuras = t;
+      if (/^(Dyzelinas|Benzinas|Elektra|Bioetanolis|Vandenilis)/i.test(t)) {
+        // v2.4.2: elektromobiliams autoplius prie kuro prikabina bateriją:
+        // „Elektra, 84 kWh". Kuras - tik žodis, baterija - atskiras laukas.
+        // Iki šiol archyve buvo 18 skirtingų „kuro" reikšmių vien elektrai.
+        const kwh = t.match(/(\d+(?:[.,]\d+)?)\s*kWh/i);
+        if (kwh) baterijaKwh = parseFloat(kwh[1].replace(',', '.'));
+        kuras = t.split(',')[0].trim();
+      }
       else if (/^(Automatinė|Mechaninė)$/i.test(t)) pavarai = t;
-      else if (/km$/i.test(t)) rida = parseInt(t.replace(/[^\d]/g, ''), 10) || null;
+      else if (/km$/i.test(t)) {
+        // v2.4.2: PIRMAS „… km" yra rida. Hibridams ir elektromobiliams autoplius
+        // rodo ANTRĄ „… km" - elektrinio nuotolio (PHEV „86 km", EV „679 km").
+        // Iki šiol antrasis perrašydavo pirmąjį: archyve 260 autoplius skelbimų
+        // (16 %) turėjo „ridą" 47–679 km, nors tikra buvo 50 000–160 000.
+        // Tai klaidino balą, ridos medianą ir Regitros „rida įtartinai maža".
+        const v = parseInt(t.replace(/[^\d]/g, ''), 10) || null;
+        if (rida == null) rida = v; else if (elektrosNuotolis == null) elektrosNuotolis = v;
+      }
       else if (/kW/i.test(t)) {
         const tur = t.match(/(\d[.,]\d)\s*l/i); const kw = t.match(/(\d+)\s*kW/i);
         if (tur) variklioTuris = parseFloat(tur[1].replace(',', '.'));
@@ -1111,7 +1143,15 @@ function extractAutopliusStructured(html) {
 
     // Kaina; "+ PVM" ir "be PVM / Eksportui" pastabos
     const kainosBlokas = el.find('.pricing-container').text().replace(/\s+/g, ' ').trim();
-    const kainaTxt = el.find('.announcement-pricing-info strong').first().text();
+    // v2.4.2: nuolaidos kortelėje <strong> turi DVI kainas - .promo-price (dabartinė)
+    // ir .strike (perbraukta sena). Visas tekstas be tarpų suliedavo jas į vieną
+    // skaičių: „92 000 € 117 843 €" -> 92 000 117 843 €. Imam tik dabartinę,
+    // o seną saugom atskirai - tai tikra žinia („kaina sumažinta").
+    const kainosStrong = el.find('.announcement-pricing-info strong').first();
+    const promo = kainosStrong.find('.promo-price').first();
+    const kainaTxt = promo.length ? promo.text() : kainosStrong.clone().find('.strike').remove().end().text();
+    const senaKainaTxt = kainosStrong.find('.strike').first().text();
+    const senaKaina = parseInt(String(senaKainaTxt).replace(/[^\d]/g, ''), 10) || null;
     let kaina = parseInt(String(kainaTxt).replace(/[^\d]/g, ''), 10) || null;
     let kainaBaze = null, pvmPastaba = null;
     if (/\+\s*PVM/i.test(kainosBlokas) && kaina) {
@@ -1164,6 +1204,7 @@ function extractAutopliusStructured(html) {
       kaina, kainaBaze, pvmPastaba, kainaBePvm, turiLizingoOpcija, lizingoSuma, kainosPastaba,
       kainosIspejimas: ispejimas,
       metai, menuo, pirmaRegistracija: dataStr, kebulas, kuras, pavarai, variklioTuris, galia, rida, miestas,
+      elektrosNuotolis, baterijaKwh, senaKaina,
       iskeltas, ikeltaLaikas, ikeltaTekstas: naujasTxt, atnaujintas,
       turiVin, turiIstorijosAtaskaita, turiGarantija, garantijosTipas, yraVerslas,
       reitingas, atsiliepimuSkaicius, galimiDefektai,
@@ -1300,8 +1341,12 @@ function extractAutoscout24Listings(html) {
     return [];
   }
   const listings = (data.props && data.props.pageProps && data.props.pageProps.listings) || [];
-  const FUEL_MAP = { Gasoline: 'Benzinas', Petrol: 'Benzinas', Diesel: 'Dyzelinas', Electric: 'Elektra', Hybrid: 'Hibridas' };
-  const GEARBOX_MAP = { Automatic: 'Automatinė', Manual: 'Mechaninė' };
+  // v2.4.3: autoscout24 hibridai ateina kaip „Electric/Gasoline" ir „Electric/Diesel".
+  // Anksciau ju zodyne nebuvo - kuras likdavo angliskas, ir `kurasAtitinka`
+  // hibrida ATMESDAVO (nei „hibrid", nei „elektra"). Pusiau automatine - Automatinė.
+  const FUEL_MAP = { Gasoline: 'Benzinas', Petrol: 'Benzinas', Diesel: 'Dyzelinas', Electric: 'Elektra', Hybrid: 'Hibridas',
+    'Electric/Gasoline': 'Benzinas / elektra', 'Electric/Diesel': 'Dyzelinas / elektra', LPG: 'Benzinas / dujos', CNG: 'Benzinas / dujos' };
+  const GEARBOX_MAP = { Automatic: 'Automatinė', Manual: 'Mechaninė', 'Semi-automatic': 'Automatinė' };
 
   return listings.map((item) => {
     const kaina = item.price && item.price.priceRaw ? Math.round(item.price.priceRaw) : null;
@@ -1389,16 +1434,33 @@ function extractAutogidasListings(html, originUrl) {
     let href = el.find('a.item-link').first().attr('href') || '';
     if (href && !href.startsWith('http')) href = origin + (href.startsWith('/') ? href : '/' + href);
     if (!href) return;
-    const modelis = el.find('h2.item-title').first().text().replace(/\s+/g, ' ').trim()
+    let modelis = el.find('h2.item-title').first().text().replace(/\s+/g, ' ').trim()
       || el.find('a.item-link').first().attr('title') || 'Nezinomas';
+    // v2.4.2: kai kurie prekeiviai antrašte rašo reklamą, ne modelį - archyve 22
+    // skelbimai „BMW Kelio ženklų atpažinimo sistem". Adresas visada neša modelį
+    // (/skelbimas/bmw-x3-2020-m-...). Jei adreso modelio žodžio antraštėje nėra -
+    // modelis imamas iš adreso. Tikrinama tik ši sąlyga, kad nesugadintume
+    // teisingų antraščių („Mercedes-Benz E 220" -> „mercedes-benz-e-klase").
+    const sl = (href.match(/\/skelbimas\/([a-z0-9-]+?)-\d{4}-m-/i) || [])[1];
+    if (sl) {
+      const pirmas = (modelis.split(' ')[0] || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      if (pirmas && sl.startsWith(pirmas + '-')) {
+        const modelioZodis = sl.slice(pirmas.length + 1).split('-')[0];
+        if (modelioZodis && !modelis.toLowerCase().includes(modelioZodis)) {
+          modelis = modelis.split(' ')[0] + ' ' + modelioZodis.toUpperCase();
+        }
+      }
+    }
 
     // Parametrai eina tvarkinga eile, bet ne visi visada yra - todel atpazistam pagal turini
     const params = [];
     el.find('span.parameter-value').each(function () { params.push($(this).text().replace(/\s+/g, ' ').trim()); });
     let metai = null, rida = null, kuras = null, pavarai = null, galia = null, variklioTuris = null,
-      miestas = null, vieta = null, menuo = null;
+      miestas = null, vieta = null, menuo = null, uzsienyje = false;
     // autogidas rašo ir su tarpais, ir be jų: "Benzinas / dujos" ir "Benzinas/Dujos"
-    const kuroTipuSarasas = ['Dyzelinas / elektra', 'Dyzelinas/Elektra', 'Benzinas / elektra / dujos',
+    // v2.4.3: pridėti „(Plug-in)" - be jų plug-in hibridų kuras likdavo null.
+    const kuroTipuSarasas = ['Dyzelinas/Elektra (Plug-in)', 'Benzinas/Elektra (Plug-in)',
+      'Dyzelinas / elektra', 'Dyzelinas/Elektra', 'Benzinas / elektra / dujos',
       'Benzinas/Elektra/Dujos', 'Benzinas / elektra', 'Benzinas/Elektra', 'Benzinas / dujos', 'Benzinas/Dujos',
       'Benzinas/Gamtinės dujos', 'Dyzelinas', 'Benzinas', 'Elektra', 'Bioetanolis', 'Dujos', 'Etanolis'];
     for (const p of params) {
@@ -1416,6 +1478,8 @@ function extractAutogidasListings(html, originUrl) {
       const kwMatch = p.match(/(\d+)\s?kW/i);
       if (kwMatch && !galia) galia = parseInt(kwMatch[1], 10);
       // "Plungė, Lietuva" arba "Vilnius"
+      // v2.4.2: „Užsienyje" - ne miestas, o automobilio vieta už Lietuvos ribų.
+      if (p === 'Užsienyje') { uzsienyje = true; continue; }
       if (!vieta && /^[A-ZĄČĘĖĮŠŲŪŽ][a-ząčęėįšųūž-]+(,\s*[A-ZĄČĘĖĮŠŲŪŽ][a-ząčęėįšųūž]+)?$/.test(p)
         && !kuroTipuSarasas.includes(p) && p !== 'Automatinė' && p !== 'Mechaninė') {
         vieta = p; miestas = p.split(',')[0].trim();
@@ -1459,7 +1523,7 @@ function extractAutogidasListings(html, originUrl) {
     results.push({
       kaina, kainaBaze, pvmPastaba, kainaBePvm: null, turiLizingoOpcija, rida, metai, menuo, modelis,
       galimiDefektai: [], galimasJavImportas, kainosIspejimas: kainosIspejimas || null,
-      kuras, pavarai, turiVin, galia, variklioTuris, miestas, vieta,
+      kuras, pavarai, turiVin, galia, variklioTuris, miestas, vieta, uzsienyje,
       turiIstorijosAtaskaita: turiVin, turiGarantija,
       garantijosTipas: turiGarantija ? 'nenurodyta_kokia' : null, yraVerslas,
       reitingas: null, atsiliepimuSkaicius: null,
@@ -1498,6 +1562,18 @@ async function fetchAllPages(baseUrl, maxPages, onProgress, onPage) {
     if (isAutogidas) newItems = extractAutogidasListings(html, pageUrl);
     else if (isAutoscout) newItems = extractAutoscout24Listings(html);
     else if (isOtomoto) newItems = extractOtomotoListings(html);
+    // v2.4.1: be render tuscias puslapis gali buti blokavimas, ne sarašo galas.
+    // Tik tada - vienas bandymas su render (10 kreditu vietoj 1).
+    if ((isAutoscout || isOtomoto) && newItems && newItems.length === 0) {
+      try {
+        const html2 = await fetchSearchPage(pageUrl, { render: true });
+        const antri = isAutoscout ? extractAutoscout24Listings(html2) : extractOtomotoListings(html2);
+        if (antri.length) {
+          console.log('  [RENDER] be render tuscia, su render ' + antri.length + ' skelbimu: ' + pageUrl.slice(0, 60));
+          newItems = antri;
+        }
+      } catch (e) { /* lieka tuscia - traktuojama kaip galas */ }
+    }
     else {
       // Pirma bandom struktūrinį (tikslūs laukai); jei autoplius pakeistų išdėstymą - senas tekstinis
       newItems = extractAutopliusStructured(html);
@@ -1643,6 +1719,33 @@ function kurasAtitinka(kuras, filtras) {
 // ============ URL SUDARYMAS PAGAL FILTRUS ============
 
 // Autoplius kuro ID (patikrinta gyvai paieskos formoje):
+// ── v2.4.3 · KURO FILTRAS VISIEMS PORTALAMS VIENODAI ─────────────────────────
+// Musu reiksmes ateina is sasajos (<select id="fuel">): dyzelis | benzinas |
+// hibridas | elektra. Ta pati prasme visur, kaip ir autoplius iki siol:
+//   dyzelis  = dyzelinas + dyzelino hibridai
+//   benzinas = benzinas + benzino hibridai + dujos
+//   hibridas = VISI hibridai (benzino IR dyzelino, iskaitant plug-in)
+//   elektra  = tik elektra
+// Visi kodai PATIKRINTI gyvai portaluose 2026-09-21 (Z-67): kiekvienas
+// pirmame puslapyje grazino tik tinkama kura. otomoto dyzelino hibridu
+// atskirai neturi - ten „hybrid" apima abu.
+const KURO_FILTRAS = {
+  autogidas: {        // f_2[N]=<tekstas> - ir indeksas, ir tekstas privalomi (vien skaicius -> 0 rezultatu)
+    dyzelis:  [[1, 'Dyzelinas'], [8, 'Dyzelinas/Elektra'], [9, 'Dyzelinas/Elektra (Plug-in)']],
+    benzinas: [[2, 'Benzinas'], [3, 'Benzinas/Dujos'], [4, 'Benzinas/Elektra'], [5, 'Benzinas/Elektra (Plug-in)'],
+               [6, 'Benzinas/Elektra/Dujos'], [11, 'Benzinas/Gamtinės dujos']],
+    hibridas: [[4, 'Benzinas/Elektra'], [5, 'Benzinas/Elektra (Plug-in)'], [6, 'Benzinas/Elektra/Dujos'],
+               [8, 'Dyzelinas/Elektra'], [9, 'Dyzelinas/Elektra (Plug-in)']],
+    elektra:  [[7, 'Elektra']],
+  },
+  autoscout24: {      // fuel=B,2,L  (B benzinas, D dyzelinas, E elektra, 2 el./benz., 3 el./dyz., L dujos)
+    dyzelis: 'D,3', benzinas: 'B,2,L', hibridas: '2,3', elektra: 'E',
+  },
+  otomoto: {          // search[filter_enum_fuel_type][i]=
+    dyzelis: ['diesel'], benzinas: ['petrol'], hibridas: ['hybrid', 'plugin-hybrid'], elektra: ['electric'],
+  },
+};
+
 const AUTOPLIUS_FUEL_IDS = {
   benzinas: [30, 36, 31],       // Benzinas, Benzinas/elektra, Benzinas/dujos
   dyzelis: [32, 17378],         // Dyzelinas, Dyzelinas/elektra
@@ -1723,8 +1826,10 @@ function buildAutogidasUrl(filters) {
   if (filters.ridaIki) params.push(`f_66=${filters.ridaIki}`);
   if (filters.pavaru_deze) params.push(`f_10=${encodeURIComponent(filters.pavaru_deze)}`);
   // v1.28.0 NAUJI filtrai - anksciau autogidas gaudavo tik puse vartotojo pasirinkimu
-  const kuroId = filters.kuras ? AUTOGIDAS_PARAM.kuras[filters.kuras] : null;
-  if (kuroId) params.push(`f_2[${kuroId}]=${kuroId}`);
+  // v2.4.3: buvo `AUTOGIDAS_PARAM.kuras[filters.kuras]` - raktai „Dyzelinas", o
+  // sasaja siuncia „dyzelis", tad kuro filtras NIEKADA nepateko i adresa.
+  // Ir net pataikius formatas `f_2[1]=1` grazina 0 rezultatu - reikia teksto.
+  (KURO_FILTRAS.autogidas[filters.kuras] || []).forEach(([i, t]) => params.push(`f_2[${i}]=${encodeURIComponent(t)}`));
   if (filters.beDefektu) params.push(`f_46=${encodeURIComponent('Be defektų')}`);
   if (filters.tikSuVin) params.push('ac_3=1');
   if (filters.tikLietuvoje) params.push('ac_4=1');
@@ -1746,6 +1851,11 @@ function buildAutoscout24Url(filters) {
   if (filters.metaiIki) params.push(`fregto=${filters.metaiIki}`);
   if (filters.kainaNuo) params.push(`pricefrom=${filters.kainaNuo}`);
   if (filters.kainaIki) params.push(`priceto=${filters.kainaIki}`);
+  // v2.4.3: kuras, deze ir rida - iki siol autoscout24 ju negaudavo is viso.
+  if (KURO_FILTRAS.autoscout24[filters.kuras]) params.push(`fuel=${KURO_FILTRAS.autoscout24[filters.kuras]}`);
+  if (filters.pavaru_deze === 'Automatinė') params.push('gear=A,S');   // S = pusiau automatinė
+  if (filters.pavaru_deze === 'Mechaninė') params.push('gear=M');
+  if (filters.ridaIki) params.push(`kmto=${filters.ridaIki}`);
   return `${url}?${params.join('&')}`;
 }
 
@@ -1771,6 +1881,8 @@ function buildOtomotoUrl(filters) {
     const g = filters.pavaru_deze === 'Automatinė' ? 'automatic' : filters.pavaru_deze === 'Mechaninė' ? 'manual' : null;
     if (g) params.push(`search[filter_enum_gearbox][0]=${g}`);
   }
+  // v2.4.3: kuras - iki siol otomoto jo negaudavo.
+  (KURO_FILTRAS.otomoto[filters.kuras] || []).forEach((v, i) => params.push(`search[filter_enum_fuel_type][${i}]=${v}`));
   return `${url}?${params.join('&')}`;
 }
 
@@ -1793,7 +1905,9 @@ function extractOtomotoListings(html) {
         break;
       }
     }
-    const FUEL_MAP = { petrol: 'Benzinas', diesel: 'Dyzelinas', electric: 'Elektra', hybrid: 'Hibridas', lpg: 'Dujos', cng: 'Dujos' };
+    // v2.4.3: „plugin-hybrid" nebuvo zodyne -> likdavo angliskas ir filtras „Hibridas" ji atmesdavo.
+    const FUEL_MAP = { petrol: 'Benzinas', diesel: 'Dyzelinas', electric: 'Elektra', hybrid: 'Hibridas', 'plugin-hybrid': 'Hibridas',
+      lpg: 'Benzinas / dujos', 'petrol-lpg': 'Benzinas / dujos', cng: 'Benzinas / dujos', 'petrol-cng': 'Benzinas / dujos' };
     const GEAR_MAP = { automatic: 'Automatinė', manual: 'Mechaninė', 'semi-automatic': 'Automatinė' };
 
     return edges.map(({ node: item }) => {
