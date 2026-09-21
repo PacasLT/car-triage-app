@@ -6217,3 +6217,18 @@ Buvo atvira nuo Z-76: otomoto skelbimas AI analizei ėjo tik kaip „pilnas pusl
   Aprašyme išmetamas paslėptas telefonas, brūkšnių linijos.
 - `scrapeSingleListing`: otomoto šaka + nuotraukos iš `advert.images` (buvo tik urqlState).
 - `testai/otomoto-skelbimas.test.js` 15/15. Be `__NEXT_DATA__` – tuščia forma, ne klaida.
+
+---
+
+## Z-95 · 2026-09-22 · Klaudijus · v2.6.9 · Nr. 10 (Luko „daryk") ir filtrų sąrašų spalvos
+
+**Nr. 10** – skelbimo puslapis (D-03 dalis, Lukas leido daryti be paketo):
+- Įvertis dukart: `#dp-panel` (prie galerijos) ir `.dp-score-section` (žemiau). Paliktas
+  skydelis; sekcija `hidden` (DOM lieka – `load()` rašo į jos ID). ct-priedai.css 18 blokas.
+- Pardavėjas: iš `.dp-main-sell` (po galerija kairėje) į naują dešinį stulpelį
+  `.dp-desine` po skydeliu. `.dp-main-sell` markupas pašalintas.
+
+**Filtrų sąrašai (Luko ekranvaizdis):** MARKĖ `<select>` išskleistas baltas, pasirinkimai
+beveik balti. Filtrų `select` yra `.ct-fld-t` – nei ct-dizainas.css 2163 (`select.ct-field
+option`), nei index.html 890 (`.ct3-select-wrap`) jų nepasiekia. ct-priedai.css 19 blokas:
+`select { color-scheme: dark }` + `option` fonas/spalva tokenais. Dizaineriui – į 34 sk.

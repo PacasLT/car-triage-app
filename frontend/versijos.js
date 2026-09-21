@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.6.9', data: '2026-09-22', pavadinimas: 'Skelbimo puslapis ir filtrų sąrašai',
+    pakeitimai: [
+      'Skelbimo puslapyje CarTriige įvertinimas rodomas vieną kartą (dubliavosi)',
+      'Pardavėjo informacija perkelta į viršų dešinėje, po įvertinimu',
+      'Filtrų išskleidžiami sąrašai (markė, modelis, kuras ir kt.) – tamsūs, tekstas aiškiai matomas',
+    ],
+  },
+  {
     versija: '2.6.8', data: '2026-09-22', pavadinimas: 'Otomoto skelbimų analizė tikslesnė',
     pakeitimai: [
       'Otomoto skelbimo parametrai, įranga ir pardavėjo aprašymas AI analizei perduodami tvarkingai, ne kaip viso puslapio tekstas',

@@ -681,34 +681,35 @@ button{font-family:inherit;cursor:pointer}
       </div>
     </div>
 
-    <div class="dp-panel" id="dp-panel"></div>
-  </section>
-
-  <!-- Pardavejo kortele - 3 dalis; kol kas lieka kaip buvo, tik zemiau -->
-  <div class="dp-main-sell">
-    <!-- SELLER COL (laukia 3 dalies) -->
-    <div class="dp-seller">
-      <div class="dp-seller-top">
-        <div class="dp-seller-label">Pardavėjas</div>
-        <button class="dp-seller-menu ct-btn ct-btn-sm ct-btn-icon" title="Daugiau" aria-label="Daugiau apie pardaveja">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
-        </button>
-      </div>
-      <div class="dp-seller-name-row">
-        <div class="dp-seller-icon" id="dp-seller-icon"></div>
-        <div>
-          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:2px">
-            <span class="dp-seller-name" id="dp-seller-name">—</span>
-            <span class="dp-seller-verified" id="dp-seller-verified" style="display:none">✓</span>
+    <!-- v2.6.9 (Nr. 10): desinys stulpelis = ivertis + pardavejas VIRSUJE desineje.
+         .dp-desine perima .dp-panel flex dydi (ct-dizainas.css 1095); skydelis viduje nebeauga. -->
+    <div class="dp-desine">
+      <div class="dp-panel" id="dp-panel"></div>
+      <!-- SELLER COL (laukia 3 dalies) -->
+      <div class="dp-seller">
+        <div class="dp-seller-top">
+          <div class="dp-seller-label">Pardavėjas</div>
+          <button class="dp-seller-menu ct-btn ct-btn-sm ct-btn-icon" title="Daugiau" aria-label="Daugiau apie pardaveja">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+          </button>
+        </div>
+        <div class="dp-seller-name-row">
+          <div class="dp-seller-icon" id="dp-seller-icon"></div>
+          <div>
+            <div style="display:flex;align-items:center;flex-wrap:wrap;gap:2px">
+              <span class="dp-seller-name" id="dp-seller-name">—</span>
+              <span class="dp-seller-verified" id="dp-seller-verified" style="display:none">✓</span>
+            </div>
+            <div class="dp-seller-type" id="dp-seller-type"></div>
           </div>
-          <div class="dp-seller-type" id="dp-seller-type"></div>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- SCORE SECTION -->
-  <div class="dp-score-section">
+  <!-- SCORE SECTION · v2.6.9 (Nr. 10): paslėpta - tas pats CarTriige įvertis jau yra
+       skydelyje (#dp-panel). Lieka DOM'e, nes load() rašo į jo ID. -->
+  <div class="dp-score-section" hidden>
     <div>
       <div class="dp-score-title">CarTriige Score</div>
       <div class="dp-score-left">
