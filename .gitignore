@@ -15,3 +15,11 @@ pasikeitimai/is-dizainerio/*
 
 # Klaidu saraso nuotraukos - laikinos, skaitomos ir istrinamos
 pasikeitimai/klaidos-*.txt
+
+# DARBO-SISTEMA §4.2: žali registro / portalų duomenys niekada nepatenka į git
+# (Regitros CSV ~945 MB, BDAR). Tik suvestinės backend/duomenys/*.json.
+*.zip
+*.csv
+
+# Testų laikinos DB (migracija.test)
+backend/testai/*.db
