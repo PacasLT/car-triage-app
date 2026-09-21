@@ -6,9 +6,9 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
 | Nr. | Kas | Kieno ėjimas | Trumpai |
 |---|---|---|---|
-| K-35 | Nr. 40 · pilno pločio juosta PRIEŠ paiešką | **Dizaineris** | 35b taisyklė be sąlygos: juosta prarado full-bleed ir plačiajame variante (1280 px: 1280 → 1240; 1920: 1920 → 1560). Pataisa su `.is-split` pamatuota ir veikia. Z-62. |
-| K-26b | Šonas 660 px prie ribos 599 | **Dizaineris** | ATSAKYTA skaičiumi (Z-62): po 33 diapazonų ir 34e turinys 660, viršija **61 px**. Jūsų siūlymas — grąžinti diapazonus prie `B+D`. |
-| ~~K-31~~, ~~K-34~~ | ~~Nr. 41, 39, 40~~ | **Uždaryti 35 paketu** | 34e: visos 11 piktogramų 10 px (buvo 0). 35b: juosta šone 276/300 px, slinktis 0. `ct-priedai.css` 7 blokas ištrintas. Laukia Luko patikros. |
+| ~~K-35~~ | ~~pilno pločio juosta PRIEŠ paiešką~~ | **Uždarytas 37 paketu** | 35c pririšta prie `.is-split`: panelė prieš paiešką vėl 1280/1920. Z-69. |
+| ~~K-26b~~ | ~~Šonas 660 prie ribos 599~~ | **Uždarytas 37 paketu** | Diapazonai `B+D` + tarpai: šonas **536** (riba 599, atsargos 63). Z-69. |
+| ~~K-36~~ | ~~„15000" KAINOS lauke ties 1280~~ | **Uždarytas Errata 4** | Laukas 44 px, „15000" 39 px — telpa. Šonas 536. Z-71. Nr. 40 — klaidingas matavimas (Z-68). K-14 dizaineris skaičiuoja nuo 536. |
 | ~~K-32~~ | ~~Amžiaus juostos danga~~ | **Uždarytas** | `A-32`: atsarga tik 7–15 m. lange, `kmmet_n ≥ 100`. Įdiegta, sargas 88/88. Mūsų archyve uždengia 3 % (skelbimai jauni). Z-58. |
 | K-33 | Registro raktų logika (`SERIE`, `REIHE`, neapibrėžti) | **Analitikas** | `A-33`: jungti pagal (šeima, kuras); `BMW SERIE` = trys serijos viename rakte. Laukiu `modelis_dalys()` + pergeneruoto failo — diegiam VIENU commit'u. Z-58. |
 | K-31 | Nr. 41 · `is-inline` etiketės ir `NUSTATYTA` juosta | **Dizaineris** | Penki langeliai platūs, tik du neša etiketę viduje — 33 paketo pasekmė. Telefone `is-inline` vardas jau neteisingas. Trys keliai, Z-53. |
@@ -17,7 +17,6 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 | ~~K-28~~ | ~~Likvidumo riba~~ | **Uždarytas** | Ribos perkeltos prie kvartilių: 26 / 13. |
 | K-28-senas | Likvidumo riba: `< 12` ar `<= 12,1`? | **Lukas** | Specifikacijoje riba „žemiau 12 %", bet BMW 530 (12,1 %) pateiktas kaip „lėto" pavyzdys. Kodas laikosi ribos. Z-51. |
 | ~~K-27~~ | ~~Nr. 40 · portalų mygtukas ir statistikos juosta~~ | **Uždarytas 34 paketu** | `K-22` diagnozuotas: du nesusiję kaltininkai, 56 px (≥1180) ir 182 px (<1180). Atsvaros `ct-priedai.css` 13 ir 14 blokuose — perimkit, ir ištrinsiu. Z-48. |
-| K-26b | Šonas 644 prie ribos 599 | **Dizaineris** | `K-26` uždarytas 33 paketu (visi šeši laukai 101 px), bet trys diapazonai per eilutę kainavo +112. Viršija tik 1280×720. Jūsų 1 variantas pamatuotas — neveikia. Z-46. |
 | K-25 | Nr. 37 · `#portal-selector` | **Dizaineris** | Niekada nebuvo dizaino sistemoje. |
 | K-24 | Nr. 38 · „Daugiau filtrų" prie „Ieškoti" | **Dizaineris** | Lukas taip nori, bet tai griauna `.ct-fld-act` 12-tą langelį. Jūsų ėjimas. |
 | A-11 | `--focus-offset` | **Dizaineris** | Vienintelis likęs negyvas tokenas; pasiliekat kartu su PT-02. |

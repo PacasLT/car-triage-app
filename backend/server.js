@@ -29,6 +29,7 @@ regitra.ikelti();
 // v2.2.0: skelbimu archyvas. Jei nepavyksta - serveris vis tiek pakyla,
 // o /admin/rinka tai parodo (ikelta:false), ne tyliai.
 const rinka = require('./rinka');
+const mobilede = require('./mobilede');
 try { rinka.ikelti(cache.DATA_DIR); } catch (e) { console.error('[RINKA] NEPAVYKO ikelti:', e.message); }
 const komplektacija = require('./komplektacija');
 const { requireAuth, handleRegister, handleLogin, handleMe, planai, duomenys, verifyToken } = require('./auth');
@@ -512,9 +513,48 @@ app.get('/admin/pavyzdys', klaiduPrieiga, async (req, res) => {
         skelbimu: sk.length, klaida,
         pavyzdziai: sk.slice(0, 2).map((l) => { const o = Object.assign({}, l); delete o.rawText; delete o.photos; return o; }) });
     }
+    // v2.4.5 (BANDYMAS): mobile.de per ScraperAPI - trys budai, BE atsarginio
+    // kelio (axios/Puppeteer). Jei ScraperAPI nepraeina, atsakymas turi sakyti
+    // „nepraejo", o ne tyliai atnesti kita saltini. Kaina imama is ScraperAPI
+    // antrastes `sa-credit-cost` - ne is musu spejimo.
+    //   ?portalas=mobilede&budas=standartinis|premium|ultra[&render=1][&modelis=X5][&puslapis=N]
+    // Kaina pagal ScraperAPI dokumentacija: standartinis 1, premium 10, ultra 30,
+    // render +; mokama tik uz 200/404.
+    if (portalas === 'mobilede') {
+      const budas = ['standartinis', 'premium', 'ultra'].includes(req.query.budas) ? req.query.budas : 'standartinis';
+      const render = req.query.render === '1';
+      const psl = Math.min(Math.max(parseInt(req.query.puslapis, 10) || 1, 1), mobilede.MOBILEDE_PUSLAPIU_RIBA);
+      const info = mobilede.buildMobileDeUrl({ marke, modelis: req.query.modelis || '', metaiNuo: parseInt(req.query.metaiNuo, 10) || 2019 }, psl, { info: true });
+      const KEY = process.env.SCRAPER_API_KEY;
+      if (!KEY) return res.status(503).json({ error: 'nera SCRAPER_API_KEY' });
+      const likutis = await kredituLikutis();
+      if (likutis === null || likutis < KREDITU_ATSARGA) return res.status(503).json({ error: 'kreditu sargas', likutis });
+      let q = `http://api.scraperapi.com?api_key=${KEY}&url=${encodeURIComponent(info.url)}&render=${render}`;
+      if (budas === 'premium') q += '&premium=true';
+      if (budas === 'ultra') q += '&ultra_premium=true';
+      const t0 = Date.now();
+      let st = null, html = null, kaina = null, klaida = null;
+      try {
+        const r = await axios.get(q, { timeout: 70000, validateStatus: () => true, responseType: 'text' });
+        st = r.status; kaina = r.headers['sa-credit-cost'] || null;
+        html = typeof r.data === 'string' ? r.data : JSON.stringify(r.data);
+      } catch (e) { klaida = e.message; }
+      const sk = st === 200 ? mobilede.extractMobileDe(html) : { rasta: false, skelbimai: [] };
+      console.log(`[MOBILEDE] ${budas} render=${render} -> ${st} kaina=${kaina} rasta=${sk.rasta} skelbimu=${sk.skelbimai.length}`);
+      return res.json({
+        portalas, budas, render, url: info.url, modelisNerastas: info.modelisNerastas,
+        statusas: st, kreditu: kaina, sekundziu: Math.round((Date.now() - t0) / 100) / 10, klaida,
+        htmlIlgis: html ? html.length : 0,
+        akamai: !!(html && /Access Denied|akamai|_abck|bm-verify/i.test(html) && !sk.rasta),
+        pradzia: html && !sk.rasta ? html.slice(0, 300) : undefined,
+        rasta: sk.rasta, viso: sk.viso, puslapis: sk.puslapis, skelbimu: sk.skelbimai.length, reklamu: sk.reklamu,
+        pavyzdziai: (sk.skelbimai || []).slice(0, 2),
+        likutisPries: likutis,
+      });
+    }
     const bazinis = portalas === 'autoplius' ? buildAutopliusUrl({ marke })
       : portalas === 'autogidas' ? buildAutogidasUrl({ marke }) : null;
-    if (!bazinis) return res.status(400).json({ error: 'portalas: autoplius | autogidas | otomoto | autoscout24' });
+    if (!bazinis) return res.status(400).json({ error: 'portalas: autoplius | autogidas | otomoto | autoscout24 | mobilede' });
 
     // Puslapio numeris. PIRMAS puslapis yra šališkas: „naujausi viršuje"
     // rikiavime jį užima vieno prekiautojo ką tik įkelta partija (pamatuota

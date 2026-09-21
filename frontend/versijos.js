@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.4.4', data: '2026-09-21', pavadinimas: 'Kompaktiskesne filtru panele sone',
+    pakeitimai: [
+      'Metu, kainos ir galios diapazonai sone vel uzima po puse eiles - visi filtrai telpa be slinkimo',
+      'Paieskos panele pries paieska vel per visa ekrano ploti',
+    ],
+  },
+  {
     versija: '2.4.3', data: '2026-09-21', pavadinimas: 'Kuro filtras veikia visuose portaluose',
     pakeitimai: [
       'Autogide kuro filtras dabar tikrai perduodamas portalui - anksciau jis buvo ignoruojamas',

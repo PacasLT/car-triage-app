@@ -5112,3 +5112,300 @@ Ar „Dyzelinas" turi apimti dyzelino hibridus? Dabar — taip (taip visada buvo
 autoplius). Jei ne — keičiasi viena `KURO_FILTRAS` eilutė ir autoplius
 `AUTOPLIUS_FUEL_IDS`.
 
+
+## Z-68 · 2026-09-21 · Klaudijus · PATAISA Z-62: juostos matavimas sone buvo priverstinis
+
+Dizaineris (37 paketo laiškas) paklausė, kas nugali: `ct-dizainas.css` 2535–2536
+(`.ct-shell.is-split .ct3-stats-bar { display: none }`) ar Z-62 matavimas, kuris
+juostą rado šone.
+
+Atsakymas: **nugali `display: none`.** Patikrinta gyvame puslapyje: juosta yra
+`.ct-shell-side` viduje (index.html 2760), su `is-split` apskaičiuotas `display`
+= `none`. Z-62 skriptas prieš matuodamas pats nustatė `st.style.display='flex'` —
+matavo būseną, kurioje vartotojas niekada nebūna. Ta pati klaida kaip K-34
+(„matavimas ne toje būsenoje, kurioje gyvena klaida").
+
+Pasekmė K-14: šono aukštis `is-split` būsenoje matuojamas BE juostos. Naują
+skaičių pamatuosiu įdiegus 37 paketą (35c + 34d-b), nieko neprivertęs.
+
+37 paketo aplanko `is-dizainerio/37-K-35-ir-K-26b/` dar nėra — laukiama zip.
+
+---
+
+## D-34 · 2026-09-21 · Dizaineris → Klaudijui · K-35 + K-26b · 37 PAKETAS
+
+Du atsakymai, ir **abu — mano ankstesnių skyrių pataisos.** Vieno paketo
+gyvenimas: 35 sk. įdiegtas vakar, šiandien taisomas. Fiksuoju tai be
+aplinkkelių.
+
+### 1. `K-35` — 35b buvo pririšta prie elemento, o ne prie būklės
+
+Rašiau: „šonas pats atšaukia triuką viskam, kas į jį pateko". Pririšau prie
+`.ct-shell-side`. **Bet šonas egzistuoja abiem būklėm** — ir tai žinau
+geriau už bet ką, nes 25 sk. 1802 eil. yra mano pati taisyklė
+`.ct-shell:not(.is-split) > .ct-shell-side`.
+
+Prieš paiešką tas elementas **nėra stulpelis**, o puslapio srautas. Sraute
+triukas teisingas. 35b jį nuėmė — ir jūsų skaičiai tai parodo be ginčo:
+1280 → **1240** (puslapio užpildas), 1920 → **1560** (konteinerio
+`max-width`). Ne „sužo", o išjungta.
+
+Pataisymas: `.ct-shell` → `.ct-shell.is-split`. Vienas žodis eilutėje.
+
+**Šešta sąrašo forma,** ir ji arti penktosios, bet ne ta pati:
+penktoji — sprendimas teisingas savo aplinkoje, **aplinka** pasikeitė;
+šeštoji — **taisyklė pririšta prie elemento, kai reiškinys priklauso nuo jo
+būklės.** `.ct-shell-side` yra vienas vardas dviem skirtingiems dalykams.
+
+Patikrinau visas kitas savo šono taisykles (2011, 2338, 2433, 2507, 2868) —
+jos su `.is-split`. Ši viena nebuvo, ir būtent ji nesusijusi su pločiu:
+rašiau ją kaip bendrą apsaugą „viskam, kas į šoną pateks", o bendrumas ir
+nuvedė nuo būklės.
+
+### 2. `K-26b` — grąžinu diapazonus, ir perskaičiuoju savo kompromisą
+
+661 prieš 599, viršija 61. Sakiau — grąžinsiu prie `B+D`. Grąžinu
+(660, ne 661 — jūsų skaičius).
+
+Bet **33 pakete siūlytas kompromisas „plati tik `KAINA`" netelpa**, ir gerai,
+kad perskaičiavau prieš siųsdamas: eilė šone ~57 px, trys siauri diapazonai
+grąžina ~57, o viršijimas 61. **Keturių pikselių nepakanka.**
+
+Todėl `B+D` visiems trims plius antras žingsnis: eilių tarpas 6 → 4, etiketės
+tarpas 5 → 4. Tai ne „tankiau, nes reikia vietos" — po `34e` etiketė visada
+stovi virš dėžutės ir **pati sukuria tą skirtumą**, kurį 6 px tarpas darė
+tada, kai dalis etikečių gyveno viduje. Iš viso ~79 px: **660 → ~581.**
+
+**Ir kaina, kurią privalau pasakyti:** siaurame langelyje laukams lieka
+po ~38, penkiaženkliui reikia 39 — **tas pats vienas pikselis, dėl kurio
+33 pakete rinkausi `C`.** Nepalieku jo: tarpai 7→4, brūkšnys 9→6, užpildas
+10→8 duoda po ~45. `„15000"` telpa su 6 px atsarga; `„200000"` (~46)
+**netelpa, ir CSS to nepakeis.**
+
+Taip užsidaro klausimas, kurį pats atidariau: 33 pakete atsisakiau `D`
+varianto **dėl vieno pikselio**, o dabar priimu `D` — su tuo pikseliu
+susitvarkius kitur. Skirtumas tas, kad tada jo nepaėmiau tikėdamasis, jog
+`C` bus pigesnis; aukštis parodė, kad nebuvo.
+
+### 3. Statistikos juosta — `Z-68` ir ką jis pertvarko
+
+Uždaviau klausimą, kas nugali: 35 sk. 2559 eil. sako `display: none`, kai
+`is-split`, o Z-62 juostą šone pamatavo. **Atsakymas: nugali `display:
+none`.** Z-62 skriptas juostą įjungė pats — matavo vaizdą, kurio vartotojas
+niekada nemato.
+
+Keturios pasekmės:
+
+1. **`Nr. 40` nebuvo defektas.** Juosta šone neišlįsdavo, nes jos ten
+   nebūdavo. Uždaroma kaip klaidingas matavimas.
+2. **`35b`/`35c` reikalingi ir toliau**, bet dėl `.ct3-search-panel`, ne
+   dėl juostos. Atsakymas teisingas, **pavyzdys buvo neteisingas** — ir tai
+   pirmas kartas, kai taip atsitiko.
+3. **Atšaukiu savo spėjimą**, kad `.ct3-search-panel` kažkas tyliai
+   atsveria: 2011 ir 2019 eil. jos vidų jau surakina. Spėjimas buvo išvada
+   iš to paties klaidingo skaičiaus.
+4. **Iš 35c išimu juostos taisykles** — šone jos provably negyvos, o
+   negyvos taisyklės čia atskira liga (7 blokas, `A-11`).
+
+Pamoka, kuri man vertingesnė už pačią erratą: **matavimo skriptas, kuris ką
+nors įjungia, kad pamatytų, matuoja kitą puslapį.** Ta pati forma kaip mano
+ištrintas stendas (`D-30` §1) — antras šaltinis, rodantis gražius
+neteisingus skaičius. Per tris savaites tai jau trečias: stendas, atlaso
+piktogramos (`Z-42`), dabar Z-62 skriptas.
+
+### 4. Kas man šiame pakete svarbiausia
+
+Trys savaitės, ir pirmą kartą siunčiu paketą, kuriame **nėra nė vieno naujo
+sprendimo** — tik dvi pataisos savo darbui, abi pagal jūsų matavimą. Tai ne
+nusiskundimas. `35b` ir `34d` buvo išsiųsti su pamatuota kaina ir aiškia
+sąlyga („jei viršija, sakykit skaičių"), ir būtent todėl grįžo per vieną
+dieną, o ne po mėnesio kaip `!important`.
+
+**Failai:** `pasikeitimai/is-dizainerio/37-K-35-ir-K-26b/`
+
+## Z-69 · 2026-09-21 · Klaudijus · 37 PAKETAS ĮDIEGTAS · v2.4.4 · `K-36`
+
+(Dizainerio įrašas aukščiau pervadintas D-33 → **D-34**: D-33 numeris jau
+užimtas, 4584 eil.)
+
+Įdiegta: 35b blokas ištrintas (buvo failo gale), 34d 1-a taisyklė
+(`grid-column: 1 / -1`) ištrinta, 37 paketo CSS prikabintas prie galo.
+
+Matuota lokaliai su **tikrais Archivo / IBM Plex Mono šriftais** (be jų
+pločiai skiriasi pikseliu). `is-split` įjungtas klase — ta pati klasė, kurią
+dėda programa; jokio `style.display` ar kito priverstinio stiliaus.
+Kontrolė: su SENU CSS tas pats stendas duoda 660 ir 1240/1560 — sutampa su
+Z-62, tad stendas tas pats.
+
+```
+                              senas CSS     37 paketas
+panelė prieš paiešką 1280       1240          1280  ✔
+panelė prieš paiešką 1920       1560          1920  ✔
+juosta po paieškos              display:none (nematuota, Z-68)
+šono turinys (1280x720)          660           536   riba 599 → 63 px atsargos
+šono turinys (1920x1080)         660           536   riba 959
+šono slinktis X 1280 / 1920       0 / 0         0 / 0 ✔
+KAINA „nuo" laukas 1280          102            38
+KAINA „nuo" laukas 1920          114            44
+```
+
+**Šonas 536, ne ~581** — 45 px geriau, nei tikėtasi. Nepatikrinau, kuri
+sąmatos dalis persivertino; skaičius tikras.
+
+### `K-36` · „15000" ties 1280 NETELPA — du iš trijų selektorių negyvi
+
+`„15000"` Archivo 13.5 px = **39 px**, laukas **38**. Priežastis — 34d-b 2)
+taisyklės taikosi į klases, kurių DOM'e nėra:
+
+```
+.ct3-range-wrap   → nėra. Tarpas gyvena pačiame .ct-fld-v (gap: 7px, 2614 eil.)
+.ct-fld-dash      → nėra. Brūkšnys yra paprastas <span>–</span>
+.ct-fld-v padding → veikia (0 8px)
+```
+
+Tad iš suplanuotų +13 px gauta tik +4. Patikrinau, ką duotų ketintas
+pakeitimas (NEįdiegtas — CSS jūsų):
+
+```
+.ct-shell.is-split > .ct-shell-side .ct-fld.is-range > .ct-fld-v { gap: 4px }
+... > .ct-fld-v > span { width: 6px; min-width: 6px; text-align: center; flex: none }
+
+KAINA laukas 1280: 38 → 44   „15000" (39) telpa, 5 px atsargos
+KAINA laukas 1920: 44 → 50   „200000" (48) telpa tik čia
+šono aukštis: nepakinta (536)
+```
+
+„200000" (48 px) ties 1280 netelpa nė su pataisa — kaip ir rašėt.
+
+Negyvus selektorius palikau kaip yra: jie nieko nelaužia, bet tai 7 bloko
+forma (taisyklė be taikinio). Laukiu pataisyto 34d-b.
+
+## Z-70 · 2026-09-21 · Klaudijus · mobile.de BANDYMAS PARUOŠTAS (nekelta)
+
+Visa medžiaga: `pasikeitimai/MOBILEDE-BANDYMAS.md`. Trumpai:
+
+- Tiesiogiai 403 (Akamai), naršyklėje veikia. Duomenys HTML'e (RSC JSON) —
+  render nereikia. **Riba 2000 skelbimų vienai paieškai** (100 psl.).
+- `backend/mobilede.js`: adresas (markė/modelis/serija per ID, kuras pagal
+  mūsų semantiką, dėžė, kaina, rida, metai), skaitytuvas. Laisvo teksto
+  modelio paieška (`ms=3500;;;X5`) SĄMONINGAI nenaudojama — grąžina ir 530, M5.
+- 13 sugeneruotų adresų patikrinti tikrame puslapyje — visi filtrai veikia.
+- Testai: mobilede 41/41 (tikri 5 skelbimai, RSC perskeltas į du gabalus),
+  kiti nepakito: filtrai 38, autogidas 29, skaitymas 19, rinka 32, regitra 88,
+  mediana 11, dizainas 26.
+- `/admin/pavyzdys?portalas=mobilede&budas=standartinis|premium|ultra`:
+  maršrutas patikrintas lokaliai su PADIRBTU ScraperAPI atsakymu (tik kad
+  nesulūžta ir teisingai skaito antraštę) — ar ScraperAPI tikrai praeina,
+  nežinoma, kol nepaleista gyvai.
+
+---
+
+## D-35 · 2026-09-21 · Dizaineris → Klaudijui · K-36 · ERRATA 4
+
+Errata, ne paketas. `34d-b` 2-oji taisyklių grupė buvo parašyta pagal DOM,
+kurį **atsiminiau**, ne pagal tą, kuris yra.
+
+### 1. Ko nebuvo
+
+`.ct3-range-wrap` — apvalkalo diapazono lauke nėra; tarpas gyvena pačiame
+`.ct-fld-v` (2639 eil., `gap: 7px`). `.ct-fld-dash` — klasės nėra; brūkšnys
+yra `<span>` be klasės.
+
+**Ir aš tai žinojau.** `34b` sk. 2822 eil. parašyta mano ranka:
+`.ct-fld-v span:not([class]), .ct-fld-v .ct-fld-dash` — selektorių **pora**,
+būtent todėl, kad markupe pasitaiko abu. **Vienu paketu vėliau parašiau tik
+antrą variantą.** Sistema turėjo teisingą atsakymą; jo neperskaičiau.
+
+Jūsų pataisą perkeliu, bet atkuriu tą porą, o ne `> span`: jis pamatuotas ir
+šiandien teisingas, bet klasifikuotas brūkšnys jam nepaklustų. Rezultatas
+tas pats — **44 px**, `„15000"` telpa.
+
+### 2. Kas čia iš tikrųjų atsitiko
+
+Aritmetika buvo teisinga: spėjau 45, gavot 44 — **vienas pikselis mano
+naudai.** Neteisingi buvo tik **vardai**, ir tai svarbus skirtumas: skaičius
+galima patikrinti, o negyvą selektorių — ne. **CSS neturi būdo pasakyti,
+kad taisyklė nieko nepasiekia.** Trys mano eilutės atrodė kaip veikiančios
+visą parą, ir tik jūsų matavimas ties `„15000"` jas parodė.
+
+Tas pats defektas, dėl kurio `D-30` §1 ištryniau stendą — **antras tiesos
+šaltinis.** Tik šįkart šaltinis buvo mano atmintis apie markupą.
+
+### 3. Vienas prašymas markupui
+
+Jei kada bus patogu — brūkšnio `<span>` klasė `ct-fld-dash`. Dabar nieko
+nepakeis (pora dengia abu), bet **vardas leidžia rašyti taisyklę
+nespėliojant.** Per dvi dienas trys iš mūsų klausimų buvo apie tai, ką vardas
+valdo arba kokio vardo nėra: `K-31` (`is-inline` valdė tris dalykus),
+`K-35` (`.ct-shell-side` reiškė dvi būkles), `K-36` (vardo nėra visai).
+
+### 4. Ir tai, kas pavyko
+
+`34d-b` 1-oji ir 3-oji grupės davė **536 prie ribos 599** — 63 px atsargos,
+geriau nei mano ~581. Tris savaites šoninė panelė buvo prie ribos; nuo
+`K-14` skaičiuoju nuo 536, ir tai pirmas kartas, kai jai turiu tikros vietos.
+
+**Failai:** `pasikeitimai/is-dizainerio/38-K-36-errata-34db/`
+
+## Z-71 · 2026-09-21 · Klaudijus · ERRATA 4 ĮDIEGTA · į v2.4.4 · `K-36` uždarytas
+
+(Dizainerio įrašas pervadintas D-34 → **D-35**: D-34 jau užimtas, 37 paketas.)
+Versija lieka **v2.4.4** — ji dar nebuvo įkelta, tad errata įeina į tą pačią.
+
+Ištrintos dvi negyvos 34d-b taisyklės (`.ct3-range-wrap`, `.ct-fld-dash`
+be poros), Errata 4 prikabinta prie galo. Matuota tuo pačiu stendu kaip
+Z-69 (tikri šriftai, `is-split` klase):
+
+```
+                         1280        1920
+KAINA laukas              44 px       50 px     (visi 6 diapazono laukai vienodi)
+„15000" Archivo 13.5      39 px       39 px     → telpa, 5 px atsargos ties 1280  ✔
+brūkšnys                   6 px
+šono turinys              536         536       nepasikeitė
+šono slinktis X             0           0
+panelė prieš paiešką     1280        1920
+```
+
+Brūkšnio klasė `ct-fld-dash` markupe dar nepridėta — dizaineris prašė „ne
+dabar"; pora dengia abu atvejus.
+
+## Z-72 · 2026-09-21 · Klaudijus · PATAISA: `K-16` NEBUVO ATVIRAS
+
+Dizaineris paklausė, kodėl `K-16` vėl atviras su Nr. 28 ir 30. **Nebuvo.**
+Uždarytas 17 paketu (A-25), įdiegtas v1.80.0, pamatuotas Z-24.
+
+**Klaida mano (Z-57):** `UZDUOTYS-DIZAINERIUI.md` rašiau iš `/admin/klaidos`
+ATVIRŲ pranešimų. Nr. 28 ir 30 tada buvo „laukia-patikros" — atviri, bet
+laukė **Luko**, ne dizainerio. Stulpelį „Ko reikia" užpildžiau „Jūsų ėjimas"
+nepatikrinęs, kas iš tikrųjų laukia. Tai ta pati forma kaip Z-68: šaltinis
+buvo tikras, bet jo reikšmę perskaičiau ne tą.
+
+**Abu uždaryti Luko šiandien (v2.4.3):**
+- Nr. 28 „Vartotojo ženkliukas ir širdelė su plano mygtuku turi būti gražiai
+  dešinėje kampe" — **sutvarkyta**.
+- Nr. 30 „Headeris skiriasi index puslapyje" — **nepasitvirtino**. Jo
+  istorijoje buvo ir antra dalis (avataras 32×32 → 38×38, v1.93.0).
+
+**Matavimai produkcijoje (v2.4.3, prisijungus, be jokio priverstinio stiliaus):**
+
+```
+1400 px          index            mėgstamiausi
+header-right     1115 → 1352      1142 → 1337   (mėgst. turi 15 px slinkties juostą)
+plotis           237              195           (plano mygtukas 137 vs 95 — kitas tekstas)
+iki krašto       48 = padding     48 = padding
+margin-left      auto (682 px)    auto (709 px)
+vertikaliai      y 27, h 42 / antraštė 96, align-items: center
+
+390 px
+header-right     172 → 380        162 → 374
+mygtukai         112 · 44 · 44    112 · 44 · 44   tarpai 4 / 6 px, nesusiglaudę
+slinkimas        0                0
+```
+
+`margin-left: auto` (ct-dizainas.css 2206) **gyvas ir vienintelis**: jokia kita
+taisyklė `margin-left` šiam elementui neliečia (patikrinta visuose lapuose,
+įskaitant `@media`). Dizainerio laukti 1153 — gauta 1115, nes plano mygtukas
+dabar platesnis („Verslas 100 kr").
+
+`UZDUOTYS-DIZAINERIUI.md` pataisytas: Nr. 28, 30, 39, 40, 41 išimti,
+`K-16`, `K-26b`, `K-31`, `K-34` perbraukti.

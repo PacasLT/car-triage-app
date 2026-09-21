@@ -2962,8 +2962,6 @@ textarea.ct-field {
 
 @media (min-width: 1180px) {
 
-  /* 1) Diapazonas per abu stulpelius */
-  .ct-shell.is-split > .ct-shell-side .ct-fld.is-range { grid-column: 1 / -1; }
 
   /* 2) ✕ tik tada, kai yra ka valyti.
      Nenustatytame lauke jis nieko nedaro - tik atima 24 px is to, kas
@@ -3142,54 +3140,190 @@ textarea.ct-field {
 
 
 /* ============================================================================
-   35b. PILNO PLOCIO TRIUKAS TURI SALYGA   ·   K-34 atsakymas
+   37 paketas - 35c sk. (K-35) + 34d-b sk. (K-26b)
    ----------------------------------------------------------------------------
-   Renkuosi jusu 1 kelia: juosta lieka sone, plotis risamas prie stulpelio.
+   Abu - MANO ankstesniu skyriu pataisos, ne nauji sprendimai. Tai fiksuoju
+   cia, kad butu matoma: 35b buvo prirista prie netinkamo dalyko, o 34d
+   kainavo daugiau, nei buvo atsargos.
 
-   ── KAS IS TIKRUJU ATSITIKO ───────────────────────────────────────────────
-   index.html 1293 eil. yra pilno plocio triukas:
+   35c PAKEICIA 35b bloka (ne priduria).
+   34d-b PAKEICIA 34d pirma taisykle, dvi kitas palieka.
+   ========================================================================== */
 
-     .ct3-hero, .ct3-stats-bar, .ct3-search-panel {
-       width: 100vw; max-width: 100vw;
-       margin-left: calc((100% - 100vw) / 2);
-     }
 
-   Jis teisingas, kol elementas yra PUSLAPIO sraute: ten „per visa langa" ir
-   „per visa plotį" sutampa. Perkelus elementa i 1560 px stulpeli jie nustoja
-   sutapti, o triukas apie tai nezino - `100vw` matuojasi nuo lango visada.
+/* ============================================================================
+   35c. TRIUKA ATSAUKIA NE ELEMENTAS, O BUKLE   ·   K-35 atsakymas
+   ----------------------------------------------------------------------------
+   PAKEISTI: visas 35b blokas keiciamas tuo, kas zemiau. Skirtumas - vienas
+   zodis kiekvienoje eiluteje: .ct-shell -> .ct-shell.is-split.
 
-   Tai penktoji musu saraso forma: sprendimas, buves teisingas savo
-   aplinkoje, tapo klaidingas, kai aplinka pasikeite. 25 sk. sukure sona po
-   to, kai sis triukas jau egzistavo.
+   ── KUR SUKLYDAU ──────────────────────────────────────────────────────────
+   35b rasiau: „sonas pats atsaukia triuka viskam, kas i ji pateko" - ir
+   pririsau prie .ct-shell-side. Bet sonas egzistuoja ABIEM buklem. 25 sk.
+   1802 eil. yra mano pati taisykle:
 
-   ── KODEL TAISOMA CIA, O NE TEN ───────────────────────────────────────────
-   Triuko istrinti negalima - placiajame variante jis reikalingas. Pridėti
-   jam `:not()` irgi ne: tada kiekvienas naujas konteineris reikalautu
-   atsiminti atnaujinti sarasa (A-08).
+     .ct-shell:not(.is-split) > .ct-shell-side { position: static; ... }
 
-   Vietoj to sona pats atsaukia triuka VISKAM, kas i ji pateko. Taisykle
-   neminí ne vieno is triju vardu - tad ir rytoj ideti elementai bus
-   sutvarkyti automatiskai.
+   T. y. pries paieska tas pats elementas NERA stulpelis - jis yra puslapio
+   srautas. O srauté pilno plocio triukas teisingas, ir 35b ji nueme.
 
-   PRIRISTA prie: .ct-shell-side - bet kuriame plotyje, be @media, nes zemiau
-   1180 px tas pats stulpelis vis dar egzistuoja (30b pamoka).            */
+   Jusu matavimas tai parodo tiksliai:
+     1280 px: 1280 -> 1240  (atemė puslapio uzpilda 2x20)
+     1920 px: 1920 -> 1560  (atemė iki konteinerio max-width)
 
-.ct-shell > .ct-shell-side > *,
-.ct-shell > .ct-shell-side .ct3-stats-bar,
-.ct-shell > .ct-shell-side .ct3-hero,
-.ct-shell > .ct-shell-side .ct3-search-panel {
+   Abu skaiciai - ne „siek tiek suzo", o „nukrito iki konteinerio", t. y.
+   triukas isjungtas visiskai.
+
+   ── KO TAI ISMOKO ─────────────────────────────────────────────────────────
+   Sesta saraso forma, ir ji arti penktosios, bet ne ta pati:
+
+     penktoji - sprendimas teisingas savo aplinkoje, aplinka pasikeite;
+     sestoji  - taisykle prirista prie ELEMENTO, kai reiskinys priklauso
+                nuo jo BUKLES.
+
+   .ct-shell-side yra pastovus vardas dviem skirtingiems dalykams: stulpeliui
+   (is-split) ir srauto blokui (ne is-split). Visos kitos mano sono taisykles
+   - 2011, 2338, 2433, 2507, 2868 eil. - priristos prie .is-split. Si viena
+   nebuvo, ir butent ji nesusijusi su pilnu plociu.
+
+   PRIRISTA prie: .ct-shell.is-split - be @media, nes zemiau 1180 px
+   stulpelis vis dar egzistuoja (30b pamoka isliko).                        */
+
+/* Z-68: .ct3-stats-bar isimta is sio saraso ir juostos vidaus taisykles
+   (ct3-stats-inner, ct3-stat-item) istrintos. Kai is-split, juosta yra
+   display: none (35 sk. 2559 eil.) - sone ju nera kam taikyti. Lieka
+   bendras `> *` ir du vardai, kurie sone tikrai gyvena. */
+.ct-shell.is-split > .ct-shell-side > *,
+.ct-shell.is-split > .ct-shell-side .ct3-hero,
+.ct-shell.is-split > .ct-shell-side .ct3-search-panel {
   width: auto;
   max-width: 100%;
   margin-left: 0;
   margin-right: 0;
 }
 
-/* Juostos vidus sone: 1440 px riba ir 24 px uzpildas suprojektuoti visam
-   ekranui. Stulpelyje jie duoda tris elementus, stumiancius vienas kita. */
-.ct-shell > .ct-shell-side .ct3-stats-inner {
-  max-width: none;
-  padding: 12px 14px;
-  flex-wrap: wrap;
-  gap: 10px 16px;
+
+/* ============================================================================
+   34d-b. DIAPAZONAI GRIZTA SIAURI   ·   K-26b atsakymas
+   ----------------------------------------------------------------------------
+   PAKEISTI: 34d sk. 1-a taisykle (.ct-fld.is-range { grid-column: 1 / -1 })
+   ISTRINAMA. 34d 2-a ir 3-a taisykles (✕ tik nustatytam; be vidines
+   piktogramos) LIEKA - jos teisingos savaime, ne del diapazonu.
+
+   Sonas 660 prie ribos 599. Virsija 61 px. Sakiau, kad tada grazinu
+   diapazonus prie B+D - grazinu.
+
+   ── KODEL NE „PLATI TIK KAINA" ────────────────────────────────────────────
+   33 pakete siuliau kompromisa: KAINA lieka plati, METAI ir GALIA siaures.
+   Perskaiciavau - jis netelpa:
+
+     eile sone = etikete 10 + tarpas 5 + dezute 36 + tarpas 6 = ~57
+     trys platus diapazonai = 3 eiles; trys siauri = 2 eiles (viena puse
+     tuscia) -> B+D grazina ~57, o virsijimas yra 61.
+
+   Keturiu pikseliu nepakanka. „Plati tik KAINA" atiduotu tik tuos pacius 57
+   ir dar pasiliktu 60 px eile - t. y. neteltu apie 60 px. Tad renkuosi abu
+   siauriais PLIUS antra, mazesni zingsni zemiau, kad rezultatas nebutu
+   „telpa, jei niekas nepasikeis".
+
+   ── KAINA, KURIA MOKAME ATVIRAI ───────────────────────────────────────────
+   120 px langelyje su B+D laukams lieka po ~38, o penkiazenkliui reikia 39.
+   Tai tas pats vienas pikselis, del kurio 33 pakete rinkausi C. Todel jo
+   nepaliekame kaip buvo - zemiau tris kartus atimama po truputi TEN, kur
+   niekas nieko nepraranda:
+
+     tarpai tarp laukų  7 -> 4  (du tarpai)        +6
+     bruksnys           9 -> 6                     +3
+     langelio uzpildas 10 -> 8  (abu krastai)      +4
+                                              -----------
+     laukams              77 -> 90, t. y. po ~45
+
+   „15000" (39) telpa su 6 px atsarga. „200000" (~46) NETELPA - siauras
+   langelis sesiazenklio nepriims, ir to CSS nepakeis. Sakau tai aiskiai:
+   grazinant diapazonus i puse eiles, sesiazenkle kaina nustoja buti pilnai
+   matoma ivedimo metu. Jei tai nepriimtina, vienintelis kelias atgal -
+   C variantas ir kita vieta aukstyje, ne dar vienas pikselis cia.
+
+   PRIRISTA prie: .ct-shell.is-split - tik sonas.                           */
+
+@media (min-width: 1180px) {
+
+  /* 1) Diapazonas nebeuzima abieju stulpeliu. Taisykle ne „grid-column:
+     auto" del atsparumo - 34d eilute ISTRINAMA, o si lieka kaip zyme, kad
+     is-range sone nieko nebevaldo plotyje. */
+  .ct-shell.is-split > .ct-shell-side .ct-fld.is-range { grid-column: auto; }
+
+  /* 2) Vidines diapazono metrikos: tarpai, bruksnys, uzpildas.
+     Tai ne „tankiau", o „nebeatimame ploto iš to, kas rasoma". */
+  .ct-shell.is-split > .ct-shell-side .ct-fld.is-range > .ct-fld-v { padding: 0 8px; }
+
+  /* 3) Eiliu tarpas 6 -> 4 ir etiketes tarpas 5 -> 4.
+     Pagrindimas ne aukstis, o 34e: etikete dabar stovi VIRS dezutes ir pati
+     sukuria vizualu skirtuma tarp laukų. 6 px tarpas buvo nustatytas tada,
+     kai dalis etikeciu buvo dezutes VIDUJE ir eiles liejosi. Su 8 eilemis
+     tai duoda ~22 px. */
+  .ct-shell.is-split > .ct-shell-side .ct3-fields { gap: 4px var(--s-3); }
+  .ct-shell.is-split > .ct-shell-side .ct3-field { gap: 4px; }
 }
-.ct-shell > .ct-shell-side .ct3-stat-item { flex: 1 1 auto; min-width: 0; }
+
+
+/* ============================================================================
+   38 paketas - ERRATA 4 - 34d-b 2-a taisykle (K-36)
+   ----------------------------------------------------------------------------
+   PAKEISTI 34d-b 2-a taisykliu grupe (tris eilutes su .ct3-range-wrap ir
+   .ct-fld-dash) tuo, kas zemiau. 1-a ir 3-a grupes lieka kaip yra -
+   jos veikia (sonas 536, Z-69).
+
+   Jusu pataisa pamatuota, tad ji cia perkeliama be pakeitimu.
+   ========================================================================== */
+
+/* ── KUR SUKLYDAU ───────────────────────────────────────────────────────────
+   Rasiau tris selektorius pagal DOM, kuri ATSIMINIAU, ne pagal ta, kuris yra:
+
+     .ct-fld.is-range .ct3-range-wrap { gap: 4px }      - apvalkalo nera
+     .ct-fld.is-range .ct-fld-dash { width: 6px }       - klases nera
+
+   Tikrasis tarpas gyvena paciame .ct-fld-v (2639 eil., gap: 7px), o bruksnys
+   yra paprastas <span> be klases.
+
+   Ir tai ne pirmas kartas, kai apie tai zinojau. 34b sk. 2822 eil. parasyta
+   MANO ranka:
+
+     .ct-fld-v span:not([class]),
+     .ct-fld-v .ct-fld-dash { flex: none; padding: 0 2px; }
+
+   Ten selektoriu PORA - „arba span be klases, arba .ct-fld-dash" - butent
+   todel, kad markupe pasitaiko abu. Vienu paketu veliau parasiau tik antra
+   varianta. Sistema jau zinojo teisinga atsakyma; jo neperskaiciau.
+
+   Todel zemiau atkuriu ta pacia pora, o ne jusu `> span`: jis pamatuotas ir
+   teisingas siandien, bet klasifikuotas bruksnys jam nepaklustu. Rezultatas
+   tas pats 44 px.
+
+   Tarpo 7 -> 4 aritmetika buvo teisinga (spejau 45, gavot 44 - vienas
+   pikselis mano naudai, ne priesingai). Neteisingi buvo tik vardai.
+
+   Uzpildo taisykle (padding: 0 8px) taikesi teisingai ir lieka nepakeista.
+   Bruksnio padding: 0 2px is 2822 eil. NEKEICIU - jusu 44 px pamatuoti su
+   juo, ir nenoriu keisti dvieju dalyku vienu metu.                        */
+
+@media (min-width: 1180px) {
+
+  /* Tarpas - paciame valdiklio dezeje, ne apvalkale */
+  .ct-shell.is-split > .ct-shell-side .ct-fld.is-range > .ct-fld-v { gap: 4px; }
+
+  /* Bruksnys - pora, kaip 2822 eil.: su klase arba be jos */
+  .ct-shell.is-split > .ct-shell-side .ct-fld.is-range > .ct-fld-v > span:not([class]),
+  .ct-shell.is-split > .ct-shell-side .ct-fld.is-range > .ct-fld-v > .ct-fld-dash {
+    width: 6px;
+    min-width: 6px;
+    text-align: center;
+  }
+}
+
+/* ISTRINTI is 34d-b (jos negyvos - vardu DOM'e nera):
+
+     .ct-fld.is-range .ct3-range-wrap { gap: 4px; }
+     .ct-fld.is-range .ct-fld-dash { width: 6px; min-width: 6px; text-align: center; }
+
+   Pirmaja pakeicia eilute virsuje; antraja - pora virsuje.               */
