@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.4.0', data: '2026-09-21', pavadinimas: 'Teisingesne rinkos kaina ir rusiavimas visam sarasui',
+    pakeitimai: [
+      'Rinkos kaina nebeiskreipiama lizingo imoku, daliu ir aiskiai netikru kainu - normalus skelbimai nebeatrodo brangesni, nei yra',
+      'Pasirinktas rusiavimas dabar taikomas ir „Kitiems skelbimams", ne tik virsutinems kortelems',
+      'Uz rinkos ribu stipriai pigesni skelbimai (galimai dauzti) patikimiau atpazistami',
+    ],
+  },
+  {
     versija: '2.3.2', data: '2026-09-21', pavadinimas: 'Svarus isjungimas atnaujinant',
     pakeitimai: [
       'Atnaujinant programa serveris isjungiamas tvarkingai ir issaugo sukauptus duomenis',

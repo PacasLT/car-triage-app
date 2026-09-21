@@ -1479,8 +1479,11 @@
   .detail-btn { padding: 11px 12px; font-size: 13px; width: 100%; }
 
   /* Sort meniu — neiš ekrano */
-  .ct-sort { position: relative; }
-  .ct-sort-menu { right: 0 !important; left: auto !important; min-width: 200px !important; max-width: calc(100vw - 24px) !important; }
+  /* v2.4.0: cia buvo `.ct-sort` / `.ct-sort-menu` taisykle - rasyta KLASEMS,
+     o elementai turi tik id, tad nuo pat pradziu nedare nieko (Z-57).
+     ISTRINTA, ne atgaivinta: `right: 0` telefone nustumtu meniu uz kairio
+     krasto (mygtukas yra kaireje). Pamatuota 385 px be jos: meniu 12..260 px,
+     telpa. Negyva taisykle, kuri butu klaidinga, jei atgytu. */
 
   /* Palyginimas */
   #compare-bar { padding: 10px 12px; }
@@ -4910,14 +4913,29 @@ document.addEventListener('click', function (e) {
   }
 });
 
+// v2.4.0 (Nr. 42): VIENA rikiavimo funkcija abiem sarasams. Iki siol
+// pasirinkimas perrikiuodavo tik 8 virsutines korteles, o „Kiti skelbimai"
+// visada eidavo pagal bala - vartotojui tai atrodydavo kaip neveikiantis
+// mygtukas. Skelbimai be kainos / be nuolaidos visada gale.
+function ctRikiuoti(sarasas, mode) {
+  const arr = (sarasas || []).slice();
+  const sk = (v, gale) => (v == null || Number.isNaN(v) ? gale : v);
+  if (mode === 'cheapest') arr.sort((a, b) => sk(a.kaina, Infinity) - sk(b.kaina, Infinity));
+  else if (mode === 'priciest') arr.sort((a, b) => sk(b.kaina, -Infinity) - sk(a.kaina, -Infinity));
+  else if (mode === 'biggest-discount') arr.sort((a, b) => sk(b.diffPct, -Infinity) - sk(a.diffPct, -Infinity));
+  else arr.sort((a, b) => {
+    const sa = a.qualityScore == null ? -1 : a.qualityScore;
+    const sb = b.qualityScore == null ? -1 : b.qualityScore;
+    if (sb !== sa) return sb - sa;
+    return (a.kaina || 0) - (b.kaina || 0);
+  });
+  return arr;
+}
+
 function applySorting() {
   if (!currentData) return;
   const mode = document.getElementById('sort-select').value;
-  const sorted = [...currentData.candidates];
-  if (mode === 'cheapest') sorted.sort((a, b) => a.kaina - b.kaina);
-  else if (mode === 'priciest') sorted.sort((a, b) => b.kaina - a.kaina);
-  else if (mode === 'biggest-discount') sorted.sort((a, b) => b.diffPct - a.diffPct);
-  else sorted.sort((a, b) => b.qualityScore - a.qualityScore);
+  const sorted = ctRikiuoti(currentData.candidates, mode);
   const resultsEl = document.getElementById('results');
   const rikiuotaPagalBala = (mode !== 'cheapest' && mode !== 'priciest' && mode !== 'biggest-discount');
   resultsEl.innerHTML = '';
@@ -5061,12 +5079,8 @@ function renderAllListings(allListings, kandidatai) {
 
   // Identiskas dizainas kaip ir pagrindiniame sarase. Skelbimai, kuriuos atmete
   // filtras, atpazistami is zenklelio "neatitinka filtro", o ne is kitokio isvaizdos.
-  const surikiuoti = allListings.slice().sort(function (a, b) {
-    const sa = a.qualityScore == null ? -1 : a.qualityScore;
-    const sb = b.qualityScore == null ? -1 : b.qualityScore;
-    if (sb !== sa) return sb - sa;
-    return (a.kaina || 0) - (b.kaina || 0);
-  });
+  const rez = (document.getElementById('sort-select') || {}).value || 'quality';
+  const surikiuoti = ctRikiuoti(allListings, rez);   // Nr. 42: tas pats rezimas, kaip virsuje
   (window.renderCandidateCards || renderCandidateCards)(surikiuoti, container, { beTopSekcijos: true });
 }
 

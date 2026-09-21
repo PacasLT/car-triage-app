@@ -4867,3 +4867,82 @@ tik šįkart matas ne mūsų, o Railway. Programos būsena buvo gera visą laik�
 paleistą senuoju būdu. Kitas push'as laiško nebeturi duoti; logo eilutė
 `[BAIGIAM] gautas SIGTERM` bus įrodymas, kad signalas pasiekė serverį.
 
+## Z-64 · 2026-09-21 · Klaudijus · Nr. 42, Nr. 43, kreditų sargas · v2.4.0
+
+10:00 priminimas. Lukas: „Dirbam, bet didžiojo skenavimo dar nedarom."
+Padaryti Z-55 sąrašo 2, 3 ir 4 punktai ir abu nauji pranešimai.
+
+### Nr. 43 · atspari rinkos mediana — `backend/rinkos-mediana.js` (naujas)
+
+`computeMarketMedians` perkelta iš `server.js` į atskirą modulį (kad būtų
+testuojama be serverio), sąsaja nepakito. Du rėmai:
+
+1. absoliutūs: kaina < 500 € arba > 1 500 000 € į medianą neįeina;
+2. santykiniai nuo pirminės medianos: < 0,4× arba > 2,5×, **tik kai imtyje
+   ≥ 5 kainos** (mažoje imtyje pirminė mediana pati nepatikima).
+
+Skelbimas iš sąrašo NEIŠMETAMAS — jis tiesiog nebedalyvauja medianoje ir
+lyginamas su švaria.
+
+Pamatuota ant tikros imties (archyvas, 2023+ benzininiai X5, 23 skelbimai):
+
+```
+senoji mediana    73 491       naujoji 76 500     atmesta 5 kainos (14–24,5 tūkst.)
+92 771 € skelbimas:  +26 %  ->  +21 %
+```
+
+**Tas pats taisymas tikėtina uždaro ir „daužta mašina iškelta į priekį".**
+Žalos sargas (`qualityScore <= 60`) įsijungia tik kai `diffPct >= 49`, o
+nuolaida skaičiuojama nuo medianos. Kai netikros kainos medianą numuša,
+daužto automobilio nuolaida atrodo mažesnė ir sargas neįsijungia. Tikrai
+pamatuoti galima tik su ta pačia paieška (kainuoja kreditų) — todėl „tikėtina".
+
+Archyvo suvestinės `vidKaina` taip pat skaičiuojama tik iš 500 € – 1,5 mln. €
+be `kainos_ispejimas` (buvo X5 vidurkis 386 mln. dėl vieno 92 mlrd. skelbimo).
+
+Sargas `mediana.test.js` **11/11** — skaičiai iš tikros imties, ne sugalvoti.
+Įrašyta ir žinoma riba: imtyje iš 4 kaina 900 € lieka (santykinio rėmo nėra).
+
+### Nr. 42 · rūšiavimas visam sąrašui
+
+Viena funkcija `ctRikiuoti(sąrašas, režimas)` abiem sąrašams — viršutinėms
+kortelėms ir „Kitiems skelbimams". Skelbimai be kainos / be nuolaidos gale.
+
+Negyva `.ct-sort` / `.ct-sort-menu` taisyklė **ištrinta, ne atgaivinta**:
+atgijusi `right: 0` telefone nustumtų meniu už kairio krašto (mygtukas kairėje,
+meniu 248 px). Be jos 385 px: meniu 12–260 px, telpa. Tai atskira forma:
+**negyva taisyklė, kuri būtų klaidinga, jei atgytų** — pataisyti selektorių
+nebūtų buvę taisymas.
+
+### Kreditų sargas (Z-55 3 punktas)
+
+- Prieš skenavimą: `likutis - maxPuslapiu × 10 >= KREDITU_ATSARGA`
+  (numatyta 5 000, Railway kintamasis). Jei ne — 409 ir pasakoma, kiek
+  puslapių daugiausiai galima.
+- **Jei likučio patikrinti nepavyksta — nepradedam** (503). Nežinomas likutis
+  nėra leidimas.
+- Skenavimo metu kas 10 puslapių paskyra tikrinama iš naujo (`/account`
+  kredito nekainuoja) ir, nukritus žemiau atsargos, skenavimas stabdomas
+  (`pabaiga: 'sargas: kreditai'`, dingimas nežymimas — skenavimas nepilnas).
+- `fetchAllPages` `onPage` dabar gali būti `async` ir grąžinti `'stop'`.
+  Senieji kvietėjai nepakito.
+
+### `autoplius-ids` (Z-55 4 punktas)
+
+Nepavykęs atnaujinimas dabar įrašo laiką į `autoplius-ids-bandymas.json`, ir
+7 dienas nebekartojamas. Iki šiol po kiekvieno deploy'aus — ~10 kreditų be
+naudos. Patikrinta vietoje: po nesėkmės failas atsiranda.
+
+### Render bandymas otomoto / autoscout24
+
+`/admin/pavyzdys?portalas=otomoto|autoscout24&render=0|1` — vienas puslapis,
+grąžina ir **kas atnešė HTML** (`scraperapi` / `axios` / `puppeteer`): jei
+ScraperAPI be render nepavyktų, grandinė nukristų į Puppeteer, ir „veikia"
+būtų melagingas atsakymas. Bandymo puslapis į talpyklą nededamas.
+
+### Patikrinta
+
+`rinka` 24/24, `mediana` 11/11, `regitra` 88/88, `dizainas` 26/26,
+`autogidas` 29. Vietinis serveris: sargas be ScraperAPI rakto grąžina 503,
+`pavyzdys` otomoto atsako su `saltinis`.
+

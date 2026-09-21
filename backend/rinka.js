@@ -251,8 +251,10 @@ function suvestine() {
     pagalPortala: q(`SELECT portalas, COUNT(*) viso, SUM(dingo IS NULL) gyvu, SUM(dingo IS NOT NULL) dingusiu
                      FROM skelbimai GROUP BY portalas`),
     pagalMetus: q(`SELECT metai, COUNT(*) n FROM skelbimai WHERE dingo IS NULL GROUP BY metai ORDER BY metai DESC`),
-    populiariausi: q(`SELECT modelis, COUNT(*) n, CAST(AVG(kaina) AS INT) vidKaina FROM skelbimai
-                      WHERE dingo IS NULL GROUP BY modelis ORDER BY n DESC LIMIT 15`),
+    // Vidurkis tik is realiu kainu: be vieno X5 uz 92 mlrd. EUR jis buvo 386 mln. (Nr. 43)
+    populiariausi: q(`SELECT modelis, COUNT(*) n,
+                        CAST(AVG(CASE WHEN kaina BETWEEN 500 AND 1500000 AND kainos_ispejimas IS NULL THEN kaina END) AS INT) vidKaina
+                      FROM skelbimai WHERE dingo IS NULL GROUP BY modelis ORDER BY n DESC LIMIT 15`),
     uzpildymas: db.prepare(`SELECT COUNT(*) n, SUM(kaina IS NOT NULL) kaina, SUM(rida IS NOT NULL) rida,
                      SUM(metai IS NOT NULL) metai, SUM(kuras IS NOT NULL) kuras, SUM(pavarai IS NOT NULL) pavarai,
                      SUM(galia IS NOT NULL) galia, SUM(variklio_turis IS NOT NULL) variklio_turis,

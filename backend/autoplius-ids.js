@@ -71,6 +71,8 @@ const PARAMETRAI = {
 
 const MAKE_COMBO_URL = 'https://autoplius.lt/skelbimai/paieska?category_id=2&filter=makes&type=make_combo';
 const ATNAUJINTI_PO_MS = 30 * 24 * 3600 * 1000;
+const BANDYTI_PO_NESEKMES_MS = 7 * 24 * 60 * 60 * 1000;   // v2.4.0
+let _bandymoFailas = null;
 
 let _pilna = null;        // { makes: {id: name}, models: {makeId: {modelId: name}}, atnaujinta }
 let _failas = null;
@@ -116,8 +118,21 @@ function prijungti(dataDir, parsisiusti) {
     }
   } catch (e) { _pilna = null; console.warn('[AUTOPLIUS-ID] failas neįskaitomas:', e.message); }
   const pasenes = !_pilna || (Date.now() - (_pilna.atnaujinta || 0)) > ATNAUJINTI_PO_MS;
-  if (pasenes && typeof parsisiusti === 'function') {
-    // Ne blokuojam paleidimo; 1 ScraperAPI kreditas kartą per mėnesį
+  // v2.4.0: NEPAVYKUSIO bandymo laikas irgi prisimenamas. Iki siol, kai
+  // autoplius pakeite puslapi („make_combo: FinnCart nerastas"), failas
+  // nebuvo atnaujinamas, lentele likdavo pasenusi, ir bandymas kartodavosi
+  // KIEKVIENO starto metu - t. y. po kiekvieno push'o po 10 kreditu, be jokios
+  // naudos. Dabar po nesekmes laukiam BANDYTI_PO_NESEKMES_MS.
+  _bandymoFailas = path.join(dataDir, 'autoplius-ids-bandymas.json');
+  let paskutineNesekme = 0;
+  try { paskutineNesekme = JSON.parse(fs.readFileSync(_bandymoFailas, 'utf8')).t || 0; } catch (e) {}
+  const neseniaiNepavyko = (Date.now() - paskutineNesekme) < BANDYTI_PO_NESEKMES_MS;
+  if (pasenes && neseniaiNepavyko) {
+    console.log('[AUTOPLIUS-ID] lentele pasenusi, bet paskutinis bandymas nepavyko pries '
+      + Math.round((Date.now() - paskutineNesekme) / 3600000) + ' val. - kartosim po ' + Math.round(BANDYTI_PO_NESEKMES_MS / 86400000) + ' d.');
+  }
+  if (pasenes && !neseniaiNepavyko && typeof parsisiusti === 'function') {
+    // Ne blokuojam paleidimo. Kaina: 1 puslapis (~10 kreditu) karta per menesi.
     setTimeout(() => atnaujinti(parsisiusti).catch(() => {}), 15000);
   }
 }
@@ -133,6 +148,7 @@ async function atnaujinti(parsisiusti) {
     return true;
   } catch (e) {
     console.warn('[AUTOPLIUS-ID] atnaujinti nepavyko (liekam su SEED):', e.message);
+    try { if (_bandymoFailas) fs.writeFileSync(_bandymoFailas, JSON.stringify({ t: Date.now(), klaida: String(e.message).slice(0, 200) })); } catch (e2) {}
     return false;
   }
 }

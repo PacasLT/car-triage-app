@@ -491,9 +491,30 @@ app.get('/admin/pavyzdys', klaiduPrieiga, async (req, res) => {
   try {
     const portalas = String(req.query.portalas || '');
     const marke = String(req.query.marke || 'BMW').slice(0, 40);
+    // v2.4.0: otomoto ir autoscout24 - render bandymui (?render=0|1). Kaina:
+    // 1 kreditas be render, 10 su render. Duomenys abiejuose gyvena
+    // __NEXT_DATA__ (serverio atiduotas JSON), tad render gali buti nereikalingas.
+    if (portalas === 'otomoto' || portalas === 'autoscout24') {
+      const render = req.query.render === '1';
+      const psl = Math.min(Math.max(parseInt(req.query.puslapis, 10) || 1, 1), 200);
+      const base = portalas === 'otomoto' ? buildOtomotoUrl({ marke }) : buildAutoscout24Url({ marke });
+      const u = psl === 1 ? base : base + (base.includes('?') ? '&' : '?') + 'page=' + psl;
+      const pr = Object.assign({}, ATSARGA.paieska);
+      let html = null, klaida = null;
+      try { html = await fetchSearchPage(u, { render }); } catch (e) { klaida = e.message; }
+      // Svarbu zinoti, KAS atnese HTML: jei ScraperAPI be render nepavyko, grandine
+      // krenta i axios/Puppeteer, ir „veikia" butu melagingas atsakymas.
+      const saltinis = ATSARGA.paieska.scraperapi > pr.scraperapi ? 'scraperapi'
+        : ATSARGA.paieska.axios > pr.axios ? 'axios' : ATSARGA.paieska.puppeteer > pr.puppeteer ? 'puppeteer' : 'nezinoma';
+      const sk = html ? (portalas === 'otomoto' ? extractOtomotoListings(html) : extractAutoscout24Listings(html)) : [];
+      return res.json({ portalas, marke, render, puslapis: psl, url: u, saltinis, uzklausu: ATSARGA.paieska.scraperapi - pr.scraperapi,
+        htmlIlgis: html ? html.length : 0, turiNextData: html ? html.includes('__NEXT_DATA__') : false,
+        skelbimu: sk.length, klaida,
+        pavyzdziai: sk.slice(0, 2).map((l) => { const o = Object.assign({}, l); delete o.rawText; delete o.photos; return o; }) });
+    }
     const bazinis = portalas === 'autoplius' ? buildAutopliusUrl({ marke })
       : portalas === 'autogidas' ? buildAutogidasUrl({ marke }) : null;
-    if (!bazinis) return res.status(400).json({ error: 'portalas: autoplius | autogidas' });
+    if (!bazinis) return res.status(400).json({ error: 'portalas: autoplius | autogidas | otomoto | autoscout24' });
 
     // Puslapio numeris. PIRMAS puslapis yra šališkas: „naujausi viršuje"
     // rikiavime jį užima vieno prekiautojo ką tik įkelta partija (pamatuota
@@ -571,13 +592,39 @@ const RINKOS_PORTALAI = {
   autogidas: (f) => buildAutogidasUrl(f),
 };
 
+// ── Kreditu sargas (v2.4.0) ──────────────────────────────────────────────────
+// Pamatuota is ScraperAPI domenu ataskaitos: autoplius.lt ir autogidas.lt
+// kainuoja 10 kreditu uz puslapi (20 su render). Viena klaida analizatoriuje
+// (kas puslapi „nauji" skelbimai) ar pamirsta riba galetu suvalgyti visa
+// paskyra. Todel:
+//   - pries pradedant: likutis - samata turi likti >= KREDITU_ATSARGA;
+//   - kas SARGO_ZINGSNIS puslapiu: paskyra tikrinama is naujo (/account
+//     kredito nekainuoja), ir skenavimas sustoja, jei likutis nukrito zemiau.
+const KREDITU_ATSARGA = parseInt(process.env.KREDITU_ATSARGA || '5000', 10);
+const KREDITAI_PUSLAPIUI = 10;
+const SARGO_ZINGSNIS = 10;
+
+async function kredituLikutis() {
+  const p = await scraperPaskyra();
+  if (!p || p.klaida || !Number.isFinite(p.riba) || !Number.isFinite(p.panaudota)) return null;
+  return p.riba - p.panaudota;
+}
+
 async function vykdytiSkenavima(skId, portalas, url, maxPuslapiu, marke) {
   const pries = ATSARGA.paieska.scraperapi;
   let klaida = null, pabaiga = null;
   try {
-    const r = await fetchAllPages(url, maxPuslapiu, null, (sarasas) => {
+    const r = await fetchAllPages(url, maxPuslapiu, null, async (sarasas, puslapis) => {
       try { rinka.irasytiPuslapi(skId, portalas, marke, sarasas); }
       catch (e) { console.error('[RINKA] puslapio irasymas:', e.message); throw e; }
+      if (puslapis % SARGO_ZINGSNIS === 0) {
+        const lik = await kredituLikutis();
+        if (lik != null && lik < KREDITU_ATSARGA) {
+          console.error('[RINKA] SARGAS: likutis ' + lik + ' < ' + KREDITU_ATSARGA + ' - skenavimas #' + skId + ' stabdomas ' + puslapis + ' puslapyje');
+          return 'stop';
+        }
+      }
+      return null;
     });
     pabaiga = r.pabaiga;
   } catch (e) { klaida = e.message; }
@@ -620,7 +667,7 @@ app.get('/admin/rinka/eilutes', klaiduPrieiga, (req, res) => {
 // Paleisti skenavimą. POST, nes KAINUOJA kreditus: ~1 kreditas puslapiui
 // (render=false), 20 skelbimų puslapyje. Atsako iš karto (202), dirba fone;
 // eigą rodo GET /admin/rinka. Vienu metu - tik vienas skenavimas.
-app.post('/admin/rinka/skenuoti', klaiduPrieiga, (req, res) => {
+app.post('/admin/rinka/skenuoti', klaiduPrieiga, async (req, res) => {
   try {
     const b = req.body || {};
     const portalas = String(b.portalas || '');
@@ -633,6 +680,15 @@ app.post('/admin/rinka/skenuoti', klaiduPrieiga, (req, res) => {
     const maxPuslapiu = Math.min(Math.max(parseInt(b.maxPuslapiu, 10) || 150, 1), 400);
     const v = rinka.vykstantis();
     if (v) return res.status(409).json({ error: 'Jau vyksta skenavimas #' + v.id, vykstantis: v });
+    // Kreditu sargas pries pradedant. Jei paskyros patikrinti nepavyksta -
+    // NEPRADEDAM: nezinomas likutis nera leidimas.
+    const likutis = await kredituLikutis();
+    const samata = maxPuslapiu * KREDITAI_PUSLAPIUI;
+    if (likutis == null) return res.status(503).json({ error: 'Nepavyko patikrinti ScraperAPI likucio - skenavimas nepradetas' });
+    if (likutis - samata < KREDITU_ATSARGA) {
+      return res.status(409).json({ error: 'Kreditu sargas: po skenavimo liktu maziau nei atsarga',
+        likutis, samata, atsarga: KREDITU_ATSARGA, daugiausiaPuslapiu: Math.max(0, Math.floor((likutis - KREDITU_ATSARGA) / KREDITAI_PUSLAPIUI)) });
+    }
     const url = RINKOS_PORTALAI[portalas]({ marke, metaiNuo, rikiavimas: 'naujausi' });
     const skId = rinka.pradeti({ portalas, marke, metaiNuo, url });
     console.log('[RINKA] skenavimas #' + skId + ' pradetas: ' + portalas + ' ' + marke + ' nuo ' + (metaiNuo || '-') + ' · riba ' + maxPuslapiu + ' psl.');
@@ -743,8 +799,12 @@ async function _fetchWithPuppeteer(url) {
   return html;
 }
 
-async function fetchSearchPage(url) {
-  const cached = cache.getCached('pages', url, cache.PAGE_TTL_MS);
+// v2.4.0: `opts.render` (true/false) leidzia perrasyti numatyta render
+// sprendima - tik /admin/pavyzdys bandymui, ar otomoto/autoscout24 veikia be
+// render (1 kreditas vietoj 10). Kiti kvietejai opts neperduoda.
+async function fetchSearchPage(url, opts) {
+  opts = opts || {};
+  const cached = opts.render === undefined ? cache.getCached('pages', url, cache.PAGE_TTL_MS) : null;
   if (cached) {
     ATSARGA.paieska.talpykla++;
     console.log(`  (talpykla: ${url.slice(0, 60)}...)`);
@@ -755,7 +815,7 @@ async function fetchSearchPage(url) {
   let html;
 
   // 1. ScraperAPI (jei raktas nurodytas)
-  const needsRender = /otomoto\.pl|autoscout24\./i.test(url);
+  const needsRender = opts.render !== undefined ? !!opts.render : /otomoto\.pl|autoscout24\./i.test(url);
   if (SCRAPER_KEY) {
     try {
       const renderParam = needsRender ? 'true' : 'false';
@@ -795,7 +855,9 @@ async function fetchSearchPage(url) {
   // 3. Puppeteer (paskutinis variantas)
   if (!html) { html = await fetchWithPuppeteer(url); ATSARGA.paieska.puppeteer++; }
 
-  cache.setCached('pages', url, html);
+  // Bandymo (opts.render) rezultato i talpykla nededam - kitaip blogas be-render
+  // puslapis 2 val. apnuodytu tikras paieskas.
+  if (opts.render === undefined) cache.setCached('pages', url, html);
   return html;
 }
 
@@ -1452,7 +1514,11 @@ async function fetchAllPages(baseUrl, maxPages, onProgress, onPage) {
     }
     filtered.forEach((b) => seenUrls.add(b.url));
     allListings.push(...filtered);
-    if (onPage) onPage(filtered, page);
+    if (onPage) {
+      // v2.4.0: onPage gali buti async ir grazinti 'stop' (kreditu sargas).
+      const ats = await onPage(filtered, page);
+      if (ats === 'stop') { pabaiga = 'sargas: kreditai'; break; }
+    }
   }
   const format = (isAutogidas || isAutoscout || isOtomoto || autopliusStruktura) ? 'parsed' : 'raw';
   return { listings: allListings, format, pabaiga };
@@ -1493,33 +1559,9 @@ function mergeDuplicatesAcrossPortals(listings) {
   return merged;
 }
 
-function computeMarketMedians(parsedListings) {
-  const byModel = {};
-  const ridaByModel = {};
-  parsedListings.forEach((l) => {
-    // Lizingo imokos ir klaidingai ivestos sumos (5 500 vietoj 55 000) griauna mediana - praleidziam
-    if (l.kaina && !l.kainosIspejimas) {
-      if (!byModel[l.modelis]) byModel[l.modelis] = [];
-      byModel[l.modelis].push(l.kaina);
-    }
-    if (l.rida) {
-      if (!ridaByModel[l.modelis]) ridaByModel[l.modelis] = [];
-      ridaByModel[l.modelis].push(l.rida);
-    }
-  });
-  const medians = {};
-  for (const [model, prices] of Object.entries(byModel)) {
-    const sorted = [...prices].sort((a, b) => a - b);
-    const ridaSorted = (ridaByModel[model] || []).sort((a, b) => a - b);
-    medians[model] = {
-      median: sorted[Math.floor(sorted.length / 2)],
-      count: sorted.length,
-      ridaMedian: ridaSorted.length > 0 ? ridaSorted[Math.floor(ridaSorted.length / 2)] : null,
-      ridaCount: ridaSorted.length,
-    };
-  }
-  return medians;
-}
+// v2.4.0: perkelta i rinkos-mediana.js (atspari mediana, Nr. 43) - kad butu
+// testuojama be serverio. Kvietejai nepasikeite.
+const { computeMarketMedians } = require('./rinkos-mediana');
 
 async function generateShortComment(listing, diffPct) {
   const turiDefektu = listing.galimiDefektai.length > 0;

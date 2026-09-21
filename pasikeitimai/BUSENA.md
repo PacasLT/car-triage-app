@@ -1,4 +1,4 @@
-# Būsena · atnaujinta 2026-09-21, v2.3.1 (v2.3.0 GYVA produkcijoje)
+# Būsena · atnaujinta 2026-09-21, v2.4.0 (v2.3.2 GYVA produkcijoje)
 
 Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
@@ -35,6 +35,8 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 | L-04 / L-05 | `/admin/atsarga`, rakto rotacija | **Lukas** | Priminimai 09-19 11:30 ir 13:15 UTC. |
 
 ## Kas uždaryta paskutiniu metu
+
+- v2.4.0 — **Nr. 43** atspari mediana (`rinkos-mediana.js`, 11/11), **Nr. 42** rūšiavimas visam sąrašui, **kreditų sargas** (atsarga 5 000, 503 jei likutis nežinomas), `autoplius-ids` nebekartojamas po nesėkmės, render bandymo maršrutas. Z-64.
 
 - **Dizaineriui perduota Z-57** (09-21): `UZDUOTYS-DIZAINERIUI.md` perrašyta iš gyvo sąrašo, nauji `K-34` ir Nr. 39 diagnozė. Nuo 34 paketo jam nebuvo perduota nieko — dabar perduota.
 
