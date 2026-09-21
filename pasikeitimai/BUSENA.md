@@ -6,6 +6,7 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
 | Nr. | Kas | Kieno ėjimas | Trumpai |
 |---|---|---|---|
+| Klaidos 2026-09-22 | Nr. 40, 42, 45, 30 | **Lukas** | Ištaisyta v2.6.5 (Z-91) – laukia patikros. Nr. 46 (Regitra) ir Nr. 10 – laukia sprendimo. |
 | ~~K-35~~ | ~~pilno pločio juosta PRIEŠ paiešką~~ | **Uždarytas 37 paketu** | 35c pririšta prie `.is-split`: panelė prieš paiešką vėl 1280/1920. Z-69. |
 | ~~K-26b~~ | ~~Šonas 660 prie ribos 599~~ | **Uždarytas 37 paketu** | Diapazonai `B+D` + tarpai: šonas **536** (riba 599, atsargos 63). Z-69. |
 | ~~K-36~~ | ~~„15000" KAINOS lauke ties 1280~~ | **Uždarytas Errata 4** | Laukas 44 px, „15000" 39 px — telpa. Šonas 536. Z-71. Nr. 40 — klaidingas matavimas (Z-68). K-14 dizaineris skaičiuoja nuo 536. |
@@ -23,7 +24,7 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 | ~~K-18~~ | ~~Portalu skydas~~ | **Uždarytas A-28** | 18 paketas; pamatuota 264/240, Z-39 §4. BUSENA buvo pasenusi. |
 | K-14 | Nr. 24 · šoninės panelės dizainas | **Klaudijus** | B įdiegtas v2.6.0 (42 paketas, 37 sk.). Laukia matavimų: šonas ~583, platusis 6×2 133 px. Z-86. |
 | Regitra | Registro punktai skelbimams | **Klaudijus** | Nuo v2.0.0 niekada neveikė (skelbimai be `marke`). Ištaisyta v2.6.0, Z-85. K-33 lieka analitikui. |
-| ID mygtukai | ID = vieta, `.ct-btn-*` = išvaizda | **Klaudijus** | Planas priimtas (42 pk.). Po vieną, pradžia `#compare-btn`. `#sort-*`, `#portal-selector` — dizaineris. |
+| ID mygtukai | ID = vieta, `.ct-btn-*` = išvaizda | **Dizaineris** | 4/5 padaryti (v2.6.6–2.6.7, Z-92/93). `#search-btn` – klausimas dizaineriui: gradientas/švytėjimas/:disabled sistemoje ar vientisas CTA? |
 | ~~K-37~~ | ~~šono mygtukų plotis~~ | **Uždarytas v2.5.1** | 250/250, 304/304, centrai y 508. Z-78. |
 | ID sąrašas | D-37 §3 | **Dizaineris** | `matavimai/ID-SELEKTORIAI-2026-09-21.md`: 5 mygtukai muša sistemą. Z-84. |
 | K-15 | Nr. 27 · hero tekstas | **Dizaineris** | Lukas prašo pašalinti `.ct3-hero-content`. 26 sk. dalis — neliečiu be atsakymo. |
