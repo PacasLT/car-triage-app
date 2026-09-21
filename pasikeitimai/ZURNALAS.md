@@ -4475,3 +4475,74 @@ jis užpildytas 100 % (pamatuota ant 2 484), bet rašomas portalo žodynu
 (`Dyzelinas`, `Benzinas/Elektra`). Ar jūs failą raktuojat ta pačia forma, ar
 man reikia žodyno, kaip dabar `kuroRaktas`?
 
+## Z-59 · 2026-09-21 · Klaudijus → Dizaineriui · `K-34` PERMATUOTA · `K-31` priimta
+
+### Pirma — mano Z-57 skaičiai buvo iš NE TOS BŪSENOS
+
+Jūs renkatės 1 kelią remdamasis mano matavimu, tad turiu jį pataisyti prieš
+jums rašant taisyklę.
+
+Z-57 mačiau `.ct-shell-side` 1240 ir 1560 px pločio. Toks jis būna tik
+**be `is-split`** — tada šonas dar nėra stulpelis, jo `overflow` yra
+`visible`, o `scrollWidth > clientWidth` ant `overflow: visible` **nereiškia
+nieko**. Tai mūsų pačių sąrašo eilutė, ir aš į ją įlipau.
+
+Permatuota teisingoje būsenoje (`ct-shell.is-split`, statistikos juosta
+matoma, stendas, demo duomenys):
+
+```
+                        1280 px            1920 px
+.ct-shell-side          276 px             300 px
+  scrollWidth / client  826 / 276          1158 / 300      overflow-y: auto
+.ct3-stats-bar          plotis 1280        plotis 1920
+  margin-left           -502 px            -810 px
+  kairysis kraštas      x = -482           x = -630
+```
+
+**Išvada nepasikeitė, bet reiškinys stipresnis, nei rašiau.** Juosta ne tik
+platesnė už stulpelį — neigiama kraštinė ją nustumia į KAIRĘ už lango ribų
+(x = −482 ir −630). Būtent tai Lukas ir aprašė: „suspaudžia į kairę".
+Horizontali slinktis šone yra tikra, nes `is-split` būsenoje ten
+`overflow-y: auto`.
+
+### `.ct3-search-panel` — kas ją atsveria
+
+Radinys jūsų: ji tame pačiame trijų elementų sąraše, o neišlenda. Atsakymas
+yra mūsų faile, `ct-priedai.css` **7 blokas**:
+
+```css
+@media (min-width: 1180px) {
+  .ct-shell-side > .ct3-search-panel { width: auto; max-width: none; margin-left: 0; }
+}
+```
+
+Parašytas įdiegiant jūsų 25 sk. — tiksliai dėl tos pačios priežasties, tik tada
+pastebėtas tik vienas iš trijų elementų. Statistikos juosta į tą patį sąrašą
+nepateko, nes tuo metu ji šone dar nebuvo matoma.
+
+Tai mūsų **„pasikartojanti atsvara = trūkstamas skyrius"**: kai tą pačią
+atsvarą tenka rašyti antrą kartą kitam elementui, tai jau ne atsvara, o
+trūkstama taisyklė. Jūsų 1 kelias tą skyrių ir sukuria.
+
+**Pasiūlymas:** jūsų taisyklė tegu dengia visus tris (`.ct3-hero`,
+`.ct3-stats-bar`, `.ct3-search-panel`) šone — tada aš `ct-priedai.css` 7 bloką
+**ištrinu**, kaip ištryniau 13 ir 14. Jei dengsit tik juostą, 7 blokas lieka
+gyventi, ir po pusmečio kas nors vėl klaus, kodėl panelė elgiasi kitaip.
+
+### `K-31` — priimta, ir jūsų perskaitymas tikslesnis už pranešimą
+
+Renkatės etiketę virš dėžutės visiems. Sutinku ir su tuo, kad taisyti reikia
+ne viena eilute: `is-inline` valdė tris dalykus, o vardas kalbėjo apie vieną.
+Nr. 39 ir Nr. 41 uždaromi kartu.
+
+Dėl 23 paketo pagrindimo — patikrinau iš naujo, ir jūsų savikritika
+pasitvirtina: 119 px lauke etiketė ir reikšmė vienoje eilutėje netelpa, o
+250 px lauke telpa laisvai. Matavimas buvo teisingas siaurajam atvejui; į
+platųjį jis buvo perkeltas be atskiro matavimo.
+
+### Dėl matavimo po įdiegimo
+
+Sutarta: šoną matuosiu **po abiejų** — 33 paketo diapazonų ir 34e +16 px —
+viename skaičiavime, `is-split` būsenoje, 1280×720 ir 1920×1080. Ribą
+tikrinsiu tą pačią, kaip `K-26b` (599 px), ir parašysiu, kiek lieka atsargos.
+

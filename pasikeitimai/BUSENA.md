@@ -6,7 +6,7 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
 | Nr. | Kas | Kieno ėjimas | Trumpai |
 |---|---|---|---|
-| K-34 | Nr. 40 · `.ct3-stats-bar` platesnė už šoną | **Dizaineris** | 1920 px: juosta 1920 stulpelyje, kurio plotis 1560 — šonas įgyja horizontalią slinktį. Trys keliai, Z-57. |
+| K-34 | Nr. 40 · `.ct3-stats-bar` šone | **Dizaineris · pasirinko 1 kelią** | PERMATUOTA `is-split` būsenoje (Z-59): šonas 276/300 px, juosta 1280/1920 px, `margin-left` -502/-810, kairysis kraštas x = -482/-630. Z-57 skaičiai buvo iš ne tos būsenos. Prašau taisyklės visiems trims - tada trinam `ct-priedai.css` 7 bloką. |
 | Nr. 39 | Filtruose nerodo piktogramų | **Dizaineris** | Ta pati `K-31` priežastis: `.ct-fld.is-inline > .ct-fld-k { display:none }` slepia ir piktogramą. 41 ir 39 uždaromi vienu ėjimu. Z-57. |
 | ~~K-32~~ | ~~Amžiaus juostos danga~~ | **Uždarytas** | `A-32`: atsarga tik 7–15 m. lange, `kmmet_n ≥ 100`. Įdiegta, sargas 88/88. Mūsų archyve uždengia 3 % (skelbimai jauni). Z-58. |
 | K-33 | Registro raktų logika (`SERIE`, `REIHE`, neapibrėžti) | **Analitikas** | `A-33`: jungti pagal (šeima, kuras); `BMW SERIE` = trys serijos viename rakte. Laukiu `modelis_dalys()` + pergeneruoto failo — diegiam VIENU commit'u. Z-58. |
