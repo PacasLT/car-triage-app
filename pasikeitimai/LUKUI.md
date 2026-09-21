@@ -3,12 +3,11 @@
 Viskas, ko laukia tavęs. Kiekvienas punktas ≤ 1 min. Perrašo Klaudijus po kiekvieno leidimo.
 
 ## Leidimai
-- [ ] **Push** – darbo sistemos A fazė (9 commit'ai, tik dokumentai, testai ir įrankiai; produkto kodas nepakeistas). Atsakyk: „push".
+- Nieko nelaukia. A fazė išsiųsta 2026-09-22 (deploy SUCCESS).
 
 ## Perdavimai
-- [ ] Claude Design → „+" → **Link local** → `Downloads\cartriige-dizaineriui` (tikras aplankas, ne nuorodos).
-- [ ] Įklijuoti paruoštas žinutes: dizaineriui, Analitikui, Finansininkui, Plėtrai (Klaudijaus atsakyme).
-- [ ] Išsaugoti 3 skill korteles (`cartriige-leidimas`, `-dizainerio-paketas`, `-klaidos`).
+- [ ] Claude Design → „+" → **Link local** → `Downloads\cartriige-dizaineriui` – jei dar nepadaryta. Dizainerio testas: 291 eil. + „# Būsena · 2026-09-22 · v2.7.2 gyva".
+- [ ] Dalyvių testų atsakymus (Fazė C) persiųsti Klaudijui.
 
 ## Sprendimai (vienu žodžiu)
 | Nr. | Klausimas | Variantai |
