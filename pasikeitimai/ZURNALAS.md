@@ -5980,4 +5980,30 @@ jos negauna.
 - Markupas: trys `.ct3-fgroup`. Tvarka nepakeista — markupe **rida eina prieš
   kurą**, tad 2 grupė: rida, kuras, pavaros, ratai, galia (sudėtis ta pati).
 - 37 sk. pridėtas `ct-dizainas.css` gale, nieko netrinta.
-- Matavimai — po deploy'aus.
+- Matavimai produkcijoje (v2.6.0, `.is-split` perjungta JS'u):
+  - 1280 platusis: `.ct3-fields` **133**, 6×2, 11 × 186×50, grupės `contents` ✔
+  - 1280 šonas: **583** (riba 599, atsarga 16), grupės 170 / 167 / 71, slinktis 0
+  - 1920 platusis: 133, 6×2 (213); šonas 300 px — **583**, slinktis 0
+  - 390: grid 2×151, grupės `contents`, horizontalios slinkties nėra
+
+---
+
+## Z-87 · 2026-09-21 · Klaudijus · v2.6.1 · Paieška lūžo „reading 'match'" (Luko pranešimas, telefonas)
+
+Paieška BMW X5 2022–2024, hibridas, automatinė, 3 psl. → 35 % → klaida.
+Railway: `TypeError … reading 'match'` ties `parseListingFields` ← runSearchJob.
+
+Priežastis: autoplius 1 psl. nuskaitytas struktūriškai, o kitame puslapyje
+struktūrinis skaitytuvas nieko nerado (mažai rezultatų — portalas rodo
+„panašius skelbimus"), suveikė TEKSTINIS atsarginis. Vienas tekstinis
+puslapis perjungdavo VISĄ portalo rezultatą į `format: 'raw'`, ir tada
+struktūriniai skelbimai (be `.text`) buvo paduodami `parseListingFields(undefined)`.
+Klaida ne v2.6.0 — ji ten nuo tekstinio atsarginio atsiradimo, tik reikėjo
+paieškos su mažai autoplius rezultatų.
+
+Pataisyta:
+- `fetchAllPages`: po struktūrinių puslapių atėjęs tik tekstinis puslapis
+  laikomas sąrašo galu (tai ne tas pats sąrašas) — „panašūs" neįmaišomi.
+- runSearchJob: skelbimas be `.text` nebeperduodamas teksto skaitytuvui.
+- `parseListingFields` atlaiko `undefined`.
+- skenavimas.test +3 (7 skyrius) → 29/29.

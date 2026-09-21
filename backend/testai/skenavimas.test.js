@@ -31,10 +31,11 @@ let ok = 0, bl = 0;
 const t = (pav, c, info) => (c ? (ok++, console.log('  ✓ ' + pav)) : (bl++, console.log('  ✗ ' + pav + ' → ' + JSON.stringify(info))));
 
 // Žymės vietoj skaitytuvų. `tuscias` - kuriems portalams grąžinti 0.
-const kurti = (tuscias, puslapiuKiekis) => {
+const kurti = (tuscias, puslapiuKiekis, tekstinisNuo) => {
   const zyme = (vardas) => (html, url) => {
     const p = (html.match(/p=(\d+)/) || [0, '1'])[1];
     if (tuscias.includes(vardas) || +p > (puslapiuKiekis || 99)) return [];
+    if (vardas === 'autoplius' && tekstinisNuo && +p >= tekstinisNuo) return [];
     return [{ url: vardas + '-' + p + '-' + (html.includes('render') ? 'R' : 'N'), skaitytuvas: vardas }];
   };
   const kodas = [
@@ -46,7 +47,7 @@ const kurti = (tuscias, puslapiuKiekis) => {
   const Z = {
     extractAutogidasListings: zyme('autogidas'), extractAutoscout24Listings: zyme('autoscout24'),
     extractOtomotoListings: zyme('otomoto'), extractAutopliusStructured: zyme('autoplius'),
-    extractListingBlocksAutoplius: () => [],
+    extractListingBlocksAutoplius: (h) => (tekstinisNuo && +((h.match(/p=(\d+)/) || [0, '1'])[1]) >= tekstinisNuo ? [{ url: 'panasus-' + h, text: 'BMW X3 2015 9 000 €' }] : []),
     mobilede: { extractMobileDe: (h) => ({ skelbimai: zyme('mobilede')(h) }) },
   };
   return new Function(...Object.keys(Z), 'fetchSearchPage', kodas)(...Object.values(Z), null);
@@ -121,6 +122,17 @@ const ADRESAI = {
   console.log('\n6. onPage „stop" (kreditų sargas) ──────────────────────────');
   r = await F.fetchAllPages(ADRESAI.mobilede, 10, null, async (s, p) => (p === 2 ? 'stop' : null), gauti);
   t('sustoja po 2 psl., pabaiga „sargas: kreditai"', r.listings.length === 2 && r.pabaiga === 'sargas: kreditai', r);
+
+  console.log('\n7. autoplius: strukturinis → tik tekstinis (Z-87, „reading match") ─');
+  {
+    const Fmix = kurti([], 99, 3);
+    const r = await Fmix.fetchAllPages(ADRESAI.autoplius, 5, null, null, gauti);
+    t('3 psl. tik tekstinis → galas, ne „raw"', r.pabaiga === 'galas' && r.format === 'parsed', { p: r.pabaiga, f: r.format });
+    t('„panašūs" tekstiniai skelbimai neįmaišyti', r.listings.length === 2 && r.listings.every((l) => l.text == null), r.listings);
+    const Ftxt = kurti([], 99, 1);
+    const r2 = await Ftxt.fetchAllPages(ADRESAI.autoplius, 2, null, null, gauti);
+    t('nuo 1 psl. tekstinis → atsarginis veikia (raw)', r2.format === 'raw' && r2.listings.length === 2, r2);
+  }
 
   console.log('\n' + (bl ? '✗ ' + bl + ' klaidos iš ' + (ok + bl) : '✓ ' + ok + '/' + ok + ' patikrų praėjo'));
   process.exit(bl ? 1 : 0);

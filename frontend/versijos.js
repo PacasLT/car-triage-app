@@ -8,6 +8,12 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.6.1', data: '2026-09-21', pavadinimas: 'Paieškos klaidos pataisymas',
+    pakeitimai: [
+      'Paieška nebenutrūksta su klaida „Cannot read properties of undefined (reading \'match\')“, kai autoplius paskutiniame puslapyje rodo panašius skelbimus',
+    ],
+  },
+  {
     versija: '2.6.0', data: '2026-09-21', pavadinimas: 'Filtrų grupės šone ir Lietuvos registro duomenys',
     pakeitimai: [
       'Šoninėje paieškos panelėje filtrai suskirstyti į tris grupes – lengviau skaityti',

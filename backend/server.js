@@ -1459,6 +1459,7 @@ function extractListingBlocksAutoplius(html) {
 }
 
 function parseListingFields(text) {
+  text = String(text == null ? '' : text);
   // "NNNN € + PVM" reiskia, kad nurodyta kaina yra BE PVM - pirkejas is tikruju
   // moka kaina + 21% PVM. Vertiname VISADA galutine suma SU PVM.
   const plusPvmMatch = text.match(/(\d[\d\s]{2,7})\s?€\s*\+\s*PVM/i);
@@ -1838,6 +1839,17 @@ async function fetchAllPages(baseUrl, maxPages, onProgress, onPage, gauti) {
           newItems = antri;
         }
       } catch (e) { /* lieka tuscia - traktuojama kaip galas */ }
+    }
+    // v2.6.1 (Z-87): autoplius - 1 puslapis strukturinis, o kitas tik
+    // tekstinis = ne tas pats sarasas (paprastai „panasus skelbimai" po
+    // paskutinio tikro puslapio). Tokio puslapio NEimam: sustojam kaip galas.
+    // Anksciau jis perjungdavo VISA rezultata i 'raw', ir strukturiniai
+    // skelbimai (be .text) nulauzdavo parseListingFields.
+    if (!struktura && page > 1 && visurStruktura && allListings.length) {
+      if (resolveStep) resolveStep();
+      console.log('  [AUTOPLIUS] ' + page + ' psl. tik tekstinis po strukturiniu - laikom saraso galu');
+      pabaiga = 'galas';
+      break;
     }
     if (!struktura) visurStruktura = false;
     const filtered = newItems.filter((b) => !seenUrls.has(b.url));
@@ -2992,7 +3004,7 @@ async function runSearchJob(jobId, filters) {
       const { listings: rawListings, format } = await fetchAllPages(url, maxPages, (p) =>
         logJobStep(jobId, `📄 Verčiame ${site} ${p} puslapį...`).bind(null, `✅ ${site} ${p} puslapis nuskaitytas`)
       );
-      let siteParsed = format === 'parsed' ? rawListings : rawListings.map((l) => ({ ...parseListingFields(l.text), url: l.url, photo: l.photo }));
+      let siteParsed = format === 'parsed' ? rawListings : rawListings.map((l) => (l.text == null ? l : { ...parseListingFields(l.text), url: l.url, photo: l.photo }));
       // Modelio filtras reikalingas tik kai portale ieskota TEKSTU. Kai autoplius ieskota
       // pagal tikrus ID, rezultatai jau tikslus - filtruoti tekstu butu klaidinga
       // ("Mercedes-Benz C 220" nesutampa su uzklausa "c klase").
