@@ -3293,8 +3293,11 @@ async function runSearchJob(jobId, filters) {
       // kortele, ir skelbimo puslapis ji gauna nemokamai, be papildomos
       // uzklausos. Balo NEKEICIA - `computeTriageScore` jau ivykdytas auksciau
       // ir apie si lauka nezino.
-      l.regitra = regitra.kontekstas(l.marke, l.modelis) || null;
-      l.regitraPunktai = regitra.punktai(l);
+      // v2.5.6: skelbimai `marke` neturi - atsarginis filtro markės laukas
+      // (kai `modelis` be markės, pvz. „X5"). Z-85.
+      const regMarke = l.marke || (filters && filters.marke) || null;
+      l.regitra = regitra.kontekstas(regMarke, l.modelis) || null;
+      l.regitraPunktai = regitra.punktai(Object.assign({}, l, { marke: regMarke }));
     });
 
     let candidates = enriched.slice().sort((a, b) => b.qualityScore - a.qualityScore);

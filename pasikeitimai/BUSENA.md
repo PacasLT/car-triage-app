@@ -21,7 +21,11 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 | K-24 | Nr. 38 · „Daugiau filtrų" prie „Ieškoti" | **Dizaineris** | Lukas taip nori, bet tai griauna `.ct-fld-act` 12-tą langelį. Jūsų ėjimas. |
 | A-11 | `--focus-offset` | **Dizaineris** | Vienintelis likęs negyvas tokenas; pasiliekat kartu su PT-02. |
 | K-18 | Portalu skydas 187 px vietoj 240 | **Dizaineris** | `max-width: calc(100% - 12px)` skaičiuojamas nuo `.ct3-portal-wrap`, ne nuo stulpelio. Veikia, bet siauriau nei rašėte. |
-| K-14 | Nr. 24 · šoninės panelės dizainas | **Dizaineris** | Be detalių; galiu atsiųsti matavimus ir ekranvaizdžius. |
+| K-14 | Nr. 24 · šoninės panelės dizainas | **Klaudijus** | B įdiegtas v2.6.0 (42 paketas, 37 sk.). Laukia matavimų: šonas ~583, platusis 6×2 133 px. Z-86. |
+| Regitra | Registro punktai skelbimams | **Klaudijus** | Nuo v2.0.0 niekada neveikė (skelbimai be `marke`). Ištaisyta v2.6.0, Z-85. K-33 lieka analitikui. |
+| ID mygtukai | ID = vieta, `.ct-btn-*` = išvaizda | **Klaudijus** | Planas priimtas (42 pk.). Po vieną, pradžia `#compare-btn`. `#sort-*`, `#portal-selector` — dizaineris. |
+| ~~K-37~~ | ~~šono mygtukų plotis~~ | **Uždarytas v2.5.1** | 250/250, 304/304, centrai y 508. Z-78. |
+| ID sąrašas | D-37 §3 | **Dizaineris** | `matavimai/ID-SELEKTORIAI-2026-09-21.md`: 5 mygtukai muša sistemą. Z-84. |
 | K-15 | Nr. 27 · hero tekstas | **Dizaineris** | Lukas prašo pašalinti `.ct3-hero-content`. 26 sk. dalis — neliečiu be atsakymo. |
 | K-12 | Nr. 26 · portalų sąrašas šone | **Dizaineris** | `right: 0` siaurame stulpelyje duoda −32 px. Atsvara `ct-priedai.css` 9 bloke, pamatuota. |
 | D-03 | Skelbimo puslapio 3 dalis | **Lukas** | Ar grąžinam šešis skydelius? Iš 27 pranešimų nė vienas nebuvo apie jų turinį. |

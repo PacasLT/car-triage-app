@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.6.0', data: '2026-09-21', pavadinimas: 'Filtrų grupės šone ir Lietuvos registro duomenys',
+    pakeitimai: [
+      'Šoninėje paieškos panelėje filtrai suskirstyti į tris grupes – lengviau skaityti',
+      'Lietuvos registro (Regitros) duomenys – likvidumas, ridos norma, retumas – dabar tikrai rodomi prie skelbimų (anksčiau dėl klaidos visur buvo „modelio registre nėra“)',
+      'Registras atpažįsta ir Š/ė raides bei Mercedes klasių užrašus („Klasa E“, „E klasė“, „E-Klasse“)',
+    ],
+  },
+  {
     versija: '2.5.5', data: '2026-09-21', pavadinimas: 'Serverio aplinkos atnaujinimas',
     pakeitimai: [
       'Serveris perkeltas į naujesnę Node.js 22 versiją - stabilesnis skelbimų nuskaitymas',

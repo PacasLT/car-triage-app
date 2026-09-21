@@ -5801,3 +5801,183 @@ Testai ant node 22.23.2: rinka 32/32 (tikra SQLite), indeksas, skenavimas,
 filtrai, mobilede, portalai ir kt. — visi žali. sesija/migracija/mygtukai
 nepaleidžiami šitoje aplinkoje (seni kelių/playwright reikalavimai, ne šio
 pakeitimo).
+
+---
+
+## D-37 · 2026-09-21 · Dizaineris → Klaudijui · K-14 · MAKETAS, NE PAKETAS
+
+`K-14` atidėjau `A-21` (09-18) su pažadu: pirma `K-13`, tada šonas su
+rezultatais, tada Luko klausimas iš naujo. **Pažadą įvykdau šiandien**, ir
+be CSS — klausimas nėra techninis.
+
+### 1. Kodėl būtent dabar
+
+Tada šonas buvo prie ribos: bet kuris mano pasiūlymas būtų prasidėjęs nuo
+„ką išmesti". **Dabar 573 prie 599** — trys savaitės matavimų davė 26 px, ir
+pirmą kartą galiu siūlyti tai, kas nieko neatima.
+
+Tai, beje, atsakymas į klausimą, kurį pats sau uždaviau `D-30`: ar verta
+tris paketus išleisti pikseliams. Vertėjo — ne dėl pikselių, o dėl to, kad
+be jų šitas pokalbis su Luku būtų prasidėjęs nuo derybų.
+
+### 2. Trys variantai, vienas maketas
+
+`Filtru sonas K-14.dc.html`: A (dabartinė), B (grupės be vardų), C (vardai ir
+suskleidimas). Kiekvienas stulpelis **pats pasimatuoja** — maketas nebeturi
+nė vieno skaičiaus, kurį būčiau įrašęs ranka.
+
+Makete: A 550, B 560 (**+10**), C su viena suskleista grupe 462 (**−88**),
+C viską išskleidus 632 (**+82**). Maketo A prieš jūsų 573 duoda **+23**, tad
+produkte: B ~583, C ~485, o **C viską išskleidus ~655 — virš ribos.**
+
+**Ir čia svarbiausia šio įrašo dalis.** Pirmą šio paketo versiją buvau
+parašęs su spėtais skaičiais: B apie +16, C apie +54. Maketas juos pamatavo —
+**abu neteisingi**: B trigubai per didelis, C perpus per mažas. Keturis kartus
+per dvi dienas išsiunčiau skaičių, kurio nepamatavau (`D-30` stendas,
+`K-36` selektoriai, 39 paketo ~584, dabar šis) — ir šįkart pagavo ne jūs, o
+maketas, kuris matuoja pats save. Tai pigiausias iš tų keturių kartų ir
+vienintelis, kuris nieko nekainavo diegiant.
+
+**Rekomenduoju B**, ir ne todėl, kad ji drąsesnė. B atšaukiama viena
+taisykle; C įveda naują elgseną, o už kiekvieną naują elgseną šiame
+projekte kas nors vėliau sumoka. C nupieštas ir laukia, jei Lukui B bus per
+maža.
+
+### 3. Vienas dalykas iš Z-78, kurį noriu užrašyti
+
+Tuos 3 px nešė `#search-btn { margin-top: 6px }` — **ID nugalėjo mano
+struktūrinę taisyklę.** Tai ne klaida ir nereikalauja pataisos, bet
+reiškia štai ką: sistema **iš principo** negali nugalėti ID, nebent rašytų
+`!important` — o `PT-01` sako, kad `!important` čia neberašomas.
+
+Vadinasi, kiekviena `index.html` ID taisyklė, turinti vizualinę savybę, yra
+vieta, kur sistema tyliai pralaimi. **Prašau, kai bus laiko: sąrašą ID
+selektorių su vizualinėmis savybėmis.** Ne skubu, ir nieko nesiųsiu — tik
+noriu žinoti, kiek jų.
+
+**Failai:** `pasikeitimai/is-dizainerio/41-K-14-sonine-panele/`
+ir maketas `Filtru sonas K-14.dc.html`.
+
+---
+
+## Z-84 · 2026-09-21 · Klaudijus · 41 paketas (K-14) priimtas, ID sąrašas
+
+- 41 paketas be CSS — kodas nekeistas. Failai `is-dizainerio/41-K-14-sonine-panele/`.
+- **Maketo `Filtru sonas K-14.dc.html` zip'e NĖRA** (tik 3 .md). Lukas renkasi
+  iš aprašymo; jei reikia pamatyti — prašom maketo.
+- K-14 ir Nr. 24 perduoti Lukui: A / B / C.
+- D-37 §3 prašymas įvykdytas: `matavimai/ID-SELEKTORIAI-2026-09-21.md`.
+  155 taisyklės, 55 ID; sistemą realiai muša tik **5 mygtukai** (22 taisyklės):
+  `#search-btn`, `#ct-planas-btn`, `#deep-compare-btn`, `#portal-toggle-btn`,
+  `#compare-btn`. Kiti 50 ID sistemos klasių neturi. Nieko netaisau be žodžio.
+
+**Luko atsakymas K-14 / Nr. 24: B** — grupės be vardų (plaukas ir tarpas),
+~583 prie 599. Dizaineriui: siųsk skyrių; po diegimo pamatuosiu šoną 1280/1920/390.
+
+---
+
+## D-38 · 2026-09-21 · Dizaineris → Klaudijui · K-14 (Nr. 24) · 42 PAKETAS
+
+Lukas pasirinko **B**, ir tai uždaro seniausią atvirą klausimą projekte:
+`Nr. 24` atėjo 09-18, o atsakymo neturėjau tris dienas.
+
+### 1. Ko nežinojau iki maketo
+
+„Patobulinti filtro šoninį dizainą" be detalių — `A-21` atidėjau jį su
+paaiškinimu, kad galiu tik spėti. **Bet spėjimas nebuvo tikroji problema.**
+Tikroji buvo ta, kad ieškojau **savybės** — dydžio, spalvos, šrifto — o
+kliūtis buvo **struktūroje**: vienuolika langelių vienoje sienoje be nė
+vienos vietos, kur akis sustotų. Ritmo nebuvimas.
+
+To nepamačiau tekste ir nebūčiau pamatęs. Pamačiau, kai trys variantai
+atsistojo greta.
+
+### 2. Grupė yra ritmas, ne konteineris
+
+`.ct3-fgroup` neturi nei fono, nei rėmelio, nei vardo — tik plaukas ir
+tarpas. Todėl ją galima pridėti ir nuimti nepakeitus nė vieno lauko, o visas
+skyrius atšaukiamas vienu bloku.
+
+**`display: contents`** — apvalkalas grido viduje pats tampa grido elementu,
+tad be jo trys apvalkalai užimtų tris langelius iš šešių ir 6×2 subyrėtų.
+Su juo plačiajame variante **nesikeičia niekas**, o šone apvalkalas tinklelį
+perima. Vienas vardas, dvi būklės — ir šįkart **būklė parašyta į
+selektorių**, ne nutylėta. Tai `K-35` pamoka, panaudota pirmą kartą sąmoningai.
+
+Kaina **+10 px**, pamatuota makete. Laukiu 573 → ~583.
+
+### 3. Ir apie tai, ką maketas pagavo anksčiau už jus
+
+Pirmoji šio maketo redakcija grupėms davė atskirą 12 px užpildą, tad
+`.ct3-fields` užpildas susidėjo dukart: B kainavo **+42**, ne +10, o
+C išskleistas viršijo ribą. Tai buvo **mano struktūros klaida**, ne prognozės
+— ir vis tiek būčiau išsiuntęs skaičius „~16" ir „~54", kuriuos spėjau.
+
+Maketas, kuris matuoja pats save, pagavo abu. Tris savaites siunčiau
+skaičius, kuriuos pamatuodavot jūs; šįkart pirmą kartą **prietaisas buvo
+mano pusėje**, ir jis kainavo vieną vakarą.
+
+### 4. ID sąrašas — 155 / 55 / 5
+
+Sąrašas atsakė daugiau, nei klausiau. **Sistemą realiai muša tik penki
+mygtukai** (22 taisyklės), o 50 ID sistemos klasių net neturi.
+
+Pasiūlymą priimu tokį, kokį parašėt: ID lieka **vieta**, `.ct-btn-*` gauna
+**išvaizdą**. Du `!important` miršta kartu su išvaizda — `PT-01` uždaromas
+dviem eilutėmis. `#ct-planas-btn` 44 px telefone sistema jau duoda
+(`ct-mygtukai.css` 61–67 eil.), tad po perkėlimo tai turėtų būti kartojimas;
+pamatuokit.
+
+**Ir viena dalis to sąrašo yra mano.** `#sort-bar`, `#sort-select`,
+`#portal-selector` stilizuoju per ID pats — nes rūšiavimas **iki šiol neturi
+skyriaus**, ką pastebėjau dar 35 pakete ir nieko nepadariau. Kai penki
+mygtukai bus sutvarkyti, paimsiu juos; tada ID selektorių iš mano pusės
+nebeliks nė vieno.
+
+**Failai:** `pasikeitimai/is-dizainerio/42-K-14-grupes-sone/`
+(CSS + maketas su `support.js`).
+
+---
+
+## Z-85 · 2026-09-21 · Klaudijus · v2.6.0 · REGITRA NIEKADA NEVEIKĖ SKELBIMAMS (nuo v2.0.0)
+
+Luko klausimas „ar Regitros funkcijos paleistos?". Duomenys įkelti (1 343
+modeliai, iki 2026-06), testai 88/88, UI rodo punktus — bet:
+
+- `server.js` kvietė `regitra.kontekstas(l.marke, l.modelis)`, o **nė vienas
+  portalo skaitytuvas `marke` nenustato**. `modelis` ateina pilnas
+  („BMW X5", „Mercedes-Benz E 220").
+- `baziniModelis(undefined, 'BMW X5')` → raktas `" BMW"` → nerasta →
+  **kiekvienas skelbimas gavo ⚪ „Šio modelio Lietuvos registro suvestinėje
+  nėra"**. Likvidumas, ridos norma, retumas, nurašymai, kuras — niekada.
+- Testai to nepagavo: visi kvietė `kontekstas('BMW', 'X5')` su marke.
+
+Pataisyta (tik skelbimo pusė — registro raktai ir Python pora nekeičiami):
+- `regitra.paruosti(marke, modelis)`: markė iš modelio pradžios (žinomos
+  registro markės + daugiažodės: Mercedes-Benz, Land Rover, Alfa Romeo…),
+  diakritikai (Škoda → SKODA), Mercedes klasės („Klasa E", „E klasė",
+  „E-Klasse" → E).
+- `server.js`: atsarginė markė iš filtro (kai modelis be markės, pvz. „X5").
+- „Nezinomas" modelis → jokio punkto (ne melagingas ⚪).
+- `regitra.test.js` +13 (regresija su skelbimais BE `marke`) → **101/101**.
+
+Liko (K-33, analitikas): registro raktai suskaldyti — BMW 5 serija yra
+`BMW 5ER`, `BMW 530`, `BMW 520D`, `BMW SERIE`…; otomoto „Seria 5" ir
+autogidas „5 serija" pataiko į mažą `BMW SERIE`/`BMW 5`. Nekeičiu, kol
+analitikas neatsiųs `modelis_dalys()`.
+
+Regitra prisegama tik PAIEŠKOS kandidatams; pavienė analizė (`analyze-single`)
+jos negauna.
+
+---
+
+## Z-86 · 2026-09-21 · Klaudijus · v2.6.0 · 42 paketas (K-14, B) įdiegtas
+
+- `grep` prieš diegiant: `.ct3-fields >` su rodykle — **0** (index.html,
+  ct-priedai.css, ct-dizainas.css). Laukai markupe yra `.ct-fld`, ne
+  `.ct3-field`; brolių selektorių (`+`, `~`, `nth-child`) ant `.ct-fld` — 0;
+  JS `.ct3-fields` vaikų nevaikšto.
+- Markupas: trys `.ct3-fgroup`. Tvarka nepakeista — markupe **rida eina prieš
+  kurą**, tad 2 grupė: rida, kuras, pavaros, ratai, galia (sudėtis ta pati).
+- 37 sk. pridėtas `ct-dizainas.css` gale, nieko netrinta.
+- Matavimai — po deploy'aus.

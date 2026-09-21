@@ -50,6 +50,7 @@ function ikelti() {
     const p = path.join(__dirname, 'duomenys', 'regitra-modeliai.json');
     const d = JSON.parse(fs.readFileSync(p, 'utf8'));
     LENT = new Map(d.modeliai.map((m) => [m.modelis, m]));
+    ZINOMOS = new Set();
     META = {
       sugeneruota: d.sugeneruota,
       modeliu: d.modeliu,
@@ -72,8 +73,42 @@ function ikelti() {
   return META;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SKELBIMO PUSĖ (v2.5.6, Z-85). Registro raktams netaikoma - Python poros
+// nekeičia. Iki v2.5.6 skelbimai `marke` lauko NETURĖJO (jį turi tik filtrai),
+// o `modelis` ateina pilnas („BMW X5", „Mercedes-Benz E 220"). Tad
+// kontekstas(undefined, 'BMW X5') → raktas „ BMW" → KIEKVIENAS skelbimas gavo
+// ⚪ „modelio registre nėra". Čia suvedam abu atvejus į (markė, modelis).
+// ─────────────────────────────────────────────────────────────────────────────
+const beDiakritiku = (s) => String(s == null ? '' : s).normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+const DAUGIAZODES = ['MERCEDES-BENZ', 'MERCEDES BENZ', 'LAND ROVER', 'LAND-ROVER', 'ALFA ROMEO',
+  'ASTON MARTIN', 'ROLLS-ROYCE', 'LYNK & CO', 'GREAT WALL', 'SSANG YONG'];
+// „Klasa E" (otomoto), „E klasė" (autogidas), „E-Klasse" (mobile.de) → „E"
+const KLASE = /^(?:KLASA|CLASSE|CLASS|KLASSE)\s+([A-Z]{1,3})\b|^([A-Z]{1,3})[\s-]*(?:KLASE|KLASSE|CLASSE|CLASS)\b/;
+
+let ZINOMOS = new Set();
+function zinomosMarkes() {
+  if (!ZINOMOS.size) for (const k of LENT.keys()) ZINOMOS.add(k.split(' ')[0]);
+  return ZINOMOS;
+}
+
+function paruosti(marke, modelis) {
+  let mk = beDiakritiku(marke).trim().toUpperCase();
+  let mo = beDiakritiku(modelis).trim().toUpperCase().replace(/\s+/g, ' ');
+  const pirma = DAUGIAZODES.find((x) => mo.startsWith(x + ' '))
+    || (zinomosMarkes().has(markeNorm(mo.split(' ')[0])) && mo.includes(' ') ? mo.split(' ')[0] : null);
+  if (mk && mo.startsWith(mk + ' ')) mo = mo.slice(mk.length).trim();
+  else if (pirma) { mk = pirma; mo = mo.slice(pirma.length).trim(); }
+  if (markeNorm(mk) === 'MERCEDES') {
+    const k = mo.match(KLASE);
+    if (k) mo = (k[1] || k[2]) + mo.slice(k[0].length);
+  }
+  return [mk, mo];
+}
+
 function kontekstas(marke, modelis) {
-  const k = baziniModelis(marke, modelis);
+  const [mk, mo] = paruosti(marke, modelis);
+  const k = baziniModelis(mk, mo);
   if (!k) return null;
   return LENT.get(k) || null;
 }
@@ -191,7 +226,8 @@ function punktai(c) {
   const r = kontekstas(c.marke, c.modelis);
 
   if (!r) {
-    if (!META) return [];   // duomenys neikelti - tyla, o ne melagingas ⚪
+    if (!META) return [];
+    if (!paruosti(c.marke, c.modelis)[0]) return [];   // markė nežinoma („Nezinomas") - ne registro žinia   // duomenys neikelti - tyla, o ne melagingas ⚪
     return [punktas(LYGIS.NEZINOMA, 'LT REGISTRAS',
       'Šio modelio Lietuvos registro suvestinėje nėra – reti modeliai duomenyse nuasmeninami')].filter(Boolean);
   }
@@ -283,7 +319,7 @@ function punktai(c) {
 
 module.exports = {
   ikelti, kontekstas, punktai,
-  baziniModelis, markeNorm, tikrintiTeksta, kuroRaktas, kuroDalis, amziausJuosta,
+  baziniModelis, markeNorm, paruosti, tikrintiTeksta, kuroRaktas, kuroDalis, amziausJuosta,
   RIBOS, LYGIS, DRAUDZIAMA,
   meta: () => META,
 };

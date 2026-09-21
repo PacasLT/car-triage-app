@@ -197,5 +197,25 @@ console.log('\n── 9. Failo nėra → serveris pakyla, punktų nėra ──�
   }
 })();
 
+console.log('\n── Skelbimo pusė: markė modelyje (Z-85 regresija) ─────────');
+// Iki v2.5.6 skelbimai `marke` neturėjo → kiekvienas gavo ⚪ „registre nėra".
+{
+  const atv = [
+    [undefined, 'BMW X5', 'BMW X5'], [undefined, 'Mercedes-Benz E 220', 'MERCEDES E'],
+    [undefined, 'Volkswagen Golf', 'VW GOLF'], [undefined, 'Škoda Octavia', 'SKODA OCTAVIA'],
+    [undefined, 'Land Rover Range Rover Sport', 'LAND ROVER RANGE'], [undefined, 'bmw x5', 'BMW X5'],
+    ['BMW', 'X5', 'BMW X5'], ['Mercedes-Benz', 'Mercedes-Benz Klasa E', 'MERCEDES E'],
+    ['Mercedes-Benz', 'E klasė', 'MERCEDES E'], ['Mercedes-Benz', 'E-Klasse', 'MERCEDES E'],
+    ['BMW', 'Audi A6', 'AUDI A6'],
+  ];
+  for (const [mk, mo, laukta] of atv) {
+    const r = R.kontekstas(mk, mo);
+    lygu(r && r.modelis, laukta, 'kontekstas(' + mk + ', "' + mo + '")');
+  }
+  const p = R.punktai({ modelis: 'BMW X5', metai: 2019, rida: 150000 });
+  T(!p.some((x) => x.k === 'LT REGISTRAS'), 'skelbimas be `marke` NEgauna ⚪ „registre nėra"');
+  lygu(R.punktai({ modelis: 'Nezinomas' }), [], '„Nezinomas" → jokio punkto (ne ⚪)');
+}
+
 console.log('\n' + (klaidu ? '✗ ' + klaidu + ' klaidos iš ' + patikru : '✓ ' + patikru + '/' + patikru + ' patikrų praėjo'));
 process.exit(klaidu ? 1 : 0);

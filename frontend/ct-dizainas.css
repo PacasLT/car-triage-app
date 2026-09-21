@@ -3430,3 +3430,111 @@ textarea.ct-field {
 }
 
 /* Laukiu: sone abu 250, telefone abu 304, visi trys centrai viename y. */
+
+
+/* ============================================================================
+   42 paketas - 37 sk. NAUJAS - grupes sone   ·   K-14 / Nr. 24 (variantas B)
+   ----------------------------------------------------------------------------
+   Lukas pasirinko B: grupes BE VARDU. Sis skyrius PRIDEDAMAS, nieko netrinama.
+   Priklauso nuo markupo pakeitimo (jusu puse), ivardyto 0 dalyje.
+
+   Laukiu: sonas 573 -> ~583 prie ribos 599.
+   ========================================================================== */
+
+
+/* ── 0) KO REIKIA MARKUPE ───────────────────────────────────────────────────
+
+   Vienuolika lauku suvyniojami i TRIS grupes .ct3-fields viduje:
+
+     <div class="ct3-fields">
+       <div class="ct3-fgroup">  marke, modelis, metai, kaina        </div>
+       <div class="ct3-fgroup">  kuras, rida, pavaros, ratai, galia  </div>
+       <div class="ct3-fgroup">  puslapiai, portalai                </div>
+     </div>
+
+   Lauku tvarka NESIKEICIA - tik atsiranda trys apvalkalai. Naujos klases
+   viena: .ct3-fgroup.
+
+   ── VIENAS DALYKAS, KURI PRASAU PATIKRINTI PRIES DIEGIANT ─────────────────
+   Laukai tampa .ct3-fields ANUKAIS, ne vaikais. Jei index.html kur nors yra
+   `.ct3-fields > .ct3-field` (su rodykle), ta taisykle nutruks tyliai.
+   Visos MANO taisykles rasytos per tarpa (2050, 2057, 2338, 2352 eil.) ir
+   nepasikeis, bet jusu pusės negaliu patikrinti is cia. Vienas grep.
+
+
+   ── KODEL GRUPES, O NE „PATOBULINIMAS" ────────────────────────────────────
+   Nr. 24 prase „patobulinti", ir tris savaites atsakymo neturejau, nes
+   klausimas neturejo detaliu. Maketas parode, kas ten iš tikruju negerai:
+   vienuolika langeliu vienoje sienoje be nė vienos vietos, kur akis
+   sustotu. Ne dydis, ne spalva, ne siftas - RITMO nebuvimas.
+
+   B duoda ritma pigiausiu imanomu budu: plaukas ir tarpas. Nieko neslepia,
+   nieko nevadina, nieko neperkelia. Ir atšaukiama vienu bloku.
+
+   PAMATUOTA makete, ne išvesta: A 550, B 560. Kaina +10 px.
+
+
+   ── KODEL `display: contents`, O NE ANTRAS TINKLELIS ──────────────────────
+   Apvalkalas grido viduje pats tampa grido elementu - t. y. placiajame
+   variante trys apvalkalai uzimtų tris langelius is siesiu, ir 6x2 isdestymas
+   subyretu.
+
+   `display: contents` reiskia „manes isdestyme nera": vaikai patenka tiesiai
+   i .ct3-fields tinkleli, lygiai kaip iki siol. Tad PLACIAJAME VARIANTE
+   NIEKAS NESIKEICIA - nei eiliu skaicius, nei stulpeliai, nei tuscia
+   dvylikta vieta.
+
+   Sone apvalkalas tinkleli PERIMA, o .ct3-fields tampa paprastu stulpeliu.
+   Vienas vardas, dvi busenos - ir siaskart tai sąmoninga, ne netycia
+   (K-35 pamoka: busena rasoma i selektoriu, ne nutylima).                 */
+
+
+/* ============================================================================
+   37. GRUPES SONE   ·   .ct3-fgroup
+   ----------------------------------------------------------------------------
+   Vienas principas: grupe yra RITMAS, ne konteineris. Ji neturi nei fono, nei
+   remelio, nei vardo - tik plauka virsuje ir tarpa aplink. Todel ja galima
+   pridėti ir nuimti nepakeitus nė vieno lauko.
+   ========================================================================== */
+
+/* Bazė: grupes nera. Galioja placiajam variantui, telefonui ir viskam,
+   kas nera sonas. */
+.ct3-fgroup { display: contents; }
+
+
+@media (min-width: 1180px) {
+
+  /* Sone tinkleli perima grupes, tad .ct3-fields lieka stulpeliu.
+     padding: 0 - uzpildas dabar grupiu, kitaip jis susidetu dukart (butent
+     tai maketo pirmoji redakcija ir padare: +42 vietoj +10). */
+  .ct-shell.is-split > .ct-shell-side .ct3-fields {
+    display: block;
+    padding: 0;
+  }
+
+  .ct-shell.is-split > .ct-shell-side .ct3-fgroup {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px var(--s-3);
+    padding: var(--s-2) var(--s-3) 0;
+    border-top: 1px solid rgba(255, 255, 255, .06);
+  }
+
+  /* Pirma grupe plauko neturi - virs jos yra paneles krastas */
+  .ct-shell.is-split > .ct-shell-side .ct3-fgroup:first-child {
+    padding-top: var(--s-3);
+    border-top: 0;
+  }
+
+  /* Paskutine uzdaro uzpilda, kuri .ct3-fields atidavė */
+  .ct-shell.is-split > .ct-shell-side .ct3-fgroup:last-child {
+    padding-bottom: var(--s-3);
+  }
+
+  /* :first-child / :last-child, o ne :nth-child(1) / (3): ketvirta grupe
+     rytoj susitvarkys pati. Tai A-08 - taisykle, kurios nereikia atsiminti
+     atnaujinti. */
+}
+
+/* Telefone ir placiajame variante nieko - `display: contents` jau padare
+   viska, ko reikia: grupiu ten tiesiog nera. */
