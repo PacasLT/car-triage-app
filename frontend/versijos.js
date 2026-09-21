@@ -8,6 +8,12 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.5.5', data: '2026-09-21', pavadinimas: 'Serverio aplinkos atnaujinimas',
+    pakeitimai: [
+      'Serveris perkeltas į naujesnę Node.js 22 versiją - stabilesnis skelbimų nuskaitymas',
+    ],
+  },
+  {
     versija: '2.5.4', data: '2026-09-21', pavadinimas: 'Saugumo atnaujinimas ir ištrinti skelbimai',
     pakeitimai: [
       'Atnaujinta naršyklės biblioteka (Puppeteer 25) - pašalintos 4 žinomos saugumo spragos',

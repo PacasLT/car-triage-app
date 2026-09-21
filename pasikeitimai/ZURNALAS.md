@@ -5783,3 +5783,21 @@ Pastaba sprendimui ateičiai: nuo v2.5.2 otomoto skelbimas pirma bandomas pigiai
 
 CLAUDE.md: push taisyklė atnaujinta — pushina Claude per Luko PowerShell'ą,
 Lukui leidus (sutarta sesijoje).
+
+## Z-83 · 2026-09-21 · Klaudijus · v2.5.5 · Railway → Node 22 (Luko OK)
+
+Priežastis: puppeteer 25 reikalauja node ≥22.12, Railway'jus buvo 20.20.2
+(build'e `EBADENGINE`). Ant 20.20.2 veikė, bet nepalaikoma.
+
+Kliūtis: better-sqlite3 **9.6.0 neturi node 22 prebuilt** (ABI 127 → GitHub 404),
+build'as bandytų kompiliuoti iš šaltinio. Todėl kartu:
+- `.nvmrc`: `20` → `22`; `package.json` engines: `>=20.0.0` → `22.x`
+- better-sqlite3 `^9.4.3` → `^12.1.0` (lock: 12.11.1, engines 20–26, prebuilt yra)
+- API nepakito tiek, kiek naudojam (prepare/exec/pragma/transaction). DB failo
+  formatas tas pats (SQLite) — duomenų migracijos nereikia.
+- Lock sugeneruotas normaliai (be `--ignore-scripts`), `npm audit`: 0.
+
+Testai ant node 22.23.2: rinka 32/32 (tikra SQLite), indeksas, skenavimas,
+filtrai, mobilede, portalai ir kt. — visi žali. sesija/migracija/mygtukai
+nepaleidžiami šitoje aplinkoje (seni kelių/playwright reikalavimai, ne šio
+pakeitimo).
