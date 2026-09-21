@@ -1,4 +1,4 @@
-# Būsena · atnaujinta 2026-09-21, v2.2.1 (v2.2.0 GYVA produkcijoje)
+# Būsena · atnaujinta 2026-09-21, v2.3.0 (v2.2.1 GYVA produkcijoje)
 
 Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
@@ -6,6 +6,10 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 
 | Nr. | Kas | Kieno ėjimas | Trumpai |
 |---|---|---|---|
+| K-34 | Nr. 40 · `.ct3-stats-bar` platesnė už šoną | **Dizaineris** | 1920 px: juosta 1920 stulpelyje, kurio plotis 1560 — šonas įgyja horizontalią slinktį. Trys keliai, Z-57. |
+| Nr. 39 | Filtruose nerodo piktogramų | **Dizaineris** | Ta pati `K-31` priežastis: `.ct-fld.is-inline > .ct-fld-k { display:none }` slepia ir piktogramą. 41 ir 39 uždaromi vienu ėjimu. Z-57. |
+| ~~K-32~~ | ~~Amžiaus juostos danga~~ | **Uždarytas** | `A-32`: atsarga tik 7–15 m. lange, `kmmet_n ≥ 100`. Įdiegta, sargas 88/88. Mūsų archyve uždengia 3 % (skelbimai jauni). Z-58. |
+| K-33 | Registro raktų logika (`SERIE`, `REIHE`, neapibrėžti) | **Analitikas** | `A-33`: jungti pagal (šeima, kuras); `BMW SERIE` = trys serijos viename rakte. Laukiu `modelis_dalys()` + pergeneruoto failo — diegiam VIENU commit'u. Z-58. |
 | K-31 | Nr. 41 · `is-inline` etiketės ir `NUSTATYTA` juosta | **Dizaineris** | Penki langeliai platūs, tik du neša etiketę viduje — 33 paketo pasekmė. Telefone `is-inline` vardas jau neteisingas. Trys keliai, Z-53. |
 | K-29 | Nurašymų riba: 50 (P75) ar 40 (kad BMW 530 suveiktų)? | **Analitikas** | Su amžiaus vartais 40 nebėra triukšmingas. Z-52. |
 | K-30 | Ar `rida_kv` apskritai naudotinas skelbimui vertinti? | **Analitikas** | Pamatuota: normalus 2–4 m. X5 gautų klaidingą 🟡. Z-52. |
@@ -30,6 +34,10 @@ Perrašyta iš žurnalo (Z-21, D-18), ne iš atminties.
 | L-04 / L-05 | `/admin/atsarga`, rakto rotacija | **Lukas** | Priminimai 09-19 11:30 ir 13:15 UTC. |
 
 ## Kas uždaryta paskutiniu metu
+
+- **Dizaineriui perduota Z-57** (09-21): `UZDUOTYS-DIZAINERIUI.md` perrašyta iš gyvo sąrašo, nauji `K-34` ir Nr. 39 diagnozė. Nuo 34 paketo jam nebuvo perduota nieko — dabar perduota.
+
+- v2.3.0 — **A-29 ir A-30 įdiegti** (Z-56): ridos norma tik amžiaus juostoje (`kmmet_juostos`), nurašymai 40 % + vartai 12 m. Sargas **80/80**. Pamatuota ant 1 827 tikrų BMW skelbimų: 🟡 258 → 112, bet ⚪ 266 → **1 203** (66 %) — jaunos juostos retai turi 50 įrašų. Nauji `K-32` (⚪ danga), `K-33` (`BMW 320` vs `320D` registro varduose). **Laukia push'o.**
 
 - v2.2.1 — **Automatinis sekimas IŠJUNGTAS** (Z-55). ScraperAPI nurašo ~10 kreditų už autoplius/autogido puslapį, ne 1; sekimas (~300 skelbimų) = ~3 000 kreditų ir buvo paleidžiamas po KIEKVIENO deploy'aus. Liko ~14 500 iš 100 000. Įjungti: `SEKIMAS_AUTO=1`. **Kol kodas nesutvarkytas iki galo — jokių pilnų skenavimų.**
 

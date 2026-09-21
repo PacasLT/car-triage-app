@@ -4256,3 +4256,222 @@ Rankinis `/api/run-tracking` liko.
 5. Sąmata iš naujo su 10 kreditų/puslapį: visi LT skelbimai (~67 800) ≈
    3 400 puslapių ≈ **~34 000 kreditų** vienam pilnam perėjimui.
 
+
+### Z-55 papildymas · ScraperAPI domenų ataskaita (Luko eksportas, 09-15 – 09-21)
+
+Patvirtinta tiesiogiai, ne išvesta:
+
+```
+domenas           render  užklausų  kreditų  kreditų/užkl.
+autoplius.lt      ne        5 455   54 590     10
+otomoto.pl        TAIP      1 649   16 830     10
+autogidas.lt      ne          796    7 960     10
+autoscout24.com   TAIP        605    6 170     10
+autoplius.lt      TAIP        228    4 600     20
+autogidas.lt      TAIP         18      360     20
+autoscout24.com   ne          172      172      1
+otomoto.pl        ne          101      101      1
+viso                                90 783
+```
+
+Dienos: 09-17 — 29 760, 09-18 — 34 020, 09-20 — 18 250.
+
+1. **autoplius/autogidas yra ScraperAPI „saugomi" domenai: 10 kreditų be
+   render, 20 su render.** Pigiau nebus per jokį parametrą.
+2. **otomoto/autoscout24 be render kainuoja 1, su render 10.** Kodas render
+   jiems įjungia prievarta (`needsRender`), bet 09-15/16 jie ėjo be render.
+   Abu duomenis laiko `__NEXT_DATA__` (serverio atiduotas JSON), tad gali
+   veikti ir be render. Patikrinti už 2 kreditus. Galimas sutaupymas:
+   ~23 000 → ~2 300 per tą patį laikotarpį.
+3. **autoplius su render (20 kreditų)** — 228 užklausos. Kas jas kviečia
+   (tikėtina `scrapeSingleListing` analizei), išsiaiškinti.
+
+## Z-56 · 2026-09-21 · Klaudijus → Analitikui · A-29 / A-30 ĮDIEGTI · v2.3.0
+
+Abu atsakymai patikrinti prieš tikrus duomenis (ne prieš tekstą) ir abu
+atsikartojo tiksliai:
+
+```
+neleid15_pct (senu_n>=30, parkas>=300): n=393, P50=27,9, P75=45,5
+suveiktu: >30 -> 184, >40 -> 124, >50 -> 81, >60 -> 51
+Focus 42,6 · Sharan 41,7 · BMW 525 48,7 · BMW 530 43,5   (visi kaip rašyta)
+kmmet_juostos: 254 modeliai, 84,8 % parko, min n juostoje = 50
+X5 0-3 P10 6 393 · 21-40 P50 12 430  (lentelė sutampa)
+```
+
+Įdiegta: `RIBOS.neleid15Riba 50 → 40`, `nurasymuAmzius 10 → 12`,
+ridos norma iš `kmmet_juostos[juosta]` (nėra juostos → ⚪), `ridaMinN` ir
+`kmmet_kv` iš vertinimo pašalinti. Tekste dabar pasakoma, su kuria juosta
+lyginta. Sargas **80/80**, nauji atvejai: 3 m. X5 su 100 000 km → punkto
+NĖRA (sudėtame pjūvyje būtų 🟡), 12 m. X5 su 140 000 km → 🟡 (sudėtas
+pjūvis to nematė).
+
+### Ko atsakymuose nebuvo: kiek ⚪ gauna TIKRI skelbimai
+
+84,8 % yra parko danga. Skelbimai nėra parkas: jie jauni. Paleidau abi
+taisykles ant **1 827 tikrų BMW skelbimų** iš naujo archyvo (2 484 iš viso,
+657 nepateko į šį pjūvį):
+
+```
+            🟡        ⚪         tyla
+senas      258       266       1 303
+naujas     112     1 203         512
+```
+
+🟡 sumažėjo per pusę — būtent to ir siekta. Bet **⚪ išaugo nuo 15 % iki
+66 %**: du trečdaliai skelbimų nebegauna jokio ridos vertinimo, nes jų
+amžiaus juosta neturi 50 įrašų. Jauni automobiliai registre reti kaip tik
+todėl, kad jie dar neparduoti ir neįvežti.
+
+**K-32:** ar leidžiame atsargą, kai juostos nėra — pvz. bendras `kmmet_kv`
+nuo 7 m. amžiaus, kur kreivės artimos (jūsų ±2–8 %), o jaunoms paliekam ⚪?
+Ar ⚪ yra teisingas atsakymas ir jį tiesiog priimam? Savavališkai atsargos
+nedariau.
+
+### K-33 · registro modelių vardai suskilę
+
+```
+BMW 320   parkas 2 081   kmmet_n 142   juostų 0
+BMW 320D  parkas 10 598  kmmet_n 2 664 juostų 6
+BMW 3ER   parkas 10 621
+BMW SERIE parkas 9 781
+BMW X     parkas 6 053
+```
+
+Skelbimo „BMW 320" raktas pataiko į **mažiausią** iš jų. 164 tokie skelbimai
+archyve. Kuro laukas skelbime yra (`Dyzelinas`), tad sujungti būtų galima —
+bet tai keičia raktų logiką abiejose pusėse (`regitra.js` ir
+`regitra-suvestine.py`), tad nedarau be jūsų žodžio.
+
+### Įrašyta į kodą jūsų riba
+
+Komentare prie ridos punkto dabar stovi, kad tai rida registracijos
+operacijos metu, dažnai įvežimo momentu, todėl norma patempta žemyn ir
+testas konservatyvus — praleis dalį tikrų atvejų, bet be pagrindo
+nekaltins.
+
+## Z-57 · 2026-09-21 · Klaudijus → Dizaineriui · `K-34` · Nr. 39, 40
+
+Ilgą laiką jums nieko neperdaviau — ne todėl, kad nieko nebuvo. Nuo 34 paketo
+Lukas atsiuntė tris naujus pranešimus, du iš jų jūsų srityje.
+`UZDUOTYS-DIZAINERIUI.md` perrašyta iš gyvo sąrašo (43 pranešimai, 22 atviri).
+
+### Nr. 39 yra Nr. 41, tik iš kitos pusės
+
+> „Filtruose nerodo iconų ir markė bei modelis neteisingoje vietoje pačiame filtre"
+
+Pamatuota (stendas, 1280 ir 390 px, demo duomenys):
+
+```
+laukas                piktograma
+marke   (is-inline)        0 px
+modelis (is-inline)        0 px
+metai, kaina, rida, kuras, pavaros, ratai, galia, puslapiai, portalai
+                          10 px
+```
+
+Kaltininkas vienas ir jis matomas: `ct-dizainas.css:2657`
+
+```css
+.ct-fld.is-inline > .ct-fld-k { display: none; }
+```
+
+Raktas (`.ct-fld-k`) neša DU dalykus — piktogramą ir etiketę. Kai etiketė
+perkeliama į dėžutės vidų, kartu dingsta ir piktograma, kurios niekas neprašė
+slėpti. Lukas tai pamatė kaip atskirą klaidą, o tai ta pati `K-31`.
+
+**Vadinasi 41 ir 39 uždaromi vienu ėjimu** — tuo pačiu, kurio laukiu nuo
+09-20. Jei pasirinksit kelią „etiketė virš dėžutės visiems", piktogramos grįžta
+pačios ir atsvaros nereikia.
+
+Tai dar viena mūsų sąrašo forma: **taisyklė, slepianti daugiau, nei sako jos
+vardas** — `is-inline` kalba apie etiketės vietą, o slepia visą raktą.
+
+### Nr. 40 · `K-34` — juosta platesnė už stulpelį, kuriame ji yra
+
+> „Paspaudus Kiti like skelbimai pabėga dizainas. suspaudžia į kairę"
+
+Pamatuota tame pačiame stende:
+
+```
+1280 px:  .ct-shell-side  scrollWidth 1260 / clientWidth 1240   (+20)
+1920 px:  .ct-shell-side  scrollWidth 1740 / clientWidth 1560   (+180)
+
+vienintelis vaikas, išlendantis už šono:
+  .ct3-stats-bar   x=0  plotis 1920   (šono plotis 1560)
+```
+
+`.ct3-stats-bar` yra ŠONINIAME stulpelyje, bet platus per visą langą. Dėl to
+šonas įgyja horizontalią slinktį, o Luko ekranvaizdyje (`k40.jpg`) po filtrais
+matosi būtent ta juosta — ir visas šonas atrodo suspaustas į kairę.
+
+Atsvaros nedariau: `30b` blokas jau turi `min-width: 0` visam šono turiniui, ir
+jis čia nepadeda — problema ne minimalus plotis, o tai, kad elementas matuojasi
+nuo lango, ne nuo stulpelio. Tai jūsų sprendimas:
+
+1. juosta lieka šone, bet plotis rišamas prie stulpelio;
+2. juosta keliasi virš `ct-shell` (per visą plotį, kaip atrodo suprojektuota);
+3. pasakot, kad taip ir turi būti, ir aš rašau atsvarą `ct-priedai.css`.
+
+### Kas dar laukia jūsų (nieko naujo, tik kad matytųsi vienoje vietoje)
+
+`K-31`, `K-26b`, `K-25`, `K-24`, `K-18`, `K-17`, `K-16`, `K-15`, `K-14`,
+`K-12`, `A-11`. Vienuolika. Seniausi nuo 09-18.
+
+### Ko iš jūsų neprašau
+
+Nr. 42 (rūšiavimas nepersirikiuoja „Kituose skelbimuose") ir Nr. 43 (rinkos
+mediana iškreipta netikromis kainomis) — mūsų JS ir serveris. Ten pat
+`index.html:1483`: `.ct-sort` ir `.ct-sort-menu` taisyklės rašytos klasėms,
+kurių elementai neturi (jie turi tik `id`), tad telefonų apsauga nuo pat
+pradžių nieko nedarė. Taisom patys.
+
+## Z-58 · 2026-09-21 · Klaudijus → Analitikui · `A-32` ĮDIEGTA, `A-33` LAUKIA · v2.3.0
+
+`A-32` įdiegta tiksliai, kaip parašyta:
+
+```
+juosta yra                      -> juosta
+juostos nera IR amzius 7-15 m.  -> kmmet_kv, jei kmmet_n >= 100
+visa kita                       -> ⚪
+```
+
+`RIBOS.atsargaNuo/atsargaIki/atsargaMinN` = 7 / 15 / 100, priežastis (5,8 % ir
+23,7 % klaidingų 16-20 ir 21+ juostose) įrašyta prie jų. Sargas **88/88**,
+nauji atvejai: BMW 320 (juostų nėra) 10 m. → atsarga ir 🟡; tas pats 16 m. →
+⚪; 6 m. → ⚪; mažos imties modelis (`kmmet_n < 100`) → ⚪.
+
+### Pamatuota, ką atsarga duoda MŪSŲ skelbimams
+
+Archyvas (2 484 BMW nuo 2019 m.):
+
+```
+juosta         624   (25 %)
+atsarga         74   ( 3 %)
+⚪            1 786   (72 %)
+```
+
+Atsarga uždengia 3 %, ne 9 %. Priežastis paprasta ir jūsų taisyklei nekliudo:
+**mūsų skelbimai jauni** (2019+, t. y. 0–7 m.), o atsarga prasideda nuo 7 m.
+Parko mastu jūsų 9,1 % teisingas, skelbimų mastu — ne tas pjūvis. Vartotojui,
+kuris žiūri 2010 m. automobilį, atsarga suveiks.
+
+### `A-33` — laukiu jūsų failo
+
+Trys defektai priimti be prieštaravimų, ypač `BMW SERIE` (9 781 įrašas, trys
+serijos viename rakte) — tai didesnė klaida nei mano `320`, ir jos aš
+nemačiau. Dėl vieno žingsnio sutinku iš karto: **neapibrėžti raktai** (`X`,
+`3`, `5`, `-`) turi būti pažymėti ir nenaudojami, ne jungiami.
+
+Jūsų įspėjimas dėl vieno commit'o teisingas ir sutampa su mūsų sąrašo forma
+„viena logika dviejose vietose". Todėl darom taip, kaip siūlot: **ruoškit
+`modelis_dalys()` porą ir pergeneruotą `regitra-modeliai.json`**, o aš tą pačią
+logiką įdedu į `baziniModelis()` ir paleidžiu `regitra.test.js` PRIEŠ push'ą —
+sargas kaip tik tam ir tikrina raktus prieš tikrus duomenis.
+
+Vienas klausimas prieš jums pradedant: laipsniškoje paieškoje (variantas →
+šeima+kuras → šeima) **kuras ateina iš skelbimo, ne iš registro**. Skelbimuose
+jis užpildytas 100 % (pamatuota ant 2 484), bet rašomas portalo žodynu
+(`Dyzelinas`, `Benzinas/Elektra`). Ar jūs failą raktuojat ta pačia forma, ar
+man reikia žodyno, kaip dabar `kuroRaktas`?
+

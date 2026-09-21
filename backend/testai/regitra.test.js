@@ -79,8 +79,25 @@ const METAI = new Date().getFullYear();
   const q = rasti({ marke: 'BMW', modelis: 'X5', metai: METAI - a, rida }, 'RIDOS NORMA');
   T(q.length === 0, a + ' m. X5, rida tiksliai pagal medianą (' + rida + ' km) → punkto NĖRA');
 });
-p = rasti({ marke: 'BMW', modelis: 'X5', metai: METAI - 3, rida: 20000 }, 'RIDOS NORMA');
-T(p.length === 1 && p[0].lygis === R.LYGIS.SIGNALAS, '3 m. X5 su 20 000 km → 🟡 (tikrai mažai)');
+// A-30: palyginimas TIK savo amžiaus juostoje. Jauni X5 važinėja mažai
+// (0-3 m. P10 = 6 393 km/met), todėl 3 m. su 20 000 km (6 667/met) jau NĖRA
+// įtartinas - anksčiau, pagal sudėtą kmmet_kv (P10 11 132), buvo 🟡.
+lygu(R.amziausJuosta(x5, 3) && R.amziausJuosta(x5, 3).raktas, '0-3', 'amziausJuosta(X5, 3) → 0-3');
+lygu(R.amziausJuosta(x5, 12) && R.amziausJuosta(x5, 12).raktas, '10-12', 'amziausJuosta(X5, 12) → 10-12');
+lygu(R.amziausJuosta(x5, 41), null, 'už paskutinės juostos → null');
+T(rasti({ marke: 'BMW', modelis: 'X5', metai: METAI - 3, rida: 20000 }, 'RIDOS NORMA').length === 0,
+  '3 m. X5 su 20 000 km → punkto NĖRA (savo juostoje virš P10)');
+// Lemiamas A-30 atvejis: 3 m. X5 su 100 000 km pagal sudėtą rida_kv būtų
+// „žemiau P10", o savo juostoje jis ties P90. Punkto būti negali.
+T(rasti({ marke: 'BMW', modelis: 'X5', metai: METAI - 3, rida: 100000 }, 'RIDOS NORMA').length === 0,
+  '3 m. X5 su 100 000 km → punkto NĖRA (juostoje ties P90, ne P10)');
+// Priešinga kryptis: 12 m. X5 su 140 000 km (11 667/met) sudėtame kmmet_kv
+// buvo virš P10 (11 132) ir praslysdavo; savo juostoje (P10 13 374) - žemiau.
+T(rasti({ marke: 'BMW', modelis: 'X5', metai: METAI - 12, rida: 140000 }, 'RIDOS NORMA').length === 1,
+  '12 m. X5 su 140 000 km → 🟡 (juostoje žemiau P10; sudėtas pjūvis to nematė)');
+p = rasti({ marke: 'BMW', modelis: 'X5', metai: METAI - 3, rida: 15000 }, 'RIDOS NORMA');
+T(p.length === 1 && p[0].lygis === R.LYGIS.SIGNALAS, '3 m. X5 su 15 000 km → 🟡 (tikrai mažai ir juostoje)');
+T(p.length === 1 && /0–3 metų/.test(p[0].tekstas), 'tekste pasakyta, su kuria amžiaus juosta lyginta');
 T(p.length === 1 && /10 %/.test(p[0].tekstas), 'tekste sakoma „tarp 10 % mažiausiai važiavusių"');
 T(p.length === 1 && /Paklauskite/.test(p[0].tekstas), 'tekstas baigiasi KLAUSIMU pardavėjui');
 p = rasti({ marke: 'BMW', modelis: 'X5', metai: null, rida: 60000 }, 'RIDOS NORMA');
@@ -88,16 +105,35 @@ T(p.length === 1 && p[0].lygis === R.LYGIS.NEZINOMA, 'be metų → ⚪, ne tyla'
 p = rasti({ marke: 'BMW', modelis: 'X5', metai: METAI - 10, rida: null }, 'RIDOS NORMA');
 T(p.length === 1 && p[0].lygis === R.LYGIS.NEZINOMA, 'be ridos → ⚪, ne tyla');
 
-console.log('\n── 5. Nurašymai · 15+ pjūvis, riba 50 (P75), amžiaus vartai ─');
-T(rasti({ marke: 'BMW', modelis: '530', metai: METAI - 18 }, 'NURAŠYMAI').length === 0,
-  'BMW 530 (43,5 % tarp 15+) → punkto nėra (žemiau P75)');
+// A-32 · atsarga, kai juostos nėra: TIK 7-15 m. ir tik kai kmmet_n >= 100.
+const b320 = R.kontekstas('BMW', '320');
+lygu(R.amziausJuosta(b320, 10) && R.amziausJuosta(b320, 10).raktas, 'atsarga', 'BMW 320 (juostų nėra), 10 m. → atsarga');
+T(R.amziausJuosta(b320, 10).v[1] === b320.kmmet_kv[0], 'atsargos P10 = sudėtinio kmmet_kv P10');
+lygu(R.amziausJuosta(b320, 6), null, '6 m. → atsargos NĖRA (jaunoms sudėtinis klysta 1,3-3,3 %)');
+lygu(R.amziausJuosta(b320, 16), null, '16 m. → atsargos NĖRA (16-20 klaidingai žymėtų 5,8 %, 21+ – 23,7 %)');
+lygu(R.amziausJuosta(R.kontekstas('BMW', '118'), 10), null, 'mažos imties modelis (kmmet_n < 100) → atsargos nėra');
+p = rasti({ marke: 'BMW', modelis: '320', metai: METAI - 10, rida: 60000 }, 'RIDOS NORMA');
+T(p.length === 1 && p[0].lygis === R.LYGIS.SIGNALAS, 'BMW 320, 10 m., 6 000 km/met → 🟡 per atsargą');
+T(p.length === 1 && /visų amžių/.test(p[0].tekstas), 'tekste pasakyta, kad lyginta su visų amžių imtimi');
+T(rasti({ marke: 'BMW', modelis: '320', metai: METAI - 16, rida: 60000 }, 'RIDOS NORMA')[0].lygis === R.LYGIS.NEZINOMA,
+  'tas pats modelis 16 m. → ⚪, ne spėjimas');
+
+console.log('\n── 5. Nurašymai · 15+ pjūvis, riba 40, amžiaus vartai 12 (A-29) ─');
+T(rasti({ marke: 'BMW', modelis: '530', metai: METAI - 18 }, 'NURAŠYMAI').length === 1,
+  'BMW 530 (43,5 % tarp 15+), 18 m. → 🟡 (riba 40)');
+T(rasti({ marke: 'FORD', modelis: 'FOCUS', metai: METAI - 17 }, 'NURAŠYMAI').length === 1,
+  'Ford Focus (42,6 %), 17 m. → 🟡 (analitiko pavyzdys)');
+T(rasti({ marke: 'FORD', modelis: 'FOCUS', metai: METAI - 5 }, 'NURAŠYMAI').length === 0,
+  'tas pats Focus, bet 5 m. → punkto NĖRA (vartai daro atranką, ne riba)');
 p = rasti({ marke: 'MAZDA', modelis: '323', metai: METAI - 20 }, 'NURAŠYMAI');
 T(p.length === 1, 'Mazda 323 (83,3 %), 20 m. skelbimas → 🟡');
 // AMZIAUS VARTAI: ta pati statistika 3 metu masinai nieko nesako.
 T(rasti({ marke: 'MAZDA', modelis: '323', metai: METAI - 3 }, 'NURAŠYMAI').length === 0,
   'tas pats modelis, bet 3 m. skelbimas → punkto NĖRA (15+ statistika ne apie jį)');
-T(rasti({ marke: 'MAZDA', modelis: '323', metai: METAI - 10 }, 'NURAŠYMAI').length === 1,
-  '10 m. skelbimas → punktas yra (vartai atsidaro)');
+T(rasti({ marke: 'MAZDA', modelis: '323', metai: METAI - 11 }, 'NURAŠYMAI').length === 0,
+  '11 m. skelbimas → punkto nėra (vartai 12)');
+T(rasti({ marke: 'MAZDA', modelis: '323', metai: METAI - 12 }, 'NURAŠYMAI').length === 1,
+  '12 m. skelbimas → punktas yra (vartai atsidaro)');
 T(rasti({ marke: 'MAZDA', modelis: '323' }, 'NURAŠYMAI').length === 0,
   'be metų → punkto nėra (amžiaus nežinom, tad ir nesakom)');
 T(p.length === 1 && /15\+/.test(p[0].tekstas), 'tekste pasakyta, kad tai 15+ metų pjūvis');

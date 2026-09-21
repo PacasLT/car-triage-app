@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.3.0', data: '2026-09-21', pavadinimas: 'Ridos palyginimas pagal automobilio amziu',
+    pakeitimai: [
+      'Rida lyginama tik su TOKIO PAT amziaus to modelio automobiliais - anksciau jauni automobiliai gaudavo klaidinga ispejima',
+      'Kai tokio amziaus duomenu registre per mazai, taip ir parasoma, o ne speliojama',
+      'Nurasymu ispejimas rodomas nuo 12 metu automobiliams, riba 40 %',
+    ],
+  },
+  {
     versija: '2.2.1', data: '2026-09-21', pavadinimas: 'Automatinis sekimas laikinai isjungtas',
     pakeitimai: [
       'Kasdienis sekamu skelbimu tikrinimas laikinai sustabdytas, kol pertvarkomas skenavimas',

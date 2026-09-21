@@ -87,16 +87,28 @@ const RIBOS = {
   apyvJudrus: 26,        // >= 26 %  -> 🟢  (133 modeliai)
   apyvLetas: 13,         // <= 13 %  -> 🟡  (129 modeliai)
 
-  // Ridos percentilis: zemiau P10 pagal MODELIO PACIOS imties pasiskirstyma.
-  ridaMinN: 20,
-
   parkasRetas: 300,      // < 300    -> 🟡
 
-  // 851 modelis su `senu_n >= 30`: mediana 29,6 %, P75 = 52,5 %.
-  // 30 % butu SUVEIKE 49 % MODELIU - tai ne signalas, o moneta.
-  neleid15Riba: 50,      // > 50 %   -> 🟡  (232 modeliai, virsutinis ketvirtis)
+  // A-29 (analitikas, 2026-09-21): 393 modeliai (senu_n >= 30, parkas >= 300),
+  // P50 = 27,9 %, P75 = 45,5 %. Ties 40 % suveiktu 124 (31,6 %) - todel
+  // riba viena pati netinka; atranka daro AMZIAUS VARTAI (>= 12 m.), ne riba.
+  // Suveikia tik nuleidus iki 40: Focus 42,6, Sharan 41,7, BMW 525 48,7,
+  // BMW 530 43,5 - kas antras ju 15+ m. egzempliorius nebevažiuoja.
+  neleid15Riba: 40,      // > 40 %   -> 🟡
   senuMinN: 30,
-  nurasymuAmzius: 10,    // skelbimo automobiliui turi buti bent tiek metu
+  nurasymuAmzius: 12,    // skelbimo automobiliui turi buti bent tiek metu
+
+  // A-30: ridos norma - TIK amziaus juostoje (`kmmet_juostos`, >= 50 irasu).
+  // Juostas turi 254 modeliai is 1 343, bet tai 84,8 % parko.
+  //
+  // A-32: kai juostos nera, sudetinis `kmmet_kv` leidziamas TIK 7-15 metu
+  // lange. Analitiko simuliacija (246 338 irasai): klaidingai pazymetu
+  // 7-9 0,4 %, 10-12 0,1 %, 13-15 0,5 %, bet 16-20 jau 5,8 %, o 21+ - 23,7 %.
+  // Uz 15 metu sudetinis P10 pakyla VIRS juostos, t. y. kaltintu be pagrindo.
+  // Jaunoms (0-6) irgi ne: ten 1,3-3,3 %.
+  atsargaNuo: 7,
+  atsargaIki: 15,
+  atsargaMinN: 100,      // P10 is 25 irasu svyruoja -24 .. +21 % (Audi A6 16-20)
 
   kuroMazuma: 15,        // <= 15 %  -> 🟡  siauras pirkeju ratas
 };
@@ -154,6 +166,26 @@ function kuroDalis(r, kuras) {
 
 // ── Punktai ──────────────────────────────────────────────────────────────────
 // `c` - skelbimas: { marke, modelis, metai, rida, kuras }.
+// Amziaus juosta is `kmmet_juostos` (raktai '0-3', '4-6', ..., '21-40').
+// Nera juostos (maziau 50 irasu) -> null, ir sasaja rodo ⚪, ne spejima.
+function amziausJuosta(r, amzius) {
+  if (!r || amzius == null) return null;
+  for (const k of Object.keys(r.kmmet_juostos || {})) {
+    const [nuo, iki] = k.split('-').map(Number);
+    if (amzius >= nuo && amzius <= iki) {
+      return { raktas: k, v: r.kmmet_juostos[k], pavadinimas: nuo + '–' + iki + ' metų' };
+    }
+  }
+  // A-32 atsarga: tik 7-15 m. lange ir tik su pakankama imtimi.
+  if (amzius >= RIBOS.atsargaNuo && amzius <= RIBOS.atsargaIki
+      && Array.isArray(r.kmmet_kv) && r.kmmet_n >= RIBOS.atsargaMinN) {
+    const kv = r.kmmet_kv;                                    // [P10, P25, P50, P75, P90]
+    return { raktas: 'atsarga', v: [r.kmmet_n, kv[0], kv[1], kv[2], kv[3], kv[4]],
+      pavadinimas: 'visų amžių', atsarga: true };
+  }
+  return null;
+}
+
 function punktai(c) {
   if (!c) return [];
   const r = kontekstas(c.marke, c.modelis);
@@ -175,32 +207,39 @@ function punktai(c) {
       'LT rinkoje tik ' + r.apyv_pct + ' % per metus keičia savininką – lėtas pardavimas'));
   }
 
-  // 2. Ridos norma · PERCENTILIS, ne santykis su mediana.
+  // 2. Ridos norma · km/metus TOS PACIOS AMZIAUS JUOSTOS viduje (A-30).
   //
-  // Lyginam KM PER METUS su `kmmet_kv`, o NE absoliucia rida su `rida_kv`.
-  // Absoliuti rida uzfiksuota registracijos operacijos metu, tad jos
-  // pasiskirstyme guli ir ka tik ivezti jauni automobiliai. Pamatuota:
-  // visiskai normalus 2-4 metu BMW X5 (mediana 17 323 km/met) patenka ZEMIAU
-  // `rida_kv` P10 ir gautu klaidinga 🟡. Su `kmmet_kv` jis atsiduria P50-P75,
-  // o tikrai mazai vazines (3 m., 20 000 km) - vis tiek zemiau P10.
+  // Sudeti procentiliai (`rida_kv`, `kmmet_kv`) konkreciam skelbimui NETINKA:
+  // km per metus krinta su amziumi monotoniskai (X5 21 851 -> 12 430,
+  // Passat 46 774 -> 11 333). Pamatuota: 3 m. X5 su 100 000 km pagal sudeta
+  // `rida_kv` butu „zemiau P10", o savo juostoje jis ties P90 - verdiktas
+  // APSIVERCIA. Vieno bendro amziaus koeficiento irgi neuztenka (Passat
+  // 0-3 m. -49 %, XC60 +18-22 %).
+  //
+  // RIBA, kuria butina zinoti: rida uzfiksuota REGISTRACIJOS operacijos metu,
+  // Lietuvoje daznai - ivezant, t. y. butent tada, kai ji atsukama. Norma
+  // pati patempta zemyn, tad testas KONSERVATYVUS: dali tikru atveju praleis,
+  // bet be pagrindo nekaltins. Tokios krypties klaidos ir norim.
   const metai = parseInt(c.metai, 10);
   const rida = parseFloat(c.rida);
   const amzius = metai ? (new Date().getFullYear() - metai) : null;
-  const kv = r.kmmet_kv;
+  const juosta = amziausJuosta(r, amzius);
 
-  if (!kv || !r.kmmet_n || r.kmmet_n < RIBOS.ridaMinN) {
-    out.push(punktas(LYGIS.NEZINOMA, 'RIDOS NORMA',
-      'Per mažai registracijų su rida, kad pasiskirstymas ką nors reikštų'));
-  } else if (!amzius || amzius < 1 || !rida) {
+  if (!amzius || amzius < 1 || !rida) {
     out.push(punktas(LYGIS.NEZINOMA, 'RIDOS NORMA',
       'Nepakanka duomenų palyginti (reikia metų ir ridos)'));
+  } else if (!juosta) {
+    out.push(punktas(LYGIS.NEZINOMA, 'RIDOS NORMA',
+      'Registre per mažai tokio amžiaus šio modelio automobilių su rida, kad būtų su kuo palyginti'));
   } else {
     const kmMet = rida / amzius;
-    if (kmMet < kv[0]) {           // kv = [P10, P25, P50, P75, P90]
+    const [n, p10, , p50] = juosta.v;   // [n, P10, P25, P50, P75, P90]
+    if (kmMet < p10) {
       out.push(punktas(LYGIS.SIGNALAS, 'RIDOS NORMA',
         sk(Math.round(kmMet)) + ' km per metus – patenka tarp 10 % mažiausiai '
-        + 'važiavusių šio modelio Lietuvoje (' + sk(r.kmmet_n) + ' registracijų, '
-        + 'mediana ' + sk(kv[2]) + ' km/metus). Paklauskite pardavėjo dėl serviso istorijos.'));
+        + 'važiavusių ' + juosta.pavadinimas + ' šio modelio automobilių Lietuvoje ('
+        + sk(n) + ' registracijų, mediana ' + sk(p50) + ' km/metus). '
+        + 'Paklauskite pardavėjo dėl serviso istorijos.'));
     }
     // Virs P10 punkto nera: „rida iprasta" nera zinia.
   }
@@ -244,7 +283,7 @@ function punktai(c) {
 
 module.exports = {
   ikelti, kontekstas, punktai,
-  baziniModelis, markeNorm, tikrintiTeksta, kuroRaktas, kuroDalis,
+  baziniModelis, markeNorm, tikrintiTeksta, kuroRaktas, kuroDalis, amziausJuosta,
   RIBOS, LYGIS, DRAUDZIAMA,
   meta: () => META,
 };

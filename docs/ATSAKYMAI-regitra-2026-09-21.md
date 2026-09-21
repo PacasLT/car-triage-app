@@ -264,3 +264,116 @@ Juosta įrašoma tik turint **≥ 50 įrašų**; kitaip jos nėra ir sąsajoje r
 Šis skaičius yra rida **registracijos operacijos metu**, o Lietuvoje tai dažniausiai įvežimo momentas – tiksliai tas momentas, prieš kurį rida ir yra atsukama. Vadinasi lyginame įtartiną skelbimą su populiacija, kurioje irgi yra atsuktų ridų.
 
 Tai daro testą **konservatyvų**: tikra atsukta rida gali atrodyti normali, nes „norma" pati patempta žemyn. Klaidingų kaltinimų kryptimi jis neklysta – tik praleidžia dalį tikrų atvejų. Būtent tokios krypties klaidą ir norim, bet pasakyti tai reikia atvirai, o ne leisti galvoti, kad P10 yra švarus etalonas.
+
+---
+
+# A-32 · Atsargą leidžiam, bet langas 7–15 metų, ne 7+
+
+Gerai, kad nedarėte savavališkai – **mano „±2–8 %" buvo apie medianas, o punktas remiasi P10 uodega, ir ji elgiasi kitaip.**
+
+Simuliacija: paimti tik tie įrašai, kuriems juosta **yra**, ir palyginta, kiek kartų sudėtinis P10 duotų kitą verdiktą nei juostos P10. 246 338 įrašai.
+
+| Juosta | Įrašų | Klaidingai pažymėta | Praleista | Klaidų iš viso |
+|---|---|---|---|---|
+| 0–3 m. | 3 295 | **3,3 %** | 1,7 % | 5,1 % |
+| 4–6 m. | 17 372 | 1,3 % | 2,6 % | 3,9 % |
+| **7–9 m.** | 38 321 | **0,4 %** | 3,5 % | 4,0 % |
+| **10–12 m.** | 61 889 | **0,1 %** | 4,8 % | 4,8 % |
+| **13–15 m.** | 57 398 | **0,5 %** | 3,4 % | 4,0 % |
+| 16–20 m. | 57 382 | **5,8 %** | 0,3 % | 6,1 % |
+| 21+ m. | 10 681 | **23,7 %** | 0,0 % | 23,7 % |
+
+**Riba yra ne ties 7, o ties 15 metų.** Nuo 16 m. sudėtinis P10 pakyla virš juostos P10, ir kas ketvirtas 21+ metų automobilis gautų 🟡 be jokio pagrindo. Tai tiksliai ta klaidos kryptis, kurios negalima leisti – kaltinimas be pagrindo.
+
+7–15 metų lange atvirkščiai: klaidingai pažymima **0,1–0,5 %**, o visa likusi klaida yra **praleidimas** (3,4–4,8 %). Tai ta pati konservatyvi kryptis, kurią jau sąmoningai priėmėm dėl atsuktų ridų etalone. Vadinasi atsarga ten beveik nemokama.
+
+**Antra sąlyga – imties dydis.** Sudėtinių `n ≥ 20` neužtenka: P10 iš 25 atsitiktinių įrašų svyruoja **−24 % … +21 %** (tikrinta su Audi A6 16–20 m. juosta, kur tikras P10 = 10 690, o iš 25 įrašų gaunasi 8 091–12 894). Atsargai siūlau reikalauti **`kmmet_n ≥ 100`**.
+
+## Sprendimas
+
+```
+juosta yra                      → naudojam juostą
+juostos nėra IR amžius 7–15 m.  → sudėtinis kmmet_kv, jei kmmet_n >= 100
+visais kitais atvejais          → ⚪
+```
+
+Taigi ⚪ yra teisingas atsakymas **0–6 ir 16+ metams**, o 7–15 m. – ne. Nauda: atsargos reikėtų 347 modeliams, o tai **9,1 % parko** – danga pakiltų nuo 84,8 % iki ~94 %.
+
+Į failą įrašyti nieko nereikia: `kmmet_kv` ir `kmmet_n` jau yra.
+
+---
+
+# A-33 · Taip, jungiam – bet ne pagal variklio kodą, o pagal šeimą + kurą
+
+Ir svarbiausia: **BMW 320 nėra didžiausia šios srities problema.** Pažiūrėjus į tikrus registro vardus matosi trys atskiri defektai.
+
+## Defektas 1 – užpildomieji žodžiai (didesnis už 320)
+
+| Tikras `KOMERCINIS_PAV` | Kiek | Dabartinis raktas |
+|---|---|---|
+| `3ER REIHE` | 10 491 | BMW 3ER |
+| `5ER REIHE` | 9 149 | BMW 5ER |
+| `SERIE 3` | 2 443 | **BMW SERIE** |
+| `SERIE 5` | 2 156 | **BMW SERIE** |
+| `SERIE X` | 3 503 | **BMW SERIE** |
+| `X REIHE` | 5 918 | **BMW X** |
+
+`BMW SERIE` (9 781) yra **trys skirtingos serijos viename rakte**, nes ėmėm pirmą žodį, o pirmas žodis yra „SERIE". Tai blogiau nei 320 atvejis ir galioja nepriklausomai nuo jo.
+
+Taisymas: prieš imant pirmą žodį išmesti `REIHE`, `SERIE`, `SERIES`, `KLASSE`, `CLASS`; `3ER` → `3`.
+
+## Defektas 2 – vardai, kurie apskritai nieko nesako
+
+`X REIHE` (5 918) reiškia tiesiog „X serija" – registras nenurodo, ar tai X1, ar X5. Tokių vienaženklių raktų BMW turi 7 672 įrašus (**4,9 % visų BMW**): `X`, `5`, `7`, `3`, `1`, `M`, `Z`, ir net `-` (328).
+
+Šitų **sujungti su niekuo negalima** – juose sumaišyti skirtingi automobiliai. Siūlau juos ne jungti, o **pažymėti `neapibreztas: true` ir niekada nenaudoti**, lygiai kaip „Nuasmeninta". Geriau ⚪ nei X1 statistika, parodyta prie X5.
+
+## Defektas 3 – 320 prieš 320D (jūsų klausimas)
+
+Išmatavau, ar 3 serijos variantus apskritai galima jungti. **Toje pačioje amžiaus juostoje – taip, jei kuras tas pats:**
+
+| Variantas | 10–12 m. P10 | 13–15 m. P10 | 16–20 m. P10 |
+|---|---|---|---|
+| **Visa 3 serija** | 14 313 | 12 493 | 9 997 |
+| 3ER/SERIE | 14 469 | 12 806 | 10 618 |
+| 320D | 14 475 | 12 575 | 9 974 |
+| 318D | 14 122 | 11 994 | 10 806 |
+| 330D | 14 313 | 13 075 | 11 256 |
+| 316D | 13 823 | – | – |
+| **320I** (benzinas) | – | – | **8 111 (−19 %)** |
+| **320ED** (hibridas) | **18 325 (+28 %)** | – | – |
+
+Dyzeliniai variantai tarpusavyje skiriasi **±2–5 %** – jungti saugu. Bet benzininis 320I yra 19 % žemiau, o hibridas 320ED 28 % aukščiau šeimos vidurkio.
+
+**Vadinasi jūsų nuojauta teisinga, tik ašis kita: skiria ne variklio kodas, o kuras.** Jungti reikia pagal **(šeima, kuras)**, o ne bandyti „320 → 320D".
+
+## Siūloma raktų logika
+
+Vietoj vieno rakto – **šeima plius variantas**, ir paieška krenta laipsniais:
+
+```js
+// 1. uzpildomieji zodziai lauk, 3ER -> 3
+const FILLER = new Set(['REIHE','SERIE','SERIES','KLASSE','CLASS']);
+// 2. seima:
+//    X5 / X 5 / Z4  -> raide + skaicius    (X5 yra sava seima, ne „X")
+//    320 / 320D     -> pirmas skaitmuo     (3 serija)
+//    GOLF / PASSAT  -> pats zodis
+// 3. neapibrezti (bare „X", „3", „-") -> neapibreztas: true, nenaudojam
+```
+
+Paieškos tvarka skelbimui:
+
+```
+1. tikslus variantas (BMW 320D)                → jei yra ir turi duomenu
+2. seima + kuras     (BMW 3 · Dyzelinas)       → siulomas numatytasis
+3. seima             (BMW 3)                   → tik parkui/likvidumui, NE ridai
+4. nieko                                       → ⚪
+```
+
+Ridos punktui 3 žingsnio neužtenka, nes būtent kuras ir skiria; likvidumui ir retumui – visiškai tinka, ten kuro skirtumas nesvarbus.
+
+## Įspėjimas dėl diegimo
+
+Raktų logika gyvena dviejose vietose, todėl **`modelis_dalys()`, `baziniModelis()` ir pergeneruotas `regitra-modeliai.json` turi keliauti VIENU commit'u**. Jei duomenys su naujais raktais pateks į produkciją prie senos JS – visi raktai nustos pataikyti ir punktai tyliai dings. `regitra.test.js` tai pagaus tik jei jis paleidžiamas prieš push'ą.
+
+Dėl šios priežasties duomenų **nepergeneravau** – tai jūsų commit'as. Pasakykit, ir paruošiu `modelis_dalys()` bei `baziniModelis()` porą kartu su pergeneruotu failu, kad viskas sugultų vienu žingsniu.
