@@ -9,8 +9,9 @@ Viskas, ko laukia tavęs. Kiekvienas punktas ≤ 1 min. Perrašo Klaudijus po ki
 - [x] Fazė C praėjo visi. `PLETRA.md` projekte (įrašė Klaudijus), `SAVIKAINA.md` – Finansininkas pats.
 - [ ] Finansininkui: Q-4–Q-7 atsakyta `SAVIKAINA-DUOMENYS.md` §6. Plano kaina, PVM – iš tavęs.
 
-## ⚠ Skubu
-- **ScraperAPI: panaudota 87 741 iš 100 000 (88 %).** Liko ~12 000 kr. ≈ 85–200 LT paieškų. ScraperAPI paskyroje pažiūrėk: (1) **kada ciklas atsinaujina**, (2) plano pavadinimas/kaina, (3) Usage grafikas per 2–4 sav. – persiųsk Klaudijui. Iki tol – jokių skenavimų.
+## ScraperAPI (nebe skubu)
+- Sąskaita: Hobby 49 $, **34 846 / 100 000** šį ciklą, atsinaujina **10-16**, pasiekus ribą – sustoja (be automatinio brangesnio plano). Mūsų admin skaitliukas (87 741) klaidingas – taisymas F-3+.
+- Tempas kūrimo savaitę ~5 800 kr./d. → jei nesumažės, riba ~10-03. Po savaitės pažiūrėk Usage dar kartą.
 
 ## Sprendimai (vienu žodžiu)
 | Nr. | Klausimas | Variantai |
@@ -20,7 +21,7 @@ Viskas, ko laukia tavęs. Kiekvienas punktas ≤ 1 min. Perrašo Klaudijus po ki
 | F-1 | Verslo planas „neribota“ → riba (pvz. 600 paieškų/mėn.) arba LT paieška skaičiuojama už 2 | riba / už 2 / palikti |
 | F-2 | Pro 100 → 60 paieškų, arba LT paieška už 2 | 60 / už 2 / palikti |
 | F-3 | Įspėjimas tau, kai ScraperAPI fondo lieka < 20 % (dabar jau 12 %) | taip / ne |
-| F-3+ | Sargas + paros ScraperAPI žurnalas diske (kiek kr. per dieną ir iš kur). Kodo darbas ~1 leidimas, 0 kr. | taip / ne |
+| F-3+ | Sargas + paros ScraperAPI žurnalas diske (kiek kr. per dieną ir iš kur) + teisingas likučio skaitliukas. ~1 leidimas, 0 kr. | taip / ne |
 | R-1 | Kainos istorija kortelėje: „↓ 1 500 € per 9 d.“ + mini grafikas. Duomenys jau renkami, 0 ScraperAPI kr. | taip / vėliau |
 | R-2 | Ridos atsukimo žyma pagal VIN (tas pats VIN vėliau su mažesne rida). Duomenys yra, trūksta VIN indekso | taip / vėliau |
 | P-1 | Plėtros tikslinės grupės A perpardavėjai (prioritetas), B pirkėjai, C vienkartiniai | taip / keisti |
