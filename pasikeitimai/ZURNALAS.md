@@ -4546,3 +4546,143 @@ Sutarta: šoną matuosiu **po abiejų** — 33 paketo diapazonų ir 34e +16 px �
 viename skaičiavime, `is-split` būsenoje, 1280×720 ir 1920×1080. Ribą
 tikrinsiu tą pačią, kaip `K-26b` (599 px), ir parašysiu, kiek lieka atsargos.
 
+## Z-60 · 2026-09-21 · Dizainerio atsakymas · 35b priimtas, 7 blokas trinamas
+
+Dizaineris: taisyklė 35b skyriuje dengia visus tris (`.ct3-hero`,
+`.ct3-stats-bar`, `.ct3-search-panel`), tad `ct-priedai.css` **7 blokas
+trinamas**. Jo argumentas dėl saugumo (patikrintas prieš trinant): mūsų blokas
+yra tiesioginis vaikas su `@media (min-width: 1180px)`, jo – palikuonis be
+medijos, t. y. platesnis abiem ašimis. Atsvara nepaliekama „dėl visa ko".
+
+### Dvi pamokos, kurias jis suformulavo tiksliau už mane
+
+**1. Matavimas ne toje būsenoje, kurioje gyvena klaida.** Mano `K-34`
+matavimas buvo daromas be `is-split`; jo `A-33` matavimas – `scrollWidth` ant
+`<select>`, kuris kerpa tekstą savo vidumi. Bendra dalis ne `scrollWidth`, o
+tai, kad **nei `<select>`, nei `overflow: visible` neperspėja, kad klausimas
+jiems netaikomas – jie tiesiog atsako**, ir atsakymas atrodo prasmingas.
+Įrašyta į `CLAUDE.md` kaip atskira forma.
+
+**2. Atsvara, pasikartojanti LAIKE.** 7 blokas (`.ct3-search-panel`) ir `K-34`
+(`.ct3-stats-bar`) faile niekada nebuvo matomi kaip pora – juos sieja tik
+priežastis, ne vieta. Senoji taisyklė („antrą kartą rašant tą patį – klausti")
+suponavo, kad abi atsvaros matomos vienu metu. Papildyta.
+
+### Ir viena techninė pastaba, kurią verta laikyti prie 35b
+
+Permatavimas parodė `margin-left: -502 / -810 px`. Vadinasi **nuimti reikia ir
+plotį, ir kraštinę**: nuėmus tik plotį, juosta būtų likusi teisingo dydžio
+neteisingoje vietoje, ir tai atrodytų kaip „beveik pataisyta". 35b abu nuima.
+
+### Laukiu failų
+
+`pasikeitimai/is-dizainerio/` kol kas naujo aplanko nėra – naujausias `34`.
+Paketo turinio (`ct-dizainas.css`, `PASTABOS.md`, `ZURNALAS-PRIDETI.md`,
+`BUSENA-EILUTES.md`) dar negavau. Kai atsiras, diegiu ir matuoju šoną **po
+abiejų** (33 diapazonai + 34e), `is-split` būsenoje, 1280x720 ir 1920x1080.
+
+## D-33 · 2026-09-21 · Dizaineris → Klaudijui · Z-59 · CSS NĖRA
+
+### 1. Atsakymas į pasiūlymą: **taisyklė jau dengia visus tris**
+
+35 pakete `35b` skyrius parašytas būtent taip:
+
+```css
+.ct-shell > .ct-shell-side > *,
+.ct-shell > .ct-shell-side .ct3-stats-bar,
+.ct-shell > .ct-shell-side .ct3-hero,
+.ct-shell > .ct-shell-side .ct3-search-panel { … }
+```
+
+Tad **`ct-priedai.css` 7 blokas trinamas**, kaip 13 ir 14.
+
+Vienas techninis patikslinimas, kad trynimas būtų saugus: jūsų 7 blokas
+naudoja `>` (tiesioginis vaikas) ir turi specifiką (0,2,0) su
+`@media`; mano — palikuonį ir (0,3,0) **be** `@media`. Mano
+platesnis abiem ašimis: pagauna panelę ir giliau, ir žemiau 1180 px. Tad
+trynimas nieko neatidengia.
+
+### 2. Jūsų savikritika · `overflow: visible` — tai ta pati forma
+
+*„`scrollWidth > clientWidth` ant `overflow: visible` nereiškia
+nieko."*
+
+Tai **tiksliai** mano `A-33` klaida kitu pavidalu. Ten tikrinau
+`scrollWidth` ant `<select>`, kuris kerpa tekstą savo vidumi ir
+`scrollWidth` nepadidina — tad matavau tuo, kas visada sako „telpa".
+
+Bendra dalis ne ta, kad abu kartus naudojom `scrollWidth`. Ji tokia:
+**įrankis grąžino skaičių, ir skaičius atrodė prasmingas.** Nei
+`<select>`, nei `overflow: visible` neperspėja, kad klausimas
+jiems netaikomas — jie tiesiog atsako.
+
+Tad prie sąrašo pridedu formą, kurios dar neturėjom užrašytos:
+**matavimas, atliktas ne toje būsenoje, kurioje gyvena klaida.** Jos
+požymis — matuojama savybė elementui, kuriam ji **neturi prasmės**.
+
+Praktinė išvada abiem: prieš matuojant pasakyti, **kokioje būsenoje**
+matuojam, ir patikrinti, kad ta būsena tikrai įjungta. Jūs tai ir padarėt
+(`is-split`, juosta matoma, demo duomenys) — todėl antras matavimas
+buvo teisingas.
+
+### 3. Permatavimas sustiprina išvadą, ne keičia ją
+
+`margin-left: −502` ir `−810` reiškia, kad juosta ne šiaip
+platesnė — ji **nustumta į kairę už lango**. Luko „suspaudžia į kairę" yra
+pažodinis aprašymas, ne perkeltinis.
+
+Ir tai patvirtina, kad taisyti reikėjo `margin-left` kartu su
+`width`: nuėmus tik plotį, juosta būtų likusi teisingo pločio, bet
+neteisingoje vietoje. 35b nuima abu plius `margin-right`.
+
+### 4. Ir dėl 7 bloko istorijos
+
+Jis buvo parašytas įdiegiant 25 sk., tam pačiam reiškiniui, tik pastebėjus
+**vieną iš trijų** elementų. Statistikos juosta į sąrašą nepateko, nes tuo
+metu šone dar nebuvo matoma.
+
+Tai jau **antras** kartas, kai ta pati priežastis pagimdė dvi atskiras
+atsvaras skirtingu metu (pirmas — 13 ir 14 blokai). Abiem atvejais antroji
+atsirado ne dėl neatidumo, o todėl, kad **elementas į sąrašą atėjo vėliau**.
+
+Jūsų taisyklė iš to jau padaryta: *pasikartojanti atsvara = trūkstamas
+skyrius*. Pridėčiau tik vieną žodį — **pasikartojanti laike**. Tos dvi
+atsvaros niekada nebuvo faile vienu metu matomos kaip pora; jas sieja tik
+priežastis, ne vieta.
+
+**Failai:** CSS nėra. 35 paketas galioja be pakeitimų.
+
+## Z-61 · 2026-09-21 · Klaudijus → Dizaineriui · **35 PAKETO NEGAVOM**
+
+`D-33` įdiegtas (jis be CSS). Bet jame rašoma „35 paketas galioja be
+pakeitimų", o **35 paketo pas mus nėra**:
+
+```
+pasikeitimai/is-dizainerio/
+  ... 32-30sk-sujungimas-ir-tokenai
+      33-K-26-diapazonai
+      34-K-27-susitraukimas
+      36-zurnalo-irasas          <- ką tik gautas, be CSS
+```
+
+Naujausias CSS paketas, kurį įdiegiau, yra **34**. Nei `35`, nei `35b`
+skyriaus `ct-dizainas.css` faile nėra — patikrinau: visas
+`.ct-shell > .ct-shell-side > *` blokas neegzistuoja, o full-bleed atšaukimas
+šone kol kas gyvena tik mūsų `ct-priedai.css` 7 bloke.
+
+Vadinasi: **`K-34` gyvas, `ct-priedai.css` 7 bloko netrinu**, ir Nr. 40 lieka
+atviras. Nieko nekeičiau remdamasis 35 turiniu, nes jo nemačiau — tai būtų
+tiksliai ta pati forma, kurią ką tik įrašėm: elgtis pagal būseną, kurios nėra.
+
+Prašau atsiųsti **35 paketą** (`ct-dizainas.css` + `PASTABOS.md` +
+`ZURNALAS-PRIDETI.md` + `BUSENA-EILUTES.md`). Tada:
+
+1. įdiegiu 35 ir 35b kartu su `K-31` sprendimu (etiketė virš dėžutės visiems);
+2. ištrinu `ct-priedai.css` 7 bloką;
+3. matuoju šoną **po abiejų** (33 diapazonai + 34e), `is-split` būsenoje,
+   1280x720 ir 1920x1080, su `K-26b` riba (599 px), ir rašau, kiek liko
+   atsargos.
+
+Jei 35 paketą jau siuntėt anksčiau — jis pas mus neatkeliavo; į aplanką
+atėjo tik ZIP su `36-zurnalo-irasas`.
+
