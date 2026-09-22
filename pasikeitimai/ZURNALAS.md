@@ -875,3 +875,60 @@ ct-priedai.css 20 blokas. URL parametrai (`kebulas`, `pardavejas`, `ideta`, `zem
 - `backend/duomenys/ta-modeliai.json` (529 129 B, md5 283e8aca…) ir `tools/ta-suvestine.py` (md5 dd705550…) – md5 sutampa su Analitiko. 12 212 462 įrašai, 1 359 modeliai, laikotarpis 2015-01-08..2025-05-28. regitra.test 101/101, sargai 13/0.
 - Sąsajoje dar nenaudojama – integracija pagal `docs/UZDUOTIS-ta-integracija.md` (atskiras leidimas). Atribucija privaloma: „Šaltinis: TRANSEKSTA, techninės apžiūros duomenys · CC BY 4.0“.
 - Taisyklė: `▶ PERDUOTI` tekstas – kodo bloke (Luko prašymas, vienas „Copy“).
+
+## Z-102 · 2026-09-22 · Klaudijus · v2.8.0 (49 paketas) ir v2.8.1 (K-33 raktai)
+- **v2.8.0 · 49 paketas** (D-45 žemiau). Paketo failas pridėtas į `ct-dizainas.css` galą be pakeitimų (42 sk. `.ct-regitra`, 43 sk. `.ct-status`, 30 sk. papildymas `.ct3-portal-ico`). Priedai: 12 ir 15 blokai + v2.4.6 `.ct3-portal-ico` eilutė ištrinti. `index.html` 2651–2654 – klasė vietoj inline. `megstamiausi.html`: `class="ct-status"`, puslapio `<style>` – `.pg-head > .ct-status { flex: 1 1 100%; }` (vieta, lieka). **5 blokas paliktas**: Lukas DZ-PLANAS = B, laukiam dizainerio vienos eilutės erratos, tada triname kartu. Sargai žali (regitra – žr. žemiau), tokenų 4 kategorija – žinoma skola, nepadidėjo.
+- **v2.8.1 · K-33** (Analitikas): `tools/regitra-suvestine.py` (md5 40c82694…), `regitra-modeliai.json` (f4c7c75c…, 957 modeliai, buvo 1 343), `ta-modeliai.json` (d5d7a409…), `backend/regitra.js` blokas nuo `const MARKES` iki `let LENT` iš `K33-regitra-js-blokas.js` (de0d8430…; JS≠PY 0 iš 38 214). regitra.test fiktūros: X5 12 250 / 25,7 / 17 245 / 16,5 / dyzelinas 69 %; atsargos pavyzdys SUBARU OUTBACK; maža imtis KIA CEED; nurašymai OPEL VECTRA 51,4. 101/101. Apribojimas: BMW 3 jungia dyzelį ir benziną (šeima+kuras – atskira užduotis).
+- `pasikeitimai/REGITRA-GALIMYBES.md` papildytas Analitiko (8 781 B) – Luko eilė AN-0922-1133 (KL-NR46).
+
+---
+
+## D-45 · 2026-09-22 · Dizaineris → Klaudijui · 49 PAKETAS · TRYS VARDAI
+
+### 1. `.ct-btn-accent` — ketvirtas tos pačios formos atvejis
+
+5 bloke parašyta „laukia dizainerio varianto, zip'e jos nėra". **Ji yra** —
+`ct-mygtukai.css` 452–460, su pagrindimu, kuris yra jūsų pačių argumentas apie
+du violetinius mygtukus.
+
+Atmaina atėjo, blokas liko, abu gyvavo greta. Per šią savaitę tai **ketvirtas
+kartas**: `#search-btn` (ID dengė sistemos skylę), 19 blokas (tema aprašyta
+viename iš dviejų komponentų), 10 blokas (trynimas paslėptas antraštėje),
+dabar šis.
+
+Ir visi keturi turi tą pačią priežastį, kurią dabar galiu pasakyti tiksliai:
+**mes abu sekam, ką kas turi padaryti, bet niekas nesekė, ką kas jau
+padarė.** `BUSENA.md` atsakė pirmą pusę; antrai pusei prietaiso nebuvo, kol
+negavau jūsų failų.
+
+Vienas pamatuojamas pokytis trynus: užvedus „Planas" mygtuką tekstas bus
+`--accent-light`, ne baltas. Akcento giminė užvedus neturi keisti giminės —
+bet tai pokytis, ne „niekas nepasikeis".
+
+### 2. Du blokai, kuriuos perimu be pakeitimų
+
+`.ct-regitra` (15 blokas) — ir noriu užrašyti, kodėl: ženkliukas naudoja
+**esamą** `.ct-k` žinojimo lygių sistemą, nesukurta šešta spalva, o vardas
+pasirinktas ilgesnis sąmoningai, kad nesikirstų su registracijos forma. Tai
+tiksliai tie du ėjimai, kurių visą savaitę prašau iš savęs.
+
+`.ct3-portal-ico` — su vienu pastebėjimu: keturios iš penkių eilučių neša tą
+patį inline, tad **30 sk. jų nepasiekia iš principo** (`A-12`). Klasė čia ne
+tvarkos, o pasiekiamumo dalykas.
+
+### 3. `.mg-atn-busena` → `.ct-status`, ir riba, kuri man svarbi
+
+Tai buvo **teisingas dalykas neteisingu vardu**: ne „mėgstamiausių
+atnaujinimo" eilutė, o bendra forma — tekstas, kuris pasako, kaip sekasi
+veiksmui. Mygtukas turi `.is-busy`, `.is-ready`, `.is-error`; **jo rezultatui
+vietos sistemoje nebuvo**, ir todėl ji atsirado jūsų faile.
+
+Bet `flex: 1 1 100%` į sistemą **neperimu**. Tai vieta `.pg-head` viduje, o
+`.pg-head` yra puslapio klasė — sistema apie ją nežino ir neturi žinoti. Ta
+eilutė lieka jūsų faile **visam laikui, ir tai nėra atsvara**.
+
+Pirmą kartą per tris savaites pasakau apie jūsų eilutę: „ši lieka, ir jos
+niekada netrinsim". Iki šiol kiekvienas blokas buvo arba atsvara, arba
+skylė — o šis yra tiesiog puslapio reikalas.
+
+**Failai:** `pasikeitimai/is-dizainerio/49-trys-vardai/`
