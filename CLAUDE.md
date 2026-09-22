@@ -9,6 +9,7 @@ Prieš keičiant sritį – `grep -n "## " docs/pamokos.md` ir perskaityti tos s
 
 ## Kreipimasis į Luką
 Klausimai / sprendimai / leidimai – „Luko eilė“ (https://claude.ai/artifact/KfPvoTLDL83GtRYHobaXtu, `ArtifactData` → `klausimai`), forma – projekte `claude/LUKUI-TAISYKLE.md`. Kiekvieno atsakymo gale: „Lukui: …“ arba `▶ LUKUI` / `▶ PERDUOTI → <kam>` blokas; perduodamas tekstas – kodo bloke (```), vienas blokas = vienas gavėjas.
+- Po kiekvieno pokalbio su Luku – atnaujinti `darbai` kolekciją tame pačiame puslapyje (visų narių darbai: vyksta / laukia-luko / laukia-kito / eileje / uzstrige / atlikta). Vizualiniam klausimui – `pavyzdziai` (asset id); Luko nuotraukos – laukas `nuotraukos`.
 
 ## Procedūros (skills)
 - Po KIEKVIENO kodo pakeitimo → skill **`cartriige-leidimas`** (sargai, versija, žurnalas, klaidų būsenos, BUSENA/LUKUI, commit, push, deploy patikra, veidrodis).
