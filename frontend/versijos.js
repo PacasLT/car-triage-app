@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.10.3', data: '2026-09-22', pavadinimas: 'Kėbulo kartos kodas',
+    pakeitimai: [
+      'Pasirinkus modelį ir metus, po filtrais parodoma, kurios kėbulo kartos patenka (pvz. BMW X5: F15 2013–2018, G05 nuo 2018).',
+      'Skelbimo kortelėje – ženkliukas „Kėbulas G05“. Jei metai ties kartų riba, rodomi abu kodai.',
+      'Kol kas 113 dažniausių Lietuvoje modelių; sąrašas bus plečiamas.',
+    ],
+  },
+  {
     versija: '2.10.2', data: '2026-09-22', pavadinimas: 'Tvarkingesnis kortelių išdėstymas',
     pakeitimai: [
       'Po paskutinės skelbimo kortelės nebelieka nereikalingo tarpo.',

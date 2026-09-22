@@ -118,8 +118,37 @@ function ikeltiTA() {
   return TA_META;
 }
 
+// v2.10.3 (A-37): modelių kartų (kėbulo kodų) lentelė. Raktas – regitra
+// modelis, tarpas po markės -> "|". Metai – gamybos; persidengimas ties
+// riba tyčinis (rodom abu kodus). Generuoja tools/kartos-lentele.py.
+let KARTOS = {};
+function ikeltiKartas() {
+  try {
+    KARTOS = JSON.parse(fs.readFileSync(path.join(__dirname, 'duomenys', 'kartos.json'), 'utf8'));
+    console.log('[KARTOS] ikelta:', Object.keys(KARTOS).length, 'modeliu');
+  } catch (e) { console.error('[KARTOS] NEPAVYKO ikelti:', e.message); KARTOS = {}; }
+}
+function kartosRaktas(marke, modelis) {
+  const r = kontekstas(marke, modelis);
+  return r && r.modelis ? r.modelis.replace(' ', '|') : null;
+}
+// Skelbimui: kodai, kurie apima tuos metus (1 arba 2 ties riba). [] - nezinoma.
+function kartos(marke, modelis, metai) {
+  const k = kartosRaktas(marke, modelis); const m = parseInt(metai, 10);
+  if (!k || !KARTOS[k] || !m) return [];
+  return KARTOS[k].filter((g) => m >= g.nuo && (g.iki == null || m <= g.iki)).map((g) => g.kodas);
+}
+// Filtrui: visos kartos, kurios persidengia su [nuo, iki].
+function kartosIntervalui(marke, modelis, nuo, iki) {
+  const k = kartosRaktas(marke, modelis);
+  if (!k || !KARTOS[k]) return [];
+  const a = parseInt(nuo, 10) || 0, b = parseInt(iki, 10) || 9999;
+  return KARTOS[k].filter((g) => g.nuo <= b && (g.iki == null || g.iki >= a)).map((g) => ({ kodas: g.kodas, nuo: g.nuo, iki: g.iki }));
+}
+
 function ikelti() {
   ikeltiTA();
+  ikeltiKartas();
   try {
     const p = path.join(__dirname, 'duomenys', 'regitra-modeliai.json');
     const d = JSON.parse(fs.readFileSync(p, 'utf8'));
@@ -505,4 +534,5 @@ module.exports = {
   RIBOS, LYGIS, DRAUDZIAMA, KURO_KILMININKAS,
   meta: () => META,
   taMeta: () => TA_META, taKontekstas,
+  kartos, kartosIntervalui,
 };

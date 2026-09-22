@@ -157,3 +157,9 @@
 
 
 /* 20 BLOKAS · IŠTRINTAS v2.9.0 (46b 41 sk. `.ct-papf`, perimta be pakeitimų). */
+
+
+/* 21 BLOKAS · v2.10.3 (A-37) · kėbulo kartų užuomina po filtrais.
+   Laikinas – dizaineriui perimti į sistemą (vardas `.ct-kartos-hint`). */
+.ct-kartos-hint { margin: var(--s-2) 0 0; font-size: 13px; color: var(--text-secondary); }
+

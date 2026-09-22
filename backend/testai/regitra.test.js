@@ -264,5 +264,21 @@ console.log('\n── Skelbimo pusė: markė modelyje (Z-85 regresija) ───
   T(R.KURO_KILMININKAS && R.KURO_KILMININKAS['benzinas/elektra'] === 'hibridinių', 'KURO_KILMININKAS eksportuotas');
 }
 
+// ── A-37: modelių kartos (kėbulo kodai) ──
+{
+  console.log('\nA-37 kartos');
+  const kk = (mk, mo, m) => R.kartos(mk, mo, m).join('+');
+  lygu(kk('BMW', '3 serija', 2012), 'E90/E91/E92/E93+F30/F31/F34', 'BMW 3 2012 → E9x ir F3x (riba)');
+  T(/E90/.test(kk('BMW', '320', 2006)), 'BMW 320 2006 → E90…');
+  lygu(kk('Volkswagen', 'Passat', 2015), 'B7+B8', 'VW Passat 2015 → B7+B8');
+  lygu(kk('Skoda', 'Octavia', 2015), 'A7', 'Skoda Octavia 2015 → A7');
+  lygu(kk('Toyota', 'Corolla', 2019), 'E170+E210', 'Toyota Corolla 2019 → E170+E210');
+  lygu(kk('Mercedes-Benz', 'E 220', 2010), 'W212', 'MB E 220 2010 → W212');
+  lygu(kk('Volvo', 'XC60', 2019), '2 karta', 'Volvo XC60 2019 → 2 karta');
+  lygu(R.kartos('NĖRATOKIOS', 'NIEKO', 2019), [], 'nežinomas modelis → []');
+  lygu(R.kartos('BMW', 'X5'), [], 'be metų → []');
+  lygu(R.kartosIntervalui('BMW', 'X5', 2016, 2020).map((g) => g.kodas).join('+'), 'F15+G05', 'X5 2016–2020 filtrui → F15+G05');
+}
+
 console.log('\n' + (klaidu ? '✗ ' + klaidu + ' klaidos iš ' + patikru : '✓ ' + patikru + '/' + patikru + ' patikrų praėjo'));
 process.exit(klaidu ? 1 : 0);

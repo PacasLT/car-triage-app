@@ -1217,3 +1217,10 @@ visu kontekstu. Kai imsiu juostą, **pirmas darbas bus nuspręsti tarp jų.**
 - **KL-PUSH-0922E – push NEleistas:** atsakymas – griežtinti kuro filtrą. v2.10.1–v2.10.2 lieka lokaliai.
 - FN-0922-0340: ScraperAPI 88 646 / 100 000 (09-22 ~14 val.).
 
+## Z-113 · 2026-09-22 · Klaudijus · v2.10.3 – A-37 kėbulo kartos (Luko prašymas)
+- Analitiko failai (md5 sutikrinti): `backend/duomenys/kartos.json` 40e0cc0c… (113 raktų), `tools/kartos-lentele.py` d726dfe9…, `docs/kartos-saltiniai.md` 030e6b10….
+- `regitra.js`: `ikeltiKartas`, `kartos(marke, modelis, metai)` (1 arba 2 kodai ties riba), `kartosIntervalui(…, nuo, iki)`; raktas per `kontekstas()` (K-33 šeimos).
+- `server.js`: `l.kartos` prie kiekvieno skelbimo (kandidatai ir visi), `GET /api/kartos` filtrui – 0 kreditų.
+- `index.html`: `#ct-kartos` po filtrais („Kėbulai: F15 (2013–2018), G05 (2018–dabar)“), kortelės ženkliukas „Kėbulas G05“. `ct-priedai.css` 21 blokas `.ct-kartos-hint` – dizaineriui perimti.
+- regitra.test +10 (135/135, analitiko pavyzdžiai). Sargai 14 / 0 / 3.
+

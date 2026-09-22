@@ -3449,6 +3449,7 @@ async function runSearchJob(jobId, filters) {
       const regMarke = l.marke || (filters && filters.marke) || null;
       l.regitra = regitra.kontekstas(regMarke, l.modelis) || null;
       l.regitraPunktai = regitra.punktai(Object.assign({}, l, { marke: regMarke }));
+      l.kartos = regitra.kartos(regMarke, l.modelis, l.metai);
     });
 
     let candidates = enriched.slice().sort((a, b) => b.qualityScore - a.qualityScore);
@@ -3619,7 +3620,7 @@ async function runSearchJob(jobId, filters) {
       kuras: l.kuras, pavarai: l.pavarai, turiVin: l.turiVin, galia: l.galia, variklioTuris: l.variklioTuris,
       pvmPastaba: l.pvmPastaba || null, kainaBaze: l.kainaBaze || null, varantieji: l.varantieji || null,
       itariamaZala: l.itariamaZala || null,
-      photo: l.photo, url: l.url, source: l.source, kryzminiaiSkelbimai: l.kryzminiaiSkelbimai || null,
+      photo: l.photo, url: l.url, source: l.source, kryzminiaiSkelbimai: l.kryzminiaiSkelbimai || null, kartos: l.kartos || [],
       isCandidate: candidateUrls.has(l.url), pardavejas: l.pardavejas || null,
       rejectionReasons: (l.hardRejections && l.hardRejections.length)
         ? l.hardRejections
@@ -3645,7 +3646,7 @@ async function runSearchJob(jobId, filters) {
       kainosPastaba: l.kainosPastaba || null, kainosIspejimas: l.kainosIspejimas || null,
       // LT registro kontekstas. `kandidatai` pjaunami i konkretu lauku sarasa,
       // tad neidejus cia jie iki sasajos nenukeliautu - nors `enriched` juos turi.
-      regitra: l.regitra || null, regitraPunktai: l.regitraPunktai || [],
+      regitra: l.regitra || null, regitraPunktai: l.regitraPunktai || [], kartos: l.kartos || [],
     }));
 
     // Skelbimai, kuriuos atmete kietasis filtras (kaina/metai/rida/deze/kuras).
@@ -4368,6 +4369,12 @@ app.post('/api/search-start', requireAuth, planai.reikalautiPaieskos(), (req, re
   const jobId = newJob();
   runSearchJob(jobId, req.body);
   res.json({ jobId });
+});
+
+// v2.10.3 (A-37): kėbulo kartos filtrui - vietinė lentelė, 0 kreditų.
+app.get('/api/kartos', requireAuth, (req, res) => {
+  const q = req.query || {};
+  res.json({ kartos: regitra.kartosIntervalui(String(q.marke || '').slice(0, 40), String(q.modelis || '').slice(0, 60), q.nuo, q.iki) });
 });
 
 app.get('/api/search-status/:jobId', requireAuth, (req, res) => {

@@ -2659,6 +2659,9 @@
       </div>
 
 
+      <!-- v2.10.3 (A-37): kėbulo kartos pagal modelį ir metus (vietinė lentelė, 0 kreditų) -->
+      <p class="ct-kartos-hint" id="ct-kartos" hidden></p>
+
       <!-- Papildomi filtrai (atidaromi mygtuku "Daugiau filtrų") -->
       <div id="more-filters" class="ct3-more-panel" style="display:none;">
         <!-- v1.77.0 (Nr. 25): `.ct3-portals-row` istrinta. Ji buvo GRYNA DEKORACIJA -
@@ -2921,6 +2924,35 @@
 window.ctToken = function () {
   try { return localStorage.getItem('ct_token'); } catch (e) { return null; }
 };
+// v2.10.3 (A-37): pasirinkus modelį (ir metus) – kurios kėbulo kartos patenka.
+var _kartosLaik = null;
+function ctKartos() {
+  clearTimeout(_kartosLaik);
+  _kartosLaik = setTimeout(function () {
+    var el = document.getElementById('ct-kartos'); if (!el) return;
+    var v = function (id) { var x = document.getElementById(id); return x ? String(x.value || '').trim() : ''; };
+    var mk = v('marke'), mo = v('modelis');
+    if (!mk || !mo || !window.ctToken || !window.ctToken()) { el.hidden = true; return; }
+    var q = '/api/kartos?marke=' + encodeURIComponent(mk) + '&modelis=' + encodeURIComponent(mo)
+      + '&nuo=' + encodeURIComponent(v('metaiNuo')) + '&iki=' + encodeURIComponent(v('metaiIki'));
+    ctApi(q).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+      var k = (d && d.kartos) || [];
+      if (!k.length) { el.hidden = true; el.textContent = ''; return; }
+      el.textContent = 'Kėbulai: ' + k.map(function (g) {
+        return g.kodas + ' (' + g.nuo + '–' + (g.iki == null ? 'dabar' : g.iki) + ')';
+      }).join(', ');
+      el.hidden = false;
+    }).catch(function () { el.hidden = true; });
+  }, 350);
+}
+document.addEventListener('change', function (e) {
+  if (e.target && /^(marke|modelis|metaiNuo|metaiIki)$/.test(e.target.id)) ctKartos();
+});
+document.addEventListener('input', function (e) {
+  if (e.target && /^(metaiNuo|metaiIki)$/.test(e.target.id)) ctKartos();
+});
+window.addEventListener('load', function () { setTimeout(ctKartos, 800); });
+
 window.ctApi = function (kelias, params) {
   const p = Object.assign({}, params || {});
   const h = Object.assign({}, p.headers || {});
@@ -6174,6 +6206,7 @@ function ctNavTab(tab) {
       // Galia ir varantieji čia NEDEDAMI – jie jau yra .ct-meta eilutėje.
       var chipsVisi = [
         c.ikeltaTekstas ? '🕒 ' + esc(c.ikeltaTekstas) : null,
+        (c.kartos && c.kartos.length) ? 'Kėbulas ' + esc(c.kartos.join(' / ')) : null,
         c.turiVin ? '✓ VIN' : null,
         c.turiIstorijosAtaskaita ? '✓ Istorija' : null,
         c.garantijosTipas ? '✓ Garantija' : null,

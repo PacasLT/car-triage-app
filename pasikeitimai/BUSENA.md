@@ -1,4 +1,4 @@
-# Būsena · 2026-09-22 · v2.10.0 gyva (v2.10.1 + v2.10.2 laukia push)
+# Būsena · 2026-09-22 · v2.10.0 gyva (v2.10.1–v2.10.3 laukia push)
 
 Tik **atviri** punktai. Uždaryti — `ZURNALAS.md` / `archyvas/`. Kas laukia Luko — `LUKUI.md`.
 Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
@@ -53,6 +53,7 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 | 5 | `.ct-btn-accent` | kitas paketas (dizainerio pažadėta atmaina) |
 | 8 | `#more-filters` iš inline | NETRINTI (mūsų) |
 | 16 | `#sort-bar` kaukė | Nr. 42 pabaiga (Klaudijus) |
+| 21 | `.ct-kartos-hint` (kėbulo kartos po filtrais) | dizaineris – perimti į sistemą |
 
 ## Kur kas guli
 
