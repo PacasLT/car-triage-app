@@ -606,7 +606,7 @@ textarea:focus-visible,
 
 @media (max-width: 640px) {
   /* .dp-tab-bar neegzistuoja — veikia per .dp-tabs */
-.dp-tabs, .ct-tabs, #sort-bar {
+.dp-tabs, .ct-tabs {
     -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 24px), transparent 100%);
     mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 24px), transparent 100%);
     scrollbar-width: none;
@@ -620,7 +620,6 @@ textarea:focus-visible,
    pasviesinta (zr. --text-dim), bet dydi keliame iki 11 px minimumo.
    !important, nes jusu sluoksnis sius dydzius raso taip pat.               */
 
-#sort-bar label,
 .ct3-field label,
 .dp-ai-meta,
 .dp-footer-logo-text small,
@@ -3772,3 +3771,357 @@ textarea.ct-field {
    vienas is ju tyliai nugali. Cia niekas nesulūžę, tad neprasau nieko -
    bet kai kada nors prasysit portalu skydo skyriaus, pirmas darbas bus
    nuspresti, kuris is dvieju bloku yra tikrasis.                          */
+
+
+/* ============================================================================
+   46b paketas - KETURI VARDAI, PERRASYTA IS FAILO   ·   38, 39, 40, 41 sk.
+   ----------------------------------------------------------------------------
+   PAKEICIA 46 paketa. Jo NEDIEKIT - ten trys skyriai buvo rasyti is jusu
+   aprasymo, ne is failo, ir visi trys butu padare zala:
+
+     41 sk. butu tyliai perdazes jusu pamatuotas reiksmes
+     39 sk. nebutu suveikes (du `display: flex !important`)
+     40 sk. butu sulauzes stulpelio ploti (pamestas `flex: 1 1 320px`)
+
+   Sis failas rasytas perskaicius `ct-priedai.css`, `ct-dizainas.css`,
+   `index.html`, `ct-bendras.css` ir `compare.html`.
+
+   Versija - siulau v2.8.0.
+   ========================================================================== */
+
+
+/* ============================================================================
+   38. RUSIAVIMO JUOSTA IR MENIU   ·   .ct-sort
+   ----------------------------------------------------------------------------
+   Vienas principas: meniu yra IŠKRENTANTIS SLUOKSNIS, ne juostos turinys.
+   Viskas, kas juosta apkerpa - overflow, mask, transform - meniu nepasiekia,
+   nes meniu juostoje negyvena.
+
+   ── KAS IS TIKRUJU ATSITIKO (Nr. 42) ──────────────────────────────────────
+   5 sk., 609 eil.:
+
+     .dp-tabs, .ct-tabs, #sort-bar { mask-image: ...; scrollbar-width: none; }
+
+   Trys vardai viename sarase, ir DU is ju yra slenkancios juostos. Trecias -
+   ne: `#sort-bar` nesislenka (jis `flex-wrap`), o kauke jam buvo uzdeta „uz
+   kompanija". Matosi net is gretimų eiluciu: `::-webkit-scrollbar` taisykle
+   573 eil. duota tik `.dp-tabs` ir `.ct-tabs` - `#sort-bar` ten jau
+   nebeįtrauktas.
+
+   Tai ne nauja forma, o A-08: SARASAS, kuri reikia atsiminti atnaujinti.
+   Iraseiau i ji varda, kuriam kaukes nereikejo, ir po dvieju menesiu i ta
+   pati elementa atejo iškrentantis meniu.
+
+   ISTRINTI:
+     609 eil. - is saraso pasalinti `#sort-bar` (kiti du lieka)
+     623 eil. - is saraso pasalinti `#sort-bar label` (ji pakeicia
+                `.ct-sortbar-k` zemiau)
+     ct-priedai.css 16 blokas
+
+   ── KO PRASAU MARKUPE ─────────────────────────────────────────────────────
+     <div id="sort-bar" class="ct-sortbar">
+       <div class="ct-sortbar-l">
+         <span class="ct-sortbar-k">RUSIUOTI</span>
+         <div id="ct-sort" class="ct-sort">
+           <button id="ct-sort-btn" class="ct-btn ct-btn-sm ct-btn-toggle"
+                   aria-expanded="false">…</button>
+           <div id="ct-sort-menu" class="ct-sort-menu"></div>
+         </div>
+       </div>
+       <button id="tinder-launch-btn" class="ct-btn">…</button>
+     </div>
+
+   `<label>` keiciamas `<span>` sąmoningai: `RUSIUOTI` nera etikete - salia
+   jo nera lauko, o `#sort-select` yra `hidden input`. Etikete, kuri nieko
+   nezymi, yra ekrano skaitytuvui melas.
+
+   JS eilutes gauna klases vietoj inline stiliu:
+
+     <div class="ct-sort-opt is-on">
+       <span class="ct-sort-opt-v">✓</span>
+       <span class="ct-sort-opt-t">Pigiausi pirmiausia<em>kaina didejanciai</em></span>
+     </div>
+
+   Ir `onmouseover` isimamas - uzvedimas yra CSS, ne ivykis.
+
+   Mygtuko inline stiliai nuimami: jis jau turi `.ct-btn-sm`, o inline uzdejo
+   34 px auksti - KETVIRTA dydi, kurio sistemoje nera. Rodykle - per
+   `.ct-btn-toggle`, kuri apsiverčia pagal `aria-expanded`, tad JS uztenka
+   keisti atributa (ir tai teisinga prieinamumui).
+
+   Sesėlis - `--shadow-panel`, `:root` aprasytas „iškrentantys meniu,
+   modalai" ir iki siol turejes nulį naudojimu.                            */
+
+.ct-sortbar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+.ct-sortbar-l { display: flex; align-items: center; gap: 10px; min-width: 0; }
+
+/* 11 px, ne 10: mano paties 6 sk. sako, kad mono etiketes zemiau 11 px yra
+   per mazos. 46 pakete buvau parases 10 - taisykle bučiau sulauzes savo. */
+.ct-sortbar-k {
+  flex: none;
+  font: var(--fw-semi) 11px/1 var(--font-mono);
+  letter-spacing: .1em;
+  color: var(--text-dim);
+}
+
+.ct-sort { position: relative; display: inline-flex; }
+
+.ct-sort-menu {
+  display: none;
+  position: absolute;
+  z-index: 400;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 248px;
+  padding: 5px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-light);
+  border-radius: calc(var(--radius-md) + 1px);
+  box-shadow: var(--shadow-panel);
+}
+.ct-sort-menu.is-open { display: block; }
+
+.ct-sort-opt {
+  display: grid;
+  grid-template-columns: 14px 1fr;
+  align-items: start;
+  gap: 8px;
+  padding: 7px 9px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+.ct-sort-opt:hover { background: rgba(255, 255, 255, .06); }
+.ct-sort-opt.is-on { background: var(--accent-dim); }
+
+/* Varneles stulpelis egzistuoja visada - kitaip eilutes sokineja i sona */
+.ct-sort-opt-v { color: var(--accent-light); font-size: 12px; line-height: 1.5; visibility: hidden; }
+.ct-sort-opt.is-on > .ct-sort-opt-v { visibility: visible; }
+
+.ct-sort-opt-t {
+  display: block;
+  min-width: 0;
+  font: var(--fw-semi) 12.5px/1.5 var(--font);
+  color: var(--text-primary);
+}
+.ct-sort-opt-t > em {
+  display: block;
+  font: var(--fw-regular) 11px/1.45 var(--font);
+  font-style: normal;
+  color: var(--text-dim);
+}
+
+/* Telefone juosta ir taip `flex-wrap` - cia tik tvarka: etikete su mygtuku
+   viena eile, „Tinder" kita. Kaukes nereikia, nes nera ko slinkti. */
+@media (max-width: 640px) {
+  .ct-sortbar { row-gap: var(--s-2); }
+  .ct-sortbar-l { flex: 1 1 100%; }
+  .ct-sort { flex: 1 1 auto; }
+  .ct-sort > .ct-btn { width: 100%; justify-content: space-between; }
+  .ct-sort-menu { left: 0; right: 0; min-width: 0; }
+  .ct-sortbar > .ct-btn { flex: 1 1 100%; }
+}
+
+
+/* 39 sk. - zr. 48 paketas (ERRATA 7) zemiau. */
+
+
+/* ============================================================================
+   40. DETALES DESINYSIS STULPELIS   ·   .dp-desine
+   ----------------------------------------------------------------------------
+   PERIMU JUSU 18 BLOKA BE PAKEITIMU. 46 pakete buvau parases tik „kruva su
+   tarpu" ir pametęs `flex: 1 1 320px` - stulpelis butu praradęs ploti, nes
+   jis yra tevo flex vaikas.
+
+   Jusu eilute teisinga is pirmo karto: `.dp-desine` perima tiksliai tuos
+   pacius dydzius, kuriuos turejo `.dp-panel` (1095 eil.), o `.dp-panel`
+   viduje ju atsisako. Taip stulpelis atsistoja i tą pačią vieta, kur stovejo
+   skydelis vienas.
+
+   Vienas principas uzrasymui: stulpelis yra KRUVA, ne remas - fona ir remeli
+   turi kortelės jame, o jo vienintelis darbas yra tarpas.                 */
+
+.dp-desine {
+  flex: 1 1 320px;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+/* Viduje skydelis nustoja buti dydzio saltiniu - jis tampa eiliniu vaiku. */
+.dp-desine > .dp-panel { flex: none; min-width: 0; }
+.dp-desine > * { flex: none; min-width: 0; }
+
+
+/* ── `#dp-panel` · „Kaip vertiname?" eilute ───────────────────────────────
+   Vienintelis turinys, kuris pasakydavo, KA skaicius reiskia. Grazinamas ne
+   kaip sekcija, o kaip viena eilute po iverciu - be mygtuko, be lango, be
+   naujos elgsenos.
+
+   MARKUPE, `.dp-panel-h` bloko gale:
+
+     <p class="dp-panel-hint">CarTriige balas rodo bendra galimybe pagal
+        kaina, rida, iranga, istorija ir rinkos potenciala.</p>            */
+
+.dp-panel-hint {
+  margin: 0;
+  font: var(--fw-regular) 12.5px/1.5 var(--font);
+  color: var(--text-muted);
+  max-width: 62ch;
+}
+
+
+/* ============================================================================
+   41. PAPILDOMU FILTRU SKYDELIS   ·   .ct-papf
+   ----------------------------------------------------------------------------
+   PERIMU JUSU 20 BLOKA BE PAKEITIMU - visos reiksmes jusu, pamatuotos, ir as
+   ju neliecju.
+
+   46 pakete buvau parases savo: `--fw-bold 9.5px`, `letter-spacing .14em`,
+   `uppercase` antrastei ir mono etiketems. Tai butu buvęs TYLUS PERDAZYMAS -
+   skyrius, kuris atrodo kaip perėmimas, o is tikruju pakeicia tai, ką Lukas
+   jau mate ir priėmė. Blogesnis uz bet kuria klaida, kuria padariau sia
+   savaite, nes butu atejęs po zodzio „perimu".
+
+   Kas cia PRIDEDAMA prie jusu bloko: nieko. Kas pasikeicia: vardas turi
+   skyriu, tad kitas zmogus randa ji ten, kur ieskos.                      */
+
+.ct-papf {
+  margin-top: var(--s-3);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--border);
+}
+.ct-papf-h {
+  margin: 0 0 var(--s-2);
+  font: var(--fw-semi) 10px/1 var(--font-mono);
+  letter-spacing: .08em;
+  color: var(--text-dim);
+}
+.ct-papf-g {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: var(--s-2) var(--s-3);
+  margin-bottom: var(--s-3);
+}
+.ct-papf-l { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.ct-papf-l > span { font-size: 12px; color: var(--text-muted); }
+.ct-papf-l > .ct-field { width: 100%; min-width: 0; }
+.ct-papf-n { font-size: 11px; color: var(--text-dim); }
+
+/* ── Vienas nesutapimas, kurio NETAISAU ───────────────────────────────────
+   `.ct3-field label` ir `#sort-bar label` yra mono 11 px (6 sk.), o
+   `.ct-papf-l > span` - 12 px `--text-muted`. Dvi etikeciu formos tame
+   paciame puslapyje.
+
+   Netaisau, nes jusu variantas pamatuotas ir Luko matytas, o mano butu tik
+   „del nuoseklumo". Bet uzrasau: kai kada nors liesim laukų etiketes, jos
+   turi tapti viena forma, ir tada sprendziam, kuria - mono ar sia.       */
+
+
+/* ============================================================================
+   48 paketas - ERRATA 7 - 39 sk. antra redakcija   ·   .ct-std-card
+   ----------------------------------------------------------------------------
+   PAKEICIA 46b 39 skyriu. Kiti trys skyriai (38, 40, 41) nesikeicia.
+
+   Priezastis: jusu archeologija. „BUTINA: nekeisti" priezastis - nuotraukos
+   stulpelis salia teksto - dingo, kai kortele pradejo piesti ctKortele().
+   Kai blokas trinamas, `display: block` tampa pasiekiamas, ir tada jis
+   teisingesnis uz 17 bloka: viena taisykle vietoj dvieju, ir nebereikia
+   atsiminti, kad kortele „yra flex, kuris elgiasi kaip blokas".
+
+   Versija - siulau v2.8.1 (arba kartu su 46b, vienu diegimu).
+   ========================================================================== */
+
+
+/* ── 39 sk. v2 ─────────────────────────────────────────────────────────── */
+
+.ct-std-card { display: block; }
+
+/* Istorijos juosta - JS prideda veliau. Bloke jai uztenka ploti. */
+.ct-std-card > .ct-istorija { display: block; width: 100%; }
+
+/* Atmesta filtru: ne „isjungta" pilka, o mazesnis kontrastas; uzvedus
+   grizta visa. Veiksmai lieka veikiantys - atmete filtras, ne sistema. */
+.ct-std-card.is-rejected { opacity: .62; transition: opacity var(--dur-fast) var(--ease); }
+.ct-std-card.is-rejected:hover { opacity: 1; }
+
+.ct-std-card > .ct-reject {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  padding: 6px 12px;
+  background: var(--danger-dim);
+  color: var(--danger);
+  font: var(--fw-semi) 11px/1.4 var(--font-mono);
+  letter-spacing: .06em;
+}
+
+
+/* ============================================================================
+   TRYNIMO SARASAS - TIKSLIAI, NES DVI VIETOS YRA SPĄSTAI
+   ----------------------------------------------------------------------------
+
+   1) SPĄSTAS: index.html 1337, ct-bendras.css 182, compare.html 1277.
+
+      Toje eiluteje yra NE TIK isdestymas:
+
+        .ct-std-card{display:flex;flex-wrap:wrap;align-items:stretch;
+                     background:var(--bg-surface);border:1px solid var(--border);
+                     border-radius:12px;overflow:hidden;margin-bottom:8px;
+                     transition:border-color .15s;}
+
+      Istrynus visa eilute kortele netenka FONO, REMELIO ir RADIUSO. Trinam
+      tik tris savybes: `display`, `flex-wrap`, `align-items`. Likusios lieka
+      kaip yra - ju sistemoje dar nera (zr. 3 punkta).
+
+   2) Grynas isdestymas - trinamas visas:
+
+        index.html      1535-1536   (blokas „BUTINA: nekeisti")
+        index.html      2153-2154   (`display: flex !important`)
+        compare.html    1469-1470   (ta pati kopija)
+        ct-bendras.css   212-213
+        ct-bendras.css   243-244    (`!important`)
+
+   3) Is `.ct-istorija` eiluciu trinam TIK `flex`:
+
+        index.html      1340        palikti `padding: 0 14px 12px`
+        ct-bendras.css   183        tas pats
+        compare.html    1280        tas pats
+
+      NELIESTI: index.html 2144-2151 ir ct-bendras.css 238-242 - ten juostos
+      isvaizda (uzpildas, radiusas, fonas, remelis), ne isdestymas. Jos man
+      dar neperimtos, tad istrynus juosta liktu be nieko.
+
+   4) KO JUSU SARASE NEBUVO: `ct-bendras.css`.
+
+      Ji krauna `megstamiausi.html`, `ataskaitos.html` ir `admin.html` -
+      NE `index.html`. Tad indexui ji netrukdo, ir jusu planas veikia.
+
+      Bet kopija ten gyva, su `display: flex !important`. Rezultatas: TA PATI
+      KLASE elgtusi skirtingai priklausomai nuo to, KURI puslapi zmogus
+      atsidare - indexe blokas, megstamiausiuose flex. Siandien tai nematoma,
+      nes ten kortele nepiesiama; pirma diena, kai bus, klaida atrodys kaip
+      vaiduoklis.
+
+      Tad trinam ir ten - ne todel, kad trukdo, o todel, kad tai vienintele
+      priezastis, del kurios vardas galetu reiksti du dalykus.             */
+
+
+/* ── ATSKIRAS KLAUSIMAS, KURIO CIA NESPRENDZIU ─────────────────────────────
+   Kortelės PAVIRSIUS (fonas, remelis, radiusas 12, `margin-bottom: 8px`,
+   `transition`, `:hover` remelis) yra parasytas TRIJUOSE failuose ranka, o
+   sistemoje `.ct-card` jau turi savo pavirsiu.
+
+   Jei jie sutampa - trys deklaracijos nereikalingos. Jei nesutampa - viena
+   is ju yra tyli isimtis, ir tada noriu zinoti, kuri teisinga.
+
+   Man reikia vieno matavimo: `.ct-std-card` ir gretimos `.ct-top-card`
+   `background`, `border-color`, `border-radius` ir `margin-bottom`
+   produkcijoje. Jei skaiciai tie patys - kitame pakete tos eilutes dingsta
+   irgi, ir `.ct-std-card` lieka tik tai, kas ji daro STD.                */

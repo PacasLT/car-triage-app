@@ -1274,10 +1274,10 @@
 .diff-neg{background:var(--danger-dim);border:1px solid var(--danger-border);color:var(--danger);}
 .ct-top-card{background:var(--bg-surface);border-radius:16px;overflow:hidden;margin-bottom:12px;transition:box-shadow .2s,border-color .2s;}
 .ct-top-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.45);}
-.ct-std-card{display:flex;flex-wrap:wrap;align-items:stretch;background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:8px;transition:border-color .15s;}
+.ct-std-card{background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:8px;transition:border-color .15s;}
 /* Auto istorijos blokas visada eina PER VISA PLOTI po kortelės turiniu, o ne
    įsiterpia į flex eilutę šalia teksto ir jo nespaudžia. */
-.ct-std-card > .ct-istorija{flex:0 0 100%;padding:0 14px 12px;}
+.ct-std-card > .ct-istorija{padding:0 14px 12px;}
 .ct-std-card > .ct-istorija > div{margin-top:0 !important;}
 .ct-top-card .ct-istorija{padding:0 18px 14px;}
 .ct-std-card:hover{border-color:var(--border-light);}
@@ -1465,9 +1465,6 @@
   .chip { font-size: 11px; height: 24px; padding: 0 8px; }
 }
 
-/* BŪTINA: .ct-std-card — nekeisti šio bloko */
-.ct-std-card { display: flex; flex-wrap: wrap; }
-.ct-std-card > .ct-istorija { flex: 0 0 100%; }
 
 /* ── PATAISYMAI PO DIZAINO PERDAVIMO (Claude Code) ───────────────────────────
    1) .ct3-hero/.ct3-stats/.ct3-search-panel naudoja "full-bleed" triuką

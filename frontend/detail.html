@@ -1099,6 +1099,7 @@ window.ctApi = function (kelias, params) {
       + '<div class="dp-panel-t"><span class="ct-verdict ' + tonas + '">' + ctEsc(verdiktas) + '</span>'
       +   (santrauka ? '<span class="ct-summary">' + ctEsc(santrauka) + '</span>' : '') + '</div>'
       + '</div>'
+      + '<p class="dp-panel-hint">CarTriige balas rodo bendrą galimybę pagal kainą, ridą, įrangą, istoriją ir rinkos potencialą.</p>'
       + '<div class="ct-l2-tags">'
       +   (c.rizikosBusena ? '<span class="ct-k ' + (/zema|\u017eema/i.test(c.rizikosBusena.label || '') ? 'ct-k-confirmed' : 'ct-k-signal') + '"><i></i>Rizika: ' + ctEsc((c.rizikosBusena.label || '').split('\u2013')[0].trim()) + '</span>' : '')
       +   (c.pasitikejimas != null ? '<span class="ct-k ct-k-unknown"><i></i>Duomenys ' + c.pasitikejimas + ' %</span>' : '')

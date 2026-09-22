@@ -179,8 +179,8 @@ body{font-family: var(--font);
 .diff-pos{background:var(--success-dim);border:1px solid var(--success-border);color:var(--success);}
 .diff-warn{background:var(--warning-dim);border:1px solid var(--warning-border);color:var(--warning);}
 .diff-neg{background:var(--danger-dim);border:1px solid var(--danger-border);color:var(--danger);}
-.ct-std-card{display:flex;flex-wrap:wrap;align-items:stretch;background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:8px;transition:border-color .15s;}
-.ct-std-card > .ct-istorija{flex:0 0 100%;padding:0 14px 12px;}
+.ct-std-card{background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:8px;transition:border-color .15s;}
+.ct-std-card > .ct-istorija{padding:0 14px 12px;}
 .ct-std-card > .ct-istorija > div{margin-top:0 !important;}
 .ct-std-card:hover{border-color:var(--border-light);}
 .photo-ph{background:repeating-linear-gradient(115deg,rgba(255,255,255,.035) 0 1px,transparent 1px 8px),#141822;display:flex;align-items:center;justify-content:center;}
@@ -209,8 +209,6 @@ body{font-family: var(--font);
 .std-photo-col{display: none !important;}
 .std-card-inner{border-left: none !important;}
 .chip{font-size: 11px; height: 24px; padding: 0 8px;}}
-.ct-std-card{display: flex; flex-wrap: wrap;}
-.ct-std-card > .ct-istorija{flex: 0 0 100%;}
 @keyframes dcspin{to { transform: rotate(360deg); }}
 @keyframes ctPortalIn{from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; }}
 @media (max-width: 640px){@keyframes ctPortalSheetIn{from { transform: translateY(100%); } to { transform: none; }}}
@@ -240,8 +238,6 @@ body{font-family: var(--font);
   background: var(--bg-base) !important;
   border: 1px solid var(--border) !important;
   padding: 10px 12px !important;}
-.ct-std-card{display: flex !important; flex-wrap: wrap !important;}
-.ct-std-card > .ct-istorija{flex: 0 0 100% !important;}
 .ct3-hist-chip{display: flex !important;
   align-items: center !important;
   gap: 10px !important;

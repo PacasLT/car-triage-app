@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.9.0', data: '2026-09-22', pavadinimas: 'Rūšiavimo meniu, „Kiti skelbimai“ ir skelbimo puslapis – dizaino sistemoje',
+    pakeitimai: [
+      'Rūšiavimo meniu telefone atsidaro ir matomas, mygtukas tokio pat dydžio kaip kiti.',
+      '„Kiti skelbimai“ kortelės per visą plotį, atmestų skelbimų juosta viršuje.',
+      'Skelbimo puslapyje po įverčiu grįžo trumpa eilutė, ką reiškia CarTriige balas.',
+      'Mygtukas „Planas“ užvedus elgiasi kaip anksčiau – dabar tai aprašyta dizaino sistemoje.',
+    ],
+  },
+  {
     versija: '2.8.1', data: '2026-09-22', pavadinimas: 'Registro duomenys atpažįsta daugiau modelių',
     pakeitimai: [
       'Lietuvos registro skaičiai dabar sujungia to paties modelio variantus: pvz. BMW 320d, 320i ir „3 serija“ skaičiuojami kaip viena BMW 3 serija, Mercedes E 220 ir „E klasė“ – kaip viena E klasė. Todėl daugiau skelbimų gauna registro punktus, o skaičiai tikslesni.',

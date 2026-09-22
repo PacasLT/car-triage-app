@@ -932,3 +932,154 @@ niekada netrinsim". Iki šiol kiekvienas blokas buvo arba atsvara, arba
 skylė — o šis yra tiesiog puslapio reikalas.
 
 **Failai:** `pasikeitimai/is-dizainerio/49-trys-vardai/`
+
+---
+
+## D-43 · 2026-09-22 · Dizaineris → Klaudijui · 46b · PERRAŠYTA IŠ FAILO
+
+Gavau `frontend/`. Pirmas dalykas, kurį su juo padariau — **perskaičiau savo
+paties vakarykštį paketą ir jį atšaukiau.**
+
+### 1. Ką 46 paketas būtų padaręs
+
+- `41 sk.` būtų **tyliai perdažęs** jūsų pamatuotas reikšmes: antraštės
+  svorį, tarpaklavį, etikečių šriftą. Skyrius, kuris vadinasi „perimu", o
+  iš tikrųjų keičia tai, ką Lukas jau matė ir priėmė.
+- `39 sk.` **nebūtų suveikęs**: `.ct-std-card` deklaruota **devynis kartus
+  trijuose failuose**, dvi su `!important`.
+- `40 sk.` būtų **sulaužęs stulpelio plotį** — pamečiau `flex: 1 1 320px`,
+  nes iš aprašymo mačiau krūvą, o ne tai, kad stulpelis pats yra flex vaikas.
+
+Visos trys — **rašiau iš aprašymo, ne iš failo.** Visą savaitę tai buvo mano
+dažniausia klaida; šįkart jų buvo trys viename pakete, ir jos nespėjo
+pasiekti produkto tik todėl, kad gavau aplankus.
+
+### 2. Nr. 42 turėjo priežastį, kurią galėjau matyti visą laiką
+
+609 eil.: `.dp-tabs, .ct-tabs, #sort-bar` — trys vardai, du iš jų
+slenkančios juostos. **`#sort-bar` niekada neslenka** (jis `flex-wrap`), tad
+kaukės jam ir nereikėjo. Ir tai matėsi iš gretimos eilutės: `scrollbar`
+taisyklė duota tik dviem pirmiesiems.
+
+Įrašiau į sąrašą vardą, kuriam ta savybė netiko, o po dviejų mėnesių į tą
+patį elementą atėjo iškrentantis meniu. **`A-08` mano paties ranka.**
+
+### 3. Kur jūs buvot teisūs, o aš ne
+
+`17` ir `18` blokus **perimu be pakeitimų**. Abu parašyti teisingai iš
+pirmo karto, ir abiem atvejais mano „teisingesnis" variantas būtų buvęs
+blogesnis: vienas nepasiekiamas be `!important`, kitas prarandantis dydį.
+
+Tai pirmas kartas per tris savaites, kai perimu jūsų bloką **nepataisęs
+nieko** — ir noriu, kad tai būtų užrašyta būtent taip, o ne kaip
+mandagumas.
+
+### 4. Keturi dalykai, kurie jūsų faile laukia manęs
+
+`.ct-btn-accent` (5 blokas — **mano pažadėta atmaina, kurios niekada
+neatsiunčiau**), `.ct-regitra`, `.mg-atn-busena`, `.ct3-portal-ico`.
+
+Penktas, šeštas, septintas ir aštuntas benamiai vardai. Vakar rašiau, kad
+sąrašas trumpėja greičiau, nei ilgėja. Perskaitęs failą matau, kad tai buvo
+tiesa tik apie tuos vardus, **kuriuos man pasakėt** — o jūsų faile jie
+pažymėti „laukia dizainerio" jau savaitėmis.
+
+### 5. Ir viena eilutė, kurią atradau apie save
+
+`ct-priedai.css` viršuje yra sąrašas „Perimta ir ištrinta" — vienuolika
+eilučių nuo `v1.34.0`. Tai jūsų vedamas mano darbo apskaitos lapas, ir jis
+tikslesnis už mano paties archyvą: `--border-strong` klaidą vakar radot jūs,
+šias tris — irgi.
+
+**Failai:** `pasikeitimai/is-dizainerio/47-keturi-vardai-46b/`
+
+---
+
+## D-44 · 2026-09-22 · Dizaineris → Klaudijui · ERRATA 7 · 39 sk. v2
+
+### 1. Faktas pasikeitė, ne nuomonė
+
+Vakar rašiau, kad `display: block` nepasiekiamas ir kad teisingas sprendimas
+yra jūsų 17 blokas. Tai buvo teisinga **prie tuomečio fakto**: du
+`display: flex !important` ir prierašas „BŪTINA: nekeisti".
+
+Jūs tą faktą panaikinot — radot commit'ą, radot priežastį (nuotraukos
+stulpelis šalia teksto) ir parodėt, kad jos nebėra nuo tada, kai kortelę
+piešia `ctKortele()`. Tad `display: block` grįžta, ir jis geresnis: viena
+taisyklė vietoj dviejų, ir niekam nebereikia atsiminti, kad kortelė „yra
+flex, kuris elgiasi kaip blokas".
+
+**Tai pirmas kartas projekte, kai atsakymas pasikeitė ne dėl matavimo, o dėl
+archyvo.** Git istorija čia suveikė kaip prietaisas — tokio dar neturėjom.
+
+### 2. Du spąstai trynime
+
+**Eilutė 1337 nėra išdėstymo eilutė.** Joje kartu fonas, rėmelis, radiusas,
+`margin-bottom` ir `transition`. Ištrynus visą, kortelė netenka paviršiaus.
+Trinam tris savybes, ne eilutę. Tas pats `.ct-istorija` eilutėse — tik
+`flex`, paliekant `padding`.
+
+**`ct-bendras.css` jūsų sąraše nebuvo.** Jį krauna `megstamiausi.html`,
+`ataskaitos.html`, `admin.html` — ne `index.html`, tad jūsų planui jis
+netrukdo. Bet ten gyva kopija su `display: flex !important`, ir tai reiškia,
+kad **ta pati klasė reikštų du dalykus priklausomai nuo puslapio.** Šiandien
+nematoma; pirmą dieną, kai ten atsiras kortelė, atrodys kaip vaiduoklis.
+
+Trinam ir ten — ne todėl, kad trukdo, o todėl, kad tai vienintelė priežastis,
+dėl kurios vardas galėtų reikšti du dalykus.
+
+### 3. Ir kas iš to matosi bendrai
+
+Per dvi dienas tas pats trejetas taisyklių buvo rastas **trijuose failuose,
+devyniose vietose**, du kartus su `!important`, vienąkart su prierašu
+„nekeisti", kurio priežastis mirusi tris mėnesius.
+
+Nė vienas iš mūsų to nematė, kol nebuvo prieigos prie failų **ir** git
+istorijos vienu metu. Aš mačiau savo sistemą, jūs matėt savo priedus, o
+tiesa gyveno tarp jų — trečiame faile, kurio niekas nekrauna tame puslapyje,
+apie kurį kalbėjom.
+
+**Failai:** `pasikeitimai/is-dizainerio/48-errata-39sk/`
+
+---
+
+## D-46 · 2026-09-22 · Dizaineris → Klaudijui · ERRATA 8 · DZ-PLANAS = B
+
+Lukas pasirinko B, ir jis teisus. Viena eilutė, bet noriu užrašyti, **kur
+mano argumentas buvo ne apie tą**.
+
+Rašiau: „akcentas yra šeima, o ne būsena; pabalimas užvedus priartina jį prie
+pirminio". Tai teisinga apie **spalvą** — bet užvedimas nėra spalvos
+klausimas, jis yra **atsako** klausimas.
+
+Sistemoje `.ct-btn` užvedus atsako rėmeliu ir fonu, `.ct-btn-primary` —
+visu mygtuku per `brightness`, `.is-on` — fonu. **`.ct-btn-accent` buvo
+vienintelė, kuri atsakydavo vien rėmeliu.** Tekstas yra didžiausias mygtuko
+elementas; jei jis nereaguoja, mygtukas atrodo lūžęs net tada, kai rėmelis
+pasikeitė.
+
+Tad B nėra išimtis dėl Luko. **B yra taisyklė, kurią pats pralaidau:**
+užvedus atsako tas elementas, kuris didžiausias, o ne tas, kurį lengviausia
+pakeisti. Klaudijaus laikinas blokas ją turėjo — aš ją praleidau, kai rašiau
+atmainą.
+
+Giminės klausimas nedingsta, tik atsakymas kitas: akcentą nuo pirminio
+atskiria **fonas**, ne teksto spalva. Užvedus abu pabąla ir vis tiek
+nesusimaiso — vienas užpildytas violetinis, kitas violetinis ant tamsaus.
+
+**Ir bendresnis dalykas.** Antrą kartą per dvi dienas Klaudijaus „laikinas
+blokas" pasirodė turintis teisingesnį atsakymą už mano skyrių (pirmas —
+17 ir 18 blokai vakar). Trys savaitės aš tuos blokus vadinau atsvaromis; dalis
+jų buvo **pastebėjimai**, tik užrašyti ne ta forma, kuria aš ieškau.
+
+**Failai:** `pasikeitimai/is-dizainerio/50-errata-accent-hover/`
+
+## Z-103 · 2026-09-22 · Klaudijus · v2.9.0 – 46b + 48 + 50 įdiegti
+- **46b** (38, 40, 41 sk.) pridėtas į `ct-dizainas.css` galą be pakeitimų, **be 39 sk.** (pakeičia 48). `ct-dizainas.css` 5 sk.: `#sort-bar` išimtas iš kaukės sąrašo (609), `#sort-bar label` iš 6 sk. sąrašo (623).
+- **38 sk. markupas** (`index.html`): `#sort-bar.ct-sortbar` → `.ct-sortbar-l` → `<span class="ct-sortbar-k">` (ne `<label>`) → `.ct-sort` → `#ct-sort-btn.ct-btn.ct-btn-sm.ct-btn-toggle[aria-expanded]` (inline 34 px ir SVG rodyklė nuimti) → `#ct-sort-menu.ct-sort-menu`. JS: `.is-open` + `aria-expanded`, eilutės `.ct-sort-opt(.is-on)` / `-v` / `-t > em`, `onmouseover` nuimtas, nauja `ctSortClose()`. **„Tinder“ mygtukas NElietas** – Lukas DZ-TINDER: funkcija bus perdaroma atskirai (dizainas + kodas).
+- **40 sk.**: „Kaip vertiname?“ – `<p class="dp-panel-hint">` detail.html įdėtas **po** `.dp-panel-h` (ne jo viduje: `.dp-panel-h` yra eilutė su įverčiu šalia teksto).
+- **48** (39 sk. v2) pridėtas. Trinta tiksliai pagal sąrašą: index 1337 / compare 1277 / ct-bendras 182 – tik `display`, `flex-wrap`, `align-items`; `.ct-istorija` 1340 / 1280 / 183 – tik `flex`; index 1534–1536 ir 2152–2154, compare 1468–1470, ct-bendras 212–213 ir 243–244 – visai. index 2144–2151 ir ct-bendras 238–242 neliesti.
+- **50**: `ct-mygtukai.css` 458 `:hover` tekstas → `--text-primary`.
+- Priedai ištrinti: 5, 16, 17, 18, 20 blokai. Sargai 13/0, onclick patikra žalia.
+- Liko index.html negyvos `#sort-bar label` taisyklės (372, 1021, 1509) – nebeturi ką pasiekti, trinsiu kartu su kitu index valymu.
+- Matavimai (46b 7 sk., 48 5 sk., 50) – po deploy produkcijoje.

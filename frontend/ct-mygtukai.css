@@ -454,7 +454,7 @@
   background: var(--accent-dim);
   color: var(--accent-light);
 }
-.ct-btn-accent:hover { background: var(--accent-dim); border-color: var(--accent); color: var(--accent-light); }
+.ct-btn-accent:hover { background: var(--accent-dim); border-color: var(--accent); color: var(--text-primary); }
 .ct-btn-accent > i { background: rgba(124, 92, 255, .22); color: var(--accent-light); }
 /* Kreditu likutis mygtuke — mono, bet ne raudonas, kol kreditu yra */
 .ct-btn-accent > u { border-left-color: var(--accent-border); color: var(--accent-light); }

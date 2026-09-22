@@ -1334,10 +1334,10 @@
 .diff-neg{background:var(--danger-dim);border:1px solid var(--danger-border);color:var(--danger);}
 .ct-top-card{background:var(--bg-surface);border-radius:16px;overflow:hidden;margin-bottom:12px;transition:box-shadow .2s,border-color .2s;}
 .ct-top-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.45);}
-.ct-std-card{display:flex;flex-wrap:wrap;align-items:stretch;background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:8px;transition:border-color .15s;}
+.ct-std-card{background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:8px;transition:border-color .15s;}
 /* Auto istorijos blokas visada eina PER VISA PLOTI po kortelės turiniu, o ne
    įsiterpia į flex eilutę šalia teksto ir jo nespaudžia. */
-.ct-std-card > .ct-istorija{flex:0 0 100%;padding:0 14px 12px;}
+.ct-std-card > .ct-istorija{padding:0 14px 12px;}
 .ct-std-card > .ct-istorija > div{margin-top:0 !important;}
 .ct-top-card .ct-istorija{padding:0 18px 14px;}
 .ct-std-card:hover{border-color:var(--border-light);}
@@ -1531,9 +1531,6 @@
   .chip { font-size: 11px; height: 24px; padding: 0 8px; }
 }
 
-/* BŪTINA: .ct-std-card — nekeisti šio bloko */
-.ct-std-card { display: flex; flex-wrap: wrap; }
-.ct-std-card > .ct-istorija { flex: 0 0 100%; }
 
 /* ── PATAISYMAI PO DIZAINO PERDAVIMO (Claude Code) ───────────────────────────
    1) .ct3-hero/.ct3-stats/.ct3-search-panel naudoja "full-bleed" triuką
@@ -2149,9 +2146,6 @@
   padding: 10px 12px !important;
 }
 
-/* Išlaikome būtinas taisykles */
-.ct-std-card { display: flex !important; flex-wrap: wrap !important; }
-.ct-std-card > .ct-istorija { flex: 0 0 100% !important; }
 </style>
 
 <style id="ct-hist-redesign">
@@ -2843,17 +2837,15 @@
     </div>
     <div id="log-box"></div>
   </div>
-  <div id="sort-bar" style="display:none;">
-    <div>
-      <label style="font:600 10px/1 var(--font-mono);letter-spacing:.1em;color:var(--text-dim);margin-right:10px;">RŪŠIUOTI</label>
+  <div id="sort-bar" class="ct-sortbar" style="display:none;">
+    <div class="ct-sortbar-l">
+      <span class="ct-sortbar-k">RŪŠIUOTI</span>
       <input type="hidden" id="sort-select" value="quality">
-      <div id="ct-sort" style="position:relative;display:inline-block;vertical-align:middle;">
-        <button type="button" id="ct-sort-btn" onclick="ctSortToggle(event)"
-          style="display:inline-flex;align-items:center;gap:9px;height:34px;padding:0 12px;border-radius:9px;border:1px solid var(--border-light);background:var(--bg-surface);color:var(--text-primary);font:500 12.5px var(--font);cursor:pointer;white-space:nowrap;" class="ct-btn ct-btn-sm">
+      <div id="ct-sort" class="ct-sort">
+        <button type="button" id="ct-sort-btn" class="ct-btn ct-btn-sm ct-btn-toggle" aria-expanded="false" onclick="ctSortToggle(event)">
           <span id="ct-sort-label">Kaina/kokybės santykis</span>
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="opacity:.6;transition:transform .18s" id="ct-sort-chev"><path d="M6 9l6 6 6-6"/></svg>
         </button>
-        <div id="ct-sort-menu" style="display:none;position:absolute;z-index:400;top:calc(100% + 6px);left:0;min-width:248px;padding:5px;border-radius:11px;background:#12151e;border:1px solid rgba(255,255,255,.13);box-shadow:0 10px 38px rgba(0,0,0,.6);"></div>
+        <div id="ct-sort-menu" class="ct-sort-menu"></div>
       </div>
     </div>
     <!-- PASALINTA: "Pagrindinis" rezimo zenklelis. Tinder narsymas - tik telefone (CSS) -->
@@ -4924,40 +4916,37 @@ window.ctSortSetLabel = function (v) {
 window.ctSortToggle = function (ev) {
   if (ev) ev.stopPropagation();
   const menu = document.getElementById('ct-sort-menu');
-  const chev = document.getElementById('ct-sort-chev');
+  const btn = document.getElementById('ct-sort-btn');
   if (!menu) return;
-  if (menu.style.display === 'block') { menu.style.display = 'none'; if (chev) chev.style.transform = ''; return; }
+  if (menu.classList.contains('is-open')) { ctSortClose(); return; }
   const dabartinis = document.getElementById('sort-select').value;
+  // v2.9.0 (46b 38 sk.): eilutes su klasemis, uzvedimas - CSS (.ct-sort-opt:hover)
   menu.innerHTML = CT_SORT_OPTS.map(function (o) {
     const akt = o.v === dabartinis;
-    const bg = akt ? 'rgba(124,111,247,.14)' : 'transparent';
-    return '<div onclick="ctSortPick(\'' + o.v + '\')" style="padding:9px 11px;border-radius:8px;cursor:pointer;display:flex;align-items:flex-start;gap:9px;background:' + bg + ';"'
-      + ' onmouseover="this.style.background=\'rgba(255,255,255,.06)\'" onmouseout="this.style.background=\'' + bg + '\'">'
-      + '<span style="width:14px;flex:none;color:var(--accent-light);font-size:12px;line-height:1.4;">' + (akt ? '✓' : '') + '</span>'
-      + '<span style="min-width:0;"><span style="display:block;font:600 12.5px/1.3 var(--font);color:var(--text-primary);">' + o.l + '</span>'
-      + '<span style="display:block;font:400 11px/1.4 var(--font);color:var(--text-dim);margin-top:1px;">' + o.s + '</span></span></div>';
+    return '<div class="ct-sort-opt' + (akt ? ' is-on' : '') + '" onclick="ctSortPick(\'' + o.v + '\')">'
+      + '<span class="ct-sort-opt-v">\u2713</span>'
+      + '<span class="ct-sort-opt-t">' + o.l + '<em>' + o.s + '</em></span></div>';
   }).join('');
-  menu.style.display = 'block';
-  if (chev) chev.style.transform = 'rotate(180deg)';
+  menu.classList.add('is-open');
+  if (btn) btn.setAttribute('aria-expanded', 'true');
+};
+
+window.ctSortClose = function () {
+  const menu = document.getElementById('ct-sort-menu');
+  const btn = document.getElementById('ct-sort-btn');
+  if (menu) menu.classList.remove('is-open');
+  if (btn) btn.setAttribute('aria-expanded', 'false');
 };
 
 window.ctSortPick = function (v) {
   window.ctSortSetLabel(v);
-  const menu = document.getElementById('ct-sort-menu');
-  const chev = document.getElementById('ct-sort-chev');
-  if (menu) menu.style.display = 'none';
-  if (chev) chev.style.transform = '';
+  ctSortClose();
   applySorting();
 };
 
 document.addEventListener('click', function (e) {
   const wrap = document.getElementById('ct-sort');
-  const menu = document.getElementById('ct-sort-menu');
-  if (menu && wrap && !wrap.contains(e.target)) {
-    menu.style.display = 'none';
-    const chev = document.getElementById('ct-sort-chev');
-    if (chev) chev.style.transform = '';
-  }
+  if (wrap && !wrap.contains(e.target)) ctSortClose();
 });
 
 // v2.4.0 (Nr. 42): VIENA rikiavimo funkcija abiem sarasams. Iki siol

@@ -50,28 +50,8 @@
    v1.42.0: dizaineris įrašė `:not(.ct-btn-tight)` į ct-mygtukai.css 420 eilutę,
    tad `.ct-btn-tight` 44 px vėl pasiekia mygtuką ir mūsų atsvaros nebereikia.   */
 
-/* ── 5. .ct-btn-accent – LAIKINA, laukia dizainerio varianto ──────────────
-   Dizaineris parašė: „ne `.ct-btn-sm` plikas, o `.ct-btn-sm ct-btn-accent` –
-   nauja atmaina zip'e". Zip'e jos nėra – nei `ct-mygtukai.css`, nei
-   `ct-dizainas.css`. Ta pati istorija kaip su `#i-zenkliukai`.
-
-   Kodėl jos reikia: `Pro · 13 kr` ir `Pilna apžvalga · 2 kr` abu prašo pinigų.
-   Du violetiniai pirkimo mygtukai viename ekrane konkuruoja, ir pralaimi tas,
-   kurio žmogui reikia dabar. Akcento šeimoje gali būti keli, pirminis – vienas.
-
-   Tik tokenai, jokios naujos spalvos.
-   ATŠAUKIMAS: ištrinti, kai atsiųs savo variantą.                             */
-
-.ct-btn-accent {
-  background: var(--accent-dim);
-  border-color: var(--accent-border);
-  color: var(--accent-light);
-}
-.ct-btn-accent:hover {
-  background: var(--accent-dim);
-  border-color: var(--accent);
-  color: var(--text-primary);
-}
+/* ── 5. .ct-btn-accent – IŠTRINTAS v2.9.0 (50 paketas, ERRATA 8): atmaina
+   ct-mygtukai.css 452–460, užvedus tekstas `--text-primary` (Luko DZ-PLANAS = B). */
 
 /* ── 5. Plaukiojantis pranešimo mygtukas – PERIMTA, IŠTRINTA ────────────
    v1.54.0: dizaineris pakėlė specifiką iki `.ct-btn.ct-report-fab` savo faile.
@@ -166,69 +146,14 @@
    papildymas; index.html visos penkios portalų piktogramos dabar su klase.   */
 
 
-/* ----------------------------------------------------------------------------
-   16 BLOKAS · Nr. 42 · RŪŠIUOTI meniu telefone nematomas · v2.6.5 (Z-91)
+/* 16 BLOKAS · IŠTRINTAS v2.9.0 (46b 38 sk. `.ct-sort`): `#sort-bar` išimtas iš 5 sk. kaukės sąrašo. */
 
-   ct-dizainas.css 5 sk. (≤640 px) uždeda `#sort-bar` kaukę (mask-image),
-   kad juosta „tęstųsi". Kaukė KERPA VISKĄ, kas išeina už elemento ribų -
-   ir absoliutų `#ct-sort-menu`, kuris atsidaro ŽEMYN už juostos. Meniu
-   atsidarydavo (rodyklė apsiversdavo), bet buvo nupieštas nematomas.
-   Todėl web'e veikė, telefone - ne. Pamatuota 385 px: meniu 12,683 248x214,
-   elementFromPoint jo vietoje grąžino `.container`.
+/* 17 BLOKAS · IŠTRINTAS v2.9.0 (48 paketas, 39 sk. v2): `.ct-std-card { display: block }`, seni flex trinti index/compare/ct-bendras. */
 
-   `#sort-bar` nėra slenkanti juosta (flex-wrap), tad uzuomina čia nereikalinga.
-   LAIKINA: dizaineriui - `.ct-sort` skyrius (jo skola) šį bloką panaikins.  */
-@media (max-width: 640px) {
-  #sort-bar { -webkit-mask-image: none; mask-image: none; }
-}
-
-
-/* ----------------------------------------------------------------------------
-   17 BLOKAS · Nr. 40 · „Kiti skelbimai" kortelės suspaustos · v2.6.5 (Z-91)
-
-   „Kiti skelbimai" kortelės turi seną klasę `.ct-std-card`, o jai index.html
-   (1343, 1546, 2173 - pastaroji su !important) ir ct-bendras.css duoda
-   `display:flex; flex-wrap:wrap` - iš laikų, kai eilutė buvo kitokia.
-   Dabar viduje tas pats `ctKortele()` kaip TOP kortelėse, ir flex eilutėje
-   `.ct-l1` susitraukia iki turinio: pamatuota 1920 px - 938 px vietoj 1235,
-   o atmestose `.ct-reject` juosta atsistoja ŠALIA (264 px), ne viršuje.
-   Todėl „mygtukai subyra" ir „ne per visą ekraną".
-
-   Senų taisyklių neliečiu (index.html 1545 „nekeisti"). Vaikams - visa eilutė,
-   tada kortelė elgiasi kaip TOP (`display:block`) be !important.           */
-.ct-std-card.ct-card > * { flex: 1 1 100%; min-width: 0; }
-
-
-
-/* ----------------------------------------------------------------------------
-   18 BLOKAS · Nr. 10 · skelbimo puslapis: vienas įvertis, pardavėjas viršuje · v2.6.9 (Z-95)
-
-   Lukas: „dubliuojasi įvertinimai – palik vieną; pardavėjo info – į viršų dešinėje".
-   Tas pats CarTriige įvertis buvo dukart: skydelyje prie galerijos (#dp-panel) ir
-   atskiroje `.dp-score-section`. v2.7.1: sekcija IŠTRINTA (markupas, JS, CSS).
-   Pardavėjo kortelė iš `.dp-main-sell` (po galerija, kairėje) perkelta į naują
-   dešinį stulpelį `.dp-desine` po skydeliu. Stulpelis perima `.dp-panel` flex dydį
-   (ct-dizainas.css 1095: flex 1 1 320px, min 280). Dizaineriui - D-03 („3 dalis").  */
-.dp-desine { flex: 1 1 320px; min-width: 280px; display: flex; flex-direction: column; gap: 16px; }
-.dp-desine > .dp-panel { flex: none; min-width: 0; }
-
+/* 18 BLOKAS · IŠTRINTAS v2.9.0 (46b 40 sk. `.dp-desine`). */
 
 /* 19 BLOKAS · IŠTRINTAS v2.7.1 (45 paketas): šaknies `color-scheme: dark` ir
    `.ct-fld-v select option` dabar ct-dizainas.css. */
 
 
-/* ----------------------------------------------------------------------------
-   20 BLOKAS · papildomi filtrai „Daugiau filtrų" skydelyje · v2.7.2 (Z-97)
-
-   Luko užduotis: filtrai pagal autoplius / mobile.de. Laukai - sistemos
-   `select.ct-field` (ct-dizainas.css, su `option` spalvomis 2163), čia tik
-   išdėstymas: etiketė virš lauko, tinklelis, kuris siaurame stulpelyje
-   (šonas 276 px, telefonas) krenta į vieną stulpelį. Dizaineriui - į
-   `.ct3-more-panel` skyrių.                                                   */
-.ct-papf { margin-top: var(--s-3); padding-top: var(--s-3); border-top: 1px solid var(--border); }
-.ct-papf-h { font: var(--fw-semi) 10px/1 var(--font-mono); letter-spacing: .08em; color: var(--text-dim); margin: 0 0 var(--s-2); }
-.ct-papf-g { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: var(--s-2) var(--s-3); margin-bottom: var(--s-3); }
-.ct-papf-l { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
-.ct-papf-l > span { font-size: 12px; color: var(--text-muted); }
-.ct-papf-l > .ct-field { width: 100%; min-width: 0; }
-.ct-papf-n { font-size: 11px; color: var(--text-dim); }
+/* 20 BLOKAS · IŠTRINTAS v2.9.0 (46b 41 sk. `.ct-papf`, perimta be pakeitimų). */

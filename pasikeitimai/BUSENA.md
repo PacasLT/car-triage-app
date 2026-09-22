@@ -9,16 +9,14 @@ Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
 |---|---|---|
 | Darbo sistema | DARBO-SISTEMA v2, fazė A | Vykdoma. Kol nebaigta — produkto darbai stovi (Luko sprendimas). |
 | TA integracija | `docs/UZDUOTIS-ta-integracija.md` | Analitiko paruošta užduotis (TA rida 99 % vs Regitra 17 %). Po fazės C. |
-| `.ct-std-card` matavimas | diegiant 46b + 48 | Produkcijoje `.ct-std-card` ir gretimos `.ct-top-card` `background`, `border-color`, `border-radius`, `margin-bottom`. Sutampa → 3 rankinės deklaracijos (index 1337, ct-bendras.css 182, compare.html 1277) kitame pakete dingsta; nesutampa → pasakyti kuri išimtis. |
-| Nr. 42 pabaiga | `#sort-bar` iš ct-dizainas.css 609 ir 623 sąrašų | Dizaineris leido daryti Klaudijui. Kartu trinti 16 bloką. |
 
 ## Dizaineris
 
 | Nr. | Kas | Trumpai |
 |---|---|---|
-| 49 | Trys vardai | **Įdiegta v2.8.0** (42, 43, 30 sk.; priedai 12 ir 15 blokai ištrinti). Liko: 5 blokas – laukia dizainerio erratos (Lukas DZ-PLANAS = B). Matavimai po deploy. |
+| 46b+48+50 | v2.9.0 įdiegta lokaliai | Laukia push (Luko eilė KL-PUSH-0922) ir matavimų produkcijoje: rūšiavimo meniu 390, kaukė `.dp-tabs`/`.ct-tabs`, „Kiti skelbimai“ 1920 (1235 px, `.ct-reject` viršuje, paviršius nepakitęs), detalė 1440 (572), „Daugiau filtrų“ nepakitę, „Planas“ užvedus baltas. |
+| `.ct-std-card` paviršius | kitam paketui | Matavimas `.ct-std-card` vs `.ct-top-card`: background, border-color, border-radius, margin-bottom (48 PASTABOS 4). |
 | Prieiga | `Downloads\cartriige-dizaineriui` | Tikros kopijos (junction'ai neveikė). Patikra: `ct-priedai.css` eil. sk. + ši pirma eilutė. |
-| 46b | 4 benamiai vardai: `.ct-sort`, `.ct-std-card`, `.dp-desine`, `.ct-papf` + „Kaip vertiname?" eilutė `#dp-panel` | 46 atšauktas (D-41). **48 Errata 7 gautas, laukia 46b** — diegiami kartu. Įdiegus trinami priedų 16, 17, 18, 20 blokai ir senos `.ct-std-card` taisyklės (index 1337 tik 3 savybės, 1534 „BŪTINA", 2173, compare.html, **ct-bendras.css**; 2144–2151 neliesti). |
 | `#search-btn` | 5-as ID mygtukas | Gradientas / švytėjimas / `:disabled` sistemoje ar vientisas CTA? Z-93. |
 | Kiti vardai | `.ct-btn-accent` (priedų 5), `.ct-regitra` (15), `.mg-atn-busena` (12), `.ct3-portal-ico` | Dizaineris pažadėjo kitame pakete. |
 | Tab žiedas | `--focus-offset` (43 pk.) | Vizualiai nepatikrinta — laukia Luko. |
