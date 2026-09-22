@@ -1083,3 +1083,8 @@ jų buvo **pastebėjimai**, tik užrašyti ne ta forma, kuria aš ieškau.
 - Priedai ištrinti: 5, 16, 17, 18, 20 blokai. Sargai 13/0, onclick patikra žalia.
 - Liko index.html negyvos `#sort-bar label` taisyklės (372, 1021, 1509) – nebeturi ką pasiekti, trinsiu kartu su kitu index valymu.
 - Matavimai (46b 7 sk., 48 5 sk., 50) – po deploy produkcijoje.
+
+## Z-104 · 2026-09-22 · Klaudijus · push iki v2.8.1, matavimai 49, „Planas“ hover faktas
+- Push `da81750..3123a5a` (Luko KL-PUSH-0922 = A, 14 commit'ų iki v2.8.1). Railway SUCCESS. v2.9.0 laukia KL-PUSH-0922B.
+- 49 matavimai produkcijoje: `/admin/atsarga` Regitra 957 modeliai; `#mg-atn-busena.ct-status` – `flex: 1 1 100%`, plotis = `.pg-head` plotis (atskira eilutė), 12 px, `--text-dim`; penkios portalų piktogramos visos `ct3-portal-ico`, be inline, 22×22, radius 5, `flex-shrink: 0` (AS24 nesusitraukė).
+- **„Planas“ hover – faktas kitoks nei manyta (D-45, 50 PASTABOS):** stilių tvarka `ct-dizainas` → `ct-priedai` → `ct-mygtukai`, specifiškumas vienodas, tad ŠIANDIEN laimi `ct-mygtukai.css` 457 → užvedus tekstas `--accent-light` (violetinis), ne baltas. Mano 5 blokas niekada nesuveikė. ERRATA 8 (`--text-primary`) padarys jį BALTĄ – tai vizualus pokytis. Lukui – KL-PUSH-0922B variantas C.
