@@ -8,6 +8,12 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.10.8', data: '2026-09-22', pavadinimas: 'Dizainas: vienas langų stilius',
+    pakeitimai: [
+      'Iššokančių langų (pvz. „Pranešti apie klaidą“) stilius sutvarkytas į vieną – išvaizda nesikeičia, bet nauji langai (stabdis, planai) atrodys vienodai.',
+    ],
+  },
+  {
     versija: '2.10.7', data: '2026-09-22', pavadinimas: 'LCI tiksliau: registracijos mėnuo ir AI apžvalga',
     pakeitimai: [
       'Atnaujinimo metų automobilis (pvz. 2023 m. X5) dabar atpažįstamas pagal pirmos registracijos mėnesį: įregistruotas prieš LCI gamybą – senas, praėjus 3 mėn. nuo jos pradžios – LCI. Tarpinis laikotarpis lieka „G05 / G05 LCI“. Kol kas BMW.',

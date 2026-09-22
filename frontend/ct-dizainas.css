@@ -382,55 +382,6 @@ button { font-family: inherit; cursor: pointer; }
 }
 
 /* ============================================================================
-   KOMPONENTAS · MODALAS
-   ========================================================================== */
-
-.ct-modal-scrim {
-  position: fixed; inset: 0; z-index: 2000;
-  display: grid; place-items: center;
-  padding: var(--s-4);
-  background: var(--bg-scrim);
-  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
-}
-.ct-modal {
-  width: 100%; max-width: 520px; max-height: min(86vh, 760px);
-  display: flex; flex-direction: column;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-3);
-  overflow: hidden;
-}
-.ct-modal-h {
-  display: flex; align-items: center; gap: var(--s-3);
-  padding: var(--s-4);
-  border-bottom: 1px solid var(--border);
-}
-.ct-modal-h > :first-child { flex: 1; min-width: 0; font: var(--fw-semi) var(--fs-500) / var(--lh-tight) var(--font); margin: 0; }
-.ct-modal-b { padding: var(--s-4); overflow-y: auto; display: flex; flex-direction: column; gap: var(--s-3); }
-.ct-modal-f {
-  display: flex; justify-content: flex-end; gap: var(--s-2);
-  padding: var(--s-3) var(--s-4);
-  border-top: 1px solid var(--border); background: var(--bg-base);
-}
-.ct-modal-x {
-  flex: none; width: 32px; height: 32px; border-radius: var(--radius-sm);
-  border: none; background: transparent; color: var(--text-muted); font-size: var(--fs-400);
-}
-.ct-modal-x:hover { background: var(--bg-elevated); color: var(--text-primary); }
-
-/* Mobiliajame modalas = apatinis lapelis (filtrai, patvirtinimai) */
-@media (max-width: 600px) {
-  .ct-modal-scrim { place-items: end center; padding: 0; }
-  .ct-modal {
-    max-width: none; max-height: 88vh;
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-    border-bottom: none;
-  }
-  .ct-modal-f { position: sticky; bottom: 0; padding-bottom: max(var(--s-3), env(safe-area-inset-bottom)); }
-}
-
-/* ============================================================================
    BŪSENOS · tuščia / kraunasi / klaida / nepakanka kreditų
    ========================================================================== */
 
@@ -4201,3 +4152,235 @@ textarea.ct-field {
 
    Del to `.ct-istorija` uzpildo skyriaus dar neturiu - kai imsiu istorijos
    juosta, pirmas darbas bus nuspresti tarp 12 ir 14, o ne perkelti abu.   */
+
+
+/* ============================================================================
+   55 paketas - 46 sk. NAUJAS - portalu lentele   ·   plius `.ct-modal` sutraukimas
+   ----------------------------------------------------------------------------
+   A dalis: `.ct-modal` dubliai sutraukiami i viena (pirmas blokas trinamas)
+   B dalis: 46 sk. NAUJAS - `.ct-portals` lentele stabdzio lange
+
+   Versija - siulau v2.13.0.
+   ========================================================================== */
+
+
+/* ============================================================================
+   A DALIS · `.ct-modal` · pirmas blokas trinamas
+   ----------------------------------------------------------------------------
+   Patikrinau abu blokus. Antrasis (1478-1536) jau turi VISKA, ko klausėt:
+   `.ct-modal-scrim` su blur (tik z-index 3000, ne 2000 - ir tai teisingesnis,
+   nes modalas turi buti virs `.ct-log` ir plaukiojancio mygtuko), ir mobilu
+   apatini lapeli (tik ties 640, ne 600 - sutampa su visu produktu).
+
+   Trūksta DVIEJŲ dalykų, tad juos perkeliu zemiau. Po to 388-430 eil.
+   trinamos VISOS.
+
+   ── IR VIENAS DALYKAS, KURIO NEPERKELIU ──────────────────────────────────
+   `.ct-modal-h > :first-child` (405 eil.) - taisykle be vardo, pati
+   uzsidedanti ant PIRMO vaiko, kas jis bebutu. Butent del jos du blokai
+   galejo gyventi kartu nesusidure: antrasis apraso `.ct-modal-t` ir
+   `.ct-modal-d`, o pirmasis dazo ta, kas pasitaikys pirmas.
+
+   Klaudijus pamatavo: pirmojo markupo nenaudoja nė vienas langas. Tad
+   taisykle dingsta be atsargos, ir tai gerai - nevardinis selektorius
+   sistemoje yra tas pats, kas inline stilius: veikia, kol niekas nieko
+   nepersikelia.                                                            */
+
+/* Perkeliama is 388-430: uzdarymo kryziukas */
+.ct-modal-x {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--fs-400);
+  cursor: pointer;
+}
+.ct-modal-x:hover { background: var(--bg-elevated); color: var(--text-primary); }
+
+/* Kryziukas antrajame bloke gyvena KITOJE vietoje: ten `.ct-modal-h` yra
+   stulpelis (antraste + paaiskinimas), tad kryziukas negali stoveti eileje su
+   jais. Jis atsistoja virsuje desineje, ant paties lango. */
+.ct-modal { position: relative; }
+.ct-modal > .ct-modal-x { position: absolute; top: 12px; right: 12px; z-index: 1; }
+.ct-modal-h:has(+ * ) > .ct-modal-t { padding-right: 34px; }
+
+/* Perkeliama is 388-430: `overflow: hidden`.
+   Be jo apatinio lapelio apvalus kampai telefone nukerpa turinio, ir
+   `.ct-modal-f` fonas islenda uz radiuso. */
+.ct-modal { overflow: hidden; }
+
+/* ISTRINTI: ct-dizainas.css 388-430 eil. (visas pirmas `.ct-modal` blokas,
+   iskaitant `@media (max-width: 600px)` ir `.ct-modal-h > :first-child`). */
+
+
+/* ============================================================================
+   B DALIS · 46. PORTALU LENTELE   ·   `.ct-portals`
+   ----------------------------------------------------------------------------
+   Vienas principas: tai ne lentele, o KETURI STULPELIAI. Skirtumas praktinis -
+   lentele telefone lieka lentele ir kysa uz krasto, o stulpeliai gali
+   persidėlioti. `<table>` cia nenaudojamas nė viename plotyje.
+
+   Ir antras: stulpeliu skaicius priklauso nuo TEISIU, ne nuo ekrano.
+   Vartotojas mato tris (portalas, rasta, puslapiu), adminas keturis.
+   `.is-admin` klases NEREIKIA - serveris arba deda kainos celes, arba ne, o
+   gridas prisitaiko pats per `--cols`.
+
+   ── KO PRASAU MARKUPE ─────────────────────────────────────────────────────
+
+     <div class="ct-portals" style="--cols:4">        <!-- vartotojui: 3 -->
+       <div class="ct-portals-h">
+         <span>Portalas</span><span>Rasta</span><span>Psl.</span><span>Kaina</span>
+       </div>
+       <div class="ct-portals-r">
+         <span class="ct-portals-p"><img class="ct3-portal-ico" …>autoplius.lt</span>
+         <b>1 240</b><b>75</b><b>890 kr.</b>
+       </div>
+       <div class="ct-portals-r is-counting">
+         <span class="ct-portals-p">…autogidas.lt</span>
+         <b class="ct-portals-w">skaičiuojama…</b>
+       </div>
+       <div class="ct-portals-r is-unknown">
+         <span class="ct-portals-p">…mobile.de</span>
+         <b class="ct-portals-w">nežinoma</b>
+       </div>
+       <div class="ct-portals-r is-total">
+         <span class="ct-portals-p">Iš viso</span>
+         <b>3 400</b><b>165</b><b>1 780 kr.</b>
+       </div>
+     </div>
+
+   `skaičiuojama…` ir `nežinoma` uzima VISAS likusias celes (`ct-portals-w`),
+   nes dalinis skaicius be kitu dvieju nieko nereiskia.                      */
+
+.ct-portals {
+  --cols: 4;
+  display: grid;
+  grid-template-columns: 1fr repeat(calc(var(--cols) - 1), max-content);
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/* Antraste ir eilutes yra `display: contents` - taip celes patenka tiesiai i
+   bendra tinkleli, ir stulpeliai lygiuojasi per visa lentele (37 sk. pamoka:
+   apvalkalas grido viduje pats tampa langeliu). */
+.ct-portals-h,
+.ct-portals-r { display: contents; }
+
+.ct-portals-h > span {
+  padding: 8px 12px;
+  background: var(--bg-sunken);
+  border-bottom: 1px solid var(--border);
+  font: var(--fw-semi) 9.5px/1 var(--font-mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+/* Skaiciu antrastes - desineje, kaip ir patys skaiciai */
+.ct-portals-h > span:not(:first-child) { text-align: right; }
+
+.ct-portals-r > * {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  min-width: 0;
+}
+.ct-portals-r:last-child > * { border-bottom: 0; }
+
+/* Portalo vardas: piktograma nesitraukia, vardas traukiasi (30b sk.) */
+.ct-portals-p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: var(--fw-medium) var(--fs-300)/1.4 var(--font);
+  color: var(--text-primary);
+  min-width: 0;
+}
+.ct-portals-p > img { flex: none; width: 18px; height: 18px; }
+
+/* Skaiciai: mono, `tabular-nums`, i desine. Jie atsinaujina, tad negali
+   keisti stulpelio plocio (ta pati priezastis kaip 44 sk. `.ct-log-sub`). */
+.ct-portals-r > b {
+  font: var(--fw-semi) var(--fs-300)/1.4 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+  color: var(--text-primary);
+}
+
+/* ── Nezinomos busenos ────────────────────────────────────────────────────
+   Abi uzima visas likusias celes. */
+.ct-portals-w {
+  grid-column: 2 / -1;
+  text-align: right;
+  font: var(--fw-regular) var(--fs-200)/1.4 var(--font);
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+/* Skaiciuojama: ta pati pulsacija kaip `.ct-progress` - vienas judejimas
+   visame produkte reiskia „dar vyksta". Nauju keyframes nerasau, naudoju
+   esamus `ct-pulse` (996 eil.). */
+.ct-portals-r.is-counting .ct-portals-w {
+  color: var(--text-muted);
+  animation: ct-pulse 1.4s ease-in-out infinite;
+}
+
+/* Nezinoma: pilka ir be judejimo. Ne raudona - portalas neatsake, o tai
+   sistemos riba, ne klaida (44 sk. ta pati logika kaip fondo sargui). */
+.ct-portals-r.is-unknown .ct-portals-w { color: var(--text-dim); }
+
+/* ── Is viso ──────────────────────────────────────────────────────────────
+   Ne remelis virsuje, o FONAS: eilute skiriasi ne tuo, kad atskirta, o tuo,
+   kad ji yra suma. */
+.ct-portals-r.is-total > * {
+  background: var(--bg-sunken);
+  border-top: 1px solid var(--border-light);
+  border-bottom: 0;
+}
+.ct-portals-r.is-total .ct-portals-p {
+  font: var(--fw-semi) var(--fs-300)/1.4 var(--font);
+  color: var(--text-secondary);
+}
+
+/* ── Telefonas · 352 px ───────────────────────────────────────────────────
+   Keturi stulpeliai netelpa. Vardas atsistoja VIRSUJE, skaiciai po juo viena
+   eile - tad eilute tampa kortele, o tinklelis lieka tas pats gridas.
+
+   Antraste dingsta: kai skaiciai stovi vienoje eileje po vardu, jie turi
+   savo etiketes (`<b>` su `data-k`), o atskira antrastes eile butu antras
+   vardu sarasas. */
+@media (max-width: 560px) {
+  .ct-portals { grid-template-columns: 1fr; }
+  .ct-portals-h { display: none; }
+  .ct-portals-r {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 14px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ct-portals-r > * { padding: 0; border-bottom: 0; }
+  .ct-portals-p { flex: 1 1 100%; }
+  .ct-portals-r > b { text-align: left; }
+
+  /* Etikete pries skaiciu - be jos trys skaiciai eileje neatskiriami */
+  .ct-portals-r > b[data-k]::before {
+    content: attr(data-k) " ";
+    font: var(--fw-semi) 9px/1 var(--font-mono);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .ct-portals-w { grid-column: auto; flex: 1 1 100%; text-align: left; }
+  .ct-portals-r.is-total { border-bottom: 0; }
+}
+
+/* MARKUPUI: kiekvienam `<b>` reikia `data-k` - „rasta", „psl.", „kaina".
+   Placiame variante jis nenaudojamas; telefone tampa etikete. Vienas
+   atributas vietoj antros markupo versijos.                               */

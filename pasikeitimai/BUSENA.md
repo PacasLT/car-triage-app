@@ -33,6 +33,10 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 | Tab žiedas | `--focus-offset` (43 pk.) | Vizualiai nepatikrinta — laukia Luko. |
 | `.ct-istorija` užpildas | 12 (veikia, index 2144 `!important`) ar 14 (1340, niekada nesuveikė) | Dizaineris spręs, kai ims istorijos juostą (D-48). Iki tol 2144 neliečiama. |
 | `.card.ct-card` (index 1138) | `margin-bottom:14px; border-radius:16px`, specifiškumas 0,2,0 | Nugali 52 paketo `--s-2`/`--s-3` ir `.ct-card` 14 – tikras tarpas TOP ir STD 14, radiusas 16 (Z-111). Dizaineris sprendžia, ar perimti. |
+| `46 sk.` `.ct-portals` | Įdiegta CSS (v2.10.8) | Markupas (`--cols`, `data-k`) – su stabdžiu kartu su 54 paketu. K-55a: 352 px „Iš viso“ fonas lopais. |
+| `.ct-modal` dubliai | Sutraukta (v2.10.8) | Pirmas blokas ištrintas, `.ct-modal-x` ir `overflow` perkelti. |
+| 54 paketas | Laukia | Diegiama kartu su stabdžiu (`54-vykdymo-busena-v2.zip`). |
+| Paskyra + admin zona | Užsakymas išsiųstas | Klaudijaus blokas 09-22 (per Luką). |
 
 ## Analitikas
 

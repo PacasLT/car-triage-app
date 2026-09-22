@@ -1274,3 +1274,54 @@ visu kontekstu. Kai imsiu juostą, **pirmas darbas bus nuspręsti tarp jų.**
 - AI apžvalga: `rinkosGrupe` ir `kartos` į marketContext (paieška, analyze-single, detail/index); dviprasmiškai fazei AI prašoma nustatyti iš aprašymo/nuotraukų arba sakyti „nematyti“.
 - Testai: regitra 178/178, mediana 19/19.
 
+---
+
+## D-51 · 2026-09-22 · Dizaineris → Klaudijui · 46 sk. + `.ct-modal` · 55 PAKETAS
+
+### 1. Dubliai buvo ne atsitiktinumas
+
+`.ct-modal` gyvavo dukart, ir dabar matau, **kodėl abu blokai galėjo
+egzistuoti nesusidūrę**: pirmajame yra `.ct-modal-h > :first-child` —
+taisyklė **be vardo**, užsidedanti ant pirmo vaiko, kas jis bebūtų. Antrasis
+aprašo `.ct-modal-t` ir `.ct-modal-d`; pirmasis dažo tą, kas pasitaikys.
+
+Du blokai nesikirto ne todėl, kad buvo suderinti, o todėl, kad vienas iš jų
+**nieko konkretaus nevardino**. Nevardinis selektorius sistemoje yra tas
+pats, kas inline stilius: veikia, kol niekas nieko nepersikelia.
+
+Antrasis blokas turėjo viską, ko reikėjo, ir net teisingesniais skaičiais
+(`z-index` 3000 — modalas turi būti virš `.ct-log`; 640 — sutampa su visu
+produktu). Perkeliau tik `.ct-modal-x` ir `overflow: hidden`.
+
+### 2. Lentelė, kuri nėra lentelė
+
+`46 sk.` neturi nė vieno `<table>`. Priežastis praktinė: **lentelė telefone
+lieka lentelė** ir kyšo už krašto, o keturi grid stulpeliai persidėlioja į
+kortelę.
+
+Ir stulpelių skaičius priklauso **nuo teisių, ne nuo ekrano** — `--cols`
+vietoj `.is-admin`. Tai trečias kartas šią savaitę, kai išvengiu būsenos
+klasės (`.ct-modal-adm`, portalų eilutės, dabar šis): **būsena, kurią
+nustato serveris, neturi turėti savo klasės** — ją galima pamiršti išjungti,
+o markupo nebuvimo pamiršti negalima.
+
+### 3. Kur nesutinku su savimi iš vakar
+
+`skaičiuojama…` ir `nežinoma` **užima visas likusias celes**. Vakar 44 sk.
+rašiau, kad būsena neturi keisti išdėstymo — o čia keičia, ir sąmoningai:
+dalinis skaičius be kitų dviejų nieko nereiškia, o tuščios celės skaitomos
+kaip nuliai. Skirtumas tas, kad 44 sk. eilutė **atsinaujina kas 1,5 s**, o ši
+keičiasi vieną kartą.
+
+`nežinoma` pilka, ne raudona — portalas neatsakė, tai sistemos riba.
+Raudona jau turi du darbus, ir trečio jai neduosiu.
+
+**Failai:** `pasikeitimai/is-dizainerio/55-portalu-lentele/`
+
+## Z-122 · 2026-09-22 · Klaudijus · v2.10.8 – 55 paketas įdiegtas
+- A dalis: `ct-dizainas.css` pirmasis `.ct-modal` blokas ištrintas (tikros eilutės 384–432: antraštės komentaras „KOMPONENTAS · MODALAS“ + 388–431 blokas su `@media` uždarančiu `}` 431 eil. – pakete nurodyta 388–430, `}` būtų likęs vienas). Grep prieš: eilutės sutapo.
+- B dalis: 46 sk. `.ct-portals` pridėtas failo gale be pakeitimų. Markupas bus su stabdžiu (54 + 55 kartu).
+- Matavimai (`pasikeitimai/matavimai/55-portalai-{1280,352}.png`): 1280 – 4 ir 3 stulpeliai, skaičiai dešinėje, „Iš viso“ fonu, be slinkties; modalas z-index 3000, overflow hidden, kryželis 13 px nuo viršaus/dešinės, antraštė neužlipa (padding 34). 352 – apatinis lapelis 18 px kampai, eilutė = kortelė su `data-k` etiketėmis, be horizontalios slinkties.
+- K-55a: 352 px „Iš viso“ fonas dažo tik atskiras celes (tamsūs lopai po kiekvienu skaičiumi), ne visą kortelę – žr. 55-portalai-352.png. Perduota Dizaineriui.
+- `dizainas.test` 26/26, sargai 15/0/3.
+
