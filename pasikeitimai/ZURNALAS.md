@@ -1248,3 +1248,9 @@ visu kontekstu. Kai imsiu juostą, **pirmas darbas bus nuspręsti tarp jų.**
 - Taisyta: index telefone gap kaip detail; `ct-bendras.css` telefone = detail (planas slepiamas, 34 px, 18 px, `flex: 0 1 auto`); varpelio piktograma pridėta megstamiausi / ataskaitos / admin.
 - Po taisymo visi trys puslapiai abiem pločiais – **SUTAMPA** (kiekvieno mygtuko geometrija lygi detail.html).
 
+## Z-118 · 2026-09-22 · Klaudijus · v2.10.5 – griežtas kuras (KL-PUSH-0922E) + Nr.47
+- Kuras: 6 reikšmės `dyzelinas | benzinas | benzinas_dujos | benzinas_elektra | elektra | dyzelinas_elektra` visiems 5 portalams + vietinis `kuroKategorija()` / `kurasAtitinka()` griežtai. `benzinas` dabar tik benzinas (buvo + dujos + hibridai). Senos `dyzelis`, `hibridas` – veikia kaip anksčiau (išsaugotos paieškos), sąsajoje verčiamos į naujas (`ctKuroSenas`).
+- Kodai patikrinti gyvai iš Luko kompiuterio be ScraperAPI (Toyota): otomoto petrol-lpg 462, petrol-cng 55, hybrid 5 169; autoscout24 L 10, C 2, 2 9 814, 3 26. otomoto hibridų pagal kurą neskiria – dyzelino hibridus atrenka vietinis filtras.
+- Nr.47: `filtruAtmesti` rodo tik tuos, kurių vienintelė priežastis – kainos įspėjimas; filtrų neatitinkantys nerodomi (rinkos vidurkiui lieka). Naršymo režimas nepakeistas.
+- filtrai.test 91/91 (+ griežti), mobilede.test 49/49. Sargai 15 / 0 / 3.
+

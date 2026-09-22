@@ -92,9 +92,11 @@ MOBILEDE_MODELIAI.Mercedes = MOBILEDE_MODELIAI['Mercedes-Benz'];
 // + dujos; hibridas = visi hibridai; elektra = tik elektra.
 const MOBILEDE_KURAS = {
   dyzelis: ['DIESEL', 'HYBRID_DIESEL'],
-  benzinas: ['PETROL', 'HYBRID', 'LPG', 'CNG'],
+  benzinas: ['PETROL'],   // v2.10.5 griežtai (buvo + HYBRID, LPG, CNG)
   hibridas: ['HYBRID', 'HYBRID_DIESEL'],
   elektra: ['ELECTRICITY'],
+  // v2.10.5 griežti
+  dyzelinas: ['DIESEL'], dyzelinas_elektra: ['HYBRID_DIESEL'], benzinas_dujos: ['LPG', 'CNG'], benzinas_elektra: ['HYBRID'],
 };
 
 // Modelio paieška: tikslus modelis → `;<id>`, serija („3", „X", „3 serija",

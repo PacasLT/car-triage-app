@@ -2558,10 +2558,12 @@
           <div class="ct-fld-v">
             <select class="ct-fld-t" id="fuel">
               <option value="">Visi</option>
-              <option value="dyzelis" selected>Dyzelinas</option>
+              <option value="dyzelinas" selected>Dyzelinas</option>
               <option value="benzinas">Benzinas</option>
-              <option value="hibridas">Hibridas</option>
-              <option value="elektra">Elektrinis</option>
+              <option value="benzinas_dujos">Benzinas / dujos</option>
+              <option value="benzinas_elektra">Benzinas / elektra</option>
+              <option value="elektra">Elektra</option>
+              <option value="dyzelinas_elektra">Dyzelinas / elektra</option>
             </select>
             <svg class="ct-i" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
             <button type="button" class="ct-fld-x" tabindex="-1" aria-label="Išvalyti">✕</button>
@@ -3255,7 +3257,7 @@ function applyHistoryFilters(idx) {
   document.getElementById('portal-mobilede').checked = !!(f.portals && f.portals.includes('mobilede'));
   // PATAISYTA: kuras buvo praleistas; portalu etikete ir "Daugiau filtru" zenklelis neatsinaujindavo;
   // iskleidziamasis likdavo atidarytas.
-  const fuelEl = document.getElementById('fuel'); if (fuelEl) fuelEl.value = f.kuras || '';
+  const fuelEl = document.getElementById('fuel'); if (fuelEl) fuelEl.value = ctKuroSenas(f.kuras) || '';
   if (typeof ctUpdatePortalBtn === 'function') ctUpdatePortalBtn();
   if (typeof ctUpdateMoreBadge === 'function') ctUpdateMoreBadge();
   updateGenerationHint();
@@ -3931,6 +3933,8 @@ async function runSearch() {
 // ── Filtrai URL adrese ─────────────────────────────────────────────────────
 // Paspaudus "Ieskoti", filtrai iraso i adresa. Taip nuoroda tampa dalinama,
 // veikia narsykles "atgal", o perkrovus puslapi filtrai lieka vietoje.
+// v2.10.5: senos kuro reikšmės (išsaugotos paieškos, nuorodos) → naujos griežtos.
+function ctKuroSenas(v) { return ({ dyzelis: 'dyzelinas', hibridas: 'benzinas_elektra' })[v] || v; }
 const CT_URL_LAUKAI = [
   ['marke', 'marke'], ['modelis', 'modelis'], ['pavaru_deze', 'deze'],
   ['fuel', 'kuras'], ['metaiNuo', 'metai_nuo'], ['metaiIki', 'metai_iki'],
@@ -3976,7 +3980,7 @@ function ctUrlIFiltrus() {
       const v = p.get(pora[1]);
       if (v == null) return;
       const el = document.getElementById(pora[0]);
-      if (el) { el.value = v; rasta = true; }
+      if (el) { el.value = (pora[0] === 'fuel' ? ctKuroSenas(v) : v); rasta = true; }
     });
 
     const portalai = p.get('portalai');

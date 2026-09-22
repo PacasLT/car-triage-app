@@ -51,7 +51,8 @@ const PARAMETRAI = {
     brangiausi: 'order_by=4&order_direction=DESC',
     naujausiMetai: 'order_by=6&order_direction=DESC',
   },
-  kuras: { benzinas: [30, 36, 31], dyzelis: [32, 17378], hibridas: [36, 17378], elektra: [35] },
+  kuras: { benzinas: [30], dyzelis: [32, 17378], hibridas: [36, 17378], elektra: [35],
+    dyzelinas: [32], dyzelinas_elektra: [17378], benzinas_dujos: [31], benzinas_elektra: [36] },   // v2.10.5 griežti
   pavaruDeze: { 'Automatinė': 38, 'Mechaninė': 37 },
   varantieji: { priekiniai: 17363, galiniai: 17362, visi: 17364 },
   kebulas: { sedanas: 4, hecbekas: 2, universalas: 5, vienaturis: 6, visureigis: 7, kupe: 1, kabrioletas: 3, pikapas: 10 },

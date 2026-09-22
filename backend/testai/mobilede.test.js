@@ -109,7 +109,9 @@ const nerastas = MD.buildMobileDeUrl({ marke: 'BMW', modelis: 'Nesamas' }, 1, { 
 T(nerastas.modelisNerastas && /ms=3500(&|$)/.test(nerastas.url), 'nežinomas modelis → tik markė + modelisNerastas:true');
 T(!u({ marke: 'BMW', modelis: 'X5' }).includes('%3B%3B%3B'), 'NIEKADA ;;;tekstas - tai laisvo teksto paieška (X5 grąžintų ir 530)');
 lygu((u({ marke: 'BMW', kuras: 'dyzelis' }).match(/ft=\w+/g)), ['ft=DIESEL', 'ft=HYBRID_DIESEL'], 'dyzelis = dyzelinas + dyzelino hibridai (29 478 + 2 295 = 31 773)');
-lygu((u({ marke: 'BMW', kuras: 'benzinas' }).match(/ft=\w+/g)), ['ft=PETROL', 'ft=HYBRID', 'ft=LPG', 'ft=CNG'], 'benzinas = benzinas + hibridai + dujos');
+lygu((u({ marke: 'BMW', kuras: 'benzinas' }).match(/ft=\w+/g)), ['ft=PETROL'], 'benzinas = tik benzinas (v2.10.5 griežtai)');
+lygu((u({ marke: 'BMW', kuras: 'benzinas_dujos' }).match(/ft=\w+/g)), ['ft=LPG', 'ft=CNG'], 'benzinas_dujos = LPG + CNG');
+lygu((u({ marke: 'BMW', kuras: 'dyzelinas_elektra' }).match(/ft=\w+/g)), ['ft=HYBRID_DIESEL'], 'dyzelinas_elektra = HYBRID_DIESEL');
 lygu((u({ marke: 'BMW', kuras: 'hibridas' }).match(/ft=\w+/g)), ['ft=HYBRID', 'ft=HYBRID_DIESEL'], 'hibridas = abu hibridai');
 lygu((u({ marke: 'BMW', kuras: 'elektra' }).match(/ft=\w+/g)), ['ft=ELECTRICITY'], 'elektra');
 lygu((u({ marke: 'BMW', pavaru_deze: 'Automatinė' }).match(/tr=\w+/g)), ['tr=AUTOMATIC_GEAR', 'tr=SEMIAUTOMATIC_GEAR'], 'automatinė + pusiau (68 178 + 74 = 68 252)');

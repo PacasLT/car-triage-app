@@ -2062,15 +2062,36 @@ iskaitant rida. Grazink TIK ta sakini.`;
 // Ar skelbimo kuras atitinka vartotojo pasirinkta filtra.
 // Filtro reiksmes ateina is frontend'o: dyzelis | benzinas | hibridas | elektra.
 // Skelbimuose kuras buna ivairiu formu: "Dyzelinas", "Benzinas / elektra", "Hibridas", "Elektra"...
+// v2.10.5 (KL-PUSH-0922E, Luko sprendimas): GRIEŽTAS kuro filtras – tik
+// pasirinktas kuras. Reikšmės: dyzelinas | benzinas | benzinas_dujos |
+// benzinas_elektra | elektra | dyzelinas_elektra. Senos (dyzelis, hibridas)
+// paliktos išsaugotoms paieškoms – jų prasmė nepakeista.
+function kuroKategorija(kuras) {
+  const k = String(kuras || '').toLowerCase();
+  if (!k) return null;
+  const el = /elektr|electric|hibrid|hybrid|hybryd/.test(k);
+  const dyz = /dyzel|diesel/.test(k);
+  const benz = /benzin|benzyn|petrol|gasoline/.test(k);
+  const duj = /duj|lpg|cng|gaz|autogas|erdgas/.test(k);
+  if (el && dyz) return 'dyzelinas_elektra';
+  if (el && (benz || /hibrid|hybrid|hybryd/.test(k))) return 'benzinas_elektra';   // „Hibridas" be kuro – benzino hibridas (dažniausias)
+  if (duj) return 'benzinas_dujos';
+  if (dyz) return 'dyzelinas';
+  if (benz) return 'benzinas';
+  if (el) return 'elektra';
+  return null;
+}
+const KURO_SENI = {
+  dyzelis: ['dyzelinas', 'dyzelinas_elektra'],
+  hibridas: ['benzinas_elektra', 'dyzelinas_elektra'],
+};
 function kurasAtitinka(kuras, filtras) {
   if (!filtras) return true;
   if (!kuras) return true; // nezinomas kuras - nefiltruojam, kad neismestume gero skelbimo
-  const k = String(kuras).toLowerCase();
-  if (filtras === 'dyzelis')  return k.includes('dyzelin');
-  if (filtras === 'benzinas') return k.includes('benzin');
-  if (filtras === 'hibridas') return k.includes('hibrid') || (k.includes('elektra') && (k.includes('benzin') || k.includes('dyzelin')));
-  if (filtras === 'elektra')  return k === 'elektra' || k.includes('elektrin');
-  return true;
+  const kat = kuroKategorija(kuras);
+  if (!kat) return true;
+  if (KURO_SENI[filtras]) return KURO_SENI[filtras].includes(kat);
+  return kat === filtras;
 }
 
 // ============ URL SUDARYMAS PAGAL FILTRUS ============
@@ -2089,25 +2110,37 @@ function kurasAtitinka(kuras, filtras) {
 const KURO_FILTRAS = {
   autogidas: {        // f_2[N]=<tekstas> - ir indeksas, ir tekstas privalomi (vien skaicius -> 0 rezultatu)
     dyzelis:  [[1, 'Dyzelinas'], [8, 'Dyzelinas/Elektra'], [9, 'Dyzelinas/Elektra (Plug-in)']],
-    benzinas: [[2, 'Benzinas'], [3, 'Benzinas/Dujos'], [4, 'Benzinas/Elektra'], [5, 'Benzinas/Elektra (Plug-in)'],
-               [6, 'Benzinas/Elektra/Dujos'], [11, 'Benzinas/Gamtinės dujos']],
+    benzinas: [[2, 'Benzinas']],   // v2.10.5: griežtai tik benzinas (buvo ir dujos, hibridai)
     hibridas: [[4, 'Benzinas/Elektra'], [5, 'Benzinas/Elektra (Plug-in)'], [6, 'Benzinas/Elektra/Dujos'],
                [8, 'Dyzelinas/Elektra'], [9, 'Dyzelinas/Elektra (Plug-in)']],
     elektra:  [[7, 'Elektra']],
+    // v2.10.5 griežti
+    dyzelinas: [[1, 'Dyzelinas']],
+    dyzelinas_elektra: [[8, 'Dyzelinas/Elektra'], [9, 'Dyzelinas/Elektra (Plug-in)']],
+    benzinas_dujos: [[3, 'Benzinas/Dujos'], [11, 'Benzinas/Gamtinės dujos']],
+    benzinas_elektra: [[4, 'Benzinas/Elektra'], [5, 'Benzinas/Elektra (Plug-in)'], [6, 'Benzinas/Elektra/Dujos']],
   },
   autoscout24: {      // fuel=B,2,L  (B benzinas, D dyzelinas, E elektra, 2 el./benz., 3 el./dyz., L dujos)
-    dyzelis: 'D,3', benzinas: 'B,2,L', hibridas: '2,3', elektra: 'E',
+    dyzelis: 'D,3', benzinas: 'B', hibridas: '2,3', elektra: 'E',   // benzinas v2.10.5: buvo 'B,2,L'
+    // v2.10.5 griežti (patikrinta 2026-09-22: L LPG, C CNG, 2 el./benz., 3 el./dyz.)
+    dyzelinas: 'D', dyzelinas_elektra: '3', benzinas_dujos: 'L,C', benzinas_elektra: '2',
   },
   otomoto: {          // search[filter_enum_fuel_type][i]=
     dyzelis: ['diesel'], benzinas: ['petrol'], hibridas: ['hybrid', 'plugin-hybrid'], elektra: ['electric'],
+    // v2.10.5 griežti (patikrinta 2026-09-22, Toyota: petrol-lpg 462, petrol-cng 55).
+    // otomoto hibridų pagal kurą neskiria – dyzelino hibridus atrenka kurasAtitinka.
+    dyzelinas: ['diesel'], benzinas_dujos: ['petrol-lpg', 'petrol-cng'],
+    benzinas_elektra: ['hybrid', 'plugin-hybrid'], dyzelinas_elektra: ['hybrid', 'plugin-hybrid'],
   },
 };
 
 const AUTOPLIUS_FUEL_IDS = {
-  benzinas: [30, 36, 31],       // Benzinas, Benzinas/elektra, Benzinas/dujos
+  benzinas: [30],               // v2.10.5 griežtai (buvo 30, 36, 31)
   dyzelis: [32, 17378],         // Dyzelinas, Dyzelinas/elektra
   hibridas: [36, 17378],        // Benzinas/elektra, Dyzelinas/elektra
   elektra: [35],                // Elektra
+  // v2.10.5 griežti
+  dyzelinas: [32], dyzelinas_elektra: [17378], benzinas_dujos: [31], benzinas_elektra: [36],
 };
 
 // v2.7.2 (Z-97): nauji filtrai - pardavejas, ideta per N d., kebulo tipas.
@@ -3658,7 +3691,15 @@ async function runSearchJob(jobId, filters) {
     // Skelbimai, kuriuos atmete kietasis filtras (kaina/metai/rida/deze/kuras).
     // Anksciau jie dingdavo cia pat ir vartotojas ju niekada nepamatydavo - dabar
     // grazinami su konkrecia priezastimi, kad matytusi VISI rasti skelbimai.
-    const filtruAtmesti = hardRejected.map((l) => ({
+    // Nr.47 (v2.10.4, Luko sprendimas): filtro NEATITINKANTYS skelbimai nerodomi
+    // visai (dažniausiai autogido mokamai iškelti, kurie nepaiso filtrų). Lieka tik
+    // tie, kurių vienintelė priežastis – kainos įspėjimas (lizingo įmoka, parduota).
+    // Rinkos vidurkiui ir archyvui jie vis tiek naudojami (combinedForMedians aukščiau).
+    const rodomiAtmesti = hardRejected.filter((l) => l.kainosIspejimas && l.hardRejectReasons.length === 1);
+    if (hardRejected.length > rodomiAtmesti.length) {
+      logJob(jobId, '🙈 Nerodoma ' + (hardRejected.length - rodomiAtmesti.length) + ' filtrų neatitinkančių skelbimų (naudojami tik rinkos vidurkiui).');
+    }
+    const filtruAtmesti = rodomiAtmesti.map((l) => ({
       modelis: l.modelis, kaina: l.kaina, metai: l.metai, rida: l.rida,
       kuras: l.kuras, pavarai: l.pavarai, turiVin: l.turiVin, galia: l.galia, variklioTuris: l.variklioTuris,
       photo: l.photo, url: l.url, source: l.source, kryzminiaiSkelbimai: null,

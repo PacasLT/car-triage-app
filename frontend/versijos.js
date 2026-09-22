@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.10.5', data: '2026-09-22', pavadinimas: 'Griežtas kuro filtras, be netinkamų skelbimų',
+    pakeitimai: [
+      'Kuro filtras dabar griežtas ir turi 6 variantus kaip autoplius: Dyzelinas, Benzinas, Benzinas / dujos, Benzinas / elektra, Elektra, Dyzelinas / elektra. Pasirinkus „Dyzelinas“, dyzelino hibridai nebesimaišo.',
+      'ISTAISYTA (Nr. 47): skelbimai, kurie neatitinka jūsų filtrų (dažniausiai portalų mokamai iškelti), nebėra rodomi „Kiti skelbimai“ sąraše. Rinkos kainai jie vis tiek naudojami.',
+    ],
+  },
+  {
     versija: '2.10.4', data: '2026-09-22', pavadinimas: 'Visos skelbimo nuotraukos be pasikartojimų',
     pakeitimai: [
       'ISTAISYTA (Nr. 45): otomoto ir kitų portalų skelbimuose ta pati nuotrauka rodyta kelis kartus, todėl dalies nuotraukų nebūdavo. Dabar imama portalo galerija, be pasikartojimų.',

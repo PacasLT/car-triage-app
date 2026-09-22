@@ -30,7 +30,8 @@ const kodas = [
   blokas(/const PLN_KURSAS = \{[^\n]*\};/),
   blokas(/const PAPILDOMI_FILTRAI = \{[\s\S]*?\n\};/),
   imk('papFiltras'),
-  ...['kurasAtitinka', 'buildAutopliusUrl', 'buildAutogidasUrl', 'buildAutoscout24Url', 'buildOtomotoUrl'].map(imk),
+  blokas(/const KURO_SENI = \{[\s\S]*?\n\};/),
+  ...['kuroKategorija', 'kurasAtitinka', 'buildAutopliusUrl', 'buildAutogidasUrl', 'buildAutoscout24Url', 'buildOtomotoUrl'].map(imk),
   'return { kurasAtitinka, buildAutopliusUrl, buildAutogidasUrl, buildAutoscout24Url, buildOtomotoUrl };',
 ].join('\n');
 const autopliusIds = require(path.join(__dirname, '..', 'autoplius-ids.js'));
@@ -42,11 +43,11 @@ const d = (u) => decodeURIComponent(u);
 
 console.log('\n1. KURAS pasiekia kiekvieną portalą ───────────────────────');
 const lauk = {
-  autoplius: { dyzelis: ['[32]=32', '[17378]=17378'], benzinas: ['[30]=30', '[36]=36', '[31]=31'], hibridas: ['[36]=36', '[17378]=17378'], elektra: ['[35]=35'] },
+  autoplius: { dyzelis: ['[32]=32', '[17378]=17378'], benzinas: ['[30]=30'], hibridas: ['[36]=36', '[17378]=17378'], elektra: ['[35]=35'] },
   autogidas: { dyzelis: ['f_2[1]=Dyzelinas', 'f_2[8]=Dyzelinas/Elektra', 'f_2[9]=Dyzelinas/Elektra (Plug-in)'],
-    benzinas: ['f_2[2]=Benzinas', 'f_2[4]=Benzinas/Elektra'], hibridas: ['f_2[4]=Benzinas/Elektra', 'f_2[8]=Dyzelinas/Elektra', 'f_2[9]=Dyzelinas/Elektra (Plug-in)'],
+    benzinas: ['f_2[2]=Benzinas'], hibridas: ['f_2[4]=Benzinas/Elektra', 'f_2[8]=Dyzelinas/Elektra', 'f_2[9]=Dyzelinas/Elektra (Plug-in)'],
     elektra: ['f_2[7]=Elektra'] },
-  autoscout24: { dyzelis: ['fuel=D,3'], benzinas: ['fuel=B,2,L'], hibridas: ['fuel=2,3'], elektra: ['fuel=E'] },
+  autoscout24: { dyzelis: ['fuel=D,3'], benzinas: ['fuel=B'], hibridas: ['fuel=2,3'], elektra: ['fuel=E'] },
   otomoto: { dyzelis: ['fuel_type][0]=diesel'], benzinas: ['fuel_type][0]=petrol'], hibridas: ['fuel_type][0]=hybrid', 'fuel_type][1]=plugin-hybrid'], elektra: ['fuel_type][0]=electric'] },
 };
 const kurti = { autoplius: F.buildAutopliusUrl, autogidas: F.buildAutogidasUrl, autoscout24: F.buildAutoscout24Url, otomoto: F.buildOtomotoUrl };
@@ -78,10 +79,36 @@ const atv = [
   ['Dyzelinas / elektra', 'hibridas', true], ['Dyzelinas/Elektra (Plug-in)', 'hibridas', true], ['Hibridas', 'hibridas', true],
   ['Benzinas', 'hibridas', false], ['Elektra', 'hibridas', false],
   ['Dyzelinas / elektra', 'dyzelis', true], ['Benzinas / elektra', 'dyzelis', false],
-  ['Benzinas / elektra', 'benzinas', true], ['Benzinas / dujos', 'benzinas', true],
+  ['Benzinas / elektra', 'benzinas', false], ['Benzinas / dujos', 'benzinas', false], ['Benzinas', 'benzinas', true],
   ['Elektra', 'elektra', true], ['Benzinas / elektra', 'elektra', false],
 ];
 for (const [k, f, laukta] of atv) t('„' + k + '" ~ ' + f + ' → ' + laukta, K(k, f) === laukta, K(k, f));
+
+console.log('\n5. v2.10.5 GRIEŽTAS kuras (Luko 6 variantai) ──────────────');
+const griezti = {
+  autoplius: { dyzelinas: ['[32]=32'], dyzelinas_elektra: ['[17378]=17378'], benzinas_dujos: ['[31]=31'], benzinas_elektra: ['[36]=36'] },
+  autogidas: { dyzelinas: ['f_2[1]=Dyzelinas'], dyzelinas_elektra: ['f_2[8]=Dyzelinas/Elektra'], benzinas_dujos: ['f_2[3]=Benzinas/Dujos'], benzinas_elektra: ['f_2[4]=Benzinas/Elektra'] },
+  autoscout24: { dyzelinas: ['fuel=D'], dyzelinas_elektra: ['fuel=3'], benzinas_dujos: ['fuel=L,C'], benzinas_elektra: ['fuel=2'] },
+  otomoto: { dyzelinas: ['fuel_type][0]=diesel'], benzinas_dujos: ['fuel_type][0]=petrol-lpg', 'fuel_type][1]=petrol-cng'], benzinas_elektra: ['fuel_type][0]=hybrid'] },
+};
+for (const [portalas, kurai] of Object.entries(griezti)) {
+  for (const [kuras, dalys] of Object.entries(kurai)) {
+    const u = d(kurti[portalas]({ marke: 'BMW', metaiNuo: 2019, kuras }));
+    t(portalas + ' · ' + kuras, dalys.every((x) => u.includes(x)), u);
+  }
+}
+t('autoscout24 benzinas be hibridų ir dujų', !/fuel=B,/.test(d(F.buildAutoscout24Url({ marke: 'BMW', kuras: 'benzinas' }))));
+t('autoscout24 dyzelinas be hibridų', !/fuel=D,/.test(d(F.buildAutoscout24Url({ marke: 'BMW', kuras: 'dyzelinas' }))));
+t('dyzelinas autoplius NEįtraukia dyzelino hibridų', !d(F.buildAutopliusUrl({ marke: 'BMW', kuras: 'dyzelinas' })).includes('[17378]'));
+const gr = [
+  ['Dyzelinas', 'dyzelinas', true], ['Dyzelinas / elektra', 'dyzelinas', false], ['Diesel', 'dyzelinas', true],
+  ['Dyzelinas / elektra', 'dyzelinas_elektra', true], ['Dyzelinas/Elektra (Plug-in)', 'dyzelinas_elektra', true], ['Dyzelinas', 'dyzelinas_elektra', false],
+  ['Benzinas / dujos', 'benzinas_dujos', true], ['Autogas (LPG)', 'benzinas_dujos', true], ['Benzinas', 'benzinas_dujos', false],
+  ['Benzinas / elektra', 'benzinas_elektra', true], ['Hibridas', 'benzinas_elektra', true], ['Benzinas', 'benzinas_elektra', false],
+  ['Elektra', 'elektra', true], ['Dyzelinas / elektra', 'elektra', false],
+  ['', 'dyzelinas', true],
+];
+for (const [k, f, laukta] of gr) t('griežtai „' + k + '" ~ ' + f + ' → ' + laukta, K(k, f) === laukta, K(k, f));
 
 if (process.argv.includes('--adresai')) {
   console.log('\n── PAVYZDINIAI ADRESAI RANKINEI PATIKRAI ──────────────────');
