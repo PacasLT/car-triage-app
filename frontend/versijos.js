@@ -8,6 +8,12 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.8.1', data: '2026-09-22', pavadinimas: 'Registro duomenys atpažįsta daugiau modelių',
+    pakeitimai: [
+      'Lietuvos registro skaičiai dabar sujungia to paties modelio variantus: pvz. BMW 320d, 320i ir „3 serija“ skaičiuojami kaip viena BMW 3 serija, Mercedes E 220 ir „E klasė“ – kaip viena E klasė. Todėl daugiau skelbimų gauna registro punktus, o skaičiai tikslesni.',
+    ],
+  },
+  {
     versija: '2.8.0', data: '2026-09-22', pavadinimas: 'Registro punktai, būsenos eilutė ir portalų ženklai – dizaino sistemoje',
     pakeitimai: [
       'Lietuvos registro punktai, mėgstamiausių atnaujinimo būsenos eilutė ir portalų ženklai dabar aprašyti bendroje dizaino sistemoje – atrodo taip pat, tik prižiūrimi vienoje vietoje.',

@@ -51,26 +51,96 @@ MENESIU = 36
 MARKES = {'VOLKSWAGEN. VW': 'VW', 'VOLKSWAGEN': 'VW', 'MERCEDES-BENZ': 'MERCEDES',
           'MERCEDES BENZ': 'MERCEDES', 'LAND-ROVER': 'LAND ROVER'}
 
+# ── v3 (K-33, 2026-09-22) ────────────────────────────────────────────────────
+# Registras markę rašo gamintojo dokumento forma. Išmatuota M1 parke:
+#   'VOLKSWAGEN-VW' 19 513 · 'BAYER.MOT.WERKE-BMW' 3 821 · 'BMW AG' 994 ·
+#   'SKODA (CZ)' 631 · 'OPEL OPEL' 293 · 'ADAM OPEL GMBH' 156 · 'FORD (D)' 1 035 ...
+# Iki v3 kiekviena tokia forma buvo ATSKIRA markė, t. y. atskiras raktas.
+# SVARBU: MARKES, IMONES_ZODZIAI ir VIENAZODES turi sutapti su backend/regitra.js.
+IMONES_ZODZIAI = {'AG', 'GMBH', 'LTD', 'LIMITED', 'SPA', 'NV', 'SA', 'CO', 'INC', 'CORP',
+                  'CORPORATION', 'MOTOR', 'MOTORS', 'EUROPE', 'AUTOMOBILES', 'AUTOMOBILE',
+                  'AUTO', 'GROUP', 'MEM', 'ADAM', 'W', 'THE', 'OF', 'CAR', 'UK'}
+VIENAZODES = {'AUDI', 'OPEL', 'TOYOTA', 'SKODA', 'VOLVO', 'FORD', 'PEUGEOT', 'RENAULT',
+              'CITROEN', 'NISSAN', 'HYUNDAI', 'KIA', 'MAZDA', 'HONDA', 'SEAT', 'FIAT', 'LEXUS',
+              'PORSCHE', 'MITSUBISHI', 'SUBARU', 'SUZUKI', 'DACIA', 'JEEP', 'MINI', 'CHEVROLET',
+              'CHRYSLER', 'DODGE', 'TESLA', 'CUPRA', 'SAAB', 'SMART', 'LANCIA', 'INFINITI'}
+
 
 def marke_norm(mk):
-    mk = (mk or '').strip().upper()
-    return MARKES.get(mk, mk.replace('.', ' ').strip())
+    m = (mk or '').strip().upper()
+    if m in MARKES:
+        return MARKES[m]
+    z = [x for x in re.split(r'[\s.,/()\-]+', re.sub(r'\([^)]*\)', ' ', m)) if x]
+    if not z:
+        return m.replace('.', ' ').strip()
+    if 'VW' in z or any('WAGEN' in x for x in z):
+        return 'VW'
+    if 'BMW' in z or 'BAYER' in z or ''.join(z) == 'BMW':
+        return 'BMW'
+    if any(x.startswith('MERCEDES') or x.startswith('MERSEDES') for x in z) or 'BENZ' in z or any(x.startswith('DAIMLER') for x in z):
+        return 'MERCEDES'
+    if z[:2] == ['LAND', 'ROVER'] or z[0] == 'LANDROVER':
+        return 'LAND ROVER'
+    liko = []
+    for x in z:
+        if x in IMONES_ZODZIAI or (liko and liko[-1] == x):
+            continue
+        liko.append(x)
+    if not liko:
+        liko = z
+    if liko[0] in VIENAZODES:
+        return liko[0]
+    return ' '.join(liko)
+
+
+# Užpildomieji žodžiai modelio lauke: 'SERIE 3', '3ER REIHE', 'CLASSE E', '5-SERIE'.
+UZPILDAI = {'REIHE', 'SERIE', 'SERIES', 'SERIJA', 'KLASSE', 'KLASE', 'CLASS', 'CLASSE', 'KLASA'}
+_BRUKS_UZPILDAS = re.compile(r'^([A-Z0-9]{1,3})-(?:REIHE|SERIE|SERIES|SERIJA|KLASSE|KLASE|CLASS|CLASSE|KLASA)$')
 
 
 def modelis_dalys(mk, md):
-    """('BMW', 'X5 XDRIVE30D') -> ('X5', 'X5 XDRIVE30D').
+    """('BMW', 'X5 XDRIVE30D') -> ('X5', 'X5 XDRIVE30D'); ('BMW', '320D') -> ('3', '320D').
+
+    Grąžina (bazinis, pilnas). bazinis None - raktas NEAPIBRĖŽTAS (pvz. BMW 'X REIHE'
+    nesako, ar X1, ar X5; modelis '-'). Tokie įrašai į suvestinę nepatenka.
 
     SVARBU: si funkcija turi ATITIKTI backend/regitra.js baziniModelis().
     Taisant viena - taisyti abi; backend/testai/regitra.test.js tai tikrina."""
     mkn = marke_norm(mk)
-    md = (md or '').strip().upper().replace('.', ' ')
-    dal = [x for x in re.split(r'[\s,/]+', md) if x]
+    dal = [x for x in re.split(r'[\s,/;]+', (md or '').strip().upper().replace('.', ' ')) if x]
     mk_zodziai = set(mkn.split())
-    while dal and dal[0] in mk_zodziai:
+    while dal and (dal[0] in mk_zodziai or marke_norm(dal[0]) == mkn):
         dal.pop(0)
-    if not dal:
+    out = []
+    for x in dal:
+        m = _BRUKS_UZPILDAS.match(x)
+        if m:
+            x = m.group(1)
+        x = re.sub(r'^(\d)ER$', r'\1', x)                       # 3ER -> 3
+        if x in UZPILDAI or not re.search(r'[A-Z0-9]', x):
+            continue
+        out.append(x)
+    if not out:
         return None, None
-    return dal[0], ' '.join(dal)
+    pilnas = ' '.join(out)
+    b = out[0]
+    if mkn == 'BMW':
+        m = re.match(r'^(\d)\d\d[A-Z]*$', b)                   # 320D, 530E, 118I -> serija
+        if m:
+            b = m.group(1)
+        elif b in ('X', 'Z', 'M', 'I') and len(out) > 1 and re.fullmatch(r'\d', out[1]):
+            b = b + out[1]                                      # 'X 5' -> X5
+        if b in ('X', 'Z', 'M', 'I'):
+            return None, pilnas                                 # 'X REIHE' - nežinia kuris
+    elif mkn == 'TESLA':
+        m = re.match(r'^(?:MODEL\s*)?([3SXY])(?![A-Z]{2})', pilnas)   # 'MODEL 3', 'MODEL3', 'S85', 'MODEL S100D'
+        if m:
+            b = 'MODEL ' + m.group(1)                           # ne visos Teslos viename rakte 'MODEL'
+    elif mkn == 'MERCEDES':
+        m = re.match(r'^([A-Z]{1,3})\d{2,3}[A-Z]*$', b)         # C220, E320CDI, ML350 -> klasė
+        if m:
+            b = m.group(1)
+    return b, pilnas
 
 
 def data(s):

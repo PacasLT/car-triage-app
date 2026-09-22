@@ -25,7 +25,7 @@ const meta = R.ikelti();
 console.log('\n── 0. Duomenys · v2 ────────────────────────────────────────');
 T(!!meta, 'JSON įkeltas');
 T(meta && meta.versija === 2, 'duomenų versija 2 (' + (meta && meta.versija) + ')');
-T(meta && meta.modeliu >= 1000, 'modelių bent 1000 (' + (meta && meta.modeliu) + ')');
+T(meta && meta.modeliu >= 900, 'modelių bent 900 – po K-33 raktų sujungimo 957 (' + (meta && meta.modeliu) + ')');
 // BE SIU DVIEJU skaiciai neturi laiko - butent ju truko v1, ir 12 men. langas
 // tyliai dengė 9,3 menesio.
 T(!!(meta && meta.duomenuPabaiga), 'yra duomenų pabaiga: ' + (meta && meta.duomenuPabaiga));
@@ -43,10 +43,10 @@ lygu(R.baziniModelis(null, null), null, 'null įvestis → null (nekrenta)');
 
 console.log('\n── 2. Kontekstas · tikri v2 skaičiai ───────────────────────');
 const x5 = R.kontekstas('BMW', 'X5');
-lygu(x5 && x5.parkas, 11878, "kontekstas('BMW','X5').parkas");
-lygu(x5 && x5.apyv_pct, 25.8, "apyv_pct = 25,8  (v1 rodė 22,1 — 12 mėn. lango klaida)");
-lygu(x5 && x5.kmmet_med, 17323, "kontekstas('BMW','X5').kmmet_med");
-lygu(x5 && x5.neleid15_pct, 16.7, "kontekstas('BMW','X5').neleid15_pct");
+lygu(x5 && x5.parkas, 12250, "kontekstas('BMW','X5').parkas");
+lygu(x5 && x5.apyv_pct, 25.7, "apyv_pct = 25,7  (v1 rodė 22,1 — 12 mėn. lango klaida; K-33 raktai)");
+lygu(x5 && x5.kmmet_med, 17245, "kontekstas('BMW','X5').kmmet_med");
+lygu(x5 && x5.neleid15_pct, 16.5, "kontekstas('BMW','X5').neleid15_pct");
 T(R.kontekstas('NĖRATOKIOS', 'NIEKO') === null, 'nežinomas modelis → null, ne klaida');
 T(R.kontekstas('BMW', 'X5 XDRIVE40D') === x5, 'variantas veda į tą patį bazinį įrašą');
 T(Array.isArray(x5.kmmet_kv) && x5.kmmet_kv.length === 5, 'kmmet_kv yra [P10..P90]');
@@ -106,21 +106,22 @@ p = rasti({ marke: 'BMW', modelis: 'X5', metai: METAI - 10, rida: null }, 'RIDOS
 T(p.length === 1 && p[0].lygis === R.LYGIS.NEZINOMA, 'be ridos → ⚪, ne tyla');
 
 // A-32 · atsarga, kai juostos nėra: TIK 7-15 m. ir tik kai kmmet_n >= 100.
-const b320 = R.kontekstas('BMW', '320');
-lygu(R.amziausJuosta(b320, 10) && R.amziausJuosta(b320, 10).raktas, 'atsarga', 'BMW 320 (juostų nėra), 10 m. → atsarga');
+// K-33: BMW 320 dabar = BMW 3 su visomis juostomis. Atsargos pavyzdys - SUBARU OUTBACK (kmmet_n 119, juostų nėra).
+const b320 = R.kontekstas('SUBARU', 'OUTBACK');
+lygu(R.amziausJuosta(b320, 10) && R.amziausJuosta(b320, 10).raktas, 'atsarga', 'SUBARU OUTBACK (juostų nėra), 10 m. → atsarga');
 T(R.amziausJuosta(b320, 10).v[1] === b320.kmmet_kv[0], 'atsargos P10 = sudėtinio kmmet_kv P10');
 lygu(R.amziausJuosta(b320, 6), null, '6 m. → atsargos NĖRA (jaunoms sudėtinis klysta 1,3-3,3 %)');
 lygu(R.amziausJuosta(b320, 16), null, '16 m. → atsargos NĖRA (16-20 klaidingai žymėtų 5,8 %, 21+ – 23,7 %)');
-lygu(R.amziausJuosta(R.kontekstas('BMW', '118'), 10), null, 'mažos imties modelis (kmmet_n < 100) → atsargos nėra');
-p = rasti({ marke: 'BMW', modelis: '320', metai: METAI - 10, rida: 60000 }, 'RIDOS NORMA');
-T(p.length === 1 && p[0].lygis === R.LYGIS.SIGNALAS, 'BMW 320, 10 m., 6 000 km/met → 🟡 per atsargą');
+lygu(R.amziausJuosta(R.kontekstas('KIA', 'CEED'), 10), null, 'mažos imties modelis KIA CEED (kmmet_n 84 < 100) → atsargos nėra');
+p = rasti({ marke: 'SUBARU', modelis: 'OUTBACK', metai: METAI - 10, rida: 60000 }, 'RIDOS NORMA');
+T(p.length === 1 && p[0].lygis === R.LYGIS.SIGNALAS, 'SUBARU OUTBACK, 10 m., 6 000 km/met → 🟡 per atsargą');
 T(p.length === 1 && /visų amžių/.test(p[0].tekstas), 'tekste pasakyta, kad lyginta su visų amžių imtimi');
-T(rasti({ marke: 'BMW', modelis: '320', metai: METAI - 16, rida: 60000 }, 'RIDOS NORMA')[0].lygis === R.LYGIS.NEZINOMA,
+T(rasti({ marke: 'SUBARU', modelis: 'OUTBACK', metai: METAI - 16, rida: 60000 }, 'RIDOS NORMA')[0].lygis === R.LYGIS.NEZINOMA,
   'tas pats modelis 16 m. → ⚪, ne spėjimas');
 
 console.log('\n── 5. Nurašymai · 15+ pjūvis, riba 40, amžiaus vartai 12 (A-29) ─');
-T(rasti({ marke: 'BMW', modelis: '530', metai: METAI - 18 }, 'NURAŠYMAI').length === 1,
-  'BMW 530 (43,5 % tarp 15+), 18 m. → 🟡 (riba 40)');
+T(rasti({ marke: 'OPEL', modelis: 'VECTRA', metai: METAI - 18 }, 'NURAŠYMAI').length === 1,
+  'OPEL VECTRA (51,4 % tarp 15+), 18 m. → 🟡 (riba 40; K-33: BMW 5 dabar 28,2)');
 T(rasti({ marke: 'FORD', modelis: 'FOCUS', metai: METAI - 17 }, 'NURAŠYMAI').length === 1,
   'Ford Focus (42,6 %), 17 m. → 🟡 (analitiko pavyzdys)');
 T(rasti({ marke: 'FORD', modelis: 'FOCUS', metai: METAI - 5 }, 'NURAŠYMAI').length === 0,
@@ -148,7 +149,7 @@ lygu(R.kuroRaktas('Benzinas / elektra'), 'benzinas/elektra', "kuroRaktas('Benzin
 lygu(R.kuroRaktas('Hibridas'), 'benzinas/elektra', "kuroRaktas('Hibridas')");
 lygu(R.kuroRaktas('Elektrinis'), 'elektra', "kuroRaktas('Elektrinis')");
 lygu(R.kuroRaktas('dyzelis'), 'dyzelinas', "kuroRaktas('dyzelis')");
-T(R.kuroDalis(x5, 'Dyzelinas') === 68, 'BMW X5 · Dyzelinas → 68 %');
+T(R.kuroDalis(x5, 'Dyzelinas') === 69, 'BMW X5 · Dyzelinas → 69 %');
 T(R.kuroDalis(x5, 'Benzinas') === 14, 'BMW X5 · Benzinas → 14 %');
 T(R.kuroDalis(x5, 'Bioetanolis') === null, 'nėra tarp trijų didžiausių → null, o ne 0');
 p = rasti({ marke: 'BMW', modelis: 'X5', kuras: 'Benzinas' }, 'KURAS');

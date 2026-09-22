@@ -14,32 +14,87 @@
 const fs = require('fs');
 const path = require('path');
 
+// K-33 (2026-09-22, Analitikas). Pakeičia backend/regitra.js nuo eilutės
+// `const MARKES = {` iki eilutės PRIEŠ `let LENT = new Map();` (visą bloką, įskaitant
+// seną SVARBU komentarą, markeNorm ir baziniModelis).
+
 const MARKES = {
   'VOLKSWAGEN. VW': 'VW', 'VOLKSWAGEN': 'VW',
   'MERCEDES-BENZ': 'MERCEDES', 'MERCEDES BENZ': 'MERCEDES',
   'LAND-ROVER': 'LAND ROVER',
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SVARBU: `markeNorm` ir `baziniModelis` turi ATITIKTI
-// `tools/regitra-suvestine.py` funkcijas `marke_norm()` ir `modelis_dalys()`.
-// Taisant vieną - taisyti abi. Įrankio v2 normalizavimo nekeitė, tad pora
-// tebesutampa; `testai/regitra.test.js` tikrina raktus prieš TIKRUS duomenis.
-// ─────────────────────────────────────────────────────────────────────────────
+// ── v3 (K-33, 2026-09-22) ──────────────────────────────────────────────────
+// Registras markę rašo gamintojo dokumento forma. Išmatuota M1 parke:
+//   'VOLKSWAGEN-VW' 19 513 · 'BAYER.MOT.WERKE-BMW' 3 821 · 'BMW AG' 994 ·
+//   'SKODA (CZ)' 631 · 'OPEL OPEL' 293 · 'ADAM OPEL GMBH' 156 · 'FORD (D)' 1 035 ...
+// Iki v3 kiekviena tokia forma buvo ATSKIRA markė, t. y. atskiras raktas.
+// SVARBU: MARKES, IMONES_ZODZIAI, VIENAZODES, UZPILDAI ir markeNorm/baziniModelis turi
+// ATITIKTI tools/regitra-suvestine.py marke_norm()/modelis_dalys(). Patikrinta 2026-09-22:
+// 38 214 tikrų registro + TA porų, 0 nesutapimų. testai/regitra.test.js tikrina raktus.
+const IMONES_ZODZIAI = new Set(['AG', 'GMBH', 'LTD', 'LIMITED', 'SPA', 'NV', 'SA', 'CO', 'INC', 'CORP',
+  'CORPORATION', 'MOTOR', 'MOTORS', 'EUROPE', 'AUTOMOBILES', 'AUTOMOBILE',
+  'AUTO', 'GROUP', 'MEM', 'ADAM', 'W', 'THE', 'OF', 'CAR', 'UK']);
+const VIENAZODES = new Set(['AUDI', 'OPEL', 'TOYOTA', 'SKODA', 'VOLVO', 'FORD', 'PEUGEOT', 'RENAULT',
+  'CITROEN', 'NISSAN', 'HYUNDAI', 'KIA', 'MAZDA', 'HONDA', 'SEAT', 'FIAT', 'LEXUS',
+  'PORSCHE', 'MITSUBISHI', 'SUBARU', 'SUZUKI', 'DACIA', 'JEEP', 'MINI', 'CHEVROLET',
+  'CHRYSLER', 'DODGE', 'TESLA', 'CUPRA', 'SAAB', 'SMART', 'LANCIA', 'INFINITI']);
+
 function markeNorm(mk) {
   const m = String(mk == null ? '' : mk).trim().toUpperCase();
-  return MARKES[m] || m.replace(/\./g, ' ').trim();
+  if (Object.prototype.hasOwnProperty.call(MARKES, m)) return MARKES[m];
+  const z = m.replace(/\([^)]*\)/g, ' ').split(/[\s.,/()\-]+/).filter(Boolean);
+  if (!z.length) return m.replace(/\./g, ' ').trim();
+  if (z.includes('VW') || z.some((x) => x.includes('WAGEN'))) return 'VW';
+  if (z.includes('BMW') || z.includes('BAYER') || z.join('') === 'BMW') return 'BMW';
+  if (z.some((x) => x.startsWith('MERCEDES') || x.startsWith('MERSEDES')) || z.includes('BENZ') || z.some((x) => x.startsWith('DAIMLER'))) return 'MERCEDES';
+  if ((z[0] === 'LAND' && z[1] === 'ROVER') || z[0] === 'LANDROVER') return 'LAND ROVER';
+  let liko = [];
+  for (const x of z) {
+    if (IMONES_ZODZIAI.has(x) || (liko.length && liko[liko.length - 1] === x)) continue;
+    liko.push(x);
+  }
+  if (!liko.length) liko = z;
+  if (VIENAZODES.has(liko[0])) return liko[0];
+  return liko.join(' ');
 }
 
+// Užpildomieji žodžiai modelio lauke: 'SERIE 3', '3ER REIHE', 'CLASSE E', '5-SERIE'.
+const UZPILDAI = new Set(['REIHE', 'SERIE', 'SERIES', 'SERIJA', 'KLASSE', 'KLASE', 'CLASS', 'CLASSE', 'KLASA']);
+const BRUKS_UZPILDAS = /^([A-Z0-9]{1,3})-(?:REIHE|SERIE|SERIES|SERIJA|KLASSE|KLASE|CLASS|CLASSE|KLASA)$/;
+
+// ('BMW', 'X5 XDRIVE30D') → 'BMW X5'; ('BMW', '320D') → 'BMW 3'.
+// null - raktas NEAPIBRĖŽTAS (BMW 'X REIHE' nesako, ar X1, ar X5; modelis '-').
 function baziniModelis(marke, modelis) {
   const mkn = markeNorm(marke);
   const mkZodziai = new Set(mkn.split(/\s+/));
   const dal = String(modelis == null ? '' : modelis).trim().toUpperCase()
     .replace(/\./g, ' ')
-    .split(/[\s,/]+/).filter(Boolean);
-  while (dal.length && mkZodziai.has(dal[0])) dal.shift();
-  if (!dal.length) return null;
-  return mkn + ' ' + dal[0];
+    .split(/[\s,/;]+/).filter(Boolean);
+  while (dal.length && (mkZodziai.has(dal[0]) || markeNorm(dal[0]) === mkn)) dal.shift();
+  const out = [];
+  for (let x of dal) {
+    const m = x.match(BRUKS_UZPILDAS);
+    if (m) x = m[1];
+    x = x.replace(/^(\d)ER$/, '$1');                            // 3ER → 3
+    if (UZPILDAI.has(x) || !/[A-Z0-9]/.test(x)) continue;
+    out.push(x);
+  }
+  if (!out.length) return null;
+  let b = out[0];
+  if (mkn === 'BMW') {
+    const m = b.match(/^(\d)\d\d[A-Z]*$/);                      // 320D, 530E, 118I → serija
+    if (m) b = m[1];
+    else if (['X', 'Z', 'M', 'I'].includes(b) && out.length > 1 && /^\d$/.test(out[1])) b = b + out[1];
+    if (['X', 'Z', 'M', 'I'].includes(b)) return null;          // 'X REIHE' - nežinia kuris
+  } else if (mkn === 'TESLA') {
+    const m = out.join(' ').match(/^(?:MODEL\s*)?([3SXY])(?![A-Z]{2})/);   // 'MODEL 3', 'MODEL3', 'S85', 'MODEL S100D'
+    if (m) b = 'MODEL ' + m[1];                                 // ne visos Teslos viename rakte 'MODEL'
+  } else if (mkn === 'MERCEDES') {
+    const m = b.match(/^([A-Z]{1,3})\d{2,3}[A-Z]*$/);           // C220, E320CDI, ML350 → klasė
+    if (m) b = m[1];
+  }
+  return mkn + ' ' + b;
 }
 
 let LENT = new Map();
