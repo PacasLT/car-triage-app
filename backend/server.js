@@ -3798,6 +3798,10 @@ function autopliusSkelbimoLaukai($) {
   return { pardavejoInfo, vinPilnas, vinPref, vinPaslėptas, istNuoroda, parametrai, iranga, aprasymas, vieta };
 }
 
+// Nr.45: kiek skelbimo nuotraukų rodom galerijoje (AI vis tiek gauna ≤ 6).
+const NUOTRAUKU_RIBA = 40;
+const { nuotraukosRaktas, nuotraukuUnikalios } = require('./nuotraukos');
+
 async function scrapeSingleListing(url) {
   const html = await fetchListingPage(url);
   // v2.4.7: mobile.de - struktūra iš RSC JSON, ne iš teksto.
@@ -3857,6 +3861,7 @@ async function scrapeSingleListing(url) {
   }
 
   const photosSet = new Set();
+  const as24Galerija = [];
   (struk.photos || []).forEach((u) => photosSet.add(String(u).split('?')[0]));
 
   // 1. img tagai - tikriname src, data-src, data-lazy-src, data-original, data-large-src
@@ -3899,7 +3904,7 @@ async function scrapeSingleListing(url) {
       const as24imgs = (nextData.props && nextData.props.pageProps && nextData.props.pageProps.listingDetails && nextData.props.pageProps.listingDetails.images) || [];
       as24imgs.forEach((img) => {
         const u = (typeof img === 'string' ? img : (img && (img.src || img.url || img.uri || '')));
-        if (u && isCarCdnUrl(u)) photosSet.add(u.split('?')[0]);
+        if (u && isCarCdnUrl(u)) { photosSet.add(u.split('?')[0]); as24Galerija.push(u.split('?')[0]); }
       });
       // Otomoto: urqlState -> advertDetails -> photos[]
       const urqlState = (nextData.props && nextData.props.pageProps && nextData.props.pageProps.urqlState) || {};
@@ -3930,7 +3935,14 @@ async function scrapeSingleListing(url) {
     });
   }
 
-  const photos = [...photosSet].slice(0, 15);
+  // Nr.45 (v2.10.4): ta pati nuotrauka ateidavo keliais dydžiais (galerija
+  // be dydžio + <img> „;s=644x461" / „/250x188.webp"), o <img> dar pagaudavo
+  // „panašių skelbimų" nuotraukas. 15 vietų užimdavo dublikatai – dalies
+  // nuotraukų nebūdavo. Dabar: jei portalas duoda struktūrinę galeriją – imam
+  // TIK ją; kitaip – dedublikuojam pagal nuotraukos tapatybę (be dydžio).
+  const galerija = (struk.photos || []).length >= 3 ? struk.photos.map((u) => String(u).split('?')[0])
+    : (as24Galerija.length >= 3 ? as24Galerija : null);
+  const photos = nuotraukuUnikalios(galerija || [...photosSet]).slice(0, NUOTRAUKU_RIBA);
   const photo = photos[0] || null;
 
   // VIN kodas - standartinis formatas: 17 simboliu, be I/O/Q raidziu. Isskiriame atskirai,

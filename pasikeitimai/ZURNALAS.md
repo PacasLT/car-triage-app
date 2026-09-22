@@ -1236,3 +1236,10 @@ visu kontekstu. Kai imsiu juostą, **pirmas darbas bus nuspręsti tarp jų.**
 - **Iki push:** „Senos paieškos“ sąrašo atidarymas vis dar kainuoja – Lukui neatidarinėti.
 - Kita: TS-0922-1730 („Duomenų šaltiniai“ puslapis + CC BY nuoroda) – Luko „Taip, iki 10-15“, eilėje; TS-0922-1700 – Luko „Ne, palikti“ (mobile.de premium lieka); DZ-STOP-ADMIN – trys mygtukai, DZ-SARGAS – mygtukas.
 
+## Z-116 · 2026-09-22 · Klaudijus · v2.10.4 – Nr.45 nuotraukos (otomoto / DE)
+- Luko komentaras: „Nerodo visur nuotraukų, bei jų yra ne visos tiek PL, tiek DE“.
+- Priežastis (patikrinta tikru otomoto skelbimu, parsisiųstu tiesiai iš Luko kompiuterio, be ScraperAPI): `scrapeSingleListing` sudėdavo portalo galeriją (12) + `<img>` tų pačių nuotraukų kitais dydžiais (`;s=644x461`) → 25 adresai, 13 unikalių; 15 vietų užimdavo dublikatai. Hotlink'as neblokuojamas (olxcdn 200 su mūsų Referer).
+- Taisymas: naujas `backend/nuotraukos.js` (`nuotraukosRaktas`, `nuotraukuUnikalios` – olxcdn „fn“, autoscout24 `/WxH.webp`, autoplius `_WxH`); jei portalas duoda struktūrinę galeriją (otomoto `advert.images`, autoscout24 `listingDetails.images`) – imama tik ji; riba 15 → 40 (`NUOTRAUKU_RIBA`), mobile.de 15 → 40. AI vis dar gauna ≤ 6.
+- Seni AI apžvalgų podėlio įrašai (7 d.) turi senas galerijas – nauja apžvalga ar „Atnaujinti“ jas pakeičia.
+- `testai/nuotraukos.test.js` 6/6. Sargai žali.
+

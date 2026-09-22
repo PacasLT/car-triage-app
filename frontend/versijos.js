@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.10.4', data: '2026-09-22', pavadinimas: 'Visos skelbimo nuotraukos be pasikartojimų',
+    pakeitimai: [
+      'ISTAISYTA (Nr. 45): otomoto ir kitų portalų skelbimuose ta pati nuotrauka rodyta kelis kartus, todėl dalies nuotraukų nebūdavo. Dabar imama portalo galerija, be pasikartojimų.',
+      'Galerijoje rodoma iki 40 nuotraukų (buvo 15), taip pat ir mobile.de.',
+    ],
+  },
+  {
     versija: '2.10.3', data: '2026-09-22', pavadinimas: 'Kėbulo kartos kodas',
     pakeitimai: [
       'Pasirinkus modelį ir metus, po filtrais parodoma, kurios kėbulo kartos patenka (pvz. BMW X5: F15 2013–2018, G05 nuo 2018).',

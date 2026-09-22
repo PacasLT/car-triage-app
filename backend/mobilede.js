@@ -329,7 +329,7 @@ function mobileDeSkelbimoPuslapis(html) {
   const privatus = c.enumType === 'PRIVATE' || c.enumType === 'FSBO';
   const vieta = [c.address2, c.country].filter(Boolean).join(', ').replace(/^DE-/, '') || null;
   const aprasymas = htmlITeksta(rscTekstas(rsc, L.htmlDescription));
-  const photos = (L.images || []).map((x) => nuotrauka(x && x.uri)).filter(Boolean).slice(0, 15);
+  const photos = (L.images || []).map((x) => nuotrauka(x && x.uri)).filter(Boolean).slice(0, 40);   // Nr.45: buvo 15
   const pr = L.priceRating || {};
   const kainosRibos = (pr.thresholdLabels || []).map((s) => parseInt(String(s).replace(/[^\d]/g, ''), 10)).filter(Number.isFinite);
 
