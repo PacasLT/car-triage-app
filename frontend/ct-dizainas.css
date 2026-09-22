@@ -4125,3 +4125,79 @@ textarea.ct-field {
    `background`, `border-color`, `border-radius` ir `margin-bottom`
    produkcijoje. Jei skaiciai tie patys - kitame pakete tos eilutes dingsta
    irgi, ir `.ct-std-card` lieka tik tai, kas ji daro STD.                */
+
+
+/* ============================================================================
+   52 paketas - 39 sk. PAPILDYMAS - tarpas tarp korteliu   ·   ir trys trynimai
+   ----------------------------------------------------------------------------
+   PRIDEDAMA prie 39 sk. Po sio - trys rankines deklaracijos trinamos VISOS.
+
+   Versija - siulau v2.9.3.
+   ========================================================================== */
+
+
+/* ── KODEL VISO TRYNIMO NEPAKAKO ────────────────────────────────────────────
+   Jusu matavimas: fonas, remelis ir radiusas - tylus dublikatai (radiusas net
+   nesuveikia, laimi `.ct-card` 14). Bet `margin-bottom: 8px` veikia, ir
+   patikrinau, kodel: `.ct-card` (264-269 eil.) paraštes NETURI VISAI - ji
+   turi tik fona, remeli, radiusa ir `overflow`.
+
+   Tad istrynus visa deklaracija kortelės suliptu be tarpo. Tarpas pirma
+   pereina i skyriu, ir tik tada trynimas saugus.
+
+
+   ── 8 AR 12 · sprendimas ir priezastis ────────────────────────────────────
+   STD lieka 8. TOP lieka 12. Ir tai NE „paliekam, kaip buvo":
+
+     TOP-5 yra penkios kortelės, kurias zmogus skaito PO VIENA - jos yra
+     atsakymas, ir kiekviena turi buti atskiras objektas.
+
+     „Kiti skelbimai" yra ilgas sarasas, kuri zmogus SKENUOJA - tankesnis
+     ritmas cia padeda, o kortelės atskyrima ir taip nesa remelis.
+
+   Skirtumas tarp 8 ir 12 tokiame sarase nera dekoracija: prie 20 korteliu
+   tai 80 px slinkimo, o TOP-5 tai 20 px, kurie niekam nekliudo.
+
+   Rasoma TOKENAIS, ne skaiciais: 8 = `--s-2`, 12 = `--s-3`. Taip skirtumas
+   lieka matomas kaip VIENAS zingsnis skaleje, o ne kaip du atsitiktiniai
+   skaiciai.                                                                */
+
+.ct-std-card { margin-bottom: var(--s-2); }
+.ct-top-card { margin-bottom: var(--s-3); }
+
+
+/* ── Paskutine kortele ────────────────────────────────────────────────────
+   Parašte po paskutine kortele yra tarpas, kurio niekas neprase - ji
+   susideda su konteinerio uzpildu. `:last-child` uztenka; naujo vardo
+   nereikia. */
+.ct-std-card:last-child,
+.ct-top-card:last-child { margin-bottom: 0; }
+
+
+/* ============================================================================
+   TRYNIMO SARASAS
+   ----------------------------------------------------------------------------
+   Dabar trinamos VISOS trys deklaracijos, ne tik trys savybes:
+
+     index.html      1337    visa `.ct-std-card{…}` eilute
+     ct-bendras.css   182    ta pati
+     compare.html    1277    ta pati
+
+   48 pakete rasiau „trinti tik tris savybes, paviršius lieka" - tai buvo
+   teisinga TADA, nes nezinojau, ar `.ct-card` duoda fona. Jusu matavimas
+   parode, kad duoda, o paraštes - ne. Tad dabar atvirksciai: paviršius
+   trinamas, parašte pereina i skyriu.
+
+   ── IR VIENA VIETA, KURIOS NELIESKIT ─────────────────────────────────────
+   `index.html` 2144 `!important` NELIECIAM. Jusu matavimas parode, kad
+   `.ct-istorija` uzpildas yra `0 12px 12px` ir laimi butent 2144, o ne 1340
+   (`0 14px`). Reiskia, 48 pakete prasiau palikti eilute, kuri niekada
+   nesuveike.
+
+   Tai jau trecias sios savaites atvejis, kai KRAUTUVIU EILE nulemia
+   rezultata (5 blokas, `.ct-btn-accent`, dabar sis): `index.html` <style>
+   blokai stovi PRIES 7128-7130 nuorodas, tad sistema nugali puslapio
+   stilius, nors ju specifiskumas vienodas.
+
+   Del to `.ct-istorija` uzpildo skyriaus dar neturiu - kai imsiu istorijos
+   juosta, pirmas darbas bus nuspresti tarp 12 ir 14, o ne perkelti abu.   */

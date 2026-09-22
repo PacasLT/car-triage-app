@@ -1158,3 +1158,56 @@ laikau tik eilės numeriu.
 - regitra.test +12 (125/125): BMW 320d 18 m. 210 000 km → 🟡 „dyzelinių“ (P10 13 240); tas pats benzininis → nėra; BMW 318 benzinas/dujos 5 m. ir Corolla hibridas 8 m. → ⚪ beKuro; X5 dyzelinas 3 m. → nėra (K-39); Golf 22 m. → ⚪ blokuota; Audi A4 be kuro → modelio juosta.
 - Sargai 14 žali / 0 / 3 praleisti.
 
+---
+
+## D-48 · 2026-09-22 · Dizaineris → Klaudijui · KORTELIŲ TARPAS · 52 PAKETAS
+
+### 1. Jūsų matavimas apvertė 48 paketo nurodymą
+
+48 pakete rašiau: „trinti tik tris savybes, paviršius lieka". Tai buvo
+teisinga **tada**, nes nežinojau, ar `.ct-card` duoda foną.
+
+Dabar žinau abi puses: `.ct-card` (264–269 eil.) duoda foną, rėmelį ir
+radiusą, bet **paraštės neturi visai**. Tad atvirkščiai: **paviršius
+trinamas, paraštė pereina į skyrių.** Ištrynus visą deklaraciją be to
+kortelės būtų sulipusios.
+
+### 2. 8 ar 12 — ir kodėl tai ne „paliekam, kaip buvo"
+
+STD lieka 8, TOP lieka 12, bet dėl priežasties, ne dėl inercijos: **TOP-5 yra
+penkios kortelės, skaitomos po vieną** — kiekviena turi būti atskiras
+objektas; **„Kiti skelbimai" yra sąrašas, kurį skenuoja** — tankesnis ritmas
+padeda, o atskyrimą neša rėmelis.
+
+Prie 20 kortelių tai 80 px slinkimo. Rašau tokenais (`--s-2`, `--s-3`), kad
+skirtumas liktų **vienas žingsnis skalėje**, ne du atsitiktiniai skaičiai.
+
+### 3. Trečias tas pats atvejis per dvi dienas
+
+`.ct-istorija` užpildas laimi iš 2144 `!important`, ne iš 1340. Vadinasi,
+48 pakete prašiau **palikti eilutę, kuri niekada nesuveikė** — ir tai
+pažodžiu ta pati klaida kaip `ERRATA 8`.
+
+Priežastis viena ir dabar aiški: **`index.html` `<style>` blokai stovi prieš
+7128–7130 nuorodas.** Sistema nugali puslapio stilius, nors specifiškumas
+vienodas. Trys kartai per dvi dienas: 5 blokas, `.ct-btn-accent`,
+`.ct-istorija`.
+
+`D-47` užsirašiau taisyklę „pirma patikrinti krautuvių eilę". Šis įrašas yra
+pirmas kartas, kai ją pritaikiau **prieš** išsiunčiant, ne po.
+
+### 4. Ir kas iš to seka istorijos juostai
+
+`.ct-istorija` užpildo skyriaus **neimu**. Yra dvi reikšmės — 12 (veikia) ir
+14 (niekada neveikė), — ir perkelti abi būtų tas pats, kas perkelti klaidą su
+visu kontekstu. Kai imsiu juostą, **pirmas darbas bus nuspręsti tarp jų.**
+
+**Failai:** `pasikeitimai/is-dizainerio/52-korteliu-tarpas/`
+
+## Z-111 · 2026-09-22 · Klaudijus · v2.10.2 – 52 paketas (kortelių tarpas) įdiegtas + matavimas
+- `ct-dizainas.css` gale – `ct-dizainas-39sk-PAPILDYMAS.css` (md5 95328799…). Ištrintos visos trys `.ct-std-card{…}` eilutės: index 1337, ct-bendras 182, compare 1277. index 2144 nepaliesta. D-48 įrašytas.
+- **Matavimas (1920, Playwright, index.html su sistemos CSS):** TOP tarpas **14**, STD tarpas **14**, paskutinė STD **0**; radiusas **16**; fonas `rgb(17,20,28)`, rėmelis `rgba(255,255,255,.075)` – nepakitę; `.ct-istorija` `0 12px 12px` – nepakitęs; plotis 1560; `:hover` perėjimas `border-color .15s` išlieka (iš `.card`).
+- **Kodėl ne 8/12:** kortelės turi klasę `card` – `index.html` 1138 `.card.ct-card { margin-bottom:14px; border-radius:16px; … }` (0,2,0) nugali `.ct-std-card`/`.ct-top-card`/`.ct-card` (0,1,0). Taip buvo ir iki 52 paketo: rankinių 8 / 12 nesuveikė nė vienas. **Mano ankstesnis matavimas (8 vs 12, radiusas 14) buvo klaidingas** – matuota be `card` klasės.
+- `:last-child` (0,2,0, ct-dizainas vėliau) suveikia – paskutinė STD 0. TOP paskutinė ne `:last-child` (po jos `#ct-kiti-hdr`), lieka 14.
+- Sargai žali.
+

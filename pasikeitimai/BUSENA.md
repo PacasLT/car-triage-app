@@ -1,4 +1,4 @@
-# Būsena · 2026-09-22 · v2.7.2 gyva
+# Būsena · 2026-09-22 · v2.10.0 gyva (v2.10.1 + v2.10.2 laukia push)
 
 Tik **atviri** punktai. Uždaryti — `ZURNALAS.md` / `archyvas/`. Kas laukia Luko — `LUKUI.md`.
 Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
@@ -10,12 +10,10 @@ Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
 | KL-PATIKRA2 | Filtrai kaip autoplius | Metai, kaina, rida, galia – išskleidžiami sąrašai; neįvesta → „–“; varantieji ratai ir kuras – autoplius variantai. |
 | KL-R1 / KL-R2 | Kainos kritimo žyma; atsuktos ridos įspėjimas | Luko „taip“. 0 kreditų. |
 | KL-F3PLUS | ScraperAPI paros žurnalas + <20 % įspėjimas | Luko „taip“. |
-| AN-0922-1133 | TA ridos norma, TA būklė pagal amžių, importo tendencija | Pagal REGITRA-GALIMYBES.md; atribucija TRANSEKSTA. |
 | FN-0922-1300 / 1302 | Nauji planai (planai.js) ir valdomas sekimas | Po Startup 10-16 (FN-0922-1310 dar klausimas). |
 | KL-MODELIS | Sonnet 5 bandymas 3–5 apžvalgomis | Mokama – daryti su Luko žinia. |
 | DZ-TINDER | „Tinder“ perdarymas | Dizainas + kodas, kartu su dizaineriu. |
 | Darbo sistema | DARBO-SISTEMA v2, fazė A | Vykdoma. Kol nebaigta — produkto darbai stovi (Luko sprendimas). |
-| TA integracija | `docs/UZDUOTIS-ta-integracija.md` | Analitiko paruošta užduotis (TA rida 99 % vs Regitra 17 %). Po fazės C. |
 
 ## Dizaineris
 
@@ -25,6 +23,8 @@ Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
 | `#search-btn` | 5-as ID mygtukas | Gradientas / švytėjimas / `:disabled` sistemoje ar vientisas CTA? Z-93. |
 | Kiti vardai | `.ct-btn-accent` (priedų 5), `.ct-regitra` (15), `.mg-atn-busena` (12), `.ct3-portal-ico` | Dizaineris pažadėjo kitame pakete. |
 | Tab žiedas | `--focus-offset` (43 pk.) | Vizualiai nepatikrinta — laukia Luko. |
+| `.ct-istorija` užpildas | 12 (veikia, index 2144 `!important`) ar 14 (1340, niekada nesuveikė) | Dizaineris spręs, kai ims istorijos juostą (D-48). Iki tol 2144 neliečiama. |
+| `.card.ct-card` (index 1138) | `margin-bottom:14px; border-radius:16px`, specifiškumas 0,2,0 | Nugali 52 paketo `--s-2`/`--s-3` ir `.ct-card` 14 – tikras tarpas TOP ir STD 14, radiusas 16 (Z-111). Dizaineris sprendžia, ar perimti. |
 
 ## Analitikas
 
@@ -45,7 +45,6 @@ Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
 | 5 | `.ct-btn-accent` | kitas paketas (dizainerio pažadėta atmaina) |
 | 8 | `#more-filters` iš inline | NETRINTI (mūsų) |
 | 16 | `#sort-bar` kaukė | Nr. 42 pabaiga (Klaudijus) |
-| 17, 18, 20 | `.ct-std-card`, `.dp-desine`, `.ct-papf` | 46b |
 
 ## Kur kas guli
 

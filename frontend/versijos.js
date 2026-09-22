@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.10.2', data: '2026-09-22', pavadinimas: 'Tvarkingesnis kortelių išdėstymas',
+    pakeitimai: [
+      'Po paskutinės skelbimo kortelės nebelieka nereikalingo tarpo.',
+      'Kortelių stiliai sutvarkyti į vieną vietą (vizualiai kitų pokyčių nėra).',
+    ],
+  },
+  {
     versija: '2.10.1', data: '2026-09-22', pavadinimas: 'Ridos palyginimas pagal kurą',
     pakeitimai: [
       'Rida dabar lyginama su to paties kuro automobiliais: dyzeliniai važiuoja daugiau, tad benzininiai nebežymimi per dažnai, o dyzeliniai – per retai.',

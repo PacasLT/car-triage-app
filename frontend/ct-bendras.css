@@ -179,7 +179,6 @@ body{font-family: var(--font);
 .diff-pos{background:var(--success-dim);border:1px solid var(--success-border);color:var(--success);}
 .diff-warn{background:var(--warning-dim);border:1px solid var(--warning-border);color:var(--warning);}
 .diff-neg{background:var(--danger-dim);border:1px solid var(--danger-border);color:var(--danger);}
-.ct-std-card{background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:8px;transition:border-color .15s;}
 .ct-std-card > .ct-istorija{padding:0 14px 12px;}
 .ct-std-card > .ct-istorija > div{margin-top:0 !important;}
 .ct-std-card:hover{border-color:var(--border-light);}
