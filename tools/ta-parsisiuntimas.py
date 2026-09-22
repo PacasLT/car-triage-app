@@ -88,19 +88,28 @@ def main():
     os.makedirs(x.katalogas, exist_ok=True)
     kelias = lambda n: os.path.join(x.katalogas, f'{x.prefiksas}-{n:04d}.csv')
 
-    esami = sorted(int(re.search(r'-(\d{4})\.csv$', p).group(1))
-                   for p in glob.glob(os.path.join(x.katalogas, x.prefiksas + '-[0-9][0-9][0-9][0-9].csv')))
-    ribos = {}
-    for n in esami:
-        if os.path.getsize(kelias(n)) > 0:
-            p, q, k = id_ribos(kelias(n))
-            if k: ribos[n] = (p, q, k)
+    # Failai: ta-apziuros-NNNN.csv arba sujungti ta-apziuros-NNNN-MMMM.csv (N..M dalys)
+    ribos, uzimta = {}, set()
+    for pth in glob.glob(os.path.join(x.katalogas, x.prefiksas + '-*.csv')):
+        m = re.search(r'-(\d{4})(?:-(\d{4}))?\.csv$', pth)
+        if not m: continue
+        nuo_nr = int(m.group(1)); iki_nr = int(m.group(2) or m.group(1))
+        if os.path.getsize(pth) > 0:
+            p1, q1, k = id_ribos(pth)
+            if k:
+                ribos[iki_nr] = (p1, q1, k if iki_nr == nuo_nr else x.failui)
+                ribos.setdefault('_pradzia', {})[iki_nr] = nuo_nr
+                uzimta.update(range(nuo_nr, iki_nr + 1))
+    pradziu = ribos.pop('_pradzia', {})
+    # sujungto failo pirmas _id priklauso jo pirmam numeriui
+    for iki_nr, nuo_nr in pradziu.items():
+        if nuo_nr != iki_nr: ribos[nuo_nr] = (ribos[iki_nr][0], None, x.failui)
 
     pradzia = time.time()
     # 1. Spragos: tusti ar trukstami failai tarp pilnu
     if ribos:
         for n in range(1, max(ribos)):
-            if n in ribos: continue
+            if n in uzimta: continue
             nuo = ribos[n - 1][1] if (n - 1) in ribos else None
             if n > 1 and (n - 1) not in ribos:
                 print(f'{n:04d}: pries ji irgi spraga - praleidziu, pataisyk rankiniu budu'); continue

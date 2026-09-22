@@ -26,6 +26,7 @@ Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
 
 | Nr. | Kas | Trumpai |
 |---|---|---|
+| TA | Pilna `ta-modeliai.json` iš ~12,2 mln. įrašų (`tools/ta-suvestine.py`) | Parsisiuntimas `tools/ta-parsisiuntimas.py` vyksta (Klaudijus). Repo dabar – bandomasis X5 failas: **necommit'inti**, kol Analitikas neperrašys pilnu. Duomenys iki 2025-05-28. |
 | K-33 | Registro raktų logika (`BMW 5ER`, `530`, `SERIE`…) | `modelis_dalys()` + pergeneruotas `regitra-modeliai.json` — diegiam vienu commit'u. |
 | K-29 | Nurašymų riba 40 vs 50 | Su amžiaus vartais 40 nebėra triukšmingas. Z-52. |
 | K-30 | Ar `rida_kv` naudotinas skelbimui | Normalus 2–4 m. X5 gautų klaidingą 🟡. Z-52. |

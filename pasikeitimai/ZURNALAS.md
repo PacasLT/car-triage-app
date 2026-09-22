@@ -846,3 +846,9 @@ priežastimi (`papAtmesta` → `explainRejection`). Kaina žemiau rinkos reikala
 Sąsaja: „Daugiau filtrų" skydelyje, `select.ct-field` (sistemos laukas), išdėstymas
 ct-priedai.css 20 blokas. URL parametrai (`kebulas`, `pardavejas`, `ideta`, `zemiau`, `balas`),
 ženkliukas ir „Išvalyti" juos skaičiuoja. filtrai.test +8 (11 skyrius) → 57/57.
+
+
+## Z-98 · 2026-09-22 · Klaudijus · TA duomenys: parsisiuntimas ir trys Analitiko faktai
+- `tools/ta-parsisiuntimas.py`: TA apžiūros be naršyklės (Windows Python, tik `Downloads`). Formatas = Analitiko (11 stulp., 100 000 eil./failą, rikiuota `_id`, `tp_klase.startswith("M1")`). Tęsia nuo paskutinio `_id`, pildo tuščius failus, supranta sujungtus `NNNN-MMMM.csv`. Tuščias `0001` užpildytas; Analitiko `0039-0042.csv` dubliavo → `Downloads\_to_delete\`.
+- Analitikas: (1) `backend/duomenys/ta-modeliai.json` – bandomasis (tik X5), necommit'inti; (2) TA duomenys baigiasi 2025-05-28 – sąsajoje rodyti `laikotarpis`, ne „naujausi" (CLAUDE.md produkto taisyklės); (3) `device_commit_files` du kartus įrašė seną kopiją nors grąžino „written" – po įrašymo tikrinti md5 (CLAUDE.md spąstai).
+- Plėtra P3 (kryžminiai skelbimai): **veikia vienos paieškos ribose** – `mergeDuplicatesAcrossPortals` (modelis + metai + rida ±300 + kuras + pavarų dėžė), kortelėje „🔗 Tas pats automobilis taip pat: …", detail „KRYŽMINIAI SKELBIMAI". Nėra: pagal VIN / nuotrauką, tarp skirtingų paieškų, istorinio. Įrašyta į GALIMYBES §2.

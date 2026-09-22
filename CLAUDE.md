@@ -49,6 +49,7 @@ Prieš keičiant sritį – `grep -n "## " docs/pamokos.md` ir perskaityti tos s
 - Po kiekvieno didesnio perdarymo: `cd frontend && python3 ../tools/onclick-patikra.py`.
 
 ## Žinomi spąstai (nekeisti atgal)
+- `device_commit_files` gali grąžinti „written", bet įrašyti SENĄ kopiją (Analitikas, 2026-09-22, du kartus). Po kiekvieno įrašymo – `md5sum` įrenginyje ir palyginti su šaltiniu.
 - `html, body { overflow-x: clip }` – ne `hidden` (sulaužo sticky antraštę).
 - ⚪ juosta: `background-color`, ne `background` (nutrintų dryžius); klasės `is-unrated`, `is-unrated-val`.
 - `ct-dizainas.css` prijungtas PASKUTINIS prieš `</body>` (po jo `ct-priedai.css`, `ct-mygtukai.css`); `<style>` blokų yra ir po `</head>`.
@@ -69,6 +70,7 @@ Kiekvieną kartą ištaisius klaidą – ieškoti to paties rašto visame kode (
 - Kaina lyginama **tik su PVM** („50 000 € + PVM" → `kaina` 60 500). `kainaBePvm` į medianą neįtraukiama.
 - `diffPct` **teigiamas = pigiau** už rinką. Kortelėje rinka rodoma nuo 8 skelbimų (`CT_RINKOS_MIN`), mediana skaičiuojama nuo 5. `ZALOS_RIBA_PCT` 49 → „GALIMAI DAUŽTAS", balas ≤ 60.
 - Vizualinis standartas: MATOME → APRAŠOME, ĮTARIAME → ĮSPĖJAME, NEŽINOME → NEIŠGALVOJAME. Draudžiami žodžiai tikrinami kode (`DRAUDZIAMA`). Trūkstamas rakursas balo nemažina.
+- TA (data.gov.lt 2721) duomenys baigiasi **2025-05-28**, nors skelbiama „kas savaitę". Sąsajoje niekada „naujausi duomenys" – rodyti laikotarpį iš suvestinės `laikotarpis` lauko. Atnaujinimas – tik kai leidėjas atnaujins.
 - Regitros punktai balo nekeičia. Svetimų VIN dekoderių automatiškai neskaitom (robots.txt).
 - „Dingo iš portalo" – tik antrą kartą iš eilės nerastas, telpantis į filtrus, nenukirstoje paieškoje.
 

@@ -23,3 +23,6 @@ pasikeitimai/klaidos-*.txt
 
 # Testų laikinos DB (migracija.test)
 backend/testai/*.db
+
+# Python
+__pycache__/
