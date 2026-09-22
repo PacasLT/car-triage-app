@@ -138,22 +138,9 @@
 
 
 /* ----------------------------------------------------------------------------
-   12 BLOKAS · megstamiausiu atnaujinimo busenos eilute · v1.96.0
-
-   `dizainas.test.js` vienintele raudona patikra: `megstamiausi.html` turejo
-   viena inline stiliu su SPALVA ir SRIFTU (`font:500 12px var(--font);
-   color:var(--text-dim)`). Riba yra 0, tad sargas krito, o skola tyliai augo.
-
-   Isdestymas (`flex:1 1 100%`) inline butu leistinas, bet kartu su spalva -
-   ne, todel visa eilute keliauja cia.
-
-   MUSU, netrinti - kol dizaineris neturi atitinkamos klases savo faile.  */
-
-.mg-atn-busena {
-  flex: 1 1 100%;
-  font: 500 12px var(--font);
-  color: var(--text-dim);
-}
+   12 BLOKAS · IŠTRINTAS v2.8.0 (49 paketas): dizaineris perėmė kaip 43 sk.
+   `.ct-status`. Vieta (`flex:1 1 100%`) - `megstamiausi.html` <style> prie
+   `.pg-head`, ne čia: tai puslapio išdėstymas, jis lieka visam laikui.        */
 
 
 /* ----------------------------------------------------------------------------
@@ -174,53 +161,9 @@
 
 
 /* ----------------------------------------------------------------------------
-   15 BLOKAS · Lietuvos registro punktai treciame lygyje · v2.0.0
-
-   Trys Regitros punktai rodomi ZINOJIMO LYGIU sistemoje - ne nauja, o ta pati:
-   zenkliukas naudoja `.ct-k` su `ct-k-confirmed` / `ct-k-signal` /
-   `ct-k-unknown`, kaip „Rizika" ir „Duomenys %". Cia tik eiluciu isdestymas.
-
-   Vardas `ct-regitra-*`, o NE `ct-reg-*`: `ct-reg-email`, `ct-reg-pass`,
-   `ct-reg-invite` jau priklauso registracijos formai. Tai ta pati bendro vardo
-   klaida, kaip `.ct-table` ir `.ct-kv` (CLAUDE.md lentele), tad vardas
-   pasirinktas ilgesnis samoningai.
-
-   MUSU, netrinti - kol dizaineris neperims i savo faila.  */
-
-.ct-regitra {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-2);
-  margin-top: var(--s-2);
-}
-
-.ct-regitra-p {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--s-2);
-  min-width: 0;
-}
-
-/* Zenkliukas nesitraukia - traukiasi tekstas salia jo (30b sk. principas). */
-.ct-regitra-p > .ct-k { flex: none; }
-
-.ct-regitra-t {
-  min-width: 0;
-  font: 400 12px/1.45 var(--font);
-  color: var(--text-secondary);
-}
-
-@media (max-width: 640px) {
-  /* Siaurame ekrane zenkliukas ir tekstas vienas po kito - salia ju
-     tekstui liktu ~150 px, o sie sakiniai yra sakiniai, ne etiketes. */
-  .ct-regitra-p { flex-direction: column; gap: 4px; }
-}
-
-
-/* v2.4.6 · mobile.de portalo ženklas (Z-74). Kitos keturios eilutės tą patį
-   nešasi inline; penktoji - klase, kad nedidintų inline ribos (dizainas.test).
-   Dizaineriui: galima perkelti visoms penkioms ir inline pašalinti. */
-.ct3-portal-ico { flex: none; border-radius: 5px; }
+   15 BLOKAS · IŠTRINTAS v2.8.0 (49 paketas): perimta be pakeitimų kaip 42 sk.
+   `.ct-regitra`. Kartu ištrinta v2.4.6 `.ct3-portal-ico` eilutė - 30 sk.
+   papildymas; index.html visos penkios portalų piktogramos dabar su klase.   */
 
 
 /* ----------------------------------------------------------------------------

@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.8.0', data: '2026-09-22', pavadinimas: 'Registro punktai, būsenos eilutė ir portalų ženklai – dizaino sistemoje',
+    pakeitimai: [
+      'Lietuvos registro punktai, mėgstamiausių atnaujinimo būsenos eilutė ir portalų ženklai dabar aprašyti bendroje dizaino sistemoje – atrodo taip pat, tik prižiūrimi vienoje vietoje.',
+      'Visi penki portalų ženklai portalų lange dabar vienodi ir nesitraukia siaurame lange.',
+    ],
+  },
+  {
     versija: '2.7.2', data: '2026-09-22', pavadinimas: 'Nauji filtrai',
     pakeitimai: [
       '„Daugiau filtrų": kėbulo tipas, pardavėjas (privatus / įmonė), įdėta per 1–14 dienų – taikomi visuose 5 portaluose',

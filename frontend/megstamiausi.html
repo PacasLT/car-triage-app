@@ -17,6 +17,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 .pg-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
 .pg-head h1 { margin: 0; font: 700 22px/1.2 var(--font); flex: 1; }
 .pg-head .kiek { font: 600 11px/1 var(--font-mono); color: var(--accent-light); background: var(--accent-dim); border: 1px solid var(--accent-border); padding: 5px 9px; border-radius: 7px; }
+.pg-head > .ct-status { flex: 1 1 100%; } /* vieta puslapyje (49 paketas, 43 sk.) - ne atsvara, lieka */
 .pg-sub { color: var(--text-muted); font-size: 13px; margin: -8px 0 20px; }
 .pg-tuscia { text-align: center; padding: 60px 20px; background: var(--bg-surface); border: 1px dashed var(--border-light); border-radius: 16px; color: var(--text-muted); font-size: 14px; }
 .pg-tuscia b { display: block; color: var(--text-primary); font-size: 16px; margin-bottom: 8px; }
@@ -221,7 +222,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 </header>
 
 <div class="pg">
-  <div class="pg-head"><h1>Mėgstamiausi</h1><span class="kiek" id="kiek">–</span><button type="button" class="ct-btn ct-btn-sm" id="mg-atn" style="margin-left:auto" onclick="if(window.ctMegstami&&ctMegstami.atnaujintiVisus)ctMegstami.atnaujintiVisus(this)" title="Iš naujo patikriname kiekvieno išsaugoto skelbimo kainą ir būseną portale. 1 kreditas už visą sąrašą (kartą per parą)."><span>↻ Atnaujinti visus · 1 kr</span></button><span id="mg-atn-busena" class="mg-atn-busena"></span></div>
+  <div class="pg-head"><h1>Mėgstamiausi</h1><span class="kiek" id="kiek">–</span><button type="button" class="ct-btn ct-btn-sm" id="mg-atn" style="margin-left:auto" onclick="if(window.ctMegstami&&ctMegstami.atnaujintiVisus)ctMegstami.atnaujintiVisus(this)" title="Iš naujo patikriname kiekvieno išsaugoto skelbimo kainą ir būseną portale. 1 kreditas už visą sąrašą (kartą per parą)."><span>↻ Atnaujinti visus · 1 kr</span></button><span id="mg-atn-busena" class="ct-status"></span></div>
   <p class="pg-sub">Skelbimai, kuriuos pažymėjote ♥. Saugomi prie paskyros – matysite iš bet kurio įrenginio. Kasdien tikriname, ar pasikeitė kaina ir ar skelbimas dar aktyvus.</p>
   <!-- v2.5.1 (Nr. 33): „Atnaujinti visus" patvirtinimas ir rezultatas. Iki šiol jie
        rašomi tik į antraštės meniu #ct-meg-busena, kurio šiame puslapyje nėra (kol

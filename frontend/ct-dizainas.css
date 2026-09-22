@@ -3604,3 +3604,171 @@ textarea.ct-field {
 
 
 /* Po idiegimo: ct-priedai.css 19 blokas trinamas. */
+
+
+/* ============================================================================
+   49 paketas - TRYS VARDAI GAUNA SKYRIU, KETVIRTAS JAU JI TURI
+   ----------------------------------------------------------------------------
+   42 sk. NAUJAS   .ct-regitra        (ct-priedai 15 blokas)
+   43 sk. NAUJAS   .ct-status         (ct-priedai 12 blokas, .mg-atn-busena)
+   30 sk. PAPILDYMAS  .ct3-portal-ico (ct-priedai, v2.4.6 eilute)
+   ct-mygtukai     .ct-btn-accent     JAU YRA - 5 blokas tik trinamas
+
+   Eilučių numeriai ir selektoriai patikrinti faile (v2.7.2).
+   Versija - siulau v2.9.0.
+   ========================================================================== */
+
+
+/* ============================================================================
+   PIRMIAUSIA: 5 BLOKAS · variantas atejo ir niekas nepastebejo
+   ----------------------------------------------------------------------------
+   `ct-priedai.css` 5 blokas parasyta: „LAIKINA, laukia dizainerio varianto -
+   zip'e jos nera nei ct-mygtukai.css, nei ct-dizainas.css".
+
+   Ji ten YRA. `ct-mygtukai.css` 452-460 eil., su pagrindimu 439-451 eil., ir
+   pagrindimas yra tas pats jusu argumentas: „Pro · 13 kr" ir „Pilna apzvalga ·
+   2 kr" abu prasο pinigu, du violetiniai konkuruoja.
+
+   Vadinasi, atmaina atejo, jusu blokas liko, ir abu gyvavo greta - nezinau,
+   kiek laiko. Tai ketvirtas sios savaites atvejis, kai skyle jau buvo
+   uzdaryta, o antra danga stovejo saugoti tos vietos.
+
+   VIENAS SKIRTUMAS, IR JI REIKIA PASAKYTI PRIES TRINANT:
+
+     jusu  :hover { color: var(--text-primary); }
+     mano  :hover { color: var(--accent-light); }
+
+   Jusu failas kraunamas veliau, tad siandien veikia JUSU - uzvedus tekstas
+   pabalta. Istrynus bloka mygtukas uzvedus liks akcento spalvos.
+
+   Taip ir turi buti: akcento gimine uzvedus nekeicia gimines, kaip ir
+   `.ct-btn.is-on`. Bet tai PAMATUOJAMAS pokytis, ne „nieko nepasikeis" -
+   uzvedus antrastes „Planas" mygtuka spalva bus kita.
+
+   ISTRINTI: ct-priedai.css 5 blokas (visas, su komentaru).                */
+
+
+/* ============================================================================
+   42. LIETUVOS REGISTRO PUNKTAI   ·   .ct-regitra
+   ----------------------------------------------------------------------------
+   PERIMU JUSU 15 BLOKA BE PAKEITIMU.
+
+   Ir noriu pasakyti, kodel cia nera ko taisyti. Jus pats parasei, kad
+   zenkliukas naudoja `.ct-k` su `ct-k-confirmed` / `ct-k-signal` /
+   `ct-k-unknown` - t. y. zinojimo lygiu sistema, kuri jau egzistuoja (343-355
+   eil.), ir nesukurei sestos spalvos „Regitrai". Tai tiksliai tas ejimas,
+   kurio visa savaite prasau is saves.
+
+   Vardas `ct-regitra-*`, o ne `ct-reg-*`, irgi jusu ir irgi teisingas:
+   `ct-reg-email`, `ct-reg-pass` priklauso registracijos formai. Ilgesnis
+   vardas samoningai - ta pati pamoka kaip `.ct-table` / `.ct-kv`.          */
+
+.ct-regitra {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin-top: var(--s-2);
+}
+
+.ct-regitra-p {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  min-width: 0;
+}
+
+/* Zenkliukas nesitraukia - traukiasi tekstas salia jo (30b sk. principas). */
+.ct-regitra-p > .ct-k { flex: none; }
+
+.ct-regitra-t {
+  min-width: 0;
+  font: var(--fw-regular) 12px/1.45 var(--font);
+  color: var(--text-secondary);
+}
+
+@media (max-width: 640px) {
+  /* Siaurame ekrane zenkliukas ir tekstas vienas po kito: salia ju tekstui
+     liktu ~150 px, o sie sakiniai yra sakiniai, ne etiketes. */
+  .ct-regitra-p { flex-direction: column; gap: 4px; }
+}
+
+/* ISTRINTI: ct-priedai.css 15 blokas. */
+
+
+/* ============================================================================
+   43. VEIKSMO BUSENOS EILUTE   ·   .ct-status
+   ----------------------------------------------------------------------------
+   `.mg-atn-busena` (12 blokas) yra teisingas dalykas neteisingu vardu:
+   tai ne „megstamiausiu atnaujinimo" eilute, o BENDRA forma - tekstas, kuris
+   pasako, kaip sekasi veiksmui, pradetam gretimu mygtuku. Mygtukas turi
+   `.is-busy`, `.is-ready`, `.is-error`; jo rezultatui vietos sistemoje nebuvo.
+
+   Todel vardas sistemoje bendras, o markupe klase keiciama:
+
+     <span id="mg-atn-busena" class="ct-status"></span>
+
+   ── IR KAS LIEKA JUSU PUSEJE ──────────────────────────────────────────────
+   `flex: 1 1 100%` NEKELIAUJA i sistema. Tai ne eilutes savybe, o jos vieta
+   `.pg-head` viduje, o `.pg-head` yra `megstamiausi.html` klase (17 eil.) -
+   sistema apie ja nezino ir neturi zinoti.
+
+   Tai ta pati riba, kuria priemem mygtuku ID plane: ISVAIZDA sistemai,
+   VIETA puslapiui. Tad puslapyje lieka viena eilute:
+
+     .pg-head > .ct-status { flex: 1 1 100%; }
+
+   Ji NEBUS atsvara ir jos netrinsim - ji aprasys tai, ko sistema is principo
+   negali zinoti.                                                           */
+
+.ct-status {
+  font: var(--fw-regular) 12px/1.45 var(--font);
+  color: var(--text-dim);
+  min-width: 0;
+}
+
+/* Busenos, kai jos prireiks. Siandien JS rašo tik teksta, tad sios dvi
+   nieko nelaužia ir nieko nereikalauja - bet kai atsiras „nepavyko",
+   spalva jau bus aprasyta, o ne parasyta inline. */
+.ct-status.is-ok { color: var(--k-confirmed); }
+.ct-status.is-error { color: var(--danger); }
+
+/* ISTRINTI: ct-priedai.css 12 blokas (po klases pakeitimo markupe). */
+
+
+/* ============================================================================
+   30 sk. PAPILDYMAS   ·   .ct3-portal-ico
+   ----------------------------------------------------------------------------
+   Penkios portalu eilutes, penkios vienodos piktogramos, ir tik VIENA turi
+   klase: `index.html` 2655 (mobile.de). Kitos keturios - 2651-2654 - nesa
+   `style="flex:none;border-radius:5px"` inline.
+
+   Jus pats tai parasei v2.4.6 komentare: „kitos keturios eilutes ta pati
+   nesasi inline; dizaineriui: galima perkelti visoms penkioms".
+
+   Perkeliu. Ir tai ne kosmetika: `flex: none` cia yra 30b sk. taisykle
+   (zenklas nesitraukia, traukiasi tekstas), o inline stiliaus mano failas
+   nenugali be `!important` (A-12). Kol keturios eilutes nesa ji inline,
+   30 sk. tų keturių eilučių nepasiekia.
+
+   MARKUPE: `index.html` 2651, 2652, 2653, 2654 - `class="ct3-portal-ico"`,
+   inline `style` nuimamas. 2655 jau turi klase.                           */
+
+.ct3-portal-ico {
+  flex: none;
+  border-radius: 5px;
+}
+
+/* ISTRINTI: ct-priedai.css eilute su .ct3-portal-ico (v2.4.6 komentaras). */
+
+
+/* ============================================================================
+   IR VIENAS DALYKAS, KURIO NETAISAU - TIK UZRASAU
+   ----------------------------------------------------------------------------
+   `.ct3-portal-row` deklaruota `index.html` DUKART: 834 eil. ir 1829 eil.,
+   antroji su `!important` (1834) ir dar kartą 1880 eil. telefonui. Antroje
+   vietoje yra `:has(input:checked)`, kurio pirmoje nera.
+
+   Tai tas pats atvejis kaip `.ct-std-card`: vienas vardas, du blokai, ir
+   vienas is ju tyliai nugali. Cia niekas nesulūžę, tad neprasau nieko -
+   bet kai kada nors prasysit portalu skydo skyriaus, pirmas darbas bus
+   nuspresti, kuris is dvieju bloku yra tikrasis.                          */
