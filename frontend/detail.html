@@ -14,7 +14,7 @@
 :root {
   --bg-base:#0A0C12;--bg-surface:#11141C;--bg-elevated:#171B25;--bg-card:#11141C;--bg-raised:#1F2431;
   --border:rgba(255,255,255,.075);--border-light:rgba(255,255,255,.14);
-  --accent:#7C5CFF;--accent-hover:#8B6FFF;--accent-light:#A78BFA;--accent-dim:rgba(124,92,255,.14);--accent-border:rgba(124,92,255,.30);
+  
   --success:oklch(.75 .15 158);--success-dim:oklch(.75 .15 158/.13);--success-border:oklch(.75 .15 158/.30);
   --warning:oklch(.81 .13 78);--warning-dim:oklch(.81 .13 78/.13);--warning-border:oklch(.81 .13 78/.30);
   --danger:oklch(.66 .19 25);--danger-dim:oklch(.66 .19 25/.13);--danger-border:oklch(.66 .19 25/.30);
@@ -86,7 +86,7 @@ button{font-family:inherit;cursor:pointer}
 .dp-thumb{aspect-ratio:4/3;border-radius:8px;overflow:hidden;border:1px solid var(--border);background:var(--bg-elevated);cursor:pointer;position:relative}
 .dp-thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .dp-thumb.dp-thumb-active{border-color:var(--accent)}
-.dp-ai-insight{padding:12px 14px;border-radius:10px;background:rgba(124,92,255,.08);border:1px solid rgba(124,92,255,.2);display:flex;gap:10px;align-items:flex-start}
+.dp-ai-insight{padding:12px 14px;border-radius:10px;background:var(--accent-dim);border:1px solid var(--accent-border);display:flex;gap:10px;align-items:flex-start}
 .dp-ai-badge{flex:none;width:24px;height:24px;border-radius:6px;background:var(--accent);color:#fff;font:700 10px/1 var(--font-mono);display:grid;place-items:center}
 .dp-ai-text{flex:1;font-size:12.5px;line-height:1.5;color:var(--text-secondary)}
 .dp-ai-link{display:inline-flex;align-items:center;gap:4px;font:600 12px var(--font);color:var(--accent-light);margin-top:8px;cursor:pointer}
@@ -201,7 +201,7 @@ button{font-family:inherit;cursor:pointer}
 
 /* ── PHOTOS AI ANALYZE ── */
 .dp-photo-ai-btn{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 20px;border-radius:10px;border:1px solid var(--accent-border);background:var(--accent-dim);color:var(--accent-light);font:600 13px var(--font);cursor:pointer;transition:background .15s}
-.dp-photo-ai-btn:hover{background:rgba(124,92,255,.2)}
+.dp-photo-ai-btn:hover{background:var(--accent-border)}
 .dp-photo-ai-btn:disabled{opacity:.5;cursor:default}
 .dp-photo-ai-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)}
 .dp-photo-ai-result{background:var(--bg-surface);border:1px solid var(--accent-border);border-radius:12px;padding:16px;margin-bottom:16px;display:none}
@@ -300,7 +300,7 @@ button{font-family:inherit;cursor:pointer}
   font: 600 14px var(--font);
   display: flex; align-items: center; justify-content: center; gap: 7px;
   text-decoration: none;
-  box-shadow: 0 4px 16px rgba(124,92,255,.35);
+  box-shadow: var(--shadow-glow); /* 58 pk. C3c */
   -webkit-tap-highlight-color: transparent;
 }
 .dp-sbar-primary:hover { filter: brightness(1.1); color: #fff; }
@@ -2302,7 +2302,7 @@ window.ctApi = function (kelias, params) {
         var html = '<div style="display:flex;flex-direction:column;gap:14px">';
         html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden">';
         html += '<div style="padding:16px;display:flex;gap:14px;align-items:center">';
-        html += '<div style="width:46px;height:46px;border-radius:50%;background:rgba(124,92,255,.12);display:grid;place-items:center;flex:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>';
+        html += '<div style="width:46px;height:46px;border-radius:50%;background:var(--accent-dim);display:grid;place-items:center;flex:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>';
         html += '<div style="flex:1;min-width:0">';
         html += '<div style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(c.pardavejas||'Pardavėjas nenurodyta')+'</div>';
         html += '<div style="font-size:12px;color:var(--text-muted);margin-top:3px">'+(c.yraVerslas ? '🏢 Verslo pardavėjas' : '👤 Privatus asmuo')+'</div>';

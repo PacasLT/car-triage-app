@@ -173,6 +173,7 @@
   --shadow-3:    0 16px 48px rgba(0, 0, 0, .55);
   --shadow-card: var(--shadow-2);   /* suderinamumui su index.html */
   --shadow-glow:  0 10px 28px -12px rgba(37, 99, 235, .85); /* TIK pirminis CTA · 56a mėlyna */
+  --shadow-panel: 0 18px 40px -24px rgba(0, 0, 0, .8);  /* 58 pk. K-57c: iš ct-bendras.css (iškrentantys meniu) */
 
   /* ── 9. FOKUSAS · matomas visur, hover niekada nėra vienintelis būdas ─────*/
   --focus-ring:   0 0 0 2px var(--bg-base), 0 0 0 4px var(--accent-light);
@@ -374,11 +375,12 @@ button { font-family: inherit; cursor: pointer; }
 
 /* Įverčio dedamosios juosta; „neįvertinta" dedamoji — dryžuota, ne tuščia */
 .ct-bar { height: 6px; border-radius: var(--radius-pill); background: var(--bg-raised); overflow: hidden; }
-.ct-bar > span { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
-/* 57 pk. (Errata 10): žalia – būsena, ne numatytoji. Įverčiui markupe `.is-good`. */
-.ct-bar.is-good > span { background: var(--success); }
-.ct-bar.is-warn > span { background: var(--warning); }
-.ct-bar.is-bad  > span { background: var(--danger); }
+.ct-bar > span { display: block; height: 100%; border-radius: inherit; }
+/* 58 pk. (Errata 11, K-57a): spalva – tik per `color` (+ 1260 eil. `background: currentColor`). */
+.ct-bar { color: var(--accent); }
+.ct-bar.is-good,  .is-good > .ct-bar  { color: var(--success); }
+.ct-bar.is-warn,  .is-warn > .ct-bar  { color: var(--warning); }
+.ct-bar.is-bad,   .is-bad  > .ct-bar  { color: var(--danger); }
 .ct-bar-unknown {
   background-image: repeating-linear-gradient(
     -45deg, var(--k-unknown-dim) 0 4px, transparent 4px 8px);
@@ -4687,7 +4689,6 @@ textarea.ct-field {
    viename puslapyje, tad jie turi buti vienas sarasas trimis turiniais, ne
    trys skirtingi sarasai. */
 .acct-row {
-  display: flex;
   align-items: center;
   gap: var(--s-3);
   padding: 13px 0;
@@ -4778,7 +4779,6 @@ textarea.ct-field {
 .acct-set details > summary { list-style: none; cursor: pointer; }
 .acct-set details > summary::-webkit-details-marker { display: none; }
 .acct-set-f {
-  display: flex;
   flex-direction: column;
   gap: var(--s-2);
   max-width: 340px;
@@ -4847,4 +4847,7 @@ textarea.ct-field {
    Stovi failo GALE sąmoningai: [hidden] specifiškumas 0,1,0 (:where prideda 0),
    tad jis nugali to paties svorio `display` taisykles tik būdamas vėliau.
    ========================================================================== */
-[hidden]:where(:not([hidden="until-found"])) { display: none; }
+:where([hidden]:not([hidden="until-found"])) { display: none; } /* 58 pk.: 0,0,0 */
+/* 58 pk. K-57b: išdėstymas klausia [hidden] (display perkeltas iš bazinių taisyklių) */
+.acct-row:not([hidden]) { display: flex; }
+.acct-set-f:not([hidden]) { display: flex; }

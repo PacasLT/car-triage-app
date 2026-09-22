@@ -1,26 +1,3 @@
-:root{--bg-base:       #0a0c10;
-    --bg-surface:    #141720;
-    --bg-elevated:   #1c2030;
-    --bg-card:       #16192a;
-    --border:        #252a38;
-    --border-light:  #2e3448;
-    --accent:        #7c6ff7;
-    --accent-hover:  #6c5ce7;
-    --accent-light:  #a78bfa;
-    --accent-dim:    rgba(124,111,247,0.12);
-    --success:       #7fd88f;
-    --danger:        #ff9d9d;
-    --warning:       #f0c674;
-    --text-primary:  #e8e8ea;
-    --text-secondary:#b0b0c0;
-    --text-muted:    #6e7080;
-    --radius-sm:     6px;
-    --radius-md:     10px;
-    --radius-lg:     14px;
-    --radius-xl:     20px;
-    --font:          -apple-system, 'Segoe UI', Arial, sans-serif;
-    --shadow-card:   0 2px 16px rgba(0,0,0,0.4);
-    --shadow-glow:   0 0 20px rgba(124,111,247,0.25);}
 *{box-sizing: border-box;}
 body{font-family: var(--font);
     background: var(--bg-base);
@@ -65,8 +42,7 @@ body{font-family: var(--font);
   color: #8C93A6; font: 600 15px 'Archivo',-apple-system,Helvetica,sans-serif;
   cursor: pointer; transition: background .14s;}
 #ct-logout-btn:hover{background: rgba(255,255,255,.06); color: #E9EBF2;}
-/* 57 pk. C2: antras :root blokas ištrintas – tokenai gyvena tik ct-dizainas.css. Paliktas tik --shadow-panel (jo ct-dizainas neturi, naudoja .ct-sort-menu). */
-:root{--shadow-panel: 0 18px 40px -24px rgba(0,0,0,.8);}
+/* 57–58 pk.: abu :root blokai ištrinti – visi tokenai gyvena tik ct-dizainas.css (--shadow-panel perkeltas ten). */
 .ct3-header{position: relative; z-index: 100;
   background: transparent;
   border-bottom: none;}

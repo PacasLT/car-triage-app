@@ -1492,3 +1492,76 @@ spalvos nėra duomenys**, kai jos neša tapatybę.
 - C2: `ct-bendras.css` antras `:root` (68–115) ištrintas; patikrinta – visi 4 puslapiai su ct-bendras krauna ir ct-dizainas. `--accent-hover` niekur nenaudojamas. Paliktas `--shadow-panel` (ct-dizainas jo neturi, naudoja `.ct-sort-menu` 3836). Pirmas `:root` (1–23, senos reikšmės) neliestas – K-57b.
 - C3: grep sąrašas `pasikeitimai/VIOLETINE-GREP.md` (83 eilutės, iš jų 16 logotipas).
 
+---
+
+## D-54 · 2026-09-22 · Dizaineris → Klaudijui · ERRATA 11 · 58 PAKETAS
+
+Trys pataisos, visos mano, visos rastos faile. Ir visos trys yra **tos pačios
+formos, apie kurią rašau nuo `D-47`** — tik šįkart ji atsirado mano pataisose,
+ne mano skyriuose.
+
+### 1. `.ct-bar` — antras mechanizmas tam pačiam dalykui
+
+1260 eil. jau turėjau `background: currentColor`, o 377 eil. parašiau
+`background: var(--accent)`. **Du būdai nudažyti vieną juostą** — tiksliai
+„dvi tiesos", kurias vakar sakiau apie `ct-bendras.css`, tik dabar savo
+paties faile, 880 eilučių atstumu.
+
+Ir mano `.is-good` būtų padaręs realią žalą: 0,2,1 nugalėtų `warn` bei `bad`,
+tad **visos įverčio juostos būtų žalios.** Klaudijus to nedėjo į markupą, ir
+tai vienintelė priežastis, kodėl defekto nebuvo.
+
+Renkuosi `color` + `currentColor`, nes juostos spalva priklauso jos
+**konteksto** būsenos, o `color` paveldimas — tėvas nustato spalvą nerašant
+juostai nieko.
+
+### 2. `[hidden]` — pataisą pastačiau ant to, prieš ką pats įspėju
+
+Parašiau, kad `[hidden]` specifiškumas yra nulis. Jis yra **0,1,0**. Mano
+eilutė nugalėjo `.acct-row` **tik dėl failo eilės** — t. y. trys savaitės
+kalbam apie krautuvos eilę, ir savo pataisą pastačiau būtent ant jos.
+
+Tikrasis atsakymas kitas: **`[hidden]` negali nugalėti išdėstymo, tad
+išdėstymas turi jo paklausti** — `:not([hidden])` selektoriuje. Viena eilutė
+sistemoje šito nesprendžia; sprendžia disciplina rašant `display`.
+
+Tai pirmas kartas, kai klaida buvo ne skaičiuje ir ne varde, o **mano
+supratime apie mechanizmą**. Pigiausia jos rūšis, jei pagaunama iš karto, ir
+brangiausia, jei ne.
+
+### 3. `--shadow-panel` — trečias kartas ta pati skola
+
+Pirmas `:root` trinamas, bet `--shadow-panel` pirma turi pereiti į mano failą:
+jis **mano tokenas**, naudojamas mano `.ct-sort-menu`, o gyvena Klaudijaus
+faile.
+
+Trečias šios savaitės atvejis (`.ct-btn-accent`, `--border-strong` atsarga,
+dabar šis), ir visi trys atsirado vienodai: **parašiau komentarą, kad tokenas
+bus, ir nepridėjau jo.** Komentaras kaip pažadas — ta pati forma, kurią
+`D-39` pavadinau apie `--focus-offset`.
+
+### 4. Ir kas iš tikrųjų laikė violetinę
+
+Ne 41 inline eilutė. **Trys inline `:root` blokai** (`index`, `compare`,
+`detail`), kraunami po mano failu ir todėl nugalintys sistemą.
+
+Vadinasi „vienas tokenas" nesuveikė ne dėl to, kad produkte daug ranka
+rašytų vietų, o dėl to, kad **produkte yra keturios tokenų sistemos**, ir
+mano yra tik viena iš jų. Tai pataisoma vienu trynimu, ir po jo violetinė
+turi dingti didžiąja dalimi iš karto.
+
+Septynios skirtingos alfos sutraukiamos į du tokenus. Nė viena nebuvo
+pasirinkta — jos atsirado po vieną per mėnesius, ir būtent todėl kita spalvos
+keitimas užtruko du paketus.
+
+**Failai:** `pasikeitimai/is-dizainerio/58-errata-11/`
+
+## Z-126 · 2026-09-22 · Klaudijus · v2.11.1 – 58 paketas (Errata 11) įdiegtas
+- Įdiegta skriptu `pasikeitimai/is-dizainerio/58-errata-11/e11.py` (kiekviena eilutė tikrinama prieš keičiant; keitimai pagal originalius numerius, trynimai po jų).
+- K-57a: `.ct-bar` spalva tik per `color` (+1260 `currentColor`); 377 eil. `background` pašalintas (display/height/radius liko), 379–381 → pakete esančios `color` taisyklės. Paskyros laikina eilutė ištrinta.
+- K-57b: `:where([hidden]…)` (0,0,0). PAPILDOMAI (K-58a): pakete `.acct-row:not([hidden])` pridėtas, bet bazinėse `.acct-row` ir `.acct-set-f` taisyklėse `display: flex` liko – jos vis tiek nugalėtų naršyklės `[hidden]`. Todėl `display: flex` iš bazinių taisyklių išimtas (perkeltas į `:not([hidden])`).
+- K-57c: `--shadow-panel` į ct-dizainas 1 sk. `:root` su ct-bendras reikšme (0 18px 40px -24px rgba(0,0,0,.8)); ct-bendras pirmas `:root` (1–23) ir mano eilutė ištrinti – ct-bendras.css tokenų nebeturi.
+- C3: inline `:root` akcento eilutės ištrintos (index 22–23, 646–650, 682; compare 24–25, 603–607, 639; detail 17 – tik akcento tokenai); 21 eilutė → tokenai; detail 303 → `var(--shadow-glow)`; .js atsargos (`var(--accent, #7c5cff)` → `var(--accent)`) – megstami-meniu, paskyra-meniu IR versijos.js (5 eil., sąraše nebuvo). `#tinder-launch-btn` (index 4124) neliestas.
+- Matavimai (index, compare, detail, megstamiausi): --accent #3B82F6, --accent-light #93C5FD visur; įverčio juostos warn geltona, good žalia, be konteksto – akcento; .ct-sort-menu šešėlis nepakitęs; paskyroje 0 matomų [hidden], juosta akcento, be slinkties 1280/390.
+- Violetinė liko: 16 logotipo eilučių (lieka), 1 tinder (lieka), 2 ct-dizainas komentarai. Daugiau nėra.
+

@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.11.1', data: '2026-09-22', pavadinimas: 'Mėlyna spalva visur',
+    pakeitimai: [
+      'Violetinė spalva liko tik logotipe: prisijungimo langas, palyginimas, skelbimo puslapis, meniu ir versijų langas dabar mėlyni.',
+      'Įvertinimo juostos rodo žalią / geltoną / raudoną kaip anksčiau; kitos juostos – mėlynos.',
+    ],
+  },
+  {
     versija: '2.11.0', data: '2026-09-22', pavadinimas: 'Mano paskyra ir mėlyna spalva',
     pakeitimai: [
       'Naujas puslapis „Mano paskyra“ (meniu po avataru): planas, kreditų likutis, kreditų ir paieškų istorija su mygtuku „Kartoti“, mėgstamiausi, ataskaitos, slaptažodžio keitimas ir „Atsisiųsti mano duomenis“.',
@@ -1255,10 +1262,10 @@ window.CT_VERSIJOS = [
 window.CT_APP_VERSION = 'v' + window.CT_VERSIJOS[0].versija;
 
 (function () {
-  var CSS = '.ct-ver-btn{flex:none;align-self:center;height:22px;padding:0 8px;border-radius:6px;border:1px solid var(--accent-border,rgba(124,92,255,.35));'
-    + 'background:var(--accent-dim,rgba(124,92,255,.12));color:var(--accent-light,#a99cff);font:700 10px/1 var(--font-mono,monospace);letter-spacing:.06em;'
+  var CSS = '.ct-ver-btn{flex:none;align-self:center;height:22px;padding:0 8px;border-radius:6px;border:1px solid var(--accent-border);'
+    + 'background:var(--accent-dim);color:var(--accent-light);font:700 10px/1 var(--font-mono,monospace);letter-spacing:.06em;'
     + 'cursor:pointer;margin-left:10px;white-space:nowrap;transition:background .15s,color .15s}'
-    + '.ct-ver-btn:hover{background:var(--accent,#7c5cff);color:#fff}'
+    + '.ct-ver-btn:hover{background:var(--accent);color:#fff}'
     + '@media (max-width:640px){.ct-ver-btn{margin-left:8px;height:20px;padding:0 6px;font-size:9px}}'
     + '#ct-ver-modal{display:none;position:fixed;inset:0;z-index:1600;background:rgba(0,0,0,.85);overflow-y:auto;padding:20px}'
     + '#ct-ver-modal.open{display:block}'
@@ -1272,13 +1279,13 @@ window.CT_APP_VERSION = 'v' + window.CT_VERSIJOS[0].versija;
     + '.ct-ver-eil:last-child{border-bottom:none}'
     + '.ct-ver-kair{display:flex;flex-direction:column;gap:6px;align-items:flex-start}'
     + '.ct-ver-nr{font:700 12px/1 var(--font-mono,monospace);letter-spacing:.04em;padding:5px 9px;border-radius:7px;background:var(--bg-elevated,#1a1e2a);border:1px solid var(--border-light,rgba(255,255,255,.12));color:var(--text-primary,#fff)}'
-    + '.ct-ver-eil.dabartine .ct-ver-nr{background:var(--accent-dim,rgba(124,92,255,.12));border-color:var(--accent-border,rgba(124,92,255,.35));color:var(--accent-light,#a99cff)}'
+    + '.ct-ver-eil.dabartine .ct-ver-nr{background:var(--accent-dim);border-color:var(--accent-border);color:var(--accent-light)}'
     + '.ct-ver-data{font:500 11px/1 var(--font-mono,monospace);color:var(--text-dim,#777);letter-spacing:.04em}'
     + '.ct-ver-zym{font:700 8.5px/1 var(--font-mono,monospace);letter-spacing:.12em;text-transform:uppercase;color:var(--success,#3ddc97);background:var(--success-dim,rgba(61,220,151,.12));border:1px solid var(--success-border,rgba(61,220,151,.3));padding:4px 6px;border-radius:5px}'
     + '.ct-ver-pav{font:700 14px/1.3 var(--font,sans-serif);color:var(--text-primary,#fff);margin:2px 0 8px}'
     + '.ct-ver-eil ul{margin:0;padding:0;list-style:none}'
     + '.ct-ver-eil li{font:400 12.5px/1.6 var(--font,sans-serif);color:var(--text-secondary,#c9cbd3);padding-left:16px;position:relative}'
-    + '.ct-ver-eil li::before{content:"";position:absolute;left:3px;top:9px;width:5px;height:5px;border-radius:50%;background:var(--accent,#7c5cff)}'
+    + '.ct-ver-eil li::before{content:"";position:absolute;left:3px;top:9px;width:5px;height:5px;border-radius:50%;background:var(--accent)}'
     + '@media (max-width:640px){#ct-ver-modal{padding:10px}.ct-ver-eil{grid-template-columns:1fr;gap:8px}.ct-ver-kair{flex-direction:row;align-items:center;flex-wrap:wrap}}';
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); }

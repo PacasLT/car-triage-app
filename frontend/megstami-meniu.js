@@ -47,8 +47,8 @@
     + '.ct-meg-head small{font:600 10px/1 var(--font-mono,monospace);color:var(--accent-light);background:var(--accent-dim);border:1px solid var(--accent-border);padding:4px 7px;border-radius:6px}'
     + '.ct-meg-head a{margin-left:auto;font:500 12px var(--font,sans-serif);color:var(--accent-light,#a99cff);text-decoration:none}'
     + '.ct-meg-head a:hover{text-decoration:underline}'
-    + '.ct-meg-head button.ct-meg-atn{margin-left:auto;font:600 11px var(--font,sans-serif);color:var(--accent-light,#a99cff);background:var(--accent-dim,rgba(124,92,255,.12));border:1px solid var(--accent-border,rgba(124,92,255,.35));padding:5px 9px;border-radius:8px;cursor:pointer}'
-    + '.ct-meg-head button.ct-meg-atn:hover{background:var(--accent,#7c5cff);color:#fff}'
+    + '.ct-meg-head button.ct-meg-atn{margin-left:auto;font:600 11px var(--font,sans-serif);color:var(--accent-light,#a99cff);background:var(--accent-dim);border:1px solid var(--accent-border);padding:5px 9px;border-radius:8px;cursor:pointer}'
+    + '.ct-meg-head button.ct-meg-atn:hover{background:var(--accent);color:#fff}'
     + '.ct-meg-head button.ct-meg-atn[disabled]{opacity:.55;cursor:default}'
     + '.ct-meg-head a.ct-meg-visi{margin-left:0}'
     + '.ct-meg-busena{padding:9px 13px;border-bottom:1px solid var(--border,rgba(255,255,255,.08));font:400 11.5px/1.5 var(--font,sans-serif);color:var(--text-muted,#aaa)}'
@@ -207,7 +207,7 @@
       bus.innerHTML = '<div style="color:var(--text-secondary,#c9cbd3)">Patikrinsime visų išsaugotų skelbimų kainą ir būseną portale.</div>'
         + '<div style="margin-top:4px;color:var(--text-dim,#777)">1 kreditas už visą sąrašą · kartą per parą, kitos patikros tą pačią dieną nemokamos.</div>'
         + '<div style="display:flex;gap:7px;margin-top:9px">'
-        + '<button type="button" id="ct-meg-taip" style="padding:6px 12px;border-radius:8px;border:none;background:var(--accent,#7c5cff);color:#fff;font:600 11.5px var(--font,sans-serif);cursor:pointer">Taip, tikrinti</button>'
+        + '<button type="button" id="ct-meg-taip" style="padding:6px 12px;border-radius:8px;border:none;background:var(--accent);color:#fff;font:600 11.5px var(--font,sans-serif);cursor:pointer">Taip, tikrinti</button>'
         + '<button type="button" id="ct-meg-ne" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border,rgba(255,255,255,.12));background:transparent;color:var(--text-secondary,#c9cbd3);font:600 11.5px var(--font,sans-serif);cursor:pointer">Atšaukti</button>'
         + '</div>';
       var taip = document.getElementById('ct-meg-taip'), ne = document.getElementById('ct-meg-ne');

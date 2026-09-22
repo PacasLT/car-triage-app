@@ -21,8 +21,6 @@
     --border:        #252a38;
     --border-light:  #2e3448;
     --accent:        #7c6ff7;
-    --accent-hover:  #6c5ce7;
-    --accent-light:  #a78bfa;
     --accent-dim:    rgba(124,111,247,0.12);
     --success:       #7fd88f;
     --danger:        #ff9d9d;
@@ -495,7 +493,7 @@
 .ct-auth-card::before {
   content: ""; position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
   width: 240px; height: 160px;
-  background: radial-gradient(ellipse, rgba(124,92,255,.32) 0%, transparent 70%);
+  background: radial-gradient(ellipse, var(--accent-dim) 0%, transparent 70%);
   pointer-events: none;
 }
 .ct-auth-close {
@@ -516,12 +514,12 @@
   transition: color .14s, border-color .14s;
 }
 .ct-auth-tab:hover { color: #E9EBF2; }
-.ct-auth-tab.ct-active { color: #E9EBF2; border-bottom-color: #7C5CFF; font-weight: 600; }
+.ct-auth-tab.ct-active { color: #E9EBF2; border-bottom-color: var(--accent); font-weight: 600; }
 .ct-auth-body { padding: 26px 28px 24px; }
 .ct-auth-logo { display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 22px; }
 .ct-auth-logo svg { width: 32px; height: 32px; flex: none; }
 .ct-auth-logo-text { font: 400 20px 'Archivo',-apple-system,Helvetica,sans-serif; color: #E9EBF2; letter-spacing: -.01em; }
-.ct-auth-logo-text b { font-weight: 700; color: #A78BFA; }
+.ct-auth-logo-text b { font-weight: 700; color: var(--accent-light); }
 .ct-auth-msg {
   display: none; padding: 10px 12px; border-radius: 9px;
   font: 500 13px/1.45 'Archivo',-apple-system,Helvetica,sans-serif; margin-bottom: 14px;
@@ -539,7 +537,7 @@
   outline: none; transition: border-color .15s, background .15s;
 }
 .ct-auth-input::placeholder { color: #5E6578; }
-.ct-auth-input:focus { border-color: rgba(124,92,255,.45); background: rgba(124,92,255,.06); }
+.ct-auth-input:focus { border-color: var(--accent-border); background: var(--accent-dim); }
 .ct-auth-icon { position: absolute; right: 12px; color: #5E6578; pointer-events: none; }
 .ct-auth-eye {
   position: absolute; right: 10px; background: transparent; border: none;
@@ -550,11 +548,11 @@
   display: inline-flex; align-items: center; gap: 5px; margin-bottom: 16px;
   font: 600 10px/1 'IBM Plex Mono', ui-monospace, monospace; letter-spacing: .1em;
   padding: 5px 9px; border-radius: 6px;
-  background: rgba(124,92,255,.15); border: 1px solid rgba(124,92,255,.3); color: #A78BFA;
+  background: var(--accent-dim); border: 1px solid var(--accent-border); color: var(--accent-light);
 }
 .ct-auth-submit {
   width: 100%; height: 46px; border-radius: 10px; border: none;
-  background: #7C5CFF; color: #fff;
+  background: var(--accent); color: #fff;
   font: 600 15px 'Archivo',-apple-system,Helvetica,sans-serif;
   cursor: pointer; margin-top: 4px; position: relative; overflow: hidden;
   transition: filter .15s, opacity .15s;
@@ -567,7 +565,7 @@
 .ct-auth-submit.ct-loading .ct-lbl  { display: none; }
 .ct-auth-submit.ct-loading .ct-spin { display: block; }
 .ct-auth-note { text-align: center; margin-top: 18px; font: 500 12px/1.5 'Archivo',-apple-system,Helvetica,sans-serif; color: #5E6578; }
-.ct-auth-note a { color: #A78BFA; text-decoration: none; }
+.ct-auth-note a { color: var(--accent-light); text-decoration: none; }
 .ct-auth-note a:hover { color: #E9EBF2; }
 .ct-auth-view { animation: ct-slide-up .18s ease; }
 #ct-logout-btn {
@@ -600,11 +598,6 @@
   --border-light:   rgba(255,255,255,.14);
 
   /* Accent — used sparingly: logo mark, primary CTA, active tab, "this car" marker */
-  --accent:         #7C5CFF;
-  --accent-hover:   #8B6FFF;
-  --accent-light:   #A78BFA;
-  --accent-dim:     rgba(124,92,255,.14);
-  --accent-border:  rgba(124,92,255,.30);
 
   /* Semantic — opportunity / warning / risk */
   --success:        oklch(.75 .15 158);
@@ -636,7 +629,6 @@
   /* Shadows — restrained */
   --shadow-card:    0 1px 0 rgba(255,255,255,.03) inset;
   --shadow-panel:   0 18px 40px -24px rgba(0,0,0,.8);
-  --shadow-glow:    0 8px 22px -12px rgba(124,92,255,.9);
 }
 
 /* Load once in <head>:
