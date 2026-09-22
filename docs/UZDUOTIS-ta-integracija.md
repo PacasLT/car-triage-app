@@ -324,3 +324,14 @@ Lukas pasirinko variantą A (AN-0922-1133). Tai trys punktai. Ribos pamatuotos p
 | BMW 3, 2 m. | BŪKLĖS nėra (0–3 m. juosta nenaudojama) |
 | VW ID, bet kokie metai | 🟢 IMPORTO TENDENCIJA +296 % |
 | VW Passat | IMPORTO TENDENCIJOS nėra (pokytis tarp ribų) |
+
+### 10.5 K-39: TA 0–3 m. juosta ridos normai – NE (A-35, 2026-09-22)
+
+TA 0–3 m. juosta ridos normai nenaudojama. 0–3 m. amžiuje ridos norma imama iš Regitros juostos, jei ji yra; jei nėra – ⚪.
+
+Priežastys (pamatuota):
+- **Kas patenka į imtį.** Nauji Lietuvoje pirkti automobiliai pirmą TA eina tik po kelerių metų. Todėl TA 0–3 m. imtis yra beveik vien įvežti automobiliai, o jų rida užfiksuota įvežimo metu – būtent tada, kai ji atsukama.
+- **Struktūrinis poslinkis.** TA 0–3 m. P10 yra mažesnis už 4–6 m. P10 net 264 modeliams iš 273 (mediana 0,76 karto). Sveikoje normoje jauni automobiliai per metus nuvažiuoja daugiau, ne mažiau.
+- **X5 atvejis.** 3 m. automobilis su 20 000 km (6 667 km/m.) pagal TA būtų 🟡, nes TA P10 = 6 788. Šį slenkstį nustato įvežtų automobilių rida, ne Lietuvos parko norma.
+
+Pasekmė testams: 3 m. BMW X5 su 20 000 km grįžta į elgesį iki v2.10.0 (Regitros juosta, punkto nėra). Regitros 0–3 m. juostą turi tik 36 modeliai, kitiems 0–3 m. skelbimams – ⚪, kaip buvo iki TA.

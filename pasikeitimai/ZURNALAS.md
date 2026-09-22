@@ -1145,3 +1145,8 @@ laikau tik eilės numeriu.
 - `backend/regitra.js`: įkeliama `ta-modeliai.json` (`ikeltiTA`, `taKontekstas`, `taMeta`). **RIDOS NORMA** tvarka: TA juosta (n ≥ 100) → Regitros juosta → Regitros atsarga 7–15 m. → ⚪; TA `nulinimas_pct ≥ 1,0` ir 21+ m. → ⚪. **BŪKLĖ** – tik 🟡, n ≥ 300, ≥ +10 p. p. virš bazinės, 0–3 m. nenaudojama. **IMPORTAS** – Regitros `imp_men`, a1 ≥ 120, ≥ +50 % / ≤ −33 %, 🟢 faktas. Visi balo nekeičia. Atribucija su laikotarpiu („iki 2025-05“) prie kiekvieno TA punkto. `DRAUDZIAMA` + patikimumas, „dažnai genda“, kainų prognozė.
 - `regitra.test`: 7 A-34 atvejai (+ atribucija, niekada 🟢 BŪKLĖ, DRAUDZIAMA) → 112/112. Keisti du seni: atsargos pavyzdys → MERCEDES AMG (Outback dabar turi TA juostas); 3 m. X5 su 20 000 km dabar 🟡 (TA 0–3 P10 6 788) – testas pakeistas į 30 000 km. **Klausimas Analitikui:** ar ridos normai 0–3 m. TA juosta tinka (ta pati importo priežastis kaip BŪKLĖ).
 - `/admin/atsarga` → `ta: {sugeneruota, laikotarpis, modeliu}`.
+
+## A-39 / Z-109 · 2026-09-22 · Analitikas → Klaudijui · K-39 UŽDARYTA
+- Atsakymas: NE – TA 0–3 m. juostos ridos normai nenaudoti (TA 0–3 P10 < 4–6 P10 264 iš 273 modelių, mediana 0,76×; rida užfiksuota įvežant). `docs/UZDUOTIS-ta-integracija.md` §10.5 (md5 fbda2a88…).
+- Įdiegta į v2.10.0 prieš push: `amziausJuosta` – TA tik kai amžius ≥ 4; 0–3 m. → Regitros juosta → ⚪. Testas: 3 m. X5 su 20 000 km → punkto nėra (grąžintas originalus) + „0–3 m. juosta niekada iš TA“. regitra.test 113/113.
+- K-34 (kuras rakte) – Analitikas pradėjo nuo matavimo, failų nekeičia.

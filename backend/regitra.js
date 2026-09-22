@@ -326,7 +326,10 @@ function amziausJuosta(r, amzius, ta) {
   if (ta && ta.nulinimas_pct != null && ta.nulinimas_pct >= RIBOS.taNulinimas && amzius >= 21) {
     return { blokuota: true };
   }
-  if (ta) {
+  // K-39 (A-34 §10.5): TA 0-3 m. juosta ridos normai NEnaudojama - ten beveik
+  // vien įvežti automobiliai, rida užfiksuota įvežant (TA 0-3 P10 < 4-6 P10
+  // 264 iš 273 modelių). 0-3 m. skelbimui - tik Regitros juosta arba ⚪.
+  if (ta && amzius >= 4) {
     const j = juostaIs(ta.kmmet_juostos, amzius, RIBOS.taJuostaMinN);
     if (j) return Object.assign(j, { ta: true });
   }

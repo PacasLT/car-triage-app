@@ -85,9 +85,10 @@ const METAI = new Date().getFullYear();
 lygu(R.amziausJuosta(x5, 3) && R.amziausJuosta(x5, 3).raktas, '0-3', 'amziausJuosta(X5, 3) → 0-3');
 lygu(R.amziausJuosta(x5, 12) && R.amziausJuosta(x5, 12).raktas, '10-12', 'amziausJuosta(X5, 12) → 10-12');
 lygu(R.amziausJuosta(x5, 41), null, 'už paskutinės juostos → null');
-// A-34: TA juosta pirmesnė. 3 m. X5 TA 0-3 P10 = 6 788 km/met, tad 20 000 km (6 667/met) - 🟡.
-T(rasti({ marke: 'BMW', modelis: 'X5', metai: METAI - 3, rida: 30000 }, 'RIDOS NORMA').length === 0,
-  '3 m. X5 su 30 000 km → punkto NĖRA (TA juostoje virš P10)');
+// K-39: 0-3 m. TA juosta nenaudojama - 3 m. X5 lyginamas su Regitros juosta, kaip iki v2.10.0.
+T(rasti({ marke: 'BMW', modelis: 'X5', metai: METAI - 3, rida: 20000 }, 'RIDOS NORMA').length === 0,
+  '3 m. X5 su 20 000 km → punkto NĖRA (0–3 m. TA nenaudojama, K-39)');
+T(!(R.amziausJuosta(R.kontekstas('BMW', 'X5'), 2, R.taKontekstas('BMW', 'X5')) || {}).ta, '0–3 m. juosta niekada iš TA (K-39)');
 // Lemiamas A-30 atvejis: 3 m. X5 su 100 000 km pagal sudėtą rida_kv būtų
 // „žemiau P10", o savo juostoje jis ties P90. Punkto būti negali.
 T(rasti({ marke: 'BMW', modelis: 'X5', metai: METAI - 3, rida: 100000 }, 'RIDOS NORMA').length === 0,
