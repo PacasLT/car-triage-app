@@ -7,6 +7,13 @@ Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
 
 | Nr. | Kas | Trumpai |
 |---|---|---|
+| KL-PATIKRA2 | Filtrai kaip autoplius | Metai, kaina, rida, galia – išskleidžiami sąrašai; neįvesta → „–“; varantieji ratai ir kuras – autoplius variantai. |
+| KL-R1 / KL-R2 | Kainos kritimo žyma; atsuktos ridos įspėjimas | Luko „taip“. 0 kreditų. |
+| KL-F3PLUS | ScraperAPI paros žurnalas + <20 % įspėjimas | Luko „taip“. |
+| AN-0922-1133 | TA ridos norma, TA būklė pagal amžių, importo tendencija | Pagal REGITRA-GALIMYBES.md; atribucija TRANSEKSTA. |
+| FN-0922-1300 / 1302 | Nauji planai (planai.js) ir valdomas sekimas | Po Startup 10-16 (FN-0922-1310 dar klausimas). |
+| KL-MODELIS | Sonnet 5 bandymas 3–5 apžvalgomis | Mokama – daryti su Luko žinia. |
+| DZ-TINDER | „Tinder“ perdarymas | Dizainas + kodas, kartu su dizaineriu. |
 | Darbo sistema | DARBO-SISTEMA v2, fazė A | Vykdoma. Kol nebaigta — produkto darbai stovi (Luko sprendimas). |
 | TA integracija | `docs/UZDUOTIS-ta-integracija.md` | Analitiko paruošta užduotis (TA rida 99 % vs Regitra 17 %). Po fazės C. |
 
@@ -14,8 +21,6 @@ Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
 
 | Nr. | Kas | Trumpai |
 |---|---|---|
-| 46b+48+50 | v2.9.0 įdiegta lokaliai | Laukia push (Luko eilė KL-PUSH-0922) ir matavimų produkcijoje: rūšiavimo meniu 390, kaukė `.dp-tabs`/`.ct-tabs`, „Kiti skelbimai“ 1920 (1235 px, `.ct-reject` viršuje, paviršius nepakitęs), detalė 1440 (572), „Daugiau filtrų“ nepakitę, „Planas“ užvedus baltas. |
-| `.ct-std-card` paviršius | kitam paketui | Matavimas `.ct-std-card` vs `.ct-top-card`: background, border-color, border-radius, margin-bottom (48 PASTABOS 4). |
 | Prieiga | `Downloads\cartriige-dizaineriui` | Tikros kopijos (junction'ai neveikė). Patikra: `ct-priedai.css` eil. sk. + ši pirma eilutė. |
 | `#search-btn` | 5-as ID mygtukas | Gradientas / švytėjimas / `:disabled` sistemoje ar vientisas CTA? Z-93. |
 | Kiti vardai | `.ct-btn-accent` (priedų 5), `.ct-regitra` (15), `.mg-atn-busena` (12), `.ct3-portal-ico` | Dizaineris pažadėjo kitame pakete. |

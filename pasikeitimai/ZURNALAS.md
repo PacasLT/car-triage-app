@@ -1130,3 +1130,13 @@ pasirinkimus formuluoju **žodžiu** — „violetinis" arba „baltas" — ir r
 laikau tik eilės numeriu.
 
 *Klaudijus: Luko atsakymas KL-PUSH-0922B žodžiu – **„baltas“** (A „užvedus „Planas“ taps baltas“). ERRATA 8 įdiegta su 5 bloko trynimu v2.9.0 – tai POKYTIS (buvo violetinis). Nuo šiol eilėje variantai – žodžiais.*
+
+## Z-107 · 2026-09-22 · Klaudijus · v2.9.2 produkcijoje; 46b/48 matavimai; Luko eilės atsakymai → darbai
+- Push `ebcb84d..c2119ce` (KL-PUSH-0922C „Taip, siųsk“), Railway SUCCESS. Produkcijoje: hero `hero-car.jpg`, `Cache-Control: public, max-age=604800`; `/admin/atsarga` → `scraperEile {riba 15, aktyvios 0}`.
+- **Matavimai (produkcija, `transition:none`)**:
+  - 390 px: rūšiavimo meniu 294×207, `elementFromPoint` centre = MENIU (ne `.container`); `#sort-bar` kaukė `none`; `.ct-tabs` kaukė vietoje; etiketė `SPAN` 11 px; mygtukas 294×44 (44 – ct-mygtukai liečiamasis minimumas).
+  - 1920 px: `.ct-std-card` `display: block`, plotis 1560 = `.ct-top-card` 1560 = `#results` 1560 (938 problemos nebėra; dizainerio „1235“ buvo senas konteinerio plotis). `.ct-reject` viršuje (top +1), per visą plotį; `.ct-istorija` per visą plotį, `padding 0 12px 12px` (nepakito – laimi index 2144 `!important`, ne 1340).
+  - „Daugiau filtrų“ `.ct-papf`: margin-top 12, rėmelis `rgba(255,255,255,.075)`, antraštė 10 px – nepakitę.
+  - **Paviršius `.ct-std-card` vs `.ct-top-card`:** background `rgb(17,20,28)` = `rgb(17,20,28)`; border-color `rgba(255,255,255,.075)` = tas pats; border-radius **14 = 14** (rankinis `12px` neveikia – laimi `.ct-card`); margin-bottom **8 ≠ 12**. → Trys rankinės deklaracijos veikia tik per `margin-bottom: 8px`; kita – tylūs dublikatai.
+  - Detalė 1440 (`.dp-desine` 572) – nematuota: reikia tikro skelbimo puslapio; CSS reikšmės identiškos 18 blokui.
+- **Luko eilės atsakymai, kurie tampa Klaudijaus darbais** (BUSENA „Klaudijus“): KL-R1 (kainos kritimo žyma, taip), KL-R2 (atsuktos ridos įspėjimas, taip), KL-F3PLUS (ScraperAPI paros žurnalas + <20 % įspėjimas, taip), KL-MODELIS (išbandyti Sonnet 5 3–5 apžvalgomis – mokama, su Luko žinia), AN-0922-1133 (TA ridos norma, TA būklė pagal amžių, importo tendencija), FN-0922-1300 (planai: Verslas 39 €, LT 300 / užsienio 600, 50 kr., LT papildymas, Pirkėjo paketas – planai.js), FN-0922-1302 (valdomas sekimas ≤20 skelb./d., po 1300), KL-PATIKRA2 (filtrai: metai/kaina/rida/galia – išskleidžiami sąrašai kaip autoplius, „–“ kai neįvesta; varantieji ratai ir kuras – pagal autoplius), DZ-D03 (skirtukai lieka), DZ-TINDER (Tinder perdarymas – dizainas + kodas). FN-0922-1301 (mokėjimai – kai bus IV/UAB), FN-0922-1310 (Lukas klausia, kas yra pilotai – Plėtrai/Finansininkui).
