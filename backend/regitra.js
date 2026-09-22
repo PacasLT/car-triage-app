@@ -318,10 +318,19 @@ function juostaIs(juostos, amzius, minN) {
   return null;
 }
 
-// A-34 tvarka: TA juosta (n >= 100) -> Regitros juosta -> Regitros atsarga
-// 7-15 m. -> null (⚪). TA modeliui su nulinimas >= 1,0 21-40 m. juosta
-// „užteršta" skaitiklių keitimais - grąžinam { blokuota: true } (⚪).
-function amziausJuosta(r, amzius, ta) {
+// K-34 (A-36): kuras - antra TA ridos normos dimensija. Modelio juosta = daugumos
+// kuro norma: pagal modelio P10 žemiau patenka benzininių 23,0 %, dyzelinių 5,9 %
+// (turėtų būti 10 %). BMW 3 16-20 m.: benzininių 36,8 %, dyzelinių 3,5 %.
+// Tvarka 4+ m.: TA to paties kuro juosta (n >= 100) -> jei kuras žinomas, bet
+// savo juostos nėra, o kito kuro yra - { beKuro: true } (⚪, modelio norma būtų
+// kito kuro) -> TA modelio juosta -> Regitros juosta -> atsarga 7-15 m. -> null.
+// 0-3 m. - tik Regitros juosta (K-39). Regitros juostos kuro neskiria.
+const KURO_KILMININKAS = {
+  'dyzelinas': 'dyzelinių', 'benzinas': 'benzininių', 'benzinas/dujos': 'benzinu ir dujomis varomų',
+  'benzinas/elektra': 'hibridinių', 'dyzelinas/elektra': 'dyzelinių hibridinių', 'elektra': 'elektrinių',
+};
+
+function amziausJuosta(r, amzius, ta, kuras) {
   if (amzius == null) return null;
   if (ta && ta.nulinimas_pct != null && ta.nulinimas_pct >= RIBOS.taNulinimas && amzius >= 21) {
     return { blokuota: true };
@@ -330,6 +339,16 @@ function amziausJuosta(r, amzius, ta) {
   // vien įvežti automobiliai, rida užfiksuota įvežant (TA 0-3 P10 < 4-6 P10
   // 264 iš 273 modelių). 0-3 m. skelbimui - tik Regitros juosta arba ⚪.
   if (ta && amzius >= 4) {
+    // Tik žinomi kuro raktai. Neatpažintas skelbimo kuras („Benzinas / etanolis",
+    // kita kalba) -> modelio juosta, kaip iki K-34, o ne ⚪.
+    const k = kuroRaktas(kuras);
+    const kj = ta.kmmet_kuras || null;
+    if (k && kj && KURO_KILMININKAS[k]) {
+      const jk = juostaIs(kj[k], amzius, RIBOS.taJuostaMinN);
+      if (jk) return Object.assign(jk, { ta: true, kuras: k });
+      const kitas = Object.keys(kj).some((f) => f !== k && juostaIs(kj[f], amzius, RIBOS.taJuostaMinN));
+      if (kitas) return { beKuro: true, kuras: k };
+    }
     const j = juostaIs(ta.kmmet_juostos, amzius, RIBOS.taJuostaMinN);
     if (j) return Object.assign(j, { ta: true });
   }
@@ -385,7 +404,7 @@ function punktai(c) {
   const metai = parseInt(c.metai, 10);
   const rida = parseFloat(c.rida);
   const amzius = metai ? (new Date().getFullYear() - metai) : null;
-  const juosta = amziausJuosta(r, amzius, ta);
+  const juosta = amziausJuosta(r, amzius, ta, c.kuras);
 
   if (!amzius || amzius < 1 || !rida) {
     out.push(punktas(LYGIS.NEZINOMA, 'RIDOS NORMA',
@@ -393,6 +412,10 @@ function punktai(c) {
   } else if (juosta && juosta.blokuota) {
     out.push(punktas(LYGIS.NEZINOMA, 'RIDOS NORMA',
       'Tokio amžiaus šio modelio ridos duomenis iškraipo dažni skaitiklių keitimai – palyginti nėra su kuo'));
+  } else if (juosta && juosta.beKuro) {
+    out.push(punktas(LYGIS.NEZINOMA, 'RIDOS NORMA',
+      'Tokio amžiaus ' + (KURO_KILMININKAS[juosta.kuras] || 'tokio kuro') + ' šio modelio automobilių '
+      + 'per mažai, o bendrą normą lemia kitas kuras – palyginti nėra su kuo'));
   } else if (!juosta) {
     out.push(punktas(LYGIS.NEZINOMA, 'RIDOS NORMA',
       'Registre per mažai tokio amžiaus šio modelio automobilių su rida, kad būtų su kuo palyginti'));
@@ -402,7 +425,9 @@ function punktai(c) {
     if (kmMet < p10) {
       out.push(punktas(LYGIS.SIGNALAS, 'RIDOS NORMA',
         sk(Math.round(kmMet)) + ' km per metus – patenka tarp 10 % mažiausiai '
-        + 'važiavusių ' + juosta.pavadinimas + ' šio modelio automobilių Lietuvoje ('
+        + 'važiavusių ' + juosta.pavadinimas + ' šio modelio '
+        + (juosta.kuras && KURO_KILMININKAS[juosta.kuras] ? KURO_KILMININKAS[juosta.kuras] + ' ' : '')
+        + 'automobilių Lietuvoje ('
         + sk(n) + (juosta.ta ? ' techninių apžiūrų' : ' registracijų') + ', mediana ' + sk(p50) + ' km/metus). '
         + 'Paklauskite pardavėjo dėl serviso istorijos.'
         + (juosta.ta ? ' ' + taSaltinis() : '')));
@@ -477,7 +502,7 @@ function punktai(c) {
 module.exports = {
   ikelti, kontekstas, punktai,
   baziniModelis, markeNorm, paruosti, tikrintiTeksta, kuroRaktas, kuroDalis, amziausJuosta,
-  RIBOS, LYGIS, DRAUDZIAMA,
+  RIBOS, LYGIS, DRAUDZIAMA, KURO_KILMININKAS,
   meta: () => META,
   taMeta: () => TA_META, taKontekstas,
 };

@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.10.1', data: '2026-09-22', pavadinimas: 'Ridos palyginimas pagal kurą',
+    pakeitimai: [
+      'Rida dabar lyginama su to paties kuro automobiliais: dyzeliniai važiuoja daugiau, tad benzininiai nebežymimi per dažnai, o dyzeliniai – per retai.',
+      'Jei tokio kuro šio modelio automobilių duomenų per mažai, parodoma „palyginti nėra su kuo“, o ne kito kuro norma.',
+    ],
+  },
+  {
     versija: '2.10.0', data: '2026-09-22', pavadinimas: 'Techninės apžiūros duomenys prie skelbimų',
     pakeitimai: [
       'Ridos palyginimas dabar remiasi Lietuvos techninių apžiūrų duomenimis (12 mln. apžiūrų) – tikslesnis, ypač populiariems modeliams.',

@@ -108,6 +108,16 @@ MIN_RIDA = 1000          # mažesnė rida - įvedimo klaida arba naujas
 ATSUKIMO_RIBA = 10000    # km; mažesnis sumažėjimas - triukšmas (31 % X5 turi kokį nors)
 NUSINULINIMO_DALIS = 0.2 # nauja < 0,2 x buvusi -> skaitiklio keitimas, ne atsukimas
 KLASE = 'M1%'            # M1 IR M1G - žr. SPĄSTAI 1
+MIN_KURO_JUOSTAI = 100   # K-34: kuro juosta - tik nuo tiek apžiūrų (kaip RIBOS.taJuostaMinN)
+
+# K-34 (A-36, 2026-09-22): kuras - antra ridos normos dimensija.
+# Pamatuota (11,1 mln. apžiūrų, 4+ m.): pagal MODELIO P10 žemiau patenka
+# benzininių 23,0 %, dyzelinių 5,9 %, benzinas/dujos 14,0 % (turėtų būti 10 %).
+# BMW 3 16-20 m.: benzininių 36,8 %, dyzelinių 3,5 %. Modelio norma = dyzelio norma.
+# Raktai - kaip backend/regitra.js kuroRaktas(): mažosios, kablelis -> '/'.
+# 'benzinas,dujos,elektra' paliekamas atskiru raktu (retas, juostų beveik nebus).
+# Automobilis, kurio kuras skirtingose apžiūrose skiriasi (~4,6 tūkst.), kuro juostose
+# neskaičiuojamas; modelio juostose lieka.
 
 JUOSTOS = [(0, 3), (4, 6), (7, 9), (10, 12), (13, 15), (16, 20), (21, 40)]
 
@@ -177,7 +187,7 @@ def juostos_sql(stulpelis):
     return 'CASE %s END' % salygos
 
 
-ETAPU_EILE = ['ikelti', 'patikra', 'raktai', 'ir', 'km', 'fail', 'traj', 'rasyti']
+ETAPU_EILE = ['ikelti', 'patikra', 'raktai', 'ir', 'kuras', 'km', 'kmk', 'fail', 'traj', 'rasyti']
 
 
 def main():
@@ -331,6 +341,31 @@ def main():
         print('Paruošta analizei: %d apžiūrų' % con.execute("SELECT count(*) FROM ir").fetchone()[0], flush=True)
         pazymeti('ir')
 
+    # ── 4b. Kuras (K-34): atskiras lengvas įkėlimas - tik tp_id ir tp_kuras ────
+    # Atskiras etapas, kad esamos DB nereikėtų įkelti iš naujo (zali neturi kuro).
+    if not atlikta('kuras'):
+        con.execute("CREATE TABLE IF NOT EXISTS kuras_zali (tp_id VARCHAR, kuras VARCHAR)")
+        con.execute("CREATE TABLE IF NOT EXISTS kuras_ikelta (failas VARCHAR PRIMARY KEY)")
+        jau = {r[0] for r in con.execute("SELECT failas FROM kuras_ikelta").fetchall()}
+        for f in [f for f in failai if os.path.basename(f) not in jau]:
+            laikas_baigesi()
+            kel = f.replace("'", "''")
+            con.execute("""
+                INSERT INTO kuras_zali
+                SELECT tp_id, replace(lower(trim(tp_kuras)), ',', '/')
+                FROM read_csv('%s', header = true, all_varchar = true)
+                WHERE tp_klase LIKE '%s'""" % (kel, KLASE))
+            con.execute("INSERT INTO kuras_ikelta VALUES (?)", [os.path.basename(f)])
+        laikas_baigesi()
+        con.execute("DROP TABLE IF EXISTS auto_kuras")
+        con.execute("""
+            CREATE TABLE auto_kuras AS
+            SELECT tp_id, CASE WHEN min(kuras) = max(kuras) THEN min(kuras) END AS kuras
+            FROM kuras_zali WHERE kuras IS NOT NULL AND kuras <> '' GROUP BY tp_id""")
+        k = con.execute("SELECT count(*), count(kuras) FROM auto_kuras").fetchone()
+        print('Kuras: automobilių %d, vienareikšmis %d' % k, flush=True)
+        pazymeti('kuras')
+
     # ── 5. Ridos normos: rida / amžius pagal modelį x juostą ─────────────────
     if not atlikta('km'):
         laikas_baigesi()
@@ -342,6 +377,21 @@ def main():
             FROM ir WHERE rida > %d AND amzius > 0.5 AND juosta IS NOT NULL
             GROUP BY ALL HAVING count(*) >= %d""" % (MIN_RIDA, MIN_JUOSTAI))
         pazymeti('km')
+
+    # ── 5b. Ridos normos pagal kurą (K-34): modelis x kuras x juosta, be 0-3 ──
+    # 0-3 m. TA juosta ridos normai nenaudojama (K-39), tad jos ir nerašom.
+    if not atlikta('kmk'):
+        laikas_baigesi()
+        con.execute("DROP TABLE IF EXISTS rez_km_kuras")
+        con.execute("""
+            CREATE TABLE rez_km_kuras AS
+            SELECT i.raktas, k.kuras, i.juosta, count(*) AS n,
+                   quantile_disc(i.rida / i.amzius, [0.10, 0.25, 0.50, 0.75, 0.90]) AS q
+            FROM ir i JOIN auto_kuras k USING (tp_id)
+            WHERE k.kuras IS NOT NULL AND i.rida > %d AND i.amzius > 0.5
+              AND i.juosta IS NOT NULL AND i.juosta <> '0-3'
+            GROUP BY ALL HAVING count(*) >= %d""" % (MIN_RIDA, MIN_KURO_JUOSTAI))
+        pazymeti('kmk')
 
     # ── 6. TA neišlaikymas: tik PIRMINĖS; vardiklis - visos pirminės (SPĄSTAI 3) ─
     if not atlikta('fail'):
@@ -392,6 +442,7 @@ def main():
     laikas_baigesi()
     traj = con.execute("SELECT * FROM rez_traj").fetchall()
     km = con.execute("SELECT * FROM rez_km").fetchall()
+    kmk = con.execute("SELECT * FROM rez_km_kuras").fetchall()
     fail = con.execute("SELECT * FROM rez_fail").fetchall()
     bazine = con.execute("SELECT * FROM rez_bazine").fetchall()
     apziuru = dict(con.execute("SELECT raktas, count(*) FROM ir GROUP BY raktas").fetchall())
@@ -407,7 +458,7 @@ def main():
             continue
         M[raktas] = {
             'modelis': raktas, 'automobiliu': aut, 'apziuru': apziuru.get(raktas, 0),
-            'kmmet_juostos': {}, 'neislaike_juostos': {},
+            'kmmet_juostos': {}, 'kmmet_kuras': {}, 'neislaike_juostos': {},
             'su_2_apziuromis': su2,
             'atsukimas_pct': p(at, su2), 'atsukimas_iki20_pct': p(at_20, su2_20),
             'nulinimas_pct': p(nu, su2),
@@ -415,6 +466,9 @@ def main():
     for raktas, juosta, n, q in km:
         if raktas in M:
             M[raktas]['kmmet_juostos'][juosta] = [n] + [int(round(x)) for x in q]
+    for raktas, kuras, juosta, n, q in kmk:
+        if raktas in M:
+            M[raktas]['kmmet_kuras'].setdefault(kuras, {})[juosta] = [n] + [int(round(x)) for x in q]
     for raktas, juosta, n, pct in fail:
         if raktas in M:
             M[raktas]['neislaike_juostos'][juosta] = [n, round(pct, 1)]
@@ -422,6 +476,8 @@ def main():
     for m in M.values():
         m['kmmet_juostos'] = {j: m['kmmet_juostos'][j] for j in eile if j in m['kmmet_juostos']}
         m['neislaike_juostos'] = {j: m['neislaike_juostos'][j] for j in eile if j in m['neislaike_juostos']}
+        m['kmmet_kuras'] = {k: {j: v[j] for j in eile if j in v}
+                            for k, v in sorted(m['kmmet_kuras'].items(), key=lambda kv: -sum(x[0] for x in kv[1].values()))}
     modeliai = sorted(M.values(), key=lambda x: -x['automobiliu'])
 
     saknis = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -430,7 +486,7 @@ def main():
     os.makedirs(os.path.dirname(isvestis), exist_ok=True)
     with open(isvestis, 'w', encoding='utf-8') as f:
         json.dump({
-            'versija': 1,
+            'versija': 2,
             'saltinis': 'TRANSEKSTA, Transporto priemonių techninės apžiūros duomenys (data.gov.lt 2721)',
             'licencija': 'CC BY 4.0',
             'sugeneruota': datetime.date.today().isoformat(),
@@ -466,6 +522,12 @@ def main():
             ok = fakt is not None and abs(fakt - v) <= tol
             blogai += 0 if ok else 1
             print('  %-4s %-15s %-17s laukta %-8s gauta %s' % ('ok' if ok else 'ŽR.', raktas, k, v, fakt))
+    # K-34: kuro juostos (A-36 matavimas 2026-09-22, ±5 %)
+    for raktas, kuras, j, laukta in (('BMW 3', 'benzinas', '16-20', 8812), ('BMW 3', 'dyzelinas', '16-20', 13240)):
+        v = ((M.get(raktas) or {}).get('kmmet_kuras', {}).get(kuras) or {}).get(j)
+        ok = v is not None and abs(v[1] - laukta) <= 0.05 * laukta
+        blogai += 0 if ok else 1
+        print('  %-4s %-15s %-17s laukta %-8s gauta %s' % ('ok' if ok else 'ŽR.', raktas, kuras + ' ' + j + ' P10', laukta, v and v[1]))
     if 'BMW X5' in M and M['BMW X5']['automobiliu'] < 9000:
         print('  !!  BMW X5 automobilių < 9 000 - tikėtina, kad M1G išmesti (SPĄSTAI 1)')
     print('\n%s' % ('Visi palyginimai sutampa.' if not blogai else 'Nesutampa: %d - žiūrėti prieš naudojant.' % blogai))

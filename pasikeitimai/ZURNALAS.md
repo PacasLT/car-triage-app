@@ -1150,3 +1150,11 @@ laikau tik eilės numeriu.
 - Atsakymas: NE – TA 0–3 m. juostos ridos normai nenaudoti (TA 0–3 P10 < 4–6 P10 264 iš 273 modelių, mediana 0,76×; rida užfiksuota įvežant). `docs/UZDUOTIS-ta-integracija.md` §10.5 (md5 fbda2a88…).
 - Įdiegta į v2.10.0 prieš push: `amziausJuosta` – TA tik kai amžius ≥ 4; 0–3 m. → Regitros juosta → ⚪. Testas: 3 m. X5 su 20 000 km → punkto nėra (grąžintas originalus) + „0–3 m. juosta niekada iš TA“. regitra.test 113/113.
 - K-34 (kuras rakte) – Analitikas pradėjo nuo matavimo, failų nekeičia.
+
+## Z-110 · 2026-09-22 · Klaudijus · v2.10.1 – K-34 (RIDOS NORMA pagal kurą)
+- `backend/regitra.js` ← analitiko `K34-regitra.js` (md5 904ad20c…, diff tik K-34: `KURO_KILMININKAS`, `amziausJuosta(r, amzius, ta, kuras)`, `beKuro` ⚪ šaka, kuro kilmininkas 🟡 tekste, eksportas).
+- Duomenys jau buvo įdiegti: `ta-modeliai.json` v2 (`kmmet_kuras`, b7044304…), `tools/ta-suvestine.py` (845b3f6f…), `docs/UZDUOTIS-ta-integracija.md` §11.
+- Tvarka 4+ m.: to paties kuro TA juosta → kuras žinomas, bet juostą turi tik kitas kuras → ⚪ → TA modelio juosta → Regitra → atsarga. Neatpažintas kuras – kaip iki K-34.
+- regitra.test +12 (125/125): BMW 320d 18 m. 210 000 km → 🟡 „dyzelinių“ (P10 13 240); tas pats benzininis → nėra; BMW 318 benzinas/dujos 5 m. ir Corolla hibridas 8 m. → ⚪ beKuro; X5 dyzelinas 3 m. → nėra (K-39); Golf 22 m. → ⚪ blokuota; Audi A4 be kuro → modelio juosta.
+- Sargai 14 žali / 0 / 3 praleisti.
+

@@ -335,3 +335,30 @@ Priežastys (pamatuota):
 - **X5 atvejis.** 3 m. automobilis su 20 000 km (6 667 km/m.) pagal TA būtų 🟡, nes TA P10 = 6 788. Šį slenkstį nustato įvežtų automobilių rida, ne Lietuvos parko norma.
 
 Pasekmė testams: 3 m. BMW X5 su 20 000 km grįžta į elgesį iki v2.10.0 (Regitros juosta, punkto nėra). Regitros 0–3 m. juostą turi tik 36 modeliai, kitiems 0–3 m. skelbimams – ⚪, kaip buvo iki TA.
+
+## 11. K-34: kuras – antra TA ridos normos dimensija (A-36, 2026-09-22)
+
+**Matavimas.** Duomenys: 11,1 mln. 4+ m. apžiūrų, 799 modeliai. Rodiklis: kokia dalis kiekvieno kuro automobilių pagal MODELIO P10 gautų 🟡 (turėtų būti 10 %).
+
+| Kuras | Apžiūrų | 🟡 pagal modelio normą |
+|---|---|---|
+| Dyzelinas | 7,89 mln. | 5,9 % |
+| Benzinas | 2,20 mln. | **23,0 %** |
+| Benzinas/dujos | 0,88 mln. | 14,0 % |
+| Benzinas/elektra | 0,14 mln. | 9,4 % |
+
+- Modelio norma iš tikrųjų yra dyzelio norma: benzininiai gauna 🟡 per dažnai, dyzeliniai – per retai.
+- BMW 3, 16–20 m.: benzininių 36,8 %, dyzelinių 3,5 %.
+- Iš 4 655 modelio×juostos×kuro porų 1 363 turi ≥ 15 %, 911 – ≤ 5 %. Paliesti 442 modeliai iš 799.
+- Daugiausia klaidų: Passat, A4, Astra, Corolla, Golf, BMW 3, A6.
+
+**Sprendimas.**
+- `ta-modeliai.json` v2 → `kmmet_kuras: {kuras: {juosta: [n,P10..P90]}}`, n ≥ 100, be 0–3 m. (K-39). Kiti laukai nepakeisti.
+- Tvarka 4+ m.:
+  1. to paties kuro TA juosta;
+  2. jei kuras žinomas, bet jo juostos nėra, o kito kuro yra → ⚪ (modelio norma būtų kito kuro; tokiais atvejais benzininiai gautų 🟡 22,5 %);
+  3. TA modelio juosta;
+  4. Regitra;
+  5. atsarga.
+- Neatpažintas kuras → modelio juosta, kaip iki K-34.
+- Regitros juostos kuro neskiria. Tai liečia 0–3 m. (36 modeliai) ir modelius be TA juostos.

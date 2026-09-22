@@ -238,5 +238,31 @@ console.log('\n── Skelbimo pusė: markė modelyje (Z-85 regresija) ───
   lygu(R.punktai({ modelis: 'Nezinomas' }), [], '„Nezinomas" → jokio punkto (ne ⚪)');
 }
 
+// ── K-34: RIDOS NORMA pagal kurą (analitiko pavyzdžiai) ──
+{
+  console.log('\nK-34 kuro juostos');
+  const rn = (mk, mo, kuras, a, rida) => R.punktai({ marke: mk, modelis: mo, kuras, metai: METAI - a, rida }).filter((q) => q.k === 'RIDOS NORMA');
+  const d320 = R.taKontekstas('BMW', '320');
+  T(d320 && d320.kmmet_kuras && d320.kmmet_kuras.dyzelinas, 'ta-modeliai v2 turi kmmet_kuras');
+  lygu(d320.kmmet_kuras.dyzelinas['16-20'][1], 13240, 'BMW 320 dyzelinas 16-20 P10 = 13 240');
+  let p = rn('BMW', '320', 'Dyzelinas', 18, 210000);
+  T(p.length === 1 && p[0].lygis === R.LYGIS.SIGNALAS && /dyzelinių/.test(p[0].tekstas), 'BMW 320d 18 m. 210 000 km → 🟡 su „dyzelinių"');
+  lygu(rn('BMW', '320', 'Benzinas', 18, 210000).length, 0, 'tas pats benzininis → punkto nėra (benzininių norma žemesnė)');
+  p = rn('BMW', '318', 'Benzinas/dujos', 5, 40000);
+  T(p.length === 1 && p[0].lygis === R.LYGIS.NEZINOMA, 'BMW 318 benzinas/dujos 5 m. → beKuro ⚪');
+  p = rn('TOYOTA', 'COROLLA', 'Hibridas', 8, 70000);
+  T(p.length === 1 && p[0].lygis === R.LYGIS.NEZINOMA && /hibridinių/.test(p[0].tekstas), 'Toyota Corolla hibridas 8 m. → beKuro ⚪');
+  lygu(rn('BMW', 'X5', 'Dyzelinas', 3, 20000).length, 0, 'BMW X5 dyzelinas 3 m. → 0-3 Regitra, punkto nėra (K-39)');
+  p = rn('VOLKSWAGEN', 'PASSAT', 'Benzinas', 12, 60000);
+  T(p.length === 1 && /benzininių/.test(p[0].tekstas), 'Passat benzinas 12 m. → 🟡 su „benzininių"');
+  p = rn('AUDI', 'A4', undefined, 12, 60000);
+  T(p.length === 1 && !/dyzelinių|benzininių/.test(p[0].tekstas), 'kuras nežinomas → modelio juosta be kuro žodžio');
+  p = rn('AUDI', 'A4', 'Elektra', 12, 60000);
+  T(p.length === 1 && p[0].lygis === R.LYGIS.NEZINOMA, 'Audi A4 „Elektra" → beKuro ⚪');
+  p = rn('VOLKSWAGEN', 'GOLF', 'Dyzelinas', 22, 100000);
+  T(p.length === 1 && p[0].lygis === R.LYGIS.NEZINOMA && /skaitiklių/.test(p[0].tekstas), 'Golf 22 m. → blokuota ⚪ (nulinimas) ir su kuru');
+  T(R.KURO_KILMININKAS && R.KURO_KILMININKAS['benzinas/elektra'] === 'hibridinių', 'KURO_KILMININKAS eksportuotas');
+}
+
 console.log('\n' + (klaidu ? '✗ ' + klaidu + ' klaidos iš ' + patikru : '✓ ' + patikru + '/' + patikru + ' patikrų praėjo'));
 process.exit(klaidu ? 1 : 0);
