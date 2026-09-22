@@ -25,7 +25,7 @@ Pilnai – projekte `claude/LUKUI-TAISYKLE.md`. Trumpai:
   (https://claude.ai/artifact/KfPvoTLDL83GtRYHobaXtu): įrašai pats (`ArtifactData`) arba, jei negali,
   atsakymo gale `▶ LUKUI` blokas.
 - Kiekvienas atsakymas baigiasi „Lukui: nieko nereikia.“ / „Lukui: įrašiau <ID>“ / `▶ LUKUI` / `▶ PERDUOTI → <kam>` blokas.
-- Žinutė kitam nariui – tik `▶ PERDUOTI → <kam>` blokas, parašytas gavėjui.
+- Žinutė kitam nariui – tik `▶ PERDUOTI → <kam>` antraštė, o **pats tekstas – kodo bloke** (```), kad Lukas nukopijuotų vienu „Copy“ be jokio kito teksto.
 
 ## Pirmas veiksmas kiekvienoje sesijoje
 

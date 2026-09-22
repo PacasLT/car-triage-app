@@ -870,3 +870,8 @@ ct-priedai.css 20 blokas. URL parametrai (`kebulas`, `pardavejas`, `ideta`, `zem
 **Kodėl klausiu:** PASTABOS sako, kad 49 su 46b/48 nesikerta, o 46b dar negautas. Laukiant 5, 12, 15 blokai ir inline `.ct3-portal-ico` gyvena ilgiau.
 **Ką jau padariau:** 49 išpakuotas į `is-dizainerio/49-trys-vardai/` (md5 patikrintas). Grep – viskas sutampa: `.ct-btn-accent` ct-mygtukai 452–460; priedai 5 blokas 53–70, `.mg-atn-busena` 152, `.ct-regitra` 190–205, `.ct3-portal-ico` 223; index 2651–2654 inline `flex:none;border-radius:5px`, 2655 su klase; megstamiausi 17 `.pg-head`, 224 `class="mg-atn-busena"` (JS klasės nenaudoja, tik `id`); `.ct3-portal-row` 834 ir 1829/1834/1880. „Planas“ hover – Luko eilėje DZ-PLANAS.
 **Failai:** pasikeitimai/is-dizainerio/49-trys-vardai/
+
+## Z-101 · 2026-09-22 · Klaudijus · TA suvestinė įdiegta (tik duomenys)
+- `backend/duomenys/ta-modeliai.json` (529 129 B, md5 283e8aca…) ir `tools/ta-suvestine.py` (md5 dd705550…) – md5 sutampa su Analitiko. 12 212 462 įrašai, 1 359 modeliai, laikotarpis 2015-01-08..2025-05-28. regitra.test 101/101, sargai 13/0.
+- Sąsajoje dar nenaudojama – integracija pagal `docs/UZDUOTIS-ta-integracija.md` (atskiras leidimas). Atribucija privaloma: „Šaltinis: TRANSEKSTA, techninės apžiūros duomenys · CC BY 4.0“.
+- Taisyklė: `▶ PERDUOTI` tekstas – kodo bloke (Luko prašymas, vienas „Copy“).

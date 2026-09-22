@@ -8,7 +8,7 @@ Darbo sistema ir rolės – `pasikeitimai/TAISYKLES.md`; pilnas planas – Claud
 Prieš keičiant sritį – `grep -n "## " docs/pamokos.md` ir perskaityti tos srities skyrių.
 
 ## Kreipimasis į Luką
-Klausimai / sprendimai / leidimai – „Luko eilė“ (https://claude.ai/artifact/KfPvoTLDL83GtRYHobaXtu, `ArtifactData` → `klausimai`), forma – projekte `claude/LUKUI-TAISYKLE.md`. Kiekvieno atsakymo gale: „Lukui: …“ arba `▶ LUKUI` / `▶ PERDUOTI → <kam>` blokas.
+Klausimai / sprendimai / leidimai – „Luko eilė“ (https://claude.ai/artifact/KfPvoTLDL83GtRYHobaXtu, `ArtifactData` → `klausimai`), forma – projekte `claude/LUKUI-TAISYKLE.md`. Kiekvieno atsakymo gale: „Lukui: …“ arba `▶ LUKUI` / `▶ PERDUOTI → <kam>` blokas; perduodamas tekstas – kodo bloke (```), vienas blokas = vienas gavėjas.
 
 ## Procedūros (skills)
 - Po KIEKVIENO kodo pakeitimo → skill **`cartriige-leidimas`** (sargai, versija, žurnalas, klaidų būsenos, BUSENA/LUKUI, commit, push, deploy patikra, veidrodis).
