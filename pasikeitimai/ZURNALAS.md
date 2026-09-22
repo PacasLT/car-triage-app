@@ -1230,3 +1230,9 @@ visu kontekstu. Kai imsiu juostą, **pirmas darbas bus nuspręsti tarp jų.**
 - BMW|3 2012 → E9x + F3x – tyčinis persidengimas (E92/E93 iki 2013), analitiko patvirtinta.
 - regitra.test +10 (145/145). Sargai žali.
 
+## Z-115 · 2026-09-22 · Klaudijus · KL-TAUPYMAS įgyvendinta (Luko „Abu“)
+- Railway kintamasis `GILINTI_TOP=3` nustatytas produkcijoje (veikia iškart, be push; redeploy'us v2.10.0).
+- Kode: `GILINTI_TOP` numatytasis 8 → 3; `/api/history-counts` grąžina tuščius skaičius, kol `ISTORIJOS_SKAICIAI` ≠ 1 (įsigalios po push).
+- **Iki push:** „Senos paieškos“ sąrašo atidarymas vis dar kainuoja – Lukui neatidarinėti.
+- Kita: TS-0922-1730 („Duomenų šaltiniai“ puslapis + CC BY nuoroda) – Luko „Taip, iki 10-15“, eilėje; TS-0922-1700 – Luko „Ne, palikti“ (mobile.de premium lieka); DZ-STOP-ADMIN – trys mygtukai, DZ-SARGAS – mygtukas.
+

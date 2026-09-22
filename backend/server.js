@@ -939,7 +939,7 @@ const TEKSTO_RIBA = parseInt(process.env.SKELBIMO_TEKSTO_RIBA || '4000', 10);
 // Ta pati skelbima analizuojam is naujo tik jei praejo 7 d. arba pasikeite kaina.
 const ANALIZES_PODELIS_MS = parseInt(process.env.ANALIZES_PODELIS_D || '7', 10) * 24 * 60 * 60 * 1000;
 // Kiek geriausiu skelbimu papildomai atidarom paieskos metu (iranga, VIN, vieta).
-const GILINTI_TOP = parseInt(process.env.GILINTI_TOP || '8', 10);
+const GILINTI_TOP = parseInt(process.env.GILINTI_TOP || '3', 10);   // KL-TAUPYMAS: 8 -> 3 (Luko sprendimas 2026-09-22)
 
 // ============ SCRAPING (ta pati logika kaip triage.js) ============
 
@@ -2542,6 +2542,12 @@ app.post('/api/history-counts', requireAuth, planai.reikalautiPlano('business'),
   try {
     const paieskos = (req.body && req.body.paieskos) || [];
     if (!Array.isArray(paieskos) || !paieskos.length) return res.json({ rezultatai: [] });
+    // KL-TAUPYMAS (Luko sprendimas 2026-09-22): „Senos paieškos" skaičiai
+    // kainavo ~40 % ScraperAPI kreditų (kiekvienas atidarymas = 1-as psl.
+    // visų išsaugotų paieškų × portalų). Įjungiama tik ISTORIJOS_SKAICIAI=1.
+    if (process.env.ISTORIJOS_SKAICIAI !== '1') {
+      return res.json({ rezultatai: paieskos.slice(0, 10).map((p, i) => ({ i, kiek: null, nauju: null })), isjungta: true });
+    }
     // Ribojam, kad vienas iskleidimas negaletu paleisti begalo uzklausu
     const dirbsim = paieskos.slice(0, 10);
     const dabar = Date.now();
