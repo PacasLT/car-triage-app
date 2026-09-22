@@ -6203,6 +6203,7 @@ function ctNavTab(tab) {
       // Galia ir varantieji čia NEDEDAMI – jie jau yra .ct-meta eilutėje.
       var chipsVisi = [
         c.ikeltaTekstas ? '🕒 ' + esc(c.ikeltaTekstas) : null,
+        c.naujas ? '✦ Naujas' : null,
         (c.kartos && c.kartos.length) ? 'Kėbulas ' + esc(c.kartos.join(' / ')) : null,
         c.turiVin ? '✓ VIN' : null,
         c.turiIstorijosAtaskaita ? '✓ Istorija' : null,

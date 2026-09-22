@@ -2924,10 +2924,20 @@ function rizikosLygis(conditionScore) {
   return 'aukšta';
 }
 
+// Nr.50 (v2.11.2): naujas automobilis – rida < 5 000 km ir ne senesnis nei 1 metai.
+// Jo kaina lyginama su kitais naujais (rinkos grupė „naujas“), o ne su naudotų mediana.
+const NAUJO_RIDA = 5000;
+function arNaujas(l) {
+  const m = parseInt(l && l.metai, 10), r = parseInt(l && l.rida, 10);
+  if (!m || !Number.isFinite(r) || r < 0) return false;
+  return r < NAUJO_RIDA && m >= new Date().getFullYear() - 1;
+}
+
 // ---- "KODEL SIS AUTO?" ----
 // Kiekviena eilute kyla is konkretaus balo komponento ar duomens, ne is AI nuomones.
 function buildWhyReasons(l, k) {
   const r = [];
+  if (l.naujas) r.push('Naujas automobilis (rida < 5 000 km) – kaina lyginama su kitais naujais');
   if (l.diffPct !== null && l.marketCount >= 3) {
     if (l.diffPct >= 3) r.push('−' + l.diffPct + '% žemiau rinkos (' + l.marketMedian + '€, imtis ' + l.marketCount + ')');
     else if (l.diffPct <= -3) r.push('+' + Math.abs(l.diffPct) + '% virš rinkos (' + l.marketMedian + '€)');
@@ -3323,6 +3333,9 @@ async function runSearchJob(jobId, filters) {
     const fMarke = (filters && filters.marke) || null;
     combinedForMedians.forEach((l) => {
       l.rinkosGrupes = regitra.rinkosGrupes(l.marke || fMarke, l.modelis, l.metai, rinkosTekstas(l), l.menuo);
+      // Nr.50: naujas auto (rida < 5 000 km, ne senesnis nei 1 m.) lyginamas su kitais naujais, ne su naudotais.
+      l.naujas = arNaujas(l);
+      if (l.naujas) l.rinkosGrupes = ['naujas'].concat(l.rinkosGrupes);
     });
     const medians = computeMarketMedians(combinedForMedians);
     // Kaupiam VISUS nuskaitytus skelbimus - kuo daugiau istorijos, tuo tikslesnes
@@ -3670,7 +3683,7 @@ async function runSearchJob(jobId, filters) {
       kuras: l.kuras, pavarai: l.pavarai, turiVin: l.turiVin, galia: l.galia, variklioTuris: l.variklioTuris,
       pvmPastaba: l.pvmPastaba || null, kainaBaze: l.kainaBaze || null, varantieji: l.varantieji || null,
       itariamaZala: l.itariamaZala || null,
-      photo: l.photo, url: l.url, source: l.source, kryzminiaiSkelbimai: l.kryzminiaiSkelbimai || null, kartos: l.kartos || [], rinkosGrupe: l.rinkosGrupe || null,
+      photo: l.photo, url: l.url, source: l.source, kryzminiaiSkelbimai: l.kryzminiaiSkelbimai || null, kartos: l.kartos || [], rinkosGrupe: l.rinkosGrupe || null, naujas: !!l.naujas,
       isCandidate: candidateUrls.has(l.url), pardavejas: l.pardavejas || null,
       rejectionReasons: (l.hardRejections && l.hardRejections.length)
         ? l.hardRejections
@@ -3696,7 +3709,7 @@ async function runSearchJob(jobId, filters) {
       kainosPastaba: l.kainosPastaba || null, kainosIspejimas: l.kainosIspejimas || null,
       // LT registro kontekstas. `kandidatai` pjaunami i konkretu lauku sarasa,
       // tad neidejus cia jie iki sasajos nenukeliautu - nors `enriched` juos turi.
-      regitra: l.regitra || null, regitraPunktai: l.regitraPunktai || [], kartos: l.kartos || [], rinkosGrupe: l.rinkosGrupe || null,
+      regitra: l.regitra || null, regitraPunktai: l.regitraPunktai || [], kartos: l.kartos || [], rinkosGrupe: l.rinkosGrupe || null, naujas: !!l.naujas,
     }));
 
     // Skelbimai, kuriuos atmete kietasis filtras (kaina/metai/rida/deze/kuras).
@@ -4587,6 +4600,8 @@ app.post('/api/analyze-single', requireAuth, kreditaiPagalLygi, async (req, res)
       ? await klasifikuotiNuotraukas(photos0)
       : { tinkamos: photos0 || [], atmestos: [], pardavejoLogo: null, parsisiusta: {} };
     const photos = foto.tinkamos, photo = photos[0] || photo0;
+    // Nr.45 diagnostika: kuriame žingsnyje dingsta nuotraukos (be URL – tik skaičiai)
+    console.log(`[APZVALGA] ${String(url).replace(/^https?:\/\/(www\.)?/, '').split('/')[0]} ${pilna ? 'pilna' : 'greita'}: puslapyje ${(photos0 || []).length} nuotr., atsisiųsta ${Object.keys(foto.parsisiusta || {}).length}, atmesta ${(foto.atmestos || []).length}, liko ${photos.length}`);
     // v1.24.0: pirma - irodymu sluoksnis (ka matome), tik tada verdiktas (ka tai reiskia)
     let vizualus = null;
     if (pilna && VIZUALUS_SLUOKSNIS && photos.length >= 2) {

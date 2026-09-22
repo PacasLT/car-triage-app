@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.11.2', data: '2026-09-22', pavadinimas: 'Nauji automobiliai vertinami atskirai',
+    pakeitimai: [
+      'Nr. 50: automobilis su rida iki 5 000 km ir ne senesnis nei 1 metai laikomas nauju – kortelėje „✦ Naujas“, o jo kaina lyginama su kitais naujais, ne su naudotais. Taip naujas nebeatrodo „brangus“.',
+      'Pilnos apžvalgos nuotraukų kelias dabar registruojamas serverio žurnale (Nr. 45 paieškai).',
+    ],
+  },
+  {
     versija: '2.11.1', data: '2026-09-22', pavadinimas: 'Mėlyna spalva visur',
     pakeitimai: [
       'Violetinė spalva liko tik logotipe: prisijungimo langas, palyginimas, skelbimo puslapis, meniu ir versijų langas dabar mėlyni.',

@@ -1565,3 +1565,9 @@ keitimas užtruko du paketus.
 - Matavimai (index, compare, detail, megstamiausi): --accent #3B82F6, --accent-light #93C5FD visur; įverčio juostos warn geltona, good žalia, be konteksto – akcento; .ct-sort-menu šešėlis nepakitęs; paskyroje 0 matomų [hidden], juosta akcento, be slinkties 1280/390.
 - Violetinė liko: 16 logotipo eilučių (lieka), 1 tinder (lieka), 2 ct-dizainas komentarai. Daugiau nėra.
 
+## Z-127 · 2026-09-22 · Klaudijus · v2.11.2 – Nr.50 naujas auto, Nr.45 diagnostika, klaidų peržiūra
+- Nr.50: `arNaujas(l)` – rida < 5 000 km ir metai ≥ einamieji − 1. Naujam rinkos grupė „naujas“ pirmoje vietoje (lyginamas su kitais naujais, kai jų ≥ 5; kitaip – kaip iki šiol), „Kodėl šis auto“ eilutė, kortelės ženklelis „✦ Naujas“. Rizikos/defektų įspėjimai NEišjungti (pigus naujas auto vis tiek įtartinas) – Luko patikrai. `naujas.test` 7/7.
+- Nr.45: serveris nuotraukas randa – patikrinta gyvai iš Luko PC (3 otomoto X5 skelbimai: 12, 38, 38 nuotr.; olxcdn atsako 200 su ir be Referer). Paieškos miniatiūros (thumbnail x1/x2) yra. Kur dingsta – nežinoma; pridėtas žurnalo įrašas `[APZVALGA] <portalas> pilna: puslapyje N, atsisiųsta K, atmesta A, liko M`. Luko prašoma vieną kartą paleisti pilną apžvalgą otomoto skelbimui po įkėlimo.
+- Nr.30: antraštės geometrija visuose puslapiuose vienoda (pamatuota 1440/390: index, detail, mėgstamiausi, paskyra). Luko pastabos – dizaino: „Verslas“ mygtukas (varpelis + kreditai) ir vartotojo nesimatymas kompiuteryje → Dizaineriui.
+- Nr.49: atsakyta (Matavimai = techniniai skaitikliai nuo paleidimo), sprendimas – Lukui.
+
