@@ -9,7 +9,7 @@ Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
 |---|---|---|
 | Darbo sistema | DARBO-SISTEMA v2, fazė A | Vykdoma. Kol nebaigta — produkto darbai stovi (Luko sprendimas). |
 | TA integracija | `docs/UZDUOTIS-ta-integracija.md` | Analitiko paruošta užduotis (TA rida 99 % vs Regitra 17 %). Po fazės C. |
-| `.ct-std-card` matavimas | prieš 46b | `.ct-std-card` vs `.ct-top-card`: fonas, rėmelis, radiusas, paraštė (dizainerio prašymas, D-41). |
+| `.ct-std-card` matavimas | diegiant 46b + 48 | Produkcijoje `.ct-std-card` ir gretimos `.ct-top-card` `background`, `border-color`, `border-radius`, `margin-bottom`. Sutampa → 3 rankinės deklaracijos (index 1337, ct-bendras.css 182, compare.html 1277) kitame pakete dingsta; nesutampa → pasakyti kuri išimtis. |
 | Nr. 42 pabaiga | `#sort-bar` iš ct-dizainas.css 609 ir 623 sąrašų | Dizaineris leido daryti Klaudijui. Kartu trinti 16 bloką. |
 
 ## Dizaineris

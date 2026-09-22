@@ -9,9 +9,8 @@ Viskas, ko laukia tavęs. Kiekvienas punktas ≤ 1 min. Perrašo Klaudijus po ki
 - [x] Fazė C praėjo visi. `PLETRA.md` projekte (įrašė Klaudijus), `SAVIKAINA.md` – Finansininkas pats.
 - [ ] Finansininkui: Q-4–Q-7 atsakyta `SAVIKAINA-DUOMENYS.md` §6. Plano kaina, PVM – iš tavęs.
 
-## ScraperAPI (nebe skubu)
-- Sąskaita: Hobby 49 $, **34 846 / 100 000** šį ciklą, atsinaujina **10-16**, pasiekus ribą – sustoja (be automatinio brangesnio plano). Mūsų admin skaitliukas (87 741) klaidingas – taisymas F-3+.
-- Tempas kūrimo savaitę ~5 800 kr./d. → jei nesumažės, riba ~10-03. Po savaitės pažiūrėk Usage dar kartą.
+## ⚠ ScraperAPI – vėl skubu (pataisyta)
+- Galioja **87 741 / 100 000** (Analytics + `/account` + portalų lentelė sutampa). 34 846 iš Billing kortelės – klaidingas. Liko ~12 300 kr. iki **10-16**; pasiekus ribą LT paieškos sustos. Sprendimas – Luko eilėje **KL-SCRAPER**.
 
 ## Sprendimai ir klausimai → **Luko eilė**
 Visi klausimai, sprendimai, nuomonės ir leidimai dabar yra puslapyje „Luko eilė“:

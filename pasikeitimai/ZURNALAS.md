@@ -852,3 +852,10 @@ ct-priedai.css 20 blokas. URL parametrai (`kebulas`, `pardavejas`, `ideta`, `zem
 - `tools/ta-parsisiuntimas.py`: TA apžiūros be naršyklės (Windows Python, tik `Downloads`). Formatas = Analitiko (11 stulp., 100 000 eil./failą, rikiuota `_id`, `tp_klase.startswith("M1")`). Tęsia nuo paskutinio `_id`, pildo tuščius failus, supranta sujungtus `NNNN-MMMM.csv`. Tuščias `0001` užpildytas; Analitiko `0039-0042.csv` dubliavo → `Downloads\_to_delete\`.
 - Analitikas: (1) `backend/duomenys/ta-modeliai.json` – bandomasis (tik X5), necommit'inti; (2) TA duomenys baigiasi 2025-05-28 – sąsajoje rodyti `laikotarpis`, ne „naujausi" (CLAUDE.md produkto taisyklės); (3) `device_commit_files` du kartus įrašė seną kopiją nors grąžino „written" – po įrašymo tikrinti md5 (CLAUDE.md spąstai).
 - Plėtra P3 (kryžminiai skelbimai): **veikia vienos paieškos ribose** – `mergeDuplicatesAcrossPortals` (modelis + metai + rida ±300 + kuras + pavarų dėžė), kortelėje „🔗 Tas pats automobilis taip pat: …", detail „KRYŽMINIAI SKELBIMAI". Nėra: pagal VIN / nuotrauką, tarp skirtingų paieškų, istorinio. Įrašyta į GALIMYBES §2.
+
+## Z-99 · 2026-09-22 · Klaudijus · Finansininko Q-9–Q-11, ScraperAPI pataisymas, dizainerio perdavimas
+- ScraperAPI: galioja 87 741 / 100 000 (Analytics, `/account`, portalų lentelė). Z-98 laikas „34 846 teisingas“ – klaida (Billing kortelė). Luko eilė KL-SCRAPER (skubu).
+- Q-9: `DEEP_INSTRUKCIJOS` ≈ 900–1 150 tok. – ties 1 024 minimumu arba žemiau; TTL 5 min. Talpykla praktiškai neveikia; vertė ~0,003 $/apžvalgą – netaisom atskirai.
+- Q-10: Sonnet 5 → 4.5 pakeitė Lukas 09-15 per GitHub (cb37ce1), priežastis neužrašyta. Luko eilė KL-MODELIS.
+- Q-11: kreditų žurnalas nuo 09-17: greitos 6, pilnos 12, VIN 4, palyginimai 5, pardavėjas 2. `SAVIKAINA-DUOMENYS.md` §7.
+- Dizaineris: matavimo prašymas `.ct-std-card` vs `.ct-top-card` (BUSENA); kitas paketas – `.ct-btn-accent`, `.ct-regitra`, `.mg-atn-busena`, `.ct3-portal-ico`; klausimas DZ-TINDER Luko eilėje.
