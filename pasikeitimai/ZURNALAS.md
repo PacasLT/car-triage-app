@@ -1571,3 +1571,8 @@ keitimas užtruko du paketus.
 - Nr.30: antraštės geometrija visuose puslapiuose vienoda (pamatuota 1440/390: index, detail, mėgstamiausi, paskyra). Luko pastabos – dizaino: „Verslas“ mygtukas (varpelis + kreditai) ir vartotojo nesimatymas kompiuteryje → Dizaineriui.
 - Nr.49: atsakyta (Matavimai = techniniai skaitikliai nuo paleidimo), sprendimas – Lukui.
 
+## Z-128 · 2026-09-22 · Klaudijus · v2.11.3 – pilnas pavadinimas kortelėje (kl-pavadinimas)
+- Naujas laukas `pavadinimas` (≤ 120 simb.) visuose penkiuose portaluose: autoplius `.announcement-title` (title atributas), autogidas `h2.item-title` (jame dažnai tik markė+modelis – tiek, kiek portalas duoda), autoscout24 `make model modelVersionInput`, otomoto `item.title`, mobile.de `item.title`. `modelis` NEKEIČIAMAS – juo remiasi rinkos medianos ir kryžminiai skelbimai.
+- Kortelė (index) ir skelbimo puslapio antraštė rodo `pavadinimas || modelis`; kortelėje dar `title=` užvedus.
+- `autogidas.test` 32/32 (nauja 7 dalis). Sargai 17 žali; `migracija` VM'e krenta dėl EPERM unlink (VM negali trinti failų) – Windows'e praeina.
+

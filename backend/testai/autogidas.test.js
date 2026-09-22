@@ -76,5 +76,13 @@ t('rikiuojama nuo naujausių', /f_50=naujausi_asc/.test(u));
 const tuscias = buildAutogidasUrl({ marke: 'BMW' });
 t('be papildomų filtrų adresas lieka tvarkingas', tuscias.includes('f_1[0]=BMW') && tuscias.includes('f_50='), tuscias);
 
+console.log('\n7. kl-pavadinimas · pilna antraštė kortelei');
+{
+  const suPav = r.filter((x) => x.pavadinimas);
+  t('visi turi pilną pavadinimą', suPav.length === r.length, suPav.length + '/' + r.length);
+  t('pavadinimas ne ilgesnis nei 120 simbolių', suPav.every((x) => x.pavadinimas.length <= 120));
+  t('pavadinimas ne trumpesnis už modelį', suPav.every((x) => x.pavadinimas.length >= (x.modelis || '').length), suPav.map((x) => x.pavadinimas).slice(0, 2));
+}
+
 console.log('\n' + ok + ' praėjo, ' + blogai + ' nepavyko');
 process.exit(blogai ? 1 : 0);

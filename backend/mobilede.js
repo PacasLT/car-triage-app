@@ -227,6 +227,8 @@ function mobileDeSkelbimas(item) {
     rida: skaicius(a.ml),
     metai,
     modelis: `${make} ${model}`.trim(),
+    // kl-pavadinimas: pilnas skelbimo pavadinimas kortelei (modelis lieka rinkos grupei)
+    pavadinimas: String(item.title || `${make} ${model}`).trim().slice(0, 120) || null,
     galimiDefektai: [],
     kuras: MD_KURAS[a.ft] || a.ft || null,
     pavarai: MD_DEZE[a.tr] || null,

@@ -6317,7 +6317,7 @@ function ctNavTab(tab) {
         +   '<div class="ct-body">'
         +     '<div class="ct-head">'
         +       '<div class="ct-head-l">'
-        +         '<div class="ct-title-row"><h3>' + esc(c.modelis) + '</h3><span class="source-tag">' + esc(c.source) + '</span></div>'
+        +         '<div class="ct-title-row"><h3 title="' + esc(c.pavadinimas || c.modelis) + '">' + esc(c.pavadinimas || c.modelis) + '</h3><span class="source-tag">' + esc(c.source) + '</span></div>'
         +         '<div class="ct-meta">' + [c.metai, c.rida ? fmtKm(c.rida) : null, c.kuras, c.pavarai,
                     c.galia ? c.galia + ' kW' : null, c.varantieji].filter(Boolean).join(' · ') + '</div>'
         +       '</div>'

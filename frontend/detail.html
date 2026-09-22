@@ -1508,7 +1508,7 @@ window.ctApi = function (kelias, params) {
     // ar vizualinis sluoksnis jau yra (pilna apzvalga), ar dar ne (greita).
     window.__dpViz = data.vizualus || null;
 
-    var title = c.modelis || 'Automobilis';
+    var title = c.pavadinimas || c.modelis || 'Automobilis';   // kl-pavadinimas
     document.getElementById('dp-bc-title').textContent = title;
     document.getElementById('dp-bc-source').textContent = (c.source || '').toUpperCase();
     document.title = title + ' — CarTriige';

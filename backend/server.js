@@ -1398,6 +1398,8 @@ function extractAutopliusStructured(html) {
     });
     const photo = photos[0] || null;
     const modelis = el.find('.announcement-title').first().text().trim() || null;
+    // kl-pavadinimas: kortelėje rodom pilną skelbimo pavadinimą, o `modelis` lieka rinkos grupei
+    const pavadinimas = (el.find('.announcement-title').first().attr('title') || modelis || '').trim().slice(0, 120) || null;
 
     // Pirma parametru eilute: "2023-10", "Visureigis / Krosoveris"
     const virsus = el.find('.announcement-title-parameters .announcement-parameters span').map(function () { return $(this).text().trim(); }).get();
@@ -1503,7 +1505,7 @@ function extractAutopliusStructured(html) {
     }
 
     listings.push({
-      url, photo, photos, modelis: modelis || 'Nezinomas',
+      url, photo, photos, modelis: modelis || 'Nezinomas', pavadinimas,
       kaina, kainaBaze, pvmPastaba, kainaBePvm, turiLizingoOpcija, lizingoSuma, kainosPastaba,
       kainosIspejimas: ispejimas,
       metai, menuo, pirmaRegistracija: dataStr, kebulas, kuras, pavarai, variklioTuris, galia, rida, miestas,
@@ -1674,6 +1676,7 @@ function extractAutoscout24Listings(html) {
     const url = item.url ? `https://www.autoscout24.com${item.url}` : null;
     const trimText = (item.vehicle && item.vehicle.modelVersionInput) || '';
     const rawText = `${item.vehicle ? `${item.vehicle.make} ${item.vehicle.model}` : ''} ${trimText}`.trim().slice(0, 200);
+    const pavadinimas = rawText.slice(0, 120) || null;
 
     // Variklio galia (kW) is vehicleDetails masyvo ("290 kW (394 hp)"), turis (l) is cm3.
     const powerEntry = (item.vehicleDetails || []).find((d) => d.iconName === 'speedometer');
@@ -1685,7 +1688,7 @@ function extractAutoscout24Listings(html) {
 
     return {
       kaina, kainaBaze: null, pvmPastaba: null, kainaBePvm: null, turiLizingoOpcija: false,
-      rida, metai, modelis, galimiDefektai: dauztas ? ['daužtas'] : [],
+      rida, metai, modelis, pavadinimas, galimiDefektai: dauztas ? ['daužtas'] : [],
       kuras, pavarai, turiVin: false, galimasJavImportas: false,
       turiIstorijosAtaskaita: false, turiGarantija: false, garantijosTipas: null, yraVerslas, pardavejas,
       galia, variklioTuris,
@@ -1748,6 +1751,9 @@ function extractAutogidasListings(html, originUrl) {
     if (!href) return;
     let modelis = el.find('h2.item-title').first().text().replace(/\s+/g, ' ').trim()
       || el.find('a.item-link').first().attr('title') || 'Nezinomas';
+    // kl-pavadinimas: pilna antraštė kortelei; `modelis` toliau gali būti sutrumpintas pagal adresą
+    const pavadinimas = (el.find('h2.item-title').first().text().replace(/\s+/g, ' ').trim()
+      || el.find('a.item-link').first().attr('title') || '').slice(0, 120) || null;
     // v2.4.2: kai kurie prekeiviai antrašte rašo reklamą, ne modelį - archyve 22
     // skelbimai „BMW Kelio ženklų atpažinimo sistem". Adresas visada neša modelį
     // (/skelbimas/bmw-x3-2020-m-...). Jei adreso modelio žodžio antraštėje nėra -
@@ -1842,7 +1848,7 @@ function extractAutogidasListings(html, originUrl) {
     }
 
     results.push({
-      kaina, kainaBaze, pvmPastaba, kainaBePvm: null, turiLizingoOpcija, rida, metai, menuo, modelis,
+      kaina, kainaBaze, pvmPastaba, kainaBePvm: null, turiLizingoOpcija, rida, metai, menuo, modelis, pavadinimas,
       galimiDefektai: [], galimasJavImportas: galimasJavImportas || aukcionas, aukcionas, kainosIspejimas: kainosIspejimas || null,
       kuras, pavarai, turiVin, galia, variklioTuris, miestas, vieta, uzsienyje,
       turiIstorijosAtaskaita: turiVin, turiGarantija,
@@ -2410,6 +2416,7 @@ function extractOtomotoListings(html) {
       const make = getDisp('make') || '';
       const model = getDisp('model') || '';
       const modelis = `${make} ${model}`.trim() || (item.title || '').trim();
+      const pavadinimas = String(item.title || modelis).trim().slice(0, 120) || null;
       const url = item.url ? (item.url.startsWith('http') ? item.url : `https://www.otomoto.pl${item.url}`) : null;
       const photo = (item.thumbnail && (item.thumbnail.x2 || item.thumbnail.x1)) || null;
       // Otomoto kartais turi photos[] masyva tiesiai paieškos rezultatuose
@@ -2418,7 +2425,7 @@ function extractOtomotoListings(html) {
 
       return {
         kaina, kainaBaze: null, pvmPastaba: null, kainaBePvm: null, turiLizingoOpcija: false,
-        rida, metai, modelis, galimiDefektai: [],
+        rida, metai, modelis, pavadinimas, galimiDefektai: [],
         kuras, pavarai, turiVin: false, galimasJavImportas: false,
         turiIstorijosAtaskaita: false, turiGarantija: false, garantijosTipas: null,
         yraVerslas: false, pardavejas: null,
@@ -3683,7 +3690,7 @@ async function runSearchJob(jobId, filters) {
       kuras: l.kuras, pavarai: l.pavarai, turiVin: l.turiVin, galia: l.galia, variklioTuris: l.variklioTuris,
       pvmPastaba: l.pvmPastaba || null, kainaBaze: l.kainaBaze || null, varantieji: l.varantieji || null,
       itariamaZala: l.itariamaZala || null,
-      photo: l.photo, url: l.url, source: l.source, kryzminiaiSkelbimai: l.kryzminiaiSkelbimai || null, kartos: l.kartos || [], rinkosGrupe: l.rinkosGrupe || null, naujas: !!l.naujas,
+      photo: l.photo, url: l.url, source: l.source, kryzminiaiSkelbimai: l.kryzminiaiSkelbimai || null, kartos: l.kartos || [], rinkosGrupe: l.rinkosGrupe || null, naujas: !!l.naujas, pavadinimas: l.pavadinimas || null,
       isCandidate: candidateUrls.has(l.url), pardavejas: l.pardavejas || null,
       rejectionReasons: (l.hardRejections && l.hardRejections.length)
         ? l.hardRejections
@@ -3709,7 +3716,7 @@ async function runSearchJob(jobId, filters) {
       kainosPastaba: l.kainosPastaba || null, kainosIspejimas: l.kainosIspejimas || null,
       // LT registro kontekstas. `kandidatai` pjaunami i konkretu lauku sarasa,
       // tad neidejus cia jie iki sasajos nenukeliautu - nors `enriched` juos turi.
-      regitra: l.regitra || null, regitraPunktai: l.regitraPunktai || [], kartos: l.kartos || [], rinkosGrupe: l.rinkosGrupe || null, naujas: !!l.naujas,
+      regitra: l.regitra || null, regitraPunktai: l.regitraPunktai || [], kartos: l.kartos || [], rinkosGrupe: l.rinkosGrupe || null, naujas: !!l.naujas, pavadinimas: l.pavadinimas || null,
     }));
 
     // Skelbimai, kuriuos atmete kietasis filtras (kaina/metai/rida/deze/kuras).

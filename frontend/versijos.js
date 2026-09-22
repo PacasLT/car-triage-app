@@ -8,6 +8,12 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.11.3', data: '2026-09-22', pavadinimas: 'Pilnas skelbimo pavadinimas kortelėje',
+    pakeitimai: [
+      'Kortelėje ir skelbimo puslapyje rodomas pilnas skelbimo pavadinimas su versija (pvz. „BMW X4 xDrive20d“), ne tik markė ir modelis. Rinkos kaina ir toliau skaičiuojama pagal modelį.',
+    ],
+  },
+  {
     versija: '2.11.2', data: '2026-09-22', pavadinimas: 'Nauji automobiliai vertinami atskirai',
     pakeitimai: [
       'Nr. 50: automobilis su rida iki 5 000 km ir ne senesnis nei 1 metai laikomas nauju – kortelėje „✦ Naujas“, o jo kaina lyginama su kitais naujais, ne su naudotais. Taip naujas nebeatrodo „brangus“.',
