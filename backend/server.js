@@ -36,6 +36,35 @@ const komplektacija = require('./komplektacija');
 const { requireAuth, handleRegister, handleLogin, handleMe, planai, duomenys, verifyToken } = require('./auth');
 
 const app = express();
+
+// v2.9.2 (Z-105): VIENA EILĖ visoms ScraperAPI užklausoms. Hobby planas leidžia
+// 20 lygiagrečių; viena paieška (5 portalai + 8 pagilinimai) naudoja ~13, tad du
+// žmonės vienu metu gaudavo 429 ir krisdavo į Chromium atsargą (09:20 gedimas).
+// Dabar daugiau nei SCRAPER_LYGIAGRECIAI (numatytai 15) užklausų laukia eilėje,
+// o ne gauna klaidą. /account (nemokamas) į eilę neina.
+const SCRAPER_LYGIAGRECIAI = parseInt(process.env.SCRAPER_LYGIAGRECIAI || '15', 10);
+const _scraperEile = { aktyvios: 0, laukia: [], didziausiaEile: 0 };
+function _scraperImti() {
+  if (_scraperEile.aktyvios < SCRAPER_LYGIAGRECIAI) { _scraperEile.aktyvios++; return Promise.resolve(); }
+  return new Promise((r) => {
+    _scraperEile.laukia.push(r);
+    _scraperEile.didziausiaEile = Math.max(_scraperEile.didziausiaEile, _scraperEile.laukia.length);
+  });
+}
+function _scraperAtiduoti() {
+  const k = _scraperEile.laukia.shift();
+  if (k) k(); else _scraperEile.aktyvios = Math.max(0, _scraperEile.aktyvios - 1);
+}
+const _yraScraper = (cfg) => cfg && typeof cfg.url === 'string' && /\/\/api\.scraperapi\.com\?/.test(cfg.url);
+axios.interceptors.request.use(async (cfg) => {
+  if (_yraScraper(cfg)) { await _scraperImti(); cfg._scraperEile = true; }
+  return cfg;
+});
+axios.interceptors.response.use(
+  (res) => { if (res.config && res.config._scraperEile) _scraperAtiduoti(); return res; },
+  (err) => { if (err && err.config && err.config._scraperEile) _scraperAtiduoti(); return Promise.reject(err); }
+);
+
 // v1.54.0 KLAIDA, rasta per pati pranesimo mygtuka: „Uzklausa per didele".
 // app.use(express.json()) turi NUTYLETA 100 KB riba ir veikia PIRMAS - tad
 // marsruto lygio express.json({limit:'3mb'}) prie /api/klaida niekada
@@ -46,7 +75,13 @@ const app = express();
 // body-parser pazymi req._body, tad bendrasis po to praleidzia.
 app.use('/api/klaida', express.json({ limit: '6mb' }));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '../frontend')));
+// v2.9.2: nuotraukos ir šriftai keičiasi retai - naršyklė laiko 7 d.; HTML/CSS/JS
+// kaip iki šiol (max-age=0 + etag), nes versijos žymės failų varduose nėra.
+app.use(express.static(path.join(__dirname, '../frontend'), {
+  setHeaders: (res, fp) => {
+    if (/\.(png|jpe?g|webp|svg|ico|woff2?)$/i.test(fp)) res.setHeader('Cache-Control', 'public, max-age=604800');
+  },
+}));
 
 // Netinkamas JSON kune (pvz. plika eilute vietoj objekto) - tvarkingas 400,
 // o ne stack trace loge ir HTML klaidos puslapis klientui.
@@ -865,6 +900,7 @@ app.get('/admin/atsarga', klaiduPrieiga, (req, res) => {
   const p = ATSARGA.puppeteer;
   res.json(Object.assign({ saugykla: saugykla() }, {
     nuoPaleidimoVal: val,
+    scraperEile: { riba: SCRAPER_LYGIAGRECIAI, aktyvios: _scraperEile.aktyvios, laukia: _scraperEile.laukia.length, didziausiaEile: _scraperEile.didziausiaEile },
     // `null` cia reiskia, kad JSON neikeltas - butent tai ir norim matyti.
     // `duomenuPabaiga` ir `langas12men` prideti v2: be ju skaiciai neturi
     // laiko, ir butent del to v1 12 men. langas tyliai dengė 9,3 menesio.

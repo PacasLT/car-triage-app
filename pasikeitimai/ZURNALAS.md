@@ -1093,3 +1093,40 @@ jų buvo **pastebėjimai**, tik užrašyti ne ta forma, kuria aš ieškau.
 - **Kas:** 09:20:25 dvi paieškos + „Senos paieškos“ skaičiai vienu metu → >20 lygiagrečių ScraperAPI užklausų → keliolika `429`. Kiekviena nukrito į atsargą; keturios pasiekė Puppeteer ir paleido 4 Chromium vienu metu. Nepavykusi (timeout) naršyklė niekada nebuvo uždaroma. Atmintis 1,0 / 1,0 GB, serveris nebeatsakė net į `index.html` (http 499 iki 300 s). Lukas pranešė „užstrigo, niekas nekrauna“.
 - **Veiksmas:** Railway restart 09:30 (Luko pranešimas = gedimas produkcijoje). Po restart `index.html` 200 per 0,6 s.
 - **Pataisa v2.9.1** (`backend/server.js`): (1) vienu metu tik VIENA Puppeteer naršyklė, kitos iškart klaida (paieška tęsiasi be to puslapio); (2) `browser.close()` per `finally` – ir po klaidos; (3) `--disable-dev-shm-usage`; (4) ScraperAPI 429 → vienas pakartojimas po 1,5–3 s prieš atsargą. Laukia push (Luko eilė KL-PUSH-0922B).
+
+## Z-106 · 2026-09-22 · Klaudijus · v2.9.2 – eilė ScraperAPI ir greitesnis puslapis
+- Luko klausimas: „ar nestrigs, kai keli žmonės leis paiešką; Railway rašo, kad lėtai kraunasi“.
+- **Išmatuota (produkcija):** GET p50 2–5 ms visą savaitę; lėti tik gedimo langai (p99 30 s 09:21–09:31). Atmintis vid. 0,2 / 1 GB, CPU ~0. Pradžios puslapis: HTML 107 KB (gzip), CSS 57 KB, **`hero-car.png` 2,16 MB** – 80 % viso svorio; `Cache-Control: max-age=0` visiems failams.
+- **Pataisyta:** (1) viena ScraperAPI eilė visam serveriui – ne daugiau 15 lygiagrečių (Hobby riba 20; viena paieška ~13), kitos laukia, 429 nebekyla iš mūsų pusės; `/admin/atsarga` → `scraperEile`; testas `scraper-eile.test.js` 4/4; (2) `assets/hero-car.jpg` 1920×768, q80, 211 KB (PNG paliktas); (3) nuotraukos/šriftai – `max-age` 7 d.
+- Gyvo kelių žmonių bandymo nedarom (mokama; iki 10-16 taupom) – elgsena patikrinta testu su netikru tinklu.
+
+---
+
+## D-47 · 2026-09-22 · Dizaineris → sau · PENKTAS KARTAS IR KO JIS MOKO
+
+Trumpas įrašas, nes faktas jau yra `Z-104`. Man jis reikalingas dėl formos.
+
+`ERRATA 8` rėmėsi sakiniu „jūsų failas kraunamas vėliau, tad šiandien veikia
+jūsų". **Krautuvių eilė yra `index.html` 7128–7130**, ji matoma vienu grep'u,
+ir ji priešinga: `ct-dizainas` → `ct-priedai` → `ct-mygtukai`.
+
+Penktas šios savaitės kartas, kai rašiau iš prielaidos apie failą, kurį
+turiu. Keturi ankstesni: `K-36` (selektoriai iš atminties), `~` selektorius,
+46 paketo trys skyriai, o šis — pats pigiausias patikrinti.
+
+**Ir tai svarbiausia jo dalis.** Keturi pirmieji buvo apie dalykus, kurių
+faile nebuvo (vardai, DOM, markupas). Šis buvo apie dalyką, kuris faile
+**yra viena eilute**. Vadinasi, prieiga prie failų problemos neišsprendė —
+ji tik pakeitė klaidos rūšį: nebe „nežinojau", o „neperskaičiau".
+
+Iš to seka konkreti taisyklė sau, ne pažadas: **kai rašau sakinį apie tai,
+kas ką nugali, pirma patikrinu krautuvių eilę.** Specifiškumas ir eilė yra du
+atskiri dalykai, ir šioje sistemoje jie abu vienodai lemia rezultatą, nes
+visi trys failai rašo tais pačiais vardais.
+
+Antra pastaba, smulkesnė, bet ji beveik kainavo klaidą: mano variantų raidės
+(`A` = violetinis) ir Klaudijaus (`A` = baltas) nesutapo. Nuo šiol
+pasirinkimus formuluoju **žodžiu** — „violetinis" arba „baltas" — ir raidę
+laikau tik eilės numeriu.
+
+*Klaudijus: Luko atsakymas KL-PUSH-0922B žodžiu – **„baltas“** (A „užvedus „Planas“ taps baltas“). ERRATA 8 įdiegta su 5 bloko trynimu v2.9.0 – tai POKYTIS (buvo violetinis). Nuo šiol eilėje variantai – žodžiais.*

@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.9.2', data: '2026-09-22', pavadinimas: 'Greitesnis pradžios puslapis ir kelios paieškos vienu metu',
+    pakeitimai: [
+      'Pradžios puslapio nuotrauka 10 kartų lengvesnė (2,2 MB → 0,2 MB) – puslapis telefone atsidaro greičiau, o antrą kartą nuotrauka imama iš naršyklės.',
+      'Kai paiešką vienu metu paleidžia keli žmonės, užklausos portalams sustoja į eilę, o ne krenta – paieška trunka kiek ilgiau, bet nebestringa.',
+    ],
+  },
+  {
     versija: '2.9.1', data: '2026-09-22', pavadinimas: 'Serveris nebeužstringa, kai portalai apkrauti',
     pakeitimai: [
       'Kai kelios paieškos vyksta vienu metu ir skelbimų tiekėjas trumpam atsisako, svetainė nebeužstringa: užklausa pakartojama, o atsarginė naršyklė paleidžiama tik viena.',
