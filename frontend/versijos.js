@@ -8,6 +8,12 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.9.1', data: '2026-09-22', pavadinimas: 'Serveris nebeužstringa, kai portalai apkrauti',
+    pakeitimai: [
+      'Kai kelios paieškos vyksta vienu metu ir skelbimų tiekėjas trumpam atsisako, svetainė nebeužstringa: užklausa pakartojama, o atsarginė naršyklė paleidžiama tik viena.',
+    ],
+  },
+  {
     versija: '2.9.0', data: '2026-09-22', pavadinimas: 'Rūšiavimo meniu, „Kiti skelbimai“ ir skelbimo puslapis – dizaino sistemoje',
     pakeitimai: [
       'Rūšiavimo meniu telefone atsidaro ir matomas, mygtukas tokio pat dydžio kaip kiti.',

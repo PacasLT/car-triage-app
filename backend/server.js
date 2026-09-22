@@ -925,8 +925,21 @@ function atsargaKlaida(zinute) {
   ATSARGA.puppeteer.klaidos[k] = (ATSARGA.puppeteer.klaidos[k] || 0) + 1;
 }
 
+// v2.9.1 (Z-105): 2026-09-22 09:20 keturi ScraperAPI 429 per sekunde paleido
+// KETURIAS Chromium kopijas vienu metu, o nepavykusi (timeout) niekada
+// neuzdarydavo naršyklės. 1 GB atmintis prisipildė, serveris nebeatsakė net
+// į index.html. Dabar: vienu metu daugiausia VIENA naršyklė, kitos iškart
+// gauna klaidą (paieška tęsiasi be to puslapio), o naršyklė uždaroma visada.
+let _puppeteerUzimtas = false;
 async function fetchWithPuppeteer(url) {
   ATSARGA.puppeteer.pasiektas++;
+  if (_puppeteerUzimtas) {
+    ATSARGA.puppeteer.nepavyko++;
+    atsargaKlaida('Puppeteer užimtas - antra naršyklė nepaleidžiama');
+    console.log(`[ATSARGA] Puppeteer UŽIMTAS - praleidžiam: ${url.slice(0, 70)}`);
+    throw new Error('Puppeteer užimtas');
+  }
+  _puppeteerUzimtas = true;
   console.log(`[ATSARGA] Puppeteer pasiektas (${ATSARGA.puppeteer.pasiektas} k.): ${url.slice(0, 70)}`);
   const pradzia = Date.now();
   try {
@@ -939,6 +952,8 @@ async function fetchWithPuppeteer(url) {
     atsargaKlaida(e && e.message);
     console.log(`[ATSARGA] Puppeteer NEPAVYKO per ${Math.round((Date.now() - pradzia) / 1000)} s: ${e && e.message}`);
     throw e;
+  } finally {
+    _puppeteerUzimtas = false;
   }
 }
 
@@ -946,17 +961,20 @@ async function _fetchWithPuppeteer(url) {
   const browser = await puppeteer.launch({
     headless: 'new',
     executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
-    args: ['--no-sandbox', '--disable-blink-features=AutomationControlled'],
+    args: ['--no-sandbox', '--disable-blink-features=AutomationControlled', '--disable-dev-shm-usage'],
   });
-  const page = await browser.newPage();
-  await page.setUserAgent(
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
-  );
-  await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
-  await new Promise((r) => setTimeout(r, 2000));
-  const html = await page.content();
-  await browser.close();
-  return html;
+  try {
+    const page = await browser.newPage();
+    await page.setUserAgent(
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+    );
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+    await new Promise((r) => setTimeout(r, 2000));
+    return await page.content();
+  } finally {
+    // Uždaroma VISADA - ir po timeout. Anksčiau klaida palikdavo gyvą Chromium.
+    try { await browser.close(); } catch (e) { /* jau uždaryta */ }
+  }
 }
 
 // v2.4.0: `opts.render` (true/false) leidzia perrasyti numatyta render
@@ -987,7 +1005,16 @@ async function fetchSearchPage(url, opts) {
       const renderParam = needsRender ? 'true' : 'false';
       const scraperUrl = `http://api.scraperapi.com?api_key=${SCRAPER_KEY}&url=${encodeURIComponent(url)}&render=${renderParam}`;
       console.log(`  ScraperAPI: ${url.slice(0, 60)}...`);
-      const response = await axios.get(scraperUrl, { timeout: 60000 });
+      // v2.9.1: 429 = per daug lygiagrečių užklausų (Hobby riba 20). Vienas
+      // pakartojimas po 1,5–3 s pigesnis už Chromium atsargą (Z-105).
+      let response;
+      try { response = await axios.get(scraperUrl, { timeout: 60000 }); }
+      catch (e) {
+        if (!(e && e.response && e.response.status === 429)) throw e;
+        console.log('  ScraperAPI 429 - kartojam po pauzės');
+        await new Promise((r) => setTimeout(r, 1500 + Math.random() * 1500));
+        response = await axios.get(scraperUrl, { timeout: 60000 });
+      }
       if (response.status === 200 && response.data && response.data.length > 500) {
         html = response.data;
         ATSARGA.paieska.scraperapi++;
