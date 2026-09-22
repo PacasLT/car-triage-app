@@ -5,15 +5,23 @@ Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
 
 ## Klaudijus
 
+Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
+
 | Nr. | Kas | Trumpai |
 |---|---|---|
-| KL-PATIKRA2 | Filtrai kaip autoplius | Metai, kaina, rida, galia – išskleidžiami sąrašai; neįvesta → „–“; varantieji ratai ir kuras – autoplius variantai. |
+| Nr.45 | Otomoto pilna apžvalga be analizės ir nuotraukų | Luko „Neveikia“. Testuoti tik su įrašytu HTML (iki 10-16). |
+| Nr.30 | Antraštė index ≠ mėgstamiausi | Luko „Neveikia“. |
+| Nr.47 | Neatitinkantys filtrų (autogidas iškelti) rodomi „Kiti skelbimai“ | Nerodyti visai, rinkos kainai lieka. |
+| Kuras | Griežtas kuro filtras (KL-PUSH-0922E) | Tik pasirinktas kuras; variantai: Dyzelinas, Benzinas, Benzinas/dujos, Benzinas/elektra, Elektra, Dyzelinas/elektra. Push v2.10.1–2 – po šito, su nauju leidimu. |
+| 53 paketas | `card` klasė nuo apvalkalo (DZ-KORTELES: visi trys) | v2.11.0; prieš – JS `closest('.card')` / `.card` paieška. |
+| Stabdis | Kiekis portaluose + kaina + stabdis + Stop | KL-STABDIS-SUMA (Finansininko ribos kreditais + fondo sargas + admin kreditų/likučio rodinys), KL-STABDIS-ADMIN (blokuoti + „tik naujausi už leistiną“), KL-STOP (sustabdyti ir rodyti rastus). Dizainas – laukia KL-STOP-DIZAINAS. Užsienio limitas nuimamas pirmas. |
+| Teisininkas | KL-TEISININKAS: taip | Faktų dokumentas iš kodo, pirma žinutė, rolė DARBO-SISTEMA. |
+| KL-PATIKRA2 | Filtrai kaip autoplius | Metai, kaina, rida, galia – sąrašai; neįvesta → „–“; varantieji ratai ir kuras – autoplius variantai. |
+| FN-0922-1300 | Nauji planai `planai.js` + LT/užsienio paieškų skaidymas | Iki 10-15. |
 | KL-R1 / KL-R2 | Kainos kritimo žyma; atsuktos ridos įspėjimas | Luko „taip“. 0 kreditų. |
-| KL-F3PLUS | ScraperAPI paros žurnalas + <20 % įspėjimas | Luko „taip“. |
-| FN-0922-1300 / 1302 | Nauji planai (planai.js) ir valdomas sekimas | Po Startup 10-16 (FN-0922-1310 dar klausimas). |
-| KL-MODELIS | Sonnet 5 bandymas 3–5 apžvalgomis | Mokama – daryti su Luko žinia. |
-| DZ-TINDER | „Tinder“ perdarymas | Dizainas + kodas, kartu su dizaineriu. |
-| Darbo sistema | DARBO-SISTEMA v2, fazė A | Vykdoma. Kol nebaigta — produkto darbai stovi (Luko sprendimas). |
+| KL-F3PLUS | ScraperAPI paros žurnalas + <20 % įspėjimas | Luko „taip“; jungti su stabdžio admin rodiniu. |
+| KL-MODELIS | Sonnet 5 bandymas 3–5 apžvalgomis | Mokama – su Luko žinia. |
+| DZ-TINDER | „Tinder“ perdarymas | Dizainas + kodas. |
 
 ## Dizaineris
 

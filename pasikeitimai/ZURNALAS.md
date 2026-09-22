@@ -1211,3 +1211,9 @@ visu kontekstu. Kai imsiu juostą, **pirmas darbas bus nuspręsti tarp jų.**
 - `:last-child` (0,2,0, ct-dizainas vėliau) suveikia – paskutinė STD 0. TOP paskutinė ne `:last-child` (po jos `#ct-kiti-hdr`), lieka 14.
 - Sargai žali.
 
+## Z-112 · 2026-09-22 · Klaudijus · Luko eilė ir klaidos sutvarkytos
+- Klaidos: #46 → laukia-patikros (v2.10.0 TA punktai; senos `val.toFixed` klaidos kode nebėra); #48 → laukia-patikros (kryžminiai skelbimai jau veikia, 502/404 – v2.9.1); #47 → patvirtinta (autogidas iškelti skelbimai nepaiso filtrų – nerodyti). #45, #30 – patvirtinta, eilėje pirmos.
+- Luko eilė: 11 įvykdytų punktų → uždaryta; 7 atsakyti → perduota Klaudijui; FN-0922-1310 vėl klausiamas (paaiškinimas PLETRA §7.6); naujas KL-STOP-DIZAINAS (3 dizainerio klausimai).
+- **KL-PUSH-0922E – push NEleistas:** atsakymas – griežtinti kuro filtrą. v2.10.1–v2.10.2 lieka lokaliai.
+- FN-0922-0340: ScraperAPI 88 646 / 100 000 (09-22 ~14 val.).
+
