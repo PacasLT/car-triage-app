@@ -85,8 +85,9 @@ const METAI = new Date().getFullYear();
 lygu(R.amziausJuosta(x5, 3) && R.amziausJuosta(x5, 3).raktas, '0-3', 'amziausJuosta(X5, 3) → 0-3');
 lygu(R.amziausJuosta(x5, 12) && R.amziausJuosta(x5, 12).raktas, '10-12', 'amziausJuosta(X5, 12) → 10-12');
 lygu(R.amziausJuosta(x5, 41), null, 'už paskutinės juostos → null');
-T(rasti({ marke: 'BMW', modelis: 'X5', metai: METAI - 3, rida: 20000 }, 'RIDOS NORMA').length === 0,
-  '3 m. X5 su 20 000 km → punkto NĖRA (savo juostoje virš P10)');
+// A-34: TA juosta pirmesnė. 3 m. X5 TA 0-3 P10 = 6 788 km/met, tad 20 000 km (6 667/met) - 🟡.
+T(rasti({ marke: 'BMW', modelis: 'X5', metai: METAI - 3, rida: 30000 }, 'RIDOS NORMA').length === 0,
+  '3 m. X5 su 30 000 km → punkto NĖRA (TA juostoje virš P10)');
 // Lemiamas A-30 atvejis: 3 m. X5 su 100 000 km pagal sudėtą rida_kv būtų
 // „žemiau P10", o savo juostoje jis ties P90. Punkto būti negali.
 T(rasti({ marke: 'BMW', modelis: 'X5', metai: METAI - 3, rida: 100000 }, 'RIDOS NORMA').length === 0,
@@ -106,18 +107,36 @@ p = rasti({ marke: 'BMW', modelis: 'X5', metai: METAI - 10, rida: null }, 'RIDOS
 T(p.length === 1 && p[0].lygis === R.LYGIS.NEZINOMA, 'be ridos → ⚪, ne tyla');
 
 // A-32 · atsarga, kai juostos nėra: TIK 7-15 m. ir tik kai kmmet_n >= 100.
-// K-33: BMW 320 dabar = BMW 3 su visomis juostomis. Atsargos pavyzdys - SUBARU OUTBACK (kmmet_n 119, juostų nėra).
-const b320 = R.kontekstas('SUBARU', 'OUTBACK');
-lygu(R.amziausJuosta(b320, 10) && R.amziausJuosta(b320, 10).raktas, 'atsarga', 'SUBARU OUTBACK (juostų nėra), 10 m. → atsarga');
+// K-33 + A-34: atsargos pavyzdys - MERCEDES AMG (Regitra kmmet_n 102, juostų nėra, TA juostų n >= 100 nėra).
+// SUBARU OUTBACK nebetinka: TA turi jo juostas.
+const b320 = R.kontekstas('MERCEDES', 'AMG');
+lygu(R.amziausJuosta(b320, 10) && R.amziausJuosta(b320, 10).raktas, 'atsarga', 'MERCEDES AMG (juostų nėra), 10 m. → atsarga');
 T(R.amziausJuosta(b320, 10).v[1] === b320.kmmet_kv[0], 'atsargos P10 = sudėtinio kmmet_kv P10');
 lygu(R.amziausJuosta(b320, 6), null, '6 m. → atsargos NĖRA (jaunoms sudėtinis klysta 1,3-3,3 %)');
 lygu(R.amziausJuosta(b320, 16), null, '16 m. → atsargos NĖRA (16-20 klaidingai žymėtų 5,8 %, 21+ – 23,7 %)');
 lygu(R.amziausJuosta(R.kontekstas('KIA', 'CEED'), 10), null, 'mažos imties modelis KIA CEED (kmmet_n 84 < 100) → atsargos nėra');
-p = rasti({ marke: 'SUBARU', modelis: 'OUTBACK', metai: METAI - 10, rida: 60000 }, 'RIDOS NORMA');
-T(p.length === 1 && p[0].lygis === R.LYGIS.SIGNALAS, 'SUBARU OUTBACK, 10 m., 6 000 km/met → 🟡 per atsargą');
+p = rasti({ marke: 'Mercedes-Benz', modelis: 'AMG', metai: METAI - 10, rida: 10000 }, 'RIDOS NORMA');
+T(p.length === 1 && p[0].lygis === R.LYGIS.SIGNALAS, 'MERCEDES AMG, 10 m., 1 000 km/met → 🟡 per atsargą (P10 1 265)');
 T(p.length === 1 && /visų amžių/.test(p[0].tekstas), 'tekste pasakyta, kad lyginta su visų amžių imtimi');
-T(rasti({ marke: 'SUBARU', modelis: 'OUTBACK', metai: METAI - 16, rida: 60000 }, 'RIDOS NORMA')[0].lygis === R.LYGIS.NEZINOMA,
+T(rasti({ marke: 'Mercedes-Benz', modelis: 'AMG', metai: METAI - 16, rida: 10000 }, 'RIDOS NORMA')[0].lygis === R.LYGIS.NEZINOMA,
   'tas pats modelis 16 m. → ⚪, ne spėjimas');
+
+console.log('\n── 4b. A-34 · TA ridos norma, būklė, importas (UZDUOTIS-ta §10.4) ─');
+T(R.taMeta() && R.taMeta().modeliu >= 900, 'TA suvestinė įkelta (' + (R.taMeta() && R.taMeta().modeliu) + ' modelių)');
+p = rasti({ marke: 'Toyota', modelis: 'Corolla', metai: METAI - 5, rida: 30000 }, 'RIDOS NORMA');
+T(p.length === 1 && p[0].lygis === R.LYGIS.SIGNALAS && /techninių apžiūrų/.test(p[0].tekstas), 'Corolla 5 m. 30 000 km → 🟡 iš TA (6 000 < 7 782)');
+T(p.length === 1 && /TRANSEKSTA/.test(p[0].tekstas) && /CC BY 4\.0/.test(p[0].tekstas) && !/naujausi/i.test(p[0].tekstas), 'TA punkte atribucija ir laikotarpis, ne „naujausi"');
+T(rasti({ marke: 'BMW', modelis: 'X5', metai: METAI - 5, rida: 100000 }, 'RIDOS NORMA').length === 0, 'X5 5 m. 100 000 km → be ridos punkto (20 000 > TA P10)');
+p = rasti({ marke: 'VW', modelis: 'Golf', metai: METAI - 25, rida: 50000 }, 'RIDOS NORMA');
+T(p.length === 1 && p[0].lygis === R.LYGIS.NEZINOMA, 'Golf 25 m. → ⚪ (nulinimas ≥ 1,0)');
+p = rasti({ marke: 'Renault', modelis: 'Megane', metai: METAI - 11 }, 'BŪKLĖ');
+T(p.length === 1 && p[0].lygis === R.LYGIS.SIGNALAS && /54,0 %/.test(p[0].tekstas) && /43,5 %/.test(p[0].tekstas), 'Megane 11 m. → 🟡 BŪKLĖ 54,0 % / 43,5 %');
+T(rasti({ marke: 'BMW', modelis: '320d', metai: METAI - 2 }, 'BŪKLĖ').length === 0, 'BMW 3, 2 m. → BŪKLĖS nėra (0–3 m. nenaudojama)');
+T(!R.punktai({ marke: 'Renault', modelis: 'Megane', metai: METAI - 11 }).some((q) => q.k === 'BŪKLĖ' && q.lygis === R.LYGIS.PATVIRTINTA), 'BŪKLĖ niekada 🟢');
+p = rasti({ marke: 'Volkswagen', modelis: 'ID.4', metai: METAI - 2 }, 'IMPORTAS');
+T(p.length === 1 && p[0].lygis === R.LYGIS.PATVIRTINTA && /296 %/.test(p[0].tekstas), 'VW ID → 🟢 IMPORTAS +296 %');
+T(rasti({ marke: 'VW', modelis: 'Passat', metai: METAI - 8 }, 'IMPORTAS').length === 0, 'VW Passat → IMPORTO TENDENCIJOS nėra');
+T(!!R.tikrintiTeksta('šis modelis nepatikimas') && !!R.tikrintiTeksta('kaina kris') && !!R.tikrintiTeksta('dažnai genda'), 'DRAUDZIAMA: patikimumas, gedimai, kainų prognozė');
 
 console.log('\n── 5. Nurašymai · 15+ pjūvis, riba 40, amžiaus vartai 12 (A-29) ─');
 T(rasti({ marke: 'OPEL', modelis: 'VECTRA', metai: METAI - 18 }, 'NURAŠYMAI').length === 1,

@@ -99,8 +99,27 @@ function baziniModelis(marke, modelis) {
 
 let LENT = new Map();
 let META = null;
+// v2.10.0 (A-34): TA apžiūrų suvestinė (TRANSEKSTA, data.gov.lt 2721, CC BY 4.0).
+let TA = new Map();
+let TA_META = null;
+let TA_BAZE = null;
+
+function ikeltiTA() {
+  try {
+    const d = JSON.parse(fs.readFileSync(path.join(__dirname, 'duomenys', 'ta-modeliai.json'), 'utf8'));
+    TA = new Map(d.modeliai.map((m) => [m.modelis, m]));
+    TA_BAZE = (d.bazine && d.bazine.neislaike_juostos) || null;
+    TA_META = { sugeneruota: d.sugeneruota, laikotarpis: d.laikotarpis || null, modeliu: d.modeliai.length };
+    console.log('[TA] ikelta:', TA_META.modeliu, 'modeliu · laikotarpis', TA_META.laikotarpis);
+  } catch (e) {
+    console.error('[TA] NEPAVYKO ikelti:', e.message, '- TA punktai isjungti');
+    TA = new Map(); TA_META = null; TA_BAZE = null;
+  }
+  return TA_META;
+}
 
 function ikelti() {
+  ikeltiTA();
   try {
     const p = path.join(__dirname, 'duomenys', 'regitra-modeliai.json');
     const d = JSON.parse(fs.readFileSync(p, 'utf8'));
@@ -168,6 +187,19 @@ function kontekstas(marke, modelis) {
   return LENT.get(k) || null;
 }
 
+function taKontekstas(marke, modelis) {
+  const [mk, mo] = paruosti(marke, modelis);
+  const k = baziniModelis(mk, mo);
+  return k ? (TA.get(k) || null) : null;
+}
+
+// Atribucija - CC BY 4.0 reikalauja. Metai iš failo, niekada „naujausi" (A-33).
+function taSaltinis() {
+  const l = TA_META && TA_META.laikotarpis;
+  const iki = l && l[1] ? String(l[1]).slice(0, 7) : '';
+  return '(Šaltinis: TRANSEKSTA, techninės apžiūros duomenys' + (iki ? ' iki ' + iki : '') + ' · CC BY 4.0)';
+}
+
 // ── Ribos ────────────────────────────────────────────────────────────────────
 // Visos RISTOS PRIE IMTIES KVARTILIU, ne prie apvaliu skaiciu. Tai analitiko
 // principas is `ATSAKYMAI` 8 sk., ir jis reiskia, kad riba pati pasako, kiek
@@ -201,6 +233,15 @@ const RIBOS = {
   atsargaMinN: 100,      // P10 is 25 irasu svyruoja -24 .. +21 % (Audi A6 16-20)
 
   kuroMazuma: 15,        // <= 15 %  -> 🟡  siauras pirkeju ratas
+
+  // A-34 (Analitikas, 2026-09-22, UZDUOTIS-ta-integracija.md §10)
+  taJuostaMinN: 100,     // TA juosta pirmesnė už Regitros, kai apžiūrų >= 100
+  taNulinimas: 1.0,      // nulinimas_pct >= 1,0 -> 21-40 m. ridos norma ⚪
+  buklesMinN: 300,       // BŪKLĖ: juostoje >= 300 apžiūrų
+  buklesPP: 10,          // ir >= +10 p. p. virš bazinės -> 🟡 (🟢 nerodom)
+  importoMinA1: 120,     // IMPORTAS: paskutinių 12 mėn. >= 120
+  importoAugo: 50,       // >= +50 %
+  importoKrito: -33,     // <= -33 %
 };
 
 // ── Uždrausti žodžiai · ta pati taisyklė, kaip nuotraukų analizėje ───────────
@@ -212,6 +253,10 @@ const DRAUDZIAMA = [
   { re: /\bsuklastot\w*\b/i, kodel: 'klastojimas iš suvestinės nenustatomas' },
   { re: /\bneatitinka\s+tikrov\w*\b/i, kodel: 'suvestinė nežino šio automobilio' },
   { re: /\bmeluoj\w*\b|\bapgaul\w*\b/i, kodel: 'suvestinė nieko neįtaria' },
+  // A-34: TA fiksuoja dėvėjimąsi, ne patikimumą; importas - faktas, ne prognozė.
+  { re: /\b(ne)?patikim\w*\b/i, kodel: 'TA matuoja būklę, ne patikimumą' },
+  { re: /\bdažnai\s+gend\w*\b|\bdaznai\s+gend\w*\b/i, kodel: 'TA matuoja būklę, ne gedimus' },
+  { re: /\b(kaina|vertė|verte)\s+(kris|sumažės|sumazes|augs)\w*\b/i, kodel: 'registras neprognozuoja kainų' },
 ];
 
 function tikrintiTeksta(t) {
@@ -230,6 +275,9 @@ function punktas(lygis, k, tekstas) {
   return { lygis, k, tekstas };
 }
 
+const proc1 = (v) => Number(v).toFixed(1).replace('.', ',');
+// „RENAULT MEGANE" -> „Renault Megane", bet „BMW X5", „VW ID" lieka.
+const graziVardas = (s) => String(s || '').split(' ').map((w) => (/^[A-Z]{4,}$/.test(w) ? w[0] + w.slice(1).toLowerCase() : w)).join(' ');
 const sk = (v) => Number(v).toLocaleString('lt-LT').replace(/,/g, ' ');
 
 // ── Kuro vardų suvedimas ─────────────────────────────────────────────────────
@@ -258,14 +306,33 @@ function kuroDalis(r, kuras) {
 // `c` - skelbimas: { marke, modelis, metai, rida, kuras }.
 // Amziaus juosta is `kmmet_juostos` (raktai '0-3', '4-6', ..., '21-40').
 // Nera juostos (maziau 50 irasu) -> null, ir sasaja rodo ⚪, ne spejima.
-function amziausJuosta(r, amzius) {
-  if (!r || amzius == null) return null;
-  for (const k of Object.keys(r.kmmet_juostos || {})) {
+function juostaIs(juostos, amzius, minN) {
+  for (const k of Object.keys(juostos || {})) {
     const [nuo, iki] = k.split('-').map(Number);
     if (amzius >= nuo && amzius <= iki) {
-      return { raktas: k, v: r.kmmet_juostos[k], pavadinimas: nuo + '–' + iki + ' metų' };
+      const v = juostos[k];
+      if (minN && !(v && v[0] >= minN)) return null;
+      return { raktas: k, v, nuo, iki, pavadinimas: nuo + '–' + iki + ' metų' };
     }
   }
+  return null;
+}
+
+// A-34 tvarka: TA juosta (n >= 100) -> Regitros juosta -> Regitros atsarga
+// 7-15 m. -> null (⚪). TA modeliui su nulinimas >= 1,0 21-40 m. juosta
+// „užteršta" skaitiklių keitimais - grąžinam { blokuota: true } (⚪).
+function amziausJuosta(r, amzius, ta) {
+  if (amzius == null) return null;
+  if (ta && ta.nulinimas_pct != null && ta.nulinimas_pct >= RIBOS.taNulinimas && amzius >= 21) {
+    return { blokuota: true };
+  }
+  if (ta) {
+    const j = juostaIs(ta.kmmet_juostos, amzius, RIBOS.taJuostaMinN);
+    if (j) return Object.assign(j, { ta: true });
+  }
+  if (!r) return null;
+  const j = juostaIs(r.kmmet_juostos, amzius, 0);
+  if (j) return j;
   // A-32 atsarga: tik 7-15 m. lange ir tik su pakankama imtimi.
   if (amzius >= RIBOS.atsargaNuo && amzius <= RIBOS.atsargaIki
       && Array.isArray(r.kmmet_kv) && r.kmmet_n >= RIBOS.atsargaMinN) {
@@ -279,6 +346,7 @@ function amziausJuosta(r, amzius) {
 function punktai(c) {
   if (!c) return [];
   const r = kontekstas(c.marke, c.modelis);
+  const ta = taKontekstas(c.marke, c.modelis);
 
   if (!r) {
     if (!META) return [];
@@ -314,11 +382,14 @@ function punktai(c) {
   const metai = parseInt(c.metai, 10);
   const rida = parseFloat(c.rida);
   const amzius = metai ? (new Date().getFullYear() - metai) : null;
-  const juosta = amziausJuosta(r, amzius);
+  const juosta = amziausJuosta(r, amzius, ta);
 
   if (!amzius || amzius < 1 || !rida) {
     out.push(punktas(LYGIS.NEZINOMA, 'RIDOS NORMA',
       'Nepakanka duomenų palyginti (reikia metų ir ridos)'));
+  } else if (juosta && juosta.blokuota) {
+    out.push(punktas(LYGIS.NEZINOMA, 'RIDOS NORMA',
+      'Tokio amžiaus šio modelio ridos duomenis iškraipo dažni skaitiklių keitimai – palyginti nėra su kuo'));
   } else if (!juosta) {
     out.push(punktas(LYGIS.NEZINOMA, 'RIDOS NORMA',
       'Registre per mažai tokio amžiaus šio modelio automobilių su rida, kad būtų su kuo palyginti'));
@@ -329,8 +400,9 @@ function punktai(c) {
       out.push(punktas(LYGIS.SIGNALAS, 'RIDOS NORMA',
         sk(Math.round(kmMet)) + ' km per metus – patenka tarp 10 % mažiausiai '
         + 'važiavusių ' + juosta.pavadinimas + ' šio modelio automobilių Lietuvoje ('
-        + sk(n) + ' registracijų, mediana ' + sk(p50) + ' km/metus). '
-        + 'Paklauskite pardavėjo dėl serviso istorijos.'));
+        + sk(n) + (juosta.ta ? ' techninių apžiūrų' : ' registracijų') + ', mediana ' + sk(p50) + ' km/metus). '
+        + 'Paklauskite pardavėjo dėl serviso istorijos.'
+        + (juosta.ta ? ' ' + taSaltinis() : '')));
     }
     // Virs P10 punkto nera: „rida iprasta" nera zinia.
   }
@@ -369,6 +441,33 @@ function punktai(c) {
       + ' – siauresnis pirkėjų ratas perparduodant'));
   }
 
+  // 6. BŪKLĖ TA (A-34 §10.2) · tik 🟡, tik toje pačioje amžiaus juostoje,
+  //    0-3 m. NE (ten beveik vien įvežti - importo ženklas, ne būklė).
+  if (ta && TA_BAZE && amzius != null && amzius >= 4) {
+    const bj = juostaIs(ta.neislaike_juostos, amzius, RIBOS.buklesMinN);
+    const bz = bj && TA_BAZE[bj.raktas];
+    if (bj && bz && (bj.v[1] - bz[1]) >= RIBOS.buklesPP) {
+      out.push(punktas(LYGIS.SIGNALAS, 'BŪKLĖ',
+        'Šio amžiaus (' + bj.nuo + '–' + bj.iki + ' m.) ' + graziVardas(ta.modelis) + ' pirmos techninės apžiūros Lietuvoje neišlaiko '
+        + proc1(bj.v[1]) + ' % – daugiau nei vidutiniškai (' + proc1(bz[1]) + ' %). '
+        + taSaltinis()));
+    }
+  }
+
+  // 7. IMPORTO TENDENCIJA (A-34 §10.3) · Regitra imp_men, 🟢 faktas, be prognozės.
+  if (r && Array.isArray(r.imp_men) && r.imp_men.length >= 36) {
+    const a0 = r.imp_men.slice(0, 12).reduce((x, y) => x + y, 0);
+    const a1 = r.imp_men.slice(-12).reduce((x, y) => x + y, 0);
+    if (a1 >= RIBOS.importoMinA1 && a0 > 0) {
+      const pok = Math.round((a1 - a0) / a0 * 100);
+      if (pok >= RIBOS.importoAugo || pok <= RIBOS.importoKrito) {
+        out.push(punktas(LYGIS.PATVIRTINTA, 'IMPORTAS',
+          'Įvežimas į Lietuvą per 3 metus ' + (pok > 0 ? 'išaugo ' : 'sumažėjo ') + Math.abs(pok) + ' % ('
+          + sk(Math.round(a0 / 12)) + ' → ' + sk(Math.round(a1 / 12)) + ' per mėn.)'));
+      }
+    }
+  }
+
   return out.filter(Boolean);
 }
 
@@ -377,4 +476,5 @@ module.exports = {
   baziniModelis, markeNorm, paruosti, tikrintiTeksta, kuroRaktas, kuroDalis, amziausJuosta,
   RIBOS, LYGIS, DRAUDZIAMA,
   meta: () => META,
+  taMeta: () => TA_META, taKontekstas,
 };

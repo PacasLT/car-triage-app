@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.10.0', data: '2026-09-22', pavadinimas: 'Techninės apžiūros duomenys prie skelbimų',
+    pakeitimai: [
+      'Ridos palyginimas dabar remiasi Lietuvos techninių apžiūrų duomenimis (12 mln. apžiūrų) – tikslesnis, ypač populiariems modeliams.',
+      'Naujas punktas „Būklė“: jei šio amžiaus modelis techninės apžiūros Lietuvoje neišlaiko gerokai dažniau nei vidutiniškai, tai parodoma skelbimo puslapyje.',
+      'Naujas punktas „Importas“: kaip per 3 metus pasikeitė modelio įvežimas į Lietuvą.',
+      'Duomenų šaltinis nurodomas prie kiekvieno punkto (TRANSEKSTA, CC BY 4.0).',
+    ],
+  },
+  {
     versija: '2.9.2', data: '2026-09-22', pavadinimas: 'Greitesnis pradžios puslapis ir kelios paieškos vienu metu',
     pakeitimai: [
       'Pradžios puslapio nuotrauka 10 kartų lengvesnė (2,2 MB → 0,2 MB) – puslapis telefone atsidaro greičiau, o antrą kartą nuotrauka imama iš naršyklės.',

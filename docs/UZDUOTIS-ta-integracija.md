@@ -273,3 +273,54 @@ Trunka **~1,5 val.** Jei nutrūks — paleisti tą pačią komandą, tęs nuo ko
 3. Playwright regresija 1400 / 390 px, 0 JS klaidų.
 4. `ta.test.js` + `regitra.test.js` + esami sargai.
 5. Klaidų sąrašo būsenos.
+
+---
+
+## 10. KL-NR46 galutinės ribos (A-34, Analitikas, 2026-09-22)
+
+Lukas pasirinko variantą A (AN-0922-1133). Tai trys punktai. Ribos pamatuotos pilname `ta-modeliai.json` (md5 d5d7a409…) ir **pakeičia** §4.1–4.2 pasiūlymus.
+
+### 10.1 RIDOS NORMA – TA pirminis šaltinis (keičia §4.1)
+
+```
+1. TA juosta modeliui, n ≥ 100 (ne 50)             → naudojam, žymim „TA"
+2. Regitros juosta (n ≥ 50)                         → naudojam
+3. Regitros sudėtinis, TIK 7–15 m., kmmet_n ≥ 100   → naudojam (A-32)
+4. kitaip                                           → ⚪
+```
+
+- Kodėl n ≥ 100: TA juostų su n ≥ 50 yra 3 617, su n ≥ 100 – 3 038. Parko aprėptis beveik ta pati (82–87 %), o P10 stabilesnis. TA `n` = apžiūrų skaičius, ne automobilių.
+- Jei `nulinimas_pct ≥ 1,0`, 21–40 m. juosta → ⚪. Tai liečia 210 modelių (Golf, Prius, Polo, Transporter…).
+- 🟡 taisyklė, tekstas ir draudžiami žodžiai nesikeičia. Prie TA juostos pridėti atribuciją §4.4.
+- Pavyzdys: Corolla, 4–6 m. Regitroje P10 = 4 296 (n 77), TA P10 = 7 782 (n 6 188). Skelbimas su 6 000 km/metus: su Regitra – be punkto, su TA – 🟡.
+
+### 10.2 BŪKLĖ TA – tik 🟡 (keičia §4.2)
+
+- Sąlyga: skelbimo amžiaus juostoje `n ≥ 300` ir `pct − bazine[juosta] ≥ 10` p. p. → 🟡.
+- **🟢 nerodom.** Lukas patvirtino tik įspėjimą. „Geriau už vidurkį" prie modelio skaitytųsi kaip „patikimas" (draudžiama).
+- **0–3 m. juostos nenaudoti.** Lietuvoje nauji automobiliai pirmą TA eina tik po kelerių metų, tad 0–3 m. pirminės apžiūros yra beveik vien įvežtų automobilių. Būtent ten didžiausi nuokrypiai (Audi A4 31,5 %, BMW 3 34,7 %, Prius 50,2 % prieš 20,5 % bazę) – tai importo ženklas, ne modelio būklė.
+- Mastas: iš 1 811 modelio×juostos porų (n ≥ 300) ribą ≥ +10 p. p. peržengia 291 (16 %). Pasiskirstymas: P50 +1,8, P75 +7,2, P90 +12,3.
+- Tekstas: „Šio amžiaus ({nuo}–{iki} m.) {modelis} pirmos techninės apžiūros Lietuvoje neišlaiko {pct} % – daugiau nei vidutiniškai ({bazė} %)." + atribucija §4.4.
+- Pavyzdžiai: Renault Megane 10–12 m. 54,0 % (bazė 43,5 %); Kia Sportage 10–12 m. 53,7 %; Volvo XC90 7–9 m. 43,4 % (bazė 32,6 %); Toyota Prius 4–6 m. 35,8 % (bazė 23,4 %).
+- Vieta: pagal K-TA-1 numatytąjį – skelbimo puslapyje ir trečiame lygyje, ne kortelėje.
+- Ribojimas: TA duomenys baigiasi 2025-05. Skelbimo amžių skaičiuojam nuo šiandien, todėl juosta gali pasislinkti ~1 metais. Tai priimtina.
+
+### 10.3 IMPORTO TENDENCIJA – iš Regitros, 🟢 (nauja)
+
+- Duomenys: `regitra-modeliai.json` → `imp_men` (36 mėn., 2023-06…2026-05). `a0 = sum(imp_men[0:12])`, `a1 = sum(imp_men[24:36])`.
+- Sąlyga: `a1 ≥ 120` ir `a0 > 0`, ir (`(a1−a0)/a0 ≥ +50 %` arba `≤ −33 %`).
+- Lygis 🟢 PATVIRTINTA – tai suskaičiuotas faktas. Spalva reiškia žinojimo lygį, ne gera/bloga.
+- Tekstas: „Įvežimas į Lietuvą per 3 metus {išaugo / sumažėjo} {N} % ({a0/12} → {a1/12} per mėn.)". **Jokios prognozės** („kaina kris", „vertė kris") – įrašyti į `DRAUDZIAMA`, jei dar nėra.
+- Mastas: tinkami 154 modeliai, suveikia 47 (7,7 % parko), daugiausia elektromobiliai. Pavyzdžiai: VW ID 186 → 737 per metus (+296 %), Škoda Enyaq 36 → 172, Mazda 6 225 → 142 (−37 %).
+
+### 10.4 Testai (`regitra.test` / `ta.test`)
+
+| Atvejis | Laukiama |
+|---|---|
+| Toyota Corolla, 5 m., 30 000 km | 🟡 RIDOS NORMA iš TA (6 000 < 7 782) |
+| BMW X5, 5 m., 100 000 km | be ridos punkto (20 000 > TA P10 11 367) |
+| VW Golf, 25 m., 50 000 km | ⚪ RIDOS NORMA (nulinimas ≥ 1,0) |
+| Renault Megane, 11 m. | 🟡 BŪKLĖ 54,0 % / 43,5 % |
+| BMW 3, 2 m. | BŪKLĖS nėra (0–3 m. juosta nenaudojama) |
+| VW ID, bet kokie metai | 🟢 IMPORTO TENDENCIJA +296 % |
+| VW Passat | IMPORTO TENDENCIJOS nėra (pokytis tarp ribų) |

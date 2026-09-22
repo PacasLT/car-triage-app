@@ -900,6 +900,7 @@ app.get('/admin/atsarga', klaiduPrieiga, (req, res) => {
   const p = ATSARGA.puppeteer;
   res.json(Object.assign({ saugykla: saugykla() }, {
     nuoPaleidimoVal: val,
+    ta: regitra.taMeta ? regitra.taMeta() : null,
     scraperEile: { riba: SCRAPER_LYGIAGRECIAI, aktyvios: _scraperEile.aktyvios, laukia: _scraperEile.laukia.length, didziausiaEile: _scraperEile.didziausiaEile },
     // `null` cia reiskia, kad JSON neikeltas - butent tai ir norim matyti.
     // `duomenuPabaiga` ir `langas12men` prideti v2: be ju skaiciai neturi
