@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.10.6', data: '2026-09-22', pavadinimas: 'Kėbulas su LCI ir kaina pagal kartos fazę',
+    pakeitimai: [
+      'BMW kėbulas dabar rodomas su atnaujinimu: „G05 LCI“, „G30/G31 LCI“. Atnaujinimo metų automobiliui rodomi abu variantai („G05 / G05 LCI“), nebent skelbime parašyta LCI arba facelift.',
+      'Rinkos kaina ir balas: automobilis lyginamas su tos pačios kartos ir fazės skelbimais (pvz. G05 LCI – tik su G05 LCI), kai jų yra bent 5. Taip naujesnis LCI nebeatrodo „brangus“, o senesnis – „pigus“. Skelbimo puslapyje prie „Panašių skelbimų“ parašyta, su kuria grupe lyginta.',
+      'Filtre, pasirinkus modelį, matyti, nuo kurių metų gaminamas LCI.',
+    ],
+  },
+  {
     versija: '2.10.5', data: '2026-09-22', pavadinimas: 'Griežtas kuro filtras, be netinkamų skelbimų',
     pakeitimai: [
       'Kuro filtras dabar griežtas ir turi 6 variantus kaip autoplius: Dyzelinas, Benzinas, Benzinas / dujos, Benzinas / elektra, Elektra, Dyzelinas / elektra. Pasirinkus „Dyzelinas“, dyzelino hibridai nebesimaišo.',

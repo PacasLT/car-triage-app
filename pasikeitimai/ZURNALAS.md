@@ -1254,3 +1254,10 @@ visu kontekstu. Kai imsiu juostą, **pirmas darbas bus nuspręsti tarp jų.**
 - Nr.47: `filtruAtmesti` rodo tik tuos, kurių vienintelė priežastis – kainos įspėjimas; filtrų neatitinkantys nerodomi (rinkos vidurkiui lieka). Naršymo režimas nepakeistas.
 - filtrai.test 91/91 (+ griežti), mobilede.test 49/49. Sargai 15 / 0 / 3.
 
+## Z-119 · 2026-09-22 · Klaudijus · v2.10.6 – LCI / facelift kėbule ir rinkos kainoje
+- Luko pastaba: „Kėbulas G05, bet gali būti G05 LCI – rodyti ir įtraukti į vertinimą, LCI brangesnis.“
+- `kartos.json` naujas laukas `atn` (atnaujinimo pradžios metai). Užpildyta BMW (11 raktų); kitoms markėms – Analitikas (A-40).
+- `regitra.js`: `kartosFazes`, `rinkosGrupe`; `kartos()` rodo „G05 LCI“; atnaujinimo metais – abu, nebent tekste LCI/facelift.
+- `rinkos-mediana.js`: grupių medianos + `lyginimoMediana` (grupė, kai ≥ 5 kainos, kitaip visas modelis). `server.js`: diffPct ir balas pagal ją; `rinkosGrupe` į kortelę ir detail.
+- Testai: regitra 158/158, mediana 17/17, kiti žali.
+

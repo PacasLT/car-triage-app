@@ -48,5 +48,23 @@ T(cm.median === r.median && cm.count === r.count, 'mediana ir imtis sutampa su a
 T(cm.ridaMedian > 0 && cm.ridaCount === 23, 'rida skaičiuojama kaip anksčiau (23)');
 T(['median', 'count', 'ridaMedian', 'ridaCount'].every((k) => k in cm), 'visi seni laukai yra');
 
+console.log('\n── v2.10.6: kartos fazės grupė ────────────────────────────');
+{
+  const L = [];
+  [60000, 62000, 63000, 64000, 65000, 66000].forEach((k) => L.push({ modelis: 'X5', kaina: k, rinkosGrupe: 'G05' }));
+  [85000, 87000, 88000, 90000, 92000].forEach((k) => L.push({ modelis: 'X5', kaina: k, rinkosGrupe: 'G05 LCI' }));
+  L.push({ modelis: 'X5', kaina: 75000 }); // atnaujinimo metai – be grupės
+  const md = M.computeMarketMedians(L).X5;
+  T(md.grupes['G05 LCI'].median === 88000 && md.grupes['G05 LCI'].count === 5, 'G05 LCI grupės mediana 88 000 (5)');
+  T(md.grupes['G05'].count === 6, 'G05 grupėje 6');
+  const lyg = M.lyginimoMediana(md, 'G05 LCI');
+  T(lyg.grupe === 'G05 LCI' && lyg.median === 88000, 'LCI skelbimas lyginamas su LCI mediana, ne su visu modeliu (' + md.median + ')');
+  const d = Math.round((88000 - 85000) / 88000 * 100), dSenas = Math.round((md.median - 85000) / md.median * 100);
+  T(dSenas < 0 && d > 0, '85 000 € LCI: vs visas modelis ' + dSenas + ' % (atrodo brangus) → vs LCI +' + d + ' % pigiau');
+  const maza = M.computeMarketMedians(L.slice(0, 4).concat([{ modelis: 'X5', kaina: 90000, rinkosGrupe: 'G05 LCI' }])).X5;
+  T(M.lyginimoMediana(maza, 'G05 LCI').grupe === null, 'grupėje < 5 → lyginama su visu modeliu');
+  T(M.lyginimoMediana(md, null).median === md.median, 'be grupės → modelio mediana');
+}
+
 console.log('\n' + (klaidu ? '✗ ' + klaidu + ' klaidos iš ' + n : '✓ ' + n + '/' + n + ' patikrų praėjo'));
 process.exit(klaidu ? 1 : 0);

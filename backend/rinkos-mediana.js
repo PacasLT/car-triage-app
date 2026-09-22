@@ -43,27 +43,52 @@ function atspariMediana(kainos) {
 }
 
 // Ta pati sąsaja, kaip buvusi `computeMarketMedians` server.js — kvietėjai nekeičiami.
+// v2.10.6: jei skelbimas turi `rinkosGrupe` (kartos fazė, pvz. „G05 LCI"), kaina
+// papildomai skaičiuojama ir grupės medianai: medians[modelis].grupes[grupe].
 function computeMarketMedians(parsedListings) {
   const byModel = {};
   const ridaByModel = {};
+  const byGrupe = {};
   (parsedListings || []).forEach((l) => {
     // Lizingo įmokos ir klaidingai įvestos sumos, kurias jau pažymėjo kainosPatikra
-    if (l.kaina && !l.kainosIspejimas) (byModel[l.modelis] = byModel[l.modelis] || []).push(l.kaina);
+    if (l.kaina && !l.kainosIspejimas) {
+      (byModel[l.modelis] = byModel[l.modelis] || []).push(l.kaina);
+      if (l.rinkosGrupe) {
+        const g = (byGrupe[l.modelis] = byGrupe[l.modelis] || {});
+        (g[l.rinkosGrupe] = g[l.rinkosGrupe] || []).push(l.kaina);
+      }
+    }
     if (l.rida) (ridaByModel[l.modelis] = ridaByModel[l.modelis] || []).push(l.rida);
   });
   const medians = {};
   for (const [model, prices] of Object.entries(byModel)) {
     const k = atspariMediana(prices);
     const r = ridaByModel[model] || [];
+    const grupes = {};
+    for (const [gr, kainos] of Object.entries(byGrupe[model] || {})) {
+      const gm = atspariMediana(kainos);
+      grupes[gr] = { median: gm.median, count: gm.count };
+    }
     medians[model] = {
       median: k.median,
       count: k.count,
       atmesta: k.atmesta,
       ridaMedian: r.length ? med(r) : null,
       ridaCount: r.length,
+      grupes,
     };
   }
   return medians;
 }
 
-module.exports = { atspariMediana, computeMarketMedians, RIBOS: { MIN_KAINA, MAX_KAINA, APACIA, VIRSUS, MIN_IMTIS_REMAMS } };
+// Kuria mediana lyginti skelbimą: grupės (kartos fazės), jei joje ≥ MIN_GRUPEI
+// kainų, kitaip – viso modelio. Grąžina { median, count, grupe|null }.
+const MIN_GRUPEI = 5;
+function lyginimoMediana(marketData, rinkosGrupe) {
+  if (!marketData) return null;
+  const g = rinkosGrupe && marketData.grupes ? marketData.grupes[rinkosGrupe] : null;
+  if (g && g.count >= MIN_GRUPEI && g.median) return { median: g.median, count: g.count, grupe: rinkosGrupe };
+  return { median: marketData.median, count: marketData.count, grupe: null };
+}
+
+module.exports = { atspariMediana, computeMarketMedians, lyginimoMediana, MIN_GRUPEI, RIBOS: { MIN_KAINA, MAX_KAINA, APACIA, VIRSUS, MIN_IMTIS_REMAMS } };

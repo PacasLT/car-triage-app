@@ -2941,7 +2941,8 @@ function ctKartos() {
       var k = (d && d.kartos) || [];
       if (!k.length) { el.hidden = true; el.textContent = ''; return; }
       el.textContent = 'Kėbulai: ' + k.map(function (g) {
-        return g.kodas + ' (' + g.nuo + '–' + (g.iki == null ? 'dabar' : g.iki) + ')';
+        return g.kodas + ' (' + g.nuo + '–' + (g.iki == null ? 'dabar' : g.iki)
+          + (g.atn ? ', ' + g.atnPav + ' nuo ' + g.atn : '') + ')';
       }).join(', ');
       el.hidden = false;
     }).catch(function () { el.hidden = true; });

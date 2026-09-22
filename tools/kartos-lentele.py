@@ -221,4 +221,25 @@ top=sorted(M,key=lambda m:-M[m])[:300]
 print('top300 su kartomis',sum(1 for m in top if m.replace(' ','|',1) in K or m.replace('LAND ROVER ','LAND ROVER|') in K),'modeliu',len(K),'parko dalis',round(100*sum(M[rk(k)] for k in K if rk(k) in M)/1876309,1))
 print('praleisti top300 kiekis', sum(1 for m in top if m.replace(' ','|',1) not in K and not m.startswith('LAND ROVER')), 'top100',[m for m in top if m.replace(' ','|',1) not in K])
 p=os.path.join(S,'backend','duomenys','kartos.json')
+# v2.10.6: kartos atnaujinimas (facelift; BMW - LCI). Metai - kada pradėtas gaminti
+# atnaujintas variantas (Europa). Tų metų auto gali būti bet kuris - rodom abu,
+# nebent skelbimo tekste parašyta LCI / facelift. Šaltinis: gamintojų pranešimai
+# spaudai ir Wikipedia generacijų straipsniai (docs/kartos-saltiniai.md).
+ATN = {
+ 'BMW|1': {'E81/E87':2007,'F20/F21':2015},
+ 'BMW|3': {'E30':1987,'E46':2001,'E90/E91/E92/E93':2008,'F30/F31/F34':2015,'G20/G21':2022},
+ 'BMW|4': {'F32/F33/F36':2017,'G22/G23/G26':2024},
+ 'BMW|5': {'E39':2000,'E60/E61':2007,'F10/F11':2013,'G30/G31':2020},
+ 'BMW|6': {'E63/E64':2007,'F06/F12/F13':2015,'G32':2020},
+ 'BMW|7': {'E38':1998,'E65/E66':2005,'F01/F02':2012,'G11/G12':2019},
+ 'BMW|X1': {'E84':2012,'F48':2019},
+ 'BMW|X3': {'E83':2006,'F25':2014,'G01':2021},
+ 'BMW|X4': {'G02':2021},
+ 'BMW|X5': {'E53':2003,'E70':2010,'G05':2023},
+ 'BMW|X6': {'E71':2012,'G06':2023},
+}
+for k,m in ATN.items():
+    for g in K[k]:
+        if g['kodas'] in m: g['atn']=m[g['kodas']]
+    assert all(c in [g['kodas'] for g in K[k]] for c in m), k
 json.dump(dict(sorted(K.items())),open(p,'w',encoding='utf-8'),ensure_ascii=False,indent=0,separators=(',',':'))

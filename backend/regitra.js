@@ -139,18 +139,47 @@ function kartosRaktas(marke, modelis) {
   }
   return m.replace(' ', '|');
 }
-// Skelbimui: kodai, kurie apima tuos metus (1 arba 2 ties riba). [] - nezinoma.
-function kartos(marke, modelis, metai) {
+// v2.10.6: kartos atnaujinimas (LCI / facelift). `atn` – metai, nuo kada gaminamas
+// atnaujintas variantas. Tų metų auto gali būti bet kuris: sprendžiam iš skelbimo
+// teksto (LCI, facelift, restyling), kitaip – nežinoma (rodom abu).
+const ATN_PAV = { BMW: 'LCI' };
+const ATN_TEKSTE = /\b(lci|facelift|face-lift|restyling|restyle|fl)\b/i;
+function atnPav(k) { return ATN_PAV[String(k).split('|')[0]] || 'facelift'; }
+// Kartos fazės skelbimui: [{kodas, lci: true|false|null, rodyti}] (1 arba 2 ties riba).
+function kartosFazes(marke, modelis, metai, tekstas) {
   const k = kartosRaktas(marke, modelis); const m = parseInt(metai, 10);
   if (!k || !KARTOS[k] || !m) return [];
-  return KARTOS[k].filter((g) => m >= g.nuo && (g.iki == null || m <= g.iki)).map((g) => g.kodas);
+  const pav = atnPav(k);
+  const tekste = tekstas ? ATN_TEKSTE.test(String(tekstas)) : false;
+  const out = [];
+  KARTOS[k].filter((g) => m >= g.nuo && (g.iki == null || m <= g.iki)).forEach((g) => {
+    if (!g.atn) { out.push({ kodas: g.kodas, lci: null, rodyti: g.kodas }); return; }
+    if (m > g.atn || (m === g.atn && tekste)) out.push({ kodas: g.kodas, lci: true, rodyti: g.kodas + ' ' + pav });
+    else if (m < g.atn) out.push({ kodas: g.kodas, lci: false, rodyti: g.kodas });
+    else { // atnaujinimo metai, tekste nieko – gali būti abu
+      out.push({ kodas: g.kodas, lci: false, rodyti: g.kodas });
+      out.push({ kodas: g.kodas, lci: true, rodyti: g.kodas + ' ' + pav });
+    }
+  });
+  return out;
+}
+// Skelbimui: rodomi pavadinimai („G05 LCI"). [] - nezinoma.
+function kartos(marke, modelis, metai, tekstas) {
+  return kartosFazes(marke, modelis, metai, tekstas).map((f) => f.rodyti);
+}
+// Rinkos grupė kainai lyginti: tik kai fazė vienareikšmė. null – lyginam su visu modeliu.
+function rinkosGrupe(marke, modelis, metai, tekstas) {
+  const f = kartosFazes(marke, modelis, metai, tekstas);
+  return f.length === 1 ? f[0].rodyti : null;
 }
 // Filtrui: visos kartos, kurios persidengia su [nuo, iki].
 function kartosIntervalui(marke, modelis, nuo, iki) {
   const k = kartosRaktas(marke, modelis);
   if (!k || !KARTOS[k]) return [];
   const a = parseInt(nuo, 10) || 0, b = parseInt(iki, 10) || 9999;
-  return KARTOS[k].filter((g) => g.nuo <= b && (g.iki == null || g.iki >= a)).map((g) => ({ kodas: g.kodas, nuo: g.nuo, iki: g.iki }));
+  const pav = atnPav(k);
+  return KARTOS[k].filter((g) => g.nuo <= b && (g.iki == null || g.iki >= a))
+    .map((g) => ({ kodas: g.kodas, nuo: g.nuo, iki: g.iki, atn: g.atn || null, atnPav: g.atn ? pav : null }));
 }
 
 function ikelti() {
@@ -541,5 +570,5 @@ module.exports = {
   RIBOS, LYGIS, DRAUDZIAMA, KURO_KILMININKAS,
   meta: () => META,
   taMeta: () => TA_META, taKontekstas,
-  kartos, kartosIntervalui,
+  kartos, kartosFazes, rinkosGrupe, kartosIntervalui,
 };

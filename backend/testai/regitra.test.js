@@ -268,7 +268,7 @@ console.log('\n── Skelbimo pusė: markė modelyje (Z-85 regresija) ───
 {
   console.log('\nA-37 kartos');
   const kk = (mk, mo, m) => R.kartos(mk, mo, m).join('+');
-  lygu(kk('BMW', '3 serija', 2012), 'E90/E91/E92/E93+F30/F31/F34', 'BMW 3 2012 → E9x ir F3x (riba)');
+  lygu(kk('BMW', '3 serija', 2012), 'E90/E91/E92/E93 LCI+F30/F31/F34', 'BMW 3 2012 → E9x LCI ir F3x (riba)');
   T(/E90/.test(kk('BMW', '320', 2006)), 'BMW 320 2006 → E90…');
   lygu(kk('Volkswagen', 'Passat', 2015), 'B7+B8', 'VW Passat 2015 → B7+B8');
   lygu(kk('Skoda', 'Octavia', 2015), 'A7', 'Skoda Octavia 2015 → A7');
@@ -289,6 +289,26 @@ console.log('\n── Skelbimo pusė: markė modelyje (Z-85 regresija) ───
   lygu(kk('Nissan', 'Leaf', 2019), 'ZE1', 'Nissan Leaf 2019 → ZE1');
   lygu(kk('Porsche', '911', 2005), '996+997', 'Porsche 911 2005 → 996+997');
   lygu(kk('Land Rover', 'Discovery', 2012), '4 karta', 'Land Rover Discovery 2012 → 4 karta (markė su tarpu)');
+}
+
+// ── v2.10.6: kartos atnaujinimas (LCI / facelift) ──
+{
+  console.log('\nv2.10.6 LCI');
+  const kt = (mo, m, t) => R.kartos('BMW', mo, m, t).join('+');
+  lygu(kt('X5', 2022), 'G05', 'X5 2022 → G05 (prieš LCI)');
+  lygu(kt('X5', 2024), 'G05 LCI', 'X5 2024 → G05 LCI');
+  lygu(kt('X5', 2023), 'G05+G05 LCI', 'X5 2023 be teksto → abu (G05 / G05 LCI)');
+  lygu(kt('X5', 2023, 'BMW X5 xDrive40d LCI M Sport'), 'G05 LCI', 'X5 2023 su „LCI" tekste → G05 LCI');
+  lygu(kt('X5', 2023, 'BMW X5 Facelift'), 'G05 LCI', 'X5 2023 su „Facelift" → G05 LCI');
+  lygu(kt('X5', 2016), 'F15', 'X5 2016 → F15 (LCI nebuvo)');
+  lygu(kt('X5', 2013), 'E70 LCI+F15', 'X5 2013 → E70 LCI + F15 (kartų riba)');
+  lygu(kt('5 serija', 2021), 'G30/G31 LCI', '5 2021 → G30/G31 LCI');
+  lygu(R.rinkosGrupe('BMW', 'X5', 2024), 'G05 LCI', 'rinkos grupė X5 2024 → G05 LCI');
+  lygu(R.rinkosGrupe('BMW', 'X5', 2023), null, 'rinkos grupė X5 2023 be teksto → null (visas modelis)');
+  lygu(R.rinkosGrupe('BMW', 'X5', 2013), null, 'rinkos grupė ties kartų riba → null');
+  lygu(R.kartos('Volkswagen', 'Passat', 2016).join('+'), 'B8', 'be atn duomenų – kaip anksčiau (VW Passat 2016 → B8)');
+  const g = R.kartosIntervalui('BMW', 'X5', 2020, 2024).find((x) => x.kodas === 'G05');
+  T(g && g.atn === 2023 && g.atnPav === 'LCI', 'filtrui G05: LCI nuo 2023');
 }
 
 console.log('\n' + (klaidu ? '✗ ' + klaidu + ' klaidos iš ' + patikru : '✓ ' + patikru + '/' + patikru + ' patikrų praėjo'));

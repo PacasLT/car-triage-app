@@ -57,3 +57,7 @@ Anglų Wikipedia straipsniai apie kiekvieną modelį (skiltys „First/Second…
 - **Subaru/Mazda/Mitsubishi/Jeep/Porsche/Saab:** Subaru Forester, Legacy, Outback; Mazda6, CX-5; Mitsubishi Outlander; Jeep Grand Cherokee; Porsche Cayenne; Saab 9-3.
 
 Patikrinta tiesiogiai 2026-09-22: Peugeot 308, Citroën Berlingo, Kia Ceed, VW Tiguan, Škoda Octavia. Kiti kodai sudaryti pagal tuos pačius straipsnius, jų tiesiogiai neperskaičiau. Klaidą pranešti Analitikui – taisoma failo generatoriuje (ne ranka JSON).
+
+## Atnaujinimas (`atn`, v2.10.6)
+Laukas `atn` – metai, kai pradėtas gaminti atnaujintas kartos variantas (BMW – LCI, kitur – facelift). Faktas, ne vertinimas. Užpildyta: BMW 1, 3, 4, 5, 6, 7, X1, X3, X4, X5, X6 (Klaudijus, gamintojo pranešimai / Wikipedia generacijų straipsniai). Kitoms markėms pildo Analitikas generatoriuje (`ATN` žodynas).
+

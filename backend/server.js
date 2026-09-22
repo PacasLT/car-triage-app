@@ -1994,7 +1994,9 @@ function mergeDuplicatesAcrossPortals(listings) {
 
 // v2.4.0: perkelta i rinkos-mediana.js (atspari mediana, Nr. 43) - kad butu
 // testuojama be serverio. Kvietejai nepasikeite.
-const { computeMarketMedians } = require('./rinkos-mediana');
+const { computeMarketMedians, lyginimoMediana } = require('./rinkos-mediana');
+// v2.10.6: tekstas kartos atnaujinimui atpažinti (LCI / facelift skelbimo pavadinime).
+function rinkosTekstas(l) { return [l.modelis, l.title, l.variantas].filter(Boolean).join(' '); }
 
 async function generateShortComment(listing, diffPct) {
   const turiDefektu = listing.galimiDefektai.length > 0;
@@ -3306,7 +3308,7 @@ async function runSearchJob(jobId, filters) {
     for (const model of modelsInSearch) {
       const hist = cache.getHistoryForModel(model);
       const currentUrls = new Set([...parsed, ...hardRejected].filter((l) => l.modelis === model).map((l) => l.url));
-      const fromHistory = hist.filter((h) => !currentUrls.has(h.url)).map((h) => ({ modelis: model, kaina: h.kaina, rida: h.rida }));
+      const fromHistory = hist.filter((h) => !currentUrls.has(h.url)).map((h) => ({ modelis: model, kaina: h.kaina, rida: h.rida, metai: h.metai }));
       combinedForMedians = combinedForMedians.concat(fromHistory);
       historyAddedCount += fromHistory.length;
     }
@@ -3315,6 +3317,13 @@ async function runSearchJob(jobId, filters) {
     }
 
     logJob(jobId, '🧮 Skaičiuojame rinkos vidurkius...');
+    // v2.10.6: kartos fazė (pvz. „G05 LCI") – kaina lyginama su tos pačios fazės
+    // skelbimais, kai jų ≥ 5. Archyvo įrašai be teksto: atnaujinimo metų auto
+    // lieka tik bendroje modelio medianoje.
+    const fMarke = (filters && filters.marke) || null;
+    combinedForMedians.forEach((l) => {
+      l.rinkosGrupe = regitra.rinkosGrupe(l.marke || fMarke, l.modelis, l.metai, rinkosTekstas(l));
+    });
     const medians = computeMarketMedians(combinedForMedians);
     // Kaupiam VISUS nuskaitytus skelbimus - kuo daugiau istorijos, tuo tikslesnes
     // busimos medianos ir balai jau matytiems modeliams.
@@ -3382,18 +3391,20 @@ async function runSearchJob(jobId, filters) {
 
     const enriched = parsed.map((l) => {
       const marketData = l.modelis ? medians[l.modelis] : null;
-      const hasReliableMarket = marketData && marketData.count >= 3;
+      const lyg = lyginimoMediana(marketData, l.rinkosGrupe);
+      const hasReliableMarket = lyg && lyg.count >= 3;
       let diffPct = null, ridaDiffPct = null;
       if (l.kaina && hasReliableMarket) {
-        diffPct = Math.round(((marketData.median - l.kaina) / marketData.median) * 100);
+        diffPct = Math.round(((lyg.median - l.kaina) / lyg.median) * 100);
       }
       if (l.rida && marketData && marketData.ridaMedian && marketData.ridaCount >= 3) {
         ridaDiffPct = Math.round(((l.rida - marketData.ridaMedian) / marketData.ridaMedian) * 100);
       }
       return {
         ...l, diffPct, ridaDiffPct,
-        marketCount: marketData ? marketData.count : 0,
-        marketMedian: marketData ? marketData.median : null,
+        marketCount: lyg ? lyg.count : 0,
+        marketMedian: lyg ? lyg.median : null,
+        rinkosGrupe: lyg ? lyg.grupe : null,
         ridaMedian: marketData ? marketData.ridaMedian : null,
       };
     });
@@ -3488,7 +3499,7 @@ async function runSearchJob(jobId, filters) {
       const regMarke = l.marke || (filters && filters.marke) || null;
       l.regitra = regitra.kontekstas(regMarke, l.modelis) || null;
       l.regitraPunktai = regitra.punktai(Object.assign({}, l, { marke: regMarke }));
-      l.kartos = regitra.kartos(regMarke, l.modelis, l.metai);
+      l.kartos = regitra.kartos(regMarke, l.modelis, l.metai, rinkosTekstas(l));
     });
 
     let candidates = enriched.slice().sort((a, b) => b.qualityScore - a.qualityScore);
@@ -3659,7 +3670,7 @@ async function runSearchJob(jobId, filters) {
       kuras: l.kuras, pavarai: l.pavarai, turiVin: l.turiVin, galia: l.galia, variklioTuris: l.variklioTuris,
       pvmPastaba: l.pvmPastaba || null, kainaBaze: l.kainaBaze || null, varantieji: l.varantieji || null,
       itariamaZala: l.itariamaZala || null,
-      photo: l.photo, url: l.url, source: l.source, kryzminiaiSkelbimai: l.kryzminiaiSkelbimai || null, kartos: l.kartos || [],
+      photo: l.photo, url: l.url, source: l.source, kryzminiaiSkelbimai: l.kryzminiaiSkelbimai || null, kartos: l.kartos || [], rinkosGrupe: l.rinkosGrupe || null,
       isCandidate: candidateUrls.has(l.url), pardavejas: l.pardavejas || null,
       rejectionReasons: (l.hardRejections && l.hardRejections.length)
         ? l.hardRejections
@@ -3685,7 +3696,7 @@ async function runSearchJob(jobId, filters) {
       kainosPastaba: l.kainosPastaba || null, kainosIspejimas: l.kainosIspejimas || null,
       // LT registro kontekstas. `kandidatai` pjaunami i konkretu lauku sarasa,
       // tad neidejus cia jie iki sasajos nenukeliautu - nors `enriched` juos turi.
-      regitra: l.regitra || null, regitraPunktai: l.regitraPunktai || [], kartos: l.kartos || [],
+      regitra: l.regitra || null, regitraPunktai: l.regitraPunktai || [], kartos: l.kartos || [], rinkosGrupe: l.rinkosGrupe || null,
     }));
 
     // Skelbimai, kuriuos atmete kietasis filtras (kaina/metai/rida/deze/kuras).
