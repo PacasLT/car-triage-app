@@ -211,7 +211,7 @@ function addToHistory(listings) {
     if (!_history[l.modelis]) _history[l.modelis] = [];
     const arr = _history[l.modelis];
     const existingIdx = arr.findIndex((e) => e.url === l.url);
-    const entry = { url: l.url, kaina: l.kaina, rida: l.rida, metai: l.metai, kuras: l.kuras || null, galia: l.galia || null, pavarai: l.pavarai || null, variklioTuris: l.variklioTuris || null, time: Date.now() };
+    const entry = { url: l.url, kaina: l.kaina, rida: l.rida, metai: l.metai, menuo: l.menuo || null, kuras: l.kuras || null, galia: l.galia || null, pavarai: l.pavarai || null, variklioTuris: l.variklioTuris || null, time: Date.now() };
     if (existingIdx >= 0) arr[existingIdx] = entry;
     else arr.push(entry);
     if (arr.length > MAX_HISTORY_PER_MODEL) arr.splice(0, arr.length - MAX_HISTORY_PER_MODEL);

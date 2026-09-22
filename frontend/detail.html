@@ -1286,7 +1286,7 @@ window.ctApi = function (kelias, params) {
       body: JSON.stringify({
         url: c.url, kaina: c.kaina, marketMedian: c.marketMedian,
         marketCount: c.marketCount, diffPct: c.diffPct, modelis: c.modelis,
-        galia: c.galia, variklioTuris: c.variklioTuris
+        galia: c.galia, variklioTuris: c.variklioTuris, rinkosGrupe: c.rinkosGrupe || null, kartos: c.kartos || []
       })
     }).then(function(r) { return r.json(); }).then(function(resp) {
       if (btn) {
@@ -1438,7 +1438,7 @@ window.ctApi = function (kelias, params) {
       body: JSON.stringify({
         url: c.url, kaina: c.kaina, marketMedian: c.marketMedian, marketCount: c.marketCount,
         diffPct: c.diffPct, modelis: c.modelis, pardavejas: c.pardavejas,
-        galia: c.galia, variklioTuris: c.variklioTuris, force: !!force,
+        galia: c.galia, variklioTuris: c.variklioTuris, rinkosGrupe: c.rinkosGrupe || null, kartos: c.kartos || [], force: !!force,
         lygis: lygis === 'greita' ? 'greita' : 'pilna',
       }),
     }).then(function (r) { return r.json(); }).then(function (resp) {
@@ -2417,7 +2417,7 @@ window.ctApi = function (kelias, params) {
         body: JSON.stringify({
           url: c.url, kaina: c.kaina, marketMedian: c.marketMedian,
           marketCount: c.marketCount, diffPct: c.diffPct, modelis: c.modelis,
-          galia: c.galia, variklioTuris: c.variklioTuris
+          galia: c.galia, variklioTuris: c.variklioTuris, rinkosGrupe: c.rinkosGrupe || null, kartos: c.kartos || []
         })
       }).then(function(r) { return r.json(); }).then(function(resp) {
         var msg = document.getElementById('dp-photo-load-msg');

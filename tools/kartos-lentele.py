@@ -330,6 +330,25 @@ ATN.update({
  'PORSCHE|CAYENNE': {'92A':2014,'9YA':2023},
  'DACIA|DUSTER': {'1 karta':2013},
 })
+# v2.10.7: atnaujinto varianto gamybos pradžios MĖNUO (Europa). Naudojamas tik
+# atnaujinimo metų auto su pirmos registracijos mėnesiu: registruotas anksčiau nei
+# gamybos pradžia -> tikrai senas; >= 3 mėn. po pradžios -> atnaujintas; tarp jų -
+# nežinoma. BMW - Klaudijus (tikrina Analitikas, A-43); kitoms markėms pildo Analitikas.
+ATN_MEN = {
+ 'BMW|1': {'E81/E87':3,'F20/F21':3},
+ 'BMW|3': {'E46':9,'E90/E91/E92/E93':9,'F30/F31/F34':7,'G20/G21':7},
+ 'BMW|5': {'E60/E61':3,'F10/F11':7,'G30/G31':7},
+ 'BMW|7': {'F01/F02':7,'G11/G12':3},
+ 'BMW|X1': {'E84':7,'F48':7},
+ 'BMW|X3': {'E83':9,'F25':4,'G01':7},
+ 'BMW|X4': {'G02':8},
+ 'BMW|X5': {'E70':9,'G05':4},
+ 'BMW|X6': {'G06':4},
+}
+for k,m in ATN_MEN.items():
+    for g in K[k]:
+        if g['kodas'] in m: g['atnMen']=m[g['kodas']]
+    assert all(c in [g['kodas'] for g in K[k]] for c in m), k
 # v2.10.7 (A-41): rinkoje įprasti atnaujinto varianto vardai (vietoj „Mk7 facelift").
 ATN_VARDAS = {'VW|GOLF': {'Mk7':'Mk7.5','Mk8':'Mk8.5'}, 'VW|PASSAT': {'B5':'B5.5'}}
 for k,m in ATN_VARDAS.items():

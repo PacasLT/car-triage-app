@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.10.7', data: '2026-09-22', pavadinimas: 'LCI tiksliau: registracijos mėnuo ir AI apžvalga',
+    pakeitimai: [
+      'Atnaujinimo metų automobilis (pvz. 2023 m. X5) dabar atpažįstamas pagal pirmos registracijos mėnesį: įregistruotas prieš LCI gamybą – senas, praėjus 3 mėn. nuo jos pradžios – LCI. Tarpinis laikotarpis lieka „G05 / G05 LCI“. Kol kas BMW.',
+      'Pilna AI apžvalga žino kėbulo fazę ir su kuria grupe lyginta kaina. Jei metai dviprasmiški, AI bando nustatyti fazę iš aprašymo ir nuotraukų (žibintai, bamperiai), o jei nematyti – taip ir parašo.',
+    ],
+  },
+  {
     versija: '2.10.6', data: '2026-09-22', pavadinimas: 'Kėbulas su LCI / facelift ir kaina pagal kartos fazę',
     pakeitimai: [
       'Kėbulas dabar rodomas su atnaujinimu: BMW „G05 LCI“, Mercedes „W213 facelift“, VW „Mk7.5“, „B5.5“ ir kt. – 97 populiarūs modeliai. Atnaujinimo metų automobiliui rodomi abu variantai („G05 / G05 LCI“), nebent skelbime parašyta LCI, facelift ar restailingas.',

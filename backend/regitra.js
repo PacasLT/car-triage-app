@@ -147,7 +147,11 @@ const ATN_TEKSTE = /\b(lci|facelift|face-lift|restyling|restyle|restailing\w*|fl
 function atnPav(k) { return ATN_PAV[String(k).split('|')[0]] || 'facelift'; }
 // Kartos fazės skelbimui: [{kodas, lci: true|false|null, rodyti, karta}] (1 arba 2 ties riba).
 // A-41: atnaujinto varianto vardas gali būti rinkos (`atnVardas`: Golf „Mk7.5").
-function kartosFazes(marke, modelis, metai, tekstas) {
+// v2.10.7: `menuo` – pirmos registracijos mėnuo (autoplius, autogidas). Atnaujinimo
+// metais: registruotas prieš gamybos pradžią (`atnMen`) – tikrai senas; ≥ 3 mėn.
+// po jos – atnaujintas (senų likučių tikimybė maža); tarp jų – nežinoma.
+const ATN_MEN_TARPAS = 3;
+function kartosFazes(marke, modelis, metai, tekstas, menuo) {
   const k = kartosRaktas(marke, modelis); const m = parseInt(metai, 10);
   if (!k || !KARTOS[k] || !m) return [];
   const pav = atnPav(k);
@@ -158,21 +162,24 @@ function kartosFazes(marke, modelis, metai, tekstas) {
     const po = { kodas: g.kodas, lci: true, rodyti: g.atnVardas || (g.kodas + ' ' + pav), atn: true };
     po.grupe = po.rodyti;
     const pries = { kodas: g.kodas, lci: false, rodyti: g.kodas, grupe: g.kodas + ' iki ' + (g.atnVardas || pav), atn: true };
-    if (m > g.atn || (m === g.atn && tekste)) out.push(po);
-    else if (m < g.atn) out.push(pries);
+    const men = parseInt(menuo, 10);
+    const pagalMen = (m === g.atn && g.atnMen && men >= 1 && men <= 12)
+      ? (men < g.atnMen ? 'senas' : (men >= g.atnMen + ATN_MEN_TARPAS ? 'naujas' : null)) : null;
+    if (m > g.atn || (m === g.atn && (tekste || pagalMen === 'naujas'))) out.push(po);
+    else if (m < g.atn || pagalMen === 'senas') out.push(pries);
     else { out.push(pries); out.push(po); } // atnaujinimo metai, tekste nieko – gali būti abu
   });
   return out;
 }
 // Skelbimui: rodomi pavadinimai („G05 LCI", „Mk7.5"). [] - nezinoma.
-function kartos(marke, modelis, metai, tekstas) {
-  return kartosFazes(marke, modelis, metai, tekstas).map((f) => f.rodyti);
+function kartos(marke, modelis, metai, tekstas, menuo) {
+  return kartosFazes(marke, modelis, metai, tekstas, menuo).map((f) => f.rodyti);
 }
 // Rinkos grupės kainai lyginti, pirmenybės tvarka: [fazė, visa karta]. Skelbimas
 // priklauso visoms šioms grupėms. Atnaujinimo metų auto be teksto – tik „visa
 // karta" (abi fazės, A-41). Ties kartų riba – [] (lyginam su visu modeliu).
-function rinkosGrupes(marke, modelis, metai, tekstas) {
-  const f = kartosFazes(marke, modelis, metai, tekstas);
+function rinkosGrupes(marke, modelis, metai, tekstas, menuo) {
+  const f = kartosFazes(marke, modelis, metai, tekstas, menuo);
   const kodai = [...new Set(f.map((x) => x.kodas))];
   if (kodai.length !== 1) return [];
   const out = [];
@@ -180,8 +187,8 @@ function rinkosGrupes(marke, modelis, metai, tekstas) {
   if (f[0].atn) out.push(kodai[0] + ' visa karta');
   return out;
 }
-function rinkosGrupe(marke, modelis, metai, tekstas) {
-  return rinkosGrupes(marke, modelis, metai, tekstas)[0] || null;
+function rinkosGrupe(marke, modelis, metai, tekstas, menuo) {
+  return rinkosGrupes(marke, modelis, metai, tekstas, menuo)[0] || null;
 }
 // Filtrui: visos kartos, kurios persidengia su [nuo, iki].
 function kartosIntervalui(marke, modelis, nuo, iki) {

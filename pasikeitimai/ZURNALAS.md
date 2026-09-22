@@ -1268,3 +1268,9 @@ visu kontekstu. Kai imsiu juostą, **pirmas darbas bus nuspręsti tarp jų.**
 - Rinkos grupės pirmenybės tvarka: fazė → visa karta → modelis; atnaujinimo metų auto be teksto lyginamas su visa karta (A-41 siūlymas).
 - Testai: regitra 172/172, mediana 19/19.
 
+## Z-121 · 2026-09-22 · Klaudijus · v2.10.7 – LCI pagal registracijos mėnesį + fazė AI apžvalgai (Luko „Taip“)
+- `kartos.json` laukas `atnMen` (atnaujinto varianto gamybos pradžios mėnuo). BMW – Klaudijus, tikrina Analitikas (A-43).
+- `regitra.kartosFazes(..., menuo)`: atnaujinimo metais registruotas < atnMen → senas; ≥ atnMen + 3 → atnaujintas; tarp – nežinoma. Mėnuo – autoplius/autogidas `menuo`; archyve išsaugomas nuo šiol.
+- AI apžvalga: `rinkosGrupe` ir `kartos` į marketContext (paieška, analyze-single, detail/index); dviprasmiškai fazei AI prašoma nustatyti iš aprašymo/nuotraukų arba sakyti „nematyti“.
+- Testai: regitra 178/178, mediana 19/19.
+

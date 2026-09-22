@@ -3308,7 +3308,7 @@ async function runSearchJob(jobId, filters) {
     for (const model of modelsInSearch) {
       const hist = cache.getHistoryForModel(model);
       const currentUrls = new Set([...parsed, ...hardRejected].filter((l) => l.modelis === model).map((l) => l.url));
-      const fromHistory = hist.filter((h) => !currentUrls.has(h.url)).map((h) => ({ modelis: model, kaina: h.kaina, rida: h.rida, metai: h.metai }));
+      const fromHistory = hist.filter((h) => !currentUrls.has(h.url)).map((h) => ({ modelis: model, kaina: h.kaina, rida: h.rida, metai: h.metai, menuo: h.menuo }));
       combinedForMedians = combinedForMedians.concat(fromHistory);
       historyAddedCount += fromHistory.length;
     }
@@ -3322,7 +3322,7 @@ async function runSearchJob(jobId, filters) {
     // (abi fazės, A-41); kitaip – su visu modeliu.
     const fMarke = (filters && filters.marke) || null;
     combinedForMedians.forEach((l) => {
-      l.rinkosGrupes = regitra.rinkosGrupes(l.marke || fMarke, l.modelis, l.metai, rinkosTekstas(l));
+      l.rinkosGrupes = regitra.rinkosGrupes(l.marke || fMarke, l.modelis, l.metai, rinkosTekstas(l), l.menuo);
     });
     const medians = computeMarketMedians(combinedForMedians);
     // Kaupiam VISUS nuskaitytus skelbimus - kuo daugiau istorijos, tuo tikslesnes
@@ -3499,7 +3499,7 @@ async function runSearchJob(jobId, filters) {
       const regMarke = l.marke || (filters && filters.marke) || null;
       l.regitra = regitra.kontekstas(regMarke, l.modelis) || null;
       l.regitraPunktai = regitra.punktai(Object.assign({}, l, { marke: regMarke }));
-      l.kartos = regitra.kartos(regMarke, l.modelis, l.metai, rinkosTekstas(l));
+      l.kartos = regitra.kartos(regMarke, l.modelis, l.metai, rinkosTekstas(l), l.menuo);
     });
 
     let candidates = enriched.slice().sort((a, b) => b.qualityScore - a.qualityScore);
@@ -3620,7 +3620,7 @@ async function runSearchJob(jobId, filters) {
           ]);
           try {
             const { title, fullText, photo: detailPhoto, photos: detailPhotos, vin, vinPrefiksas, pardavejas } = await scrapeSingleListing(c.url);
-            const marketContext = { kaina: c.kaina, marketMedian: c.marketMedian, marketCount: c.marketCount, diffPct: c.diffPct, modelis: c.modelis, galia: c.galia, variklioTuris: c.variklioTuris };
+            const marketContext = { kaina: c.kaina, marketMedian: c.marketMedian, marketCount: c.marketCount, diffPct: c.diffPct, modelis: c.modelis, galia: c.galia, variklioTuris: c.variklioTuris, rinkosGrupe: c.rinkosGrupe || null, kartos: c.kartos || [] };
             const analysis = await generateDeepAnalysis(title, fullText, detailPhotos, marketContext, c.url);
             c.deepAnalysis = analysis;
             c.vin = vin;
@@ -4337,12 +4337,20 @@ nera automobilio truksmas - jis virsta klausimu pardavejui arba patikrinimo punk
       : '');
 
   const engineNote = marketContext && (marketContext.galia || marketContext.variklioTuris)
-    ? ` Sio konkretaus automobilio variklis: ${marketContext.variklioTuris ? marketContext.variklioTuris + 'L' : ''}${marketContext.galia ? ' ' + marketContext.galia + 'kW' : ''} - SVARBU: rinkos vidurkis skaiciuotas VISIEMS to modelio variantams kartu, o galingesni/silpnesni varikliai realiai kainuoja skirtingai (galingesnis = brangesnis). Atsizvelk i tai vertindamas, ar si kaina tikrai zema/auksta KONKRECIAM variantui, ne tik modeliui bendrai.`
+    ? ` Sio konkretaus automobilio variklis: ${marketContext.variklioTuris ? marketContext.variklioTuris + 'L' : ''}${marketContext.galia ? ' ' + marketContext.galia + 'kW' : ''} - SVARBU: rinkos vidurkis skaiciuotas VISIEMS to modelio (ar kartos) varianto varikliams kartu, o galingesni/silpnesni varikliai realiai kainuoja skirtingai (galingesnis = brangesnis). Atsizvelk i tai vertindamas, ar si kaina tikrai zema/auksta KONKRECIAM variantui, ne tik modeliui bendrai.`
     : '';
+  // v2.10.7: kartos fazė (LCI / facelift). Jei metai dviprasmiški – AI prašoma nustatyti
+  // iš aprašymo ir nuotraukų (žibintai, bamperiai), bet NEspėti, jei nematyti.
+  const kartos = (marketContext && marketContext.kartos) || [];
+  const kartosTekstas = !marketContext ? '' : (marketContext.rinkosGrupe
+    ? ` Rinkos vidurkis skaiciuotas tik tos pacios kartos ir fazes skelbimams: ${marketContext.rinkosGrupe}.`
+    : '') + (kartos.length > 1
+    ? ` Kebulas: ${kartos.join(' ARBA ')} (atnaujinimo metai). Jei is aprasymo ar nuotrauku aiskiai matyti, kuri faze (atnaujinta ar ne), parasyk tai ir kaip tai keicia kainos vertinima (atnaujinta brangesne). Jei nematyti - taip ir parasyk, nespek.`
+    : (kartos.length === 1 ? ` Kebulas: ${kartos[0]}.` : ''));
   const marketContextText = marketContext && marketContext.marketMedian
     ? `\n\nRINKOS DUOMENYS (musu sistemos apskaiciuoti, PATIKIMI): sio skelbimo kaina ${marketContext.kaina}€,
 ${marketContext.modelis || 'sio modelio'} rinkos vidurkis ${marketContext.marketMedian}€ (remiantis ${marketContext.marketCount || '?'} panasiu skelbimu imtimi),
-t.y. si kaina yra ${marketContext.diffPct}% ${marketContext.diffPct >= 0 ? 'ZEMESNE' : 'AUKSTESNE'} nei vidurkis.${engineNote}`
+t.y. si kaina yra ${marketContext.diffPct}% ${marketContext.diffPct >= 0 ? 'ZEMESNE' : 'AUKSTESNE'} nei vidurkis.${kartosTekstas}${engineNote}`
     : '\n\nRinkos vidurkio duomenu sitam skelbimui neturime - jei reikia, remkis bendromis ziniomis/web paieska apie tipine sio modelio/metu kaina.';
 
   // Sukaupta SIO skelbimo istorija: kainos mazinimai, ridos pokyciai, kiek kabo.
@@ -4478,6 +4486,9 @@ function kreditaiPagalLygi(req, res, next) {
 app.post('/api/analyze-single', requireAuth, kreditaiPagalLygi, async (req, res) => {
   try {
     const { url, force, kaina, marketMedian, marketCount, diffPct, modelis, pardavejas: knownPardavejas, galia, variklioTuris } = req.body;
+    // v2.10.7: kartos fazė AI apžvalgai (iš kortelės; tik trumpi tekstai)
+    const rinkosGrupe = typeof req.body.rinkosGrupe === 'string' ? req.body.rinkosGrupe.slice(0, 40) : null;
+    const kartosSar = Array.isArray(req.body.kartos) ? req.body.kartos.slice(0, 3).map((x) => String(x).slice(0, 30)) : [];
     if (!url) return res.status(400).json({ error: 'Trūksta URL' });
     // C-2: atsakom anksti ir aiskiai, kad naudotojas gautu priezasti, o ne 500.
     // Kreditai dar nenurasyti - kreditaiPagalLygi juos ima po sekmingo atsakymo.
@@ -4502,7 +4513,7 @@ app.post('/api/analyze-single', requireAuth, kreditaiPagalLygi, async (req, res)
 
     const { title, fullText, photo: photo0, photos: photos0, vin, vinPrefiksas, pardavejas,
       pardavejoInfo, vinPaslėptas, istorijosNuoroda, skelbimoParametrai, iranga, aprasymas, vieta } = await scrapeSingleListing(url);
-    const marketContext = marketMedian ? { kaina, marketMedian, marketCount, diffPct, modelis, galia, variklioTuris } : null;
+    const marketContext = marketMedian ? { kaina, marketMedian, marketCount, diffPct, modelis, galia, variklioTuris, rinkosGrupe, kartos: kartosSar } : null;
     // Ne automobilio nuotraukos (reklamos, logotipai) - salin; pardavejo logotipas - prie pardavejo
     // Greitam lygiui nuotrauku AI nekvieciam - todel jis ir pigesnis
     const foto = pilna
