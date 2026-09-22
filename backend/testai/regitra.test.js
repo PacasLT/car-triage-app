@@ -272,7 +272,7 @@ console.log('\n── Skelbimo pusė: markė modelyje (Z-85 regresija) ───
   T(/E90/.test(kk('BMW', '320', 2006)), 'BMW 320 2006 → E90…');
   lygu(kk('Volkswagen', 'Passat', 2015), 'B7+B8', 'VW Passat 2015 → B7+B8');
   lygu(kk('Skoda', 'Octavia', 2015), 'A7', 'Skoda Octavia 2015 → A7');
-  lygu(kk('Toyota', 'Corolla', 2019), 'E170+E210', 'Toyota Corolla 2019 → E170+E210');
+  lygu(kk('Toyota', 'Corolla', 2019), 'E170 facelift+E210', 'Toyota Corolla 2019 → E170 facelift+E210');
   lygu(kk('Mercedes-Benz', 'E 220', 2010), 'W212', 'MB E 220 2010 → W212');
   lygu(kk('Volvo', 'XC60', 2019), '2 karta', 'Volvo XC60 2019 → 2 karta');
   lygu(R.kartos('NĖRATOKIOS', 'NIEKO', 2019), [], 'nežinomas modelis → []');
@@ -304,9 +304,24 @@ console.log('\n── Skelbimo pusė: markė modelyje (Z-85 regresija) ───
   lygu(kt('X5', 2013), 'E70 LCI+F15', 'X5 2013 → E70 LCI + F15 (kartų riba)');
   lygu(kt('5 serija', 2021), 'G30/G31 LCI', '5 2021 → G30/G31 LCI');
   lygu(R.rinkosGrupe('BMW', 'X5', 2024), 'G05 LCI', 'rinkos grupė X5 2024 → G05 LCI');
-  lygu(R.rinkosGrupe('BMW', 'X5', 2023), null, 'rinkos grupė X5 2023 be teksto → null (visas modelis)');
+  lygu(R.rinkosGrupes('BMW', 'X5', 2023).join('+'), 'G05 visa karta', 'rinkos grupė X5 2023 be teksto → visa karta (abi fazės, A-41)');
+  lygu(R.rinkosGrupes('BMW', 'X5', 2024).join('+'), 'G05 LCI+G05 visa karta', 'X5 2024 grupės: G05 LCI, tada visa karta');
+  lygu(R.rinkosGrupes('BMW', 'X5', 2020).join('+'), 'G05 iki LCI+G05 visa karta', 'X5 2020 grupės: G05 iki LCI, visa karta');
+  lygu(R.rinkosGrupes('BMW', 'X5', 2016).join('+'), 'F15', 'X5 2016 (be atn) → tik F15');
   lygu(R.rinkosGrupe('BMW', 'X5', 2013), null, 'rinkos grupė ties kartų riba → null');
-  lygu(R.kartos('Volkswagen', 'Passat', 2016).join('+'), 'B8', 'be atn duomenų – kaip anksčiau (VW Passat 2016 → B8)');
+  lygu(R.kartos('Volkswagen', 'Passat', 2016).join('+'), 'B8', 'VW Passat 2016 → B8 (prieš facelift)');
+  // A-41 Analitiko pavyzdžiai
+  lygu(R.kartos('Mercedes-Benz', 'E 220', 2021).join('+'), 'W213 facelift', 'MB E 2021 → W213 facelift');
+  lygu(R.kartos('Mercedes-Benz', 'E 220', 2018).join('+'), 'W213', 'MB E 2018 → W213');
+  lygu(R.kartos('Volkswagen', 'Golf', 2018).join('+'), 'Mk7.5', 'VW Golf 2018 → Mk7.5');
+  lygu(R.kartos('Volkswagen', 'Golf', 2017).join('+'), 'Mk7+Mk7.5', 'VW Golf 2017 → Mk7 / Mk7.5');
+  lygu(R.kartos('Volkswagen', 'Passat', 2020).join('+'), 'B8 facelift', 'VW Passat 2020 → B8 facelift');
+  lygu(R.kartos('Volkswagen', 'Passat', 2002).join('+'), 'B5.5', 'VW Passat 2002 → B5.5');
+  lygu(R.kartos('Skoda', 'Octavia', 2018).join('+'), 'A7 facelift', 'Škoda Octavia 2018 → A7 facelift');
+  lygu(R.kartos('Toyota', 'RAV4', 2016).join('+'), 'XA40 facelift', 'Toyota RAV4 2016 → XA40 facelift');
+  lygu(R.kartos('Audi', 'A6', 2015).join('+'), 'C7 facelift', 'Audi A6 2015 → C7 facelift');
+  lygu(R.kartos('Volvo', 'XC60', 2014).join('+'), '1 karta facelift', 'Volvo XC60 2014 → 1 karta facelift');
+  lygu(R.kartos('Volkswagen', 'Golf', 2017, 'VW Golf restailingas').join('+'), 'Mk7.5', 'Golf 2017 „restailingas" tekste → Mk7.5');
   const g = R.kartosIntervalui('BMW', 'X5', 2020, 2024).find((x) => x.kodas === 'G05');
   T(g && g.atn === 2023 && g.atnPav === 'LCI', 'filtrui G05: LCI nuo 2023');
 }

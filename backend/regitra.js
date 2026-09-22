@@ -143,9 +143,10 @@ function kartosRaktas(marke, modelis) {
 // atnaujintas variantas. Tų metų auto gali būti bet kuris: sprendžiam iš skelbimo
 // teksto (LCI, facelift, restyling), kitaip – nežinoma (rodom abu).
 const ATN_PAV = { BMW: 'LCI' };
-const ATN_TEKSTE = /\b(lci|facelift|face-lift|restyling|restyle|fl)\b/i;
+const ATN_TEKSTE = /\b(lci|facelift|face-lift|restyling|restyle|restailing\w*|fl)\b/i;
 function atnPav(k) { return ATN_PAV[String(k).split('|')[0]] || 'facelift'; }
-// Kartos fazės skelbimui: [{kodas, lci: true|false|null, rodyti}] (1 arba 2 ties riba).
+// Kartos fazės skelbimui: [{kodas, lci: true|false|null, rodyti, karta}] (1 arba 2 ties riba).
+// A-41: atnaujinto varianto vardas gali būti rinkos (`atnVardas`: Golf „Mk7.5").
 function kartosFazes(marke, modelis, metai, tekstas) {
   const k = kartosRaktas(marke, modelis); const m = parseInt(metai, 10);
   if (!k || !KARTOS[k] || !m) return [];
@@ -153,24 +154,34 @@ function kartosFazes(marke, modelis, metai, tekstas) {
   const tekste = tekstas ? ATN_TEKSTE.test(String(tekstas)) : false;
   const out = [];
   KARTOS[k].filter((g) => m >= g.nuo && (g.iki == null || m <= g.iki)).forEach((g) => {
-    if (!g.atn) { out.push({ kodas: g.kodas, lci: null, rodyti: g.kodas }); return; }
-    if (m > g.atn || (m === g.atn && tekste)) out.push({ kodas: g.kodas, lci: true, rodyti: g.kodas + ' ' + pav });
-    else if (m < g.atn) out.push({ kodas: g.kodas, lci: false, rodyti: g.kodas });
-    else { // atnaujinimo metai, tekste nieko – gali būti abu
-      out.push({ kodas: g.kodas, lci: false, rodyti: g.kodas });
-      out.push({ kodas: g.kodas, lci: true, rodyti: g.kodas + ' ' + pav });
-    }
+    if (!g.atn) { out.push({ kodas: g.kodas, lci: null, rodyti: g.kodas, grupe: g.kodas }); return; }
+    const po = { kodas: g.kodas, lci: true, rodyti: g.atnVardas || (g.kodas + ' ' + pav), atn: true };
+    po.grupe = po.rodyti;
+    const pries = { kodas: g.kodas, lci: false, rodyti: g.kodas, grupe: g.kodas + ' iki ' + (g.atnVardas || pav), atn: true };
+    if (m > g.atn || (m === g.atn && tekste)) out.push(po);
+    else if (m < g.atn) out.push(pries);
+    else { out.push(pries); out.push(po); } // atnaujinimo metai, tekste nieko – gali būti abu
   });
   return out;
 }
-// Skelbimui: rodomi pavadinimai („G05 LCI"). [] - nezinoma.
+// Skelbimui: rodomi pavadinimai („G05 LCI", „Mk7.5"). [] - nezinoma.
 function kartos(marke, modelis, metai, tekstas) {
   return kartosFazes(marke, modelis, metai, tekstas).map((f) => f.rodyti);
 }
-// Rinkos grupė kainai lyginti: tik kai fazė vienareikšmė. null – lyginam su visu modeliu.
-function rinkosGrupe(marke, modelis, metai, tekstas) {
+// Rinkos grupės kainai lyginti, pirmenybės tvarka: [fazė, visa karta]. Skelbimas
+// priklauso visoms šioms grupėms. Atnaujinimo metų auto be teksto – tik „visa
+// karta" (abi fazės, A-41). Ties kartų riba – [] (lyginam su visu modeliu).
+function rinkosGrupes(marke, modelis, metai, tekstas) {
   const f = kartosFazes(marke, modelis, metai, tekstas);
-  return f.length === 1 ? f[0].rodyti : null;
+  const kodai = [...new Set(f.map((x) => x.kodas))];
+  if (kodai.length !== 1) return [];
+  const out = [];
+  if (f.length === 1) out.push(f[0].grupe);
+  if (f[0].atn) out.push(kodai[0] + ' visa karta');
+  return out;
+}
+function rinkosGrupe(marke, modelis, metai, tekstas) {
+  return rinkosGrupes(marke, modelis, metai, tekstas)[0] || null;
 }
 // Filtrui: visos kartos, kurios persidengia su [nuo, iki].
 function kartosIntervalui(marke, modelis, nuo, iki) {
@@ -179,7 +190,7 @@ function kartosIntervalui(marke, modelis, nuo, iki) {
   const a = parseInt(nuo, 10) || 0, b = parseInt(iki, 10) || 9999;
   const pav = atnPav(k);
   return KARTOS[k].filter((g) => g.nuo <= b && (g.iki == null || g.iki >= a))
-    .map((g) => ({ kodas: g.kodas, nuo: g.nuo, iki: g.iki, atn: g.atn || null, atnPav: g.atn ? pav : null }));
+    .map((g) => ({ kodas: g.kodas, nuo: g.nuo, iki: g.iki, atn: g.atn || null, atnPav: g.atn ? (g.atnVardas || pav) : null }));
 }
 
 function ikelti() {
@@ -570,5 +581,5 @@ module.exports = {
   RIBOS, LYGIS, DRAUDZIAMA, KURO_KILMININKAS,
   meta: () => META,
   taMeta: () => TA_META, taKontekstas,
-  kartos, kartosFazes, rinkosGrupe, kartosIntervalui,
+  kartos, kartosFazes, rinkosGrupe, rinkosGrupes, kartosIntervalui,
 };

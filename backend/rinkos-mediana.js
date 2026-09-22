@@ -53,9 +53,10 @@ function computeMarketMedians(parsedListings) {
     // Lizingo įmokos ir klaidingai įvestos sumos, kurias jau pažymėjo kainosPatikra
     if (l.kaina && !l.kainosIspejimas) {
       (byModel[l.modelis] = byModel[l.modelis] || []).push(l.kaina);
-      if (l.rinkosGrupe) {
+      const gr = l.rinkosGrupes || (l.rinkosGrupe ? [l.rinkosGrupe] : []);
+      if (gr.length) {
         const g = (byGrupe[l.modelis] = byGrupe[l.modelis] || {});
-        (g[l.rinkosGrupe] = g[l.rinkosGrupe] || []).push(l.kaina);
+        gr.forEach((x) => (g[x] = g[x] || []).push(l.kaina));
       }
     }
     if (l.rida) (ridaByModel[l.modelis] = ridaByModel[l.modelis] || []).push(l.rida);
@@ -81,13 +82,17 @@ function computeMarketMedians(parsedListings) {
   return medians;
 }
 
-// Kuria mediana lyginti skelbimą: grupės (kartos fazės), jei joje ≥ MIN_GRUPEI
-// kainų, kitaip – viso modelio. Grąžina { median, count, grupe|null }.
+// Kuria mediana lyginti skelbimą: pirma grupė (pirmenybės tvarka: fazė, visa
+// karta), kurioje ≥ MIN_GRUPEI kainų, kitaip – viso modelio. `grupes` – masyvas
+// arba viena eilutė. Grąžina { median, count, grupe|null }.
 const MIN_GRUPEI = 5;
-function lyginimoMediana(marketData, rinkosGrupe) {
+function lyginimoMediana(marketData, grupes) {
   if (!marketData) return null;
-  const g = rinkosGrupe && marketData.grupes ? marketData.grupes[rinkosGrupe] : null;
-  if (g && g.count >= MIN_GRUPEI && g.median) return { median: g.median, count: g.count, grupe: rinkosGrupe };
+  const sar = Array.isArray(grupes) ? grupes : (grupes ? [grupes] : []);
+  for (const gr of sar) {
+    const g = marketData.grupes ? marketData.grupes[gr] : null;
+    if (g && g.count >= MIN_GRUPEI && g.median) return { median: g.median, count: g.count, grupe: gr };
+  }
   return { median: marketData.median, count: marketData.count, grupe: null };
 }
 

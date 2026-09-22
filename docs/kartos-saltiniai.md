@@ -61,3 +61,39 @@ Patikrinta tiesiogiai 2026-09-22: Peugeot 308, Citroën Berlingo, Kia Ceed, VW T
 ## Atnaujinimas (`atn`, v2.10.6)
 Laukas `atn` – metai, kai pradėtas gaminti atnaujintas kartos variantas (BMW – LCI, kitur – facelift). Faktas, ne vertinimas. Užpildyta: BMW 1, 3, 4, 5, 6, 7, X1, X3, X4, X5, X6 (Klaudijus, gamintojo pranešimai / Wikipedia generacijų straipsniai). Kitoms markėms pildo Analitikas generatoriuje (`ATN` žodynas).
 
+
+## Atnaujinimai (`atn`) – A-41, 2026-09-23
+
+`atn` – metai, kai Europai pradėtas gaminti atnaujintas kartos variantas. Žymimi tik atnaujinimai su nauja išvaizda ir (ar) įranga, kurie keičia kainą. Modelio metų smulkmenos nežymimos.
+- **Iš viso:** 97 raktai, 187 kartos.
+- **Kai kartos atnaujintos du kartus**, žymimas didesnis atnaujinimas:
+  - Touran 1T – 2010 (ne 2006);
+  - Caddy 2K – 2015;
+  - Avensis T270 – 2015;
+  - Yaris XP130 – 2017;
+  - Mégane 3 – 2014;
+  - Mazda6 GJ – 2018.
+
+**BMW (Klaudijaus užpildyta) – patikrinta.** Visi 8 prašyti metai sutampa:
+- E46 2001-09, E90/E91 2008-09 (Wikipedia „BMW 3 Series (E90)“), F30 2015-07, G20 2022-07 (Wikipedia „BMW 3 Series (G20)“);
+- G30 2020-07, G05 2023-03 (Wikipedia „BMW X5 (G05)“), G01 2021-06, F48 2019-07.
+
+Pastaba: E92/E93 kupė ir kabrioleto LCI – 2010 m. (vėliau nei sedano). Lentelėje vienas skaičius visai kartai, todėl kupė 2008–2009 bus priskirtas atnaujintiems.
+
+**Tiesiogiai patikrinta Wikipedijoje:**
+- Mercedes-Benz E-Class (W212) – 2013;
+- Volkswagen Golf Mk7 – pristatyta 2016-11, gamyba 2017.
+
+Kiti metai sudaryti pagal tų pačių modelių Wikipedia straipsnių skiltis „Facelift“, ir jų tiesiogiai neperskaičiau.
+
+**Pavadinimai rinkoje:**
+- BMW – LCI;
+- Mercedes – Vokietijoje MOPF, bet Lietuvos skelbimuose retas;
+- VW – „Golf 7.5“, „Golf 8.5“, „Passat B5.5“ (skelbimuose dažni);
+- Audi – „B8.5“ retai;
+- Lietuvoje dažniausiai – „restailingas“ / „facelift“.
+
+Rekomendacija: rodyti „facelift“ (BMW – „LCI“), Golf ir Passat B5 papildomai „7.5 / 8.5 / B5.5“.
+
+`atnVardas` (v2.10.6, A-41): rinkoje įprastas atnaujinto varianto vardas vietoj „<kodas> facelift“ – VW Golf Mk7 → Mk7.5, Mk8 → Mk8.5, Passat B5 → B5.5 (generatoriaus žodynas `ATN_VARDAS`).
+

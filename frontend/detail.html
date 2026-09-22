@@ -1566,7 +1566,7 @@ window.ctApi = function (kelias, params) {
         var sk = Math.round(c.marketMedian - c.kaina);
         eil.push('<div class="ct-market-row ' + diffTonas + '"><span class="ct-market-k">' + (sk >= 0 ? 'PIGIAU' : 'BRANGIAU') + '</span><span class="ct-market-v">' + fmt(Math.abs(sk)) + ' \u20AC</span></div>');
       }
-      eil.push('<div class="ct-market-row"><span class="ct-market-k">PANA\u0160I\u0172 SKELBIM\u0172</span><span class="ct-market-v">' + c.marketCount + (c.rinkosGrupe ? ' \u00B7 tik ' + String(c.rinkosGrupe).replace(/[<>&"]/g, '') : '') + '</span></div>');
+      eil.push('<div class="ct-market-row"><span class="ct-market-k">PANA\u0160I\u0172 SKELBIM\u0172</span><span class="ct-market-v">' + c.marketCount + (c.rinkosGrupe ? ' \u00B7 ' + String(c.rinkosGrupe).replace(/[<>&"]/g, '') : '') + '</span></div>');
     } else {
       eil.push('<div class="ct-market-row"><span class="ct-market-k">RINKOS VIDURKIS</span><span class="ct-market-v is-unrated-val">\u2013</span></div>');
       eil.push('<div class="ct-market-row"><span class="ct-market-k">PANA\u0160I\u0172 SKELBIM\u0172</span><span class="ct-market-v is-unrated-val">' + (c.marketCount ? c.marketCount + ' \u2013 per ma\u017Eai duomen\u0173' : '\u2013 per ma\u017Eai duomen\u0173') + '</span></div>');

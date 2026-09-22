@@ -1261,3 +1261,10 @@ visu kontekstu. Kai imsiu juostą, **pirmas darbas bus nuspręsti tarp jų.**
 - `rinkos-mediana.js`: grupių medianos + `lyginimoMediana` (grupė, kai ≥ 5 kainos, kitaip visas modelis). `server.js`: diffPct ir balas pagal ją; `rinkosGrupe` į kortelę ir detail.
 - Testai: regitra 158/158, mediana 17/17, kiti žali.
 
+## Z-120 · 2026-09-22 · Klaudijus · v2.10.6 papildyta – A-41 (Analitikas) atn visoms markėms
+- Įdiegta Analitiko A-41: `atn` 97 raktams / 187 kartoms (md5 patikrinti). BMW metai patvirtinti.
+- `atnVardas` (A-41 pasiūlymas): Golf Mk7.5 / Mk8.5, Passat B5.5.
+- Tekste atpažįstama ir „restailingas“.
+- Rinkos grupės pirmenybės tvarka: fazė → visa karta → modelis; atnaujinimo metų auto be teksto lyginamas su visa karta (A-41 siūlymas).
+- Testai: regitra 172/172, mediana 19/19.
+

@@ -3318,11 +3318,11 @@ async function runSearchJob(jobId, filters) {
 
     logJob(jobId, '🧮 Skaičiuojame rinkos vidurkius...');
     // v2.10.6: kartos fazė (pvz. „G05 LCI") – kaina lyginama su tos pačios fazės
-    // skelbimais, kai jų ≥ 5. Archyvo įrašai be teksto: atnaujinimo metų auto
-    // lieka tik bendroje modelio medianoje.
+    // skelbimais, kai jų ≥ 5; atnaujinimo metų auto be teksto – su visa karta
+    // (abi fazės, A-41); kitaip – su visu modeliu.
     const fMarke = (filters && filters.marke) || null;
     combinedForMedians.forEach((l) => {
-      l.rinkosGrupe = regitra.rinkosGrupe(l.marke || fMarke, l.modelis, l.metai, rinkosTekstas(l));
+      l.rinkosGrupes = regitra.rinkosGrupes(l.marke || fMarke, l.modelis, l.metai, rinkosTekstas(l));
     });
     const medians = computeMarketMedians(combinedForMedians);
     // Kaupiam VISUS nuskaitytus skelbimus - kuo daugiau istorijos, tuo tikslesnes
@@ -3391,7 +3391,7 @@ async function runSearchJob(jobId, filters) {
 
     const enriched = parsed.map((l) => {
       const marketData = l.modelis ? medians[l.modelis] : null;
-      const lyg = lyginimoMediana(marketData, l.rinkosGrupe);
+      const lyg = lyginimoMediana(marketData, l.rinkosGrupes);
       const hasReliableMarket = lyg && lyg.count >= 3;
       let diffPct = null, ridaDiffPct = null;
       if (l.kaina && hasReliableMarket) {

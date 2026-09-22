@@ -64,6 +64,12 @@ console.log('\n── v2.10.6: kartos fazės grupė ─────────�
   const maza = M.computeMarketMedians(L.slice(0, 4).concat([{ modelis: 'X5', kaina: 90000, rinkosGrupe: 'G05 LCI' }])).X5;
   T(M.lyginimoMediana(maza, 'G05 LCI').grupe === null, 'grupėje < 5 → lyginama su visu modeliu');
   T(M.lyginimoMediana(md, null).median === md.median, 'be grupės → modelio mediana');
+  // A-41: pirmenybės tvarka – fazė, tada visa karta
+  const L2 = [60000, 61000, 62000, 88000, 89000, 90000].map((k, i) => ({ modelis: 'X5', kaina: k, rinkosGrupes: i < 3 ? ['G05 iki LCI', 'G05 visa karta'] : ['G05 LCI', 'G05 visa karta'] }));
+  const md2 = M.computeMarketMedians(L2).X5;
+  const l2 = M.lyginimoMediana(md2, ['G05 LCI', 'G05 visa karta']);
+  T(l2.grupe === 'G05 visa karta' && l2.count === 6, 'LCI grupėje < 5 → visa karta (6)');
+  T(M.lyginimoMediana(md2, ['G05 visa karta']).grupe === 'G05 visa karta', 'atnaujinimo metai → visa karta');
 }
 
 console.log('\n' + (klaidu ? '✗ ' + klaidu + ' klaidos iš ' + n : '✓ ' + n + '/' + n + ' patikrų praėjo'));

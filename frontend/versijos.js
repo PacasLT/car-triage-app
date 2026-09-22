@@ -8,10 +8,10 @@
 
 window.CT_VERSIJOS = [
   {
-    versija: '2.10.6', data: '2026-09-22', pavadinimas: 'Kėbulas su LCI ir kaina pagal kartos fazę',
+    versija: '2.10.6', data: '2026-09-22', pavadinimas: 'Kėbulas su LCI / facelift ir kaina pagal kartos fazę',
     pakeitimai: [
-      'BMW kėbulas dabar rodomas su atnaujinimu: „G05 LCI“, „G30/G31 LCI“. Atnaujinimo metų automobiliui rodomi abu variantai („G05 / G05 LCI“), nebent skelbime parašyta LCI arba facelift.',
-      'Rinkos kaina ir balas: automobilis lyginamas su tos pačios kartos ir fazės skelbimais (pvz. G05 LCI – tik su G05 LCI), kai jų yra bent 5. Taip naujesnis LCI nebeatrodo „brangus“, o senesnis – „pigus“. Skelbimo puslapyje prie „Panašių skelbimų“ parašyta, su kuria grupe lyginta.',
+      'Kėbulas dabar rodomas su atnaujinimu: BMW „G05 LCI“, Mercedes „W213 facelift“, VW „Mk7.5“, „B5.5“ ir kt. – 97 populiarūs modeliai. Atnaujinimo metų automobiliui rodomi abu variantai („G05 / G05 LCI“), nebent skelbime parašyta LCI, facelift ar restailingas.',
+      'Rinkos kaina ir balas: automobilis lyginamas su tos pačios kartos ir fazės skelbimais (pvz. G05 LCI – tik su G05 LCI), kai jų yra bent 5; jei mažiau – su visa karta, dar mažiau – su visu modeliu. Atnaujinimo metų automobilis lyginamas su visa karta. Skelbimo puslapyje prie „Panašių skelbimų“ parašyta, su kuria grupe lyginta.',
       'Filtre, pasirinkus modelį, matyti, nuo kurių metų gaminamas LCI.',
     ],
   },
