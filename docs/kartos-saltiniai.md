@@ -4,7 +4,8 @@ Failas: `backend/duomenys/kartos.json`. Raktas `MARKĖ|BAZĖ` – tas pats kaip 
 Metai – gamybos (modelio) metai, `iki: null` – gaminama dabar. Ribų persidengimas leidžiamas: kartos keitėsi per metus, o Europoje dažnai skirtingai nei JAV.
 
 ## Apimtis
-- 113 raktų. Iš Regitros top 100 padengti 91 – tai 72,8 % Lietuvos M1 parko.
+- **184 raktai.** Iš Regitros top 300 padengti 184, top 100 – 91. Tai 78,3 % Lietuvos M1 parko.
+- Etapas 1 (A-37): top 100. Etapas 2 (A-39): vietos 101–300.
 - **Top 100 sąmoningai praleisti:**
   - CITROEN C4 – vienas raktas apima C4 ir C4 Picasso, o jų kartos skirtingos;
   - TOYOTA LAND – Land Cruiser ir Prado viename rakte;
@@ -12,6 +13,11 @@ Metai – gamybos (modelio) metai, `iki: null` – gaminama dabar. Ribų perside
   - HYUNDAI I – i20/i30/i40 viename rakte;
   - FORD TRANSIT – per daug variantų;
   - VOLVO V50, PEUGEOT 307, TOYOTA VERSO, SEAT ALTEA – po vieną kartą, rodyti nėra ką.
+
+- **101–300 vietose praleista 116 raktų.** Dvi priežastys:
+  - vienos kartos modeliai – rodyti nėra ką (pvz. Karoq, Yeti, Kamiq, Antara, 407, XC40, Tesla Model 3/Y, Q8, ID. šeima);
+  - raktas, kuriame susimaišę keli modeliai arba kodai neaiškūs (pvz. VW T, VW NEW, VW KOMBI, AUDI 8D, FORD GRAND, FORD TOURNEO, FORD FUSION, KIA BL, MERCEDES AMG, CHRYSLER GRAND, DODGE GRAND, SUZUKI GRAND, MITSUBISHI SPACE, BMW 2 (F22/F45/F44), Opel variantų raktai ASTRA-G-*, VECTRA-C-*).
+- Mercedes GLE / GL / GLS kodai – SUV versijų (kupė C292/C167 atskirai neišskirti).
 
 ## Kodų taisyklė
 - Kodas rašomas tik tada, kai jis įprastas rinkoje:
@@ -47,6 +53,7 @@ Anglų Wikipedia straipsniai apie kiekvieną modelį (skiltys „First/Second…
 - **Renault/Dacia/Peugeot/Citroën:** Renault Mégane, Clio, Laguna, Espace, Trafic; Dacia Duster; Peugeot 308, 508, 2008, 3008, 5008; Citroën C3, C5, Berlingo.
 - **Kia/Hyundai:** Kia Sportage, Ceed, Sorento; Hyundai Tucson, Santa Fe.
 - **Honda:** Honda Civic, CR-V, Accord, Jazz.
+- **Etapas 2 papildomai:** Mazda 2/3/5/323/626; BMW X4/X6/4/6 Series; Audi A7/A8/allroad; Mercedes CLA/CLS/CLK/GLA/GLE/GL/GLS/Vito/V-Class/Sprinter; Mini Hatch; Nissan Primera/Micra/Leaf/Murano/Patrol; Toyota Camry/Aygo/Highlander/Sienna; Kia Niro; Hyundai Kona/i20; Land Rover Freelander/Discovery; Subaru Impreza/XV; SEAT Toledo/Córdoba; Ford Mustang/Edge; Jeep Cherokee/Compass; Lexus IS/GS; Fiat Punto; VW Crafter; Porsche 911/Panamera; Jaguar XF; Chrysler Voyager/Town & Country; Renault Captur/Scénic/Kangoo/Master/Koleos; Peugeot Partner/208/Expert; Citroën Jumper; Dacia Sandero; Honda HR-V; Opel Omega; Saab 9-5; Mitsubishi Pajero.
 - **Subaru/Mazda/Mitsubishi/Jeep/Porsche/Saab:** Subaru Forester, Legacy, Outback; Mazda6, CX-5; Mitsubishi Outlander; Jeep Grand Cherokee; Porsche Cayenne; Saab 9-3.
 
 Patikrinta tiesiogiai 2026-09-22: Peugeot 308, Citroën Berlingo, Kia Ceed, VW Tiguan, Škoda Octavia. Kiti kodai sudaryti pagal tuos pačius straipsnius, jų tiesiogiai neperskaičiau. Klaidą pranešti Analitikui – taisoma failo generatoriuje (ne ranka JSON).

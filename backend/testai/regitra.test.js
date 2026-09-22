@@ -278,6 +278,17 @@ console.log('\n── Skelbimo pusė: markė modelyje (Z-85 regresija) ───
   lygu(R.kartos('NĖRATOKIOS', 'NIEKO', 2019), [], 'nežinomas modelis → []');
   lygu(R.kartos('BMW', 'X5'), [], 'be metų → []');
   lygu(R.kartosIntervalui('BMW', 'X5', 2016, 2020).map((g) => g.kodas).join('+'), 'F15+G05', 'X5 2016–2020 filtrui → F15+G05');
+  // A-39 (184 raktai)
+  lygu(kk('BMW', 'X4', 2016), 'F26', 'BMW X4 2016 → F26');
+  lygu(kk('BMW', 'X4', 2018), 'F26+G02', 'BMW X4 2018 → F26+G02');
+  lygu(kk('BMW', 'X6', 2015), 'F16', 'BMW X6 2015 → F16');
+  lygu(kk('Mercedes-Benz', 'GLE', 2020), 'V167', 'MB GLE 2020 → V167');
+  lygu(kk('Mercedes-Benz', 'Sprinter', 2010), 'NCV3', 'MB Sprinter 2010 → NCV3');
+  lygu(kk('Toyota', 'Camry', 2019), 'XV70', 'Toyota Camry 2019 → XV70');
+  lygu(kk('Mazda', '3', 2016), 'BM', 'Mazda 3 2016 → BM');
+  lygu(kk('Nissan', 'Leaf', 2019), 'ZE1', 'Nissan Leaf 2019 → ZE1');
+  lygu(kk('Porsche', '911', 2005), '996+997', 'Porsche 911 2005 → 996+997');
+  lygu(kk('Land Rover', 'Discovery', 2012), '4 karta', 'Land Rover Discovery 2012 → 4 karta (markė su tarpu)');
 }
 
 console.log('\n' + (klaidu ? '✗ ' + klaidu + ' klaidos iš ' + patikru : '✓ ' + patikru + '/' + patikru + ' patikrų praėjo'));

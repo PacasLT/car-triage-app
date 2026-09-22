@@ -130,7 +130,14 @@ function ikeltiKartas() {
 }
 function kartosRaktas(marke, modelis) {
   const r = kontekstas(marke, modelis);
-  return r && r.modelis ? r.modelis.replace(' ', '|') : null;
+  if (!r || !r.modelis) return null;
+  // A-39: markė gali turėti tarpą („LAND ROVER|DISCOVERY") – bandom kiekvieną tarpą.
+  const m = r.modelis;
+  for (let i = m.indexOf(' '); i > 0; i = m.indexOf(' ', i + 1)) {
+    const k = m.slice(0, i) + '|' + m.slice(i + 1);
+    if (KARTOS[k]) return k;
+  }
+  return m.replace(' ', '|');
 }
 // Skelbimui: kodai, kurie apima tuos metus (1 arba 2 ties riba). [] - nezinoma.
 function kartos(marke, modelis, metai) {

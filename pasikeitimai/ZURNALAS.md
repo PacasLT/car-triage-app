@@ -1224,3 +1224,9 @@ visu kontekstu. Kai imsiu juostą, **pirmas darbas bus nuspręsti tarp jų.**
 - `index.html`: `#ct-kartos` po filtrais („Kėbulai: F15 (2013–2018), G05 (2018–dabar)“), kortelės ženkliukas „Kėbulas G05“. `ct-priedai.css` 21 blokas `.ct-kartos-hint` – dizaineriui perimti.
 - regitra.test +10 (135/135, analitiko pavyzdžiai). Sargai 14 / 0 / 3.
 
+## Z-114 · 2026-09-22 · Klaudijus · A-39 kartos iki top 300 (v2.10.3 papildymas)
+- `kartos.json` a938abdb… (184 raktai, 78,3 % parko), `kartos-lentele.py` 3a132b46…, `kartos-saltiniai.md` 911fbfc3… – md5 sutampa.
+- Pataisa `regitra.js` `kartosRaktas`: markė su tarpu („LAND ROVER|DISCOVERY") – anksčiau tarpas keistas tik pirmas, raktas nerandamas.
+- BMW|3 2012 → E9x + F3x – tyčinis persidengimas (E92/E93 iki 2013), analitiko patvirtinta.
+- regitra.test +10 (145/145). Sargai žali.
+
