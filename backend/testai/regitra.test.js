@@ -312,11 +312,18 @@ console.log('\n── Skelbimo pusė: markė modelyje (Z-85 regresija) ───
   lygu(R.kartos('Volkswagen', 'Passat', 2016).join('+'), 'B8', 'VW Passat 2016 → B8 (prieš facelift)');
   // v2.10.7: pirmos registracijos mėnuo atnaujinimo metais (G05 LCI gamyba nuo 4 mėn.)
   lygu(R.kartos('BMW', 'X5', 2023, '', 2).join('+'), 'G05', 'X5 2023-02 → G05 (registruotas prieš LCI gamybą)');
-  lygu(R.kartos('BMW', 'X5', 2023, '', 5).join('+'), 'G05+G05 LCI', 'X5 2023-05 → abu (per anksti spręsti)');
-  lygu(R.kartos('BMW', 'X5', 2023, '', 8).join('+'), 'G05 LCI', 'X5 2023-08 → G05 LCI');
-  lygu(R.rinkosGrupes('BMW', 'X5', 2023, '', 8).join('+'), 'G05 LCI+G05 visa karta', 'X5 2023-08 rinkos grupė → G05 LCI');
+  lygu(R.kartos('BMW', 'X5', 2023, '', 8).join('+'), 'G05+G05 LCI', 'X5 2023-08 → abu (tarpas 6 mėn., A-44)');
+  lygu(R.kartos('BMW', 'X5', 2023, '', 11).join('+'), 'G05 LCI', 'X5 2023-11 → G05 LCI');
+  lygu(R.rinkosGrupes('BMW', 'X5', 2023, '', 11).join('+'), 'G05 LCI+G05 visa karta', 'X5 2023-11 rinkos grupė → G05 LCI');
+  // A-44 Analitiko pavyzdžiai
+  lygu(R.kartos('BMW', 'X5', 2010, '', 5).join('+'), 'E70', 'X5 E70 2010-05 → senas');
+  lygu(R.kartos('BMW', 'X5', 2010, '', 12).join('+'), 'E70 LCI', 'X5 E70 2010-12 → LCI');
+  lygu(R.kartos('BMW', 'X5', 2010, '', 8).join('+'), 'E70+E70 LCI', 'X5 E70 2010-08 → nežinoma');
+  lygu(R.kartos('Volkswagen', 'Golf', 2017, '', 2).join('+'), 'Mk7', 'Golf 2017-02 → Mk7');
+  lygu(R.kartos('Volkswagen', 'Golf', 2017, '', 9).join('+'), 'Mk7.5', 'Golf 2017-09 → Mk7.5');
+  lygu(R.kartos('Toyota', 'Corolla', 2022, '', 10).join('+'), 'E210', 'Corolla E210 2022-10 → senas (atn 2023)');
+  lygu(R.kartos('Toyota', 'Corolla', 2023, '', 8).join('+'), 'E210 facelift', 'Corolla E210 2023-08 → facelift');
   lygu(R.kartos('BMW', 'X5', 2024, '', 1).join('+'), 'G05 LCI', 'X5 2024-01 → G05 LCI (metai po atnaujinimo)');
-  lygu(R.kartos('Volkswagen', 'Golf', 2017, '', 11).join('+'), 'Mk7+Mk7.5', 'Golf 2017-11 be atnMen → abu');
   // A-41 Analitiko pavyzdžiai
   lygu(R.kartos('Mercedes-Benz', 'E 220', 2021).join('+'), 'W213 facelift', 'MB E 2021 → W213 facelift');
   lygu(R.kartos('Mercedes-Benz', 'E 220', 2018).join('+'), 'W213', 'MB E 2018 → W213');
@@ -325,7 +332,8 @@ console.log('\n── Skelbimo pusė: markė modelyje (Z-85 regresija) ───
   lygu(R.kartos('Volkswagen', 'Passat', 2020).join('+'), 'B8 facelift', 'VW Passat 2020 → B8 facelift');
   lygu(R.kartos('Volkswagen', 'Passat', 2002).join('+'), 'B5.5', 'VW Passat 2002 → B5.5');
   lygu(R.kartos('Skoda', 'Octavia', 2018).join('+'), 'A7 facelift', 'Škoda Octavia 2018 → A7 facelift');
-  lygu(R.kartos('Toyota', 'RAV4', 2016).join('+'), 'XA40 facelift', 'Toyota RAV4 2016 → XA40 facelift');
+  lygu(R.kartos('Toyota', 'RAV4', 2017).join('+'), 'XA40 facelift', 'Toyota RAV4 2017 → XA40 facelift (A-44: atn 2016)');
+  lygu(R.kartos('Toyota', 'RAV4', 2016).join('+'), 'XA40+XA40 facelift', 'Toyota RAV4 2016 → abu');
   lygu(R.kartos('Audi', 'A6', 2015).join('+'), 'C7 facelift', 'Audi A6 2015 → C7 facelift');
   lygu(R.kartos('Volvo', 'XC60', 2014).join('+'), '1 karta facelift', 'Volvo XC60 2014 → 1 karta facelift');
   lygu(R.kartos('Volkswagen', 'Golf', 2017, 'VW Golf restailingas').join('+'), 'Mk7.5', 'Golf 2017 „restailingas" tekste → Mk7.5');

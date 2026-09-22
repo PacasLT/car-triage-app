@@ -97,3 +97,33 @@ Rekomendacija: rodyti „facelift“ (BMW – „LCI“), Golf ir Passat B5 papi
 
 `atnVardas` (v2.10.6, A-41): rinkoje įprastas atnaujinto varianto vardas vietoj „<kodas> facelift“ – VW Golf Mk7 → Mk7.5, Mk8 → Mk8.5, Passat B5 → B5.5 (generatoriaus žodynas `ATN_VARDAS`).
 
+
+## Atnaujinimo mėnuo (`atnMen`) – A-44, 2026-09-23
+
+**Kas tai.** `atnMen` – atnaujinto varianto **pardavimų pradžios mėnuo Vokietijoje**, ne gamybos pradžia.
+- Tikrų gamybos pradžios mėnesių viešai beveik nėra: iš 64 patikrintų atvejų rasti tik 4 (Passat B5 2000-10, Sharan 7M 2000-05, W212 2013-03, X3 G01 2021-09).
+- Registracijos logikai pardavimų pradžia tinka geriau: pirmosios atnaujinto varianto registracijos vyksta nuo jos.
+
+**Šaltiniai.**
+- ADAC autokatalogas (adac.de/rund-ums-fahrzeug/autokatalog/marken-modelle/…/*-facelift) – ankstyviausias atnaujinto varianto versijos pradžios mėnuo.
+- de.wikipedia generacijų straipsniai (BMW_E70, BMW_F25, BMW_G01, VW_Passat_B5, VW_Golf_VIII, Mercedes-Benz_Baureihe_211/212/213/203/204/205, Opel_Astra_J/K, Opel_Zafira_B, Ford_Focus_II, Renault_Mégane_II/III, Škoda_Octavia_II, VW_Tiguan_I, VW_Touran_I, VW_Sharan_I, Audi_A6_C5/C7, Audi_A4_B8).
+- Toyota Europe newsroom (Corolla 2010).
+
+**BMW patikra (Klaudijaus reikšmės).**
+- Sutampa 15 iš 18.
+- Pataisyta:
+  - X5 E70 9 → **6** (pardavimai 2010-06);
+  - X3 F25 4 → **6**;
+  - X3 G01 7 → **8** (pardavimai 2021-08; de.wiki gamybą nurodo nuo 2021-09 – šaltiniai nesutaria).
+- E60 3 – tik pristatymas 2007-03, pardavimų data nenurodyta (tikėtina).
+
+**Metai pakeisti pagal pardavimų pradžią** (atnaujinimas pristatytas metais anksčiau):
+- Octavia A5 2008 → **2009** (01);
+- RAV4 XA40 2015 → **2016** (01);
+- Corolla E210 2022 → **2023** (02).
+
+**Prastesni duomenys:**
+- Prius XW50 2019-02 – ADAC atskiro atnaujinimo įrašo neturi, imta pagal naujas kainoraščio versijas;
+- Mercedes W205 2018-07 – data gali būti tik įkraunamo hibrido.
+
+**Apimtis.** 35 modeliai, 77 kartos (visi top 30 su `atn` + BMW).

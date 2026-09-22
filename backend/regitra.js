@@ -148,9 +148,10 @@ function atnPav(k) { return ATN_PAV[String(k).split('|')[0]] || 'facelift'; }
 // Kartos fazės skelbimui: [{kodas, lci: true|false|null, rodyti, karta}] (1 arba 2 ties riba).
 // A-41: atnaujinto varianto vardas gali būti rinkos (`atnVardas`: Golf „Mk7.5").
 // v2.10.7: `menuo` – pirmos registracijos mėnuo (autoplius, autogidas). Atnaujinimo
-// metais: registruotas prieš gamybos pradžią (`atnMen`) – tikrai senas; ≥ 3 mėn.
+// (A-44: `atnMen` – atnaujinto varianto pardavimų pradžia Vokietijoje, ne gamyba.)
+// metais: registruotas prieš pardavimų pradžią (`atnMen`) – tikrai senas; ≥ 6 mėn.
 // po jos – atnaujintas (senų likučių tikimybė maža); tarp jų – nežinoma.
-const ATN_MEN_TARPAS = 3;
+const ATN_MEN_TARPAS = 6; // A-44: atnMen = pardavimų pradžia DE, likučiai registruojami dar kelis mėn.
 function kartosFazes(marke, modelis, metai, tekstas, menuo) {
   const k = kartosRaktas(marke, modelis); const m = parseInt(metai, 10);
   if (!k || !KARTOS[k] || !m) return [];

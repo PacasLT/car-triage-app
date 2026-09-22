@@ -1325,3 +1325,9 @@ Raudona jau turi du darbus, ir trečio jai neduosiu.
 - K-55a: 352 px „Iš viso“ fonas dažo tik atskiras celes (tamsūs lopai po kiekvienu skaičiumi), ne visą kortelę – žr. 55-portalai-352.png. Perduota Dizaineriui.
 - `dizainas.test` 26/26, sargai 15/0/3.
 
+## Z-123 · 2026-09-22 · Klaudijus · v2.10.8 papildyta – A-44 atnMen (Analitikas)
+- Įdiegta A-44: `atnMen` 35 raktams / 77 kartoms (md5 sutampa; pergeneravus – tas pats). `atnMen` = pardavimų pradžia DE, ne gamyba.
+- BMW pataisyta: X5 E70 9→6, X3 F25 4→6, X3 G01 7→8. `atn` metai pakeisti: Octavia A5 2009, RAV4 XA40 2016, Corolla E210 2023.
+- `ATN_MEN_TARPAS` 3 → 6 (Analitiko siūlymas: likučiai registruojami dar kelis mėn.).
+- Testai: regitra 185/185 (A-44 pavyzdžiai įtraukti), sargai žali.
+

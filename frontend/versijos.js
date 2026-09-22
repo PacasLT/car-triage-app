@@ -8,9 +8,10 @@
 
 window.CT_VERSIJOS = [
   {
-    versija: '2.10.8', data: '2026-09-22', pavadinimas: 'Dizainas: vienas langų stilius',
+    versija: '2.10.8', data: '2026-09-22', pavadinimas: 'LCI 35 modeliams, vienas langų stilius',
     pakeitimai: [
       'Iššokančių langų (pvz. „Pranešti apie klaidą“) stilius sutvarkytas į vieną – išvaizda nesikeičia, bet nauji langai (stabdis, planai) atrodys vienodai.',
+      'LCI / facelift pagal registracijos mėnesį dabar veikia 35 populiariems modeliams (BMW, VW, Audi, Toyota, Škoda, Mercedes, Volvo ir kt.). Atnaujintu laikomas automobilis, įregistruotas praėjus 6 mėn. nuo atnaujinto modelio pardavimų pradžios.',
     ],
   },
   {

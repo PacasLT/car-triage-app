@@ -340,11 +340,33 @@ ATN_MEN = {
  'BMW|5': {'E60/E61':3,'F10/F11':7,'G30/G31':7},
  'BMW|7': {'F01/F02':7,'G11/G12':3},
  'BMW|X1': {'E84':7,'F48':7},
- 'BMW|X3': {'E83':9,'F25':4,'G01':7},
+ 'BMW|X3': {'E83':9,'F25':6,'G01':8},   # A-44: F25 6 (de.wiki), G01 8 – pardavimai 2021-08
  'BMW|X4': {'G02':8},
- 'BMW|X5': {'E70':9,'G05':4},
+ 'BMW|X5': {'E70':6,'G05':4},           # A-44: E70 6 (de.wiki, ADAC)
  'BMW|X6': {'G06':4},
 }
+# A-44 (Analitikas, 2026-09-23). Mėnuo = atnaujinto varianto PARDAVIMŲ PRADŽIA Vokietijoje
+# (ADAC autokatalogas / de.wikipedia). Tikrų gamybos pradžios mėnesių viešai beveik nėra,
+# o registracijos logikai pardavimų pradžia tinka geriau. Šaltiniai: docs/kartos-saltiniai.md.
+# Trims metai pataisyti pagal pardavimų pradžią (atnaujinimas pristatytas metais anksčiau).
+ATN['SKODA|OCTAVIA']['A5'] = 2009
+ATN['TOYOTA|RAV4']['XA40'] = 2016
+ATN['TOYOTA|COROLLA']['E210'] = 2023
+ATN_MEN.update({
+ 'VW|PASSAT': {'B5':11,'B8':6}, 'VW|GOLF': {'Mk7':3,'Mk8':7}, 'VW|TOURAN': {'1T':8},
+ 'VW|TIGUAN': {'5N':7,'AD1':9}, 'VW|SHARAN': {'7M':5},
+ 'AUDI|A6': {'C5':5,'C6':10,'C7':10,'C8':6}, 'AUDI|A4': {'B8':11,'B9':10},
+ 'AUDI|A3': {'8P':7,'8V':7,'8Y':6}, 'AUDI|Q5': {'8R':9,'FY':9},
+ 'TOYOTA|COROLLA': {'E120':7,'E150':5,'E170':12,'E210':2}, 'TOYOTA|RAV4': {'XA30':5,'XA40':1},
+ 'TOYOTA|AVENSIS': {'T250':6,'T270':6}, 'TOYOTA|AURIS': {'E150':3,'E180':9}, 'TOYOTA|PRIUS': {'XW30':4,'XW50':2},
+ 'SKODA|OCTAVIA': {'A5':1,'A7':1,'A8':5},
+ 'OPEL|ASTRA': {'J':9,'K':8}, 'OPEL|ZAFIRA': {'B':2,'C':6},
+ 'VOLVO|XC60': {'1 karta':6,'2 karta':5}, 'VOLVO|V70': {'3 karta':6}, 'VOLVO|XC90': {'1 karta':5,'2 karta':5},
+ 'NISSAN|QASHQAI': {'J10':3,'J11':7},
+ 'FORD|FOCUS': {'Mk2':2,'Mk3':10,'Mk4':2}, 'FORD|GALAXY': {'Mk2':5},
+ 'MERCEDES|E': {'W211':6,'W212':4,'W213':6}, 'MERCEDES|C': {'W203':4,'W204':3,'W205':7},
+ 'RENAULT|MEGANE': {'2 karta':1,'3 karta':1},
+})
 for k,m in ATN_MEN.items():
     for g in K[k]:
         if g['kodas'] in m: g['atnMen']=m[g['kodas']]
