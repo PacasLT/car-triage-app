@@ -23,6 +23,7 @@ Klausimai / sprendimai / leidimai – „Luko eilė“ (https://claude.ai/artifa
 - `git push origin main` – **tik Lukui leidus** kiekvieną kartą. Commit'o gale – Co-Authored-By ir Claude-Session eilutės.
 - Raktai (`ANTHROPIC_API_KEY`, `SCRAPER_API_KEY`, `JWT_SECRET`, `ADMIN_EMAILS`, `INVITE_CODES`, `KLAIDU_RAKTAS`) – tik Railway Variables. `backend/.env` – niekada į git. Raktai niekada adrese (tik antraštėje).
 - Žali duomenys (`*.zip`, `*.csv`, registro 945 MB) – niekada repo aplanke; tik suvestinės `backend/duomenys/*.json`.
+- **Iki 2026-10-16 (ScraperAPI ciklas, Luko sprendimas KL-SCRAPER A):** kūrimo testai tik su įrašytu HTML (`backend/testai/`) arba užsienio portalais (1 kr./psl.). Gyvų autoplius/autogidas paieškų ir skenavimų testavimui – ne. Tas pats skelbimas LT su render = 30 kr.
 - Serveryje testavimui **niekada nekviesti mokamų maršrutų** (analyze, vin-lookup, seller, compare, paieška) – tik GET ir nemokami. Jokių didelių skenavimų be Luko OK.
 - Produkcija: Railway MCP (žurnalai, deploy'ai – tik skaityti; jokių restart/redeploy be Luko), naršyklės `seed` skirtukas (prisijungęs, žetonas `localStorage.ct_token`).
 

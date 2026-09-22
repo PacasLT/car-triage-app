@@ -859,3 +859,8 @@ ct-priedai.css 20 blokas. URL parametrai (`kebulas`, `pardavejas`, `ideta`, `zem
 - Q-10: Sonnet 5 → 4.5 pakeitė Lukas 09-15 per GitHub (cb37ce1), priežastis neužrašyta. Luko eilė KL-MODELIS.
 - Q-11: kreditų žurnalas nuo 09-17: greitos 6, pilnos 12, VIN 4, palyginimai 5, pardavėjas 2. `SAVIKAINA-DUOMENYS.md` §7.
 - Dizaineris: matavimo prašymas `.ct-std-card` vs `.ct-top-card` (BUSENA); kitas paketas – `.ct-btn-accent`, `.ct-regitra`, `.mg-atn-busena`, `.ct3-portal-ico`; klausimas DZ-TINDER Luko eilėje.
+
+## Z-100 · 2026-09-22 · Klaudijus · TA parsisiųsta; Q-12–Q-14; KL-SCRAPER A
+- TA: 105 failai, 12 212 462 įrašai, `_id` griežtai didėja per visus failus (be dublikatų), numeriai 0001–0123 be spragų. Analitiko ėjimas (`ta-suvestine.py`).
+- Q-12: autoplius užklausos be render 09-17–20 – automatinis sekimas po kiekvieno deploy'aus (išjungtas v2.2.1, 09-21). Q-13: LT render 20 kr. (+10 bazinis). Q-14: VIN `max_uses` 5, pardavėjas 4; 432 paieškos 09-17 – seni AI komentarai su web_search (pataisyta a739cc1). `SAVIKAINA-DUOMENYS.md` §2, §8.
+- Lukas KL-SCRAPER = A (lieka Hobby). CLAUDE.md: iki 10-16 testai be gyvų LT paieškų.
