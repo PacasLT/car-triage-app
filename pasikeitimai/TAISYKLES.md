@@ -18,6 +18,15 @@ Verslo sesijos repo nerašo ir kodo neskaito. Faktus joms (ką produktas moka,
 kiek kainuoja) Klaudijus laiko projekte: `claude/GALIMYBES.md`,
 `claude/SAVIKAINA-DUOMENYS.md`.
 
+## Kreipimasis į Luką (privaloma visiems)
+
+Pilnai – projekte `claude/LUKUI-TAISYKLE.md`. Trumpai:
+- Klausimas / sprendimas / nuomonė / patikra / leidimas Lukui → punktas **„Luko eilėje“**
+  (https://claude.ai/artifact/KfPvoTLDL83GtRYHobaXtu): įrašai pats (`ArtifactData`) arba, jei negali,
+  atsakymo gale `▶ LUKUI` blokas.
+- Kiekvienas atsakymas baigiasi „Lukui: nieko nereikia.“ / „Lukui: įrašiau <ID>“ / `▶ LUKUI` / `▶ PERDUOTI → <kam>` blokas.
+- Žinutė kitam nariui – tik `▶ PERDUOTI → <kam>` blokas, parašytas gavėjui.
+
 ## Pirmas veiksmas kiekvienoje sesijoje
 
 1. `pasikeitimai/BUSENA.md` — kieno ėjimas. Ieškok savo vardo.

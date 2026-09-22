@@ -13,21 +13,10 @@ Viskas, ko laukia tavęs. Kiekvienas punktas ≤ 1 min. Perrašo Klaudijus po ki
 - Sąskaita: Hobby 49 $, **34 846 / 100 000** šį ciklą, atsinaujina **10-16**, pasiekus ribą – sustoja (be automatinio brangesnio plano). Mūsų admin skaitliukas (87 741) klaidingas – taisymas F-3+.
 - Tempas kūrimo savaitę ~5 800 kr./d. → jei nesumažės, riba ~10-03. Po savaitės pažiūrėk Usage dar kartą.
 
-## Sprendimai (vienu žodžiu)
-| Nr. | Klausimas | Variantai |
-|---|---|---|
-| Nr. 46 | Regitra: ką dar rodyti prie skelbimų? Sąrašas `REGITRA-GALIMYBES.md`. Siūlau 3: importo tendencija, pavarų dėžė, kilmės šalis | „3" / „visi" / „nieko" / sąrašas |
-| D-03 | Skelbimo puslapyje – grąžinam šešis skydelius (AI, tech, rizikos, VIN, rinka, pardavėjas) ar lieka skirtukai? | skydeliai / skirtukai |
-| F-1 | Verslo planas „neribota“ → riba (pvz. 600 paieškų/mėn.) arba LT paieška skaičiuojama už 2 | riba / už 2 / palikti |
-| F-2 | Pro 100 → 60 paieškų, arba LT paieška už 2 | 60 / už 2 / palikti |
-| F-3 | Įspėjimas tau, kai ScraperAPI fondo lieka < 20 % (dabar jau 12 %) | taip / ne |
-| F-3+ | Sargas + paros ScraperAPI žurnalas diske (kiek kr. per dieną ir iš kur) + teisingas likučio skaitliukas. ~1 leidimas, 0 kr. | taip / ne |
-| R-1 | Kainos istorija kortelėje: „↓ 1 500 € per 9 d.“ + mini grafikas. Duomenys jau renkami, 0 ScraperAPI kr. | taip / vėliau |
-| R-2 | Ridos atsukimo žyma pagal VIN (tas pats VIN vėliau su mažesne rida). Duomenys yra, trūksta VIN indekso | taip / vėliau |
-| P-1 | Plėtros tikslinės grupės A perpardavėjai (prioritetas), B pirkėjai, C vienkartiniai | taip / keisti |
-| P-2 | Verslo planą kol kas duoti ne daugiau kaip 1–2 klientams (kol F-1 neišspręstas) | taip / ne |
-| P-3 | Paprašyti carVertical / autoDNA B2B kainų (tik užklausa, jokio kodo) | taip / ne |
-| Data plugin | Įjungti Analitiko sesijoje (be BigQuery/Snowflake)? Naudos nedaug. | taip / ne |
+## Sprendimai ir klausimai → **Luko eilė**
+Visi klausimai, sprendimai, nuomonės ir leidimai dabar yra puslapyje „Luko eilė“:
+https://claude.ai/artifact/KfPvoTLDL83GtRYHobaXtu – atsakai ten, perdavimo tekstas paruošiamas.
+Taisyklė visiems nariams: projekte `claude/LUKUI-TAISYKLE.md`.
 
 ## Patikra produkcijoje
 **admin: 5 laukia tavęs** → `/admin.html` (Nr. 40, 42, 45, 30, 10 – kiekviename „KĄ PATIKRINTI"). Veikia/Neveikia.

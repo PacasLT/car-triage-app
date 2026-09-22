@@ -7,6 +7,9 @@ Darbo sistema ir rolės – `pasikeitimai/TAISYKLES.md`; pilnas planas – Claud
 1. `pasikeitimai/BUSENA.md` – kas atvira ir kieno ėjimas. 2. `pasikeitimai/LUKUI.md`. 3. `ZURNALAS.md` pabaiga.
 Prieš keičiant sritį – `grep -n "## " docs/pamokos.md` ir perskaityti tos srities skyrių.
 
+## Kreipimasis į Luką
+Klausimai / sprendimai / leidimai – „Luko eilė“ (https://claude.ai/artifact/KfPvoTLDL83GtRYHobaXtu, `ArtifactData` → `klausimai`), forma – projekte `claude/LUKUI-TAISYKLE.md`. Kiekvieno atsakymo gale: „Lukui: …“ arba `▶ LUKUI` / `▶ PERDUOTI → <kam>` blokas.
+
 ## Procedūros (skills)
 - Po KIEKVIENO kodo pakeitimo → skill **`cartriige-leidimas`** (sargai, versija, žurnalas, klaidų būsenos, BUSENA/LUKUI, commit, push, deploy patikra, veidrodis).
 - Atėjo dizainerio zip → skill **`cartriige-dizainerio-paketas`**.
