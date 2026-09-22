@@ -12,6 +12,7 @@ window.CT_VERSIJOS = [
     pakeitimai: [
       'ISTAISYTA (Nr. 45): otomoto ir kitų portalų skelbimuose ta pati nuotrauka rodyta kelis kartus, todėl dalies nuotraukų nebūdavo. Dabar imama portalo galerija, be pasikartojimų.',
       'Galerijoje rodoma iki 40 nuotraukų (buvo 15), taip pat ir mobile.de.',
+      'ISTAISYTA (Nr. 30): antraštė visuose puslapiuose vienoda – paieškos, skelbimo, mėgstamiausių ir ataskaitų (kompiuteryje ir telefone).',
     ],
   },
   {

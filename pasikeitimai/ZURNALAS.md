@@ -1243,3 +1243,8 @@ visu kontekstu. Kai imsiu juostą, **pirmas darbas bus nuspręsti tarp jų.**
 - Seni AI apžvalgų podėlio įrašai (7 d.) turi senas galerijas – nauja apžvalga ar „Atnaujinti“ jas pakeičia.
 - `testai/nuotraukos.test.js` 6/6. Sargai žali.
 
+## Z-117 · 2026-09-22 · Klaudijus · v2.10.4 – Nr.30 antraštė
+- Matuota Playwright (lokaliai, 1440 ir 390 px, index / detail / mėgstamiausi, visų antraštės mygtukų x, y, plotis, aukštis). Kompiuteryje index = detail jau buvo; skyrėsi telefone: index `gap 6` (detail 0), dešinė `gap 6` (detail 10); mėgstamiausi / ataskaitos / admin (`ct-bendras.css`) – planas rodomas telefone, logotipas 36 px / 20 px, `flex: 1` (tekstas „Car…“ nukirptas), planas be varpelio piktogramos.
+- Taisyta: index telefone gap kaip detail; `ct-bendras.css` telefone = detail (planas slepiamas, 34 px, 18 px, `flex: 0 1 auto`); varpelio piktograma pridėta megstamiausi / ataskaitos / admin.
+- Po taisymo visi trys puslapiai abiem pločiais – **SUTAMPA** (kiekvieno mygtuko geometrija lygi detail.html).
+
