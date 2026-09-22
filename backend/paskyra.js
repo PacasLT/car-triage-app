@@ -84,6 +84,20 @@ function paieskos(userId, kiek, nuo) {
   return db.prepare('SELECT * FROM paieskos_zurnalas WHERE user_id = ? ORDER BY laikas DESC LIMIT ? OFFSET ?')
     .all(userId, Math.min(kiek || 20, 200), nuo || 0).map(isPaieskos);
 }
+// Admin: visų vartotojų paieškos (Finansininkui – tikri ScraperAPI skaičiai; admin zonai).
+function visosPaieskos(kiek, nuo) {
+  return db.prepare(`SELECT p.*, u.email FROM paieskos_zurnalas p JOIN users u ON u.id = p.user_id
+    ORDER BY p.laikas DESC LIMIT ? OFFSET ?`).all(Math.min(kiek || 100, 1000), nuo || 0)
+    .map((r) => Object.assign(isPaieskos(r), { email: r.email }));
+}
+function paieskuSantrauka() {
+  const r = db.prepare(`SELECT COUNT(*) AS viso,
+      SUM(CASE WHEN kr_apytiksliai = 0 THEN 1 ELSE 0 END) AS tikslus,
+      SUM(scraper_kr) AS kr_viso,
+      MIN(laikas) AS nuo, MAX(laikas) AS iki FROM paieskos_zurnalas`).get();
+  return r || null;
+}
+
 function paieskuSkaicius(userId) {
   return db.prepare('SELECT COUNT(*) AS n FROM paieskos_zurnalas WHERE user_id = ?').get(userId).n;
 }
@@ -146,7 +160,7 @@ function eksportas(userId) {
 }
 
 module.exports = {
-  prijungti, irasytiPaieska, paieskos, paieskuSkaicius,
+  prijungti, irasytiPaieska, paieskos, paieskuSkaicius, visosPaieskos, paieskuSantrauka,
   naujaUzklausa, manoUzklausos, visosUzklausos, uzklausa, uzdarytiUzklausa,
   keistiSlaptazodi, eksportas, UZKL_TIPAI,
 };

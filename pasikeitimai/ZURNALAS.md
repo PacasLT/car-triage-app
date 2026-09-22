@@ -1576,3 +1576,9 @@ keitimas užtruko du paketus.
 - Kortelė (index) ir skelbimo puslapio antraštė rodo `pavadinimas || modelis`; kortelėje dar `title=` užvedus.
 - `autogidas.test` 32/32 (nauja 7 dalis). Sargai 17 žali; `migracija` VM'e krenta dėl EPERM unlink (VM negali trinti failų) – Windows'e praeina.
 
+## Z-129 · 2026-09-22 · Klaudijus · v2.11.4 – admin paieškų žurnalas (Finansininko §3.4)
+- `paskyra.js`: `visosPaieskos(kiek, nuo)` (su el. paštu) ir `paieskuSantrauka()` (viso, kiek su tiksliu kreditų skaičiumi, kr. suma, laikotarpis).
+- `GET /admin/paieskos?kiek=&nuo=` (tik admin). Kai susikaups ~50 įrašų – siunčiu Finansininkui maržoms iš matavimo.
+- Finansininko §3.1 formulė įrašyta į `planai.js` užduotį (darbai kl-planai): LT kreditai = autoplius + autogidas (puslapiai + gilinimai + quick-count), užsienio neskaičiuojami; vienetai = 0, jei LT kreditų 0, kitaip max(1, ⌈LT/140⌉); nurašymo eilė Verslas 300 → LT papildymas → paieška nepradedama; talpykla = 0 vienetų; faktas > sąmata × 1,5 → nurašom sąmatą; apvalinimas kliento naudai; LT papildymas 90 d.
+- `paskyra.test` 18/18.
+

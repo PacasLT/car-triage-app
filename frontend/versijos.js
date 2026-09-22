@@ -8,6 +8,12 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.11.4', data: '2026-09-22', pavadinimas: 'Paieškų žurnalas administratoriui',
+    pakeitimai: [
+      'Administratorius gali peržiūrėti visų vartotojų paieškas su tikra ScraperAPI kaina – iš to skaičiuojamos plano maržos (Finansininko §3.4).',
+    ],
+  },
+  {
     versija: '2.11.3', data: '2026-09-22', pavadinimas: 'Pilnas skelbimo pavadinimas kortelėje',
     pakeitimai: [
       'Kortelėje ir skelbimo puslapyje rodomas pilnas skelbimo pavadinimas su versija (pvz. „BMW X4 xDrive20d“), ne tik markė ir modelis. Rinkos kaina ir toliau skaičiuojama pagal modelį.',

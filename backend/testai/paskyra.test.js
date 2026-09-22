@@ -29,6 +29,13 @@ P.prijungti(db);
   T(s[0].rasta === 240 && s[0].scraperKr === 12, 'rasta ir kreditai');
   T(P.paieskuSkaicius(1) === 1, 'skaičius');
 
+  console.log('\nAdmin paieškų žurnalas (Finansininkui)');
+  const visos = P.visosPaieskos(10);
+  T(visos.length === 2 && visos[0].email && visos.some((x) => x.email === 'c@d.lt'), 'admin mato visų vartotojų paieškas su el. paštu');
+  const sant = P.paieskuSantrauka();
+  T(sant.viso === 2 && sant.kr_viso === 12, 'santrauka: 2 paieškos, 12 ScraperAPI kr.');
+  T(sant.tikslus === 2, 'pažymėta, kiek įrašų su tiksliu kreditų skaičiumi');
+
   console.log('\nUžklausos');
   const u1 = P.naujaUzklausa(1, 'planas', 'pro');
   T(u1.id && !u1.jau, 'nauja užklausa');

@@ -4516,6 +4516,16 @@ app.get('/api/paskyra/eksportas', requireAuth, (req, res) => {
   } catch (e) { res.status(500).json({ error: 'Nepavyko paruošti' }); }
 });
 
+// Admin: paieškų žurnalas (Finansininkui – tikri ScraperAPI skaičiai maržoms, §3.4)
+app.get('/admin/paieskos', requireAuth, planai.reikalautiAdmin, (req, res) => {
+  try {
+    res.json({
+      santrauka: paskyra.paieskuSantrauka(),
+      sarasas: paskyra.visosPaieskos(parseInt(req.query.kiek, 10) || 100, parseInt(req.query.nuo, 10) || 0),
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // Admin: plano / kreditų užklausos (KL-PASKYRA-PLANAS)
 app.get('/admin/uzklausos', requireAuth, planai.reikalautiAdmin, (req, res) => {
   try { res.json({ sarasas: paskyra.visosUzklausos(req.query.visos ? null : 'laukia') }); }
