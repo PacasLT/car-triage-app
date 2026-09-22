@@ -16,6 +16,7 @@ Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
 
 | Nr. | Kas | Trumpai |
 |---|---|---|
+| 49 | Trys vardai (`.ct-regitra`, `.ct-status`, `.ct3-portal-ico`; 5 bloko trynimas) | Gautas, grep sutampa. Laukia K-38 (diegti dabar ar po 46b) ir DZ-PLANAS (Luko eilė). |
 | Prieiga | `Downloads\cartriige-dizaineriui` | Tikros kopijos (junction'ai neveikė). Patikra: `ct-priedai.css` eil. sk. + ši pirma eilutė. |
 | 46b | 4 benamiai vardai: `.ct-sort`, `.ct-std-card`, `.dp-desine`, `.ct-papf` + „Kaip vertiname?" eilutė `#dp-panel` | 46 atšauktas (D-41). **48 Errata 7 gautas, laukia 46b** — diegiami kartu. Įdiegus trinami priedų 16, 17, 18, 20 blokai ir senos `.ct-std-card` taisyklės (index 1337 tik 3 savybės, 1534 „BŪTINA", 2173, compare.html, **ct-bendras.css**; 2144–2151 neliesti). |
 | `#search-btn` | 5-as ID mygtukas | Gradientas / švytėjimas / `:disabled` sistemoje ar vientisas CTA? Z-93. |

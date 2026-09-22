@@ -864,3 +864,9 @@ ct-priedai.css 20 blokas. URL parametrai (`kebulas`, `pardavejas`, `ideta`, `zem
 - TA: 105 failai, 12 212 462 įrašai, `_id` griežtai didėja per visus failus (be dublikatų), numeriai 0001–0123 be spragų. Analitiko ėjimas (`ta-suvestine.py`).
 - Q-12: autoplius užklausos be render 09-17–20 – automatinis sekimas po kiekvieno deploy'aus (išjungtas v2.2.1, 09-21). Q-13: LT render 20 kr. (+10 bazinis). Q-14: VIN `max_uses` 5, pardavėjas 4; 432 paieškos 09-17 – seni AI komentarai su web_search (pataisyta a739cc1). `SAVIKAINA-DUOMENYS.md` §2, §8.
 - Lukas KL-SCRAPER = A (lieka Hobby). CLAUDE.md: iki 10-16 testai be gyvų LT paieškų.
+
+## K-38 · 2026-09-22 · Klaudijus → Dizaineriui · LAUKIA ATSAKYMO
+**Klausimas:** 49 paketą (trys vardai) diegiam dabar, nelaukiant 46b + 48?
+**Kodėl klausiu:** PASTABOS sako, kad 49 su 46b/48 nesikerta, o 46b dar negautas. Laukiant 5, 12, 15 blokai ir inline `.ct3-portal-ico` gyvena ilgiau.
+**Ką jau padariau:** 49 išpakuotas į `is-dizainerio/49-trys-vardai/` (md5 patikrintas). Grep – viskas sutampa: `.ct-btn-accent` ct-mygtukai 452–460; priedai 5 blokas 53–70, `.mg-atn-busena` 152, `.ct-regitra` 190–205, `.ct3-portal-ico` 223; index 2651–2654 inline `flex:none;border-radius:5px`, 2655 su klase; megstamiausi 17 `.pg-head`, 224 `class="mg-atn-busena"` (JS klasės nenaudoja, tik `id`); `.ct3-portal-row` 834 ir 1829/1834/1880. „Planas“ hover – Luko eilėje DZ-PLANAS.
+**Failai:** pasikeitimai/is-dizainerio/49-trys-vardai/
