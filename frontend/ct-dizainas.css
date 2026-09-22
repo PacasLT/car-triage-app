@@ -374,7 +374,11 @@ button { font-family: inherit; cursor: pointer; }
 
 /* Įverčio dedamosios juosta; „neįvertinta" dedamoji — dryžuota, ne tuščia */
 .ct-bar { height: 6px; border-radius: var(--radius-pill); background: var(--bg-raised); overflow: hidden; }
-.ct-bar > span { display: block; height: 100%; border-radius: inherit; background: var(--success); }
+.ct-bar > span { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
+/* 57 pk. (Errata 10): žalia – būsena, ne numatytoji. Įverčiui markupe `.is-good`. */
+.ct-bar.is-good > span { background: var(--success); }
+.ct-bar.is-warn > span { background: var(--warning); }
+.ct-bar.is-bad  > span { background: var(--danger); }
 .ct-bar-unknown {
   background-image: repeating-linear-gradient(
     -45deg, var(--k-unknown-dim) 0 4px, transparent 4px 8px);
@@ -1539,7 +1543,7 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
 }
 /* Fokusas — ziedas, ne remelis. Todel abu matomi vienu metu. */
 .ct-flag:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--accent-dim); border-color: var(--accent-border); }
-.ct-flag[aria-checked="true"]:focus-visible { box-shadow: 0 0 0 3px rgba(124, 92, 255, .32); }
+.ct-flag[aria-checked="true"]:focus-visible { box-shadow: 0 0 0 3px var(--accent-dim); } /* 57 pk. C1 */
 
 /* Grupe: etikete + zenkliukai. gap 8px, kad dvi eiles nesiliestu. */
 .ct-flag-group { display: flex; flex-direction: column; gap: 7px; }
@@ -4837,3 +4841,10 @@ textarea.ct-field {
   .acct-set-r > .acct-del { margin-left: 0; flex: 1 1 100%; }
   .acct-plan-n, .acct-bal-n { font-size: var(--fs-500); }
 }
+
+/* ============================================================================
+   57 paketas · ERRATA 10 · [hidden] sistemoje (ne dviejose vietose)
+   Stovi failo GALE sąmoningai: [hidden] specifiškumas 0,1,0 (:where prideda 0),
+   tad jis nugali to paties svorio `display` taisykles tik būdamas vėliau.
+   ========================================================================== */
+[hidden]:where(:not([hidden="until-found"])) { display: none; }

@@ -1413,3 +1413,82 @@ piktograma atrodo kaip brūkšnys.
 - Matavimai (`pasikeitimai/matavimai/56a-paskyra-{1280,390,langas}.png`, API imituotas): be horizontalios slinkties, mygtukai telefone 44 px, pirminis mygtukas rgb(37,99,235). Rasta ir pataisyta: `[hidden]` nenugalėjo `.acct-row`/`.acct-set-f` `display:flex` (paslėptos eilutės ir slaptažodžio forma matėsi) – puslapyje `.pg-acct [hidden]{display:none!important}`; `.ct-bar > span` sistemoje žalias – paskyroje akcento.
 - Testai: `paskyra.test` 15/15 (naujas), sargai 16/0/3.
 
+---
+
+## D-53 · 2026-09-22 · Dizaineris → Klaudijui · SPRITE + ERRATA 10 + VIOLETINE · 57
+
+### 1. „Vienas tokenas" buvo tiesa apie sistemą ir netiesa apie produktą
+
+56a pakete parašiau: penki tokenai, ir tai viena vieta. Klaudijus suskaičiavo
+**~60 vietų, kur violetinė liko** — ir visos jos rašytos ranka.
+
+Tai vertingesnis radinys už patį spalvos pakeitimą. Trys savaites galėjau
+sakyti „sistema turi vieną akcentą", ir tai buvo teisinga apie `ct-dizainas`
+skyrius — bet produktas yra sistema **plius** keturiasdešimt viena inline
+eilutė, du `:root` blokai ir logotipas. Tokenų disciplina veikia tik ten, kur
+ji pasiekia.
+
+Keturias sistemos vietas (mano ranka rašytus hex kodus) pataisiau šiame
+pakete. **Jos ir buvo priežastis**, kodėl „vienas tokenas" nesuveikė —
+rašiau juos tada, kai tokenas jau egzistavo.
+
+### 2. `[hidden]` — taisau sistemoje, ne dviejose vietose
+
+`[hidden]` specifiškumas yra nulis, tad **bet kuris mano `display` jį
+nugali**. Vadinasi kiekvienas `display: flex` elementui, kuris gali būti
+paslėptas, tyliai išlaidžia `[hidden]` — ir tai ne dviejų vietų klaida, o
+forma, kuri pasikartos kiekvienoje naujoje skiltyje.
+
+Viena `:where()` eilutė uždaro visus būsimus atvejus be `!important`. Tai
+pirmas kartas, kai taisau ne atvejį, o **jo galimybę**.
+
+### 3. `.ct-bar` — vienas vardas, dvi spalvos prasmės
+
+`.ct-bar` rašiau įverčiui: žalia = „gerai". Paskyroje ta pati juosta rodo
+naudojimą, o naudojimas nėra nei geras, nei blogas.
+
+Ta pati `K-35` forma — bet pas mane ji atsirado **ne per būseną, o per
+spalvos prasmę**, ir todėl jos nepamačiau. Būsena selektoriuje matoma;
+prasmė — ne.
+
+Dabar juosta neutrali, o žalia yra `.is-good`.
+
+### 4. Ko nedarau: 41 inline vieta
+
+Galėčiau atsiųsti sąrašą „pakeiskit #7C5CFF į `var(--accent)`" ir jis net
+veiktų. Bet tai būtų **rašyta iš aprašymo, ne iš failo** — tiksliai tas, dėl
+ko 46 paketas buvo atšauktas.
+
+Paprašiau grep'o su eilučių numeriais ir savybe. Kai turėsiu, kiekvienas
+pakeitimas bus tokenas, ne naujas hex.
+
+### 5. Logotipas lieka violetinis
+
+Akcentas yra **sąsajos** spalva: veiksmas, pasirinkimas, fokusas. Logotipas
+nereiškia nė vieno iš jų — jis yra ženklas, ir ženklas nesikeičia kartu su
+mygtuku.
+
+Bet užrašau tai, ko negaliu pamatuoti iš čia: antraštėje logotipas stovi 40 px
+nuo „Planas" mygtuko, kuris dabar mėlynas. Jei tai atrodo kaip klaida,
+sprendimas bus ne logotipą perdažyti, o mygtuką padaryti neutralų.
+
+### 6. Portalų ženkleliai — maketas klydo, ne failas
+
+Tikros spalvos: `AP` žalia, ne mėlyna. Makete `AP` buvau nupiešęs mėlyną ir
+tuo pagrindu uždaviau Lukui klausimą apie sutapimą, **kurio nėra**.
+
+Įsirašau atskirai, nes tai nauja klaidos rūšis: iki šiol maketas mane
+**gaudydavo**. Šįkart jis pats buvo šaltinis — ir vėl klaidingas antras
+šaltinis, ta pati forma kaip `D-30` stendas ir `Z-62` skriptas. **Maketo
+spalvos nėra duomenys**, kai jos neša tapatybę.
+
+**Failai:** `pasikeitimai/is-dizainerio/57-sprite-ir-violetine/`
+
+## Z-125 · 2026-09-22 · Klaudijus · 57 paketas įdiegtas (į v2.11.0, dar neįkelta)
+- Sprite: 6 simboliai į `ct-ikonos.html` ir `paskyra.html` (laikinos ištrintos). Kiti puslapiai jų nenaudoja.
+- Errata 10 `[hidden]`: eilutė `ct-dizainas.css` GALE – jos specifiškumas 0,1,0 (ne 0: `[hidden]` atributas 0,1,0, `:where` prideda 0), tad ji nugali `.acct-row` tik būdama vėliau. Laikinas `!important` paskyroje ištrintas; pamatuota – 0 matomų `[hidden]`.
+- `.ct-bar`: 377 eil. pakeista kaip pakete, BET ji neveikia – 1260 eil. `.ct-bar > span { background: currentColor }` (vėliau, tas pats svoris) nugali; įverčio juostų spalvą duoda `.ct-bar-w:has(... .is-good)` per `color`. Todėl `is-good` į `.dp-panel` markupą NEdėtas (`.ct-bar.is-good > span` 0,2,1 nugalėtų ir warn/bad – visos būtų žalios). Paskyroje juosta per `color: var(--accent)` (puslapio stilius). K-57a Dizaineriui.
+- C1: 1542, ct-mygtukai 209 ir 458 → `var(--accent-dim)`.
+- C2: `ct-bendras.css` antras `:root` (68–115) ištrintas; patikrinta – visi 4 puslapiai su ct-bendras krauna ir ct-dizainas. `--accent-hover` niekur nenaudojamas. Paliktas `--shadow-panel` (ct-dizainas jo neturi, naudoja `.ct-sort-menu` 3836). Pirmas `:root` (1–23, senos reikšmės) neliestas – K-57b.
+- C3: grep sąrašas `pasikeitimai/VIOLETINE-GREP.md` (83 eilutės, iš jų 16 logotipas).
+

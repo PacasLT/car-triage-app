@@ -206,7 +206,7 @@
   background: var(--accent-dim);
   color: var(--accent-light);
 }
-.ct-btn.is-on > i { background: rgba(124, 92, 255, .22); color: var(--accent-light); }
+.ct-btn.is-on > i { background: var(--accent-dim); color: var(--accent-light); } /* 57 pk. C1 */
 .ct-btn.is-on:hover { background: var(--accent-dim); border-color: var(--accent); color: var(--accent-light); }
 
 /* Širdutė įjungta — užpildyta, ne tik violetinė */
@@ -455,7 +455,7 @@
   color: var(--accent-light);
 }
 .ct-btn-accent:hover { background: var(--accent-dim); border-color: var(--accent); color: var(--text-primary); }
-.ct-btn-accent > i { background: rgba(124, 92, 255, .22); color: var(--accent-light); }
+.ct-btn-accent > i { background: var(--accent-dim); color: var(--accent-light); } /* 57 pk. C1 */
 /* Kreditu likutis mygtuke — mono, bet ne raudonas, kol kreditu yra */
 .ct-btn-accent > u { border-left-color: var(--accent-border); color: var(--accent-light); }
 

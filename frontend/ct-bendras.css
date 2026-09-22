@@ -65,54 +65,8 @@ body{font-family: var(--font);
   color: #8C93A6; font: 600 15px 'Archivo',-apple-system,Helvetica,sans-serif;
   cursor: pointer; transition: background .14s;}
 #ct-logout-btn:hover{background: rgba(255,255,255,.06); color: #E9EBF2;}
-:root{--bg-base:        #0A0C12;
-  --bg-surface:     #11141C;
-  --bg-elevated:    #171B25;
-  --bg-card:        #11141C;
-  --bg-raised:      #1F2431;            
-
-  
-  --border:         rgba(255,255,255,.075);
-  --border-light:   rgba(255,255,255,.14);
-
-  
-  --accent:         #7C5CFF;
-  --accent-hover:   #8B6FFF;
-  --accent-light:   #A78BFA;
-  --accent-dim:     rgba(124,92,255,.14);
-  --accent-border:  rgba(124,92,255,.30);
-
-  
-  --success:        oklch(.75 .15 158);
-  --success-dim:    oklch(.75 .15 158 / .13);
-  --success-border: oklch(.75 .15 158 / .30);
-  --warning:        oklch(.81 .13 78);
-  --warning-dim:    oklch(.81 .13 78 / .13);
-  --warning-border: oklch(.81 .13 78 / .30);
-  --danger:         oklch(.66 .19 25);
-  --danger-dim:     oklch(.66 .19 25 / .13);
-  --danger-border:  oklch(.66 .19 25 / .30);
-
-  
-  --text-primary:   #E9EBF2;
-  --text-secondary: #C3C9D8;
-  --text-muted:     #8C93A6;
-  --text-dim:       #5E6578;            
-
-  
-  --radius-sm:      6px;
-  --radius-md:      7px;
-  --radius-lg:      11px;
-  --radius-xl:      12px;
-
-  
-  --font:           'Archivo', -apple-system, 'Segoe UI', Helvetica, sans-serif;
-  --font-mono:      'IBM Plex Mono', ui-monospace, Menlo, monospace;
-
-  
-  --shadow-card:    0 1px 0 rgba(255,255,255,.03) inset;
-  --shadow-panel:   0 18px 40px -24px rgba(0,0,0,.8);
-  --shadow-glow:    0 8px 22px -12px rgba(124,92,255,.9);}
+/* 57 pk. C2: antras :root blokas ištrintas – tokenai gyvena tik ct-dizainas.css. Paliktas tik --shadow-panel (jo ct-dizainas neturi, naudoja .ct-sort-menu). */
+:root{--shadow-panel: 0 18px 40px -24px rgba(0,0,0,.8);}
 .ct3-header{position: relative; z-index: 100;
   background: transparent;
   border-bottom: none;}

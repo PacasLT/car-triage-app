@@ -37,7 +37,8 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 | `.ct-modal` dubliai | Sutraukta (v2.10.8) | Pirmas blokas ištrintas, `.ct-modal-x` ir `overflow` perkelti. |
 | 54 paketas | Laukia | Diegiama kartu su stabdžiu (`54-vykdymo-busena-v2.zip`). |
 | 56a paskyra | Įdiegta (v2.11.0) | 47 sk., Errata 9, akcentas mėlynas (tokenai). Ranka rašyta violetinė liko ~60 vietų (Z-124). |
-| 56b admin zona | Dizaineris rašo | + 6 sprite simboliai (paskyroje dabar laikini). |
+| 57 paketas | Įdiegta (v2.11.0) | Sprite 6, `[hidden]`, C1, C2. K-57a `.ct-bar` 1260 currentColor; K-57b ct-bendras `:root` 1–23. C3 – VIOLETINE-GREP.md. |
+| 56b admin zona | Dizaineris rašo | |
 
 ## Analitikas
 

@@ -12,7 +12,7 @@ window.CT_VERSIJOS = [
     pakeitimai: [
       'Naujas puslapis „Mano paskyra“ (meniu po avataru): planas, kreditų likutis, kreditų ir paieškų istorija su mygtuku „Kartoti“, mėgstamiausi, ataskaitos, slaptažodžio keitimas ir „Atsisiųsti mano duomenis“.',
       '„Keisti planą / Pirkti kreditų“ – pasirinkite planą ar kreditų paketą, užklausa nueina administratoriui, o patvirtinus viskas atsiranda paskyroje.',
-      'Pagrindinė produkto spalva dabar mėlyna.',
+      'Pagrindinė produkto spalva dabar mėlyna (ir mygtukų piktogramų fonai, pažymėti filtrai).',
       'Paieškos nuo šiol išsaugomos jūsų paskyroje (paieškų istorija).',
     ],
   },
