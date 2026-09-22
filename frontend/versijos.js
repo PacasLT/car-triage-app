@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.11.0', data: '2026-09-22', pavadinimas: 'Mano paskyra ir mėlyna spalva',
+    pakeitimai: [
+      'Naujas puslapis „Mano paskyra“ (meniu po avataru): planas, kreditų likutis, kreditų ir paieškų istorija su mygtuku „Kartoti“, mėgstamiausi, ataskaitos, slaptažodžio keitimas ir „Atsisiųsti mano duomenis“.',
+      '„Keisti planą / Pirkti kreditų“ – pasirinkite planą ar kreditų paketą, užklausa nueina administratoriui, o patvirtinus viskas atsiranda paskyroje.',
+      'Pagrindinė produkto spalva dabar mėlyna.',
+      'Paieškos nuo šiol išsaugomos jūsų paskyroje (paieškų istorija).',
+    ],
+  },
+  {
     versija: '2.10.8', data: '2026-09-22', pavadinimas: 'LCI 35 modeliams, vienas langų stilius',
     pakeitimai: [
       'Iššokančių langų (pvz. „Pranešti apie klaidą“) stilius sutvarkytas į vieną – išvaizda nesikeičia, bet nauji langai (stabdis, planai) atrodys vienodai.',

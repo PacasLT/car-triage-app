@@ -95,6 +95,7 @@
     var dabartinis = d.palyginimoSarasas >= 2 ? ' · dabar lyginami ' + d.palyginimoSarasas : '';
     m.innerHTML = '<div class="ct-pask-head"><div class="ct-pask-av">' + esc(ini) + '</div><div class="ct-pask-el"><b>' + esc(el || 'Paskyra') + '</b><small>' + planoHtml + '</small></div></div>'
       + '<div class="ct-pask-list">'
+      + eil({ ik: 'planas', t: 'Mano paskyra', sub: 'planas, kreditai, istorija, nustatymai', href: 'paskyra.html' })
       + '<div class="ct-pask-gr">Automobiliai</div>'
       + eil({ ik: 'paieska', t: 'Paieška', sub: 'nauja skelbimų paieška', href: 'index.html' })
       + eil({ ik: 'sirdis', t: 'Mėgstamiausi', sub: 'išsaugoti skelbimai, kainų pokyčiai', n: d.megstami, ncls: d.megstami ? 'sirdis' : '', href: 'megstamiausi.html' })

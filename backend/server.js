@@ -33,7 +33,7 @@ const rinka = require('./rinka');
 const mobilede = require('./mobilede');
 try { rinka.ikelti(cache.DATA_DIR); } catch (e) { console.error('[RINKA] NEPAVYKO ikelti:', e.message); }
 const komplektacija = require('./komplektacija');
-const { requireAuth, handleRegister, handleLogin, handleMe, planai, duomenys, verifyToken } = require('./auth');
+const { requireAuth, handleRegister, handleLogin, handleMe, planai, duomenys, paskyra, verifyToken } = require('./auth');
 
 const app = express();
 
@@ -4445,8 +4445,75 @@ ${turinys}`;
 
 app.post('/api/search-start', requireAuth, planai.reikalautiPaieskos(), (req, res) => {
   const jobId = newJob();
-  runSearchJob(jobId, req.body);
+  // v2.11.0: paieškų žurnalas (paskyra ir admin zona). ScraperAPI skaitiklis
+  // bendras – jei tuo metu vyko kita paieška, skaičius apytikslis.
+  const pradzia = Date.now(), priesKr = ATSARGA.paieska.scraperapi, kitosVyko = _vykdomosPaieskos > 0;
+  _vykdomosPaieskos++;
+  const userId = req.user.id, filtrai = Object.assign({}, req.body || {});
+  Promise.resolve(runSearchJob(jobId, req.body)).finally(() => {
+    _vykdomosPaieskos = Math.max(0, _vykdomosPaieskos - 1);
+    const j = jobs[jobId] || {}, r = j.result || {};
+    paskyra.irasytiPaieska(userId, filtrai, {
+      busena: j.status === 'error' ? 'error' : (ATSARGA.paieska.scraperapi === priesKr && r.totalScanned && (Date.now() - pradzia) < 3000 ? 'talpykla' : (j.status || 'done')),
+      rasta: r.totalScanned, kandidatai: Array.isArray(r.candidates) ? r.candidates.length : null,
+      scraperKr: ATSARGA.paieska.scraperapi - priesKr, apytiksliai: kitosVyko || _vykdomosPaieskos > 0,
+      trukmeMs: Date.now() - pradzia,
+    });
+  });
   res.json({ jobId });
+});
+let _vykdomosPaieskos = 0;
+
+// ── Mano paskyra (v2.11.0, 47 sk.) ─────────────────────────────────────────
+app.get('/api/paskyra', requireAuth, (req, res) => {
+  try {
+    let meg = 0, ata = 0;
+    try { meg = duomenys.megstamiausi(req.user.id).length; } catch (e) {}
+    try { ata = duomenys.ataskaitos(req.user.id).length; } catch (e) {}
+    res.json({
+      email: req.user.email, created_at: req.user.created_at,
+      planas: planai.busena(req.user), megstamiausi: meg, ataskaitos: ata,
+      paieskos: paskyra.paieskuSkaicius(req.user.id), uzklausos: paskyra.manoUzklausos(req.user.id),
+    });
+  } catch (e) { res.status(500).json({ error: 'Nepavyko gauti paskyros' }); }
+});
+app.get('/api/paskyra/paieskos', requireAuth, (req, res) => {
+  try { res.json({ sarasas: paskyra.paieskos(req.user.id, parseInt(req.query.kiek, 10) || 20, parseInt(req.query.nuo, 10) || 0), viso: paskyra.paieskuSkaicius(req.user.id) }); }
+  catch (e) { res.status(500).json({ error: 'Nepavyko gauti paieškų' }); }
+});
+app.post('/api/paskyra/uzklausa', requireAuth, (req, res) => {
+  try { const b = req.body || {}; res.json(paskyra.naujaUzklausa(req.user.id, b.tipas, b.kas, b.pastaba)); }
+  catch (e) { res.status(400).json({ error: e.message }); }
+});
+app.post('/api/paskyra/slaptazodis', requireAuth, async (req, res) => {
+  try { const b = req.body || {}; await paskyra.keistiSlaptazodi(req.user.id, b.dabartinis, b.naujas); res.json({ ok: true }); }
+  catch (e) { res.status(e.kodas || 500).json({ error: e.kodas ? e.message : 'Nepavyko pakeisti' }); }
+});
+app.get('/api/paskyra/eksportas', requireAuth, (req, res) => {
+  try {
+    res.setHeader('Content-Disposition', 'attachment; filename="cartriige-mano-duomenys.json"');
+    res.json(paskyra.eksportas(req.user.id));
+  } catch (e) { res.status(500).json({ error: 'Nepavyko paruošti' }); }
+});
+
+// Admin: plano / kreditų užklausos (KL-PASKYRA-PLANAS)
+app.get('/admin/uzklausos', requireAuth, planai.reikalautiAdmin, (req, res) => {
+  try { res.json({ sarasas: paskyra.visosUzklausos(req.query.visos ? null : 'laukia') }); }
+  catch (e) { res.status(500).json({ error: e.message }); }
+});
+app.post('/admin/uzklausos/:id', requireAuth, planai.reikalautiAdmin, (req, res) => {
+  try {
+    const u = paskyra.uzklausa(parseInt(req.params.id, 10));
+    if (!u || u.busena !== 'laukia') return res.status(404).json({ error: 'Nerasta arba jau uždaryta' });
+    const veiksmas = (req.body || {}).veiksmas;
+    if (veiksmas === 'priskirti') {
+      if (u.tipas === 'planas') planai.nustatytiPlana(u.email, u.kas, null, req.user.email);
+      else planai.pridetiKreditu(u.email, parseInt(u.kas, 10), 'Užklausa #' + u.id + ' (paketas ' + u.kas + ' kr.)', req.user.email);
+      paskyra.uzdarytiUzklausa(u.id, 'priskirta', req.user.email);
+    } else if (veiksmas === 'atmesti') paskyra.uzdarytiUzklausa(u.id, 'atmesta', req.user.email);
+    else return res.status(400).json({ error: 'veiksmas: priskirti | atmesti' });
+    res.json({ ok: true });
+  } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 // v2.10.3 (A-37): kėbulo kartos filtrui - vietinė lentelė, 0 kreditų.

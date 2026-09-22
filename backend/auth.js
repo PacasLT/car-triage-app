@@ -134,6 +134,9 @@ const planai = require('./planai');
 planai.prijungti(db);
 const duomenys = require('./vartotojo-duomenys');
 duomenys.prijungti(db);
+// v2.11.0: paieškų žurnalas, plano užklausos, slaptažodis, eksportas
+const paskyra = require('./paskyra');
+paskyra.prijungti(db);
 
 function getUserByEmail(email) {
   // COLLATE NOCASE - kad rastu ir tuos irasus, kurie i migracija nepateko
@@ -354,7 +357,7 @@ const asyncRoute = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next
 
 module.exports = {
   verifyToken,   // v1.49.0: klaidu pranesimams - kas pranese, jei zetonas galioja
-  requireAuth, handleMe, planai, duomenys,
+  requireAuth, handleMe, planai, duomenys, paskyra,
   handleRegister: asyncRoute(handleRegister),
   handleLogin: asyncRoute(handleLogin),
 };

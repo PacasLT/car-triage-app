@@ -232,6 +232,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
     <button class="ct-tab active" data-t="klaidos" role="tab">Klaidos</button>
     <button class="ct-tab" data-t="matavimai" role="tab">Matavimai</button>
     <button class="ct-tab" data-t="vartotojai" role="tab">Vartotojai</button>
+    <button class="ct-tab" data-t="uzklausos" role="tab">Užklausos <span id="ad-uzkl-n"></span></button>
   </div>
 
   <div id="ad-turinys"></div>
@@ -826,6 +827,32 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
       }).catch(function (e) { el.innerHTML = tuscia('never', 'Nepavyko įkelti', e.message); sub.textContent = ''; });
   }
 
+  // v2.11.0 (KL-PASKYRA-PLANAS): kliento plano / kreditų užklausos iš „Mano paskyra“.
+  // „Priskirti“ – planas 30 d. arba kreditų paketas iškart; sąskaitą siunčia Lukas.
+  var UZKL_VARDAI = { pro: 'Pro', business: 'Verslas' };
+  function piestiUzklausas() {
+    el.innerHTML = '';
+    imti('/admin/uzklausos').then(function (d) {
+      var v = (d && d.sarasas) || [];
+      sub.textContent = v.length ? 'Laukia ' + v.length : 'Laukiančių nėra';
+      var n = document.getElementById('ad-uzkl-n'); if (n) n.textContent = v.length ? '· ' + v.length : '';
+      if (!v.length) { el.innerHTML = tuscia('never', 'Užklausų nėra', 'Kai klientas „Mano paskyroje“ pasirinks planą ar kreditų paketą, jis atsiras čia.'); return; }
+      el.innerHTML = '<div class="ct-table-w"><table class="ct-table is-dense"><thead><tr><th class="is-time">LAIKAS</th><th>EL. PAŠTAS</th><th>KO PRAŠO</th><th></th></tr></thead><tbody>'
+        + v.map(function (u) {
+            var ko = u.tipas === 'planas' ? 'Planas ' + (UZKL_VARDAI[u.kas] || u.kas) : u.kas + ' kreditų';
+            return '<tr><td class="is-time" data-stulpelis="LAIKAS">' + laikas(u.laikas) + '</td>'
+              + '<td class="is-id" data-stulpelis="EL. PAŠTAS">' + esc(u.email) + '</td><td data-stulpelis="KO PRAŠO">' + esc(ko) + '</td>'
+              + '<td style="white-space:nowrap;text-align:right"><button type="button" class="ct-btn ct-btn-sm ct-btn-primary" onclick="adUzklausa(' + u.id + ',\'priskirti\',this)">Priskirti</button> '
+              + '<button type="button" class="ct-btn ct-btn-sm" onclick="adUzklausa(' + u.id + ',\'atmesti\',this)">Atmesti</button></td></tr>';
+          }).join('') + '</tbody></table></div>';
+    }).catch(function (e) { el.innerHTML = tuscia('never', 'Nepavyko įkelti', e.message); sub.textContent = ''; });
+  }
+  window.adUzklausa = function (id, veiksmas, btn) {
+    if (btn) btn.disabled = true;
+    siusti('/admin/uzklausos/' + id, { veiksmas: veiksmas }).then(piestiUzklausas)
+      .catch(function (e) { if (btn) btn.disabled = false; alert('Nepavyko: ' + e.message); });
+  };
+
   window.adVartotojas = function (i) {
     var u = (window._vartotojai || [])[i];
     if (!u) return;
@@ -975,6 +1002,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
     _rodyti = b.dataset.t;
     if (_rodyti === 'klaidos') piestiKlaidas();
     else if (_rodyti === 'matavimai') piestiMatavimus();
+    else if (_rodyti === 'uzklausos') piestiUzklausas();
     else piestiVartotojus();
   });
 

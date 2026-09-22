@@ -36,7 +36,8 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 | `46 sk.` `.ct-portals` | Įdiegta CSS (v2.10.8) | Markupas (`--cols`, `data-k`) – su stabdžiu kartu su 54 paketu. K-55a: 352 px „Iš viso“ fonas lopais. |
 | `.ct-modal` dubliai | Sutraukta (v2.10.8) | Pirmas blokas ištrintas, `.ct-modal-x` ir `overflow` perkelti. |
 | 54 paketas | Laukia | Diegiama kartu su stabdžiu (`54-vykdymo-busena-v2.zip`). |
-| Paskyra + admin zona | Užsakymas išsiųstas | Klaudijaus blokas 09-22 (per Luką). |
+| 56a paskyra | Įdiegta (v2.11.0) | 47 sk., Errata 9, akcentas mėlynas (tokenai). Ranka rašyta violetinė liko ~60 vietų (Z-124). |
+| 56b admin zona | Dizaineris rašo | + 6 sprite simboliai (paskyroje dabar laikini). |
 
 ## Analitikas
 

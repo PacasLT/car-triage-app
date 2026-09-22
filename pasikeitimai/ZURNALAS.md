@@ -1331,3 +1331,85 @@ Raudona jau turi du darbus, ir trečio jai neduosiu.
 - `ATN_MEN_TARPAS` 3 → 6 (Analitiko siūlymas: likučiai registruojami dar kelis mėn.).
 - Testai: regitra 185/185 (A-44 pavyzdžiai įtraukti), sargai žali.
 
+---
+
+## D-52 · 2026-09-22 · Dizaineris → Klaudijui · ERRATA 9 + 47 sk. + AKCENTAS · 56a
+
+### 1. K-55a · `display: contents` antra pusė
+
+Foną buvau uždėjęs celėms, nes plačiame variante eilutės dėžutės **nėra**.
+Ties 560 eilutė tampa `flex` ir dėžutę atgauna — todėl tamsūs lopai po
+kiekvienu skaičiumi.
+
+Tai mano paties 37 sk. pamokos antra pusė, kurios nebuvau užrašęs:
+**`display: contents` reiškia ne tik „išdėstyme manęs nėra", bet ir „fono
+turėti negaliu".** Antras kartas, kai ta savybė mane pagavo.
+
+### 2. Akcentas tapo mėlynas — ir kodėl tai buvo viena eilutė
+
+Lukas atsiuntė pavyzdį su mėlynu akcentu ir paprašė „sutvarkyti spalvas".
+Pakeitimas yra **penki `:root` tokenai** ir pasiekia pirminius mygtukus,
+`.is-on` būseną, fokuso žiedą, pažangos juostą, `.ct-tag-ai`, rūšiavimo
+meniu, portalų eilutes, `.ct-top1` ir švytėjimą.
+
+Verta pasakyti, kas čia iš tikrųjų atsitiko: **produkto spalva pasikeitė per
+vieną failą su penkiomis eilutėmis.** Rugsėjo pradžioje tas pats darbas būtų
+buvęs paieška per `index.html`, `ct-priedai.css` ir tris puslapius su
+ranka rašytais hex kodais. Trys savaitės tokenų disciplinos atsipirko
+šiandien, ir pirmą kartą tai matosi be paaiškinimų.
+
+Kontrastą patikrinau visose keturiose vietose. Vienintelis pablogėjimas —
+baltas ant pirminio mygtuko 4,9 → 4,6; riba išlaikyta. Portalų ženklelių
+spalvos **lieka**: jos yra portalų tapatybė, ne mūsų akcentas.
+
+### 3. Piktogramos gavo dėžutes, ir tai ne dekoracija
+
+19 px linijinė piktograma šalia 10 px mono etiketės atrodo kaip atsitiktinis
+brūkšnys — **jai reikia savo ploto, kad būtų žymė.** Dėžutė tą plotą duoda.
+
+Nustatymuose dėžutė neutrali, ne akcento: ten piktograma yra **lauko žymė**,
+o akcentas reikštų, kad eilutė svarbi. Raudona — tik trynimo eilutėje.
+
+Ir sprite'e šešių reikalingų simbolių **nėra**. Dėl `#i-trinti` atskirai:
+21 pakete sąmoningai atsisakiau šiukšlinės, nes `#i-pasalinti` tik **nuima**
+nuo sąrašo. Paskyros trynimas **sunaikina** — tad tai kitas vardas, ne kitas
+dydis. Vardų sistema šįkart pasakė, ko man reikia, prieš man to paklausus.
+
+### 4. Du kartus apsigalvota, ir abu kartus Luko naudai
+
+Buvau padaręs dvi nuorodas su skaičiais. Lukas pasakė tiksliai, kas su jomis
+ne taip: **nuoroda pasako, kiek jų yra, bet ne kas jie.**
+
+Tada padariau vieną kortelę su dviem skirtukais — ir Lukas paprašė atskirai.
+Jis vėl teisus, ir priežastis vertesnė už pačią kortelę: **skirtukas reiškia
+„arba viena, arba kita".** Mėgstamiausi ir ataskaitos nėra pasirinkimas — tai
+du dalykai, kuriuos žmogus tikrina tame pačiame apsilankyme. Skirtukas jų
+nesulygina, tik paslepia vieną.
+
+Tai forma, kurią verta užsirašyti: **skirtukus renkuosi tada, kai turinys
+konkuruoja dėl vietos, o ne kai jo daug.** Šįkart pasirinkau juos dėl vietos
+taupymo, ir tai buvo neteisinga priežastis.
+
+Eilučių forma ta pati kaip paieškų istorijoje: viename puslapyje yra trys
+sąrašai, tad jie turi būti vienas sąrašas trimis turiniais.
+
+### 5. Kas šiame pakete man svarbiausia
+
+Visos keturios dalys atėjo **iš Luko akių, ne iš matavimo**: ikonos per
+mažos, spalvos ne tos, šešėlių nėra, nuorodos per tuščios. Trys savaitės
+dirbome su skaičiais, ir tai buvo teisinga — bet skaičius nepasako, kad
+piktograma atrodo kaip brūkšnys.
+
+**Failai:** `pasikeitimai/is-dizainerio/56a-paskyra/`
+
+## Z-124 · 2026-09-22 · Klaudijus · v2.11.0 – „Mano paskyra“ (47 sk., 56a) + backend + admin užklausos
+- 56a įdiegta: Errata 9 (K-55a) ir 47 sk. – `ct-dizainas.css` gale be pakeitimų; akcento failas – penki `:root` tokenai + `--shadow-glow` pakeisti vietoje (1 sk.), ne pridėti antru `:root` bloku.
+- Akcentas: tokenų keliu mėlyna visur, kur naudojamas `var(--accent*)`. LIKO VIOLETINĖ (rašyta ranka): logotipas `#7C5CFF` visų puslapių antraštėse, `.ct-flag:focus-visible` (ct-dizainas 1542), `.ct-btn.is-on > i` ir `.ct-btn-accent > i` (ct-mygtukai 209, 458), `ct-bendras.css` `:root` tokenai 79–115 (neveikia – ct-dizainas kraunamas vėliau, bet klaidina) ir jo `--accent-hover`, index/compare/detail inline – ~60 vietų. Perduota Dizaineriui.
+- Nauja: `backend/paskyra.js` – `paieskos_zurnalas` (įrašoma kiekvienai paieškai: filtrai, portalai, rasta, ScraperAPI užklausos, trukmė; kelioms vienu metu – `kr_apytiksliai`), `paskyros_uzklausos`, slaptažodžio keitimas, eksportas (BDAR 15/20). Paskyros trynimo nėra – laukia Teisininko.
+- Maršrutai: `GET /api/paskyra`, `/api/paskyra/paieskos`, `POST /api/paskyra/uzklausa`, `/api/paskyra/slaptazodis`, `GET /api/paskyra/eksportas`, `GET/POST /admin/uzklausos` (KL-PASKYRA-PLANAS: „Užklausa į admin zoną“).
+- `frontend/paskyra.html` + `paskyra.js`: 7 kortelės pagal 47 sk.; planų langas – `.ct-modal` (planai ir paketai viename lange, dviem grupėmis). Laikinos 6 piktogramos puslapyje, kol 56b atsiųs į sprite'ą. Meniu – „Mano paskyra“, avataras paskyros puslapyje veda į ją.
+- Portalų ženkleliai – TIKROS portalų spalvos iš index (AP žalia #19b86a, AG #2D6FCA …), ne makete buvusios (AP mėlyna). Tad klausimas dėl AP ir akcento panašumo nebeaktualus.
+- Admin: naujas skirtukas „Užklausos“ (Priskirti / Atmesti). Didelė admin zona – 56b.
+- Matavimai (`pasikeitimai/matavimai/56a-paskyra-{1280,390,langas}.png`, API imituotas): be horizontalios slinkties, mygtukai telefone 44 px, pirminis mygtukas rgb(37,99,235). Rasta ir pataisyta: `[hidden]` nenugalėjo `.acct-row`/`.acct-set-f` `display:flex` (paslėptos eilutės ir slaptažodžio forma matėsi) – puslapyje `.pg-acct [hidden]{display:none!important}`; `.ct-bar > span` sistemoje žalias – paskyroje akcento.
+- Testai: `paskyra.test` 15/15 (naujas), sargai 16/0/3.
+

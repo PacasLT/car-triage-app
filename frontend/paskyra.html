@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mano paskyra — CarTriige</title>
+<script src="ct-sesija.js"></script>
+<!-- ct-sesija.js: vienintelis zetono ir sesijos saltinis (revizija A-1..A-3, A-7).
+     Deti PIRMA: jis apvynioja fetch, tad turi buti anksciau uz bet ka, kas kviecia API. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="ct-bendras.css">
+<style>
+body { background: var(--bg-base); color: var(--text-primary); font-family: var(--font); margin: 0; }
+.pg { max-width: 1112px; margin: 0 auto; padding: 26px 16px 80px; }
+.pg-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+.pg-head h1 { margin: 0; font: 700 22px/1.2 var(--font); flex: 1; }
+/* Puslapio vidus (47 sk. aprašo tik .pg-acct / .acct-*; šitie – laikinai, kol dizaineris neperims) */
+.pg-acct { margin: 0 auto; }
+.pg-acct .ct-card { padding: var(--s-4) var(--s-5); }
+.pg-acct .acct-h { margin-bottom: var(--s-3); }
+.pg-acct .acct-h > span:not(.acct-ic) { font: var(--fw-semi) var(--fs-400)/1.2 var(--font); }
+.pg-acct .acct-h > .acct-k { font: var(--fw-semi) 10px/1 var(--font-mono) !important; letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); }
+.pg-acct .acct-h > .acct-n { margin-left: auto; font: 400 11px/1 var(--font-mono) !important; color: var(--text-dim); }
+/* [hidden] turi nugalėti .acct-row / .acct-set-f display (flex) */
+.pg-acct [hidden] { display: none !important; }
+/* Paieškų juosta – akcento (makete mėlyna); .ct-bar > span sistemoje žalia */
+.acct-bal-lim > .ct-bar > span { background: var(--accent); }
+.acct-num { text-align: right; white-space: nowrap; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.acct-plus { color: var(--success); }
+.acct-portals { display: flex; gap: 5px; flex: none; }
+.acct-portals svg { display: block; border-radius: 7px; }
+.acct-row-v small { font: 500 9.5px/1 var(--font-mono); letter-spacing: .1em; color: var(--text-dim); margin-left: 4px; }
+.acct-badge { font: 700 10px/1 var(--font-mono); }
+.acct-msg { font-size: var(--fs-200); color: var(--text-muted); margin-top: var(--s-2); }
+.acct-msg.is-ok { color: var(--success); } .acct-msg.is-err { color: var(--danger); }
+.acct-opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--s-2); }
+.acct-opt { text-align: left; padding: 12px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-light); background: var(--bg-elevated); color: var(--text-primary); cursor: pointer; font: inherit; }
+.acct-opt:hover, .acct-opt:focus-visible { border-color: var(--accent-border); background: var(--accent-dim); }
+.acct-opt b { display: block; font: 600 var(--fs-300)/1.3 var(--font); }
+.acct-opt span { display: block; margin-top: 3px; font-size: var(--fs-200); color: var(--text-muted); }
+.acct-opt-k { font: 600 9.5px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin: var(--s-2) 0 2px; }
+</style>
+</head>
+
+<body>
+<!-- v2.11.0 LAIKINOS piktogramos paskyrai – 56b paketas atsiųs galutines į ct-ikonos sprite'ą. Tada šį bloką ištrinti. -->
+<svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true" focusable="false"><defs>
+  <symbol id="i-istorija" viewBox="0 0 16 16"><path d="M2.8 8a5.2 5.2 0 1 0 1.5-3.7"/><path d="M2.5 2.8v2.4h2.4"/><path d="M8 5.4V8l1.8 1.3"/></symbol>
+  <symbol id="i-pastas" viewBox="0 0 16 16"><rect x="2.5" y="3.8" width="11" height="8.4" rx="1.4"/><path d="m3 4.5 5 4 5-4"/></symbol>
+  <symbol id="i-slaptazodis" viewBox="0 0 16 16"><rect x="3.2" y="7" width="9.6" height="6.3" rx="1.3"/><path d="M5.4 7V5.2a2.6 2.6 0 0 1 5.2 0V7"/></symbol>
+  <symbol id="i-atsisiusti" viewBox="0 0 16 16"><path d="M8 2.8v7.4"/><path d="m5.2 7.6 2.8 2.8 2.8-2.8"/><path d="M3 13h10"/></symbol>
+  <symbol id="i-trinti" viewBox="0 0 16 16"><path d="M3 4.6h10"/><path d="M6.3 4.6V3.2h3.4v1.4"/><path d="M4.4 4.6 5 13h6l.6-8.4"/></symbol>
+  <symbol id="i-kalendorius" viewBox="0 0 16 16"><rect x="2.8" y="3.6" width="10.4" height="9.6" rx="1.4"/><path d="M2.8 6.8h10.4M5.6 2.4v2.4M10.4 2.4v2.4"/></symbol>
+</defs></svg>
+
+<!-- ============================================================================
+     ct-ikonos.html · CarTriige · piktogramų rinkinys
+     ----------------------------------------------------------------------------
+     Keturiolika piktogramų, vienas failas, jokio išorinio paketo.
+     Įdėkite šį bloką VIENĄ kartą į kiekvieno puslapio <body> pradžią.
+
+     Iškvietimas pagal vardą:
+         <i><svg class="ct-i"><use href="#i-skelbimas"></use></svg></i>
+
+     Visos 16×16, stroke: currentColor, be fill — spalvą nustato mygtukas.
+     Vienintelė išimtis: #i-issaugoti gauna fill, kai mygtukas .is-on
+     (taisyklė yra ct-mygtukai.css).
+     ========================================================================= -->
+
+<svg width="0" height="0" style="position: absolute; overflow: hidden" aria-hidden="true" focusable="false">
+  <defs>
+
+    <!-- skelbimas · išorinė nuoroda į portalą -->
+    <symbol id="i-skelbimas" viewBox="0 0 16 16">
+      <path d="M13 9.5V13H3V3h3.5"/>
+      <path d="M9.5 3H13v3.5"/>
+      <path d="M13 3 7.5 8.5"/>
+    </symbol>
+
+    <!-- apzvalga · pilna analizė, ataskaita -->
+    <symbol id="i-apzvalga" viewBox="0 0 16 16">
+      <rect x="3" y="2" width="10" height="12" rx="1.5"/>
+      <path d="M5.5 6h5M5.5 8.5h5M5.5 11h3"/>
+    </symbol>
+
+    <!-- palyginti · du keliai priešingomis kryptimis -->
+    <symbol id="i-palyginti" viewBox="0 0 16 16">
+      <path d="M3 6h9"/><path d="M9.5 3.5 12 6 9.5 8.5"/>
+      <path d="M13 10.5H4"/><path d="M6.5 8 4 10.5 6.5 13"/>
+    </symbol>
+
+    <!-- issaugoti · mėgstamiausi -->
+    <symbol id="i-issaugoti" viewBox="0 0 16 16">
+      <path class="ct-i-issaugoti" d="M8 13.2S2.8 10 2.8 6.4a2.9 2.9 0 0 1 5.2-1.8 2.9 2.9 0 0 1 5.2 1.8c0 3.6-5.2 6.8-5.2 6.8Z"/>
+    </symbol>
+
+    <!-- pranesti apie klaida · sauktukas apskritime. NE trikampis:
+         trikampis yra „atsargiai, tu kazka darai blogai", o cia zmogus
+         padeda mums. -->
+    <symbol id="i-pranesti" viewBox="0 0 16 16">
+      <circle cx="8" cy="8" r="6"/>
+      <path d="M8 5v4"/>
+      <circle cx="8" cy="11.2" r=".55" fill="currentColor" stroke="none"/>
+    </symbol>
+
+    <!-- klaida · sistemos busena (5xx, portalas neatsako). Tas pats sauktukas,
+         bet trikampyje — cia kalba sistema, ne zmogus. -->
+    <symbol id="i-klaida" viewBox="0 0 16 16">
+      <path d="M8 2.6l5.4 9.4H2.6L8 2.6z"/>
+      <path d="M8 6.4v2.8"/>
+      <circle cx="8" cy="10.9" r=".55" fill="currentColor" stroke="none"/>
+    </symbol>
+
+    <!-- siusti · lekstuve -->
+    <symbol id="i-siusti" viewBox="0 0 16 16">
+      <path d="M2.4 8l11.2-5-3.4 11.4-2.6-4.4L2.4 8z"/>
+    </symbol>
+
+    <!-- zenkliukai · ko yra skelbime (Daugiau mygtukas) -->
+    <symbol id="i-zenkliukai" viewBox="0 0 16 16">
+      <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h7"/>
+    </symbol>
+
+    <!-- pasalinti · nuimti is saraso. NE siukslinė: skelbimas neistrinamas,
+         tik nuimamas nuo saraso. -->
+    <symbol id="i-pasalinti" viewBox="0 0 16 16">
+      <path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/>
+    </symbol>
+
+    <!-- filtrai · trys slankiojami kriterijai -->
+    <symbol id="i-filtrai" viewBox="0 0 16 16">
+      <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/>
+      <circle cx="6" cy="4.5" r="1.6" fill="currentColor" stroke="none"/>
+      <circle cx="10.5" cy="8" r="1.6" fill="currentColor" stroke="none"/>
+      <circle cx="5" cy="11.5" r="1.6" fill="currentColor" stroke="none"/>
+    </symbol>
+
+    <!-- ieskoti · nuskaityti portalus -->
+    <symbol id="i-ieskoti" viewBox="0 0 16 16">
+      <circle cx="7" cy="7" r="4.2"/>
+      <path d="M10.2 10.2 13.5 13.5"/>
+    </symbol>
+
+    <!-- rusiuoti · tvarka pagal reikšmę -->
+    <symbol id="i-rusiuoti" viewBox="0 0 16 16">
+      <path d="M3 4.5h9M3 8h6M3 11.5h3"/>
+      <path d="M12.5 9v4.5"/><path d="M10.8 11.8l1.7 1.7 1.7-1.7"/>
+    </symbol>
+
+    <!-- isskleisti -->
+    <symbol id="i-isskleisti" viewBox="0 0 16 16">
+      <path d="M4 6.5 8 10.5l4-4"/>
+    </symbol>
+
+    <!-- suskleisti -->
+    <symbol id="i-suskleisti" viewBox="0 0 16 16">
+      <path d="M4 9.5 8 5.5l4 4"/>
+    </symbol>
+
+    <!-- vin · kodas, kurį nuskaitome -->
+    <symbol id="i-vin" viewBox="0 0 16 16">
+      <path d="M3 3.5v9M5.5 3.5v9M8 3.5v9M10.5 3.5v9M13 3.5v9" stroke-width="1.4"/>
+    </symbol>
+
+    <!-- pardavejas -->
+    <symbol id="i-pardavejas" viewBox="0 0 16 16">
+      <circle cx="8" cy="6" r="2.6"/>
+      <path d="M3.5 13.2c.6-2.3 2.4-3.6 4.5-3.6s3.9 1.3 4.5 3.6"/>
+    </symbol>
+
+    <!-- nuotraukos · vizualinė analizė -->
+    <symbol id="i-nuotraukos" viewBox="0 0 16 16">
+      <rect x="2.5" y="3.5" width="11" height="9" rx="1.5"/>
+      <circle cx="6" cy="6.8" r="1.1"/>
+      <path d="M3 11.5 6.5 8.5l3 2.5 2-1.6 2 1.6"/>
+    </symbol>
+
+    <!-- kreditai -->
+    <symbol id="i-kreditai" viewBox="0 0 16 16">
+      <circle cx="8" cy="8" r="5.2"/>
+      <path d="M8 5.4v5.2M6.4 6.8h3.2M6.4 9.2h3.2" stroke-width="1.4"/>
+    </symbol>
+
+    <!-- planai · prenumeratos lygiai -->
+    <symbol id="i-planai" viewBox="0 0 16 16">
+      <path d="M8 2.5 13.5 5.5 8 8.5 2.5 5.5 8 2.5Z"/>
+      <path d="M2.5 9 8 12l5.5-3"/>
+    </symbol>
+
+  </defs>
+</svg>
+<!-- Klaidu pranesimas. Prijungiamas ANKSTI, kad spetu pagauti kraunantis ivykusias klaidas. -->
+<script src="klaidu-pranesimas.js"></script>
+
+
+
+<header class="ct3-header">
+  <div class="ct3-header-inner">
+    <a class="ct3-logo" href="index.html">
+      <svg class="ct3-logo-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="18" y="2" width="20" height="20" rx="3" transform="rotate(45 18 2)" fill="#7C5CFF"/>
+        <rect x="18" y="9" width="11" height="11" rx="2" transform="rotate(45 18 9)" fill="#0A0C12" opacity="0.7"/>
+        <rect x="18" y="13" width="5" height="5" rx="1" transform="rotate(45 18 13)" fill="#7C5CFF" opacity="0.9"/>
+      </svg>
+      <div class="ct3-logo-text">
+        <span>Car<b>Triige</b></span>
+        <small>AUTOMOTIVE MARKET INTELLIGENCE</small>
+      </div>
+    </a>
+    <button class="ct-ver-btn ct-btn ct-btn-quiet" id="app-version" type="button" onclick="ctVersijuModalas()" title="Versijų istorija"></button>
+    <nav class="ct3-nav"></nav>
+    <div class="ct3-header-right">
+      <button class="ct3-premium-btn ct-btn ct-btn-sm ct-btn-accent" id="ct-planas-btn" onclick="location.href='index.html?planas=1'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V10l6-8 6 8v10"/></svg><span id="ct-planas-btn-text">Planas</span></button>
+      <a class="ct3-avatar ct-btn ct-btn-icon ct-btn-round" href="paskyra.html" title="Paskyra" aria-label="Paskyra"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></a>
+    </div>
+  </div>
+</header>
+<div class="pg">
+  <div class="pg-head"><h1>Mano paskyra</h1></div>
+  <div class="pg-acct" id="acct"><div class="ct-card"><div class="ct-state"><p>Kraunama…</p></div></div></div>
+</div>
+
+<script src="versijos.js"></script>
+<script src="megstami-meniu.js"></script>
+<script src="paskyra-meniu.js"></script>
+<script src="ct-bendras.js"></script>
+<script src="paskyra.js"></script>
+<!-- CarTriige dizaino sistema – PASKUTINĖ prieš </body> (kaip kituose puslapiuose). -->
+<link rel="stylesheet" href="ct-dizainas.css">
+<link rel="stylesheet" href="ct-priedai.css">
+<link rel="stylesheet" href="ct-mygtukai.css">
+</body>
+</html>

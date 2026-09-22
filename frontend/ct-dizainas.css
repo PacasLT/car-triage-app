@@ -90,13 +90,13 @@
      žalia = patvirtinta / gerai        geltona = galimas signalas / dėmesio
      raudona = rimta rizika             pilka  = neįvertinta
      violetinė = veiksmas ir „mūsų" AI */
-  --accent:         #7C5CFF;
+  --accent:         #3B82F6;   /* 56a: mėlyna (buvo #7C5CFF) */
   /* Tekstą nešančiam užpildui: #fff ant --accent duoda 4,35:1 — nepraeina AA.
      --accent-strong duoda 4,66:1, hover 5,6:1. Mygtukams su tekstu VISADA šie. */
-  --accent-strong:  #7856F7;
-  --accent-light:   #A78BFA;
-  --accent-dim:     rgba(124, 92, 255, .14);
-  --accent-border:  rgba(124, 92, 255, .30);
+  --accent-strong:  #2563EB;
+  --accent-light:   #93C5FD;
+  --accent-dim:     rgba(59, 130, 246, .14);
+  --accent-border:  rgba(59, 130, 246, .38);
 
   --success:        oklch(.75 .15 158);
   --success-dim:    oklch(.75 .15 158 / .13);
@@ -172,7 +172,7 @@
   --shadow-2:    0 4px 16px rgba(0, 0, 0, .40);
   --shadow-3:    0 16px 48px rgba(0, 0, 0, .55);
   --shadow-card: var(--shadow-2);   /* suderinamumui su index.html */
-  --shadow-glow:  0 8px 22px -12px rgba(124, 92, 255, .9); /* TIK pirminis CTA */
+  --shadow-glow:  0 10px 28px -12px rgba(37, 99, 235, .85); /* TIK pirminis CTA · 56a mėlyna */
 
   /* ── 9. FOKUSAS · matomas visur, hover niekada nėra vienintelis būdas ─────*/
   --focus-ring:   0 0 0 2px var(--bg-base), 0 0 0 4px var(--accent-light);
@@ -4384,3 +4384,456 @@ textarea.ct-field {
 /* MARKUPUI: kiekvienam `<b>` reikia `data-k` - „rasta", „psl.", „kaina".
    Placiame variante jis nenaudojamas; telefone tampa etikete. Vienas
    atributas vietoj antros markupo versijos.                               */
+
+/* ============================================================================
+   56a paketas - ERRATA 9 (K-55a) + 47 sk. NAUJAS - „Mano paskyra"
+   ----------------------------------------------------------------------------
+   Admin zona - 56b, atskirai. Ji didesne uz sia dali ir turi savo klausimus.
+
+   Versija - siulau v2.14.0.
+   ========================================================================== */
+
+
+/* ============================================================================
+   ERRATA 9 · K-55a · „Is viso" fonas telefone
+   ----------------------------------------------------------------------------
+   Ties 560 `.ct-portals-r` tampa `flex`, tad eilute vel turi savo dezute -
+   bet fona buvau uzdejes CELĖMS (`> *`), nes placiame variante eilutes
+   dezutes NERA (`display: contents`).
+
+   Rezultatas: tamsūs lopai po kiekvienu skaiciumi.
+
+   Tai mano paties 37 sk. pamokos antra pusė: `display: contents` reiskia, kad
+   elementas isdestyme neegzistuoja - IR KAD JIS NEGALI TURETI FONO. Placiame
+   variante fonas privalo buti ant celiu, telefone - ant eilutes. Tai ne
+   isimtis, o tos pacios taisykles dvi puses.                               */
+
+@media (max-width: 560px) {
+  .ct-portals-r.is-total {
+    background: var(--bg-sunken);
+    border-top: 1px solid var(--border-light);
+  }
+  .ct-portals-r.is-total > * {
+    background: none;
+    border-top: 0;
+  }
+}
+
+
+/* ============================================================================
+   47. MANO PASKYRA   ·   .pg-acct
+   ----------------------------------------------------------------------------
+   Vienas principas: paskyra yra SASKAITA, ne nustatymu puslapis. Zmogus i ja
+   ateina su vienu klausimu - „kiek man liko ir uz ka isejo" - tad likutis ir
+   istorija stovi virsuje, o nustatymai apacioje.
+
+   Del to plano ir likucio skiltys yra VIENA EILE virsuje, o ne dvi kortelės
+   sarase: jos atsako i ta pati klausima is dvieju pusiu (kiek turiu / kiek
+   naudoju).
+
+   ── KO PRASAU MARKUPE ─────────────────────────────────────────────────────
+
+     <div class="pg-acct">
+       <div class="acct-top">
+         <div class="ct-card acct-plan">…</div>
+         <div class="ct-card acct-bal">…</div>
+       </div>
+       <div class="ct-card">…kreditu istorija (.ct-table)…</div>
+       <div class="ct-card">…paiesku istorija (.ct-table)…</div>
+       <div class="ct-card">…Mėgstamiausi (.acct-rows)…</div>
+       <div class="ct-card">…Ataskaitos (.acct-rows)…</div>
+       <div class="ct-card">…nustatymai (.acct-set)…</div>
+     </div>
+
+   Kortelės - esamos `.ct-card` + `.ct-card-h`. Lentelės - esamos `.ct-table`
+   ir `.ct-table-w`. Tuscias ekranas - esamas `.ct-state`. Zenkleliai
+   portalams - esami `.ct3-portal-ico`. Nauji vardai tik tie, kurie zemiau.  */
+
+.pg-acct {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  max-width: 1080px;
+}
+
+/* Mygtuku tekstas cia nesilauzo. Visi sio puslapio mygtukai yra ILGI
+   („Keisti plana / Pirkti kreditu", „Ištrinti paskyra"), ir maketas parode,
+   kad be sios eilutes jie lauzosi i dvi eiles bei augina eilute.
+   Sistemoje `.ct-btn` `nowrap` neturi - tad rasoma cia, o ne visiems. */
+.pg-acct .ct-btn,
+.pg-acct .acct-del { white-space: nowrap; }
+
+
+/* ── PIKTOGRAMOS · skilciu antrastes ir nustatymu eilutes ─────────────────
+   Kiekviena skiltis turi piktograma is `ct-ikonos.html` sprite'o, ir ji stovi
+   DEZUTEJE, ne plika:
+
+     <span class="acct-ic"><svg class="ct-i"><use href="#i-planai"/></svg></span>
+
+   Kodel dezute, o ne tik piktograma: 19 px linijinė piktograma salia 10 px
+   mono etiketes atrodo kaip atsitiktinis brukšnys - jai reikia savo ploto,
+   kad butu ZYME. Dezute duoda ta ploto ir leidzia piktogramai buti
+   didesnei nepajudinant teksto.
+
+   Naudojamos TIK esamos. Sprite'e siandien 31 simbolis; sesiu, kuriu reikia
+   paskyrai, jame NERA:
+
+     #i-istorija    laikrodis su strele atgal   (Kreditu istorija)
+     #i-pastas      vokas                       (El. pastas)
+     #i-slaptazodis uzraktas                    (Slaptazodis)
+     #i-atsisiusti  strele zemyn su linija      (Mano duomenys)
+     #i-trinti      siukslinė                   (Paskyros trynimas)
+     #i-kalendorius data                        (Galioja iki)
+
+   Del `#i-trinti` turiu pasakyti atskirai: 21 pakete sprite'e SAMONINGAI
+   nera siukslinės - `#i-pasalinti` yra kryziukas, ir jo komentaras sako
+   „NE siukslinė: skelbimas neistrinamas, tik nuimamas nuo saraso".
+
+   Paskyros trynimas yra PRIESINGAS atvejis - ten tikrai istrinama, ir tai
+   vienintelis veiksmas produkte, kurio neatsauksi. Tad siukslinė cia
+   teisinga, ir butent todel ji negali buti tas pats vardas:
+   `#i-pasalinti` nuima, `#i-trinti` sunaikina.
+
+   Nustatymams gear'o NENAUDOJU - 17 px dydyje jis atrodo kaip saulė (maketas
+   parode). Naudoju esama `#i-filtrai`: trys slankmatrai reiskia tiksliai
+   tai, kas ten yra.
+
+   SESIUS SIMBOLIUS atsiusiu kaip `ct-ikonos.html` papildyma su 56b - maketo
+   SVG'us perrasysiu i sprite'o forma (16 tinklelis, 1.5 storis, be `fill`). */
+
+.acct-h {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-width: 0;
+}
+.acct-h > span:not(.acct-ic) { white-space: nowrap; }
+
+/* Dezute. Akcento fonas + remelis - tas pats sluoksnis kaip `.ct-tag-ai`,
+   tad naujos spalvos neivedama. */
+.acct-ic {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-md);
+  display: grid;
+  place-items: center;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  color: var(--accent-light);
+}
+.acct-ic > .ct-i { width: 19px; height: 19px; }
+
+/* Nustatymu eiluteje dezute mazesne ir NEUTRALI: ten piktograma yra lauko
+   zyme, ne skilties vardas - akcentas ten reikstu, kad eilute svarbi. */
+.acct-set-r > .acct-ic {
+  width: 30px;
+  height: 30px;
+  background: rgba(255, 255, 255, .05);
+  border-color: transparent;
+  color: var(--text-muted);
+}
+.acct-set-r > .acct-ic > .ct-i { width: 17px; height: 17px; }
+
+/* Trynimo eilute - vienintelė, kur dezute raudona */
+.acct-set-r.is-danger > .acct-ic {
+  background: var(--danger-dim);
+  border-color: var(--danger-border);
+  color: var(--danger);
+}
+
+/* Skirtuku eiluteje dezute akcento (portalas) arba neutrali (PDF) - ja
+   nustato TURINYS, ne eilute: portalas yra tapatybe, formatas - ne. */
+.acct-row > .acct-ic { width: 34px; height: 34px; }
+.acct-row > .acct-ic > .ct-i { width: 18px; height: 18px; }
+
+
+/* ── SESELIAI · kortelė pakyla nuo fono ────────────────────────────────
+   `.ct-card` seselio neturi, ir sarase tarp lenteliu tai teisinga. Bet
+   paskyroje kortelės yra atskiri objektai vienas po kito, ir be seselio jos
+   susilieja i viena tamsu stulpeli.
+
+   Naudojamas `--shadow-2` is `:root` - ne naujas. Rasoma TIK `.pg-acct`
+   viduje: sistemos kortelėms seselio nededu, nes jis liestu kiekviena
+   sarasa produkte.                                                         */
+.pg-acct .ct-card { box-shadow: var(--shadow-2); }
+
+/* Pirminis mygtukas su savo seseliu - jis yra vienintelis akcento pavirsius
+   puslapyje, tad turi atrodyti pakeltas. `--shadow-glow` (44 sk.) jau
+   duodamas `.ct-btn-primary`, tad cia nieko rasyti nereikia. */
+
+/* Portalu zenkleliai istorijoje - 26 px su seseliu. Jie yra objektai (kiekvienas
+   savo spalvos), ne etiketes, tad seselis juos atskiria nuo kortelės fono. */
+.pg-acct .ct3-portal-ico { width: 26px; height: 26px; box-shadow: var(--shadow-1); }
+
+
+/* ── „KARTOTI" MYGTUKAS · akcento, bet ne pirminis ───────────────────────
+   Kiekvienoje istorijos eileje jis yra pagrindinis veiksmas, bet eiluciu yra
+   50 - penkiasdesimt uzpildytu mygtuku butu penkiasdesimt kvietimu.
+
+   Tad `.ct-btn.is-on` (esama busena): akcento fonas ir remelis, bet ne
+   uzpildytas. Naujos atmainos nekuriu.                                    */
+.pg-acct .ct-btn > .ct-i { width: 14px; height: 14px; flex: none; }
+
+/* Planas ir likutis - viena eile, dvi lygios pusės. `minmax(0, 1fr)`, kad
+   ilgas plano pavadinimas nestumtu likucio. */
+.acct-top {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--s-4);
+}
+
+
+/* ── PLANAS ───────────────────────────────────────────────────────────────
+   Plano pavadinimas yra didziausias sio puslapio tekstas - ne del svarbos, o
+   del to, kad tai vienintelis dalykas, kuri zmogus tikrina zvilgsniu.
+
+   Kaina RASOMA po pavadinimu, ne salia: „39 €/men." salia „Verslas" skaitosi
+   kaip mygtukas su kaina (44 sk. pamoka), o cia tai faktas.                */
+
+.acct-plan-n {
+  font: var(--fw-semi) var(--fs-600)/var(--lh-tight) var(--font);
+  color: var(--text-primary);
+}
+.acct-plan-p {
+  margin-top: 3px;
+  font: var(--fw-regular) var(--fs-300)/1.5 var(--font);
+  color: var(--text-muted);
+}
+/* Galiojimas - mono, nes tai data, ir ji skaitoma, ne perziurima */
+.acct-plan-d {
+  margin-top: var(--s-3);
+  font: var(--fw-regular) var(--fs-200)/1.5 var(--font-mono);
+  color: var(--text-dim);
+}
+.acct-plan > .ct-btn { margin-top: var(--s-4); }
+
+
+/* ── LIKUTIS ──────────────────────────────────────────────────────────────
+   Trys skaiciai, ir jie nera lygiaverčiai: KREDITAI yra tai, kas issinaudoja,
+   o paieskos - riba. Tad kreditai dideli, paieskos - eilute po jais.
+
+   `tabular-nums` visur, kur skaicius gali pasikeisti nepakraunant puslapio. */
+
+.acct-bal-n {
+  font: var(--fw-semi) var(--fs-600)/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+.acct-bal-n > small {
+  margin-left: 7px;
+  font: var(--fw-regular) var(--fs-300)/1 var(--font);
+  color: var(--text-muted);
+}
+/* Iš ko susideda - plano + pirkti. Pastaba, ne antras skaicius. */
+.acct-bal-s {
+  margin-top: 4px;
+  font: var(--fw-regular) var(--fs-200)/1.5 var(--font);
+  color: var(--text-dim);
+}
+
+.acct-bal-rows {
+  margin-top: var(--s-3);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+/* Paieskos su riba - `.ct-bar` (376 eil.) jau yra. Be ribos (Verslas) juostos
+   NERA VISAI: juosta be galo yra melas, o „be ribos" pasakoma zodziu. */
+.acct-bal-lim { display: flex; flex-direction: column; gap: 6px; }
+.acct-bal-lim > .ct-bar { margin-top: 2px; }
+
+/* Etikete ir skaicius vienoje eileje, abu be lauzimo: maketas parode, kad
+   „Paieskos si menesi" lauzosi ir uzlipa ant juostos. */
+.acct-bal-lim-h {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+.acct-bal-lim-h > span { white-space: nowrap; }
+
+
+/* ── DU SARASAI · Mėgstamiausi ir Ataskaitos ──────────────────────────────
+   Per sia dalį apsigalvota DUKART, ir abu kartus Luko naudai.
+
+   Pirma buvau padares DVI NUORODAS su skaiciais. Lukas pasakė, kas ne taip:
+   nuoroda pasako, KIEK ju yra, bet ne KAS jie - tad zmogus nezino, ar verta
+   eiti.
+
+   Tada padariau VIENA kortelę su dviem skirtukais. Lukas paprase atskirai, ir
+   jis vel teisus: skirtukas reiskia „arba viena, arba kita", o megstamiausi ir
+   ataskaitos nera pasirinkimas - tai DU dalykai, kuriuos zmogus tikrina tame
+   paciame apsilankyme. Skirtukas ju nesulygina, tik paslepia viena.
+
+   Tad du atskiri blokai, kiekvienas su savo antraste, trimis eilutemis ir
+   „Rodyti daugiau". Skirtuku vardu (`.acct-list`, `.ct-tabs`) cia nebeliko.
+
+   Eiluciu forma ta pati kaip paiesku istorijoje - samoningai: viename
+   puslapyje yra TRYS sarasai, tad jie turi buti vienas sarasas trimis
+   turiniais, ne trys skirtingi.                                            */
+
+/* Blokas - eilinis `.ct-card`; naujo vardo nereikia. Cia tik vidus. */
+
+/* Eilute: zenklelis, tekstas su paaiskinimu, reiksme, veiksmas.
+   Ta pati forma kaip paiesku istorija - samoningai: zmogus mato TRIS sarasus
+   viename puslapyje, tad jie turi buti vienas sarasas trimis turiniais, ne
+   trys skirtingi sarasai. */
+.acct-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: 13px 0;
+  border-bottom: 1px solid var(--border);
+}
+.acct-row:last-of-type { border-bottom: 0; }
+
+.acct-row-t { flex: 1 1 auto; min-width: 0; }
+.acct-row-t > div:first-child {
+  font: var(--fw-medium) var(--fs-300)/1.4 var(--font);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.acct-row-t > div:last-child {
+  margin-top: 3px;
+  font: var(--fw-regular) 11px/1.5 var(--font-mono);
+  color: var(--text-dim);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.acct-row-v {
+  flex: none;
+  text-align: right;
+  font: var(--fw-semi) var(--fs-300)/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.acct-row > .ct-btn { flex: none; }
+
+.acct-more {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin-top: var(--s-3);
+  flex-wrap: wrap;
+}
+/* Skaicius PRIE mygtuko, ne virs saraso: jis atsako i klausima „ar verta
+   spausti", tad turi stoveti ten, kur spaudziama. */
+.acct-more > span {
+  font: var(--fw-regular) var(--fs-200)/1 var(--font-mono);
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .acct-row { flex-wrap: wrap; }
+  .acct-row-t { flex: 1 1 calc(100% - 46px); }
+  .acct-row-v { margin-left: 46px; }
+  .acct-row > .ct-btn { margin-left: auto; min-height: var(--tap-min); }
+}
+
+/* ── NUSTATYMAI ───────────────────────────────────────────────────────────
+   Vienas principas: nustatymai yra EILUCIU SARASAS, ne forma. Kiekviena
+   eilute - vienas dalykas ir vienas veiksmas prie jo. Forma atsidaro tik
+   tada, kai reikia rasyti (slaptazodis).                                  */
+
+.acct-set { display: flex; flex-direction: column; }
+
+.acct-set-r {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3) 0;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.acct-set-r:last-child { border-bottom: 0; padding-bottom: 0; }
+.acct-set-r:first-child { padding-top: 0; }
+
+.acct-set-l { min-width: 0; flex: 1 1 auto; }
+.acct-set-k {
+  font: var(--fw-semi) 9.5px/1 var(--font-mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.acct-set-v {
+  margin-top: 4px;
+  font: var(--fw-regular) var(--fs-300)/1.5 var(--font);
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+.acct-set-r > .ct-btn { flex: none; margin-left: auto; }
+
+/* Slaptazodzio forma - `<details>`, o ne langas: tai vienintelis nustatymas,
+   kuri zmogus keicia savo puslapyje, ir jam nereikia uzdengti visko aplink.
+   `.ct-modal input` stiliai (1508 eil.) taikosi tik lange, tad laukams cia
+   reikia savo eilutes - bet ne naujo vardo: `.acct-set` viduje jie yra
+   vienintele forma. */
+.acct-set details > summary { list-style: none; cursor: pointer; }
+.acct-set details > summary::-webkit-details-marker { display: none; }
+.acct-set-f {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  max-width: 340px;
+  margin-top: var(--s-3);
+}
+.acct-set-f input {
+  width: 100%;
+  padding: 10px 13px;
+  background: var(--bg-sunken);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font: var(--fw-regular) var(--fs-300)/var(--lh-snug) var(--font);
+}
+.acct-set-f input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+/* ── PASKYROS TRYNIMAS ────────────────────────────────────────────────────
+   Vienintele vieta puslapyje, kur raudona teisinga: veiksmas, kurio
+   neatsauksi. Butent del to Stop mygtukas 44 sk. NEBUVO raudonas - kad si
+   eilute liktu vienintele.
+
+   Mygtukas turi REMELI, ne uzpilda: uzpildytas raudonas mygtukas yra
+   kvietimas, o cia jis yra isejimas. Uzvedus - uzpildomas, nes tada zmogus
+   jau nusprende.                                                          */
+
+.acct-set-r.is-danger { border-top: 1px solid var(--border); margin-top: var(--s-3); padding-top: var(--s-4); }
+.acct-set-r.is-danger .acct-set-k { color: var(--danger); }
+
+.acct-del {
+  flex: none;
+  margin-left: auto;
+  height: 38px;
+  padding: 0 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius-md);
+  color: var(--danger);
+  font: var(--fw-medium) var(--fs-300)/1 var(--font);
+  cursor: pointer;
+}
+.acct-del:hover { background: var(--danger-dim); }
+
+
+/* ── TELEFONAS ────────────────────────────────────────────────────────────
+   Vienas stulpelis. `auto-fit` tai padaro pats - ribos rasyti nereikia (ta
+   pati priezastis kaip 41 sk. `.ct-papf-g`).
+
+   Kas TIKRAI reikia: veiksmu mygtukai nustatymu eilutese nusileidzia po
+   tekstu, nes 352 px eileje „Keisti slaptazodi" + etikete netelpa.        */
+@media (max-width: 560px) {
+  .acct-set-r { gap: var(--s-2); }
+  .acct-set-r > .ct-btn,
+  .acct-set-r > .acct-del { margin-left: 0; flex: 1 1 100%; }
+  .acct-plan-n, .acct-bal-n { font-size: var(--fs-500); }
+}
