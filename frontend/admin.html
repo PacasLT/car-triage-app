@@ -259,7 +259,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
     <button class="ct-tab" data-t="uzklausos" role="tab">Užklausos <span id="ad-uzkl-n"></span></button>
   </div>
 
-  <div id="ad-turinys"></div>
+  <div id="ad-turinys" class="adm-panel"></div>
 </div>
 
 <script>
@@ -870,7 +870,8 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
       +   '<span>' + (f.atsinaujina ? 'Atsinaujina ' + esc(f.atsinaujina) + dienosIki(f.atsinaujina) : 'Atsinaujinimo data nenurodyta') + '</span></div>'
       + '<div class="adm-fund-v"><b>' + skM(f.panaudota) + '</b><span>/ ' + skM(riba) + ' kr. · ' + pr(used) + '</span></div>'
       + '<div class="adm-fund-bar" style="--used:' + used.toFixed(1) + '%; --guard:' + guard.toFixed(1) + '%"><span></span><em></em><i></i></div>'
-      + '<div class="adm-fund-scale" style="--guard:' + guard.toFixed(1) + '%"><span>0</span><span>sargas ' + skM(riba - sargas) + '</span><span>' + skM(riba) + '</span></div>'
+      + '<div class="adm-fund-scale' + (guard > 85 ? ' is-edge' : '') + '" style="--guard:' + guard.toFixed(1) + '%">'
+      +   '<span>0</span><span>sargas ' + skM(riba - sargas) + '</span><span>' + skM(riba) + '</span></div>'
       + '<dl class="adm-kv">'
       +   kv('PANAUDOTA', skM(f.panaudota), 'var(--warning)')
       +   kv('LIKO', skM(liko), 'var(--bg-raised)')
@@ -890,10 +891,8 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
     var vid = serija.length ? serija.reduce(function (a, b) { return a + (b[laukas] || 0); }, 0) / serija.length : 0;
     var stulp = serija.map(function (d) {
       var v = maks ? (d[laukas] || 0) / maks : 0;
-      // K-60: `.adm-chart > span[style*="--v:0"]` pagauna ir „--v:0.345“, tad
-      // nenulines reiksmes rasom be nulio priekyje („--v:.345“) – tada nulio
-      // taisykle pataiko tik i tikra nuli.
-      return '<span style="--v:' + (v ? v.toFixed(3).replace(/^0/, '') : '0') + '" data-d="' + esc(d.diena) + '" data-v="' + (d[laukas] || 0) + '"></span>';
+      // Errata 14 (K-60): nulio stulpelį žymim klase, ne skaičiaus formatu.
+      return '<span' + (v ? '' : ' class="is-nulis"') + ' style="--v:' + (v ? v.toFixed(3) : '0') + '" data-d="' + esc(d.diena) + '" data-v="' + (d[laukas] || 0) + '"></span>';
     }).join('');
     var x = serija.length ? [serija[0].diena, serija[Math.floor(serija.length / 2)].diena, serija[serija.length - 1].diena] : [];
     return '<div class="ad-chart-blk">'

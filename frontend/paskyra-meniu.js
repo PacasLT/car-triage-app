@@ -13,7 +13,7 @@
   // ta pati kortelės stilių kaip visas puslapis - rėmelis, blur, švelnus atsiradimas.
   var CSS = ''
     + '#ct-pask{position:fixed;z-index:1700;top:64px;right:16px;width:318px;max-width:calc(100vw - 24px);'
-      + 'background:linear-gradient(180deg,rgba(23,27,38,.98),rgba(17,20,28,.98));'
+      + 'background:linear-gradient(180deg,rgba(21, 28, 48,.98),rgba(14, 20, 36,.98));'
       + 'border:1px solid var(--border-light,rgba(255,255,255,.12));border-radius:16px;'
       + 'box-shadow:0 24px 60px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.03) inset;'
       + 'backdrop-filter:blur(18px);overflow:hidden;display:none;transform-origin:top right}'

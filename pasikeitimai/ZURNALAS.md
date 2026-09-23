@@ -1632,3 +1632,61 @@ užuot teigęs, kad veiks.
 - **Trys pakete rastos klaidos** (grąžintos dizaineriui): **K-60** `[style*="--v:0"]` pagauna ir `--v:0.345` (58 iš 60 stulpelių tapdavo pilki 2 px) – apeita rašant `--v:.345`; **K-61** `.adm-share` Erratoje lieka `align-items: center` iš bazės, juosta 0 px – priedų 22 blokas; **K-62** datos stulpelis 92 px per siauras `2026-10-19` (eilutė 68 px) – priedų 23 blokas, tik ≥641 px, nes telefone 48 sk. lentelė virsta kortelėmis; **K-63** telefone fondo skalė „sargas 95 000“ ir „100 000“ užlipa.
 - **Matavimai** (1440 ir 390, imituoti duomenys): fondas `is-warn`, juosta `--used:88.6% --guard:95%`; 4 plytelės; 60 stulpelių, 12 nulinių; 10 dalies eilučių; 4 vartotojų eilutės, viena `aria-selected`, du „—“ vietoj nulio; 2 užklausos, viena atsakyta; antraštė 1440 – planas 118×32, avataras 32×32; 390 – planas paslėptas, avataras 32×32; paslėptų, bet matomų elementų – 0; horizontalios slinkties nėra.
 - Sargai 17 žali; `migracija` VM'e krenta dėl EPERM – Windows'e praeina.
+
+---
+
+## D-58 · 2026-09-23 · Dizaineris → Klaudijui · NAVY · 60 PAKETAS
+
+Lukas pasirinko navy visam produktui. Antras spalvos pakeitimas per savaitę,
+ir antrą kartą tai devynios eilutės viename faile. Po 58 pk. `:root` blokų
+trynimo tokenai turi vieną namą, tad šį kartą rizika ne juose, o ranka
+rašytose vietose — jos po pakeitimo liks juodos. Prieš diegiant prašau
+grep'o, ne po.
+
+Errata 12 lokalūs admin tokenai trinami tą pačią dieną, kai tapo nereikalingi —
+laikinas sprendimas „kol Lukas nuspręs" negali tapti antra tiesa.
+
+**Failai:** `pasikeitimai/is-dizainerio/60-navy/`
+
+## Z-132 · 2026-09-23 · Klaudijus · v2.13.0 – 60 paketas (navy visame produkte)
+- Devyni `:root` tokenai pakeisti `ct-dizainas.css` 1 sk.; Erratos 12 lokalus `.pg-adm` navy blokas ištrintas, liko tik `gap` ir `padding`. **Senos reikšmės sutapo su dizainerio atmintimi visos, išskyrus `--border-light`: repo buvo `rgba(255,255,255,.14)`, ne `.075`** (jo grep to varianto negaudė).
+- **Patikrinta, ar tokenai apskritai pasiekia puslapius:** `index.html` ir `compare.html` turi po du savo `:root` blokus su senais fonais, `detail.html` – vieną. Jie nieko nelemia, nes `ct-dizainas.css` prikabinamas vėliau (index 7155 eil.) – pamatuota naršyklėje: visuose septyniuose puslapiuose `--bg-base` = `#070B16`. `--bg-card` gyvena tik tuose dubliuose ir niekur nenaudojamas.
+- **Dizainerio grep'as gaudė tik hex formą, o didžioji dalis senų fonų parašyta kaip `rgba(10,12,18,.x)`** – permatomos antraštės, juostos ir meniu. Pakeista 43 vietos septyniuose mūsų failuose (`index` 17, `compare` 16, `detail` 4, `ct-bendras.css` 2, `paskyra-meniu.js` 2, `ct-sesija.js` 1, `megstami-meniu.js` 1) pagal atitikmenis: `rgba(10,12,18)`→`rgba(7,11,22)`, `(17,20,28)`→`(14,20,36)`, `(23,27,38)`→`(21,28,48)`, `(31,36,49)`→`(28,36,64)`, `(14,17,26)`→`(11,16,31)`. Dizainerio failų (`ct-dizainas.css` `.ct-fld-x` 2 vietos) neliečiau – K-64.
+- **Matavimas (Playwright, 1440 ir 390, septyni puslapiai):** prieš pataisas – 4 juodi lopai (`.ct3-header`, `.ct3-search-panel`, `.cr-top`, `#dp-sticky-bar`); po pataisų – **0** visuose septyniuose puslapiuose abiem pločiais. `--bg-base` `#070B16`, `--bg-surface` `#0E1424`, `body` `rgb(7,11,22)`, horizontalios slinkties nėra.
+- Neliesta sąmoningai: `color: #0A0C12` ant `--success` / `--warning` (tekstas ant šviesaus, 14 vietų) ir logotipo SVG vidus (5 puslapiai).
+- Sargai 17 žali. Hero nuotraukos kraštų iš debesies nepamatuosiu – reikia Luko žvilgsnio produkcijoje.
+
+## Z-133 · 2026-09-23 · Klaudijus · v2.13.1 – Errata 13 (K-64) ir `:root` dubliai
+- **Errata 13:** `ct-dizainas.css` `.ct-fld-x` ir `:hover` – `rgba(10, 12, 18, .4/.65)` → `color-mix(in oklab, var(--bg-base) 40%/65%, transparent)`. Per tokeną, tad kitas fono keitimas jas pasieks pats. K-64 uždarytas.
+- **Negyvi `:root` blokai ištrinti** (dizainerio 6 d.): `index.html` 2, `compare.html` 2, `detail.html` 1. Prieš trinant patikrinta programiškai: visi 21–28 tokenai kiekviename bloke egzistuoja `ct-dizainas.css`, išskyrus `--bg-card`, kuris nenaudojamas nė karto (`var(--bg-card)` – 0 vietų).
+- **Patikra, kad išvaizda nepasikeitė:** tie patys septyni puslapiai 1440 ir 390 – tokenai ir lopai identiški (0), o `index.html` ekranvaizdžių palyginimas pikselis į pikselį rodo didžiausią kanalo skirtumą **2/255** (šrifto glotninimas), t. y. vizualiai nieko.
+- Sargai 17 žali, `dizainas.test` 26/26, `indeksas.test` 10/10.
+
+## Z-134 · 2026-09-23 · Klaudijus · v2.13.2 – Errata 14 (K-60…K-63)
+- **K-60** (5047 eil.): `[style*="--v:0"]` → `.adm-chart > span.is-nulis`; `admin.html` nebeslepia nulio skaičiaus formatu (`.345` apėjimas nuimtas), o deda klasę, kai reikšmė 0.
+- **K-61** (5055 eil.): `.adm-share` sutrauktas į vieną bloką (`flex` + `align-items: stretch`), Erratos 12 dublis 5277 eil. ištrintas. Priedų **22 blokas ištrintas**.
+- **K-62** (5092 eil.): datos stulpeliai 92 → 104 px. Priedų **23 blokas ištrintas** – telefono `1fr` taisyklė tame pačiame faile vėliau, tad `@media` nebereikia.
+- **K-63** (5225 eil.): ≤640 px sargo užrašas keliamas virš juostos; `admin.html` deda `.is-edge`, kai `--guard > 85 %`.
+- **Matavimai (1440 / 390 / 360):** stulpelių 60, su `.is-nulis` – 12 (senoji taisyklė būtų pagavusi 58); `.adm-share` 534 px = eilutė 534 = juosta 534 (buvo 148 ir 0); vartotojų eilutė 52 px, datos po 104 px (buvo 68 px ir 92); telefone „sargas 95 000“ atsiduria y 424, juosta y 425, „100 000“ y 453 – atskirose eilutėse, dešinys kraštas 357 sutampa su juostos kraštu, horizontalios slinkties nėra.
+- Sargai 17 žali. Po šito `ct-priedai.css` nebeturi nė vieno gyvo bloko, liečiančio sistemos vardus (liko tik 8 ir 16 – mūsų pačių, ir 21 `.ct-kartos-hint`).
+
+## Z-135 · 2026-09-23 · Klaudijus · v2.13.3 – 63 paketas (50 sk. `.ct-kartos-hint`)
+- 50 sk. įrašytas į `ct-dizainas.css` prieš 57 pk. ERRATA 10 bloką; **priedų 21 blokas ištrintas**. Po šito `ct-priedai.css` nebeturi nė vieno sistemos vardo – liko tik mūsų 8 (`#more-filters`) ir 16 (`#sort-bar` kaukė).
+- `index.html` (~2866 eil.) vietoj `textContent` rašo `innerHTML` su `<span>Kėbulai:</span>` ir `<b>` kodams; visos reikšmės iš `/api/kartos` praleidžiamos per `ctEsc`.
+- **Matavimai:** paslėpta (`[hidden]`) – aukštis 0 px, `offsetParent` null, tarpo nedaro. Plačiai 1440: 1342 px, viena eilutė, 123 simboliai. Šone (`.ct-shell.is-split`): 274 px, trys eilutės, `margin-top` 4 px (`--s-1`, dizainerio taisyklė veikia). Telefone 390: 324 px, trys eilutės. Kodai – IBM Plex Mono `--text-primary`, etiketė `--text-dim`, tekstas 12,5 px `--text-muted`.
+- Sargai 17 žali.
+
+## Z-136 · 2026-09-23 · Klaudijus · v2.13.4 – Errata 16 (priedų 1 ir 2 blokai)
+- **2 blokas – matavimas parodė B, ne A.** Išjungus priedų taisyklę, TOP kortelės istorijos juosta atgauna `padding: 0 18px 14px` iš `index.html` 1266 eil. (specifiškumas lygus, 0,2,0 – sprendžia failų eilė). Dizainerio spėjimas, kad paraštes duoda `.ct-std-card > .ct-istorija` su `!important`, nepasitvirtino: nuo v1.33.0 istorija segama į `.ct-l3`, tad ta taisyklė nebeatitinka.
+- Todėl Erratos 16 dvi eilutės įrašytos į **39 sk.** (po `.ct-std-card > .ct-istorija`), o priedų 2 blokas ištrintas. Po perkėlimo pamatuota: TOP ir STD `padding: 0px`, pirmo `div` `margin-top: 0px`, taisyklė ateina iš `ct-dizainas.css` – **be `!important`**, kaip dizaineris ir norėjo.
+- **1 blokas NEIŠTRINTAS – ir tai ne atsargumas.** Sistemos 685 eil. `.ct-photo img { height: 100% }` laiko `.ct-photo` pačia nuotraukos dėže (kaip 1 sk. numato: `.ct-media` – stulpelis, `.ct-photo` – dėžė, `.ct-thumbs` – sesuo). Mūsų `index.html` kortelėje `.ct-photo` yra **apvalkalas**, kuriame guli ir `.ct-photo-main`, ir `.ct-thumbs`, tad sisteminė taisyklė pataiko ir į kiekvieną miniatiūrą. Priedų 1 bloko pirmoji eilutė (`height: auto`) būtent tai ir neutralizuoja – ją ištrynus miniatiūros gautų `height: 100%`. Antroji eilutė (`.ct-card .ct-photo img { height: 100% }`) tikrai perteklinė – ją dubliuoja 685.
+- Vadinasi tai ne priedų skola, o **markupo nesutapimas mūsų pusėje** (K-65) – siūlau pervadinti: apvalkalas `.ct-photo` → `.ct-media`, vidinė dėžė `.ct-photo-main` → `.ct-photo`. Tada 1 blokas dingsta savaime.
+- Errata 15 (tarpai) neatėjo – zip'e buvo tik 65 paketas. Dėl to versija 2.13.4, ne 2.13.5.
+
+## Z-137 · 2026-09-23 · Klaudijus · v2.13.5 – Errata 15 (tarpai) ir priedų 1 blokas
+- **Errata 15 – dizainerio spėjimas pasitvirtino.** Pamatuota: `#ad-turinys` yra `display: block`, `gap: normal`, tarpai tarp sekcijų **0 px** (390 px – net −1). `.pg-adm { gap: 24px }` veikia tik tiesioginiams vaikams, o sekcijos guli skirtuko skydelyje.
+- Skydeliui daviau vardą, kurio jis prašė (`class="adm-panel"` ant `#ad-turinys`), ir įrašiau **susiaurintą** taisyklę `.adm-panel:not([hidden])` vietoj `.pg-adm > :not([hidden]):not(.ct-tabs)` – kitaip ji būtų pagavusi ir `h1`, ir `p.pg-sub`. Po įdiegimo tarpai **24 px** abiem pločiais. `.adm-tiles { gap: var(--s-4) }` iš Erratos 15 praleista – ji jau yra Erratoje 12 (5253 eil.).
+- **Priedų 1 blokas ištrintas, bet ne dėl pervadinimo.** Pakartojau matavimą su TIKRU kortelės markupu (`index.html` 6246–6251: `.ct-media > .ct-photo + .ct-thumbs`) – ištrynus nesikeičia niekas: nuotrauka 288×197 (1440) ir 318×218 (390), miniatiūros 68×51 ir 76×57.
+- **Mano ankstesnė išvada buvo klaidinga.** Teigiau, kad `.ct-photo` yra apvalkalas su miniatiūromis viduje, ir pasiūliau K-65 pervadinimą. Tai buvo iš `index.html` CSS 1067–1069 eil. (senos kortelės variantas su `.ct-photo-main`), o ne iš to, ką JS tikrai piešia. Tikrasis markupas jau atitinka sistemos 1 sk. struktūrą, tad **pervadinti nereikia** – K-65 uždaromas be darbų.
+- Lieka pastebėjimas kitam kartui: `index.html` 1068–1069 eil. `.ct-photo-main` taisyklės yra **negyvos** (markupe tokio vardo nėra). Trinsiu atskirai, su matavimu.
+- Po šito `ct-priedai.css` turi **vienintelį gyvą bloką – 8 (mūsų `#more-filters`)**. Sargai 17 žali.

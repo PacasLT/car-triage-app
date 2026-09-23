@@ -121,7 +121,7 @@
       var st = document.createElement('style');
       st.textContent =
         '#ct-sesija-uzdanga{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;' +
-        'background:rgba(10,12,18,.72);backdrop-filter:blur(2px);padding:16px}' +
+        'background:rgba(7, 11, 22,.72);backdrop-filter:blur(2px);padding:16px}' +
         '#ct-sesija-uzdanga .ct-sesija-kort{max-width:380px;width:100%;box-sizing:border-box;' +
         'background:var(--bg-surface,#12151F);border:1px solid var(--border,#252A38);' +
         'border-radius:var(--radius-lg,14px);padding:20px;text-align:center;' +

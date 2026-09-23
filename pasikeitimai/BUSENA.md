@@ -42,10 +42,13 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 | `49 sk.` Nr. 30 | Įdiegta (v2.12.1) | `.ct-hdr-plan` + `.ct-avatar` šešiuose puslapiuose; JS deda `is-low` (<5) / `is-zero` (0) ant `<u>`. |
 | 1 sk. komentarai | Įdiegta (v2.12.1) | Violetinė → mėlyna, 3,7 / 5,2, `--shadow-panel` gyvas nuo 58 pk. |
 | Užsakymas ≠ serveris | Dizaineriui | „7 d.“, „AI apžvalgos“, „paskutinis aktyvumas“ — laukų nėra. DZ-SUVESTINE laukia Luko. |
-| K-60 | `.adm-chart > span[style*="--v:0"]` | Pagauna ir `--v:0.345` — visi stulpeliai tapdavo pilki 2 px. Apeita: reikšmės rašomos be nulio priekyje (`--v:.345`). |
-| K-61 | `.adm-share` po Erratos 12 | Bazėje `align-items: center` (grid), Errata perjungia į `flex-direction: column` jo nenuėmusi — juosta 0 px. Priedų 22 blokas. |
-| K-62 | `.adm-users` 3 ir 7 stulpeliai | `2026-10-19` mono 12 px netelpa į 92 px: eilutė 68 px vietoj 52. Priedų 23 blokas (tik ≥641 px). |
-| K-63 | `.adm-fund-scale` telefone | 390 px „sargas 95 000“ ir „100 000“ užlipa vienas ant kito. |
+| ~~K-60~~ | `.adm-chart > span[style*="--v:0"]` | Pagauna ir `--v:0.345` — visi stulpeliai tapdavo pilki 2 px. Apeita: reikšmės rašomos be nulio priekyje (`--v:.345`). |
+| ~~K-61~~ | `.adm-share` po Erratos 12 | Bazėje `align-items: center` (grid), Errata perjungia į `flex-direction: column` jo nenuėmusi — juosta 0 px. Priedų 22 blokas. |
+| ~~K-62~~ | `.adm-users` 3 ir 7 stulpeliai | `2026-10-19` mono 12 px netelpa į 92 px: eilutė 68 px vietoj 52. Priedų 23 blokas (tik ≥641 px). |
+| ~~K-63~~ | `.adm-fund-scale` telefone | **Uždaryta** (Errata 14, v2.13.2). Visi keturi K-60…K-63 uždaryti. |
+| 60 navy | Įdiegta (v2.13.0) | Devyni `:root` tokenai; Erratos lokalus blokas ištrintas. 43 ranka rašytos vietos pakeistos, 0 lopų po matavimo. |
+| K-64 | `.ct-fld-x` per `--bg-base` | **Uždaryta** (Errata 13, v2.13.1). |
+| `:root` dubliai | Ištrinti (v2.13.1) | index ×2, compare ×2, detail ×1. `--bg-card` buvo vienintelis niekur nenaudotas tokenas. |
 
 ## Analitikas
 
@@ -62,13 +65,14 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 
 | Blokas | Kas | Perims |
 |---|---|---|
-| 1, 2 | senos kortelės taisyklės, `.ct-istorija` trečiame lygyje | 46b (`.ct-std-card`) |
-| 5 | `.ct-btn-accent` | kitas paketas (dizainerio pažadėta atmaina) |
+| ~~1~~ | `.ct-card .ct-photo img` / `.ct-thumbs img` | **Ištrintas** (v2.13.5). Matavimas su tikru markupu: pokyčių nėra. |
+| ~~2~~ | `.ct-l3 > .ct-istorija` | **Perimta į 39 sk.** (Errata 16, v2.13.4). |
+| ~~K-65~~ | `.ct-photo` pervadinimas | **Atšauktas** – tikrasis markupas jau atitinka sistemos 1 sk. struktūrą. Mano klaida: skaičiau `index.html` CSS, ne JS piešiamą markupą. |
 | 8 | `#more-filters` iš inline | NETRINTI (mūsų) |
-| 16 | `#sort-bar` kaukė | Nr. 42 pabaiga (Klaudijus) |
-| 21 | `.ct-kartos-hint` (kėbulo kartos po filtrais) | dizaineris – perimti į sistemą |
-| 22 | `.adm-share { align-items: stretch }` (K-61) | dizaineris – į 48 sk. |
-| 23 | `.adm-users` datos stulpeliai (K-62) | dizaineris – į 48 sk. |
+
+Blokai 3–7, 9–23 jau ištrinti. Gyvų taisyklių faile – 7 (trys blokai).
+
+
 
 ## Kur kas guli
 

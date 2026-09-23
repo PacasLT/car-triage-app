@@ -46,11 +46,11 @@
   /* ── 1. PAVIRŠIAI · trys aiškūs lygiai ────────────────────────────────────
      Taisyklė: kortelė niekada nesideda ant to paties lygio paviršiaus.
      fonas(base) → kortelė(surface) → pakylėta(elevated) → aukščiausia(raised) */
-  --bg-base:        #0A0C12;
-  --bg-surface:     #11141C;
-  --bg-elevated:    #171B25;
-  --bg-raised:      #1F2431;
-  --bg-sunken:      #070910;             /* log'ai, kodo blokai, įdubos */
+  --bg-base:        #070B16;   /* 60 pk.: navy (buvo #0A0C12) */
+  --bg-surface:     #0E1424;   /* 60 pk. (buvo #11141C) */
+  --bg-elevated:    #151C30;   /* 60 pk. (buvo #171B25) */
+  --bg-raised:      #1C2440;   /* 60 pk. (buvo #1F2431) */
+  --bg-sunken:      #050811;   /* 60 pk. (buvo #070910) */             /* log'ai, kodo blokai, įdubos */
   --bg-scrim:       rgba(5, 6, 10, .72); /* modalų fonas */
   /* BŪTINI aliasai. detail.html JS naudoja var(--card) 18 vietose ir var(--bg) —
      nė vienas niekur neapibrėžtas, tad tie blokai šiandien lieka be fono.
@@ -58,8 +58,8 @@
   --bg:             var(--bg-base);
   --card:           var(--bg-surface);
 
-  --border:         rgba(255, 255, 255, .075);
-  --border-light:   rgba(255, 255, 255, .14);
+  --border:         rgba(148, 163, 184, .12);   /* 60 pk.: melsvas, ne baltas (buvo rgba(255,255,255,.075)) */
+  --border-light:   rgba(148, 163, 184, .22);   /* 60 pk. (buvo rgba(255,255,255,.14)) */
   --border-strong:  rgba(255, 255, 255, .22);
 
   /* ── 2. TEKSTAS ───────────────────────────────────────────────────────────
@@ -67,11 +67,11 @@
      --text-dim yra ~3:1 → TIK mono etiketėms, versijoms, poraštėms. */
   --text-primary:   #E9EBF2;
   --text-secondary: #C3C9D8;
-  --text-muted:     #8C93A6;
+  --text-muted:     #9AA3B8;   /* 60 pk.: 7,1:1 ant navy (buvo #8C93A6) */
   /* Buvo #5E6578 (~3:1) ir naudojama 11 px mono etiketėms — per mažai net etiketėms.
      Pašviesinta iki 4,7:1 ant --bg-elevated ir 5,2:1 ant --bg-base, tad tinka ir
      11 px tekstui. Vis tiek matomai blankesnė už --text-muted (5,9:1). */
-  --text-dim:       #7E8699;
+  --text-dim:       #8790A6;   /* 60 pk.: 5,9:1 ant navy (buvo #7E8699) */
   --text-on-light:  #0A0C12;
 
   /* 32 paketas · IŠTRINTI AŠTUONI NEGYVI TOKENAI (I-04). Tokenas, nepanaudotas
@@ -2452,12 +2452,12 @@ textarea.ct-field {
   border: none; padding: 0;
   border-radius: 50%;
   display: grid; place-items: center;
-  background: rgba(10, 12, 18, .4);
+  background: color-mix(in oklab, var(--bg-base) 40%, transparent);   /* Errata 13 (K-64) */
   color: var(--accent-light);
   font: var(--fw-bold) 9px/1 var(--font-mono);
   cursor: pointer;
 }
-.ct-fld-x:hover { background: rgba(10, 12, 18, .65); color: var(--text-primary); }
+.ct-fld-x:hover { background: color-mix(in oklab, var(--bg-base) 65%, transparent); color: var(--text-primary); }   /* Errata 13 (K-64) */
 
 
 /* ── Platusis isdestymas · etikete viduje ─────────────────────────────────── */
@@ -4004,6 +4004,12 @@ textarea.ct-field {
 /* Istorijos juosta - JS prideda veliau. Bloke jai uztenka ploti. */
 .ct-std-card > .ct-istorija { display: block; width: 100%; }
 
+/* Errata 16 (65 pk.): istorija trečiame lygyje – paraštes nuima pats skyrius,
+   ne priedai. Pamatuota: be šitos eilutės TOP kortelė atgautų `0 18px 14px`
+   iš index.html 1266 eil., ir blokas atrodytų kaip blokas bloke. */
+.ct-l3 > .ct-istorija { padding: 0; }
+.ct-l3 > .ct-istorija > div:first-child { margin-top: 0; }
+
 /* Atmesta filtru: ne „isjungta" pilka, o mazesnis kontrastas; uzvedus
    grizta visa. Veiksmai lieka veikiantys - atmete filtras, ne sistema. */
 .ct-std-card.is-rejected { opacity: .62; transition: opacity var(--dur-fast) var(--ease); }
@@ -5044,7 +5050,7 @@ textarea.ct-field {
   border-radius: 3px 3px 0 0;
   background: var(--accent);
 }
-.adm-chart > span[style*="--v:0"] { min-height: 2px; background: var(--border-light); }
+.adm-chart > span.is-nulis { min-height: 2px; background: var(--border-light); }   /* Errata 14 (K-60): klasė, ne teksto paieška */
 
 
 /* ── DALIS · top modeliai, portalai ────────────────────────────────────────
@@ -5052,12 +5058,7 @@ textarea.ct-field {
    (didziausia dalis retai virsija 50 %, tad juosta butu per trumpa).
    Portalams - esama `.ct3-portal-ico` (18 px).                             */
 
-.adm-share {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 44px 56px;
-  align-items: center;
-  gap: var(--s-3);
-}
+.adm-share { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }   /* Errata 14 (K-61): vienas blokas */
 .adm-share-n { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .adm-share-n > span:first-child {
   display: flex; align-items: center; gap: var(--s-2);
@@ -5094,7 +5095,7 @@ textarea.ct-field {
 
 .adm-users {
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) 96px 92px 80px 80px 96px 92px;
+  grid-template-columns: minmax(0, 1.6fr) 96px 104px 80px 80px 96px 104px;   /* Errata 14 (K-62) */
 }
 .adm-users-h,
 .adm-u { display: contents; }
@@ -5193,20 +5194,14 @@ textarea.ct-field {
    rasomi TIK `.pg-adm` viduje, kaip lokalūs tokenai, ne `:root`.
    ========================================================================== */
 
-/* ── NAVY · tik admin, kol Lukas nenuspres del viso produkto ─────────────── */
-.pg-adm {
-  --bg-base:     #070B16;
-  --bg-sunken:   #050811;
-  --bg-surface:  #0E1424;
-  --bg-elevated: #151C30;
-  --bg-raised:   #1C2440;
-  --border:       rgba(148, 163, 184, .12);
-  --border-light: rgba(148, 163, 184, .22);
-  --text-muted:   #9AA3B8;   /* buvo #8C93A6 - mazi tekstai ant navy: 7,1:1 */
-  --text-dim:     #8790A6;   /* 5,9:1 */
-  gap: var(--s-5);
-  padding: 28px;
-}
+/* ── 60 pk.: navy dabar `:root` (Luko DZ-NAVY). Čia liko tik admin išdėstymas ── */
+.pg-adm { gap: var(--s-5); padding: 28px; }
+
+/* Errata 15 (64 pk.): `.pg-adm { gap }` veikia tik tiesioginiams vaikams, o
+   suvestinės sekcijos guli skirtuko skydelyje (`#ad-turinys`), kuris yra
+   `display: block` – todėl fondo kortelė ir plytelės lietėsi (pamatuota: 0 px).
+   Tarpas priklauso skydeliui; `display` – tik su `:not([hidden])` (59 pk.). */
+.adm-panel:not([hidden]) { display: flex; flex-direction: column; gap: var(--s-5); }
 
 /* ── FONDAS · ryskiausias elementas ────────────────────────────────────────
    Didesnis skaicius (44), procentas salia, juosta 14 px, skale po ja, keturi
@@ -5238,6 +5233,21 @@ textarea.ct-field {
 .adm-fund-scale > span:first-child { left: 0; }
 .adm-fund-scale > span:nth-child(2) { left: var(--guard); transform: translateX(-100%); padding-right: 6px; color: var(--danger); white-space: nowrap; }
 .adm-fund-scale > span:last-child { right: 0; }
+
+/* Errata 14 (K-63): siaurame ekrane sargo uzrasas keliauja VIRS juostos */
+@media (max-width: 640px) {
+  .adm-fund-scale { height: 30px; }
+  .adm-fund-scale > span:nth-child(2) {
+    top: auto;
+    bottom: 100%;
+    margin-bottom: 18px;           /* virs juostos (14) + tarpas */
+    transform: translateX(-50%);
+    padding-right: 0;
+  }
+  /* Kai sargas arti desinio krasto (> 85 %), uzrasas lygiuojamas pagal krasta.
+     JS deda `is-edge`, kai --guard > 85 %. */
+  .adm-fund-scale.is-edge > span:nth-child(2) { left: auto; right: 0; transform: none; }
+}
 
 .adm-kv { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--border); padding-top: 18px; }
 .adm-kv > div { padding: 0 18px; }
@@ -5286,7 +5296,6 @@ textarea.ct-field {
 @media (prefers-reduced-motion: reduce) { .adm-chart > span { transition: none; } }
 
 /* ── DALIS · vardas, kiekis ir % vienoje eiluteje, juosta po ja ─────────── */
-.adm-share { display: flex; flex-direction: column; gap: 8px; }
 .adm-share-r { display: flex; align-items: center; gap: 10px; }
 .adm-share-r > span { flex: 1; min-width: 0; font: var(--fw-medium) var(--fs-300)/1.3 var(--font); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .adm-share-r > b { flex: none; font: var(--fw-semi) 13px/1 var(--font-mono); font-variant-numeric: tabular-nums; }
@@ -5305,6 +5314,46 @@ textarea.ct-field {
   .adm-tile { min-height: 0; padding: 14px; }
   .adm-tile > b { font-size: 24px; }
 }
+
+
+/* ============================================================================
+   63 · 50 sk. · `.ct-kartos-hint` · kėbulo kartų užuomina (perimta iš priedų 21)
+   ----------------------------------------------------------------------------
+   Po diegimo: ct-priedai.css 21 blokas (162-164) trinamas. Markupas nekinta.
+   Siulau v2.13.3.
+
+   Kas pasikeicia nuo 21 bloko: ne isvaizda, o PRASME. Tai ne pagalbinis
+   tekstas, o FAKTAS apie paieska - kurios kartos pateks i rezultatus. Tad:
+     - kodai (G05, F15) - mono ir sviesesni: jie yra tai, ka zmogus lygina
+       su skelbimais;
+     - metai - tabular-nums, kad keli kartų sarasai lygiuotusi akimis;
+     - etikete „Kėbulai:" - pritemdyta, ji tik paaiskina, kas eina toliau.
+
+   `display` NERASOMAS: elementas yra <p>, [hidden] veikia savaime (59 pk.
+   taisykle - kol nereikia kito display, jo nera).
+   ========================================================================== */
+
+.ct-kartos-hint {
+  margin: var(--s-2) 0 0;
+  font: var(--fw-regular) var(--fs-200)/1.5 var(--font);
+  color: var(--text-muted);
+  text-wrap: pretty;
+  font-variant-numeric: tabular-nums;
+}
+
+/* JS ideda teksta. Jei gali - kodus apgaubti <b>, o etikete <span>:
+     <span>Kėbulai:</span> <b>G05</b> (2018–dabar, LCI nuo 2023), <b>F15</b> (2013–2018)
+   Jei ne - taisykle virs pakanka, tekstas tiesiog vientisas. */
+.ct-kartos-hint > span { color: var(--text-dim); margin-right: 2px; }
+.ct-kartos-hint > b {
+  font: var(--fw-semi) var(--fs-200)/1 var(--font-mono);
+  color: var(--text-primary);
+  letter-spacing: .02em;
+}
+
+/* Sone (`.ct-shell.is-split`, 276 px) - 130 simboliu lauzosi i 3-4 eilutes;
+   tai priimtina, bet tarpas virs mazinamas, kad nesiatrodytu kaip nauja sekcija. */
+.ct-shell.is-split .ct-kartos-hint { margin-top: var(--s-1); }
 
 
 /* ============================================================================

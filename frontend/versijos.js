@@ -8,6 +8,48 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.13.5', data: '2026-09-23', pavadinimas: 'Tarpai administravimo suvestinėje',
+    pakeitimai: [
+      'Administravimo suvestinėje kortelės nebesiliečia – tarp jų atsirado tarpas, kaip ir buvo numatyta.',
+    ],
+  },
+  {
+    versija: '2.13.4', data: '2026-09-23', pavadinimas: 'Istorijos juosta – viena taisyklė',
+    pakeitimai: [
+      'Skelbimų istorijos pastabos trečiame lygyje toliau atrodo taip pat, bet jų išvaizdą dabar lemia viena taisyklė dizaino sistemoje, o ne laikinas priedas.',
+    ],
+  },
+  {
+    versija: '2.13.3', data: '2026-09-23', pavadinimas: 'Kėbulų užuomina po filtrais',
+    pakeitimai: [
+      'Pasirinkus markę ir modelį po filtrais matoma, kurios kėbulo kartos pateks į rezultatus – patys kodai (G05, F15) dabar išskirti, kad juos būtų lengva palyginti su skelbimais.',
+    ],
+  },
+  {
+    versija: '2.13.2', data: '2026-09-23', pavadinimas: 'Administravimo zonos pataisos',
+    pakeitimai: [
+      'Suvestinės grafikuose stulpeliai vėl rodo tikrą dienos dydį – anksčiau beveik visi buvo suplokštinti iki pilkos linijos.',
+      'Dažniausių modelių ir portalų juostos matomos per visą plotį.',
+      'Vartotojų lentelėje datos telpa į vieną eilutę.',
+      'Telefone ScraperAPI fondo sargo riba nebeužlipa ant bendros sumos – ji perkelta virš juostos, prie savo brūkšnio.',
+    ],
+  },
+  {
+    versija: '2.13.1', data: '2026-09-23', pavadinimas: 'Spalvų tvarka po mėlyno fono',
+    pakeitimai: [
+      'Paskutinės dvi vietos, kur senas fonas buvo įrašytas ranka, dabar ima spalvą iš vieno šaltinio – kitas fono keitimas jas pasieks automatiškai.',
+      'Iš trijų puslapių pašalinti seni spalvų sąrašai, kurie kartojo tas pačias reikšmes kitokiomis vertėmis. Išvaizda nepasikeitė – patikrinta palyginus ekranvaizdžius.',
+    ],
+  },
+  {
+    versija: '2.13.0', data: '2026-09-23', pavadinimas: 'Tamsiai mėlynas fonas visame produkte',
+    pakeitimai: [
+      'Visas produktas – paieška, skelbimo puslapis, palyginimas, mėgstamiausi, paskyra ir administravimas – gavo tamsiai mėlyną foną vietoj beveik juodo.',
+      'Rėmeliai tapo melsvi, o smulkus tekstas šviesesnis, kad ant naujo fono skaitytųsi be įtampos.',
+      'Sutvarkytos 43 vietos, kur senas fonas buvo įrašytas ranka – jos būtų likusios juodomis dėmėmis.',
+    ],
+  },
+  {
     versija: '2.12.1', data: '2026-09-23', pavadinimas: 'Nauja administravimo zona ir antraštė',
     pakeitimai: [
       'Administravime atsirado „Suvestinė“: ScraperAPI fondas su sargo riba, vartotojų ir paieškų rodikliai, 30 dienų grafikai, dažniausi modeliai ir portalų dalis.',

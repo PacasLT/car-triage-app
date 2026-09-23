@@ -22,23 +22,14 @@
    ========================================================================== */
 
 
-/* ── 1. Senos kortelės taisyklių tinklas ───────────────────────────────────
-   `index.html` turi `.card img { height: 158px/180px }` iš senosios kortelės.
-   Selektoriai jau atriboti į `.card:not(.ct-card) img` pačiame faile, bet
-   paliekame tinklą – jei kas nors kada grąžins seną taisyklę.                */
+/* 1 BLOKAS · IŠTRINTAS v2.13.5 (Errata 16): pamatuota su TIKRU kortelės
+   markupu (`.ct-media > .ct-photo + .ct-thumbs`) – ištrynus nesikeičia niekas:
+   nuotrauka 288×197 (1440) ir 318×218 (390), miniatiūros 68×51 ir 76×57.
+   Miniatiūros NĖRA `.ct-photo` viduje, tad sisteminė 685 eil. jų nepasiekia. */
 
-.ct-card .ct-photo img,
-.ct-card .ct-thumbs img { height: auto; }
-.ct-card .ct-photo img { height: 100%; }
-
-
-/* ── 2. Istorijos pastabos trečiame lygyje ─────────────────────────────────
-   `.ct-istorija` blokas anksčiau kabėjo PO kortele atskiru rėmeliu. Nuo
-   v1.33.0 segamas į `.ct-l3`. Nuimam paraštes, kad neatrodytų kaip blokas
-   bloke. Dizainerio faile šio konteksto nėra – jis nemato mūsų sekimo sistemos. */
-
-.ct-l3 > .ct-istorija { padding: 0; }
-.ct-l3 > .ct-istorija > div { margin-top: 0; }
+/* 2 BLOKAS · IŠTRINTAS v2.13.5 (Errata 16): `.ct-l3 > .ct-istorija` perimta į
+   39 sk. Matavimas parodė, kad blokas buvo gyvas: be jo TOP kortelė atgaudavo
+   `padding: 0 18px 14px` iš index.html 1266 eil. */
 
 /* ── 3. Telefone kortelėje nerodom įverčio – PERIMTA, IŠTRINTA ──────────
    v1.41.0: dizaineris perdarė sprendimą savo 17 skyriuje. Dedamosios telefone
@@ -159,27 +150,11 @@
 /* 20 BLOKAS · IŠTRINTAS v2.9.0 (46b 41 sk. `.ct-papf`, perimta be pakeitimų). */
 
 
-/* 21 BLOKAS · v2.10.3 (A-37) · kėbulo kartų užuomina po filtrais.
-   Laikinas – dizaineriui perimti į sistemą (vardas `.ct-kartos-hint`). */
-.ct-kartos-hint { margin: var(--s-2) 0 0; font-size: 13px; color: var(--text-secondary); }
+/* 21 BLOKAS · IŠTRINTAS v2.13.3 (63 paketas): `.ct-kartos-hint` perimta į
+   50 sk. Po šito prieduose nebeliko nė vieno sistemos vardo – tik 8 ir 16. */
 
+/* 22 BLOKAS · IŠTRINTAS v2.13.2 (Errata 14, K-61): `.adm-share` sutrauktas į
+   vieną bloką 48 sk. – `align-items: stretch` dabar ten. */
 
-/* 22 BLOKAS · v2.12.1 (K-61) · `.adm-share` po Errata 12.
-   48 sk. bazėje `.adm-share` yra `display: grid` su `align-items: center`.
-   Errata 12 perjungia į `flex-direction: column`, bet `align-items` nenuima,
-   tad eilutė ir juosta susitraukia iki turinio pločio (juosta – 0 px).
-   Laikinas – dizaineriui įrašyti `align-items: stretch` į 48 sk. */
-.adm-share { align-items: stretch; }
-
-
-/* 23 BLOKAS · v2.12.1 (K-62) · `.adm-users` datos stulpeliai.
-   48 sk. duoda 92 px, o „2026-10-19“ mono 12 px + 2×12 px vidinis tarpas užima
-   ~96 px. Pamatuota 1440 px: eilutė 68 px (dvi eilutės) vietoj ~44.
-   Laikinas – dizaineriui perskaičiuoti 3 ir 7 stulpelius. */
-/* TIK nuo 641 px: telefone 48 sk. lentelė virsta kortelėmis (`1fr`), ir
-   platesnis tinklelis čia nugalėtų tą medija taisyklę (ta pati specifika,
-   o šis failas – vėliau). Tas pats „taisyklė dviejose vietose“ atvejis. */
-@media (min-width: 641px) {
-  .adm-users { grid-template-columns: minmax(0, 1.6fr) 96px 104px 80px 80px 96px 104px; }
-  .adm-u > *, .adm-users-h > * { white-space: nowrap; }
-}
+/* 23 BLOKAS · IŠTRINTAS v2.13.2 (Errata 14, K-62): datos stulpeliai 104 px
+   pačiame 48 sk.; telefono `1fr` taisyklė tame pačiame faile vėliau. */

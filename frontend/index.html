@@ -11,29 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   /* ===== DESIGN TOKENS (v1) ===== */
-  :root {
-    --bg-base:       #0a0c10;
-    --bg-surface:    #141720;
-    --bg-elevated:   #1c2030;
-    --bg-card:       #16192a;
-    --border:        #252a38;
-    --border-light:  #2e3448;
-    --accent:        #7c6ff7;
-    --accent-dim:    rgba(124,111,247,0.12);
-    --success:       #7fd88f;
-    --danger:        #ff9d9d;
-    --warning:       #f0c674;
-    --text-primary:  #e8e8ea;
-    --text-secondary:#b0b0c0;
-    --text-muted:    #6e7080;
-    --radius-sm:     6px;
-    --radius-md:     10px;
-    --radius-lg:     14px;
-    --radius-xl:     20px;
-    --font:          -apple-system, 'Segoe UI', Arial, sans-serif;
-    --shadow-card:   0 2px 16px rgba(0,0,0,0.4);
-    --shadow-glow:   0 0 20px rgba(124,111,247,0.25);
-  }
+  /* 61 pk. (6 d.): šio puslapio `:root` blokas ištrintas – tokenai gyvena tik ct-dizainas.css. */
 
   /* ===== RESET & BASE ===== */
   * { box-sizing: border-box; }
@@ -283,7 +261,7 @@
   #compare-bar {
     display: none; position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
     width: max-content; max-width: min(720px, calc(100vw - 32px));
-    background: rgba(17,20,28,.92);
+    background: rgba(14, 20, 36,.92);
     border: 1px solid var(--border-light);
     border-radius: 16px;
     padding: 10px 12px 10px 14px; z-index: 900;
@@ -628,51 +606,6 @@
    Drop-in replacement for the :root block in frontend/index.html.
    Existing variable names are KEPT (JS/HTML untouched); new ones added.
    ============================================================ */
-:root {
-  /* Surfaces — navy/charcoal, four elevation steps */
-  --bg-base:        #0A0C12;
-  --bg-surface:     #11141C;
-  --bg-elevated:    #171B25;
-  --bg-card:        #11141C;
-  --bg-raised:      #1F2431;            /* new: hover / active / tick tracks */
-
-  /* Hairlines */
-  --border:         rgba(255,255,255,.075);
-  --border-light:   rgba(255,255,255,.14);
-
-  /* Accent — used sparingly: logo mark, primary CTA, active tab, "this car" marker */
-
-  /* Semantic — opportunity / warning / risk */
-  --success:        oklch(.75 .15 158);
-  --success-dim:    oklch(.75 .15 158 / .13);
-  --success-border: oklch(.75 .15 158 / .30);
-  --warning:        oklch(.81 .13 78);
-  --warning-dim:    oklch(.81 .13 78 / .13);
-  --warning-border: oklch(.81 .13 78 / .30);
-  --danger:         oklch(.66 .19 25);
-  --danger-dim:     oklch(.66 .19 25 / .13);
-  --danger-border:  oklch(.66 .19 25 / .30);
-
-  /* Type colour ramp */
-  --text-primary:   #E9EBF2;
-  --text-secondary: #C3C9D8;
-  --text-muted:     #8C93A6;
-  --text-dim:       #5E6578;            /* new: mono eyebrow labels */
-
-  /* Radii — tighter than v1 */
-  --radius-sm:      6px;
-  --radius-md:      7px;
-  --radius-lg:      11px;
-  --radius-xl:      12px;
-
-  /* Typography — UI sans + data mono */
-  --font:           'Archivo', -apple-system, 'Segoe UI', Helvetica, sans-serif;
-  --font-mono:      'IBM Plex Mono', ui-monospace, Menlo, monospace;
-
-  /* Shadows — restrained */
-  --shadow-card:    0 1px 0 rgba(255,255,255,.03) inset;
-  --shadow-panel:   0 18px 40px -24px rgba(0,0,0,.8);
-}
 
 /* Load once in <head>:
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -758,16 +691,16 @@
   position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(
     105deg,
-    rgba(10,12,18,.96) 0%,
-    rgba(10,12,18,.78) 30%,
-    rgba(10,12,18,.4) 60%,
-    rgba(10,12,18,.65) 100%
+    rgba(7, 11, 22,.96) 0%,
+    rgba(7, 11, 22,.78) 30%,
+    rgba(7, 11, 22,.4) 60%,
+    rgba(7, 11, 22,.65) 100%
   );
 }
 /* Bottom fade into search panel */
 .ct3-hero::after {
   content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 120px;
-  background: linear-gradient(to bottom, transparent, rgba(10,12,18,.9));
+  background: linear-gradient(to bottom, transparent, rgba(7, 11, 22,.9));
   pointer-events: none;
 }
 
@@ -799,7 +732,7 @@
 /* ---- SEARCH PANEL ---- */
 .ct3-search-panel {
   position: relative; z-index: 20;
-  background: rgba(14,17,26,.97);
+  background: rgba(11, 16, 31,.97);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255,255,255,.1);
   border-radius: 0 0 20px 20px;
@@ -1030,8 +963,8 @@
 .card:hover { border-color: var(--border-light); }
 .card-photo-wrap { background: #141822; border-right: 1px solid var(--border); align-self: flex-start; }
 .card:not(.ct-card) img, .card-photo-wrap img { width: 216px; height: 158px; border-radius: 0; object-fit: cover; }
-.card-photo-count { background: rgba(10,12,18,.82); border: 1px solid var(--border-light); color: var(--text-muted); font: 600 9.5px/1 var(--font-mono); padding: 4px 6px; border-radius: 3px; bottom: 8px; right: 8px; }
-.card-photo-nav { background: rgba(10,12,18,.75); border: 1px solid var(--border-light); width: 24px; height: 24px; }
+.card-photo-count { background: rgba(7, 11, 22,.82); border: 1px solid var(--border-light); color: var(--text-muted); font: 600 9.5px/1 var(--font-mono); padding: 4px 6px; border-radius: 3px; bottom: 8px; right: 8px; }
+.card-photo-nav { background: rgba(7, 11, 22,.75); border: 1px solid var(--border-light); width: 24px; height: 24px; }
 .card-body { padding: 14px 18px 14px; }
 .fav-star { top: 12px; right: 12px; width: 34px; height: 34px; border-radius: var(--radius-md); background: transparent; border: 1px solid var(--border-light); color: var(--text-muted); font-size: 14px; line-height: 1; display: grid; place-items: center; padding: 0; }
 .fav-star:hover { background: var(--bg-elevated); }
@@ -1092,7 +1025,7 @@
 #all-listings { border-radius: 0; }
 
 /* ===== COMPARE ===== */
-#compare-bar { background: rgba(17,20,28,.92); backdrop-filter: blur(16px); border: 1px solid var(--border-light); border-radius: 16px; box-shadow: 0 12px 34px rgba(0,0,0,.55); padding: 10px 12px 10px 14px; }
+#compare-bar { background: rgba(14, 20, 36,.92); backdrop-filter: blur(16px); border: 1px solid var(--border-light); border-radius: 16px; box-shadow: 0 12px 34px rgba(0,0,0,.55); padding: 10px 12px 10px 14px; }
 .compare-bar-chip { background: var(--bg-elevated); border-radius: var(--radius-md); }
 #compare-modal-inner { border-radius: var(--radius-xl); }
 .compare-col { border-radius: var(--radius-lg); }
@@ -1134,12 +1067,12 @@
 .ct-photo { grid-row: 1 / 3; padding: 14px 0 14px 14px; display: flex; flex-direction: column; gap: 8px; align-self: stretch; }
 .ct-photo-main { position: relative; aspect-ratio: 4 / 3; border-radius: 12px; overflow: hidden; background: #141822 repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 1px, transparent 1px 9px); }
 .ct-photo-main img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; display: block; }
-.ct-rank { white-space: nowrap; position: absolute; top: 10px; left: 10px; font: 600 10px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; padding: 6px 8px; border-radius: 6px; background: rgba(10,12,18,.82); border: 1px solid var(--border-light); color: var(--text-primary); }
+.ct-rank { white-space: nowrap; position: absolute; top: 10px; left: 10px; font: 600 10px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; padding: 6px 8px; border-radius: 6px; background: rgba(7, 11, 22,.82); border: 1px solid var(--border-light); color: var(--text-primary); }
 .ct-rank-top { background: var(--success); border-color: var(--success); color: #0A0C12; }
 .ct-full { white-space: nowrap; position: absolute; top: 10px; right: 10px; font: 600 10px/1 var(--font-mono); letter-spacing: .06em; padding: 6px 8px; border-radius: 6px; background: var(--accent-dim); border: 1px solid var(--accent-border); color: var(--accent-light); }
-.ct-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-light); background: rgba(10,12,18,.75); color: #fff; font-size: 16px; line-height: 1; padding: 0; cursor: pointer; }
+.ct-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-light); background: rgba(7, 11, 22,.75); color: #fff; font-size: 16px; line-height: 1; padding: 0; cursor: pointer; }
 .ct-nav-l { left: 8px; } .ct-nav-r { right: 8px; }
-.ct-count { position: absolute; left: 10px; bottom: 10px; font: 600 10px/1 var(--font-mono); padding: 5px 7px; border-radius: 5px; background: rgba(10,12,18,.82); border: 1px solid var(--border-light); color: var(--text-secondary); }
+.ct-count { position: absolute; left: 10px; bottom: 10px; font: 600 10px/1 var(--font-mono); padding: 5px 7px; border-radius: 5px; background: rgba(7, 11, 22,.82); border: 1px solid var(--border-light); color: var(--text-secondary); }
 .ct-thumbs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; align-items: start; }  /* v1.30.0: start, kitaip tinklelio eilute issitempia ir aspect-ratio nustoja galioti */
 .ct-thumbs img, .ct-thumbs button { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-elevated); cursor: pointer; display: block; padding: 0; }
 .ct-thumbs img[src=""] { display: none; }
@@ -1202,7 +1135,7 @@
 .ct-side-neg { background: var(--danger-dim); border-color: var(--danger-border); } .ct-side-neg .ct-side-ic { background: var(--danger); color: #fff; }
 .ct-side-muted .ct-side-ic { background: var(--bg-raised); color: var(--text-muted); }
 .ct-side-h { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--text-primary); }
-.ct-side-h b { margin-left: auto; font: 600 11px/1 var(--font-mono); padding: 4px 6px; border-radius: 5px; background: rgba(10,12,18,.4); color: var(--text-secondary); }
+.ct-side-h b { margin-left: auto; font: 600 11px/1 var(--font-mono); padding: 4px 6px; border-radius: 5px; background: rgba(7, 11, 22,.4); color: var(--text-secondary); }
 .ct-side-ic { width: 22px; height: 22px; border-radius: 6px; display: grid; place-items: center; font: 700 11px/1 var(--font-mono); flex: none; }
 .ct-side-big { font-size: 15px; font-weight: 700; margin-top: 8px; } .ct-side-big span { font: 600 12px var(--font-mono); opacity: .8; }
 .ct-side p { margin: 8px 0 0; color: var(--text-muted); font-size: 12px; line-height: 1.45; }
@@ -1288,7 +1221,7 @@
   position: sticky;
   top: 0;
   z-index: 200;
-  background: rgba(10,12,18,0.92);
+  background: rgba(7, 11, 22,0.92);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(255,255,255,.07);
 }
@@ -1367,7 +1300,7 @@
 
   /* Header — naujas (ct3) */
   .ct3-header { position: sticky; top: 0; z-index: 200;
-    background: rgba(10,12,18,0.94); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,.07); }
+    background: rgba(7, 11, 22,0.94); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,.07); }
   /* v2.6.5 (Nr. 30): antraste telefone = detail.html (12px 16px, 34, 18). */
   .ct3-header-inner { padding: 12px 16px !important; }   /* Nr.30 v2.10.4: be gap – kaip detail.html */
   .ct3-logo { gap: 14px !important; min-width: 0; }
@@ -2144,7 +2077,7 @@
 
 /* Konteinerio stilius */
 #ct-history-dropdown {
-  background: rgba(14,17,26,.98) !important;
+  background: rgba(11, 16, 31,.98) !important;
   border: 1px solid rgba(255,255,255,.13) !important;
   border-radius: 14px !important;
   padding: 0 !important;
@@ -2931,9 +2864,12 @@ function ctKartos() {
     ctApi(q).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
       var k = (d && d.kartos) || [];
       if (!k.length) { el.hidden = true; el.textContent = ''; return; }
-      el.textContent = 'Kėbulai: ' + k.map(function (g) {
-        return g.kodas + ' (' + g.nuo + '–' + (g.iki == null ? 'dabar' : g.iki)
-          + (g.atn ? ', ' + g.atnPav + ' nuo ' + g.atn : '') + ')';
+      // 50 sk. (63 paketas): kodai – <b> (mono, ryškiau), etiketė – <span> (pritemdyta).
+      // Reikšmės iš /api/kartos praleidžiamos per ctEsc – innerHTML be jo nerašomas.
+      var esc = window.ctEsc || function (x) { return String(x == null ? '' : x).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); };
+      el.innerHTML = '<span>Kėbulai:</span> ' + k.map(function (g) {
+        return '<b>' + esc(g.kodas) + '</b> (' + esc(g.nuo) + '–' + (g.iki == null ? 'dabar' : esc(g.iki))
+          + (g.atn ? ', ' + esc(g.atnPav) + ' nuo ' + esc(g.atn) : '') + ')';
       }).join(', ');
       el.hidden = false;
     }).catch(function () { el.hidden = true; });

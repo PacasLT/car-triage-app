@@ -11,25 +11,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ── TOKENS ── */
-:root {
-  --bg-base:#0A0C12;--bg-surface:#11141C;--bg-elevated:#171B25;--bg-card:#11141C;--bg-raised:#1F2431;
-  --border:rgba(255,255,255,.075);--border-light:rgba(255,255,255,.14);
-  
-  --success:oklch(.75 .15 158);--success-dim:oklch(.75 .15 158/.13);--success-border:oklch(.75 .15 158/.30);
-  --warning:oklch(.81 .13 78);--warning-dim:oklch(.81 .13 78/.13);--warning-border:oklch(.81 .13 78/.30);
-  --danger:oklch(.66 .19 25);--danger-dim:oklch(.66 .19 25/.13);--danger-border:oklch(.66 .19 25/.30);
-  --text-primary:#E9EBF2;--text-secondary:#C3C9D8;--text-muted:#8C93A6;--text-dim:#5E6578;
-  --radius-sm:6px;--radius-md:7px;--radius-lg:11px;--radius-xl:12px;
-  --font:'Archivo',-apple-system,'Segoe UI',Helvetica,sans-serif;
-  --font-mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
-}
+  /* 61 pk. (6 d.): šio puslapio `:root` blokas ištrintas – tokenai gyvena tik ct-dizainas.css. */
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--font);background:var(--bg-base);color:var(--text-primary);min-height:100vh}
 a{color:var(--accent-light);text-decoration:none}a:hover{color:var(--text-primary)}
 button{font-family:inherit;cursor:pointer}
 
 /* ── HEADER ── */
-.ct3-header{position:sticky;top:0;z-index:200;background:rgba(10,12,18,0.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.07)}
+.ct3-header{position:sticky;top:0;z-index:200;background:rgba(7, 11, 22,0.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.07)}
 .ct3-header-inner{display:flex;align-items:center;max-width:1440px;margin:0 auto;padding:22px 48px}
 .ct3-logo{display:flex;align-items:center;gap:14px;text-decoration:none;flex:none}
 .ct3-logo-icon{width:52px;height:52px;flex:none}
@@ -79,8 +68,8 @@ button{font-family:inherit;cursor:pointer}
 .dp-photo{display:flex;flex-direction:column;gap:10px}
 .dp-photo-main{position:relative;aspect-ratio:4/3;border-radius:14px;overflow:hidden;background:var(--bg-elevated);border:1px solid var(--border)}
 .dp-photo-main img{width:100%;height:100%;object-fit:cover;display:block}
-.dp-photo-count{position:absolute;top:10px;left:10px;font:600 11px/1 var(--font-mono);padding:5px 8px;border-radius:6px;background:rgba(10,12,18,.82);border:1px solid var(--border-light);color:var(--text-secondary)}
-.dp-nav{position:absolute;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;border:1px solid var(--border-light);background:rgba(10,12,18,.75);color:#fff;font-size:18px;display:grid;place-items:center;cursor:pointer}
+.dp-photo-count{position:absolute;top:10px;left:10px;font:600 11px/1 var(--font-mono);padding:5px 8px;border-radius:6px;background:rgba(7, 11, 22,.82);border:1px solid var(--border-light);color:var(--text-secondary)}
+.dp-nav{position:absolute;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;border:1px solid var(--border-light);background:rgba(7, 11, 22,.75);color:#fff;font-size:18px;display:grid;place-items:center;cursor:pointer}
 .dp-nav-l{left:10px}.dp-nav-r{right:10px}
 .dp-thumbs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
 .dp-thumb{aspect-ratio:4/3;border-radius:8px;overflow:hidden;border:1px solid var(--border);background:var(--bg-elevated);cursor:pointer;position:relative}
@@ -285,7 +274,7 @@ button{font-family:inherit;cursor:pointer}
   position: fixed;
   bottom: 0; left: 0; right: 0;
   z-index: 500;
-  background: rgba(17,20,28,0.97);
+  background: rgba(14, 20, 36,0.97);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid rgba(255,255,255,.09);
