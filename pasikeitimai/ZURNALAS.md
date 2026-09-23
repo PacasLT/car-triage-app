@@ -1582,3 +1582,53 @@ keitimas užtruko du paketus.
 - Finansininko §3.1 formulė įrašyta į `planai.js` užduotį (darbai kl-planai): LT kreditai = autoplius + autogidas (puslapiai + gilinimai + quick-count), užsienio neskaičiuojami; vienetai = 0, jei LT kreditų 0, kitaip max(1, ⌈LT/140⌉); nurašymo eilė Verslas 300 → LT papildymas → paieška nepradedama; talpykla = 0 vienetų; faktas > sąmata × 1,5 → nurašom sąmatą; apvalinimas kliento naudai; LT papildymas 90 d.
 - `paskyra.test` 18/18.
 
+## Z-130 · 2026-09-22 · Klaudijus · v2.11.5 – Teisininko §5 (eksportas, ištrynimas, saugojimo terminai)
+- Eksportas (TS §5.1): `apie{kas, sugeneruota, slaptazodis, privatumoPolitika, klausimai}` viršuje; pridėta registracijos data, `paskutinis_prisijungimas` (naujas `users` stulpelis, rašomas prisijungiant), `planoIstorija` + visas kreditų žurnalas, `klaiduPranesimai` (to vartotojo klaidos iš `_klaidos`, be IP ir ekranvaizdžio). Riba – 1 per 24 val. (`eksporto_zurnalas`, HTTP 429 su valandomis); priekyje rodoma serverio žinutė.
+- Ištrynimas (TS §5.2 + TS-0922-1900 – Lukas pasirinko **7 d. užšaldymą**): `POST /api/paskyra/istrinti` patvirtinamas žodžiu „IŠTRINTI“ ir slaptažodžiu, paskyra pažymima (`users.trynimo_data`); `POST /api/paskyra/istrinti/atsaukti` atšaukia; tikrasis ištrynimas – iš `duomenuValymas()` praėjus 7 d. Trinama: users, mėgstamiausi, ataskaitos, eksporto žurnalas; nuasmeninama (`user_id = 0`): kreditų žurnalas, paieškų žurnalas, plano užklausos; klaidose – el. paštas, IP, ekranvaizdis. Paskyros puslapyje – eilutė „Ištrinti paskyrą“, o pažymėjus – įspėjimas su data, likusiomis dienomis ir mygtuku „Atšaukti“.
+- Saugojimo terminai (TS §5.3): `duomenuValymas()` – paleidžiama po 30 s nuo starto ir kas 24 val.; paieškų ir kreditų žurnalai 12 mėn. → nuasmeninami, klaidų pranešimai 12 mėn. → ištrinami kartu su nuotraukomis.
+- **Admin suvestinė 56b paketui:** `paskyra.adminSuvestine(dienu, planoVardas)` + `GET /admin/suvestine?dienu=30` – `laikotarpis`, `serija[{diena, paieskos, vartotojai, scraperKr}]`, `topModeliai[{marke, modelis, paieskos, dalisProc}]`, `portalai[{portalas, paieskos, dalisProc}]`, `vartotojai{viso, naujiMen, aktyvusMen, pagalPlana[{planas, pavadinimas, kiek, aktyvus}]}`, `paieskos{viso, krViso, krVidutiniskai, tikslus}` ir `fondas{panaudota, riba, liko, sargas, ikiSargo, paieskuIkiSargo, lygiagreciai, atsinaujina}` (atsinaujinimo data – `FONDO_ATSINAUJINIMAS`, ScraperAPI /account jos neduoda). Dizaineriui išsiųsti tikri JSON pavyzdžiai.
+- `paskyra.test` 44/44 (buvo 18). Sargai 17 žali; `migracija` VM'e krenta dėl EPERM – Windows'e praeina.
+- Nepadaryta: `PRIVATUMO_NUORODA` ir `DUOMENU_KONTAKTAS` kintamieji Railway (įrašysiu, kai bus privatumo politikos nuoroda).
+
+---
+
+## D-57 · 2026-09-23 · Dizaineris → Klaudijui · 48–49 sk. · 56b PAKETAS
+
+### 1. Pirmas paketas, rašytas iš JSON
+
+Iki šiol stulpelius rašiau iš užsakymo aprašymo, ir iš to kilo pusė K-nn.
+Šįkart paprašiau laukų vardų pirmiausia — ir jie iš karto parodė tris vietas,
+kur užsakymas prašė to, ko serveris neduoda („7 d.", „AI apžvalgos",
+„paskutinis aktyvumas"). Be JSON būčiau nupiešęs tris plyteles tuščiais
+duomenimis, o Klaudijus būtų jas radęs diegdamas.
+
+### 2. Fondas nėra statistika
+
+Užsakyme fondas buvo viena iš plytelių. Padariau jį pirmą ir per visą plotį,
+nes tai vienintelis skaičius, kuris gali **sustabdyti produktą** — ir
+šiandienos duomenys tai patvirtino: iki sargo liko 6 354 kr., apie 70 paieškų.
+Maketas nuo pirmos dienos rodo įspėjimo būseną, ne ramią.
+
+### 3. `null` ≠ `0`
+
+Bandomojo vartotojo laukai ateina `null`. Rodau „—": nulis reiškia
+„išnaudojo", brūkšnys — „netaikoma". Ta pati „⚪ neįvertinta" logika kaip
+įvertyje, tik lentelėje.
+
+### 4. Ko nepatikrinau
+
+Šviesaus režimo. Veidrodžio šios sesijos metu perskaityti negalėjau, tad
+nežinau, ar šviesus `:root` egzistuoja. Rašau tik tokenais ir prašau grep'o,
+užuot teigęs, kad veiks.
+
+**Failai:** `pasikeitimai/is-dizainerio/56b-admin/`
+
+## Z-131 · 2026-09-23 · Klaudijus · v2.12.1 – 56b + Errata 12 įdiegti (K-59)
+- **CSS:** abu dizainerio failai (48/49/1 sk. bazė, tada Errata 12) įrašyti į `ct-dizainas.css` prieš 57 pk. ERRATA 10 bloką – `[hidden]` taisyklė lieka failo gale sąmoningai. Prieš diegiant patikrinti visi 20 naudojamų tokenų ir `.acct-ic` / `.ct-bar` / `.ct3-portal-ico` – visi repo yra.
+- **1 sk. komentarai:** „violetinė“ → „mėlyna“, kontrastai 4,35 / 4,66 → 3,7 / 5,2 (seni skaičiai buvo iš violetinio akcento), `--shadow-panel` iš „sąmoningai nėra“ → „gyvas nuo 58 pk.“.
+- **49 sk. (Nr. 30):** šešiuose puslapiuose plano mygtukas neteko `.ct-btn-accent` ir piktogramos, gavo `.ct-hdr-plan`; avataras – `.ct-avatar` (32×32) šalia seno `.ct3-avatar` (jo ieško `megstami-meniu.js`). `ct-bendras.js` ir `detail.html` vietoj inline `<span class="ct-pl-kr">` deda `<u>` su `is-low` / `is-zero`; iš `index.html` ištrintos trys senos `.ct-pl-kr` taisyklės.
+- **48 sk. markupas ir JS – mano:** naujas skirtukas „Suvestinė“ (pirmas, atsidaro atsidarius puslapiui), `piestiSuvestine()` iš `GET /admin/suvestine`; vartotojų `<table>` → `.adm-users` tinklelis su `aria-selected` eilute ir šonine kortele (`.adm-side`: planas, kreditai, kreditų ir paieškų žurnalai); užklausos → `.adm-req`, rodomos ir atsakytos (pritemdytos, su admino el. paštu ir laiku).
+- **Serveris:** `/admin/vartotojai` grąžina `apiKr30` kiekvienam vartotojui (`apiKrPagalVartotoja`), `/admin/zurnalas` – ir `paieskos`, `/admin/suvestine` fondas papildytas `sargas`, `ikiSargo`, `paieskuIkiSargo`, o `pagalPlana` – `aktyvus`.
+- **Trys pakete rastos klaidos** (grąžintos dizaineriui): **K-60** `[style*="--v:0"]` pagauna ir `--v:0.345` (58 iš 60 stulpelių tapdavo pilki 2 px) – apeita rašant `--v:.345`; **K-61** `.adm-share` Erratoje lieka `align-items: center` iš bazės, juosta 0 px – priedų 22 blokas; **K-62** datos stulpelis 92 px per siauras `2026-10-19` (eilutė 68 px) – priedų 23 blokas, tik ≥641 px, nes telefone 48 sk. lentelė virsta kortelėmis; **K-63** telefone fondo skalė „sargas 95 000“ ir „100 000“ užlipa.
+- **Matavimai** (1440 ir 390, imituoti duomenys): fondas `is-warn`, juosta `--used:88.6% --guard:95%`; 4 plytelės; 60 stulpelių, 12 nulinių; 10 dalies eilučių; 4 vartotojų eilutės, viena `aria-selected`, du „—“ vietoj nulio; 2 užklausos, viena atsakyta; antraštė 1440 – planas 118×32, avataras 32×32; 390 – planas paslėptas, avataras 32×32; paslėptų, bet matomų elementų – 0; horizontalios slinkties nėra.
+- Sargai 17 žali; `migracija` VM'e krenta dėl EPERM – Windows'e praeina.

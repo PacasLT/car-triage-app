@@ -82,17 +82,19 @@
        --bg-card                              --bg-surface užima jo vietą
        --dur-base                             perėjimai rašo .14s tiesiogiai
        --fs-700                               nėra nė vieno tokio dydžio teksto
-       --shadow-1, --shadow-panel             sistemoje sąmoningai nėra šešėlių
+       --shadow-1                             sistemoje sąmoningai nėra šešėlių
+       --shadow-panel                         gyvas nuo 58 pk. (iškrentantys meniu)
        --text-on-accent                       keturios vietos rašo #fff aiškiau
      --focus-offset pritaikytas 43 pakete (ct-mygtukai.css .ct-btn / .ct-tab). */   /* tekstas ant šviesaus žalio/geltono užpildo */
 
   /* ── 3. SEMANTINĖS SPALVOS · turi prasmę, dekoracijai NENAUDOJAMOS ────────
      žalia = patvirtinta / gerai        geltona = galimas signalas / dėmesio
      raudona = rimta rizika             pilka  = neįvertinta
-     violetinė = veiksmas ir „mūsų" AI */
+     mėlyna = veiksmas ir „mūsų" AI */   /* 56b 1 sk.: buvo „violetinė“ – akcentas mėlynas nuo 56a */
   --accent:         #3B82F6;   /* 56a: mėlyna (buvo #7C5CFF) */
-  /* Tekstą nešančiam užpildui: #fff ant --accent duoda 4,35:1 — nepraeina AA.
-     --accent-strong duoda 4,66:1, hover 5,6:1. Mygtukams su tekstu VISADA šie. */
+  /* Tekstą nešančiam užpildui: #fff ant --accent duoda 3,7:1 — tekstui NETINKA.
+     --accent-strong duoda 5,2:1 — visi mygtukai su tekstu VISADA šie. (56b 1 sk.:
+     skaičiai 4,35 / 4,66 buvo iš violetinio akcento, po 56a jie nebegalioja.) */
   --accent-strong:  #2563EB;
   --accent-light:   #93C5FD;
   --accent-dim:     rgba(59, 130, 246, .14);
@@ -4841,6 +4843,469 @@ textarea.ct-field {
   .acct-set-r > .acct-del { margin-left: 0; flex: 1 1 100%; }
   .acct-plan-n, .acct-bal-n { font-size: var(--fs-500); }
 }
+
+/* ============================================================================
+   56b paketas - 48 sk. ADMIN ZONA · 49 sk. ANTRASTES DESINE (Nr. 30)
+                 + 1 sk. komentaru pataisos
+   ----------------------------------------------------------------------------
+   Laukai - is jusu JSON (09-23), ne is uzsakymo. Kur jie skiriasi, rasau
+   PASTABOS.md 2 d. - ten trys vietos, kur maketas rodo tai, ko serveris dar
+   neduoda.
+   Versija - siulau v2.12.0. Tik tokenai; sviesus rezimas - zr. PASTABOS 5 d.
+   ========================================================================== */
+
+
+/* ============================================================================
+   1 sk. · KOMENTARU PATAISOS (mano skola is 56a)
+   ----------------------------------------------------------------------------
+   Tik komentarai, reiksmes nesikeicia:
+     ~88 eil.  „violetine - veiksmas ir mūsų AI"   ->  „melyna - ..."
+     ~95 eil.  „#fff ant --accent 4,35:1"         ->  „3,7:1 - tekstui NETINKA"
+               „--accent-strong 4,66:1"           ->  „5,2:1 - visi mygtukai su tekstu"
+     32 pk. sakinys „--shadow-panel istrintas ... seseliu nera"
+               ->  „--shadow-panel gyvas nuo 58 pk. (iskrentantys meniu)"
+   ========================================================================== */
+
+
+/* ============================================================================
+   49 sk. · ANTRASTES DESINE · Nr. 30
+   ----------------------------------------------------------------------------
+   Trys elementai: [Verslas | 34 kr]  [sirdele]  [avataras].
+
+     <div class="ct3-header-right">
+       <a class="ct-btn ct-btn-sm ct-hdr-plan" href="/paskyra.html">
+         Verslas<u data-kr="34">34 kr</u>
+       </a>
+       <a class="ct-btn ct-btn-sm ct-btn-icon" href="/megstamiausi.html" aria-label="Megstamiausi">…</a>
+       <button class="ct-avatar" aria-label="Paskyros meniu">L</button>
+     </div>
+
+   Planas ir kreditai - VIENAS mygtukas. Planas atsako „kodel tiek", skaicius -
+   „ar man uztenka". Du zenkleliai butu dvi to paties dalyko busenos.
+   Mygtukas NE pirminis: kas susije su pinigais, nera pirminis.
+
+   Spalva - pagal SKAICIU, ne mygtuka. Busena JS deda `is-low` / `is-zero` ant
+   `<u>` (< 5 ir 0). Rinkaus klases, o ne `[data-kr]` palyginima: CSS skaiciu
+   lyginti nemoka.                                                          */
+
+.ct-hdr-plan { gap: 9px; }
+.ct-hdr-plan > u {
+  text-decoration: none;
+  padding-left: 9px;
+  border-left: 1px solid var(--border-light);
+  font: var(--fw-semi) var(--fs-200)/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-light);
+}
+.ct-hdr-plan > u.is-low  { color: var(--warning); }
+.ct-hdr-plan > u.is-zero { color: var(--danger); }
+
+.ct-avatar {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-pill);
+  display: grid;
+  place-items: center;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-light);
+  color: var(--text-secondary);
+  font: var(--fw-semi) var(--fs-200)/1 var(--font);
+  cursor: pointer;
+}
+
+/* El. pasto antrasteje NERA - jis meniu virsuje ir paskyroje. Antraste rodo
+   busena, ne tapatybe. Telefone - kaip dabar (planas paslėptas, Nr. 30). */
+@media (max-width: 640px) {
+  .ct-hdr-plan { display: none; }
+}
+
+
+/* ============================================================================
+   48 sk. · ADMIN ZONA · `.pg-adm`
+   ----------------------------------------------------------------------------
+   Skirtukai - esami `.ct-tabs` / `.ct-tab` (5 sk.). Korteles - `.ct-card`.
+   Nauji vardai - tik tai, ko sistema neturi: fondo juosta su sargo zyme,
+   stulpeliu grafikas, dalies eilute, vartotoju tinklelis, soninė kortelė.
+
+   Visi `display`, kuriuos JS gali paslepti, rasomi `:not([hidden])` (59 pk.).
+   ========================================================================== */
+
+.pg-adm { display: flex; flex-direction: column; gap: var(--s-4); }
+
+
+/* ── FONDAS ────────────────────────────────────────────────────────────────
+   Pirmas, per visa ploti, ne plyteleje: tai vienintelis skaicius suvestineje,
+   kuris gali sustabdyti produkta. Plytelės greta ji sulygintu su „vartotoju
+   skaiciumi".
+
+   Busena - ant PACIOS kortelės (`is-warn`, `is-bad`), ir ja paveldi remelis,
+   juosta (`.ct-bar` per `color`, 58 pk.) ir zenklelis. Skaiciuoja JS:
+     liko - sargas  >  10 % ribos   ->  be klases
+     liko - sargas  <= 10 % ribos   ->  is-warn
+     liko <= sargas                  ->  is-bad  (LT paieskos sustabdytos)
+
+     <section class="ct-card adm-fund is-warn">
+       <div class="adm-fund-h">…zenklelis…<span>atsinaujina 2026-10-16 · po 23 d.</span></div>
+       <div class="adm-fund-v"><b>88 646</b><span>is 100 000 panaudota</span></div>
+       <div class="adm-fund-bar" style="--used:88.6%; --guard:95%"><span></span><i></i></div>
+       <dl class="adm-kv">…</dl>
+     </section>
+
+   `--used` ir `--guard` - vienintelis inline stilius, ir teisingas: tai
+   duomenys, ne isvaizda.                                                   */
+
+.adm-fund { display: flex; flex-direction: column; gap: var(--s-3); }
+.adm-fund.is-warn { border-color: color-mix(in oklab, var(--warning) 30%, transparent); color: var(--warning); }
+.adm-fund.is-bad  { border-color: color-mix(in oklab, var(--danger) 30%, transparent);  color: var(--danger); }
+
+.adm-fund-h { display: flex; align-items: baseline; gap: var(--s-3); flex-wrap: wrap; }
+.adm-fund-h > span:last-child {
+  margin-left: auto;
+  font: var(--fw-regular) var(--fs-200)/1 var(--font-mono);
+  color: var(--text-muted);
+}
+.adm-fund-v { display: flex; align-items: baseline; gap: 10px; color: var(--text-primary); }
+.adm-fund-v > b { font: var(--fw-bold) 30px/1 var(--font-mono); font-variant-numeric: tabular-nums; }
+.adm-fund-v > span { font: var(--fw-regular) var(--fs-300)/1 var(--font-mono); color: var(--text-muted); }
+
+.adm-fund-bar { position: relative; height: 10px; border-radius: var(--radius-pill); background: var(--bg-raised); }
+.adm-fund-bar > span {
+  position: absolute; inset: 0 auto 0 0;
+  width: var(--used);
+  border-radius: inherit;
+  background: currentColor;
+}
+.adm-fund:not(.is-warn):not(.is-bad) .adm-fund-bar > span { background: var(--accent); }
+/* Sargo zyme - VISADA raudona: ji rodo riba, ne busena */
+.adm-fund-bar > i {
+  position: absolute; top: -5px; bottom: -5px;
+  left: var(--guard);
+  width: 2px;
+  border-radius: 1px;
+  background: var(--danger);
+}
+
+/* `fondas: null` arba `{klaida}` - ne nulis ir ne raudona: sistema nezino.
+   Rodomas `.ct-state` (43 sk.) kortelės viduje, juostos nera. */
+.adm-fund.is-unknown .adm-fund-bar,
+.adm-fund.is-unknown .adm-fund-v { display: none; }
+
+.adm-kv { display: flex; gap: var(--s-6); flex-wrap: wrap; margin: 0; }
+.adm-kv > div { display: flex; flex-direction: column; gap: 5px; }
+.adm-kv dt {
+  font: var(--fw-semi) 9.5px/1 var(--font-mono);
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text-dim); white-space: nowrap;
+}
+.adm-kv dd {
+  margin: 0;
+  font: var(--fw-semi) var(--fs-300)/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary); white-space: nowrap;
+}
+
+
+/* ── PLYTELĖS ─────────────────────────────────────────────────────────── */
+.adm-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-3); }
+.adm-tile { display: flex; flex-direction: column; gap: var(--s-2); }
+.adm-tile > span:first-child {
+  font: var(--fw-semi) 9.5px/1 var(--font-mono);
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text-dim); white-space: nowrap;
+}
+.adm-tile > b { font: var(--fw-bold) 26px/1 var(--font-mono); font-variant-numeric: tabular-nums; }
+.adm-tile > span:last-child { font: var(--fw-regular) var(--fs-200)/1.4 var(--font); color: var(--text-muted); }
+
+
+/* ── GRAFIKAS · 30 d. ──────────────────────────────────────────────────────
+   DVI juostos, ne dvi asys viename grafike: paieskos ir kreditai turi
+   skirtinga masteli, o dvieju asiu grafikas verčia skaityti, kuri kreive
+   kuriai asiai priklauso.
+
+   Kiekvienas stulpelis - `<span style="--v:.4">` (0-1, JS padalina is maks.).
+   Diena be paieskų (`serija` visada pilna, su nuliais) - pilka 2 px žymė:
+   tuštuma atrodytu kaip truksta duomenu.
+
+     <div class="adm-chart" role="img" aria-label="Paieskos per diena, 30 d.">
+       <span style="--v:.2"></span><span style="--v:0"></span>…
+     </div>                                                                 */
+
+.adm-chart-h { display: flex; justify-content: space-between; gap: var(--s-3); }
+.adm-chart {
+  display: flex; align-items: flex-end; gap: 3px;
+  height: 64px;
+  border-bottom: 1px solid var(--border);
+}
+.adm-chart > span {
+  flex: 1;
+  height: calc(var(--v) * 100%);
+  min-height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--accent);
+}
+.adm-chart > span[style*="--v:0"] { min-height: 2px; background: var(--border-light); }
+
+
+/* ── DALIS · top modeliai, portalai ────────────────────────────────────────
+   Vardas su juosta | skaicius | procentas. Juostos plotis - procentas × 2
+   (didziausia dalis retai virsija 50 %, tad juosta butu per trumpa).
+   Portalams - esama `.ct3-portal-ico` (18 px).                             */
+
+.adm-share {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px 56px;
+  align-items: center;
+  gap: var(--s-3);
+}
+.adm-share-n { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.adm-share-n > span:first-child {
+  display: flex; align-items: center; gap: var(--s-2);
+  font: var(--fw-medium) var(--fs-300)/1.3 var(--font);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.adm-share-n .ct3-portal-ico { width: 18px; height: 18px; }
+.adm-share-n > .ct-bar { height: 5px; }
+.adm-share > b,
+.adm-share > span:last-child {
+  text-align: right;
+  font: var(--fw-semi) var(--fs-200)/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.adm-share > span:last-child { font-weight: var(--fw-regular); color: var(--text-muted); }
+
+
+/* ── VARTOTOJAI · lentelė + soninė kortelė ─────────────────────────────────
+   Tinklelis, ne `<table>` - ta pati priezastis kaip 46 sk. Eilute
+   `display: contents`, tad FONAS - ant celiu (K-55a pamoka: `contents`
+   fono neturi).
+
+     <div class="adm-users">
+       <div class="adm-users-h">…7 antrastes…</div>
+       <div class="adm-u" aria-selected="true" tabindex="0">…7 celes…</div>
+     </div>
+
+   Pasirinkta eilute - `aria-selected`, ne klasė: tai ir busena, ir
+   prieinamumas vienu atributu.
+
+   NULL is serverio (bandomasis: `plan_iki`, `kreditai_*`) rodomas „—",
+   ne „0": nulis reiskia „isnaudojo", bruksnys - „netaikoma".
+   `krApytiksliai: true` - skaicius su „~" priekyje.                        */
+
+.adm-users {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) 96px 92px 80px 80px 96px 92px;
+}
+.adm-users-h,
+.adm-u { display: contents; }
+.adm-users-h > span {
+  padding: 9px 12px;
+  background: var(--bg-sunken);
+  border-bottom: 1px solid var(--border);
+  font: var(--fw-semi) 9.5px/1.2 var(--font-mono);
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text-dim); white-space: nowrap;
+}
+.adm-u > * {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  min-width: 0;
+  cursor: pointer;
+}
+.adm-u:hover > * { background: var(--bg-elevated); }
+.adm-u[aria-selected="true"] > * { background: var(--accent-dim); }
+.adm-u[aria-selected="true"] > :first-child { box-shadow: inset 2px 0 0 var(--accent); }
+.adm-u:focus-visible > :first-child { outline: 2px solid var(--accent); outline-offset: -2px; }
+/* Skaiciu stulpeliai - 4-6 ir 7 (data) i desine */
+.adm-users-h > :nth-child(n+4),
+.adm-u > :nth-child(n+4) { text-align: right; font-variant-numeric: tabular-nums; }
+.adm-u > :first-child { font: var(--fw-medium) var(--fs-300)/1.3 var(--font); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.adm-u > .is-low  { color: var(--warning); }
+.adm-u > .is-zero { color: var(--danger); }
+
+/* Plano zenklelis - esamas `.ct-tag`; Verslas - `.ct-tag-ai` (akcento),
+   Pro - akcento remelis, Bandomasis - neutralus. Nauju vardu nereikia. */
+
+/* Soninė kortelė - kyla virs lentelės, todel su seseliu (--shadow-panel) */
+.adm-side { box-shadow: var(--shadow-panel); padding: 0; overflow: hidden; }
+.adm-side > section { padding: var(--s-4) 18px; border-bottom: 1px solid var(--border); }
+.adm-side > section:last-child { border-bottom: 0; }
+.adm-side-add { display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: var(--s-2); }
+
+.adm-log-r { display: flex; align-items: baseline; gap: 10px; padding: 6px 0; }
+.adm-log-r > time { flex: none; width: 78px; font: var(--fw-regular) 11px/1.4 var(--font-mono); color: var(--text-dim); }
+.adm-log-r > span { flex: 1; min-width: 0; font: var(--fw-regular) var(--fs-200)/1.4 var(--font); color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.adm-log-r > b { flex: none; font: var(--fw-semi) var(--fs-200)/1 var(--font-mono); font-variant-numeric: tabular-nums; }
+.adm-log-r > b.is-plus { color: var(--success); }
+
+/* ≤1100: soninė kortelė nusileidzia po lentele (ne uždengia) */
+.adm-vart:not([hidden]) { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: var(--s-4); align-items: start; }
+@media (max-width: 1100px) {
+  .adm-vart:not([hidden]) { grid-template-columns: 1fr; }
+}
+
+
+/* ── UZKLAUSOS ─────────────────────────────────────────────────────────────
+   Trys busenos, daugiau nera: laukia | priskirta | atmesta.
+   Laukiancios - pilnos, su mygtukais. Atsakytos - pritemdytos (.72) ir
+   vietoj mygtuku rodo, KAS ir KADA atsake: tai zurnalas, ne darbas.
+   „Priskirti" pirminis - cia jis nieko nekainuoja adminui; jis ivykdo
+   jau apmoketa (arba bus apmoketa) uzklausa.                               */
+
+.adm-req { display: flex; align-items: center; gap: var(--s-4); padding: 14px 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.adm-req:last-child { border-bottom: 0; }
+.adm-req:not([data-busena="laukia"]) { opacity: .72; }
+.adm-req-t { flex: 1 1 240px; min-width: 0; }
+.adm-req-who { flex: none; text-align: right; font: var(--fw-regular) 11.5px/1.4 var(--font-mono); color: var(--text-dim); white-space: nowrap; }
+
+
+/* ── TELEFONAS ≤640 ───────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .adm-tiles { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .adm-fund-v > b { font-size: 24px; }
+  .adm-fund-h > span:last-child { margin-left: 0; flex-basis: 100%; }
+  .pg-adm .ct-tabs { overflow-x: auto; }
+  /* Lentele tampa kortelemis: el. pastas virsuje, trys skaiciai po juo */
+  .adm-users { grid-template-columns: 1fr; }
+  .adm-users-h { display: none; }
+  .adm-u:not([hidden]) { display: flex; flex-wrap: wrap; gap: 6px 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .adm-u > * { padding: 0; border: 0; }
+  .adm-u > :first-child { flex: 1 1 100%; white-space: normal; overflow-wrap: anywhere; }
+  .adm-u > :nth-child(3),
+  .adm-u > :nth-child(7) { display: none; }
+  .adm-u > [data-k]::before {
+    content: attr(data-k) " ";
+    font: var(--fw-semi) 9px/1 var(--font-mono);
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--text-dim);
+  }
+}
+
+
+/* ============================================================================
+   56b-2 · ERRATA 12 · 48 sk. admin zona - „premium" perziura (Luko pavyzdys)
+   ----------------------------------------------------------------------------
+   Keicia 56b 48 sk. bloku reiksmes. Vardai tie patys, nauju vardu tik du:
+   `.adm-fund-scale` (skale po juosta) ir `.adm-tip` (grafiko reiksme).
+   Siulau v2.12.1. Diegti KARTU su 56b arba vietoj jo 48 sk. daliu.
+
+   NAVY paviršiai - ATSKIRAS klausimas Lukui (PASTABOS 2 d.). Siame faile jie
+   rasomi TIK `.pg-adm` viduje, kaip lokalūs tokenai, ne `:root`.
+   ========================================================================== */
+
+/* ── NAVY · tik admin, kol Lukas nenuspres del viso produkto ─────────────── */
+.pg-adm {
+  --bg-base:     #070B16;
+  --bg-sunken:   #050811;
+  --bg-surface:  #0E1424;
+  --bg-elevated: #151C30;
+  --bg-raised:   #1C2440;
+  --border:       rgba(148, 163, 184, .12);
+  --border-light: rgba(148, 163, 184, .22);
+  --text-muted:   #9AA3B8;   /* buvo #8C93A6 - mazi tekstai ant navy: 7,1:1 */
+  --text-dim:     #8790A6;   /* 5,9:1 */
+  gap: var(--s-5);
+  padding: 28px;
+}
+
+/* ── FONDAS · ryskiausias elementas ────────────────────────────────────────
+   Didesnis skaicius (44), procentas salia, juosta 14 px, skale po ja, keturi
+   rodikliai su spalvos zyme - ta pati spalva kaip juostos dalis.            */
+.adm-fund {
+  padding: 26px 28px 24px;
+  gap: 20px;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(180deg, var(--accent-dim), transparent 55%), var(--bg-surface);
+  box-shadow: 0 24px 48px -32px rgba(0, 0, 0, .9);
+}
+.adm-fund-v > b { font-size: 44px; letter-spacing: -.02em; }
+.adm-fund-v > i { font: var(--fw-semi) 16px/1 var(--font-mono); font-style: normal; color: currentColor; }
+.adm-fund-bar { height: 14px; }
+/* Geltona - TIK finansiniam rodikliui. Svytejimas - tik cia. */
+.adm-fund.is-warn .adm-fund-bar > span { box-shadow: 0 0 18px -4px currentColor; }
+/* Sargo zona - bruksniuota, kad matytusi, kiek NEGALIMA naudoti */
+.adm-fund-bar > em {
+  position: absolute; top: 0; bottom: 0; left: var(--guard); right: 0;
+  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+  background: repeating-linear-gradient(-45deg, color-mix(in oklab, var(--danger) 38%, transparent) 0 3px, transparent 3px 6px);
+}
+.adm-fund-scale {
+  position: relative; height: 14px;
+  font: var(--fw-medium) 11px/1 var(--font-mono);
+  color: var(--text-dim);
+}
+.adm-fund-scale > span { position: absolute; }
+.adm-fund-scale > span:first-child { left: 0; }
+.adm-fund-scale > span:nth-child(2) { left: var(--guard); transform: translateX(-100%); padding-right: 6px; color: var(--danger); white-space: nowrap; }
+.adm-fund-scale > span:last-child { right: 0; }
+
+.adm-kv { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--border); padding-top: 18px; }
+.adm-kv > div { padding: 0 18px; }
+.adm-kv > div + div { border-left: 1px solid var(--border); }
+.adm-kv dd { font-size: 20px; }
+.adm-kv dt > i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 7px; background: var(--dot, transparent); }
+
+/* ── KPI · vienodas aukstis ────────────────────────────────────────────── */
+.adm-tiles { gap: var(--s-4); }
+.adm-tile {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 14px;
+  min-height: 152px;
+  padding: 20px;
+  border-radius: 16px;
+}
+.adm-tile > b { align-self: end; font-size: 34px; letter-spacing: -.02em; }
+.adm-tile-h { display: flex; align-items: center; gap: 10px; }
+/* Piktogramos dezute - ta pati forma kaip `.acct-ic` (47 sk.), 30 px */
+.adm-tile-h > .acct-ic { width: 30px; height: 30px; }
+.adm-tile-h > .acct-ic > .ct-i { width: 16px; height: 16px; }
+
+/* ── GRAFIKAS · be tinklelio, su vidurkio linija ir reiksme uzvedus ───────
+   Vienintele pagalbine linija - vidurkis (punktyras). Asiu nera: trys datos
+   apacioje ir maksimumas nereikalingas, nes reiksme rodoma uzvedus.        */
+.adm-chart { position: relative; gap: 4px; height: 84px; border-bottom: 0; }
+.adm-chart::after {
+  content: ""; position: absolute; left: 0; right: 0;
+  bottom: var(--avg);
+  border-top: 1px dashed var(--border-light);
+  pointer-events: none;
+}
+.adm-chart > span { border-radius: 4px 4px 1px 1px; transition: background .12s; }
+.adm-chart:hover > span { background: color-mix(in oklab, var(--accent) 45%, transparent); }
+.adm-chart:hover > span:hover { background: var(--accent-light); }
+.adm-chart-x { display: flex; justify-content: space-between; font: var(--fw-regular) 10.5px/1 var(--font-mono); color: var(--text-dim); }
+.adm-tip {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  padding: 6px 9px; border-radius: 8px;
+  background: var(--bg-raised); border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-panel);
+  font: var(--fw-semi) 11.5px/1.3 var(--font-mono);
+  white-space: nowrap; z-index: 2;
+}
+@media (prefers-reduced-motion: reduce) { .adm-chart > span { transition: none; } }
+
+/* ── DALIS · vardas, kiekis ir % vienoje eiluteje, juosta po ja ─────────── */
+.adm-share { display: flex; flex-direction: column; gap: 8px; }
+.adm-share-r { display: flex; align-items: center; gap: 10px; }
+.adm-share-r > span { flex: 1; min-width: 0; font: var(--fw-medium) var(--fs-300)/1.3 var(--font); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.adm-share-r > b { flex: none; font: var(--fw-semi) 13px/1 var(--font-mono); font-variant-numeric: tabular-nums; }
+.adm-share-r > small { flex: none; width: 58px; text-align: right; font: var(--fw-regular) var(--fs-200)/1 var(--font-mono); color: var(--text-muted); }
+.adm-share-r > .ct3-portal-ico { width: 22px; height: 22px; }
+.adm-share > .ct-bar { height: 6px; }
+/* Pirma vieta sviesesne - tai lyderis, vienintelis akcentas sarase */
+.adm-share:first-of-type > .ct-bar { color: var(--accent-light); }
+
+@media (max-width: 640px) {
+  .pg-adm { padding: 14px; gap: var(--s-3); }
+  .adm-fund { padding: 18px; gap: 14px; }
+  .adm-fund-v > b { font-size: 30px; }
+  .adm-kv { grid-template-columns: 1fr 1fr; row-gap: 14px; }
+  .adm-kv > div:nth-child(3) { border-left: 0; }
+  .adm-tile { min-height: 0; padding: 14px; }
+  .adm-tile > b { font-size: 24px; }
+}
+
 
 /* ============================================================================
    57 paketas · ERRATA 10 · [hidden] sistemoje (ne dviejose vietose)

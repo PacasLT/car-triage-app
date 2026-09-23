@@ -67,6 +67,8 @@ function prijungti(database) {
     ['paieskos_viso', 'INTEGER DEFAULT 0'],
     ['menuo', 'TEXT'],
     ['is_admin', 'INTEGER DEFAULT 0'],
+    ['paskutinis_prisijungimas', 'INTEGER'],   // TS §5.1: eksporte
+    ['trynimo_data', 'INTEGER'],              // TS-0922-1900: 7 d. užšaldymas
   ];
   let prideta = 0;
   nauji.forEach(([stulpelis, tipas]) => {

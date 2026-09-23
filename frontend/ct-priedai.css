@@ -163,3 +163,23 @@
    Laikinas – dizaineriui perimti į sistemą (vardas `.ct-kartos-hint`). */
 .ct-kartos-hint { margin: var(--s-2) 0 0; font-size: 13px; color: var(--text-secondary); }
 
+
+/* 22 BLOKAS · v2.12.1 (K-61) · `.adm-share` po Errata 12.
+   48 sk. bazėje `.adm-share` yra `display: grid` su `align-items: center`.
+   Errata 12 perjungia į `flex-direction: column`, bet `align-items` nenuima,
+   tad eilutė ir juosta susitraukia iki turinio pločio (juosta – 0 px).
+   Laikinas – dizaineriui įrašyti `align-items: stretch` į 48 sk. */
+.adm-share { align-items: stretch; }
+
+
+/* 23 BLOKAS · v2.12.1 (K-62) · `.adm-users` datos stulpeliai.
+   48 sk. duoda 92 px, o „2026-10-19“ mono 12 px + 2×12 px vidinis tarpas užima
+   ~96 px. Pamatuota 1440 px: eilutė 68 px (dvi eilutės) vietoj ~44.
+   Laikinas – dizaineriui perskaičiuoti 3 ir 7 stulpelius. */
+/* TIK nuo 641 px: telefone 48 sk. lentelė virsta kortelėmis (`1fr`), ir
+   platesnis tinklelis čia nugalėtų tą medija taisyklę (ta pati specifika,
+   o šis failas – vėliau). Tas pats „taisyklė dviejose vietose“ atvejis. */
+@media (min-width: 641px) {
+  .adm-users { grid-template-columns: minmax(0, 1.6fr) 96px 104px 80px 80px 96px 104px; }
+  .adm-u > *, .adm-users-h > * { white-space: nowrap; }
+}

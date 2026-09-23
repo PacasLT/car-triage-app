@@ -28,6 +28,12 @@ window.ctLaikas = function (ts) {
   try {
     const r = await ctApi('/api/planas'); if (!r.ok) return;
     const b = await r.json(); const kr = b.kreditai.viso;
-    el.innerHTML = ctEsc(b.planoPavadinimas) + ' <span class="ct-pl-kr ' + (kr <= 0 ? 'nulis' : kr <= 2 ? 'maza' : '') + '">' + kr + ' kr</span>';
+    // 49 sk. (Nr. 30): planas ir kreditai – VIENAS mygtukas. Būsena pagal SKAIČIŲ,
+    // klasėmis ant <u> (CSS skaičių lyginti nemoka): < 5 → is-low, 0 → is-zero.
+    el.textContent = b.planoPavadinimas;
+    const u = document.createElement('u');
+    u.className = kr <= 0 ? 'is-zero' : kr < 5 ? 'is-low' : '';
+    u.textContent = kr + ' kr';
+    el.after(u);
   } catch (e) {}
 })();

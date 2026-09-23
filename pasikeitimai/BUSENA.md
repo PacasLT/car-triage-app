@@ -38,7 +38,14 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 | 54 paketas | Laukia | Diegiama kartu su stabdžiu (`54-vykdymo-busena-v2.zip`). |
 | 56a paskyra | Įdiegta (v2.11.0) | 47 sk., Errata 9, akcentas mėlynas (tokenai). Ranka rašyta violetinė liko ~60 vietų (Z-124). |
 | 57 paketas | Įdiegta (v2.11.0) | Sprite 6, `[hidden]`, C1, C2. K-57a `.ct-bar` 1260 currentColor; K-57b ct-bendras `:root` 1–23. C3 – VIOLETINE-GREP.md. |
-| 56b admin zona | Dizaineris rašo | |
+| `48 sk.` admin | Įdiegta (v2.12.1) | `.pg-adm`, `.adm-*`. Skirtukai — esami `.ct-tabs`. Markupas ir JS — Klaudijaus (suvestinė, vartotojai, užklausos). |
+| `49 sk.` Nr. 30 | Įdiegta (v2.12.1) | `.ct-hdr-plan` + `.ct-avatar` šešiuose puslapiuose; JS deda `is-low` (<5) / `is-zero` (0) ant `<u>`. |
+| 1 sk. komentarai | Įdiegta (v2.12.1) | Violetinė → mėlyna, 3,7 / 5,2, `--shadow-panel` gyvas nuo 58 pk. |
+| Užsakymas ≠ serveris | Dizaineriui | „7 d.“, „AI apžvalgos“, „paskutinis aktyvumas“ — laukų nėra. DZ-SUVESTINE laukia Luko. |
+| K-60 | `.adm-chart > span[style*="--v:0"]` | Pagauna ir `--v:0.345` — visi stulpeliai tapdavo pilki 2 px. Apeita: reikšmės rašomos be nulio priekyje (`--v:.345`). |
+| K-61 | `.adm-share` po Erratos 12 | Bazėje `align-items: center` (grid), Errata perjungia į `flex-direction: column` jo nenuėmusi — juosta 0 px. Priedų 22 blokas. |
+| K-62 | `.adm-users` 3 ir 7 stulpeliai | `2026-10-19` mono 12 px netelpa į 92 px: eilutė 68 px vietoj 52. Priedų 23 blokas (tik ≥641 px). |
+| K-63 | `.adm-fund-scale` telefone | 390 px „sargas 95 000“ ir „100 000“ užlipa vienas ant kito. |
 
 ## Analitikas
 
@@ -60,6 +67,8 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 | 8 | `#more-filters` iš inline | NETRINTI (mūsų) |
 | 16 | `#sort-bar` kaukė | Nr. 42 pabaiga (Klaudijus) |
 | 21 | `.ct-kartos-hint` (kėbulo kartos po filtrais) | dizaineris – perimti į sistemą |
+| 22 | `.adm-share { align-items: stretch }` (K-61) | dizaineris – į 48 sk. |
+| 23 | `.adm-users` datos stulpeliai (K-62) | dizaineris – į 48 sk. |
 
 ## Kur kas guli
 

@@ -19,6 +19,29 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 .ad-patikra > span { font-size: 13px; color: var(--text-muted); }
 .pg-sub { color: var(--text-muted); font-size: 13px; margin: 0 0 18px; }
 
+/* 56b: tik puslapio isdestymas. Viskas, kas turi varda sistemoje (.adm-*,
+   .ct-card, .ct-bar, .acct-ic), rasoma ct-dizainas.css - cia jo nekartojam. */
+.ad-chart-blk { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.ad-chart-k { font: 500 10.5px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--text-dim); }
+.ad-chart-k > b { font-weight: 600; color: var(--text-primary); letter-spacing: 0; }
+.ad-dvi { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-4); }
+/* .ct-card sistemoje be vidinio tarpo – jį deda puslapis (taip pat ir paskyra).
+   .adm-fund ir .adm-tile savo tarpą turi Erratoje, todėl jų neliečiam. */
+.pg-adm .ct-card:not(.adm-fund):not(.adm-tile) { padding: var(--s-4) var(--s-5); }
+.pg-adm .acct-h { margin-bottom: var(--s-3); }
+.pg-adm .acct-h > span:not(.acct-ic):not(.acct-n) { font: var(--fw-semi) var(--fs-400)/1.2 var(--font); }
+.pg-adm .acct-h > .acct-n { margin-left: auto; font: 400 11px/1 var(--font-mono); color: var(--text-dim); }
+.pg-adm .adm-side > section { padding: var(--s-4) 18px; }
+.ad-sub2 { font: 400 12px/1.4 var(--font); color: var(--text-muted); margin-top: 3px; }
+.ad-veiksmai { display: flex; gap: var(--s-2); flex: none; }
+/* Soninės kortelės smulkmenos: pati kortelė (.adm-side, .adm-side-add,
+   .adm-log-r) yra 48 sk., čia tik tai, ko pakete nėra. */
+.ad-side-e { font: 600 15px/1.3 var(--font); color: var(--text-primary); word-break: break-all; }
+.ad-side-m { font: 400 11.5px/1.5 var(--font-mono); color: var(--text-dim); margin-top: 5px; }
+.ad-side-btn { width: 100%; margin-top: var(--s-2); }
+.ad-sek-v { margin-left: auto; font: 600 12px/1 var(--font-mono); color: var(--text-primary); }
+@media (max-width: 900px) { .ad-dvi { grid-template-columns: 1fr; } }
+
 /* Skirtuku juosta - .ct-tab yra dizainerio, cia tik juosta */
 .ad-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin-bottom: 16px; overflow-x: auto; }
 .ad-tabs .ct-tab { border-bottom: 2px solid transparent; background: transparent; padding: 0 14px; white-space: nowrap; }
@@ -61,7 +84,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
 .ad-sk-p { font: 500 10px/1.3 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--text-dim); }
 .ad-sk-z { flex: 1 1 100%; font-size: 12px; color: var(--text-muted); }
 .ad-sekcija { margin: 18px 0; padding-top: 14px; border-top: 1px solid var(--border); }
-.ad-sek-h { font: 600 10px/1 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px; }
+.ad-sek-h { display: flex; align-items: baseline; font: 600 10px/1 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px; }
 .ad-kred-f { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .ad-kred-f input { flex: 0 1 200px; min-width: 0; }
 .ad-poveikis { margin-top: 12px; border: 1px solid var(--warning-border, var(--border-light)); border-radius: 12px; padding: 12px 14px; background: var(--bg-elevated); }
@@ -218,18 +241,19 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
     <button class="ct-ver-btn ct-btn ct-btn-quiet" id="app-version" type="button" onclick="ctVersijuModalas()" title="Versijų istorija"></button>
     <nav class="ct3-nav"></nav>
     <div class="ct3-header-right">
-      <button class="ct3-premium-btn ct-btn ct-btn-sm ct-btn-accent" id="ct-planas-btn" onclick="location.href='index.html?planas=1'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V10l6-8 6 8v10"/></svg><span id="ct-planas-btn-text">Planas</span></button>
-      <a class="ct3-avatar ct-btn ct-btn-icon ct-btn-round" href="index.html" title="Paskyra" aria-label="Paskyra"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></a>
+      <button class="ct3-premium-btn ct-btn ct-btn-sm ct-hdr-plan" id="ct-planas-btn" onclick="location.href='index.html?planas=1'"><span id="ct-planas-btn-text">Planas</span></button>
+      <a class="ct3-avatar ct-avatar" href="index.html" title="Paskyra" aria-label="Paskyra"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></a>
     </div>
   </div>
 </header>
 
-<div class="pg">
+<div class="pg pg-adm">
   <div class="pg-head"><h1>Administravimas</h1></div>
   <p class="pg-sub" id="ad-sub">Kraunama…</p>
 
-  <div class="ad-tabs" id="ad-tabs" role="tablist">
-    <button class="ct-tab active" data-t="klaidos" role="tab">Klaidos</button>
+  <div class="ad-tabs ct-tabs" id="ad-tabs" role="tablist">
+    <button class="ct-tab active" data-t="suvestine" role="tab">Suvestinė</button>
+    <button class="ct-tab" data-t="klaidos" role="tab">Klaidos</button>
     <button class="ct-tab" data-t="matavimai" role="tab">Matavimai</button>
     <button class="ct-tab" data-t="vartotojai" role="tab">Vartotojai</button>
     <button class="ct-tab" data-t="uzklausos" role="tab">Užklausos <span id="ad-uzkl-n"></span></button>
@@ -797,6 +821,162 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
     return 'neribota';
   }
 
+  // ── 48 sk. (56b) · SUVESTINĖ ──────────────────────────────────────────────
+  // Duomenys – GET /admin/suvestine. Vienintelis inline stilius čia – --used,
+  // --guard, --v ir --avg: tai duomenys, ne išvaizda (dizainerio taisyklė).
+  var PORTALAI_ADM = {
+    autoplius: ['autoplius', '#19b86a', 'AP', 15],
+    autogidas: ['autogidas', '#2D6FCA', 'AG', 15],
+    autoscout24: ['autoscout24', '#F06A00', 'AS24', 13],
+    otomoto: ['otomoto', '#C0392B', 'OT', 15],
+    mobilede: ['mobile.de', '#1F4E8C', 'MD', 15]
+  };
+  function skM(n) { return n == null ? '—' : Number(n).toLocaleString('lt-LT').replace(/[\s, ]/g, ' '); }
+  function pr(n) { return n == null ? '—' : String(Math.round(n * 10) / 10).replace('.', ',') + ' %'; }
+  function icd(v) { return '<span class="acct-ic"><svg class="ct-i" aria-hidden="true"><use href="#' + v + '"></use></svg></span>'; }
+  function portaloIko(k) {
+    var p = PORTALAI_ADM[k]; if (!p) return '';
+    return '<svg class="ct3-portal-ico" viewBox="0 0 32 32" width="18" height="18" aria-hidden="true">'
+      + '<rect width="32" height="32" rx="7" fill="' + p[1] + '"/>'
+      + '<text x="16" y="22" font-family="system-ui,sans-serif" font-weight="900" font-size="' + p[3] + '" fill="#fff" text-anchor="middle">' + p[2] + '</text></svg>';
+  }
+  function dienosIki(iso) {
+    if (!iso) return '';
+    var d = Math.ceil((new Date(iso + 'T00:00:00Z').getTime() - Date.now()) / 86400000);
+    return d > 0 ? ' · po ' + d + ' d.' : '';
+  }
+
+  function kv(pav, v, dot) {
+    return '<div><dt>' + (dot ? '<i style="--dot:' + dot + '"></i>' : '') + esc(pav) + '</dt><dd>' + v + '</dd></div>';
+  }
+
+  function fondoKortele(f, vidKr) {
+    if (!f || f.klaida) {
+      return '<section class="ct-card adm-fund is-unknown"><div class="adm-fund-h">' + icd('i-kreditai') + '<b>ScraperAPI fondas</b></div>'
+        + tuscia('never', 'Fondo skaičiaus nėra', f && f.klaida ? 'ScraperAPI neatsakė: ' + esc(f.klaida) : 'Duomenys nepasiekiami – tai ne nulis, o „nežinome“.') + '</section>';
+    }
+    var riba = f.riba || 0, liko = f.liko || 0, sargas = f.sargas || 0;
+    var iki = f.ikiSargo != null ? f.ikiSargo : Math.max(0, liko - sargas);
+    var busena = iki <= 0 ? ' is-bad' : (riba && iki <= riba * 0.1 ? ' is-warn' : '');
+    var zenklas = iki <= 0 ? ' ct-tag-risk' : (busena ? ' ct-tag-signal' : '');
+    var used = riba ? (f.panaudota / riba) * 100 : 0;
+    var guard = riba ? ((riba - sargas) / riba) * 100 : 100;
+    var zinia = iki <= 0
+      ? 'Sargas sustabdė LT paieškas'
+      : 'Iki sargo liko ' + skM(iki) + ' kr.' + (f.paieskuIkiSargo != null ? ' · ~' + f.paieskuIkiSargo + ' paieškų' : '');
+    return '<section class="ct-card adm-fund' + busena + '">'
+      + '<div class="adm-fund-h">' + icd('i-kreditai') + '<b>ScraperAPI fondas</b>'
+      +   '<span class="ct-tag' + zenklas + '">' + esc(zinia) + '</span>'
+      +   '<span>' + (f.atsinaujina ? 'Atsinaujina ' + esc(f.atsinaujina) + dienosIki(f.atsinaujina) : 'Atsinaujinimo data nenurodyta') + '</span></div>'
+      + '<div class="adm-fund-v"><b>' + skM(f.panaudota) + '</b><span>/ ' + skM(riba) + ' kr. · ' + pr(used) + '</span></div>'
+      + '<div class="adm-fund-bar" style="--used:' + used.toFixed(1) + '%; --guard:' + guard.toFixed(1) + '%"><span></span><em></em><i></i></div>'
+      + '<div class="adm-fund-scale" style="--guard:' + guard.toFixed(1) + '%"><span>0</span><span>sargas ' + skM(riba - sargas) + '</span><span>' + skM(riba) + '</span></div>'
+      + '<dl class="adm-kv">'
+      +   kv('PANAUDOTA', skM(f.panaudota), 'var(--warning)')
+      +   kv('LIKO', skM(liko), 'var(--bg-raised)')
+      +   kv('SARGAS', skM(sargas), 'var(--danger)')
+      +   kv('VID. PAIEŠKA', vidKr ? skM(vidKr) + ' kr.' : '—', '')
+      + '</dl></section>';
+  }
+
+  function plytele(ik, etik, sk, po) {
+    return '<div class="ct-card adm-tile"><div class="adm-tile-h">' + icd(ik) + '<span>' + esc(etik) + '</span></div>'
+      + '<b>' + sk + '</b><span>' + po + '</span></div>';
+  }
+
+  function grafikas(etik, suma, vnt, serija, laukas) {
+    var maks = 0, i;
+    for (i = 0; i < serija.length; i++) maks = Math.max(maks, serija[i][laukas] || 0);
+    var vid = serija.length ? serija.reduce(function (a, b) { return a + (b[laukas] || 0); }, 0) / serija.length : 0;
+    var stulp = serija.map(function (d) {
+      var v = maks ? (d[laukas] || 0) / maks : 0;
+      // K-60: `.adm-chart > span[style*="--v:0"]` pagauna ir „--v:0.345“, tad
+      // nenulines reiksmes rasom be nulio priekyje („--v:.345“) – tada nulio
+      // taisykle pataiko tik i tikra nuli.
+      return '<span style="--v:' + (v ? v.toFixed(3).replace(/^0/, '') : '0') + '" data-d="' + esc(d.diena) + '" data-v="' + (d[laukas] || 0) + '"></span>';
+    }).join('');
+    var x = serija.length ? [serija[0].diena, serija[Math.floor(serija.length / 2)].diena, serija[serija.length - 1].diena] : [];
+    return '<div class="ad-chart-blk">'
+      + '<div class="adm-chart-h"><span class="ad-chart-k">' + esc(etik) + ' <b>' + skM(suma) + ' ' + esc(vnt) + '</b></span>'
+      +   '<span class="ad-chart-k">vid. ' + String(Math.round(vid * 10) / 10).replace('.', ',') + ' ' + esc(vnt) + ' / d.</span></div>'
+      + '<div class="adm-chart" role="img" aria-label="' + esc(etik) + ' per dieną, 30 d." style="--avg:' + (maks ? (vid / maks * 100).toFixed(1) : '0') + '%">' + stulp + '</div>'
+      + '<div class="adm-chart-x">' + x.map(function (d) { return '<span>' + esc(String(d).slice(5)) + '</span>'; }).join('') + '</div></div>';
+  }
+
+  function dalies(vardas, kiek, proc, ikona) {
+    return '<div class="adm-share"><div class="adm-share-r">' + (ikona || '')
+      + '<span>' + esc(vardas) + '</span><b>' + skM(kiek) + '</b><small>' + pr(proc) + '</small></div>'
+      + '<div class="ct-bar"><span style="width:' + Math.max(2, Math.min(100, proc || 0)) + '%"></span></div></div>';
+  }
+
+  function piestiSuvestine() {
+    el.innerHTML = '';
+    _vartotojas = null;
+    imti('/admin/suvestine?dienu=30').then(function (d) {
+      var l = d.laikotarpis || {}, v = d.vartotojai || {}, p = d.paieskos || {};
+      sub.textContent = 'Paskutinės ' + (l.dienu || 30) + ' dienų · ' + (l.nuo || '') + ' – ' + (l.iki || '');
+      var planai = (v.pagalPlana || []).filter(function (x) { return x.aktyvus; })
+        .map(function (x) { return x.pavadinimas + ' ' + x.aktyvus; }).join(' · ');
+      el.innerHTML = fondoKortele(d.fondas, p.krVidutiniskai)
+        + '<div class="adm-tiles">'
+        +   plytele('i-pardavejas', 'Vartotojai', skM(v.viso), (v.naujiMen || 0) + ' nauji šį mėnesį')
+        +   plytele('i-planai', 'Aktyvūs · mėn.', skM(v.aktyvusMen), esc(planai || 'nėra'))
+        +   plytele('i-ieskoti', 'Paieškos · 30 d.', skM(p.viso), skM(p.krViso) + ' ScraperAPI kr.')
+        +   plytele('i-kreditai', 'Tiksli kaina', skM(p.tikslus), 'iš ' + skM(p.viso) + ' · ' + skM((p.viso || 0) - (p.tikslus || 0)) + ' apytikslės (~)')
+        + '</div>'
+        + '<section class="ct-card"><div class="acct-h"><span>Paskutinės ' + (l.dienu || 30) + ' dienų</span>'
+        +   '<span class="acct-n">užveskite ant stulpelio – dienos reikšmė</span></div>'
+        +   grafikas('PAIEŠKOS', p.viso, 'iš viso', d.serija || [], 'paieskos')
+        +   grafikas('SCRAPERAPI KREDITAI', p.krViso, 'kr.', d.serija || [], 'scraperKr')
+        + '</section>'
+        + '<div class="ad-dvi">'
+        +   '<section class="ct-card"><div class="acct-h"><span>Top 5 modeliai</span><span class="acct-n">iš ' + skM(p.viso) + ' paieškų</span></div>'
+        +     ((d.topModeliai || []).slice(0, 5).map(function (m) {
+                return dalies(((m.marke || '') + ' ' + (m.modelis || '')).trim() || '—', m.paieskos, m.dalisProc, '');
+              }).join('') || tuscia('never', 'Paieškų dar nebuvo', 'Kai kas nors ieškos, čia matysis dažniausi modeliai.'))
+        +   '</section>'
+        +   '<section class="ct-card"><div class="acct-h"><span>Portalų dalis</span><span class="acct-n">iš ' + skM(p.viso) + ' paieškų</span></div>'
+        +     ((d.portalai || []).map(function (x) {
+                return dalies((PORTALAI_ADM[x.portalas] || [x.portalas])[0], x.paieskos, x.dalisProc, portaloIko(x.portalas));
+              }).join('') || tuscia('never', 'Portalų duomenų nėra', 'Jie atsiras po pirmos paieškos.'))
+        +   '</section></div>';
+    }).catch(function (e) { el.innerHTML = tuscia('never', 'Nepavyko įkelti', e.message); sub.textContent = ''; });
+  }
+
+  // Grafiko reikšmė užvedus (.adm-tip) – vienas klausytojas visam puslapiui
+  document.addEventListener('mouseover', function (e) {
+    var b = e.target && e.target.closest ? e.target.closest('.adm-chart > span') : null;
+    var sena = document.querySelector('.adm-tip'); if (sena) sena.remove();
+    if (!b) return;
+    var t = document.createElement('div');
+    t.className = 'adm-tip';
+    t.textContent = b.dataset.d + ' · ' + b.dataset.v;
+    t.style.left = (b.offsetLeft + b.offsetWidth / 2) + 'px';
+    t.style.bottom = 'calc(100% + 6px)';
+    b.parentElement.appendChild(t);
+  });
+
+  // 48 sk.: tinklelis, ne <table> – eilutė `display: contents`, todėl fonas
+  // ant celių. Pasirinkta eilutė – aria-selected (ir būsena, ir prieinamumas).
+  // NULL rodomas „—", ne „0": nulis reiškia „išnaudojo", brūkšnys – „netaikoma".
+  function nulArba(v) { return v == null ? '—' : v; }
+  function krKlase(v, riba) {
+    if (v == null) return '';
+    if (v === 0) return ' class="is-zero"';
+    return riba && v <= riba * 0.2 ? ' class="is-low"' : '';
+  }
+  // Lentelėje riba telpa tik skaičiumi: „14 / ∞", ne „14 / neribota“.
+  function trumpaRiba(k) {
+    var v = planoRiba(k, 'paieskosViso');
+    if (v != null) return v;
+    v = planoRiba(k, 'paieskosMen');
+    return v != null ? v : '∞';
+  }
+  function planoZyme(k) {
+    var kl = k === 'business' ? 'ct-tag ct-tag-ai' : k === 'pro' ? 'ct-tag' : 'ct-tag';
+    return '<span class="' + kl + '">' + esc(planoVardas(k)) + '</span>';
+  }
+
   function piestiVartotojus() {
     el.innerHTML = '';
     _vartotojas = null;
@@ -810,41 +990,65 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
           return;
         }
         window._vartotojai = v;
-        el.innerHTML = '<div class="ct-table-w"><table class="ct-table is-dense"><thead><tr>'
-          + '<th>EL. PAŠTAS</th><th>PLANAS</th><th class="is-num">PLANO KR.</th>'
-          + '<th class="is-num">PIRKTI KR.</th><th class="is-num">PAIEŠKOS</th><th class="is-time">NUO</th>'
-          + '</tr></thead><tbody>'
-          + v.map(function (u, i) {
-              return '<tr class="ad-tr" onclick="adVartotojas(' + i + ')">'
-                + '<td class="is-id" data-stulpelis="EL. PAŠTAS">' + esc(u.email || '—') + '</td>'
-                + '<td data-stulpelis="PLANAS"><span class="chip">' + esc(planoVardas(u.plan)) + '</span></td>'
-                + '<td class="is-num" data-stulpelis="PLANO KR.">' + (u.kreditai_plano || 0) + '</td>'
-                + '<td class="is-num" data-stulpelis="PIRKTI KR.">' + (u.kreditai_pirkti || 0) + '</td>'
-                + '<td class="is-num" data-stulpelis="PAIEŠKOS">' + (u.paieskos_menesi || 0) + '</td>'
-                + '<td class="is-time" data-stulpelis="NUO">' + (u.created_at ? laikas(u.created_at) : '—') + '</td></tr>';
-            }).join('')
-          + '</tbody></table></div>';
+        el.innerHTML = '<div class="adm-vart">'
+          + '<section class="ct-card"><div class="adm-users">'
+          +   '<div class="adm-users-h"><span>El. paštas</span><span>Planas</span><span>Galioja iki</span>'
+          +     '<span>Paieškos</span><span>Kreditai</span><span>API kr. 30 d.</span><span>Sukurta</span></div>'
+          +   v.map(function (u, i) {
+                var pl = u.kreditai_plano, pi = u.kreditai_pirkti;
+                var kr = (pl == null && pi == null) ? null : (pl || 0) + (pi || 0);
+                var api = u.apiKr30;
+                return '<div class="adm-u" role="button" tabindex="0" data-i="' + i + '"'
+                  + (_vartotojas && _vartotojas.id === u.id ? ' aria-selected="true"' : '') + '>'
+                  + '<span>' + esc(u.email || '—') + '</span>'
+                  + '<span data-k="Planas">' + planoZyme(u.plan) + '</span>'
+                  + '<span data-k="Galioja iki">' + (u.plan_iki ? esc(u.plan_iki) : '—') + '</span>'
+                  + '<span data-k="Paieškos">' + nulArba(u.paieskos_menesi) + ' / ' + trumpaRiba(u.plan) + '</span>'
+                  + '<span data-k="Kreditai"' + krKlase(kr, planoRiba(u.plan, 'kreditaiMen')) + '>' + nulArba(kr) + '</span>'
+                  + '<span data-k="API kr. 30 d.">' + (api ? (api.apytiksliai ? '~' : '') + api.kr : '—') + '</span>'
+                  + '<span data-k="Sukurta">' + (u.created_at ? String(u.created_at).slice(0, 10) : '—') + '</span></div>';
+              }).join('')
+          + '</div></section><div id="ad-sonine"></div></div>';
       }).catch(function (e) { el.innerHTML = tuscia('never', 'Nepavyko įkelti', e.message); sub.textContent = ''; });
   }
+  // Eilutė pasirenkama pele ir klaviatūra (Tab + Enter) – ta pati eilutė, ne du keliai.
+  document.addEventListener('click', function (e) {
+    var r = e.target && e.target.closest ? e.target.closest('.adm-u') : null;
+    if (r) adVartotojas(parseInt(r.dataset.i, 10));
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    var r = e.target && e.target.closest ? e.target.closest('.adm-u') : null;
+    if (r) { e.preventDefault(); adVartotojas(parseInt(r.dataset.i, 10)); }
+  });
 
   // v2.11.0 (KL-PASKYRA-PLANAS): kliento plano / kreditų užklausos iš „Mano paskyra“.
   // „Priskirti“ – planas 30 d. arba kreditų paketas iškart; sąskaitą siunčia Lukas.
   var UZKL_VARDAI = { pro: 'Pro', business: 'Verslas' };
   function piestiUzklausas() {
     el.innerHTML = '';
-    imti('/admin/uzklausos').then(function (d) {
+    imti('/admin/uzklausos?visos=1').then(function (d) {
       var v = (d && d.sarasas) || [];
-      sub.textContent = v.length ? 'Laukia ' + v.length : 'Laukiančių nėra';
-      var n = document.getElementById('ad-uzkl-n'); if (n) n.textContent = v.length ? '· ' + v.length : '';
+      var laukia = v.filter(function (x) { return x.busena === 'laukia'; }).length;
+      sub.textContent = laukia ? 'Laukia ' + laukia + ' iš ' + v.length : 'Laukiančių nėra';
+      var n = document.getElementById('ad-uzkl-n'); if (n) n.textContent = laukia ? '· ' + laukia : '';
       if (!v.length) { el.innerHTML = tuscia('never', 'Užklausų nėra', 'Kai klientas „Mano paskyroje“ pasirinks planą ar kreditų paketą, jis atsiras čia.'); return; }
-      el.innerHTML = '<div class="ct-table-w"><table class="ct-table is-dense"><thead><tr><th class="is-time">LAIKAS</th><th>EL. PAŠTAS</th><th>KO PRAŠO</th><th></th></tr></thead><tbody>'
+      // 48 sk.: laukiančios – pilnos, su mygtukais; atsakytos – pritemdytos ir
+      // vietoj mygtukų rodo, KAS ir KADA atsakė: tai žurnalas, ne darbas.
+      el.innerHTML = '<section class="ct-card">'
         + v.map(function (u) {
             var ko = u.tipas === 'planas' ? 'Planas ' + (UZKL_VARDAI[u.kas] || u.kas) : u.kas + ' kreditų';
-            return '<tr><td class="is-time" data-stulpelis="LAIKAS">' + laikas(u.laikas) + '</td>'
-              + '<td class="is-id" data-stulpelis="EL. PAŠTAS">' + esc(u.email) + '</td><td data-stulpelis="KO PRAŠO">' + esc(ko) + '</td>'
-              + '<td style="white-space:nowrap;text-align:right"><button type="button" class="ct-btn ct-btn-sm ct-btn-primary" onclick="adUzklausa(' + u.id + ',\'priskirti\',this)">Priskirti</button> '
-              + '<button type="button" class="ct-btn ct-btn-sm" onclick="adUzklausa(' + u.id + ',\'atmesti\',this)">Atmesti</button></td></tr>';
-          }).join('') + '</tbody></table></div>';
+            var laukia = u.busena === 'laukia';
+            return '<div class="adm-req" data-busena="' + esc(u.busena) + '">'
+              + '<div class="adm-req-t"><div>' + esc(u.email) + '</div>'
+              +   '<div class="ad-sub2">' + esc(ko) + ' · ' + laikas(u.laikas) + '</div></div>'
+              + (laukia
+                  ? '<div class="ad-veiksmai"><button type="button" class="ct-btn ct-btn-sm ct-btn-primary" onclick="adUzklausa(' + u.id + ',\'priskirti\',this)">Priskirti</button>'
+                    + '<button type="button" class="ct-btn ct-btn-sm" onclick="adUzklausa(' + u.id + ',\'atmesti\',this)">Atmesti</button></div>'
+                  : '<div class="adm-req-who">' + (u.busena === 'priskirta' ? 'Priskirta' : 'Atmesta')
+                    + '<br>' + esc(u.admin || '—') + (u.atsakyta ? '<br>' + laikas(u.atsakyta) : '') + '</div>')
+              + '</div>';
+          }).join('') + '</section>';
     }).catch(function (e) { el.innerHTML = tuscia('never', 'Nepavyko įkelti', e.message); sub.textContent = ''; });
   }
   window.adUzklausa = function (id, veiksmas, btn) {
@@ -857,6 +1061,10 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
     var u = (window._vartotojai || [])[i];
     if (!u) return;
     _vartotojas = u;
+    [].forEach.call(document.querySelectorAll('.adm-u'), function (r) {
+      if (parseInt(r.dataset.i, 10) === i) r.setAttribute('aria-selected', 'true');
+      else r.removeAttribute('aria-selected');
+    });
     piestiVartotoja();
   };
 
@@ -876,32 +1084,53 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
   }
 
   function piestiVartotoja() {
-    var u = _vartotojas;
+    var u = _vartotojas, sonine = document.getElementById('ad-sonine');
+    if (!u || !sonine) return;
     sub.textContent = u.email;
-    el.innerHTML = '<button type="button" class="ct-back ct-btn ct-btn-sm" onclick="piestiVartotojus()"><span>← Vartotojai</span></button>'
-      + '<div class="ad-vart-h"><div class="ad-vart-e">' + esc(u.email) + '</div>'
-      +   '<div class="ad-vart-m">' + esc(planoVardas(u.plan))
-      +     (u.plan_iki ? ' · iki ' + esc(u.plan_iki) : '')
-      +     (u.created_at ? ' · nuo ' + laikas(u.created_at) : '')
-      +     (u.is_admin ? ' · administratorius' : '') + '</div></div>'
-      + skaitikliai(u)
-      + '<div class="ad-sekcija"><div class="ad-sek-h">PLANAS</div>'
-      +   '<div class="ct-flags" role="radiogroup">'
+    var pl = u.kreditai_plano, pi = u.kreditai_pirkti;
+    var kr = (pl == null && pi == null) ? null : (pl || 0) + (pi || 0);
+    sonine.innerHTML = '<section class="ct-card adm-side">'
+      + '<section><div class="ad-side-e">' + esc(u.email) + '</div>'
+      +   '<div class="ad-side-m">nuo ' + (u.created_at ? String(u.created_at).slice(0, 10) : '—')
+      +   ' · id ' + u.id + (u.is_admin ? ' · administratorius' : '') + '</div></section>'
+      + '<section><div class="ad-sek-h">PLANAS</div>'
+      +   '<div class="adm-side-add"><select class="ct-field" id="ad-pl-sel" aria-label="Planas">'
       +     ['trial', 'pro', 'business'].map(function (k) {
-            return '<button type="button" class="ct-flag" role="radio" aria-checked="' + (k === u.plan)
-              + '" onclick="adPlanoPasirinkimas(&quot;' + k + '&quot;)">' + esc(planoVardas(k)) + '</button>';
+            return '<option value="' + k + '"' + (k === u.plan ? ' selected' : '') + '>' + esc(planoVardas(k)) + '</option>';
           }).join('')
-      +   '</div><div id="ad-plano-poveikis"></div></div>'
-      + '<div class="ad-sekcija"><div class="ad-sek-h">PRIDĖTI KREDITŲ</div>'
-      +   '<div class="ad-kred-f">'
-      +     '<input class="ct-field" id="ad-kr-kiekis" type="number" step="1" placeholder="kiek">'
-      +     '<input class="ct-field" id="ad-kr-pastaba" type="text" placeholder="kodėl (matysis žurnale)">'
-      +     '<button type="button" class="ct-btn ct-btn-sm" onclick="adKredituPrideti()"><span>Pridėti</span></button>'
-      +     '<span class="ad-irankiu-zinia" id="ad-kr-z"></span>'
-      +   '</div></div>'
-      + '<div class="ad-sekcija"><div class="ad-sek-h">KREDITŲ ŽURNALAS</div><div id="ad-zurnalas">Kraunama…</div></div>';
-    imti('/admin/zurnalas?userId=' + u.id).then(piestiZurnala)
-      .catch(function (e) { document.getElementById('ad-zurnalas').innerHTML = tuscia('never', 'Nepavyko', e.message); });
+      +   '</select><button type="button" class="ct-btn ct-btn-sm" onclick="adPlanoPasirinkimas(document.getElementById(&quot;ad-pl-sel&quot;).value)">Keisti</button></div>'
+      +   '<div class="ad-side-m">' + esc(paieskuRiba(u.plan)) + ' · riba „' + (planoRiba(u.plan, 'paieskosViso') != null ? 'viso' : (planoRiba(u.plan, 'paieskosMen') != null ? 'menesi' : 'neribota')) + '"'
+      +     (u.plan_iki ? ' · iki ' + esc(u.plan_iki) : '') + '</div>'
+      +   '<div id="ad-plano-poveikis"></div></section>'
+      + '<section><div class="ad-sek-h">KREDITAI <b class="ad-sek-v">' + (kr == null ? '—' : kr + ' kr.') + '</b></div>'
+      +   '<div class="adm-side-add"><input class="ct-field" id="ad-kr-kiekis" type="number" step="1" placeholder="+10" aria-label="Kiek kreditų">'
+      +     '<input class="ct-field" id="ad-kr-pastaba" type="text" placeholder="Pastaba (privaloma)" aria-label="Pastaba"></div>'
+      +   '<button type="button" class="ct-btn ct-btn-sm ct-btn-primary ad-side-btn" onclick="adKredituPrideti()">Pridėti kreditų</button>'
+      +   '<span class="ad-irankiu-zinia" id="ad-kr-z"></span>'
+      +   '<div class="ad-side-m">Plano ' + nulArba(pl) + ' · pirkti ' + nulArba(pi) + '. Nurašoma pirmiausia iš plano.</div></section>'
+      + '<section><div class="ad-sek-h">KREDITŲ ŽURNALAS</div><div id="ad-zurnalas">Kraunama…</div></section>'
+      + '<section><div class="ad-sek-h">PAIEŠKŲ ŽURNALAS · SCRAPERAPI KR.</div><div id="ad-paieskos">Kraunama…</div></section>'
+      + '</section>';
+    imti('/admin/zurnalas?userId=' + u.id).then(function (d) { piestiZurnala(d); piestiVartPaieskas(d); })
+      .catch(function (e) {
+        var z = document.getElementById('ad-zurnalas'); if (z) z.innerHTML = tuscia('never', 'Nepavyko', e.message);
+      });
+  }
+
+  // Paieškų žurnalas šoninėje kortelėje: data · ką ieškojo · ScraperAPI kaina.
+  // krApytiksliai → „~" priekyje (kelios paieškos vienu metu dalijasi skaitikliu).
+  function piestiVartPaieskas(d) {
+    var v = (d && d.paieskos) || [], z = document.getElementById('ad-paieskos');
+    if (!z) return;
+    if (!v.length) { z.innerHTML = '<div class="ad-side-m">Paieškų dar nebuvo.</div>'; return; }
+    z.innerHTML = v.slice(0, 8).map(function (x) {
+      var kas = ((x.marke || '') + ' ' + (x.modelis || '')).trim() || 'be markės';
+      var kur = (x.portalai || []).length > 2 ? x.portalai.length + ' portalai' : (x.portalai || []).join(', ');
+      var kiek = x.busena === 'stabdyta' ? 'stabdyta' : (x.rasta != null ? x.rasta + ' rasta' : '—');
+      return '<div class="adm-log-r"><time>' + laikas(x.laikas).slice(5) + '</time>'
+        + '<span>' + esc(kas) + ' · ' + esc(kur) + ' · ' + esc(kiek) + '</span>'
+        + '<b>' + (x.krApytiksliai ? '~' : '') + (x.scraperKr != null ? x.scraperKr : '—') + '</b></div>';
+    }).join('');
   }
 
   // Trys busenos atpazistamos IS TURINIO, be naujo stulpelio (13 paketas, 6):
@@ -919,20 +1148,15 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
     var ir = (d && d.irasai) || [];
     var z = document.getElementById('ad-zurnalas');
     if (!z) return;
-    if (!ir.length) { z.innerHTML = tuscia('never', 'Žurnalas tuščias', 'Kreditų judėjimo dar nebuvo.'); return; }
-    z.innerHTML = '<div class="ct-table-w"><table class="ct-table is-dense"><thead><tr>'
-      + '<th class="is-time">KADA</th><th>VEIKSMAS</th><th>OBJEKTAS</th>'
-      + '<th class="is-num">KIEKIS</th><th class="is-num">LIKUTIS</th><th>PASTABA</th>'
-      + '</tr></thead><tbody>'
-      + ir.map(function (x) {
-          return '<tr><td class="is-time" data-stulpelis="KADA">' + laikas(x.laikas) + '</td>'
-            + '<td data-stulpelis="VEIKSMAS">' + esc(x.veiksmas || '—') + ' ' + zurnaloZenklas(x) + '</td>'
-            + '<td class="is-id" data-stulpelis="OBJEKTAS">' + esc((x.raktas || '—')).slice(0, 60) + '</td>'
-            + '<td class="is-num" data-stulpelis="KIEKIS">' + (x.kiekis > 0 ? '+' : '') + (x.kiekis != null ? x.kiekis : '—') + '</td>'
-            + '<td class="is-num" data-stulpelis="LIKUTIS">' + (x.likutis_po != null ? x.likutis_po : '—') + '</td>'
-            + '<td class="is-text" data-stulpelis="PASTABA"><span class="ct-clamp">' + esc(x.pastaba || '') + '</span></td></tr>';
-        }).join('')
-      + '</tbody></table></div>';
+    if (!ir.length) { z.innerHTML = '<div class="ad-side-m">Kreditų judėjimo dar nebuvo.</div>'; return; }
+    z.innerHTML = ir.slice(0, 8).map(function (x) {
+      var kas = (x.veiksmas === 'planas' ? 'Planas' : x.veiksmas === 'admin' ? 'Admin' : (x.veiksmas || '—'));
+      var ka = x.raktas ? ' · ' + String(x.raktas).slice(0, 40) : '';
+      var past = x.pastaba ? ' · pastaba: ' + String(x.pastaba).slice(0, 40) : '';
+      return '<div class="adm-log-r"><time>' + laikas(x.laikas).slice(5) + '</time>'
+        + '<span>' + esc(kas + ka + past) + '</span>'
+        + '<b' + (x.kiekis > 0 ? ' class="is-plus"' : '') + '>' + (x.kiekis > 0 ? '+' : '') + (x.kiekis != null ? x.kiekis : '—') + '</b></div>';
+    }).join('');
   }
 
   // Prie plano NERA „Issaugoti" mygtuko. nustatytiPlana() PERRASO kreditai_plano
@@ -976,7 +1200,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
     }).then(function (d) {
       window._vartotojai = d.vartotojai || [];
       var n = window._vartotojai.filter(function (x) { return x.id === u.id; })[0];
-      if (n) { _vartotojas = n; piestiVartotoja(); }
+      if (n) { _vartotojas = n; piestiVartotojus(); setTimeout(function () { adVartotojas(window._vartotojai.indexOf(n)); }, 0); }
     }).catch(function (e) { if (z) z.textContent = 'Nepavyko: ' + e.message; });
   };
 
@@ -992,7 +1216,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
     }).then(function (d) {
       window._vartotojai = d.vartotojai || [];
       var n = window._vartotojai.filter(function (x) { return x.id === u.id; })[0];
-      if (n) { _vartotojas = n; piestiVartotoja(); }
+      if (n) { _vartotojas = n; piestiVartotojus(); setTimeout(function () { adVartotojas(window._vartotojai.indexOf(n)); }, 0); }
     }).catch(function (e) { if (z) z.textContent = 'Nepavyko: ' + e.message; });
   };
 
@@ -1000,7 +1224,8 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
     var b = e.target.closest('.ct-tab'); if (!b) return;
     [].forEach.call(this.children, function (x) { x.classList.toggle('active', x === b); });
     _rodyti = b.dataset.t;
-    if (_rodyti === 'klaidos') piestiKlaidas();
+    if (_rodyti === 'suvestine') piestiSuvestine();
+    else if (_rodyti === 'klaidos') piestiKlaidas();
     else if (_rodyti === 'matavimai') piestiMatavimus();
     else if (_rodyti === 'uzklausos') piestiUzklausas();
     else piestiVartotojus();
@@ -1010,7 +1235,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
     el.innerHTML = tuscia('never', 'Reikia prisijungti', 'Šis puslapis skirtas administratoriui.');
     sub.textContent = '';
   } else {
-    piestiKlaidas();
+    piestiSuvestine();
   }
 
   // v1.78.0 (Nr. 22): busena, pakeista telefone, web'e likdavo sena, nes puslapis

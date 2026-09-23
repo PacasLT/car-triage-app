@@ -175,9 +175,30 @@
       + '<input type="password" name="naujas2" placeholder="Pakartokite naują" aria-label="Pakartokite naują slaptažodį" autocomplete="new-password" minlength="8" required>'
       + '<button type="submit" class="ct-btn ct-btn-primary">Išsaugoti</button><div class="acct-msg" id="acct-slapt-msg" role="status"></div></form></div>'
       + '<button type="button" class="ct-btn" id="acct-slapt-btn" aria-expanded="false" aria-controls="acct-slapt">Keisti</button></div>'
-      + '<div class="acct-set-r">' + ic('i-atsisiusti') + '<div class="acct-set-l"><div class="acct-set-k">Mano duomenys</div><div class="acct-set-v">Paieškos, kreditai, mėgstamiausi, ataskaitos (JSON)</div></div>'
+      + '<div class="acct-set-r">' + ic('i-atsisiusti') + '<div class="acct-set-l"><div class="acct-set-k">Mano duomenys</div><div class="acct-set-v">Paieškos, kreditai, mėgstamiausi, ataskaitos, klaidų pranešimai (JSON). Kartą per parą.</div></div>'
       + '<button type="button" class="ct-btn" id="acct-eksp">Atsisiųsti</button></div>'
+      + trynimoEilute(p)
       + '</div></div>';
+  }
+  // TS-0922-1900: ištrynimas su 7 d. užšaldymu – galima persigalvoti.
+  function trynimoEilute(p) {
+    var t = p.trynimas;
+    if (t) {
+      return '<div class="acct-set-r">' + ic('i-klaida') + '<div class="acct-set-l"><div class="acct-set-k">Paskyra bus ištrinta</div>'
+        + '<div class="acct-set-v">' + data(t.ivyks, true) + ' (liko ' + dienos(t.ivyks) + '). Iki tol gali persigalvoti – paskyra veikia kaip anksčiau.</div></div>'
+        + '<button type="button" class="ct-btn ct-btn-primary" id="acct-trynimas-atsaukti">Atšaukti</button></div>';
+    }
+    return '<div class="acct-set-r">' + ic('i-trinti') + '<div class="acct-set-l"><div class="acct-set-k">Ištrinti paskyrą</div>'
+      + '<div class="acct-set-v">Paskyra, mėgstamiausi ir ataskaitos ištrinami po 7 dienų. Iki tol gali atšaukti.</div>'
+      + '<form class="acct-set-f" id="acct-trynimas" hidden>'
+      + '<input type="password" name="slaptazodis" placeholder="Slaptažodis" aria-label="Slaptažodis" autocomplete="current-password" required>'
+      + '<input type="text" name="patvirtinu" placeholder="Įrašyk IŠTRINTI" aria-label="Įrašyk IŠTRINTI" required>'
+      + '<button type="submit" class="ct-btn">Ištrinti paskyrą</button><div class="acct-msg" id="acct-trynimas-msg" role="status"></div></form></div>'
+      + '<button type="button" class="ct-btn" id="acct-trynimas-btn" aria-expanded="false" aria-controls="acct-trynimas">Ištrinti</button></div>';
+  }
+  function dienos(iki) {
+    var d = Math.max(0, Math.ceil((iki - Date.now()) / 86400000));
+    return d + (d === 1 ? ' diena' : (d >= 10 && d <= 20) || d % 10 === 0 ? ' dienų' : ' dienos');
   }
 
   // ── Veiksmai ──────────────────────────────────────────────────────────────
@@ -207,12 +228,36 @@
     });
     document.getElementById('acct-eksp').addEventListener('click', function () {
       var btn = this; btn.disabled = true;
-      ctApi('/api/paskyra/eksportas').then(function (r) { if (!r.ok) throw new Error(); return r.blob(); }).then(function (b) {
+      // TS §5.1: serveris riboja iki 1 eksporto per parą – parodom jo žinutę
+      ctApi('/api/paskyra/eksportas').then(function (r) {
+        if (r.ok) return r.blob();
+        return r.json().catch(function () { return {}; }).then(function (j) { throw new Error(j.error || 'Nepavyko paruošti duomenų'); });
+      }).then(function (b) {
         var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'cartriige-mano-duomenys.json';
         document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
-      }).catch(function () { alert('Nepavyko paruošti duomenų'); }).then(function () { btn.disabled = false; });
+      }).catch(function (er) { alert(er.message || 'Nepavyko paruošti duomenų'); }).then(function () { btn.disabled = false; });
     });
     document.getElementById('acct-keisti').addEventListener('click', function () { planuLangas(pl); });
+    var tb = document.getElementById('acct-trynimas-btn'), tf = document.getElementById('acct-trynimas');
+    if (tb && tf) {
+      tb.addEventListener('click', function () { tf.hidden = !tf.hidden; tb.setAttribute('aria-expanded', String(!tf.hidden)); if (!tf.hidden) tf.slaptazodis.focus(); });
+      tf.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var m = document.getElementById('acct-trynimas-msg');
+        m.className = 'acct-msg'; m.textContent = 'Siunčiama…';
+        ctApi('/api/paskyra/istrinti', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slaptazodis: tf.slaptazodis.value, patvirtinu: tf.patvirtinu.value.trim() }) })
+          .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Nepavyko'); return j; }); })
+          .then(function () { location.reload(); })
+          .catch(function (er) { m.className = 'acct-msg is-err'; m.textContent = er.message; });
+      });
+    }
+    var ta = document.getElementById('acct-trynimas-atsaukti');
+    if (ta) ta.addEventListener('click', function () {
+      ta.disabled = true;
+      ctApi('/api/paskyra/istrinti/atsaukti', { method: 'POST' })
+        .then(function () { location.reload(); })
+        .catch(function () { ta.disabled = false; alert('Nepavyko atšaukti'); });
+    });
   }
 
   function planuLangas(pl) {

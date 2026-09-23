@@ -26,3 +26,6 @@ backend/testai/*.db
 
 # Python
 __pycache__/
+
+# Linux VM negali trinti failu - cia sumetami trintini failai (Lukas istrina Windowse)
+_to_delete/

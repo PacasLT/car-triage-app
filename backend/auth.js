@@ -334,6 +334,8 @@ async function handleLogin(req, res) {
     console.error('[C-4] maisos perrasymas nepavyko:', e.message);
   }
 
+  // TS §5.1: paskutinio prisijungimo laikas – eksportui (BDAR 15 str.)
+  try { db.prepare('UPDATE users SET paskutinis_prisijungimas = ? WHERE id = ?').run(Date.now(), user.id); } catch (e) {}
   const token = createToken(user.email);
   res.json({ access_token: token, token_type: 'bearer', email: user.email });
 }

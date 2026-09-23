@@ -2436,15 +2436,14 @@
          visa kita (ataskaitos, palyginimai, istorija, megstamiausi) paskyros meniu -->
     <nav class="ct3-nav"></nav>
     <div class="ct3-header-right">
-      <button class="ct3-premium-btn ct-btn ct-btn-sm ct-btn-accent" id="ct-planas-btn" onclick="ctPlanuModalas()" title="Planas ir kreditai">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V10l6-8 6 8v10"/></svg>
+      <button class="ct3-premium-btn ct-btn ct-btn-sm ct-hdr-plan" id="ct-planas-btn" onclick="ctPlanuModalas()" title="Planas ir kreditai">
         <span id="ct-planas-btn-text">Planas</span>
       </button>
       <!-- v1.93.0 (Nr. 30): `ct-btn-sm` nuimta. Del jos avataras cia buvo 32x32,
            o detail.html - 38x38, nors abu puslapiai naudoja ta pati komponenta.
            Tai ta pati „kur dar yra tas pats" forma: v1.66.0 si klase nuimiau,
            bet ne visur. -->
-      <button class="ct3-avatar ct-btn ct-btn-icon ct-btn-round" id="ct3-avatar-btn" onclick="window.__ctAvatarClick()" title="Paskyra" aria-label="Paskyra">
+      <button class="ct3-avatar ct-avatar" id="ct3-avatar-btn" onclick="window.__ctAvatarClick()" title="Paskyra" aria-label="Paskyra">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
       </button>
     </div>
@@ -6922,10 +6921,8 @@ function ctNavTab(tab) {
 <!-- ═══ PLANAI IR KREDITAI ═══ -->
 <style id="ct-planai-css">
 /* ═══════════ PLANAI IR KREDITAI ═══════════ */
-#ct-planas-btn .ct-pl-kr { font: 700 11px/1 var(--font-mono); padding: 3px 7px; border-radius: 6px;
-  background: var(--accent-dim); color: var(--accent-light); border: 1px solid var(--accent-border); }
-#ct-planas-btn .ct-pl-kr.maza { background: var(--warning-dim); color: var(--warning); border-color: var(--warning-border); }
-#ct-planas-btn .ct-pl-kr.nulis { background: var(--danger-dim); color: var(--danger); border-color: var(--danger-border); }
+/* 56b 49 sk.: kreditų ženklelis perimtas į sistemą (.ct-hdr-plan > u). Čia buvo
+   trys taisyklės su --accent-dim / --warning-dim / --danger-dim – ištrintos. */
 @media (max-width: 900px) {
   /* v1.65.0: cia buvo `height: 34px`, ir si eilute nugalejo 1381 eil. 44 px,
      nes ta pati specifika, o si faile YRA VELIAU. Ta pati klaida, kaip su

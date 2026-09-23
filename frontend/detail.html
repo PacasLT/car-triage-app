@@ -552,8 +552,8 @@ button{font-family:inherit;cursor:pointer}
     <button class="ct-ver-btn ct-btn ct-btn-quiet" id="app-version" type="button" onclick="ctVersijuModalas()" title="Versijų istorija"></button>
     <nav class="ct3-nav"></nav>
     <div class="ct3-header-right">
-      <button class="ct3-premium-btn ct-btn ct-btn-sm ct-btn-accent" id="ct-planas-btn" onclick="location.href='index.html?planas=1'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V10l6-8 6 8v10"/></svg><span id="ct-planas-btn-text">Planas</span></button>
-      <button class="ct3-avatar ct-btn ct-btn-icon ct-btn-round" aria-label="Paskyra" title="Paskyra"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></button>
+      <button class="ct3-premium-btn ct-btn ct-btn-sm ct-hdr-plan" id="ct-planas-btn" onclick="location.href='index.html?planas=1'"><span id="ct-planas-btn-text">Planas</span></button>
+      <button class="ct3-avatar ct-avatar" aria-label="Paskyra" title="Paskyra"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></button>
     </div>
   </div>
 </header>
@@ -864,7 +864,11 @@ window.ctToken = function () {
   try {
     var r = await ctApi('/api/planas'); if (!r.ok) return;
     var b = await r.json(); var kr = b.kreditai.viso;
-    el.innerHTML = String(b.planoPavadinimas).replace(/[<>&]/g, '') + ' <span class="ct-pl-kr" style="font:700 11px/1 var(--font-mono);padding:3px 7px;border-radius:6px;background:var(--accent-dim);color:var(--accent-light);border:1px solid var(--accent-border)">' + kr + ' kr</span>';
+    el.textContent = b.planoPavadinimas;   // 49 sk.: <u> – sistemoje, ne inline
+    var u = document.createElement('u');
+    u.className = kr <= 0 ? 'is-zero' : kr < 5 ? 'is-low' : '';
+    u.textContent = kr + ' kr';
+    el.after(u);
   } catch (e) {}
 })();
 window.ctApi = function (kelias, params) {

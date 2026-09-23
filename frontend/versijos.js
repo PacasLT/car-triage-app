@@ -8,6 +8,24 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.12.1', data: '2026-09-23', pavadinimas: 'Nauja administravimo zona ir antraštė',
+    pakeitimai: [
+      'Administravime atsirado „Suvestinė“: ScraperAPI fondas su sargo riba, vartotojų ir paieškų rodikliai, 30 dienų grafikai, dažniausi modeliai ir portalų dalis.',
+      'Vartotojų sąrašas – su plano galiojimu, kreditais ir ScraperAPI suvartojimu per 30 d.; pasirinkus vartotoją šone matosi jo planas, kreditai ir abu žurnalai.',
+      'Plano ir kreditų užklausos rodomos kartu su atsakytomis – matyti, kas ir kada jas uždarė.',
+      'Antraštėje planas ir kreditai sujungti į vieną mygtuką („Verslas · 34 kr“); likus mažiau nei 5 kreditams skaičius pageltonuoja, o ties nuliu tampa raudonas.',
+    ],
+  },
+  {
+    versija: '2.11.5', data: '2026-09-22', pavadinimas: 'Duomenų eksportas ir ištrynimas (BDAR)',
+    pakeitimai: [
+      'Duomenų eksporte dabar yra registracijos data, paskutinis prisijungimas, plano ir kreditų priskyrimo istorija, jūsų klaidų pranešimai ir paaiškinimas su nuoroda į privatumo politiką. Atsisiųsti galima kartą per parą.',
+      'Paskyros ištrynimas: patvirtinus slaptažodžiu paskyra pažymima trynimui ir ištrinama po 7 dienų – per tą laiką gali persigalvoti. Apskaitos žurnalai nuasmeninami, o ne ištrinami.',
+      'Paieškų ir kreditų žurnalai bei klaidų pranešimai automatiškai nuasmeninami arba ištrinami po 12 mėnesių.',
+      'Administratoriui – suvestinės duomenys (30 d. serija, top modeliai, portalų dalis, vartotojai pagal planą, ScraperAPI fondas) būsimai admin zonai.',
+    ],
+  },
+  {
     versija: '2.11.4', data: '2026-09-22', pavadinimas: 'Paieškų žurnalas administratoriui',
     pakeitimai: [
       'Administratorius gali peržiūrėti visų vartotojų paieškas su tikra ScraperAPI kaina – iš to skaičiuojamos plano maržos (Finansininko §3.4).',

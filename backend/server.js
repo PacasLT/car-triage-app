@@ -185,8 +185,11 @@ app.delete('/api/ataskaitos/:id', requireAuth, (req, res) => {
 
 // ── Administravimas (ADMIN_EMAILS env) ──────────────────────────────────────
 app.get('/admin/vartotojai', requireAuth, planai.reikalautiAdmin, (req, res) => {
-  try { res.json({ vartotojai: planai.visiVartotojai() }); }
-  catch (e) { res.status(500).json({ error: e.message }); }
+  try {
+    // 56b: lentelėje rodomas ir ScraperAPI suvartojimas per 30 d.
+    const kr = paskyra.apiKrPagalVartotoja(30);
+    res.json({ vartotojai: planai.visiVartotojai().map((u) => Object.assign({}, u, { apiKr30: kr[u.id] || null })) });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 app.post('/admin/planas', requireAuth, planai.reikalautiAdmin, (req, res) => {
   try {
@@ -922,7 +925,8 @@ app.get('/admin/zurnalas', requireAuth, planai.reikalautiAdmin, (req, res) => {
   try {
     const id = parseInt(req.query.userId, 10);
     if (!id) return res.status(400).json({ error: 'Trūksta userId' });
-    res.json({ irasai: planai.zurnalas(id, 100) });
+    // 56b soninė kortelė: kreditų ir paieškų žurnalai vienu kvietimu
+    res.json({ irasai: planai.zurnalas(id, 100), paieskos: paskyra.paieskos(id, 20) });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -4494,6 +4498,7 @@ app.get('/api/paskyra', requireAuth, (req, res) => {
       email: req.user.email, created_at: req.user.created_at,
       planas: planai.busena(req.user), megstamiausi: meg, ataskaitos: ata,
       paieskos: paskyra.paieskuSkaicius(req.user.id), uzklausos: paskyra.manoUzklausos(req.user.id),
+      trynimas: paskyra.trynimoBusena(req.user.id),
     });
   } catch (e) { res.status(500).json({ error: 'Nepavyko gauti paskyros' }); }
 });
@@ -4511,9 +4516,113 @@ app.post('/api/paskyra/slaptazodis', requireAuth, async (req, res) => {
 });
 app.get('/api/paskyra/eksportas', requireAuth, (req, res) => {
   try {
+    // TS §5.1: vienas eksportas per 24 val.
+    const r = paskyra.arGalimaEksportuoti(req.user.id);
+    if (!r.galima) {
+      const val = Math.max(1, Math.ceil((r.kitas - Date.now()) / 3600000));
+      return res.status(429).json({ error: `Duomenis galima atsisiųsti kartą per parą. Bandykite po ${val} val.` });
+    }
+    const manoKlaidos = _klaidos
+      .filter((k) => k.kas && req.user.email && String(k.kas).toLowerCase() === String(req.user.email).toLowerCase())
+      .map((k) => ({ nr: k.nr, laikas: k.laikas, kategorija: k.kategorija, svarba: k.svarba, tekstas: k.tekstas, busena: k.busena, arYraNuotrauka: !!k.foto }));
+    const duom = paskyra.eksportas(req.user.id, { klaidos: manoKlaidos });
+    paskyra.zymetiEksporta(req.user.id);
     res.setHeader('Content-Disposition', 'attachment; filename="cartriige-mano-duomenys.json"');
-    res.json(paskyra.eksportas(req.user.id));
+    res.json(duom);
   } catch (e) { res.status(500).json({ error: 'Nepavyko paruošti' }); }
+});
+
+// TS §5.2 + TS-0922-1900: paskyros ištrynimas su 7 dienų užšaldymu.
+// Vartotojas patvirtina žodžiu „IŠTRINTI“ ir slaptažodžiu – paskyra pažymima
+// trynimui. 7 dienas gali persigalvoti (mygtukas „Atšaukti“); po to ištrina
+// automatinis valymas. Klaidų pranešimuose ištrinamas el. paštas, IP ir
+// ekranvaizdis – pats pranešimas lieka nuasmenintas, nes jis apie produktą.
+app.post('/api/paskyra/istrinti', requireAuth, async (req, res) => {
+  try {
+    const b = req.body || {};
+    if (String(b.patvirtinu) !== 'IŠTRINTI') return res.status(400).json({ error: 'Patvirtinimui įrašykite IŠTRINTI' });
+    const r = await paskyra.pazymetiTrynimui(req.user.id, b.slaptazodis);
+    console.log('[PASKYRA] pažymėta trynimui', JSON.stringify({ laikas: new Date().toISOString(), ivyks: new Date(r.ivyks).toISOString() }));
+    res.json(Object.assign({ ok: true }, r));
+  } catch (e) { res.status(e.kodas || 500).json({ error: e.kodas ? e.message : 'Nepavyko' }); }
+});
+app.post('/api/paskyra/istrinti/atsaukti', requireAuth, (req, res) => {
+  try { res.json({ ok: paskyra.atsauktiTrynima(req.user.id) }); }
+  catch (e) { res.status(500).json({ error: 'Nepavyko atšaukti' }); }
+});
+
+// Tikrasis ištrynimas – po 7 d. užšaldymo, iš automatinio valymo.
+function ivykdytiIstrynima(userId, email) {
+  const el = String(email || '').toLowerCase();
+  let klaiduNuasmeninta = 0;
+  if (el) {
+    _klaidos.forEach((k) => {
+      if (!k.kas || String(k.kas).toLowerCase() !== el) return;
+      k.kas = null; k.ip = null;
+      if (k.foto) { try { fs.unlinkSync(path.join(KLAIDU_FOTO_KAT, k.foto)); } catch (e) {} k.foto = null; }
+      (k.istorija || []).forEach((h) => { if (h.kas && String(h.kas).toLowerCase() === el) h.kas = 'vartotojas (ištrinta)'; });
+      (k.komentarai || []).forEach((c) => { if (c.kas && String(c.kas).toLowerCase() === el) c.kas = 'vartotojas (ištrinta)'; });
+      klaiduNuasmeninta++;
+    });
+    if (klaiduNuasmeninta) issaugotiKlaidas();
+  }
+  const rez = paskyra.istrintiPaskyra(userId);
+  console.log('[PASKYRA] paskyra ištrinta', JSON.stringify({ laikas: new Date().toISOString(), klaiduNuasmeninta, rez }));
+  return { klaiduNuasmeninta, rez };
+}
+function vykdytiTrynimus() {
+  let n = 0;
+  (paskyra.laukiantysIstrynimo() || []).forEach((u) => { try { ivykdytiIstrynima(u.id, u.email); n++; } catch (e) { console.error('[PASKYRA] trynimas:', e.message); } });
+  return n;
+}
+
+// TS §5.3: automatinis valymas – paieškų ir kreditų žurnalas 12 mėn., klaidų
+// pranešimai 12 mėn. Paleidžiama startuojant ir kartą per parą.
+const KLAIDU_SAUGOJIMAS_MS = 365 * 24 * 60 * 60 * 1000;
+function valytiKlaidas() {
+  const riba = Date.now() - KLAIDU_SAUGOJIMAS_MS;
+  const pries = _klaidos.length;
+  const liko = _klaidos.filter((k) => (k.laikas || 0) >= riba);
+  if (liko.length === pries) return 0;
+  _klaidos.filter((k) => (k.laikas || 0) < riba && k.foto).forEach((k) => {
+    try { fs.unlinkSync(path.join(KLAIDU_FOTO_KAT, k.foto)); } catch (e) {}
+  });
+  _klaidos.length = 0; liko.forEach((k) => _klaidos.push(k));
+  issaugotiKlaidas();
+  console.log(`[KLAIDOS] valymas (12 mėn.): ištrinta ${pries - liko.length}`);
+  return pries - liko.length;
+}
+function duomenuValymas() {
+  try { vykdytiTrynimus(); } catch (e) { console.error('[PASKYRA] trynimai:', e.message); }
+  try { paskyra.valymas(); } catch (e) { console.error('[PASKYRA] valymas:', e.message); }
+  try { valytiKlaidas(); } catch (e) { console.error('[KLAIDOS] valymas:', e.message); }
+}
+setTimeout(duomenuValymas, 30000);
+setInterval(duomenuValymas, 24 * 60 * 60 * 1000);
+
+// Admin: suvestinė pirmam ekranui (56b). Laukų vardai fiksuoti – pagal juos
+// Dizaineris rašo lenteles; fondas pridedamas iš ScraperAPI /account (nekainuoja).
+app.get('/admin/suvestine', requireAuth, planai.reikalautiAdmin, async (req, res) => {
+  try {
+    const sv = paskyra.adminSuvestine(req.query.dienu, (k) => (planai.PLANAI[k] || {}).pavadinimas || k);
+    let fondas = null;
+    try {
+      const a = await scraperPaskyra();
+      if (a && !a.klaida) {
+        const liko = Math.max(0, (a.riba || 0) - (a.panaudota || 0));
+        const ikiSargo = Math.max(0, liko - KREDITU_ATSARGA);
+        const vid = sv.paieskos.krVidutiniskai;
+        fondas = {
+          panaudota: a.panaudota, riba: a.riba, liko,
+          sargas: KREDITU_ATSARGA, ikiSargo,
+          paieskuIkiSargo: vid ? Math.floor(ikiSargo / vid) : null,
+          lygiagreciai: a.lygiagreciai, atsinaujina: process.env.FONDO_ATSINAUJINIMAS || null,
+        };
+      }
+      else if (a) fondas = { klaida: a.klaida };
+    } catch (e) { fondas = { klaida: e.message }; }
+    res.json(Object.assign({ fondas }, sv));
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // Admin: paieškų žurnalas (Finansininkui – tikri ScraperAPI skaičiai maržoms, §3.4)
