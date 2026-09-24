@@ -5307,7 +5307,9 @@ ${kontekstas}
 
 Toliau žmogus klaus klausimų. Atsakyk lietuviškai, trumpai (iki 150 žodžių), dalykiškai.
 Pirmiausia remkis šiais duomenimis ir sakyk skaičius iš jų; jei atsakymo čia nėra – pasitikrink internete ir pasakyk, iš kur žinai.
-Jei atsakymo patikimai nėra, taip ir pasakyk – nespėliok. Rašyk paprastu tekstu, be JSON ir be markdown ženklų.
+Jei atsakymo patikimai nėra, taip ir pasakyk – nespėliok.
+Rašyk taisyklinga lietuvių kalba, paprastu tekstu: JOKIŲ markdown ženklų (**, ##, -, *) – nei paryškinimui, nei sąrašams.
+Jei reikia išvardyti, rašyk sakiniais arba kiekvieną punktą iš naujos eilutės be jokio ženklo priekyje.
 Prisimink, kas buvo sakyta anksčiau pokalbyje – žmogus gali klausti trumpai, nekartodamas konteksto.` },
     { role: 'assistant', content: 'Supratau. Klauskite.' },
   ];

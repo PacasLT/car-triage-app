@@ -7137,6 +7137,17 @@ function ctModelioMygtukas() {
   if (!b.hidden) b.title = 'Ap\u017evalga apie ' + f.marke + ' ' + f.modelis + ' \u2013 kartos, b\u0117dos, LT rinka';
 }
 
+// AI kartais vis tiek atsiun\u010dia markdown (`**`, `-`). Rodom textContent, tad
+// tie \u017eenklai b\u016bt\u0173 matomi kaip \u0161iuk\u0161l\u0117s \u2013 nuvalom, o eilu\u010di\u0173 l\u016b\u017eius paliekam
+// (`white-space: pre-wrap` prie atsakymo).
+window.ctBeMarkdown = function (t) {
+  return String(t || '')
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/__(.+?)__/g, '$1')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/^\s*[-*\u2022]\s+/gm, '\u00b7 ')
+    .trim();
+};
 function ctApzSk(n) { return n == null ? '\u2013' : Number(n).toLocaleString('lt-LT'); }
 // Lietuvoje tr\u0161kmuo yra kablelis - `toLocaleString` sveikiems skai\u010diams to nedaro.
 function ctApzPr(n) { return n == null ? '\u2013' : String(n).replace('.', ','); }
@@ -7263,7 +7274,8 @@ function ctModelioLangas(r) {
         blokas.lastChild.style.color = 'var(--danger)';
         return;
       }
-      blokas.lastChild.textContent = a.atsakymas;
+      blokas.lastChild.textContent = ctBeMarkdown(a.atsakymas);
+      blokas.lastChild.style.whiteSpace = 'pre-wrap';
       pokalbis.push({ role: 'user', tekstas: kl }, { role: 'assistant', tekstas: a.atsakymas });
       laukas.value = '';
       blokas.scrollIntoView({ block: 'nearest' });

@@ -1351,6 +1351,17 @@ window.ctApi = function (kelias, params) {
   // Tas pats laukas kaip modelio apžvalgoje, tik kontekstas kitas: čia klausiama
   // apie KONKRETŲ automobilį, todėl į serverį keliauja skelbimo laukai, o
   // serveris prideda jau padarytą to skelbimo analizę.
+  // AI kartais vis tiek atsiunčia markdown (`**`, `-`) – nuvalom, nes rodom
+  // textContent ir tie ženklai matytųsi kaip šiukšlės.
+  function dpBeMarkdown(t) {
+    return String(t || '')
+      .replace(/\*\*(.+?)\*\*/g, '$1')
+      .replace(/__(.+?)__/g, '$1')
+      .replace(/^#{1,6}\s+/gm, '')
+      .replace(/^\s*[-*\u2022]\s+/gm, '\u00b7 ')
+      .trim();
+  }
+
   function dpKlausimaiParuosti() {
     var laukas = document.getElementById('dp-klaus-laukas');
     var mygt = document.getElementById('dp-klaus-btn');
@@ -1391,7 +1402,8 @@ window.ctApi = function (kelias, params) {
           blokas.lastChild.style.color = 'var(--danger)';
           return;
         }
-        blokas.lastChild.textContent = a.atsakymas;
+        blokas.lastChild.textContent = dpBeMarkdown(a.atsakymas);
+        blokas.lastChild.style.whiteSpace = 'pre-wrap';
         pokalbis.push({ role: 'user', tekstas: kl }, { role: 'assistant', tekstas: a.atsakymas });
         blokas.scrollIntoView({ block: 'nearest' });
         if (!a.suAnalize) {

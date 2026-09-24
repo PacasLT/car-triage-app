@@ -1756,3 +1756,11 @@ laikinas sprendimas „kol Lukas nuspręs" negali tapti antra tiesa.
 - Tas pats rodiklis liko `/api/model-trends` (jį naudoja kitos vietos) – apribotas tik apžvalgos kelias.
 - `modelio-apzvalga.test` 70/70.
 - **Ką dar pamačiau tame pačiame bandyme:** mūsų sukauptos kainų istorijos mediana „BMW X5“ – 67 800 € (visos laidos kartu, įskaitant naujus), o kainų kryptis – `null`, nes turime tik vieno mėnesio duomenis. Į apžvalgą kryptis nepateko (sargas suveikė), bet vertėtų kainų istoriją skaidyti pagal metus – atskiras darbas.
+
+## Z-145 · 2026-09-24 · Klaudijus · v2.16.2 – markdown ženklai AI atsakymuose (rasta gyvame pokalbyje)
+
+- Produkcijoje paleidau pokalbį: „Ar verta imti dyzelinį su 200 000 km rida?“ → „O benzininis?“. Pokalbio atmintis veikia – antras klausimas suprastas kaip tęsinys (atsakyme lygino su ta pačia rida).
+- **Bet:** nepaisant nurodymo, AI atsiuntė `**paryškinimus**` ir `-` sąrašus, o mes rodom `textContent`, tad ženklai matėsi kaip šiukšlės.
+- **Pataisa iš dviejų pusių:** (1) prompte aiškiai – jokių markdown ženklų nei paryškinimui, nei sąrašams, punktai iš naujos eilutės be ženklo; (2) naršyklėje `ctBeMarkdown` / `dpBeMarkdown` nuvalo `**`, `__`, `#` ir `- ` (pastarasis virsta „· “), o atsakymas rodomas su `white-space: pre-wrap`, kad eilučių lūžiai išliktų. Vien prompto neužtenka – modelis jo ne visada paiso.
+- Bandyme matėsi ir kelios AI rašybos klaidos („remonai“, „didėlė“) – prompte pridėta „rašyk taisyklinga lietuvių kalba“; jei kartosis, teks tikrinti atskirai.
+- `modelio-apzvalga.test` 77/77.

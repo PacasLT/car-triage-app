@@ -149,5 +149,16 @@ const blogas = m.surinktiDuomenis({ marke: 'BMW', modelis: 'X5' }, {
 T(blogas.pardavimoGreitis === null, 'nepatikimas greitis nepatenka nei į langą, nei į AI promptą');
 T(!/parduodamas per/.test(m.promptas(blogas)), 'prompte tokios eilutės nėra');
 
+// ── v2.16.2: markdown ženklai iš AI atsakymo (rasta gyvame pokalbyje) ──────
+const valyt = html.match(/window\.ctBeMarkdown = function \(t\) \{[\s\S]*?\n\};/);
+T(!!valyt, 'yra markdown valytojas');
+const V = new Function('window', valyt[0] + '; return window.ctBeMarkdown;')({});
+T(V('**Svarbu** – tikrinti') === 'Svarbu – tikrinti', 'paryškinimo žvaigždutės nuimamos');
+T(V('- pirmas\n- antras') === '· pirmas\n· antras', 'brūkšneliai virsta taškais, eilutės lieka');
+T(V('## Antraštė\ntekstas') === 'Antraštė\ntekstas', 'antraštės ženklai nuimami');
+T(/dpBeMarkdown/.test(detail), 'skelbimo puslapyje tas pats valymas');
+T(/whiteSpace = 'pre-wrap'/.test(html) && /whiteSpace = 'pre-wrap'/.test(detail), 'eilučių lūžiai matomi abiejose vietose');
+T(/JOKIŲ markdown ženklų/.test(src), 'AI paprašyta nenaudoti markdown');
+
 console.log('\n' + (klaidu ? '✗ ' + klaidu + ' klaidos iš ' + n : '✓ ' + n + '/' + n + ' patikrų praėjo'));
 process.exit(klaidu ? 1 : 0);

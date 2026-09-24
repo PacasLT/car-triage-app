@@ -8,6 +8,12 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.16.2', data: '2026-09-24', pavadinimas: 'Pataisa: ženklai AI atsakymuose',
+    pakeitimai: [
+      'Pokalbio atsakymuose nebesimato techninių ženklų (** ir -) – tekstas rodomas švarus, su eilučių lūžiais.',
+    ],
+  },
+  {
     versija: '2.16.1', data: '2026-09-24', pavadinimas: 'Pataisa: „parduodama per 1 dieną“',
     pakeitimai: [
       'Modelio apžvalgoje neberodomas pardavimo greitis, kai mūsų skelbimų istorija dar per trumpa – anksčiau ji rodė „parduodama per 1 dieną“, nors tai reiškė tik tai, kad duomenis kaupiame vos savaitę.',
