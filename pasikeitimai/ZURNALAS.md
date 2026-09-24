@@ -1709,3 +1709,26 @@ laikinas sprendimas „kol Lukas nuspręs" negali tapti antra tiesa.
 - **Modelių sąrašai – visoms 31 markei** (Luko prašymas tą pačią dieną). Pridėta 14 markių, kurių sąrašo nebuvo (Seat, Cupra, Citroen, Dacia, Fiat, Jeep, Mini, Mitsubishi, Subaru, Suzuki, Jaguar, Tesla, plius praplėsti Land Rover ir Lexus), ir papildytos devynios esamos (Skoda +Enyaq/Yeti/Rapid/Roomster, Opel +Crossland/Combo, Kia +Stonic/Picanto/EV6/Soul, Hyundai +i10/Ioniq/Ioniq 5/Bayon, Renault +Arkana/Austral/Zoe/Trafic/Kangoo, Nissan +Note/Navara/Ariya, Mazda +2/CX-60/MX-5, Honda +HR-V, Peugeot +408/Partner/Expert/Rifter). Iš viso **255 modeliai**.
 - **Ko dar trūksta ir ką tai reiškia:** `autoplius-ids.js` modelių ID turi 17 markių; likusioms 14 paieška autoplius vyksta **tekstu** (`qt=`) – veikia, bet mažiau tiksliai ir brangiau, nes portalas grąžina ir nesusijusių skelbimų. Tas pats su mobile.de: modelių atitikmenys aprašyti tik BMW, Audi ir VW, kitoms markėms užsienio paieška eina pagal markę. Abu dalykai – atskiras darbas, ne šio pataisymo dalis.
 - `filtrai.test` papildytas: kiekviena markė privalo turėti modelių sąrašą, o modelių iš viso – bent 200 (97/97).
+
+## Z-141 · 2026-09-24 · Klaudijus · v2.15.0 – puslapių kiekis iki „visų“ + kainos stabdis
+
+- **Luko prašymas:** leisti pasirinkti, kad skenuotų visus puslapius, ne tik 5.
+- **Kodėl kartu su stabdžiu:** TS-0922-1602 (Luko atsakymas „nuimti kaip planuota, su kainos stabdžiu“). Be stabdžio viena gili paieška suvalgytų ketvirtadalį mėnesio ScraperAPI fondo: LT portalo puslapis – 10 kr., užsienio – 1 kr., tad 5 portalai × 50 psl. ≈ 1 150 kr.
+- **Sąrašas:** 1, 2, 3 (numatyta), 5, 10, 20, „Visi (kol baigsis sąrašas)“. „Visi“ = iki 50 psl. vienam portalui (1 000 skelbimų); `fetchAllPages` ir taip sustoja, kai sąrašas baigiasi (`pabaiga: 'galas'`), o mobile.de – ties 100 psl. portalo riba.
+- **Serveris:** sena riba `Math.min(..., 10)` nuimta. Prieš paiešką skaičiuojama sąmata; jei ji viršija `PAIESKOS_RIBA_KR` (Railway kintamasis, numatyta **200 kr.** pagal KL-STABDIS-SUMA), paieška **nepaleidžiama** ir grąžinama `perbrangu` su pasiūlymu (KL-STABDIS-ADMIN: blokuoti + pasiūlyti tik naujausius už leistiną sumą). Adminui stabdžio nėra – matavimams reikia pilno skenavimo.
+- **Naujas failas** `backend/paieskos-kaina.js`: įkainiai, portalų ribos, `samata()` ir `telpaPuslapiu()`. Skaičiavimas vienoje vietoje, nes jį naudoja ir sąmata, ir stabdis.
+- **Langas:** dizaino sistemos `.ct-modal` + **46 sk. `.ct-portals`** (`--cols:3`, `data-k` telefonui) – tas pats markupas, kurio dizaineris laukė prie stabdžio. Pamatuota 1280 ir 390 px: langas 520 px, be horizontalaus slinkimo, telefone eilutė virsta kortele su etiketėmis.
+- **ScraperAPI kreditų vartotojui NErodom:** produkte „kr.“ reiškia plano kreditus, o puslapių kaina – ScraperAPI kreditus; du skaičiai viename ekrane klaidintų. Lange – tik puslapiai, kreditai lieka serverio žurnale ir admin zonoje.
+- `patvirtinta` neįeina į talpyklos raktą – kitaip patvirtinta paieška nebematytų ką tik surinktų rezultatų.
+- Naujas testas `puslapiai.test` (28/28). Sargai: filtrai 97/97, mobilede 53/53, mediana 22/22, paskyra 44/44, regitra 185/185, rinka 32/32, skenavimas 29/29.
+- **Kas dar nepadaryta iš stabdžio darbo:** Stop mygtukas paieškos metu (KL-STOP), kiekio patikra portaluose prieš paiešką (DZ-LENTELE – reikia po 1 psl. iš portalo) ir admin kreditų rodinys pagal vartotoją. Šis paketas – tik puslapių pasirinkimas ir kainos riba.
+
+## Z-142 · 2026-09-24 · Klaudijus · v2.15.0 – kiekis portaluose prieš paiešką
+
+- **Luko prašymas:** nustačius filtrus matyti, kiek skelbimų rado iš viso per visus tinklapius, dar prieš spaudžiant „Ieškoti“.
+- Naudojamas jau esamas `POST /api/quick-count` (1 puslapis iš kiekvieno pasirinkto portalo). Funkcija `runQuickCount` buvo likusi be mygtuko – dabar vietoj jos veikia automatinis `ctKiekioImti`.
+- **Kaina ir kaip ją laikom mažą:** skaičiuojama tik praėjus **0,9 s** po paskutinio filtro pakeitimo; tie patys filtrai antrą kartą imami iš naršyklės atminties; serveryje puslapiai guli talpykloje 2 val., tad pakartojimas nieko nekainuoja. **Įkeliant puslapį neskaičiuojama** – tik po vartotojo veiksmo.
+- **Ką rodo:** „Portaluose rasta ~1 240 skelbimų“, užvedus – skaidymas po portalus. `~` dedamas, kai portalas duoda tik „bent N“ arba kai portalų daugiau nei vienas (tas pats automobilis gali būti keliuose).
+- Skaičius **nėra** galutinis paieškos rezultatas: paieška dar atmeta netinkančius ir sujungia dublikatus, todėl kortelių bus mažiau.
+- **Dizaino skola:** eilutė kol kas su `style=""` (nuolatinės klasės nėra). Kai dizaineris duos lentelę prieš paiešką (DZ-LENTELE, `.ct-portals`), ši eilutė pereis į ją.
+- `puslapiai.test` papildytas šešiomis patikromis (38/38).

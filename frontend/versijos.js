@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.15.0', data: '2026-09-24', pavadinimas: 'Puslapių kiekį renkatės patys – iki „visų“',
+    pakeitimai: [
+      'Puslapių kiekio sąraše atsirado 10, 20 ir „Visi (kol baigsis sąrašas)“ – anksčiau daugiausia buvo 5.',
+      'Skenavimas sustoja pats, kai portalo sąrašas baigiasi, tad „Visi“ neskaito tuščių puslapių.',
+      'Jei pasirinkimas per didelis, prieš paiešką parodomas langas su lentele „portalas · prašyta · galima“ ir pasiūlymu perskaityti tiek naujausių puslapių, kiek telpa į ribą.',
+      'Nustačius filtrus, šalia mygtuko „Ieškoti ir analizuoti“ parodoma, kiek skelbimų pagal juos yra portaluose – dar prieš paleidžiant paiešką.',
+    ],
+  },
+  {
     versija: '2.14.0', data: '2026-09-24', pavadinimas: 'Visos markės, mobile.de nuotraukos ir platesnė „naujo“ riba',
     pakeitimai: [
       'Markių sąraše dabar visos 31 markė, kurias moka paieška – anksčiau buvo tik septynios, todėl Škodos, Opel, Ford ir kitų paprasčiausiai nebuvo galima pasirinkti.',

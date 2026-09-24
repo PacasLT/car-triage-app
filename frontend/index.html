@@ -2568,7 +2568,10 @@
               <option value="1">1 (greičiausia)</option>
               <option value="2">2</option>
               <option value="3" selected>3 (numatyta)</option>
-              <option value="5">5 (lėčiausia)</option>
+              <option value="5">5</option>
+              <option value="10">10 (giliau)</option>
+              <option value="20">20</option>
+              <option value="visi">Visi (kol baigsis sąrašas)</option>
             </select>
             <button type="button" class="ct-fld-x" tabindex="-1" aria-label="Išvalyti">✕</button>
           </div>
@@ -2718,6 +2721,9 @@
         </div>
         <!-- PASALINTA: "Naršyti viską" režimas. Liko tik CarTriige analizė, todėl režimų pasirinkiklio nebereikia. -->
         <div class="ct3-search-bottom-right">
+          <!-- v2.15.0: kiek skelbimų portaluose pagal dabartinius filtrus. Skaičiuojama
+               automatiškai, praejus 0,9 s po paskutinio filtro pakeitimo. -->
+          <span id="ct-kiekis" hidden style="font:500 12px/1.4 var(--font);color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px"></span>
           <!-- PASALINTA: "Išsaugoti paiešką" - mygtukas neturėjo jokio veiksmo. -->
           <button class="ct3-search-btn ct-btn ct-btn-primary ct-btn-lg" id="search-btn" onclick="console.log('search-btn clicked, runSearch=', typeof runSearch); if(typeof runSearch==='function'){ runSearch(); } else { showToast('runSearch nerasta — perkraukite puslapį', 'error'); }"><i><svg class="ct-i"><use href="#i-ieskoti"></use></svg></i><span>Ieškoti ir analizuoti</span></button>
         </div>
@@ -3722,6 +3728,8 @@ async function runSearch() {
     kainaNuo: document.getElementById('kainaNuo').value,
     kainaIki: document.getElementById('kainaIki').value,
     maxPages: document.getElementById('maxPages').value,
+    // v2.15.0: tik kai vartotojas lange pasakė „taip" gilesnei paieškai
+    patvirtinta: !!window._ctPatvirtinta,
     varantieji: (document.getElementById('varantieji') || {}).value || '',
     galiaNuo: (document.getElementById('galiaNuo') || {}).value || '',
     galiaIki: (document.getElementById('galiaIki') || {}).value || '',
@@ -3814,6 +3822,7 @@ async function runSearch() {
       const errText = await startResp.text().catch(() => startResp.statusText);
       throw new Error('Serverio klaida ' + startResp.status + ': ' + errText.slice(0, 120));
     }
+    window._ctPatvirtinta = false;   // galioja tik vienai paieškai
     const { jobId } = await startResp.json();
 
     let lastLogSnapshot = '';
@@ -3884,6 +3893,15 @@ async function runSearch() {
         break;
       }
       if (job.status === 'done') {
+        // v2.15.0: paieska nepaleista, nes puslapiu per daug. Rodom langa su
+        // pasiulymu (KL-STABDIS-ADMIN: blokuoti + pasiulyti naujausius).
+        if (job.result && job.result.perbrangu) {
+          logContainer.style.display = 'none';
+          status.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;background:var(--warning-dim);border:1px solid var(--warning-border);color:var(--warning);font:500 13px var(--font);">'
+            + '<span style="font-size:15px">\u23f8</span> Paie\u0161ka nepaleista \u2013 pasirinkote per daug puslapi\u0173.</span>';
+          ctPerbranguLangas(job.result);
+          break;
+        }
         renderResults(job.result, status, results);
         break;
       }
@@ -7021,6 +7039,158 @@ function ctPlanoKortele(raktas, p, dabartinis) {
   var kaina = p.kaina ? '€' + p.kaina.toFixed(2).replace('.', ',') + ' <small>/ mėn.</small>' : '€0';
   return '<div class="ct-pl-planas' + (dabartinis ? ' dabartinis' : '') + '"><h3>' + ctEscP(p.pavadinimas) + '</h3>'
     + '<div class="kaina">' + kaina + '</div><ul>' + eil.join('') + '</ul></div>';
+}
+
+
+// ── Kiek skelbimų portaluose pagal dabartinius filtrus (v2.15.0) ─────────
+// Luko prašymas: matyti kiekį PRIEŠ spaudžiant „Ieškoti".
+// Kaina: 1 puslapis iš kiekvieno pasirinkto portalo. Todel:
+//   - laukiam 0,9 s po paskutinio pakeitimo (ne po kiekvieno klavišo),
+//   - tie patys filtrai antrą kartą imami iš atminties,
+//   - puslapiai serveryje guli talpykloje 2 val., tad pakartojimas nieko
+//     nekainuoja ir tiems patiems filtrams.
+var _ctKiekLaikmatis = null, _ctKiekPodelis = {}, _ctKiekVykdoma = false;
+
+function ctKiekioFiltrai() {
+  var portals = [];
+  ['autoplius', 'autogidas', 'autoscout24', 'otomoto', 'mobilede'].forEach(function (k) {
+    var c = document.getElementById('portal-' + k);
+    if (c && c.checked) portals.push(k);
+  });
+  var v = function (id) { var e = document.getElementById(id); return e ? e.value : ''; };
+  return {
+    marke: v('marke'), modelis: v('modelis'), pavaru_deze: v('pavaru_deze'), kuras: v('fuel'),
+    metaiNuo: v('metaiNuo'), metaiIki: v('metaiIki'), ridaIki: v('ridaIki'),
+    kainaNuo: v('kainaNuo'), kainaIki: v('kainaIki'), portals: portals,
+  };
+}
+
+function ctKiekioTekstas(d, portals) {
+  var suma = 0, tikslu = true, dalys = [];
+  var vardai = { autoplius: 'autoplius.lt', autogidas: 'autogidas.lt', autoscout24: 'autoscout24.com', otomoto: 'otomoto.pl', mobilede: 'mobile.de' };
+  portals.forEach(function (k) {
+    var r = d[k === 'mobilede' ? 'mobilede' : k];
+    if (!r || r.count == null) { tikslu = false; dalys.push(vardai[k] + ': nežinoma'); return; }
+    suma += r.count;
+    if (!r.exact) tikslu = false;
+    dalys.push(vardai[k] + ': ' + (r.exact ? '' : 'bent ') + r.count.toLocaleString('lt-LT'));
+  });
+  if (!suma) return { tekstas: 'Pagal šiuos filtrus skelbimų nerasta', detales: dalys.join(' · ') };
+  var apytiksliai = !tikslu || portals.length > 1;
+  return {
+    tekstas: 'Portaluose rasta ' + (apytiksliai ? '~' : '') + suma.toLocaleString('lt-LT') + ' skelbimų',
+    detales: dalys.join(' · ') + (portals.length > 1 ? ' · tas pats automobilis gali būti keliuose portaluose' : ''),
+  };
+}
+
+async function ctKiekioImti() {
+  var el = document.getElementById('ct-kiekis');
+  if (!el || _ctKiekVykdoma) return;
+  var f = ctKiekioFiltrai();
+  if (!f.portals.length) { el.hidden = true; return; }
+  var raktas = JSON.stringify(f);
+  if (_ctKiekPodelis[raktas]) {
+    el.hidden = false;
+    el.textContent = _ctKiekPodelis[raktas].tekstas;
+    el.title = _ctKiekPodelis[raktas].detales;
+    return;
+  }
+  _ctKiekVykdoma = true;
+  el.hidden = false;
+  el.textContent = 'Skaičiuojama…';
+  el.title = '';
+  try {
+    var resp = await ctApi('/api/quick-count', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(f),
+    });
+    if (!resp.ok) { el.hidden = true; return; }
+    var d = await resp.json();
+    if (d.error) { el.hidden = true; return; }
+    var t = ctKiekioTekstas(d, f.portals);
+    _ctKiekPodelis[raktas] = t;
+    el.textContent = t.tekstas;
+    el.title = t.detales;
+  } catch (e) {
+    el.hidden = true;   // kiekis yra patogumas, ne rezultatas - tyliai dingsta
+  } finally {
+    _ctKiekVykdoma = false;
+  }
+}
+
+window.ctKiekioAtnaujinti = function () {
+  clearTimeout(_ctKiekLaikmatis);
+  _ctKiekLaikmatis = setTimeout(ctKiekioImti, 900);
+};
+
+// Pirmo įkelimo metu NESKAIČIUOJAM: puslapis atsidaro su numatytais filtrais,
+// o skaičiavimas be vartotojo veiksmo būtų išleisti kreditai už tai, ko niekas neprašė.
+document.addEventListener('DOMContentLoaded', function () {
+  ['marke', 'modelis', 'pavaru_deze', 'fuel', 'metaiNuo', 'metaiIki', 'ridaIki', 'kainaNuo', 'kainaIki',
+   'portal-autoplius', 'portal-autogidas', 'portal-autoscout24', 'portal-otomoto', 'portal-mobilede'
+  ].forEach(function (id) {
+    var e = document.getElementById(id);
+    if (e) e.addEventListener('change', window.ctKiekioAtnaujinti);
+  });
+});
+
+// ── „Paieska per didele" langas (v2.15.0) ──────────────────────────────────
+// Kreditu SKAICIU cia NERODOM: produkte „kr." reiskia plano kreditus, o
+// puslapiu kaina matuojama ScraperAPI kreditais - du skirtingi dalykai
+// viename ekrane klaidintu. Vartotojui svarbu tik puslapiai.
+var CT_PORTALU_SPALVOS = { autoplius: ['#19b86a', 'AP', 15, 'autoplius.lt'], autogidas: ['#2D6FCA', 'AG', 15, 'autogidas.lt'],
+  autoscout24: ['#F06A00', 'AS24', 13, 'autoscout24.com'], otomoto: ['#C0392B', 'OT', 15, 'otomoto.pl'], mobilede: ['#1F4E8C', 'MD', 15, 'mobile.de'] };
+function ctPortaloZenklas(k) {
+  var p = CT_PORTALU_SPALVOS[k]; if (!p) return '';
+  return '<svg class="ct3-portal-ico" viewBox="0 0 32 32" width="18" height="18" aria-hidden="true">'
+    + '<rect width="32" height="32" rx="7" fill="' + p[0] + '"/>'
+    + '<text x="16" y="22" font-family="system-ui,sans-serif" font-weight="900" font-size="' + p[2] + '" fill="#fff" text-anchor="middle">' + p[1] + '</text></svg>';
+}
+function ctPerbranguLangas(r) {
+  var galima = r.siulomaPuslapiu || 1;
+  var scrim = document.createElement('div');
+  scrim.className = 'ct-modal-scrim';
+  scrim.innerHTML = ''
+    + '<div class="ct-modal" role="dialog" aria-modal="true" aria-labelledby="ct-pb-h">'
+    + '<div class="ct-modal-h">'
+    +   '<span class="ct-modal-t" id="ct-pb-h">Paie\u0161ka per didel\u0117</span>'
+    +   '<span class="ct-modal-d">Pra\u0161\u0117te ' + (r.visiPuslapiai ? 'vis\u0173' : r.puslapiu) + ' puslapi\u0173 i\u0161 kiekvieno portalo. Tiek vienu kartu neskaitome \u2013 '
+    +     'si\u016blome ' + galima + ' naujausius puslapius (apie ' + (galima * 20) + ' \u0161vie\u017eiausi\u0173 skelbim\u0173 kiekviename portale).</span>'
+    + '</div>'
+    + '<div class="ct-modal-b">'
+    +   '<div class="ct-portals" style="--cols:3">'
+    +     '<div class="ct-portals-h"><span>Portalas</span><span>Pra\u0161yta</span><span>Galima</span></div>'
+    +     (r.eilutes || []).map(function (e) {
+            var v = (CT_PORTALU_SPALVOS[e.portalas] || ['', '', 0, e.portalas])[3];
+            return '<div class="ct-portals-r"><span class="ct-portals-p">' + ctPortaloZenklas(e.portalas) + ctEsc(v) + '</span>'
+              + '<b data-k="pra\u0161yta">' + e.puslapiu + '</b><b data-k="galima">' + Math.min(galima, e.puslapiu) + '</b></div>';
+          }).join('')
+    +   '</div>'
+    +   '<div style="font:400 12px/1.5 var(--font);color:var(--text-muted)">Riba saugo bendr\u0105 skaitymo fond\u0105: viena labai gili paie\u0161ka gali suvalgyti vis\u0173 vartotoj\u0173 dienos kiek\u012f. Nori gilesn\u0117s \u2013 palikite ma\u017eiau portal\u0173 ir kartokite.</div>'
+    + '</div>'
+    + '<div class="ct-modal-f">'
+    +   '<button type="button" class="ct-btn ct-btn-primary" id="ct-pb-ok">Skaityti ' + galima + ' naujausius psl.</button>'
+    +   '<button type="button" class="ct-modal-cancel" id="ct-pb-no">At\u0161aukti</button>'
+    + '</div></div>';
+  document.body.appendChild(scrim);
+  function uzdaryti() { scrim.remove(); document.body.style.overflow = ''; }
+  document.body.style.overflow = 'hidden';
+  scrim.addEventListener('click', function (e) { if (e.target === scrim) uzdaryti(); });
+  scrim.querySelector('#ct-pb-no').onclick = uzdaryti;
+  scrim.querySelector('#ct-pb-ok').onclick = function () {
+    var sel = document.getElementById('maxPages');
+    if (sel) {
+      if (!Array.prototype.some.call(sel.options, function (o) { return o.value === String(galima); })) {
+        var opt = document.createElement('option');
+        opt.value = String(galima); opt.textContent = galima + ' (daugiausia dabar)';
+        sel.appendChild(opt);
+      }
+      sel.value = String(galima);
+      if (typeof window.ctUpdateMoreBadge === 'function') window.ctUpdateMoreBadge();
+    }
+    window._ctPatvirtinta = true;
+    uzdaryti();
+    runSearch();
+  };
 }
 
 async function ctPlanuModalas(zinute) {

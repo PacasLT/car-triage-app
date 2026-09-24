@@ -1125,7 +1125,7 @@ body { background: var(--bg-base); color: var(--text-primary); font-family: var(
     z.innerHTML = v.slice(0, 8).map(function (x) {
       var kas = ((x.marke || '') + ' ' + (x.modelis || '')).trim() || 'be markės';
       var kur = (x.portalai || []).length > 2 ? x.portalai.length + ' portalai' : (x.portalai || []).join(', ');
-      var kiek = x.busena === 'stabdyta' ? 'stabdyta' : (x.rasta != null ? x.rasta + ' rasta' : '—');
+      var kiek = (x.busena === 'stabdyta' || x.busena === 'nepaleista') ? x.busena : (x.rasta != null ? x.rasta + ' rasta' : '—');
       return '<div class="adm-log-r"><time>' + laikas(x.laikas).slice(5) + '</time>'
         + '<span>' + esc(kas) + ' · ' + esc(kur) + ' · ' + esc(kiek) + '</span>'
         + '<b>' + (x.krApytiksliai ? '~' : '') + (x.scraperKr != null ? x.scraperKr : '—') + '</b></div>';

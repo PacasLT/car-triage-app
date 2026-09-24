@@ -175,6 +175,16 @@ function reikalautiPaieskos() {
   };
 }
 
+// v2.15.0: paieska skaiciuojama PRIES ja paleidziant, todel kainos stabdzio
+// sustabdyta (nepaleista) paieska turi buti grazinta - kitaip vartotojas
+// netenka paieskos uz tai, kad jam neleido ieskoti.
+function grazintiPaieska(userId) {
+  try {
+    db.prepare(`UPDATE users SET paieskos_menesi = MAX(0, paieskos_menesi - 1),
+                paieskos_viso = MAX(0, paieskos_viso - 1) WHERE id = ?`).run(userId);
+  } catch (e) { console.error('[PLANAI] paieskos grazinimas:', e.message); }
+}
+
 // ── Plano lygio reikalavimas (pvz. sekimas tik Verslo planui) ──────────────
 const LYGIAI = { trial: 0, pro: 1, business: 2 };
 function reikalautiPlano(minPlanas) {
@@ -330,7 +340,7 @@ function zurnalas(userId, kiek) {
 }
 
 module.exports = {
-  PLANAI, KAINOS, PAKETAI, arAdmin,
+  PLANAI, KAINOS, PAKETAI, arAdmin, grazintiPaieska,
   prijungti, busena, reikalautiPaieskos, reikalautiKreditu, reikalautiPlano,
   reikalautiAdmin, visiVartotojai, nustatytiPlana, pridetiKreditu, zurnalas,
 };

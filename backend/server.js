@@ -31,6 +31,7 @@ regitra.ikelti();
 // o /admin/rinka tai parodo (ikelta:false), ne tyliai.
 const rinka = require('./rinka');
 const mobilede = require('./mobilede');
+const kaina = require('./paieskos-kaina');
 try { rinka.ikelti(cache.DATA_DIR); } catch (e) { console.error('[RINKA] NEPAVYKO ikelti:', e.message); }
 const komplektacija = require('./komplektacija');
 const { requireAuth, handleRegister, handleLogin, handleMe, planai, duomenys, paskyra, verifyToken } = require('./auth');
@@ -3142,7 +3143,7 @@ function computeQualityScore(l, mode) {
 const SEARCH_ENGINE_VERSION = 'triage-v3';
 
 function hashFilters(f) {
-  const keys = Object.keys(f).filter((k) => f[k] != null && f[k] !== '' && !(Array.isArray(f[k]) && f[k].length === 0)).sort();
+  const keys = Object.keys(f).filter((k) => k !== 'patvirtinta' && f[k] != null && f[k] !== '' && !(Array.isArray(f[k]) && f[k].length === 0)).sort();
   const normalized = { __v: SEARCH_ENGINE_VERSION };
   for (const k of keys) {
     normalized[k] = Array.isArray(f[k]) ? [...f[k]].sort().join(',') : String(f[k]);
@@ -3150,7 +3151,7 @@ function hashFilters(f) {
   return JSON.stringify(normalized);
 }
 
-async function runSearchJob(jobId, filters) {
+async function runSearchJob(jobId, filters, arAdminas) {
   try {
     // Jei ta pati paieska per 20 min - grazinam is talpyklos nedarydam is naujo skenuojant
     const filterHash = hashFilters(filters);
@@ -3162,12 +3163,43 @@ async function runSearchJob(jobId, filters) {
       return;
     }
 
-    const requestedPages = parseInt(filters.maxPages, 10);
-    const maxPages = Math.min(Math.max(requestedPages || parseInt(process.env.MAX_PAGES || '3', 10), 1), 10);
     const modelQuery = (filters.modelis || '').toLowerCase().trim();
     const selectedPortals = Array.isArray(filters.portals) && filters.portals.length > 0
       ? filters.portals
       : ['autoplius', 'autogidas']; // atsarginis variantas - jei nenurodyta, tikrinam abu
+
+    // ── Puslapiu kiekis ir kainos stabdis (v2.15.0) ───────────────────
+    // Iki siol riba buvo 10 puslapiu ir "visu puslapiu" pasirinkti buvo
+    // negalima. Riba nuimta pagal TS-0922-1602 ("nuimti kaip planuota, su
+    // kainos stabdziu"), todel riba ir stabdis ateina KARTU: be stabdzio
+    // viena paieska su "visi" suvalgytu ketvirtadali menesio fondo.
+    // Stabdzio suma - KL-STABDIS-SUMA (iki 10-16 visiems 200 kr., keiciama
+    // Railway kintamuoju PAIESKOS_RIBA_KR be kodo).
+    // Kas vyksta virsijus - KL-STABDIS-ADMIN: blokuoti ir pasiulyti perskaityti
+    // tik naujausius puslapius uz leistina suma. Adminui stabdzio nera:
+    // matavimams reikia pilno skenavimo.
+    const visiPuslapiai = String(filters.maxPages || '').toLowerCase() === 'visi';
+    const requestedPages = parseInt(filters.maxPages, 10);
+    const maxPages = visiPuslapiai ? kaina.VISI_PUSLAPIAI
+      : Math.min(Math.max(requestedPages || parseInt(process.env.MAX_PAGES || '3', 10), 1), kaina.VISI_PUSLAPIAI);
+    const sam = kaina.samata(selectedPortals, maxPages);
+    const stabdzioRiba = parseInt(process.env.PAIESKOS_RIBA_KR || '200', 10);
+    if (sam.kr > stabdzioRiba && !filters.patvirtinta && !arAdminas) {
+      const telpa = kaina.telpaPuslapiu(selectedPortals, stabdzioRiba);
+      logJob(jobId, '\u23f8 \u0160i paie\u0161ka kainuot\u0173 ~' + sam.kr + ' kr., o riba yra ' + stabdzioRiba + ' kr.');
+      jobs[jobId].result = {
+        perbrangu: true, samata: sam.kr, samataEur: kaina.eurais(sam.kr), riba: stabdzioRiba,
+        puslapiu: maxPages, visiPuslapiai, siulomaPuslapiu: telpa,
+        siulomaKr: kaina.samata(selectedPortals, telpa).kr, eilutes: sam.eilutes,
+        totalScanned: 0, rawFoundCount: 0, medians: {}, candidates: [], allListings: [],
+      };
+      jobs[jobId].status = 'done';
+      return;
+    }
+    if (maxPages > 5) {
+      logJob(jobId, '\ud83d\udd0d Gilus skenavimas: iki ' + maxPages + ' psl. i\u0161 kiekvieno portalo. Sustosime anks\u010diau, jei s\u0105ra\u0161as pasibaigs.');
+      console.log('[PAIESKA] gilus skenavimas: ' + maxPages + ' psl. x ' + selectedPortals.length + ' portalu = ~' + sam.kr + ' ScraperAPI kr.');
+    }
     // Rinkos mediana turi remtis VISAIS to modelio skelbimais, ne tik tais, kurie
     // telpa i vartotojo biudzeta - kitaip "nuolaida nuo rinkos" yra uzdaras ratas
     // (filtruoji 22-35k, mediana irgi 22-35k, skirtumas ~0). Todel portalams
@@ -4478,11 +4510,13 @@ app.post('/api/search-start', requireAuth, planai.reikalautiPaieskos(), (req, re
   const pradzia = Date.now(), priesKr = ATSARGA.paieska.scraperapi, kitosVyko = _vykdomosPaieskos > 0;
   _vykdomosPaieskos++;
   const userId = req.user.id, filtrai = Object.assign({}, req.body || {});
-  Promise.resolve(runSearchJob(jobId, req.body)).finally(() => {
+  Promise.resolve(runSearchJob(jobId, req.body, planai.arAdmin(req.user))).finally(() => {
     _vykdomosPaieskos = Math.max(0, _vykdomosPaieskos - 1);
     const j = jobs[jobId] || {}, r = j.result || {};
+    // Kainos stabdis paieskos NEPALEIDO - grazinam ja i plano limita.
+    if (r.perbrangu) planai.grazintiPaieska(userId);
     paskyra.irasytiPaieska(userId, filtrai, {
-      busena: j.status === 'error' ? 'error' : (ATSARGA.paieska.scraperapi === priesKr && r.totalScanned && (Date.now() - pradzia) < 3000 ? 'talpykla' : (j.status || 'done')),
+      busena: r.perbrangu ? 'nepaleista' : (j.status === 'error' ? 'error' : (ATSARGA.paieska.scraperapi === priesKr && r.totalScanned && (Date.now() - pradzia) < 3000 ? 'talpykla' : (j.status || 'done'))),
       rasta: r.totalScanned, kandidatai: Array.isArray(r.candidates) ? r.candidates.length : null,
       scraperKr: ATSARGA.paieska.scraperapi - priesKr, apytiksliai: kitosVyko || _vykdomosPaieskos > 0,
       trukmeMs: Date.now() - pradzia,

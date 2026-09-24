@@ -14,7 +14,7 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 | Nr.47 | Neatitinkantys filtrų (autogidas iškelti) rodomi „Kiti skelbimai“ | Nerodyti visai, rinkos kainai lieka. |
 | Kuras | Griežtas kuro filtras (KL-PUSH-0922E) | Tik pasirinktas kuras; variantai: Dyzelinas, Benzinas, Benzinas/dujos, Benzinas/elektra, Elektra, Dyzelinas/elektra. Push v2.10.1–2 – po šito, su nauju leidimu. |
 | 53 paketas | `card` klasė nuo apvalkalo (DZ-KORTELES: visi trys) | v2.11.0; prieš – JS `closest('.card')` / `.card` paieška. |
-| Stabdis | Kiekis portaluose + kaina + stabdis + Stop | KL-STABDIS-SUMA (Finansininko ribos kreditais + fondo sargas + admin kreditų/likučio rodinys), KL-STABDIS-ADMIN (blokuoti + „tik naujausi už leistiną“), KL-STOP (sustabdyti ir rodyti rastus). Dizainas – laukia KL-STOP-DIZAINAS. Užsienio limitas nuimamas pirmas. |
+| Stabdis | Kiekis portaluose + kaina + stabdis + Stop | **Dalis padaryta v2.15.0:** puslapių pasirinkimas iki „visų“ + kainos riba (`PAIESKOS_RIBA_KR`, 200 kr.) su langu „per didelė paieška“. Liko: Stop mygtukas (KL-STOP), kiekis portaluose prieš paiešką (DZ-LENTELE) ir admin kreditų rodinys pagal vartotoją (KL-F3PLUS). |
 | Teisininkas | KL-TEISININKAS: taip | Faktų dokumentas iš kodo, pirma žinutė, rolė DARBO-SISTEMA. |
 | KL-PATIKRA2 | Filtrai kaip autoplius | Metai, kaina, rida, galia – sąrašai; neįvesta → „–“; varantieji ratai ir kuras – autoplius variantai. |
 | FN-0922-1300 | Nauji planai `planai.js` + LT/užsienio paieškų skaidymas | Iki 10-15. |
