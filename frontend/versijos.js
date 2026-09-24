@@ -8,6 +8,19 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.16.0', data: '2026-09-24', pavadinimas: 'Modelio apžvalga – „Analizuoti modelį“',
+    pakeitimai: [
+      'Po paieškos, kai pasirinktas modelis, virš rezultatų atsiranda mygtukas „Analizuoti modelį“.',
+      'Apžvalgoje: kartos ir varikliai, dažniausios bėdos su šaltiniais, ką tikrinti apžiūros metu, eksploatacija ir Lietuvos rinka.',
+      'Skaičiai – iš Regitros, techninės apžiūros duomenų ir mūsų sukauptos kainų istorijos; pasakojimą surenka AI iš interneto šaltinių.',
+      'Apžvalgoje – ir kainų diagrama pagal gamybos metus: kiekvienų metų kainos mediana iš tos pačios paieškos, užvedus matosi tiksli suma ir kiek skelbimų.',
+      'Lango apačioje galima užduoti papildomą klausimą apie tą patį modelį („ar verta dyzelis po 250 000 km?“) – atsakymas remiasi apžvalga ir mūsų duomenimis, 1 kreditas.',
+      'Toks pat pokalbio laukas yra ir skelbimo puslapyje – ten atsakymai remiasi to automobilio duomenimis ir jo apžvalga, ne modeliu apskritai.',
+      'Tai pokalbis, ne pavieniai klausimai: kitas klausimas mato ankstesnius atsakymus, tad galima klausti trumpai („o dyzelis?“).',
+      'Kaina – 2 kreditai; paruošta apžvalga 30 dienų galioja visiems, tad antrą kartą ji nieko nekainuoja.',
+    ],
+  },
+  {
     versija: '2.15.0', data: '2026-09-24', pavadinimas: 'Puslapių kiekį renkatės patys – iki „visų“',
     pakeitimai: [
       'Puslapių kiekio sąraše atsirado 10, 20 ir „Visi (kol baigsis sąrašas)“ – anksčiau daugiausia buvo 5.',

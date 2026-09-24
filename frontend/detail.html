@@ -766,6 +766,20 @@ button{font-family:inherit;cursor:pointer}
         <div id="dp-iranga"></div>
       </div>
     </div>
+
+    <!-- v2.16.0: klausimai apie ŠĮ skelbimą. Kontekstas – to paties auto analizė,
+         todėl atsakymas kalba apie šį automobilį, ne apie modelį apskritai. -->
+    <section id="dp-klaus" style="display:flex;flex-direction:column;gap:9px;border-top:1px solid var(--border);margin-top:18px;padding-top:16px">
+      <span style="font:600 10px/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim)">Pokalbis apie šį skelbimą</span>
+      <div id="dp-klaus-sarasas" style="display:flex;flex-direction:column;gap:10px"></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <input class="ct-field" id="dp-klaus-laukas" type="text" maxlength="300"
+          placeholder="Pvz.: ar ši kaina pagrįsta pagal ridą ir komplektaciją?" aria-label="Klausimas apie skelbimą"
+          style="flex:1;min-width:220px">
+        <button type="button" class="ct-btn ct-btn-sm ct-btn-primary" id="dp-klaus-btn">Klausti</button>
+      </div>
+      <span style="font:400 11px/1.5 var(--font);color:var(--text-dim)">Klausiama toliau to paties pokalbio – galima klausti trumpai · 1 kreditas už klausimą</span>
+    </section>
   </div>
 
   <!-- OTHER PANES -->
@@ -1333,6 +1347,71 @@ window.ctApi = function (kelias, params) {
       btn.title = saved ? 'Išsaugota – spauskite, kad pašalintumėte' : 'Išsaugoti į mėgstamiausius';
     });
   }
+  // ── Klausimai apie šį skelbimą (v2.16.0) ─────────────────────────────────
+  // Tas pats laukas kaip modelio apžvalgoje, tik kontekstas kitas: čia klausiama
+  // apie KONKRETŲ automobilį, todėl į serverį keliauja skelbimo laukai, o
+  // serveris prideda jau padarytą to skelbimo analizę.
+  function dpKlausimaiParuosti() {
+    var laukas = document.getElementById('dp-klaus-laukas');
+    var mygt = document.getElementById('dp-klaus-btn');
+    var sarasas = document.getElementById('dp-klaus-sarasas');
+    if (!laukas || !mygt || !sarasas || laukas.dataset.paruosta) return;
+    laukas.dataset.paruosta = '1';
+    // Pokalbis apie ŠĮ skelbimą: klausimai mato ankstesnius atsakymus.
+    var pokalbis = [];
+
+    async function klausti() {
+      var kl = (laukas.value || '').trim();
+      if (!kl) { laukas.focus(); return; }
+      var c = window.__dpCar || {};
+      mygt.disabled = true; laukas.disabled = true;
+      var senas = mygt.textContent;
+      mygt.textContent = '\u23f3';
+      var blokas = document.createElement('div');
+      blokas.innerHTML = '<div style="font:600 12.5px/1.45 var(--font);color:var(--text-primary)"></div>'
+        + '<div style="font:400 13px/1.55 var(--font);color:var(--text-secondary)">Galvoju\u2026</div>';
+      blokas.firstChild.textContent = kl;
+      sarasas.appendChild(blokas);
+      try {
+        var resp = await ctApi('/api/skelbimo-klausimas', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: window.__dpUrl, klausimas: kl, kaina: c.kaina || null, istorija: pokalbis.slice(-8),
+            kortele: {
+              modelis: c.modelis, metai: c.metai, rida: c.rida, kaina: c.kaina, kuras: c.kuras,
+              pavarai: c.pavarai, galia: c.galia, marketMedian: c.marketMedian,
+              diffPct: c.diffPct, source: c.source, kartos: c.kartos,
+            },
+          }),
+        });
+        if (resp.status === 402) { blokas.remove(); return; }   // planų langas atsidaro per ctApi
+        var a = await resp.json();
+        if (!resp.ok || a.error) {
+          blokas.lastChild.textContent = a.error || 'Nepavyko atsakyti.';
+          blokas.lastChild.style.color = 'var(--danger)';
+          return;
+        }
+        blokas.lastChild.textContent = a.atsakymas;
+        pokalbis.push({ role: 'user', tekstas: kl }, { role: 'assistant', tekstas: a.atsakymas });
+        blokas.scrollIntoView({ block: 'nearest' });
+        if (!a.suAnalize) {
+          var past = document.createElement('div');
+          past.style.cssText = 'font:400 11px/1.5 var(--font);color:var(--text-dim)';
+          past.textContent = 'Atsakyta iš skelbimo laukų – pilna apžvalga dar nepadaryta, su ja atsakymas būtų tikslesnis.';
+          blokas.appendChild(past);
+        }
+        laukas.value = '';
+      } catch (e) {
+        blokas.lastChild.textContent = 'Nepavyko atsakyti: ' + e.message;
+        blokas.lastChild.style.color = 'var(--danger)';
+      } finally {
+        mygt.disabled = false; laukas.disabled = false; mygt.textContent = senas; laukas.focus();
+      }
+    }
+    mygt.onclick = klausti;
+    laukas.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); klausti(); } });
+  }
+
   function dpArIssaugotas() {
     var favs = []; try { favs = JSON.parse(localStorage.getItem('carTriageFavorites') || '[]'); } catch(e) {}
     return !!window.__dpUrl && favs.some(function (f) { return (typeof f === 'object' ? f.url : f) === window.__dpUrl; });
@@ -1490,6 +1569,7 @@ window.ctApi = function (kelias, params) {
     }
     window.__dpUrl = c.url || '';
     window.__dpCar = c;
+    dpKlausimaiParuosti();
     window.__dpPhotos = photos;
     window.__dpVinPaslėptas = !!(data.vinPaslėptas || c.vinPaslėptas);
     window.__dpVinPrefiksas = data.vinPrefiksas || c.vinPrefiksas || null;

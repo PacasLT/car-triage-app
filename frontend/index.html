@@ -2802,6 +2802,9 @@
         <div id="ct-sort-menu" class="ct-sort-menu"></div>
       </div>
     </div>
+    <!-- v2.16.0: apzvalga apie PATI modeli (ne apie viena skelbima). Rodomas
+         tik tada, kai paieskoje buvo pasirinktas modelis. -->
+    <button type="button" id="ct-modelio-btn" class="ct-btn ct-btn-sm" hidden onclick="ctModelioApzvalga()">📘 Analizuoti modelį</button>
     <!-- PASALINTA: "Pagrindinis" rezimo zenklelis. Tinder narsymas - tik telefone (CSS) -->
     <button id="tinder-launch-btn" onclick="startTinder()" style="padding:9px 18px; background:linear-gradient(135deg,var(--accent),var(--accent-light)); color:#fff; border:none; border-radius:20px; font-size:13px; font-weight:600; cursor:pointer; box-shadow:0 4px 14px rgba(124,111,247,0.4);">🔥 Tinder naršymas</button>
   </div>
@@ -3745,6 +3748,7 @@ async function runSearch() {
     zemiauRinkos: (document.getElementById('pf-zemiau') || {}).value || '',
     minBalas: (document.getElementById('pf-balas') || {}).value || '',
     searchMode: _ctSearchMode || 'default',
+    // v2.16.0: įsimenam, ko buvo ieškoma – „Analizuoti modelį" ima iš čia
     portals: [
       document.getElementById('portal-autoplius').checked ? 'autoplius' : null,
       document.getElementById('portal-autogidas').checked ? 'autogidas' : null,
@@ -3822,6 +3826,7 @@ async function runSearch() {
       const errText = await startResp.text().catch(() => startResp.statusText);
       throw new Error('Serverio klaida ' + startResp.status + ': ' + errText.slice(0, 120));
     }
+    window.ctPaskFiltrai = filters;
     window._ctPatvirtinta = false;   // galioja tik vienai paieškai
     const { jobId } = await startResp.json();
 
@@ -4841,6 +4846,7 @@ function renderResults(data, status, results) {
   if (window.ctLogSkaiciai) window.ctLogSkaiciai(data.rawFoundCount || 0, data.totalScanned || 0, data.candidates.length);
   document.getElementById('sort-bar').style.display = data.candidates.length > 0 ? 'flex' : 'none';
   window.ctSortSetLabel('quality');
+  ctModelioMygtukas();
   results.innerHTML = '';
   (window.renderCandidateCards || renderCandidateCards)(data.candidates, results);
   renderAllListings(data.allListings || [], data.candidates || []);
@@ -7042,6 +7048,269 @@ function ctPlanoKortele(raktas, p, dabartinis) {
 }
 
 
+
+// ── „Analizuoti modelį" (v2.16.0) ─────────────────────────────────
+// Apžvalga apie VISĄ modelį: mūsų skaičiai (Regitra, techninė apžiūra, sukaupta
+// kainų istorija) plius AI su interneto paieška. Stiliai kol kas inline –
+// dizaino failai neliesti; kai dizaineris duos apžvalgos langą, pereis į klases.
+var CT_APZ_ST = {
+  h: 'font:600 10px/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin:2px 0 -4px',
+  p: 'font:400 13px/1.55 var(--font);color:var(--text-secondary);margin:0',
+  ul: 'margin:0;padding-left:18px;font:400 13px/1.6 var(--font);color:var(--text-secondary)',
+  maz: 'font:400 11px/1.5 var(--font);color:var(--text-dim)',
+};
+
+
+// ── Kainų diagrama pagal gamybos metus (v2.16.0) ──────────────────────
+// Skaičiuojama iš TOS PAČIOS paieškos, kurią vartotojas ką tik matė – ne iš
+// serverio ir ne iš AI. Metai su vienu skelbimu praleidžiami: iš vienos kainos
+// mediana nėra mediana.
+function ctKainuPagalMetus() {
+  var d = window.currentData || {};
+  var visi = (d.allListings || []).concat(d.candidates || []);
+  var matyti = {}, pagalMetus = {}, dabar = new Date().getFullYear();
+  visi.forEach(function (l) {
+    if (!l || !l.kaina || !l.metai) return;
+    if (l.url) { if (matyti[l.url]) return; matyti[l.url] = 1; }
+    var m = parseInt(l.metai, 10), k = parseInt(l.kaina, 10);
+    if (!m || m < 1980 || m > dabar + 1 || !k || k < 100) return;
+    (pagalMetus[m] = pagalMetus[m] || []).push(k);
+  });
+  return Object.keys(pagalMetus).map(Number).sort(function (a, b) { return a - b; })
+    .map(function (m) {
+      var k = pagalMetus[m].sort(function (a, b) { return a - b; });
+      return { metai: m, kiek: k.length, mediana: k[Math.floor(k.length / 2)] };
+    }).filter(function (x) { return x.kiek >= 2; });
+}
+
+// Stulpeliai: <= 24 px storio, 4 px apvalus virsus, 2 px tarpas tarp gretimu,
+// plona pagrindo linija. Skaičius rašomas tik ties branžiausiais ir pigiausiais
+// metais – skaičius ant kiekvieno stulpelio niekas neskaito. Likusius pasako
+// užvedimas (SVG `<title>`).
+function ctKainuGrafikas(eil) {
+  if (!eil || eil.length < 2) return '';
+  var W = 460, H = 156, virsus = 20, apacia = 20, kaire = 2;
+  var plotH = H - virsus - apacia;
+  var maks = Math.max.apply(null, eil.map(function (e) { return e.mediana; }));
+  var minE = eil.reduce(function (a, b) { return b.mediana < a.mediana ? b : a; });
+  var maksE = eil.reduce(function (a, b) { return b.mediana > a.mediana ? b : a; });
+  var juosta = (W - kaire * 2) / eil.length;
+  var plotis = Math.max(6, Math.min(24, juosta - 2));
+  var kasKelinti = eil.length > 10 ? 2 : 1;
+  var stulpeliai = eil.map(function (e, i) {
+    var h = Math.max(3, Math.round((e.mediana / maks) * plotH));
+    var x = Math.round(kaire + i * juosta + (juosta - plotis) / 2);
+    var y = virsus + plotH - h;
+    var r = Math.min(4, plotis / 2, h);
+    var kelias = 'M' + x + ' ' + (y + h) + ' V' + (y + r)
+      + ' a' + r + ' ' + r + ' 0 0 1 ' + r + ' -' + r
+      + ' h' + (plotis - 2 * r)
+      + ' a' + r + ' ' + r + ' 0 0 1 ' + r + ' ' + r
+      + ' V' + (y + h) + ' Z';
+    var zyma = (e === minE || e === maksE)
+      ? '<text x="' + (x + plotis / 2) + '" y="' + (y - 5) + '" text-anchor="middle" '
+        + 'style="font:600 9.5px var(--font-mono);fill:var(--text-secondary)">'
+        + String(Math.round(e.mediana / 100) / 10).replace('.', ',') + 'k</text>'
+      : '';
+    var metai = (i % kasKelinti === 0)
+      ? '<text x="' + (x + plotis / 2) + '" y="' + (H - 6) + '" text-anchor="middle" '
+        + 'style="font:400 9px var(--font-mono);fill:var(--text-dim)">' + e.metai + '</text>'
+      : '';
+    return '<g><path d="' + kelias + '" fill="var(--accent)"><title>' + e.metai + ' \u00b7 '
+      + e.mediana.toLocaleString('lt-LT') + ' \u20ac \u00b7 ' + e.kiek + ' skelb.</title></path>'
+      + zyma + metai + '</g>';
+  }).join('');
+  return '<figure style="margin:0;display:flex;flex-direction:column;gap:6px">'
+    + '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" height="' + H + '" role="img" '
+    + 'aria-label="Kain\u0173 mediana pagal gamybos metus" style="overflow:visible">'
+    + '<line x1="0" y1="' + (virsus + plotH + 0.5) + '" x2="' + W + '" y2="' + (virsus + plotH + 0.5) + '" '
+    + 'stroke="var(--border)" stroke-width="1"/>' + stulpeliai + '</svg>'
+    + '<figcaption style="font:400 11px/1.5 var(--font);color:var(--text-dim)">'
+    + 'Kainos mediana pagal gamybos metus \u2013 i\u0161 \u0161ios paie\u0161kos. Rodomi metai, kuriuose rasti bent 2 skelbimai; '
+    + 'u\u017evedus matosi tiksli suma ir kiek skelbim\u0173.</figcaption></figure>';
+}
+
+function ctModelioMygtukas() {
+  var b = document.getElementById('ct-modelio-btn'), f = window.ctPaskFiltrai;
+  if (!b) return;
+  b.hidden = !(f && f.marke && f.modelis);
+  if (!b.hidden) b.title = 'Ap\u017evalga apie ' + f.marke + ' ' + f.modelis + ' \u2013 kartos, b\u0117dos, LT rinka';
+}
+
+function ctApzSk(n) { return n == null ? '\u2013' : Number(n).toLocaleString('lt-LT'); }
+// Lietuvoje tr\u0161kmuo yra kablelis - `toLocaleString` sveikiems skai\u010diams to nedaro.
+function ctApzPr(n) { return n == null ? '\u2013' : String(n).replace('.', ','); }
+
+function ctApzMusuDuomenys(d) {
+  var e = [];
+  if (d.lt) {
+    e.push(['Lietuvoje registruota', ctApzSk(d.lt.parkas) + ' vnt.']);
+    e.push(['\u012eve\u017eta per 12 m\u0117n.', ctApzSk(d.lt.importuota12) + (d.lt.importoDalisPct != null ? ' (' + ctApzPr(d.lt.importoDalisPct) + ' % parko)' : '')]);
+    e.push(['Kei\u010dia savinink\u0105 per metus', ctApzPr(d.lt.apyvartaPct) + ' %']);
+    e.push(['Neteikia technin\u0117s ap\u017ei\u016bros', ctApzPr(d.lt.taNeleistaPct) + ' % (15 m. ir senesni \u2013 ' + ctApzPr(d.lt.taNeleista15Pct) + ' %)']);
+    e.push(['Ridos mediana', ctApzSk(d.lt.ridaMediana) + ' km \u00b7 ' + ctApzSk(d.lt.kmPerMetusMediana) + ' km/metus']);
+  }
+  if (d.kainuKryptis) {
+    e.push(['Kain\u0173 kryptis', d.kainuKryptis.kryptis + ' (' + (d.kainuKryptis.procentai > 0 ? '+' : '') + d.kainuKryptis.procentai
+      + ' %, ' + d.kainuKryptis.nuo + ' \u2192 ' + d.kainuKryptis.iki + ')']);
+  }
+  if (d.pardavimoGreitis) e.push(['Parduodama per', d.pardavimoGreitis.medianaDienu + ' d. (mediana)']);
+  if (d.kartos && d.kartos.length) e.push(['Kartos', d.kartos.join(', ')]);
+  if (!e.length) return '<p style="' + CT_APZ_ST.maz + '">\u0160iam modeliui savo skai\u010di\u0173 dar neturime \u2013 ap\u017evalga remiasi tik interneto \u0161altiniais.</p>';
+  return '<div style="display:grid;grid-template-columns:auto 1fr;gap:5px 14px;align-items:baseline">'
+    + e.map(function (x) {
+        return '<span style="' + CT_APZ_ST.maz + '">' + ctEsc(x[0]) + '</span>'
+          + '<b style="font:600 12.5px/1.4 var(--font);color:var(--text-primary)">' + ctEsc(String(x[1])) + '</b>';
+      }).join('') + '</div>';
+}
+
+function ctApzSkyrius(antraste, turinys) {
+  if (!turinys) return '';
+  return '<section style="display:flex;flex-direction:column;gap:7px"><span style="' + CT_APZ_ST.h + '">' + ctEsc(antraste) + '</span>' + turinys + '</section>';
+}
+
+function ctApzSarasas(masyvas, formatas) {
+  if (!Array.isArray(masyvas) || !masyvas.length) return '';
+  return '<ul style="' + CT_APZ_ST.ul + '">' + masyvas.map(formatas).join('') + '</ul>';
+}
+
+function ctModelioLangas(r) {
+  var a = r.apzvalga || {}, d = r.duomenys || {};
+  var pav = ((r.marke || '') + ' ' + (r.modelis || '')).trim();
+  var laik = (r.metaiNuo || r.metaiIki) ? ((r.metaiNuo || '\u2026') + '\u2013' + (r.metaiIki || '\u2026') + ' m.') : 'visos laidos';
+  var scrim = document.createElement('div');
+  scrim.className = 'ct-modal-scrim';
+  scrim.innerHTML = ''
+    + '<div class="ct-modal" role="dialog" aria-modal="true" aria-labelledby="ct-apz-h">'
+    + '<button type="button" class="ct-modal-x" aria-label="U\u017edaryti">\u2715</button>'
+    + '<div class="ct-modal-h">'
+    +   '<span class="ct-modal-t" id="ct-apz-h">' + ctEsc(pav) + '</span>'
+    +   '<span class="ct-modal-d">Modelio ap\u017evalga \u00b7 ' + ctEsc(laik) + (r.isTalpyklos ? ' \u00b7 paruo\u0161ta anks\u010diau' : '') + '</span>'
+    + '</div>'
+    + '<div class="ct-modal-b">'
+    +   (a.santrauka ? '<p style="' + CT_APZ_ST.p + '">' + ctEsc(a.santrauka) + '</p>' : '')
+    +   ctApzSkyrius('M\u016bs\u0173 duomenys', ctApzMusuDuomenys(d))
+    +   ctApzSkyrius('Kainos pagal metus', ctKainuGrafikas(ctKainuPagalMetus()))
+    +   ctApzSkyrius('Kartos', ctApzSarasas(a.kartos, function (k) {
+          return '<li><b>' + ctEsc(k.kodas || '') + '</b>' + (k.metai ? ' \u00b7 ' + ctEsc(k.metai) : '')
+            + (k.kas_pasikeite ? ' \u2013 ' + ctEsc(k.kas_pasikeite) : '') + '</li>';
+        }))
+    +   ctApzSkyrius('Varikliai', ctApzSarasas(a.varikliai, function (v) {
+          return '<li><b>' + ctEsc(v.variklis || '') + '</b>' + (v.ka_zinoti ? ' \u2013 ' + ctEsc(v.ka_zinoti) : '') + '</li>';
+        }))
+    +   ctApzSkyrius('Da\u017eniausios b\u0117dos', ctApzSarasas(a.problemos, function (pb) {
+          return '<li><b>' + ctEsc(pb.kas || '') + '</b>'
+            + (pb.kada ? ' \u00b7 ' + ctEsc(pb.kada) : '') + (pb.kaina ? ' \u00b7 ' + ctEsc(pb.kaina) : '')
+            + (pb.saltinis ? '<br><span style="' + CT_APZ_ST.maz + '">' + ctEsc(pb.saltinis) + '</span>' : '') + '</li>';
+        }))
+    +   ctApzSkyrius('K\u0105 tikrinti ap\u017ei\u016bros metu', ctApzSarasas(a.ka_tikrinti, function (x) { return '<li>' + ctEsc(x) + '</li>'; }))
+    +   ctApzSkyrius('Eksploatacija', a.eksploatacija ? '<p style="' + CT_APZ_ST.p + '">' + ctEsc(a.eksploatacija) + '</p>' : '')
+    +   ctApzSkyrius('Lietuvos rinka', a.rinka_lt ? '<p style="' + CT_APZ_ST.p + '">' + ctEsc(a.rinka_lt) + '</p>' : '')
+    +   ctApzSkyrius('Kam tinka', a.kam_tinka ? '<p style="' + CT_APZ_ST.p + '">' + ctEsc(a.kam_tinka) + '</p>' : '')
+    +   '<p style="' + CT_APZ_ST.maz + '">\u0160altiniai: '
+    +     ctEsc((d.saltiniai || []).concat(a.saltiniai || []).join(' \u00b7 ') || '\u2013')
+    +     '. Ap\u017evalga yra bendra informacija apie model\u012f, ne konkretaus automobilio patikra.</p>'
+    +   '<section style="display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--border);padding-top:14px">'
+    +     '<span style="' + CT_APZ_ST.h + '">Pokalbis apie \u0161\u012f model\u012f</span>'
+    +     '<div id="ct-apz-atsakymai" style="display:flex;flex-direction:column;gap:10px"></div>'
+    +     '<div style="display:flex;gap:8px;align-items:center">'
+    +       '<input class="ct-field" id="ct-apz-kl" type="text" maxlength="300" '
+    +         'placeholder="Pvz.: ar verta imti dyzel\u012f po 250 000 km?" aria-label="Klausimas apie model\u012f" style="flex:1;min-width:0">'
+    +       '<button type="button" class="ct-btn ct-btn-sm ct-btn-primary" id="ct-apz-kl-btn">Klausti</button>'
+    +     '</div>'
+    +     '<span style="' + CT_APZ_ST.maz + '">Klausiama toliau to paties pokalbio \u2013 galima klausti trumpai \u00b7 1 kreditas u\u017e klausim\u0105</span>'
+    +   '</section>'
+    + '</div>'
+    + '<div class="ct-modal-f"><button type="button" class="ct-btn ct-btn-primary" id="ct-apz-ok">U\u017edaryti</button></div></div>';
+  document.body.appendChild(scrim);
+  function uzdaryti() { scrim.remove(); document.body.style.overflow = ''; }
+  document.body.style.overflow = 'hidden';
+  scrim.addEventListener('click', function (e) { if (e.target === scrim) uzdaryti(); });
+  scrim.querySelector('.ct-modal-x').onclick = uzdaryti;
+  scrim.querySelector('#ct-apz-ok').onclick = uzdaryti;
+
+  // \u2500\u2500 Papildomi klausimai apie t\u0105 pat\u012f model\u012f \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+  var laukas = scrim.querySelector('#ct-apz-kl'), mygt = scrim.querySelector('#ct-apz-kl-btn');
+  var sarasas = scrim.querySelector('#ct-apz-atsakymai');
+  // Pokalbis: kiekvienas klausimas mato ankstesnius, tod\u0117l galima klausti
+  // trumpai („o dyzelis?"). Gyvuoja tiek, kiek atidarytas langas.
+  var pokalbis = [];
+  async function klausti() {
+    var kl = (laukas.value || '').trim();
+    if (!kl) { laukas.focus(); return; }
+    mygt.disabled = true; laukas.disabled = true;
+    var senas = mygt.textContent;
+    mygt.textContent = '\u23f3';
+    var blokas = document.createElement('div');
+    blokas.innerHTML = '<div style="font:600 12.5px/1.45 var(--font);color:var(--text-primary)">' + ctEsc(kl) + '</div>'
+      + '<div style="' + CT_APZ_ST.p + '">Galvoju\u2026</div>';
+    sarasas.appendChild(blokas);
+    sarasas.scrollIntoView({ block: 'nearest' });
+    try {
+      var resp = await ctApi('/api/modelio-klausimas', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ marke: r.marke, modelis: r.modelis, metaiNuo: r.metaiNuo, metaiIki: r.metaiIki,
+          klausimas: kl, istorija: pokalbis.slice(-8) }),
+      });
+      if (resp.status === 402) {
+        blokas.remove();
+        if (typeof ctPlanuModalas === 'function') ctPlanuModalas('Klausimui apie model\u012f reikia kredit\u0173.');
+        return;
+      }
+      var a = await resp.json();
+      if (!resp.ok || a.error) {
+        blokas.lastChild.textContent = a.error || 'Nepavyko atsakyti.';
+        blokas.lastChild.style.color = 'var(--danger)';
+        return;
+      }
+      blokas.lastChild.textContent = a.atsakymas;
+      pokalbis.push({ role: 'user', tekstas: kl }, { role: 'assistant', tekstas: a.atsakymas });
+      laukas.value = '';
+      blokas.scrollIntoView({ block: 'nearest' });
+    } catch (e) {
+      blokas.lastChild.textContent = 'Nepavyko atsakyti: ' + e.message;
+      blokas.lastChild.style.color = 'var(--danger)';
+    } finally {
+      mygt.disabled = false; laukas.disabled = false; mygt.textContent = senas;
+      laukas.focus();
+    }
+  }
+  mygt.onclick = klausti;
+  laukas.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); klausti(); } });
+}
+
+window.ctModelioApzvalga = async function () {
+  var f = window.ctPaskFiltrai, b = document.getElementById('ct-modelio-btn');
+  if (!f || !f.marke || !f.modelis) return;
+  var sena = b.innerHTML;
+  b.disabled = true;
+  b.textContent = '\u23f3 Renkam informacij\u0105\u2026';
+  try {
+    // Paieskos santrauka keliauja kartu: taip apzvalga remiasi TOMIS paciomis
+    // kainomis, kurias vartotojas ka tik mate.
+    var d = window.currentData || {}, kainos = (d.candidates || []).map(function (c) { return c.kaina; }).filter(Boolean).sort(function (x, y) { return x - y; });
+    var resp = await ctApi('/api/modelio-apzvalga', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        marke: f.marke, modelis: f.modelis, metaiNuo: f.metaiNuo, metaiIki: f.metaiIki,
+        rinka: kainos.length ? {
+          rasta: d.totalScanned || kainos.length, mediana: kainos[Math.floor(kainos.length / 2)],
+          nuo: kainos[0], iki: kainos[kainos.length - 1],
+        } : null,
+      }),
+    });
+    if (resp.status === 402) { if (typeof ctPlanuModalas === 'function') ctPlanuModalas('Modelio ap\u017evalgai reikia kredit\u0173.'); return; }
+    var r = await resp.json();
+    if (!resp.ok || r.error) { showToast(r.error || 'Nepavyko paruo\u0161ti ap\u017evalgos', 'error', 7000); return; }
+    ctModelioLangas(r);
+  } catch (e) {
+    showToast('Nepavyko paruo\u0161ti ap\u017evalgos: ' + e.message, 'error', 7000);
+  } finally {
+    b.disabled = false;
+    b.innerHTML = sena;
+  }
+};
+
 // ── Kiek skelbimų portaluose pagal dabartinius filtrus (v2.15.0) ─────────
 // Luko prašymas: matyti kiekį PRIEŠ spaudžiant „Ieškoti".
 // Kaina: 1 puslapis iš kiekvieno pasirinkto portalo. Todel:
@@ -7218,6 +7487,7 @@ async function ctPlanuModalas(zinute) {
   html += '<p class="ct-pl-h">Kiek kainuoja veiksmai</p><div class="ct-pl-kainos">'
     + '<span>Greita apžvalga <b>' + k.analize + ' kr</b></span>'
     + (k.analizePilna != null ? '<span>Pilna apžvalga <b>' + k.analizePilna + ' kr</b></span>' : '')
+    + (k.modelioApzvalga != null ? '<span>Modelio ap\u017evalga <b>' + k.modelioApzvalga + ' kr</b></span>' : '')
     + '<span>VIN istorija <b>' + k.vin + ' kr</b></span>'
     + '<span>Pardavėjo patikra <b>' + k.pardavejas + ' kr</b></span><span>Palyginimas <b>' + k.palyginimas + ' kr</b></span>'
     + (k.megstamiuAtnaujinimas != null ? '<span>Mėgstamiausių atnaujinimas <b>' + k.megstamiuAtnaujinimas + ' kr</b></span>' : '')

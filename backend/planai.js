@@ -36,6 +36,8 @@ const KAINOS = {
   pardavejas: 1,   // pardavėjo patikra
   palyginimas: 2,  // gilus 2–3 auto palyginimas
   megstamiuAtnaujinimas: 1, // v1.23.1: visu megstamiausiu busenos/kainos pertikrinimas
+  modelioApzvalga: 2,  // v2.16.0: viso modelio apzvalga (web paieska + musu duomenys)
+  modelioKlausimas: 1, // v2.16.0: papildomas klausimas apie ta pati modeli
 };
 
 const PAKETAI = [

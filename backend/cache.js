@@ -37,6 +37,7 @@ function rasytiSaugiai(failas, turinys) {
 
 const PAGE_TTL_MS = 120 * 60 * 1000;       // 2 val - puslapiu nuskaitymas
 const ANALYSIS_TTL_MS = 24 * 60 * 60 * 1000; // 24 val - detali analize
+const MODELIO_TTL_MS = parseInt(process.env.MODELIO_PODELIS_D || '30', 10) * 24 * 60 * 60 * 1000; // modelio apzvalga
 const SEARCH_TTL_MS = 20 * 60 * 1000;       // 20 min - tos pacios filtru paieskos talpykla
 
 // --- PAGRINDINĖ ATMINTINĖ (ikeliam VIENKARTI paleidus) ---
@@ -79,7 +80,10 @@ let _cacheTimer = null;
 
 function valytiPasenusius() {
   const dabar = Date.now();
-  const ribos = { analysis: ANALYSIS_TTL_MS, shortComment: ANALYSIS_TTL_MS };
+  // `modelis` gyvena ilgai: modelio kartos ir tipines bedos nesikeicia per
+  // savaite, o apzvalga ta pati VISIEMS vartotojams - todel antram zmogui ji
+  // nieko nebekainuoja (v2.16.0).
+  const ribos = { analysis: ANALYSIS_TTL_MS, shortComment: ANALYSIS_TTL_MS, modelis: MODELIO_TTL_MS };
   for (const ns of Object.keys(_cache)) {
     const ttl = ribos[ns];
     if (!ttl || !_cache[ns]) continue;
@@ -642,7 +646,7 @@ module.exports = {
   DATA_SALTINIS: _dk.saltinis,
   DATA_PERSISTENTINIS: _dk.saltinis.indexOf('konteinerio vidus') < 0,
   puslapiuPodelis: () => ({ irasu: _pages.size, mb: +(_pagesBytes / 1048576).toFixed(1) }),
-  getCached, setCached, cacheAgeMinutes, PAGE_TTL_MS, ANALYSIS_TTL_MS,
+  getCached, setCached, cacheAgeMinutes, PAGE_TTL_MS, ANALYSIS_TTL_MS, MODELIO_TTL_MS,
   zymetiNerasta, valytiSenusDingo, rastiPagalVin,
   getSearchCached, setSearchCached,
   addToHistory, getHistoryForModel,

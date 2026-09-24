@@ -32,6 +32,7 @@ regitra.ikelti();
 const rinka = require('./rinka');
 const mobilede = require('./mobilede');
 const kaina = require('./paieskos-kaina');
+const modelioApzvalga = require('./modelio-apzvalga');
 try { rinka.ikelti(cache.DATA_DIR); } catch (e) { console.error('[RINKA] NEPAVYKO ikelti:', e.message); }
 const komplektacija = require('./komplektacija');
 const { requireAuth, handleRegister, handleLogin, handleMe, planai, duomenys, paskyra, verifyToken } = require('./auth');
@@ -5217,6 +5218,168 @@ app.get('/api/listing-history', requireAuth, (req, res) => {
 });
 
 // Modelio tendencijos ir sezoniskumas
+// ── Modelio apžvalga (v2.16.0, Luko prašymas 09-24) ────────────────────
+// Ne apie viena skelbima, o apie VISA modeli: kartos, tipines bedos, LT rinka.
+// Skaiciai - musu (Regitra, TA, sukaupta kainu istorija), pasakojimas - AI su
+// web paieska. Apzvalga vienoda visiems, todel guli talpykloje 30 dienu:
+// pirmas uzsakovas moka, kiti gauna is karto ir nemokamai.
+function modelioRaktas(b) {
+  b = b || {};
+  return [String(b.marke || '').trim(), String(b.modelis || '').trim(),
+    parseInt(b.metaiNuo, 10) || '', parseInt(b.metaiIki, 10) || ''].join('|').toLowerCase();
+}
+
+app.post('/api/modelio-apzvalga', requireAuth, (req, res, next) => {
+  // Talpykla tikrinama PRIES kreditu nurasyma - uz jau turima atsakyma
+  // neimam nieko. Kitaip antras vartotojas moketu uz teksta, kuris jau guli.
+  const b = req.body || {};
+  if (!b.marke || !b.modelis) return res.status(400).json({ error: 'Nurodykite mark\u0119 ir model\u012f' });
+  const c = cache.getCached('modelis', modelioRaktas(b), cache.MODELIO_TTL_MS);
+  if (c) return res.json({ ...c, isTalpyklos: true, kreditai: 0 });
+  next();
+}, planai.reikalautiKreditu('modelioApzvalga', (r) => modelioRaktas(r.body)), async (req, res) => {
+  const b = req.body || {};
+  try {
+    const duomenys = modelioApzvalga.surinktiDuomenis({
+      marke: String(b.marke).slice(0, 40), modelis: String(b.modelis).slice(0, 40),
+      metaiNuo: b.metaiNuo, metaiIki: b.metaiIki,
+      rinka: b.rinka && typeof b.rinka === 'object' ? {
+        rasta: parseInt(b.rinka.rasta, 10) || null, mediana: parseInt(b.rinka.mediana, 10) || null,
+        nuo: parseInt(b.rinka.nuo, 10) || null, iki: parseInt(b.rinka.iki, 10) || null,
+      } : null,
+    }, { regitra, cache });
+
+    const atsakymas = await anthropic.messages.create({
+      model: MODEL,
+      max_tokens: 3500,
+      tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 5 }],
+      messages: [{ role: 'user', content: modelioApzvalga.promptas(duomenys) }],
+    });
+    const tekstas = atsakymas.content.filter((x) => x.type === 'text').map((x) => x.text).join('');
+    const svarus = String(tekstas || '').replace(/```json|```/g, '').trim();
+    const rastas = svarus.match(/\{[\s\S]*\}/);
+    let apzvalga = null;
+    try { apzvalga = JSON.parse(rastas ? rastas[0] : svarus); } catch (e) { apzvalga = null; }
+    if (!apzvalga || !apzvalga.santrauka) {
+      // 500 => kreditai grazinami automatiskai (planai.reikalautiKreditu)
+      return res.status(500).json({ error: 'Ap\u017evalgos paruo\u0161ti nepavyko \u2013 pabandykite dar kart\u0105' });
+    }
+    const rez = {
+      marke: duomenys.marke, modelis: duomenys.modelis,
+      metaiNuo: duomenys.metaiNuo, metaiIki: duomenys.metaiIki,
+      duomenys, apzvalga, sukurta: new Date().toISOString(),
+    };
+    cache.setCached('modelis', modelioRaktas(b), rez);
+    console.log('[MODELIS] apzvalga: ' + duomenys.marke + ' ' + duomenys.modelis
+      + ' (' + (duomenys.kartos || []).join(', ') + ') · saltiniai: ' + (apzvalga.saltiniai || []).length);
+    res.json({ ...rez, isTalpyklos: false, kreditai: (req.kreditai && req.kreditai.kaina) || 0 });
+  } catch (e) {
+    console.error('[MODELIS]', e.message);
+    res.status(500).json({ error: 'Nepavyko paruo\u0161ti ap\u017evalgos: ' + e.message });
+  }
+});
+
+// Vienas klausimo atsakytojas DVIEM vietom: modelio apzvalgai ir skelbimui.
+// Skiriasi tik kontekstas ir pavadinimas; pats nurodymas AI (trumpai, remkis
+// duotais duomenimis, nespeliok) vienodas - kitaip atsakymai dviejuose languose
+// elgtusi skirtingai.
+// v2.16.0 (Luko prašymas): tai POKALBIS, ne pavieniai klausimai. Kontekstas
+// (duomenys + analizė) siunčiamas VIENĄ kartą pirmoje žinutėje, o tolesni
+// klausimai eina kaip pokalbio tęsinys – todėl „o kaip dėl dyzelio?" supranta,
+// apie ką kalbama. Istorija apkarpoma: modelis neturi skaityti viso pokalbio iš
+// naujo kiekvieną kartą, o ilgas pokalbis brangtų tolydžio.
+const POKALBIO_ZINUCIU = 8;        // 4 klausimai ir 4 atsakymai
+const POKALBIO_ZENKLU = 1200;      // vienos žinutės riba
+
+function pokalbioZinutes(istorija) {
+  if (!Array.isArray(istorija)) return [];
+  return istorija
+    .filter((z) => z && typeof z.tekstas === 'string' && z.tekstas.trim()
+      && (z.role === 'user' || z.role === 'assistant'))
+    .slice(-POKALBIO_ZINUCIU)
+    .map((z) => ({ role: z.role, content: String(z.tekstas).slice(0, POKALBIO_ZENKLU) }));
+}
+
+async function aiKlausimas(pav, kontekstas, klausimas, istorija) {
+  const pradzia = [
+    { role: 'user', content: `Kalbamės apie ${pav}. Štai ką jau žinome (mūsų duomenys ir paruošta analizė):
+${kontekstas}
+
+Toliau žmogus klaus klausimų. Atsakyk lietuviškai, trumpai (iki 150 žodžių), dalykiškai.
+Pirmiausia remkis šiais duomenimis ir sakyk skaičius iš jų; jei atsakymo čia nėra – pasitikrink internete ir pasakyk, iš kur žinai.
+Jei atsakymo patikimai nėra, taip ir pasakyk – nespėliok. Rašyk paprastu tekstu, be JSON ir be markdown ženklų.
+Prisimink, kas buvo sakyta anksčiau pokalbyje – žmogus gali klausti trumpai, nekartodamas konteksto.` },
+    { role: 'assistant', content: 'Supratau. Klauskite.' },
+  ];
+  const atsakymas = await anthropic.messages.create({
+    model: MODEL,
+    max_tokens: 900,
+    tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 2 }],
+    messages: pradzia.concat(pokalbioZinutes(istorija), [{ role: 'user', content: klausimas }]),
+  });
+  return atsakymas.content.filter((x) => x.type === 'text').map((x) => x.text).join('').trim();
+}
+
+// Papildomas klausimas apie TA PATI modeli (v2.16.0, Luko pra\u0161ymas 09-24).
+// Kontekstas imamas i\u0161 jau paruo\u0161tos ap\u017evalgos, todel atsakymas pigus: nereikia
+// nei i\u0161 naujo rinkti m\u016bs\u0173 duomen\u0173, nei per\u017ei\u016br\u0117ti vis\u0105 internet\u0105. Dvi web
+// u\u017eklausos paliktos tiems klausimams, kuri\u0173 ap\u017evalgoje n\u0117ra (pvz. detal\u0117s kaina).
+app.post('/api/modelio-klausimas', requireAuth,
+  planai.reikalautiKreditu('modelioKlausimas', (r) => modelioRaktas(r.body) + '#' + String((r.body && r.body.klausimas) || '').trim().toLowerCase().slice(0, 120)),
+  async (req, res) => {
+    const b = req.body || {};
+    const klausimas = String(b.klausimas || '').trim().slice(0, 300);
+    if (!b.marke || !b.modelis || !klausimas) return res.status(400).json({ error: 'Tr\u016bksta modelio arba klausimo' });
+    try {
+      const turimas = cache.getCached('modelis', modelioRaktas(b), cache.MODELIO_TTL_MS);
+      const pav = (String(b.marke) + ' ' + String(b.modelis)).trim();
+      const kontekstas = turimas
+        ? JSON.stringify({ duomenys: turimas.duomenys, apzvalga: turimas.apzvalga }).slice(0, 12000)
+        : '(ap\u017evalgos dar n\u0117ra)';
+      const tekstas = await aiKlausimas('automobil\u012f ' + pav, kontekstas, klausimas, b.istorija);
+      if (!tekstas) return res.status(500).json({ error: 'Atsakymo gauti nepavyko \u2013 pabandykite dar kart\u0105' });
+      console.log('[MODELIS] klausimas: ' + pav + ' \u00b7 ' + klausimas.slice(0, 60));
+      res.json({ klausimas, atsakymas: tekstas, kreditai: (req.kreditai && req.kreditai.kaina) || 0 });
+    } catch (e) {
+      console.error('[MODELIS] klausimas:', e.message);
+      res.status(500).json({ error: 'Nepavyko atsakyti: ' + e.message });
+    }
+  });
+
+// Klausimas apie KONKRETU skelbima (v2.16.0, Luko prasymas: „ir apzvalgos, ir
+// skelbime"). Kontekstas - to skelbimo analize (jei jau padaryta ir guli
+// talpykloje) plius korteles laukai is narsykles. Be analizes irgi veikia:
+// tada atsakymas remiasi tik laukais ir tai pasakoma atsakyme.
+app.post('/api/skelbimo-klausimas', requireAuth,
+  planai.reikalautiKreditu('modelioKlausimas', (r) => String((r.body && r.body.url) || '') + '#' + String((r.body && r.body.klausimas) || '').trim().toLowerCase().slice(0, 120)),
+  async (req, res) => {
+    const b = req.body || {};
+    const url = String(b.url || '').slice(0, 500);
+    const klausimas = String(b.klausimas || '').trim().slice(0, 300);
+    if (!url || !klausimas) return res.status(400).json({ error: 'Trūksta skelbimo arba klausimo' });
+    try {
+      const analize = analizesPodelis(url, b.kaina) || cache.getCached('analysis', url, ANALIZES_PODELIS_MS);
+      const k = b.kortele && typeof b.kortele === 'object' ? b.kortele : {};
+      const pav = [k.modelis, k.metai].filter(Boolean).join(' ') || 'automobilį iš skelbimo';
+      const kontekstas = JSON.stringify({
+        skelbimas: {
+          modelis: k.modelis || null, metai: k.metai || null, rida: k.rida || null,
+          kaina: b.kaina || k.kaina || null, kuras: k.kuras || null, pavarai: k.pavarai || null,
+          galia: k.galia || null, rinkosMediana: k.marketMedian || null,
+          skirtumasProc: k.diffPct != null ? k.diffPct : null, portalas: k.source || null, kartos: k.kartos || null,
+        },
+        analize: analize && analize.analysis ? analize.analysis : (analize || null),
+      }).slice(0, 12000);
+      const tekstas = await aiKlausimas(pav, kontekstas, klausimas, b.istorija);
+      if (!tekstas) return res.status(500).json({ error: 'Atsakymo gauti nepavyko – pabandykite dar kartą' });
+      console.log('[SKELBIMAS] klausimas: ' + pav + ' · ' + klausimas.slice(0, 60) + (analize ? '' : ' (be analizes)'));
+      res.json({ klausimas, atsakymas: tekstas, suAnalize: !!analize, kreditai: (req.kreditai && req.kreditai.kaina) || 0 });
+    } catch (e) {
+      console.error('[SKELBIMAS] klausimas:', e.message);
+      res.status(500).json({ error: 'Nepavyko atsakyti: ' + e.message });
+    }
+  });
+
 app.get('/api/model-trends', requireAuth, (req, res) => {
   const modelis = req.query.modelis;
   if (!modelis) return res.status(400).json({ error: 'Trūksta modelis parametro' });
