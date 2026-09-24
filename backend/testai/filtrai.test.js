@@ -178,5 +178,31 @@ console.log('\n11. KĖBULAS, PARDAVĖJAS, ĮDĖTA PER (Z-97, skaičiai iš porta
       && /filter_enum_body_type\]\[0\]=[a-z-]+/.test(d(F.buildOtomotoUrl(x))) && /c=[A-Za-z]+/.test(d(MD.buildMobileDeUrl(x))); }));
 }
 
+// Luko pranešimas 09-24: markių sąraše nebuvo Škodos. Priežastis – septynios
+// ranka įrašytos `<option>` eilutės, nors paieška moka 31 markę. Ši patikra
+// neleidžia abiem sąrašams vėl prasilenkti.
+{
+  const html = fs.readFileSync(path.join(__dirname, '..', '..', 'frontend', 'index.html'), 'utf8');
+  const i = html.indexOf('id="marke"'), j = html.indexOf('</select>', i);
+  const sel = [...html.slice(i, j).matchAll(/<option[^>]*>([^<]+)</g)].map((m) => m[1].trim())
+    .filter((x) => x !== 'Visos markės');
+  const seed = Object.keys(autopliusIds.SEED.makes);
+  const truksta = seed.filter((m) => !sel.includes(m));
+  const perteklius = sel.filter((m) => !seed.includes(m));
+  t('markių sąraše yra Skoda', sel.includes('Skoda'));
+  t('sąraše yra visos markės, kurių ID turim' + (truksta.length ? ' (trūksta: ' + truksta.join(', ') + ')' : ''), truksta.length === 0);
+  t('sąraše nėra markių be autoplius ID' + (perteklius.length ? ' (be ID: ' + perteklius.join(', ') + ')' : ''), perteklius.length === 0);
+  t('markių bent 30 (dabar ' + sel.length + ')', sel.length >= 30);
+  // Kiekviena markė turi modelių sąrašą – kitaip lange lieka tik „Visi modeliai“.
+  const bm = {};
+  { const i2 = html.indexOf('const BRAND_MODELS = {'), j2 = html.indexOf('\n};', i2);
+    // eslint-disable-next-line no-eval
+    eval('Object.assign(bm, ' + html.slice(i2 + 'const BRAND_MODELS = '.length, j2 + 2) + ')'); }
+  const beModeliu = sel.filter((m) => !bm[m] || !bm[m].length);
+  t('visos markės turi modelių sąrašą' + (beModeliu.length ? ' (be jo: ' + beModeliu.join(', ') + ')' : ''), beModeliu.length === 0);
+  t('modelių iš viso bent 200 (dabar ' + Object.values(bm).reduce((a, b) => a + b.length, 0) + ')',
+    Object.values(bm).reduce((a, b) => a + b.length, 0) >= 200);
+}
+
 console.log('\n' + (bl ? '✗ ' + bl + ' klaidos, ' + ok + ' praėjo' : '✓ ' + ok + '/' + ok + ' patikrų praėjo'));
 process.exit(bl ? 1 : 0);

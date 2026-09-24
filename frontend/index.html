@@ -10,7 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  /* ===== DESIGN TOKENS (v1) ===== */
+  /* 63 pk. patikra: `.ct-photo-main` ir `.ct-grid` markupe nenaudojami – taisyklės ištrintos v2.13.6. */
+/* ===== DESIGN TOKENS (v1) ===== */
   /* 61 pk. (6 d.): šio puslapio `:root` blokas ištrintas – tokenai gyvena tik ct-dizainas.css. */
 
   /* ===== RESET & BASE ===== */
@@ -1063,10 +1064,7 @@
 .card.ct-card { display: block; padding: 0; gap: 0; margin-bottom: 14px; background: var(--bg-surface); border: 1px solid var(--border); border-left: 1px solid var(--border); border-radius: 16px; box-shadow: none; overflow: visible; }
 .card.ct-card:hover { border-color: var(--border-light); }
 .card.ct-top1 { border-color: var(--accent-border); }
-.ct-grid { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 0; border-radius: 16px; overflow: hidden; }
 .ct-photo { grid-row: 1 / 3; padding: 14px 0 14px 14px; display: flex; flex-direction: column; gap: 8px; align-self: stretch; }
-.ct-photo-main { position: relative; aspect-ratio: 4 / 3; border-radius: 12px; overflow: hidden; background: #141822 repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 1px, transparent 1px 9px); }
-.ct-photo-main img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; display: block; }
 .ct-rank { white-space: nowrap; position: absolute; top: 10px; left: 10px; font: 600 10px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; padding: 6px 8px; border-radius: 6px; background: rgba(7, 11, 22,.82); border: 1px solid var(--border-light); color: var(--text-primary); }
 .ct-rank-top { background: var(--success); border-color: var(--success); color: #0A0C12; }
 .ct-full { white-space: nowrap; position: absolute; top: 10px; right: 10px; font: 600 10px/1 var(--font-mono); letter-spacing: .06em; padding: 6px 8px; border-radius: 6px; background: var(--accent-dim); border: 1px solid var(--accent-border); color: var(--accent-light); }
@@ -1191,7 +1189,6 @@
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 900px) {
-  .ct-grid { grid-template-columns: 240px minmax(0, 1fr); }
   .ct-photo { grid-row: 1; }
   .ct-score { }
   .ct-sides { grid-column: 1 / 3; padding: 0 16px 14px 14px; }
@@ -1199,7 +1196,6 @@
   .ct-cols, .ct-cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 640px) {
-  .ct-grid { grid-template-columns: 1fr; }
   .ct-photo { padding: 12px 12px 0; }
   .ct-main { padding: 12px; }
   .ct-sides { grid-column: 1; padding: 0 12px 12px; }
@@ -2420,13 +2416,37 @@
           <div class="ct-fld-v"><svg class="ct-i"><use href="#i-f-marke"></use></svg><span class="ct-fld-inlabel">MARKĖ</span>
             <select class="ct-fld-t" id="marke" onchange="updateModels ? updateModels() : null">
               <option value="">Visos markės</option>
-              <option value="BMW" selected>BMW</option>
-              <option>Mercedes-Benz</option>
               <option>Audi</option>
-              <option>Volkswagen</option>
-              <option>Toyota</option>
-              <option>Volvo</option>
+              <option value="BMW" selected>BMW</option>
+              <option>Citroen</option>
+              <option>Cupra</option>
+              <option>Dacia</option>
+              <option>Fiat</option>
+              <option>Ford</option>
+              <option>Honda</option>
+              <option>Hyundai</option>
+              <option>Jaguar</option>
+              <option>Jeep</option>
+              <option>Kia</option>
+              <option>Land Rover</option>
+              <option>Lexus</option>
+              <option>Mazda</option>
+              <option>Mercedes-Benz</option>
+              <option>Mini</option>
+              <option>Mitsubishi</option>
+              <option>Nissan</option>
+              <option>Opel</option>
+              <option>Peugeot</option>
               <option>Porsche</option>
+              <option>Renault</option>
+              <option>Seat</option>
+              <option>Skoda</option>
+              <option>Subaru</option>
+              <option>Suzuki</option>
+              <option>Tesla</option>
+              <option>Toyota</option>
+              <option>Volkswagen</option>
+              <option>Volvo</option>
             </select>
             <svg class="ct-i" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
             <button type="button" class="ct-fld-x" tabindex="-1" aria-label="Išvalyti">✕</button>
@@ -2913,21 +2933,37 @@ const BRAND_MODELS = {
   'Audi': ['A1', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'Q2', 'Q3', 'Q5', 'Q7', 'Q8'],
   'Volkswagen': ['Golf', 'Polo', 'Passat', 'Tiguan', 'Touran', 'T-Roc', 'T-Cross', 'Caddy', 'Taigo', 'Touareg', 'ID.4'],
   'Mercedes-Benz': ['A Klasė', 'B Klasė', 'C Klasė', 'E Klasė', 'S Klasė', 'CLA Klasė', 'GLA', 'GLC', 'GLE', 'ML Klasė', 'Vito', 'Sprinter'],
-  'Opel': ['Astra', 'Corsa', 'Insignia', 'Mokka', 'Zafira', 'Meriva', 'Grandland X', 'Vivaro'],
+  'Opel': ['Astra', 'Corsa', 'Insignia', 'Mokka', 'Zafira', 'Meriva', 'Grandland X', 'Crossland', 'Combo', 'Vivaro'],
   'Ford': ['Focus', 'Fiesta', 'Kuga', 'Mondeo', 'S-Max', 'Galaxy', 'Puma', 'Mustang', 'Transit'],
   'Volvo': ['S60', 'S80', 'V40', 'V50', 'V60', 'V70', 'XC40', 'XC60', 'XC70', 'XC90'],
   'Toyota': ['Corolla', 'Yaris', 'Avensis', 'Auris', 'RAV4', 'C-HR', 'Yaris Cross', 'Prius', 'Land Cruiser'],
-  'Skoda': ['Octavia', 'Fabia', 'Superb', 'Kodiaq', 'Karoq', 'Scala'],
-  'Peugeot': ['208', '308', '3008', '5008', '2008', '508'],
-  'Nissan': ['Qashqai', 'X-Trail', 'Juke', 'Micra', 'Leaf'],
-  'Hyundai': ['i30', 'i20', 'Tucson', 'Santa Fe', 'Kona'],
-  'Kia': ['Ceed', 'Sportage', 'Sorento', 'Rio', 'Niro'],
-  'Renault': ['Clio', 'Megane', 'Kadjar', 'Scenic', 'Captur'],
-  'Mazda': ['3', '6', 'CX-5', 'CX-3', 'CX-30'],
-  'Honda': ['Civic', 'CR-V', 'Accord', 'Jazz'],
+  'Skoda': ['Octavia', 'Fabia', 'Superb', 'Kodiaq', 'Karoq', 'Scala', 'Enyaq', 'Yeti', 'Rapid', 'Roomster'],
+  'Peugeot': ['208', '308', '408', '508', '2008', '3008', '5008', 'Partner', 'Expert', 'Rifter'],
+  'Nissan': ['Qashqai', 'X-Trail', 'Juke', 'Micra', 'Leaf', 'Note', 'Navara', 'Ariya'],
+  'Hyundai': ['i30', 'i20', 'i10', 'Tucson', 'Santa Fe', 'Kona', 'Ioniq', 'Ioniq 5', 'Bayon'],
+  'Kia': ['Ceed', 'Sportage', 'Sorento', 'Rio', 'Niro', 'Stonic', 'Picanto', 'EV6', 'Soul'],
+  'Renault': ['Clio', 'Megane', 'Kadjar', 'Scenic', 'Captur', 'Arkana', 'Austral', 'Zoe', 'Trafic', 'Kangoo'],
+  'Mazda': ['2', '3', '6', 'CX-3', 'CX-30', 'CX-5', 'CX-60', 'MX-5'],
+  'Honda': ['Civic', 'CR-V', 'HR-V', 'Accord', 'Jazz'],
   'Porsche': ['911', 'Cayenne', 'Macan', 'Panamera', 'Taycan'],
-  'Land Rover': ['Discovery', 'Range Rover', 'Range Rover Sport', 'Range Rover Evoque', 'Defender'],
-  'Lexus': ['IS', 'ES', 'RX', 'NX', 'CT'],
+  'Lexus': ['IS', 'ES', 'RX', 'NX', 'UX', 'GS', 'LS', 'CT'],
+  // v2.14.0 (Luko pranešimas 09-24): markių sąrašas išsiplėtė iki 31, tad
+  // modelių sąrašai – ir likusioms. Autoplius ID šioms markėms dar neturim
+  // (`autoplius-ids.js` SEED.models), tad paieška joms vyksta tekstu –
+  // veikia, tik mažiau tiksliai. IDus susirinksime atskirai.
+  'Seat': ['Ibiza', 'Leon', 'Arona', 'Ateca', 'Tarraco', 'Alhambra', 'Toledo'],
+  'Cupra': ['Formentor', 'Leon', 'Ateca', 'Born', 'Terramar'],
+  'Citroen': ['C3', 'C4', 'C5', 'C5 Aircross', 'C3 Aircross', 'Berlingo', 'C-Elysée', 'Jumpy'],
+  'Dacia': ['Duster', 'Sandero', 'Logan', 'Jogger', 'Lodgy', 'Dokker', 'Spring'],
+  'Fiat': ['500', '500X', '500L', 'Panda', 'Tipo', 'Doblo', 'Ducato'],
+  'Jeep': ['Renegade', 'Compass', 'Cherokee', 'Grand Cherokee', 'Wrangler', 'Avenger'],
+  'Mini': ['Cooper', 'Countryman', 'Clubman', 'Cabrio', 'Paceman'],
+  'Mitsubishi': ['Outlander', 'ASX', 'Pajero', 'Lancer', 'L200', 'Space Star', 'Eclipse Cross'],
+  'Subaru': ['Forester', 'Outback', 'XV', 'Impreza', 'Legacy', 'Levorg'],
+  'Suzuki': ['Vitara', 'SX4 S-Cross', 'Swift', 'Jimny', 'Ignis', 'Across'],
+  'Jaguar': ['XE', 'XF', 'XJ', 'F-Pace', 'E-Pace', 'I-Pace', 'F-Type'],
+  'Tesla': ['Model 3', 'Model S', 'Model X', 'Model Y'],
+  'Land Rover': ['Discovery', 'Discovery Sport', 'Range Rover', 'Range Rover Sport', 'Range Rover Evoque', 'Range Rover Velar', 'Freelander', 'Defender'],
 };
 
 // ============ PAIESKOS ISTORIJA (localStorage, tik siame narsyklyje) ============
@@ -3385,8 +3421,14 @@ function updateModels() {
   const marke = document.getElementById('marke').value;
   const modelSelect = document.getElementById('modelis');
   const models = BRAND_MODELS[marke] || [];
+  // Markių sąrašas imamas iš tų pačių autoplius ID, kuriuos naudoja paieška
+  // (backend/autoplius-ids.js SEED.makes) – anksčiau čia buvo septynios ranka
+  // įrašytos markės, ir Škoda, Opel, Ford bei kitos tiesiog nebuvo pasirenkamos.
+  // Modelių sąrašo turim ne visoms: kai jo nėra, rodom tik „Visi modeliai“,
+  // o vartotojas gali įrašyti modelį pats (laukas lieka veikiantis).
   modelSelect.innerHTML = '<option value="">Visi modeliai</option>' +
     models.map((m) => `<option value="${m}">${m}</option>`).join('');
+  modelSelect.title = models.length ? '' : 'Šiai markei modelių sąrašo dar neturim – paieška vyks pagal visą markę';
 }
 updateModels();
 

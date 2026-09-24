@@ -256,10 +256,35 @@ function mobileDeSkelbimas(item) {
 // Grąžina { viso, puslapis, skelbimai, reklamu }. Reklaminiai (topOfPage,
 // topInCategory) į `skelbimai` NEįeina: jie kartojasi kituose puslapiuose ir
 // nepaklūsta rikiavimui. Paryškinti (eyecatcher) - tikri paieškos rezultatai.
+// Saraso nuotraukos (Luko pranesimas 09-23: korteles rode „BE NUOTRAUKOS").
+// Paieskos JSON nuotrauku NETURI - jame tik `numImages`. Bet tame paciame
+// atsakyme, salia skelbimo id, guli korteles <img> adresas:
+//   img.classistatic.de/api/v1/mo-prod/images/dc/dc3a…?rule=mo-80
+// Pamatuota gyvame mobile.de puslapyje 2026-09-23. Imam ji is to paties
+// atsakymo - jokiu papildomu uzklausu ir jokiu kreditu.
+const MD_FOTO = /img\.classistatic\.de(?:\\?\/)api(?:\\?\/)v1(?:\\?\/)mo-prod(?:\\?\/)images(?:\\?\/)[a-z0-9]{2}(?:\\?\/)[a-f0-9-]{36}/i;
+function mobileDeSarasoFoto(html, id) {
+  if (!html || !id) return null;
+  const i = html.indexOf('"' + id);
+  const j = i >= 0 ? i : html.indexOf(String(id));
+  if (j < 0) return null;
+  const langas = html.slice(Math.max(0, j - 2500), j + 2500);
+  const m = langas.match(MD_FOTO);
+  if (!m) return null;
+  return 'https://' + m[0].replace(/\\\//g, '/') + '?rule=mo-1024.jpg';
+}
+
 function extractMobileDe(html) {
   const sr = mobileDePaieska(html);
   if (!sr) return { viso: null, puslapis: null, skelbimai: [], reklamu: 0, rasta: false };
-  const visi = (sr.listings || []).map(mobileDeSkelbimas);
+  const visi = (sr.listings || []).map((x) => {
+    const l = mobileDeSkelbimas(x);
+    if (!l.photo) {
+      const f = mobileDeSarasoFoto(html, x && x.id);
+      if (f) { l.photo = f; l.photos = [f]; }
+    }
+    return l;
+  });
   const skelbimai = visi.filter((l) => !l.reklama && l.url && l.kaina);
   return {
     viso: typeof sr.numResultsTotal === 'number' ? sr.numResultsTotal : null,
@@ -387,3 +412,4 @@ function mobileDeAnalizesTekstas(p) {
 module.exports.mobileDeSkelbimoPuslapis = mobileDeSkelbimoPuslapis;
 module.exports.mobileDeAnalizesTekstas = mobileDeAnalizesTekstas;
 module.exports.rscTekstas = rscTekstas;
+module.exports.mobileDeSarasoFoto = mobileDeSarasoFoto;

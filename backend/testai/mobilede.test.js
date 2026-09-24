@@ -132,5 +132,18 @@ console.log('\n── 6. Archyvo tapatybė ────────────�
   lygu(R.skelbimoId('autoplius', 'https://autoplius.lt/skelbimai/bmw-x5-28797115.html'), 'autoplius:28797115', 'autoplius nepakito');
 }
 
+
+// Luko pranešimas 09-23: mobile.de kortelės rodė „BE NUOTRAUKOS". Paieškos JSON
+// nuotraukų neturi (tik numImages) – adresas guli HTML'e šalia skelbimo id.
+{
+  const id = 445819118;
+  const adresas = 'img.classistatic.de/api/v1/mo-prod/images/dc/dc3a6610-1a0a-4e3e-ad1c-431cabb576d6?rule=mo-80';
+  const laukiama = 'https://img.classistatic.de/api/v1/mo-prod/images/dc/dc3a6610-1a0a-4e3e-ad1c-431cabb576d6?rule=mo-1024.jpg';
+  T(MD.mobileDeSarasoFoto('"id":' + id + ',"type":"regular" … ' + adresas, id) === laukiama, 'nuotrauka paimama iš to paties HTML');
+  T(MD.mobileDeSarasoFoto('\\"id\\":' + id + ' … ' + adresas.replace(/\//g, '\\/'), id) === laukiama, 'veikia ir su pasvirais brūkšniais (RSC)');
+  T(MD.mobileDeSarasoFoto('jokio adreso', id) === null, 'kai adreso nėra – null, ne šiukšlė');
+  T(MD.mobileDeSarasoFoto('', null) === null, 'be id – null');
+}
+
 console.log('\n' + (klaidu ? '✗ ' + klaidu + ' klaidos iš ' + patikru : '✓ ' + patikru + '/' + patikru + ' patikrų praėjo'));
 process.exit(klaidu ? 1 : 0);

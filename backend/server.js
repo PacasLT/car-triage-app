@@ -2937,11 +2937,15 @@ function rizikosLygis(conditionScore) {
 
 // Nr.50 (v2.11.2): naujas automobilis – rida < 5 000 km ir ne senesnis nei 1 metai.
 // Jo kaina lyginama su kitais naujais (rinkos grupė „naujas“), o ne su naudotų mediana.
-const NAUJO_RIDA = 5000;
+// AN-0923-NAUJAS (Luko atsakymas A, 09-23): buvo rida < 5 000 ir ne senesnis nei
+// praeje metai. Analitikas parode dvi spragas: 2 metu automobilis su 3 000 km
+// likdavo „naudotas", o „nauju" grupe beveik niekada nesurinkdavo 5 kainu.
+const NAUJO_RIDA = 10000;
+const NAUJO_AMZIUS = 3;
 function arNaujas(l) {
   const m = parseInt(l && l.metai, 10), r = parseInt(l && l.rida, 10);
   if (!m || !Number.isFinite(r) || r < 0) return false;
-  return r < NAUJO_RIDA && m >= new Date().getFullYear() - 1;
+  return r < NAUJO_RIDA && m >= new Date().getFullYear() - NAUJO_AMZIUS;
 }
 
 // ---- "KODEL SIS AUTO?" ----

@@ -86,14 +86,20 @@ function computeMarketMedians(parsedListings) {
 // karta), kurioje ≥ MIN_GRUPEI kainų, kitaip – viso modelio. `grupes` – masyvas
 // arba viena eilutė. Grąžina { median, count, grupe|null }.
 const MIN_GRUPEI = 5;
+// AN-0923-NAUJAS: naujų automobilių rinkoje visada mažiau, tad „naujas" grupei
+// užtenka 3 kainų – kitaip ji beveik niekada nesusidarydavo ir naujas auto vis
+// tiek buvo lyginamas su naudotais.
+const MIN_NAUJU_GRUPEI = 3;
+function grupesRiba(gr) { return gr === 'naujas' ? MIN_NAUJU_GRUPEI : MIN_GRUPEI; }
+
 function lyginimoMediana(marketData, grupes) {
   if (!marketData) return null;
   const sar = Array.isArray(grupes) ? grupes : (grupes ? [grupes] : []);
   for (const gr of sar) {
     const g = marketData.grupes ? marketData.grupes[gr] : null;
-    if (g && g.count >= MIN_GRUPEI && g.median) return { median: g.median, count: g.count, grupe: gr };
+    if (g && g.count >= grupesRiba(gr) && g.median) return { median: g.median, count: g.count, grupe: gr };
   }
   return { median: marketData.median, count: marketData.count, grupe: null };
 }
 
-module.exports = { atspariMediana, computeMarketMedians, lyginimoMediana, MIN_GRUPEI, RIBOS: { MIN_KAINA, MAX_KAINA, APACIA, VIRSUS, MIN_IMTIS_REMAMS } };
+module.exports = { atspariMediana, computeMarketMedians, lyginimoMediana, MIN_GRUPEI, MIN_NAUJU_GRUPEI, RIBOS: { MIN_KAINA, MAX_KAINA, APACIA, VIRSUS, MIN_IMTIS_REMAMS } };

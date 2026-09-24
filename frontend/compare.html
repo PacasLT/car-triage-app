@@ -12,7 +12,8 @@
 
 /* ── blokas #0 ── */
 
-  /* ===== DESIGN TOKENS (v1) ===== */
+  /* 63 pk. patikra: `.ct-photo-main` ir `.ct-grid` markupe nenaudojami – taisyklės ištrintos v2.13.6. */
+/* ===== DESIGN TOKENS (v1) ===== */
   /* 61 pk. (6 d.): šio puslapio `:root` blokas ištrintas – tokenai gyvena tik ct-dizainas.css. */
 
   /* ===== RESET & BASE ===== */
@@ -1004,10 +1005,7 @@
 .card.ct-card { display: block; padding: 0; gap: 0; margin-bottom: 14px; background: var(--bg-surface); border: 1px solid var(--border); border-left: 1px solid var(--border); border-radius: 16px; box-shadow: none; overflow: visible; }
 .card.ct-card:hover { border-color: var(--border-light); }
 .card.ct-top1 { border-color: var(--accent-border); }
-.ct-grid { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 0; border-radius: 16px; overflow: hidden; }
 .ct-photo { grid-row: 1 / 3; padding: 14px 0 14px 14px; display: flex; flex-direction: column; gap: 8px; align-self: stretch; }
-.ct-photo-main { position: relative; aspect-ratio: 4 / 3; border-radius: 12px; overflow: hidden; background: #141822 repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 1px, transparent 1px 9px); }
-.ct-photo-main img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; display: block; }
 .ct-rank { white-space: nowrap; position: absolute; top: 10px; left: 10px; font: 600 10px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; padding: 6px 8px; border-radius: 6px; background: rgba(7, 11, 22,.82); border: 1px solid var(--border-light); color: var(--text-primary); }
 .ct-rank-top { background: var(--success); border-color: var(--success); color: #0A0C12; }
 .ct-full { white-space: nowrap; position: absolute; top: 10px; right: 10px; font: 600 10px/1 var(--font-mono); letter-spacing: .06em; padding: 6px 8px; border-radius: 6px; background: var(--accent-dim); border: 1px solid var(--accent-border); color: var(--accent-light); }
@@ -1131,7 +1129,6 @@
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 900px) {
-  .ct-grid { grid-template-columns: 240px minmax(0, 1fr); }
   .ct-photo { grid-row: 1; }
   .ct-score { }
   .ct-sides { grid-column: 1 / 3; padding: 0 16px 14px 14px; }
@@ -1139,7 +1136,6 @@
   .ct-cols, .ct-cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 640px) {
-  .ct-grid { grid-template-columns: 1fr; }
   .ct-photo { padding: 12px 12px 0; }
   .ct-main { padding: 12px; }
   .ct-sides { grid-column: 1; padding: 0 12px 12px; }

@@ -72,5 +72,19 @@ console.log('\n── v2.10.6: kartos fazės grupė ─────────�
   T(M.lyginimoMediana(md2, ['G05 visa karta']).grupe === 'G05 visa karta', 'atnaujinimo metai → visa karta');
 }
 
+
+// AN-0923-NAUJAS: „naujas" grupei užtenka 3 kainų, kitoms – 5.
+{
+  const md = { median: 20000, count: 40, grupes: {
+    naujas: { median: 31000, count: 3 },
+    'G05 LCI': { median: 26000, count: 3 },
+  } };
+  const n = M.lyginimoMediana(md, ['naujas', 'G05 visa karta']);
+  T(n.grupe === 'naujas' && n.median === 31000, 'naujas: 3 kainų užtenka');
+  const k = M.lyginimoMediana(md, ['G05 LCI', 'G05 visa karta']);
+  T(k.grupe === null && k.median === 20000, 'kitoms grupėms 3 kainų per mažai – lieka viso modelio mediana');
+  T(M.MIN_NAUJU_GRUPEI === 3 && M.MIN_GRUPEI === 5, 'ribos: naujas 3, kitos 5');
+}
+
 console.log('\n' + (klaidu ? '✗ ' + klaidu + ' klaidos iš ' + n : '✓ ' + n + '/' + n + ' patikrų praėjo'));
 process.exit(klaidu ? 1 : 0);

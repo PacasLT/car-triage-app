@@ -1690,3 +1690,22 @@ laikinas sprendimas „kol Lukas nuspręs" negali tapti antra tiesa.
 - **Mano ankstesnė išvada buvo klaidinga.** Teigiau, kad `.ct-photo` yra apvalkalas su miniatiūromis viduje, ir pasiūliau K-65 pervadinimą. Tai buvo iš `index.html` CSS 1067–1069 eil. (senos kortelės variantas su `.ct-photo-main`), o ne iš to, ką JS tikrai piešia. Tikrasis markupas jau atitinka sistemos 1 sk. struktūrą, tad **pervadinti nereikia** – K-65 uždaromas be darbų.
 - Lieka pastebėjimas kitam kartui: `index.html` 1068–1069 eil. `.ct-photo-main` taisyklės yra **negyvos** (markupe tokio vardo nėra). Trinsiu atskirai, su matavimu.
 - Po šito `ct-priedai.css` turi **vienintelį gyvą bloką – 8 (mūsų `#more-filters`)**. Sargai 17 žali.
+
+## Z-138 · 2026-09-23 · Klaudijus · v2.13.6 – negyvos taisyklės `index.html` ir `compare.html`
+- Ištrintos `.ct-photo-main`, `.ct-photo-main img` ir `.ct-grid` (su dviem medijos variantais) abiejuose failuose – iš viso 10 taisyklių. Tikrinta ne komentaruose, o markupe: `class="ct-photo-main"` ir `class="ct-grid"` nėra nė karto (JS piešia `.ct-media > .ct-photo + .ct-thumbs`).
+- **Matavimas prieš/po:** kortelės nuotrauka 288×197 (1440) ir 318×218 (390), miniatiūros 68×51 ir 76×57 – nepakito. Navy patikra: 0 lopų, `--bg-base` `#070B16`, horizontalios slinkties nėra.
+- Dizainerio taisyklė ateičiai (priimta abiejų): kai klausimas „ką pasiekia taisyklė“, tikrinam JS piešiamą DOM, ne CSS komentarą ar statinį HTML.
+
+## Z-139 · 2026-09-23 · Klaudijus · v2.14.0 – mobile.de nuotraukos ir Nr. 50 ribos
+- **mobile.de „BE NUOTRAUKOS“ (Luko pranešimas 09-23).** Priežastis rasta atidarius gyvą mobile.de paiešką naršyklėje (0 kreditų): paieškos JSON nuotraukų **neturi** – skelbimo objekte yra tik `numImages: 18`, todėl `mobileDeSkelbimas` ir rašė `photo: null, photos: []`. Adresas guli tame pačiame HTML šalia skelbimo id (`img.classistatic.de/api/v1/mo-prod/images/<xx>/<uuid>?rule=mo-80`), tad `mobileDeSarasoFoto(html, id)` jį paima iš to paties atsakymo ir pakeičia `mo-80` → `mo-1024.jpg`. **Jokių papildomų užklausų.** `mobilede.test` 53/53 (keturios naujos patikros, tarp jų RSC variantas su pasvirais brūkšniais).
+- **AN-0923-NAUJAS (Luko atsakymas A).** `NAUJO_RIDA` 5 000 → 10 000, naujas `NAUJO_AMZIUS = 3` (buvo „praėję metai“). `rinkos-mediana.js`: grupei `naujas` užtenka **3** kainų (`MIN_NAUJU_GRUPEI`), kitoms lieka 5 – kitaip naujų grupė beveik niekada nesusidarydavo ir naujas automobilis vis tiek buvo lyginamas su naudotais. `naujas.test` 10/10, `mediana.test` 22/22.
+- Sargai 17 žali.
+
+## Z-140 · 2026-09-24 · Klaudijus · v2.14.0 – markių sąrašas (Luko pranešimas: nėra Škodos)
+- **Priežastis:** `index.html` markės laukelyje buvo **septynios ranka įrašytos `<option>` eilutės** (BMW, Mercedes-Benz, Audi, Volkswagen, Toyota, Volvo, Porsche). Visa kita grandinė Škodą moka jau seniai: modelių sąrašas (`BRAND_MODELS`), autoplius ID (`SEED.makes` – `Skoda: 48` ir šeši modelių ID), kartų lentelė (Octavia Mk4, Superb Mk3, Kodiaq Mk1).
+- Sąrašas dabar generuojamas iš to paties šaltinio, kurį naudoja paieška – **31 markė** abėcėlės tvarka, BMW lieka numatytoji. Markėms be modelių sąrašo rodoma tik „Visi modeliai“, o laukelis turi paaiškinimą, kad paieška vyks pagal visą markę.
+- **Sargas, kad nepasikartotų:** `filtrai.test` dabar lygina `index.html` markių `<option>` su `autoplius-ids.js` `SEED.makes` – trūkstama arba perteklinė markė krenta testą (95/95, keturios naujos patikros).
+- Sargai 17 žali.
+- **Modelių sąrašai – visoms 31 markei** (Luko prašymas tą pačią dieną). Pridėta 14 markių, kurių sąrašo nebuvo (Seat, Cupra, Citroen, Dacia, Fiat, Jeep, Mini, Mitsubishi, Subaru, Suzuki, Jaguar, Tesla, plius praplėsti Land Rover ir Lexus), ir papildytos devynios esamos (Skoda +Enyaq/Yeti/Rapid/Roomster, Opel +Crossland/Combo, Kia +Stonic/Picanto/EV6/Soul, Hyundai +i10/Ioniq/Ioniq 5/Bayon, Renault +Arkana/Austral/Zoe/Trafic/Kangoo, Nissan +Note/Navara/Ariya, Mazda +2/CX-60/MX-5, Honda +HR-V, Peugeot +408/Partner/Expert/Rifter). Iš viso **255 modeliai**.
+- **Ko dar trūksta ir ką tai reiškia:** `autoplius-ids.js` modelių ID turi 17 markių; likusioms 14 paieška autoplius vyksta **tekstu** (`qt=`) – veikia, bet mažiau tiksliai ir brangiau, nes portalas grąžina ir nesusijusių skelbimų. Tas pats su mobile.de: modelių atitikmenys aprašyti tik BMW, Audi ir VW, kitoms markėms užsienio paieška eina pagal markę. Abu dalykai – atskiras darbas, ne šio pataisymo dalis.
+- `filtrai.test` papildytas: kiekviena markė privalo turėti modelių sąrašą, o modelių iš viso – bent 200 (97/97).

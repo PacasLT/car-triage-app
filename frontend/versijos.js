@@ -8,6 +8,21 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.14.0', data: '2026-09-24', pavadinimas: 'Visos markės, mobile.de nuotraukos ir platesnė „naujo“ riba',
+    pakeitimai: [
+      'Markių sąraše dabar visos 31 markė, kurias moka paieška – anksčiau buvo tik septynios, todėl Škodos, Opel, Ford ir kitų paprasčiausiai nebuvo galima pasirinkti.',
+      'Kiekviena markė turi ir modelių sąrašą – iš viso 255 modeliai (buvo 19 markių iš 31).',
+      'mobile.de skelbimai kortelėse vėl su nuotrauka – anksčiau jų vietoje buvo užrašas „Be nuotraukos“.',
+      'Naujais laikomi automobiliai iki 3 metų su rida iki 10 000 km (buvo – iki metų senumo ir 5 000 km), o jų kaina lyginama su kitais naujais jau turint tris palyginimus.',
+    ],
+  },
+  {
+    versija: '2.13.6', data: '2026-09-23', pavadinimas: 'Nebenaudojamų taisyklių valymas',
+    pakeitimai: [
+      'Iš paieškos ir palyginimo puslapių pašalintos taisyklės, kurios aprašinėjo jau neegzistuojančius elementus. Išvaizda nepasikeitė – patikrinta matavimu.',
+    ],
+  },
+  {
     versija: '2.13.5', data: '2026-09-23', pavadinimas: 'Tarpai administravimo suvestinėje',
     pakeitimai: [
       'Administravimo suvestinėje kortelės nebesiliečia – tarp jų atsirado tarpas, kaip ir buvo numatyta.',
