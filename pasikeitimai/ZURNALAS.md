@@ -1747,3 +1747,12 @@ laikinas sprendimas „kol Lukas nuspręs" negali tapti antra tiesa.
 - **Klausimai ir prie skelbimo** (Luko patikslinimas: „ir apžvalgos, ir skelbime“). `POST /api/skelbimo-klausimas` – tas pats atsakytojas (`aiKlausimas`), bet kontekstas to skelbimo: kortelės laukai iš naršyklės + jau padaryta analizė iš talpyklos. Be analizės irgi atsako, tik pasako, kad atsakymas remiasi vien skelbimo laukais. Laukas – `detail.html` AI skydelio apačioje.
 - **Papildomi klausimai apie modelį** (Luko prašymas tą pačią dieną). Lango apačioje – laukas „Klauskite apie šį modelį“; `POST /api/modelio-klausimas` ima kontekstą iš jau paruoštos apžvalgos, todėl atsakymas pigus (2 web užklausos tik tam, ko apžvalgoje nėra). Kaina 1 kr.; raktas su klausimo tekstu, tad tas pats klausimas per parą – nemokamai.
 - **Neišbandyta gyvai:** pirmą tikrą apžvalgą reikės paleisti produkcijoje (kaina ~0,08 €, ScraperAPI kreditų nenaudoja).
+
+## Z-144 · 2026-09-24 · Klaudijus · v2.16.1 – „parduodama per 1 dieną“ (rasta pirmame gyvame bandyme)
+
+- Po v2.16.0 deploy'o paleidau tikrą apžvalgą (BMW X5 2018–2024, produkcija). Turinys geras – 13 tikrų šaltinių, 10 bėdų su kainomis – bet viena eilutė melavo: „Skelbimai parduodami per 1 dieną (mediana iš 578), įrodant didelę paklausą.“
+- **Priežastis:** `cache.modelioPardavimoGreitis` skaičiuoja dienas tarp „pirmą kartą matytas“ ir „dingo“. Gyvavimo ciklą kaupiame nuo neseniai, tad **ilgiausias stebėtas skelbimas gyveno 7 d.** (`greiciausias 0, leciausias 7`). Mediana pasakė, kiek laiko MES stebime, o ne kaip greitai parduodama.
+- **Pataisa:** `patikimasGreitis()` – rodiklis imamas tik kai imtis ≥ 5 **ir** ilgiausias stebėtas skelbimas išgyveno ≥ 30 d. Kitaip eilutės nėra nei lange, nei AI prompte (geriau nerodyti, nei rodyti neteisingą – ta pati taisyklė kaip AN-0923-RIBA).
+- Tas pats rodiklis liko `/api/model-trends` (jį naudoja kitos vietos) – apribotas tik apžvalgos kelias.
+- `modelio-apzvalga.test` 70/70.
+- **Ką dar pamačiau tame pačiame bandyme:** mūsų sukauptos kainų istorijos mediana „BMW X5“ – 67 800 € (visos laidos kartu, įskaitant naujus), o kainų kryptis – `null`, nes turime tik vieno mėnesio duomenis. Į apžvalgą kryptis nepateko (sargas suveikė), bet vertėtų kainų istoriją skaidyti pagal metus – atskiras darbas.

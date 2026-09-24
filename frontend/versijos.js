@@ -8,6 +8,12 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.16.1', data: '2026-09-24', pavadinimas: 'Pataisa: „parduodama per 1 dieną“',
+    pakeitimai: [
+      'Modelio apžvalgoje neberodomas pardavimo greitis, kai mūsų skelbimų istorija dar per trumpa – anksčiau ji rodė „parduodama per 1 dieną“, nors tai reiškė tik tai, kad duomenis kaupiame vos savaitę.',
+    ],
+  },
+  {
     versija: '2.16.0', data: '2026-09-24', pavadinimas: 'Modelio apžvalga – „Analizuoti modelį“',
     pakeitimai: [
       'Po paieškos, kai pasirinktas modelis, virš rezultatų atsiranda mygtukas „Analizuoti modelį“.',

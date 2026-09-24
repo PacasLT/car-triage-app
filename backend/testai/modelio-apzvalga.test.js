@@ -137,5 +137,17 @@ T(/pokalbis\.push\(\{ role: 'user', tekstas: kl \}, \{ role: 'assistant', teksta
 T(/istorija: pokalbis\.slice\(-8\)/.test(html) && /istorija: pokalbis\.slice\(-8\)/.test(detail),
   'abi vietos siunčia tik paskutines žinutes');
 
+// ── v2.16.1: nepatikimas pardavimo greitis (rasta pirmame gyvame bandyme) ──
+T(m.patikimasGreitis({ imtis: 578, medianaDienu: 1, greiciausias: 0, leciausias: 7 }) === null,
+  '1 diena iš 7 d. istorijos – ne faktas, o mūsų istorijos amžius; neimam');
+T(m.patikimasGreitis({ imtis: 4, medianaDienu: 24, greiciausias: 2, leciausias: 61 }) === null, 'per maža imtis – neimam');
+T(m.patikimasGreitis({ imtis: 20, medianaDienu: 24, greiciausias: 2, leciausias: 61 }) !== null, 'mėnesio langas ir imtis – imam');
+const blogas = m.surinktiDuomenis({ marke: 'BMW', modelis: 'X5' }, {
+  regitra: deps.regitra,
+  cache: { modelioTendencijos: () => null, modelioPardavimoGreitis: () => ({ imtis: 578, medianaDienu: 1, greiciausias: 0, leciausias: 7 }) },
+});
+T(blogas.pardavimoGreitis === null, 'nepatikimas greitis nepatenka nei į langą, nei į AI promptą');
+T(!/parduodamas per/.test(m.promptas(blogas)), 'prompte tokios eilutės nėra');
+
 console.log('\n' + (klaidu ? '✗ ' + klaidu + ' klaidos iš ' + n : '✓ ' + n + '/' + n + ' patikrų praėjo'));
 process.exit(klaidu ? 1 : 0);

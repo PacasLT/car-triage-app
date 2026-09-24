@@ -15,6 +15,20 @@
 
 const METAI_DABAR = () => new Date().getFullYear();
 
+// v2.16.1 (rasta pirmame gyvame bandyme): „parduodama per 1 d." buvo ne faktas,
+// o mūsų istorijos amžius. Skelbimų gyvavimo ciklą kaupiame nuo neseniai, tad
+// ilgiausias stebėtas skelbimas gyveno 7 d. – vadinasi, mediana pasako, kiek
+// laiko STEBIME, o ne kaip greitai parduodama. Rodiklį imam tik tada, kai
+// ilgiausias stebėtas skelbimas išgyveno bent mėnesį: tik tada langas
+// pakankamai platus, kad mediana ką nors reikštų.
+const GREICIO_LANGAS_D = 30;
+const GREICIO_IMTIS = 5;
+function patikimasGreitis(g) {
+  if (!g || g.imtis < GREICIO_IMTIS) return null;
+  if (!(g.leciausias >= GREICIO_LANGAS_D)) return null;
+  return g;
+}
+
 function pr(x) { return x == null ? null : Math.round(x * 10) / 10; }
 
 // ── 1. Mūsų duomenys ────────────────────────────────────────────────────────
@@ -32,7 +46,7 @@ function surinktiDuomenis(uzklausa, deps) {
 
   const pilnas = ((marke || '') + ' ' + (modelis || '')).trim();
   const tend = cache.modelioTendencijos ? cache.modelioTendencijos(pilnas) : null;
-  const greitis = cache.modelioPardavimoGreitis ? cache.modelioPardavimoGreitis(pilnas) : null;
+  const greitis = patikimasGreitis(cache.modelioPardavimoGreitis ? cache.modelioPardavimoGreitis(pilnas) : null);
 
   const lt = reg ? {
     parkas: reg.parkas,
@@ -120,4 +134,4 @@ Rašyk lietuviškai, dalykiškai, be reklamos. Grąžink TIK JSON (be markdown):
 }`;
 }
 
-module.exports = { surinktiDuomenis, promptas };
+module.exports = { surinktiDuomenis, promptas, patikimasGreitis, GREICIO_LANGAS_D };
