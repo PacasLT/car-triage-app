@@ -61,5 +61,13 @@ T(/_ctKiekPodelis\[raktas\]/.test(html), 'tie patys filtrai antrą kartą imami 
 T(/'portal-autoplius', 'portal-autogidas'/.test(html), 'portalų varnelės taip pat perskaičiuoja kiekį');
 T(!/DOMContentLoaded', function \(\) \{\s*ctKiekioImti/.test(html), 'įkeliant puslapį kiekis NESKAIČIUOJAMAS (kreditai)');
 
+// ── v2.16.3: žurnale – KREDITAI, ne užklausų skaičius ──────────────────
+T(/paieska:   \{ talpykla: 0, scraperapi: 0, kreditai: 0/.test(src), 'yra atskiras kreditų skaitiklis');
+T(/ATSARGA\.paieska\.kreditai \+= needsRender \? 10 : kaina\.kainaPortalui\(paieskosPortalas\(url\)\)/.test(src),
+  'kreditai skaičiuojami pagal portalą (LT 10, užsienio 1) ir renderį');
+T(/scraperKr: ATSARGA\.paieska\.kreditai - priesKr/.test(src), 'paieškų žurnale rašomi kreditai');
+T(/const kreditu = ATSARGA\.paieska\.kreditai - pries;/.test(src), 'rinkos skenavime – taip pat kreditai');
+T(/ATSARGA\.paieska\.scraperapi === priesUzkl/.test(src), '„is talpyklos“ vis dar sprendžiama pagal užklausas, ne kreditus');
+
 console.log('\n' + (klaidu ? '✗ ' + klaidu + ' klaidos iš ' + n : '✓ ' + n + '/' + n + ' patikrų praėjo'));
 process.exit(klaidu ? 1 : 0);

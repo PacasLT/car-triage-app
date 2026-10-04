@@ -8,6 +8,12 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.16.3', data: '2026-09-24', pavadinimas: 'Pataisa: tikra paieškos kaina administravime',
+    pakeitimai: [
+      'Administravimo žurnale prie kiekvienos paieškos dabar rodomi tikri ScraperAPI kreditai – anksčiau buvo rodomas užklausų skaičius, todėl lietuviškų portalų paieškos atrodė apie dešimt kartų pigesnės, nei yra.',
+    ],
+  },
+  {
     versija: '2.16.2', data: '2026-09-24', pavadinimas: 'Pataisa: ženklai AI atsakymuose',
     pakeitimai: [
       'Pokalbio atsakymuose nebesimato techninių ženklų (** ir -) – tekstas rodomas švarus, su eilučių lūžiais.',

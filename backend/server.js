@@ -800,7 +800,7 @@ async function kredituLikutis() {
 
 async function vykdytiSkenavima(skId, portalas, url, maxPuslapiu, marke, metaiNuo) {
   let uzAprepties = 0;
-  const pries = ATSARGA.paieska.scraperapi;
+  const pries = ATSARGA.paieska.kreditai;   // v2.16.3: kreditai, ne u\u017eklaus\u0173 skai\u010dius
   let klaida = null, pabaiga = null;
   try {
     const r = await fetchAllPages(url, maxPuslapiu, null, async (sarasas, puslapis) => {
@@ -825,7 +825,7 @@ async function vykdytiSkenavima(skId, portalas, url, maxPuslapiu, marke, metaiNu
     });
     pabaiga = r.pabaiga;
   } catch (e) { klaida = e.message; }
-  const kreditu = ATSARGA.paieska.scraperapi - pries;
+  const kreditu = ATSARGA.paieska.kreditai - pries;
   const s = rinka.baigti(skId, {
     pilnas: !klaida && pabaiga === 'galas',
     priezastis: klaida || pabaiga,
@@ -959,7 +959,11 @@ const GILINTI_TOP = parseInt(process.env.GILINTI_TOP || '3', 10);   // KL-TAUPYM
 // Skaitliukai atmintyje, matomi per GET /admin/atsarga. Perkrovus - is nulio.
 const ATSARGA = {
   nuo: Date.now(),
-  paieska:   { talpykla: 0, scraperapi: 0, axios: 0, puppeteer: 0 },
+  // `scraperapi` - UžKLAUSOS, `kreditai` - ScraperAPI KREDITAI. Tai ne tas pats:
+  // LT portalo puslapis kainuoja 10 kreditų, užsienio - 1, o su render - 10.
+  // Iki v2.16.3 paieškų žurnale buvo rašomos užklausos su antrašte „kr.", todėl
+  // admin rodinys rodė maždaug 10 kartų mažesnę kainą nei fondas iš tiesų prarado.
+  paieska:   { talpykla: 0, scraperapi: 0, kreditai: 0, axios: 0, puppeteer: 0 },
   skelbimas: { talpykla: 0, scraperapi: 0, puppeteer: 0, atsarginis: 0 },
   puppeteer: { pasiektas: 0, pavyko: 0, nepavyko: 0, klaidos: {} },
 };
@@ -1061,6 +1065,8 @@ async function fetchSearchPage(url, opts) {
       if (response.status === 200 && response.data && response.data.length > 500) {
         html = response.data;
         ATSARGA.paieska.scraperapi++;
+        // Render visada brangus (10 kr.), kitaip - portalo \u012fkainis.
+        ATSARGA.paieska.kreditai += needsRender ? 10 : kaina.kainaPortalui(paieskosPortalas(url));
         console.log(`  ScraperAPI OK (${html.length} simboliu)`);
       }
     } catch (err) {
@@ -4508,7 +4514,7 @@ app.post('/api/search-start', requireAuth, planai.reikalautiPaieskos(), (req, re
   const jobId = newJob();
   // v2.11.0: paieškų žurnalas (paskyra ir admin zona). ScraperAPI skaitiklis
   // bendras – jei tuo metu vyko kita paieška, skaičius apytikslis.
-  const pradzia = Date.now(), priesKr = ATSARGA.paieska.scraperapi, kitosVyko = _vykdomosPaieskos > 0;
+  const pradzia = Date.now(), priesKr = ATSARGA.paieska.kreditai, priesUzkl = ATSARGA.paieska.scraperapi, kitosVyko = _vykdomosPaieskos > 0;
   _vykdomosPaieskos++;
   const userId = req.user.id, filtrai = Object.assign({}, req.body || {});
   Promise.resolve(runSearchJob(jobId, req.body, planai.arAdmin(req.user))).finally(() => {
@@ -4517,9 +4523,9 @@ app.post('/api/search-start', requireAuth, planai.reikalautiPaieskos(), (req, re
     // Kainos stabdis paieskos NEPALEIDO - grazinam ja i plano limita.
     if (r.perbrangu) planai.grazintiPaieska(userId);
     paskyra.irasytiPaieska(userId, filtrai, {
-      busena: r.perbrangu ? 'nepaleista' : (j.status === 'error' ? 'error' : (ATSARGA.paieska.scraperapi === priesKr && r.totalScanned && (Date.now() - pradzia) < 3000 ? 'talpykla' : (j.status || 'done'))),
+      busena: r.perbrangu ? 'nepaleista' : (j.status === 'error' ? 'error' : (ATSARGA.paieska.scraperapi === priesUzkl && r.totalScanned && (Date.now() - pradzia) < 3000 ? 'talpykla' : (j.status || 'done'))),
       rasta: r.totalScanned, kandidatai: Array.isArray(r.candidates) ? r.candidates.length : null,
-      scraperKr: ATSARGA.paieska.scraperapi - priesKr, apytiksliai: kitosVyko || _vykdomosPaieskos > 0,
+      scraperKr: ATSARGA.paieska.kreditai - priesKr, apytiksliai: kitosVyko || _vykdomosPaieskos > 0,
       trukmeMs: Date.now() - pradzia,
     });
   });

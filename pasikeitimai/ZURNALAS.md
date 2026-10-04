@@ -1764,3 +1764,12 @@ laikinas sprendimas „kol Lukas nuspręs" negali tapti antra tiesa.
 - **Pataisa iš dviejų pusių:** (1) prompte aiškiai – jokių markdown ženklų nei paryškinimui, nei sąrašams, punktai iš naujos eilutės be ženklo; (2) naršyklėje `ctBeMarkdown` / `dpBeMarkdown` nuvalo `**`, `__`, `#` ir `- ` (pastarasis virsta „· “), o atsakymas rodomas su `white-space: pre-wrap`, kad eilučių lūžiai išliktų. Vien prompto neužtenka – modelis jo ne visada paiso.
 - Bandyme matėsi ir kelios AI rašybos klaidos („remonai“, „didėlė“) – prompte pridėta „rašyk taisyklinga lietuvių kalba“; jei kartosis, teks tikrinti atskirai.
 - `modelio-apzvalga.test` 77/77.
+
+## Z-146 · 2026-09-24 · Klaudijus · v2.16.3 – paieškos kaina žurnale buvo užklausos, ne kreditai
+
+- **Kaip radau:** Lukas atsiuntė gilaus skenavimo ekranvaizdį (BMW X5 2024, visi portalai, „Visi puslapiai“). Patikrinau serveryje: `/admin/suvestine` rodė, kad šiandienos 6 paieškos suvartojo **27 kr.**, o fondas per tas pačias dienas nukrito nuo ~12 000 iki **10 397** likučio. Skaičiai nesutapo maždaug dešimt kartų.
+- **Priežastis:** `ATSARGA.paieska.scraperapi` skaičiuoja **užklausas**, o į paieškų žurnalą jis buvo rašomas kaip `scraperKr` („kreditai“). LT portalo puslapis kainuoja 10 kreditų, užsienio – 1, su render – 10. Todėl LT paieškos žurnale atrodė ~10 kartų pigesnės.
+- **Pataisa:** atskiras skaitiklis `ATSARGA.paieska.kreditai`, pildomas ten, kur einama į ScraperAPI (`needsRender ? 10 : kainaPortalui(portalas)`). Paieškų žurnalas ir rinkos skenavimas dabar rašo kreditus. „Iš talpyklos“ požymis toliau sprendžiamas pagal užklausas – jis apie tai, ar apskritai buvo eita į tinklą.
+- **Kodėl svarbu:** ta pati suma (200 kr.) naudojama naujam paieškos stabdžiui. Stabdis skaičiavo teisingai (`paieskos-kaina.js`), bet admin rodinys ir Finansininko ataskaitos rodė kitą skaičių – reikėjo suvienodinti, kitaip ribos derinamos pagal klaidingus duomenis.
+- **Senuose įrašuose skaičiai lieka užklausomis** – jų neperskaičiuoju, nes portalų sudėties ten nebeturime. Nuo šiol žurnale – kreditai.
+- `puslapiai.test` 43/43.
