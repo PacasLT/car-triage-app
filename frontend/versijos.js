@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.19.1', data: '2026-10-16', pavadinimas: 'Pataisos: „iki“ prie neaiškaus mokesčio ir dizaino skolos pabaiga',
+    pakeitimai: [
+      'Kai taršos mokesčio tiksliai apskaičiuoti neįmanoma (skelbime nėra CO₂), didžiausia pirkimo kaina rodoma su žodžiu „iki“ ir punktyru – tai viršutinė riba, ne tikslus skaičius. Anksčiau tokiu atveju skaičius atrodė tikslesnis, nei yra.',
+      'Kai modelio likvidumo dar nesame išmatavę, dienų skaičius tiesiog nerodomas – geriau nerodyti, nei rodyti neteisingai.',
+      'Dizaino nustatymų skola uždaryta: nebeliko nė vieno nustatymo, kuris naudojamas be aprašymo ar aprašytas be naudojimo.',
+    ],
+  },
+  {
     versija: '2.19.0', data: '2026-10-16', pavadinimas: 'Perpardavėjo lentelės ir būklės dizainas',
     pakeitimai: [
       'Įdiegtas dizainerio 66 paketas: tanki lentelė su lipnia antrašte ir rikiavimu paspaudus stulpelį, bei būklės jungiklis su dviem žymomis.',

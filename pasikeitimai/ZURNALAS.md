@@ -1847,3 +1847,31 @@ dirbtuvė: ten duomenys tikri, o vartotojas — mes patys.
 - Sargai: 21 žali, `dizainas.test` 26/26 (ribos nepakito), `migracija` krenta aplinkoje (`better-sqlite3` ABI).
 
 **Atsakyta dizaineriui (PASTABOS 7 d.):** formulė patvirtinta su patikslinimais, `likvidumas.etikete` – trys reikšmės plius `null`. Detaliai – atsakyme Lukui.
+
+
+## Z-151 · 2026-10-16 · Klaudijus · v2.19.1 – Errata 17 įdiegta, tokenų skola 0
+
+Dizainerio Errata 17 (67) – trys punktai priimti, ketvirtas **padarytas kitaip, nei jis siūlė, ir pagal jo paties sąlygą**.
+
+- **1) `.is-key.is-cap`** – kai `kainaLt.tarsa.tikslumas === "nezinoma"`, MAX rodomas kaip viršutinė riba: `<b><i>iki</i> 23 150 €</b>` su punktyriniu pabraukimu. Įdiegta be pakeitimų.
+- **2) Likvidumas be dienų** – `.ct-dt-liq:not([data-l]) + span` pilkinamas. Įdiegta. Markupe `~N d.` nededamas, kol `patikimasGreitis` sargas jo neduoda (Z-144).
+- **3) K-66a `--dt-h`** – įdėtas į `:root`, 51 sk. atsarginė reikšmė nuimta.
+- **4) K-66b `--neutral` – NUKRYPIMAS, pamatuotas.**
+
+  Dizaineris rašė: „jei `-dim` ir `-border` rašyti ranka (rgba), perrašykit per jį" su 14 % / 32 %. **Prielaida neteisinga:** `--k-unknown-dim` ir `--k-unknown-border` ranka nerašyti – jie jau rodo į `--neutral-dim` / `--neutral-border`. Negyvas buvo **bare `--neutral`**, nes `-dim` ir `-border` yra atskiros `oklch(...)` reikšmės, o ne išvestos iš jo.
+
+  Jo 14 % / 32 % pamatuota (oklch → sRGB, uždėta ant keturių fonų):
+
+  | | Dabar | Jo siūlymas | Max skirtumas |
+  |---|---|---|---|
+  | dim ant `--bg-base` | rgb(21,25,36) | rgb(26,31,42) | **5,7/255** |
+  | dim ant `--bg-raised` | rgb(40,48,74) | rgb(44,52,78) | **4,7/255** |
+  | border ant `--bg-base` | rgb(42,48,59) | rgb(51,57,68) | **8,6/255** |
+  | border ant `--bg-raised` | rgb(58,67,90) | rgb(65,74,96) | **7,1/255** |
+
+  Visi keturi virš jo paties 2/255 ribos, tad pagal jo taisyklę reikėtų palikti kaip yra ir `--neutral` trinti.
+
+  **Bet yra trečias kelias, kurio jis nesvarstė:** perrašyti `--neutral-dim` / `--neutral-border` per `--neutral` **tomis pačiomis** procentinėmis reikšmėmis – 10 % ir 26 %. `color-mix(in oklab, X 10%, transparent)` yra matematiškai tapatu `oklch(... / .10)` (maišant su `transparent` premultiplied erdvėje gaunama ta pati spalva su ta alfa), tad **skirtumas 0/255**, o `--neutral` tampa gyvas. Taip ir padaryta.
+
+- **Rezultatas: tokenų patikra 0 sulūžusių ir 0 negyvų** – pirmą kartą projekte. Buvo 1 + 2 prieš 66 paketą.
+- Sargai: 21 žali, `dizainas.test` 26/26.

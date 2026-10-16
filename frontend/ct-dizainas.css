@@ -113,8 +113,8 @@
   --danger-border:  oklch(.66 .19 25 / .30);
 
   --neutral:        oklch(.68 .02 250);
-  --neutral-dim:    oklch(.68 .02 250 / .10);
-  --neutral-border: oklch(.68 .02 250 / .26);
+  --neutral-dim:    color-mix(in oklab, var(--neutral) 10%, transparent);   /* E17 K-66b: per --neutral, tos pacios 10 % - 0/255 skirtumas */
+  --neutral-border: color-mix(in oklab, var(--neutral) 26%, transparent);   /* E17 K-66b: per --neutral, tos pacios 26 % - 0/255 skirtumas */
 
   /* ── 4. TRYS ŽINOJIMO LYGIAI · produkto pagrindinė informacinė sistema ────
      Visada per šiuos tokenus, ne per success/warning tiesiogiai — kad vėliau
@@ -5394,7 +5394,7 @@ textarea.ct-field {
    descending). Rodykle piesia CSS is atributo - JS keicia tik atributa.
    ========================================================================== */
 
-.ct-dtable-wrap { overflow: auto; max-height: var(--dt-h, 70vh); }
+.ct-dtable-wrap { overflow: auto; max-height: var(--dt-h); }
 .ct-dtable { display: grid; grid-template-columns: var(--cols); }
 .ct-dtable-h,
 .ct-dtable-r { display: contents; }
@@ -5631,3 +5631,63 @@ textarea.ct-field {
 }
 .ct-bukle-legend { display: flex; align-items: center; gap: 12px; font: var(--fw-regular) 11.5px/1 var(--font); color: var(--text-muted); }
 @media (max-width: 640px) { .ct-bukle-legend { display: none; } }
+
+
+/* ============================================================================
+   67 · ERRATA 17 · po 66 paketo
+   Siulau v2.19.1. Visi trys atsakymai - is jusu matavimu, ne is mano atminties.
+   ========================================================================== */
+
+/* ── 1) MAX su nezinoma tarsa · VIRSUTINE RIBA ───────────────────────────
+   Kai `kainaLt.tarsa.tikslumas === "nezinoma"`, MAX nera tikslus - jis
+   daugiausia tiek. Rodom zodi „iki" pries skaiciu ir PUNKTYRA po juo
+   (ta pati kalba kaip „tarša ?" ≈LT stulpelyje - vienas zenklas abiem).
+   Skaicius NEmazinamas ir nespalvinamas: jis vis dar svarbiausias, tik
+   sąžiningai pasakytas.
+
+     <span class="is-key is-num is-cap">
+       <b><i>iki</i> 23 150 €</b>
+       <small class="is-ok">telpa · +750</small>
+     </span>
+   „telpa / derėtis" lieka - bet suprantama kaip „jei tarsa ~0".        */
+.ct-dtable-r > .is-key.is-cap > b {
+  text-decoration: underline dotted color-mix(in oklab, var(--warning) 70%, transparent);
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1.5px;
+}
+.ct-dtable-r > .is-key.is-cap > b > i {
+  font: var(--fw-medium) 11px/1 var(--font);
+  font-style: normal;
+  color: var(--text-muted);
+  margin-right: 3px;
+  vertical-align: 2px;
+}
+
+/* ── 2) Likvidumas be dienu ──────────────────────────────────────────────
+   Sutinku su jusu siulymu: dienu dalis tiesiog NEDEDAMA markupe, kol
+   sargas jos neduoda. Ne „0 d.", ne „–", ne „?": zodis ir bruksniai
+   jau pilnai atsako i klausima „kaip greitai", o dienos - tik tikslumas,
+   kurio dar neturim.
+   CSS nereikia nieko - `<b>~22 d.</b>` tiesiog nerasomas.
+
+   `etikete: null` → `.ct-dt-liq` be `data-l` (visi bruksniai pilki) ir
+   zodis „nėra duomenų" --text-dim. Taisykle 51 sk. jau tai daro. */
+.ct-dt-liq:not([data-l]) + span { color: var(--text-dim); }
+
+/* ── 3) K-66a · --dt-h ───────────────────────────────────────────────────
+   Dedam i :root. Atsargine reiksme var(..., 70vh) yra ta pati „tinklo"
+   forma, kuria nuemem nuo --border-strong ir --accent - tokenas, kuris
+   egzistuoja tik kaip atsarga, yra pusiau tokenas. */
+:root { --dt-h: 70vh; }
+/* ir 51 sk.: `.ct-dtable-wrap { max-height: var(--dt-h); }` - be atsargos. */
+
+/* ── 4) K-66b · --neutral ────────────────────────────────────────────────
+   NETRINAM. Jis yra semantinis pagrindas (ta pati eile kaip --success /
+   --warning / --danger), o --k-unknown-dim ir -border is tikruju ji
+   turi naudoti. Patikrinkit 1 sk.: jei -dim ir -border rasyti ranka
+   (rgba), perrasykit per ji:
+     --k-unknown-dim:    color-mix(in oklab, var(--neutral) 14%, transparent);
+     --k-unknown-border: color-mix(in oklab, var(--neutral) 32%, transparent);
+   Tada --neutral gyvas, ir negyvu tokenu - 0.
+   Jei vizualiai pasikeistu daugiau nei 2/255 - palikit kaip yra ir
+   pasakykit, tada --neutral trinam. */
