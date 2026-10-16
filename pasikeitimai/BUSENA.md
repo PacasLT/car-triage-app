@@ -1,4 +1,4 @@
-# Būsena · 2026-10-16 · v2.22.1 (laukia push)
+# Būsena · 2026-10-16 · v2.22.1 (GYVA)
 
 Tik **atviri** punktai. Uždaryti — `ZURNALAS.md` / `archyvas/`. Kas laukia Luko — `LUKUI.md`.
 Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).

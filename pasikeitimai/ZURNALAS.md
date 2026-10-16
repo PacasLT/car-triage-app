@@ -2006,3 +2006,31 @@ Dizaineris perėmė visus keturis `ct-priedai.css` 24 bloko vardus į **51b sk.*
 Būklės filtras kortelių režime: 8 skelb. → **6 skelb.**, kortelių DOM'e irgi 6. Juosta abiem atvejais liko virš rezultatų (`bar.nextElementSibling === #results`).
 
 - Sargai: **23 žali**; `perpardavejas.test.js` 5 → **17 patikrų** (prisidėjo juostos vieta, vardai, legendos `[hidden]`, skaitiklis ir būklės filtras kortelių režime). Tokenai **0 + 0**.
+
+## Z-158 · 2026-10-16 · PRASTOVA 16:08–20:18 · Railway planas ir deploy'o kabliukas
+
+**Svetainė neveikė keturias valandas**, ir tai paaiškėjo tik darant v2.22.1 deploy patikrą – ne iš sargų, ne iš klaidų sąrašo.
+
+### Kas nutiko
+
+| Laikas | Įvykis |
+|---|---|
+| 16:08 | Konteineris gavo SIGTERM, išsijungė švariai. Naujo nepakilo. Servisas – `Offline`, aktyvių deploy'ų 0. |
+| 18:2x | `033780f` (v2.22.1) push'intas. **Railway nepradėjo nei build'o, nei deploy'o** – sustabdytas servisas GitHub įvykio nepriima. |
+| 20:09 | Lukas atnaujino Railway planą į Hobby ir paspaudė Redeploy. |
+| 20:12 | Servisas pakilo – **bet su SENU `2d7fb12`** (v2.22.0): „Redeploy" paleidžia tą patį snapshot'ą, ne naujausią commit'ą. |
+| 20:17 | Tuščias commit `0732786` į `main` → GitHub kabliukas suveikė → v2.22.1 gyva 20:18. |
+
+### Trys dalykai, kuriuos tai parodė
+
+1. **Push ≠ deploy.** Iki šiol laikiau, kad po push'o Railway visada pakyla. Kai servisas sustabdytas, įvykis dingsta be pėdsako – nei klaidos, nei eilės. Patikra privalo baigtis **ne „push OK", o tikru atsakymu iš `versijos.js` produkcijoje**.
+2. **„Redeploy" nėra „deploy latest".** Jis atkuria snapshot'ą. Po prastovos reikia naujo commit'o (arba Deploy latest dashboard'e), kitaip grįžta sena versija ir atrodo, kad viskas gerai.
+3. **Prastovos niekas nepraneša.** Keturias valandas nė vienas sargas, nė vienas žurnalo įrašas nesakė, kad produkcijos nėra. Reikia išorinės patikros – K-71b.
+
+### K-71b · išorinis gyvybės sargas (laukia Luko)
+
+Siūlymas: `tools/gyvas.js` – kas N min. paima `/versijos.js`, lygina su `main` versija ir rašo į `/admin.html`. Paleidžiamas NE Railway'uje (kitaip krinta kartu). Tai atskiras darbas, ne šio paketo dalis.
+
+### Antra, dar neuždaryta: `ANTHROPIC_API_KEY`
+
+Prieš išsijungimą žurnale kas antra eilutė buvo `generateShortComment KLAIDA: 401 invalid x-api-key`. Skelbimai nuskaitomi, AI komentarai – ne. Sargai to nepagauna, nes nekviečia tikro API. Punktas Lukui – KL-1016-1840. Po rakto pakeitimo reikia **vienos tikros analizės** patikrai, žurnale 401 turi dingti.
