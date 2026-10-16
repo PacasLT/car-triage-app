@@ -1,4 +1,4 @@
-# Būsena · 2026-10-16 · v2.20.0 (laukia push)
+# Būsena · 2026-10-16 · v2.20.0 gyva
 
 Tik **atviri** punktai. Uždaryti — `ZURNALAS.md` / `archyvas/`. Kas laukia Luko — `LUKUI.md`.
 Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
@@ -38,7 +38,8 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 | ~~K-66b~~ | `--neutral` | **Uždaryta** (Errata 17): `--neutral-dim`/`-border` perrašyti per jį 10 %/26 % – 0/255 skirtumas. Tokenų skola **0 + 0**. |
 | K-66c | `.adm-users` → `.ct-dtable` | Atidėta į B dalį: `.ct-dtable` neperima 4 admino taisyklių. |
 | ~~dz-perpardavejas B~~ | **Įdiegta v2.20.0** | 53 sk. `.ct-mkts`, 54 sk. `.ct-money`, 55 sk. `.ct-pipe`. |
-| K-68a | `.adm-users` → `.ct-dtable` | Bendros klasės yra; liko `admin.html` markupas – su perpardavėjo rodiniu kartu. |
+| K-68a | `.adm-users` → `.ct-dtable` | Bendros klasės yra; liko `admin.html` markupas – su perpardavėjo rodiniu kartu. **Dizaineris sutiko.** |
+| Dizaineris | **Nieko nelaukia** | 66/67/68 įdiegti, abu klausimai atsakyti ir priimti (dienos rėžiu, „čia būtų 7"). |
 | Prieiga | `Downloads\cartriige-dizaineriui` | Tikros kopijos (junction'ai neveikė). Patikra: `ct-priedai.css` eil. sk. + ši pirma eilutė. |
 | `#search-btn` | 5-as ID mygtukas | Gradientas / švytėjimas / `:disabled` sistemoje ar vientisas CTA? Z-93. |
 | Kiti vardai | `.ct-btn-accent` (priedų 5), `.ct-regitra` (15), `.mg-atn-busena` (12), `.ct3-portal-ico` | Dizaineris pažadėjo kitame pakete. |
