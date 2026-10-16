@@ -8,6 +8,12 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.18.1', data: '2026-10-16', pavadinimas: 'Pataisa: rinkos duomenys nepasiekdavo ekrano',
+    pakeitimai: [
+      'Naujos eilutės „Vokietijos rinka“ ir „≈ Lietuvoje“ buvo suskaičiuojamos serveryje, bet nepasiekdavo ekrano – sąsajai siunčiamų laukų sąrašas yra baltasis, o nauji laukai į jį nebuvo įrašyti. Dabar matosi.',
+    ],
+  },
+  {
     versija: '2.18.0', data: '2026-10-16', pavadinimas: 'Tikri parsivežimo kaštai ir taršos mokestis',
     pakeitimai: [
       'Eilutė „≈ Lietuvoje“ dabar skaičiuojama iš tikrų rinkos kainų, ne iš spėjimų: transportas iš Vokietijos 450 €, iš Lenkijos 300 €, iš kitos Vakarų Europos 700 €; registracija Regitroje 20 €; techninė apžiūra 30 €; paruošimas pardavimui 250 €.',

@@ -3763,6 +3763,10 @@ async function runSearchJob(jobId, filters, arAdminas) {
       rizikosBusena: l.rizikosBusena, istorijosBusena: l.istorijosBusena,
       irangosBusena: l.irangosBusena, neivertinta: l.neivertinta,
       diffPct: l.diffPct, marketMedian: l.marketMedian, marketCount: l.marketCount,
+      // v2.18.1: rinka ir kaina Lietuvoje. Šis sąrašas yra BALTASIS SĄRAŠAS - laukas,
+      // kurio čia nėra, iki sąsajos nenukeliauja, net jei `enriched` jį turi.
+      rinka: l.rinka || null, lygintaRinka: l.lygintaRinka || null,
+      rinkosVardas: l.rinkosVardas || null, kainaLt: l.kainaLt || null,
       // v1.25.0: PVM skaidymas - rodom, kad kaina yra galutine (su PVM)
       pvmPastaba: l.pvmPastaba || null, kainaBaze: l.kainaBaze || null, kainaBePvm: l.kainaBePvm || null,
       varantieji: l.varantieji || null, itariamaZala: l.itariamaZala || null,

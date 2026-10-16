@@ -1799,3 +1799,11 @@ laikinas sprendimas „kol Lukas nuspręs" negali tapti antra tiesa.
 - **Naujas sargas** `backend/testai/tarsos-mokestis.test.js` – 27/27. Sargai: **21 žali**, 2 praleisti, `migracija` krenta aplinkoje (`better-sqlite3` ABI: Node 24 Windows / Node 22 VM) – nesusiję su šiuo darbu.
 - **Pastebėjimas Lukui (verslo, ne kodo):** mokestis mokamas **ir registruojant, ir kiekvieną kartą keičiantis valdytojui**. Perpardavėjui tai reiškia, kad jį sumoka jis, o paskui dar kartą jo pirkėjas – tai argumentas, kurį verta turėti derybose, ir priežastis, kodėl PHEV/EV Lietuvoje perparduoti pigiau nei atrodo.
 - **Kas lieka:** trijų rinkų rodinys (`UZSAKYMAS-KLIENTUI.md` §6, 2 žingsnis) ir produkto peržiūra „tik perpardavėjams“ – abu laukia atskiro paketo.
+
+## Z-149 · 2026-10-16 · Klaudijus · v2.18.1 – rinkos laukai nepasiekdavo sąsajos (rasta ruošiant duomenų pavyzdį dizaineriui)
+
+- **Kaip radau:** dizaineris paprašė JSON pavyzdžio su laukais, kuriuos piešti. Ruošdamas jį atidariau `allListingsBase` ir pamačiau, kad tai **baltasis laukų sąrašas**, o ne `{...l}`.
+- **Klaida:** v2.17.0 ir v2.18.0 pridėjo `rinka`, `lygintaRinka`, `rinkosVardas`, `kainaLt` į `enriched`, bet ne į šį sąrašą. Serveris skaičiavo teisingai, testai žali, o ekrane nieko nesimatė – `rinkosEtikete()` visada grąžindavo „RINKOS VIDURKIS", `kainaLtEilute()` – tuščią eilutę.
+- **Pamoka:** naujas laukas skelbime reikalauja DVIEJŲ vietų – `enriched` ir `allListingsBase`. Sargai to nepagauna, nes jie tikrina modulius, ne atsakymo formą. Vertėtų atskiras sargas, tikrinantis, kad `kainaLt` ir `rinka` yra atsakyme.
+- **Pataisa:** keturi laukai įrašyti į baltąjį sąrašą su komentaru, kad tai baltasis sąrašas.
+- Sargai: 21 žali.
