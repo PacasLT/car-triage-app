@@ -1,30 +1,34 @@
-# Lukui · 2026-09-22
+# Lukui · 2026-10-16
 
 Viskas, ko laukia tavęs. Kiekvienas punktas ≤ 1 min. Perrašo Klaudijus po kiekvieno leidimo.
 
 ## Leidimai
-- Nieko nelaukia. A fazė išsiųsta 2026-09-22 (deploy SUCCESS).
+- **v2.17.0 paruošta, laukia push.** Sargai 20 žali (`rinkos` 23/23), `migracija` krenta tik Klaudijaus aplinkoje (trynimo teisės), tavo PowerShell'yje turi praeiti.
+
+## Sprendimai, kurių laukiu
+| Nr. | Kas | Ko reikia iš tavęs |
+|---|---|---|
+| KL-1016-KASTAI | Parsivežimo kaštai | Transportas iš DE ir iš PL, registracija LT, TA, paruošimas pardavimui. Dabar įrašyti pradiniai orientyrai (DE 1 050 €, PL 800 €, EU 1 300 €) – jie rodomi su „≈“. |
+| KL-1016-TARSA | Taršos mokestis | Ar darau `backend/tarsos-mokestis.js` iš viešos LR tvarkos (be jo rinkų palyginimas iškreiptas – PHEV 0 €, dyzelinis visureigis šimtai). |
+| KL-1016-UZSAKYMAS | Užsakymas klientui | Planas `claude/UZSAKYMAS-KLIENTUI.md`. Ar einam prie 2 žingsnio (trijų rinkų rodinys)? Reikės ir dizainerio. |
+| KL-1006-RADARAS | Radaras | Tas pats planuoklis kaip užsakymo sekimui – verta daryti kartu. |
+| FN-0922-1310 | ScraperAPI Startup (149 $) | Be jo nei radaras, nei užsakymų sekimas netelpa į fondą. |
+| FN-0922-1600/1700 B | `planai.js` kainodara | Vienintelis darbas, blokuojantis pilotus. |
 
 ## Perdavimai
-- [x] Fazė C praėjo visi. `PLETRA.md` projekte (įrašė Klaudijus), `SAVIKAINA.md` – Finansininkas pats.
 - [ ] Finansininkui: Q-4–Q-7 atsakyta `SAVIKAINA-DUOMENYS.md` §6. Plano kaina, PVM – iš tavęs.
-
-## ⚠ ScraperAPI – vėl skubu (pataisyta)
-- Galioja **87 741 / 100 000** (Analytics + `/account` + portalų lentelė sutampa). 34 846 iš Billing kortelės – klaidingas. Liko ~12 300 kr. iki **10-16**; pasiekus ribą LT paieškos sustos. Sprendimas – Luko eilėje **KL-SCRAPER**.
+- [ ] Dizaineriui: `dz-perpardavejas` paketas (`PERPARDAVEJO-APLINKA.md` §7) – laukia tavo „siųsk“.
 
 ## Sprendimai ir klausimai → **Luko eilė**
-Visi klausimai, sprendimai, nuomonės ir leidimai dabar yra puslapyje „Luko eilė“:
-https://claude.ai/artifact/KfPvoTLDL83GtRYHobaXtu – atsakai ten, perdavimo tekstas paruošiamas.
-Taisyklė visiems nariams: projekte `claude/LUKUI-TAISYKLE.md`.
+https://claude.ai/artifact/KfPvoTLDL83GtRYHobaXtu – taisyklė `claude/LUKUI-TAISYKLE.md`.
 
-## Patikra produkcijoje
-**admin: 5 laukia tavęs** → `/admin.html` (Nr. 40, 42, 45, 30, 10 – kiekviename „KĄ PATIKRINTI"). Veikia/Neveikia.
-
-Be admin:
+## Patikra produkcijoje po v2.17.0
 | Kas | Kur | Ką pažiūrėti |
 |---|---|---|
-| Nr. 37 portalų langas | paieška → „Portalai" | ar dar „ne pagal dizainą"; jei taip – vienas žodis: plotis / kraštas / spalva / šriftas |
-| Nauji filtrai v2.7.2 | „Daugiau filtrų" | kėbulas, pardavėjas, įdėta per, kaina žemiau rinkos, balas – paieška su vienu iš jų |
-| Tamsūs sąrašai | MARKĖ išskleisti | tamsus fonas, tekstas matomas |
-| Tab žiedas | 1280 px, spaudinėk Tab | mygtukų rėmelis kaip anksčiau |
-| Slinkties juostos, autofill | bet kur / prisijungimo el. paštas | tamsios, ne mėlynas fonas |
+| Rinkos antraštė | paieška su DE/PL portalais → kortelė | vietoj „RINKOS VIDURKIS“ turi rašyti „VOKIETIJOS RINKA“ / „LENKIJOS RINKA“ |
+| ≈ Lietuvoje | ta pati kortelė, užsienio skelbimas | eilutė „≈ LIETUVOJE“ su suma; užvedus – iš ko sudėta |
+| Nuolaidos dydis | tas pats vokiškas skelbimas | procentas turi SUMAŽĖTI, palyginus su anksčiau – tai ir yra pataisos esmė |
+| LT skelbimai | tik autoplius/autogidas paieška | niekas nepasikeitė, „≈ Lietuvoje“ eilutės nėra |
+
+## ⚠ ScraperAPI
+- Likutis buvo **10 397 kr.** (09-24). Radaras ir užsakymų sekimas be Startup plano netelpa – **FN-0922-1310**.

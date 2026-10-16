@@ -2013,6 +2013,7 @@ function mergeDuplicatesAcrossPortals(listings) {
 // v2.4.0: perkelta i rinkos-mediana.js (atspari mediana, Nr. 43) - kad butu
 // testuojama be serverio. Kvietejai nepasikeite.
 const { computeMarketMedians, lyginimoMediana } = require('./rinkos-mediana');
+const rinkos = require('./rinkos');
 // v2.10.6: tekstas kartos atnaujinimui atpažinti (LCI / facelift skelbimo pavadinime).
 function rinkosTekstas(l) { return [l.modelis, l.title, l.variantas].filter(Boolean).join(' '); }
 
@@ -2962,8 +2963,12 @@ function buildWhyReasons(l, k) {
   const r = [];
   if (l.naujas) r.push('Naujas automobilis (rida < 5 000 km) – kaina lyginama su kitais naujais');
   if (l.diffPct !== null && l.marketCount >= 3) {
-    if (l.diffPct >= 3) r.push('−' + l.diffPct + '% žemiau rinkos (' + l.marketMedian + '€, imtis ' + l.marketCount + ')');
-    else if (l.diffPct <= -3) r.push('+' + Math.abs(l.diffPct) + '% virš rinkos (' + l.marketMedian + '€)');
+    // v2.17.0: pasakom, SU KURIA rinka palyginta. Be to „−18 % žemiau rinkos"
+    // vokiškam skelbimui reiškė tik tai, kad Vokietijoje pigiau nei Lietuvoje.
+    const rv = l.lygintaRinka ? rinkos.rinkosVardas(l.lygintaRinka) : null;
+    const kas = rv ? rv + ' rinkos' : 'rinkos (visos šalys kartu)';
+    if (l.diffPct >= 3) r.push('−' + l.diffPct + '% žemiau ' + kas + ' (' + l.marketMedian + '€, imtis ' + l.marketCount + ')');
+    else if (l.diffPct <= -3) r.push('+' + Math.abs(l.diffPct) + '% virš ' + kas + ' (' + l.marketMedian + '€)');
     else r.push('Kaina atitinka rinką (' + l.marketMedian + '€)');
   } else {
     r.push('Rinkos kaina nenustatyta – per maža panašių skelbimų imtis');
@@ -3387,6 +3392,8 @@ async function runSearchJob(jobId, filters, arAdminas) {
     const fMarke = (filters && filters.marke) || null;
     combinedForMedians.forEach((l) => {
       l.rinkosGrupes = regitra.rinkosGrupes(l.marke || fMarke, l.modelis, l.metai, rinkosTekstas(l), l.menuo);
+      // v2.17.0 (A punktas): iš kurios rinkos skelbimas – LT / DE / EU / PL.
+      l.rinka = l.rinka || rinkos.rinkaPagalPortala(l.source);
       // Nr.50: naujas auto (rida < 5 000 km, ne senesnis nei 1 m.) lyginamas su kitais naujais, ne su naudotais.
       l.naujas = arNaujas(l);
       if (l.naujas) l.rinkosGrupes = ['naujas'].concat(l.rinkosGrupes);
@@ -3458,7 +3465,8 @@ async function runSearchJob(jobId, filters, arAdminas) {
 
     const enriched = parsed.map((l) => {
       const marketData = l.modelis ? medians[l.modelis] : null;
-      const lyg = lyginimoMediana(marketData, l.rinkosGrupes);
+      const rinka = l.rinka || rinkos.rinkaPagalPortala(l.source);
+      const lyg = lyginimoMediana(marketData, l.rinkosGrupes, rinka);
       const hasReliableMarket = lyg && lyg.count >= 3;
       let diffPct = null, ridaDiffPct = null;
       if (l.kaina && hasReliableMarket) {
@@ -3468,10 +3476,16 @@ async function runSearchJob(jobId, filters, arAdminas) {
         ridaDiffPct = Math.round(((l.rida - marketData.ridaMedian) / marketData.ridaMedian) * 100);
       }
       return {
-        ...l, diffPct, ridaDiffPct,
+        ...l, diffPct, ridaDiffPct, rinka,
         marketCount: lyg ? lyg.count : 0,
         marketMedian: lyg ? lyg.median : null,
         rinkosGrupe: lyg ? lyg.grupe : null,
+        // su kuria rinka palyginta (null = su visų portalų mišiniu, nes savos rinkos imtis per maža)
+        lygintaRinka: lyg ? (lyg.rinka || null) : null,
+        rinkosVardas: rinkos.rinkosVardas(rinka),
+        // apytikslė kaina Lietuvoje: skelbimo kaina + parsivežimas. Pradiniai
+        // orientyrai (rinkos.js), be taršos mokesčio, PVM ir remonto.
+        kainaLt: rinkos.kainaLietuvoje(l.kaina, rinka),
         ridaMedian: marketData ? marketData.ridaMedian : null,
       };
     });

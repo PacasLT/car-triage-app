@@ -4396,6 +4396,26 @@ function escJs(s) {
   return String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, ' ');
 }
 
+// v2.17.0 (A punktas): su kuria rinka palyginta ir kiek auto maždaug kainuotų
+// Lietuvoje. Kaštai apytiksliai (backend/rinkos.js) – be taršos mokesčio, PVM
+// ir remonto, todėl visur rašom „≈" ir paaiškinam užvedus.
+function rinkosEtikete(c) {
+  if (!c || !c.lygintaRinka) return 'RINKOS VIDURKIS';
+  var v = { LT: 'LIETUVOS RINKA', DE: 'VOKIETIJOS RINKA', EU: 'VAK. EUROPOS RINKA', PL: 'LENKIJOS RINKA' };
+  return v[c.lygintaRinka] || 'RINKOS VIDURKIS';
+}
+function kainaLtEilute(c) {
+  if (!c || !c.kainaLt || c.rinka === 'LT') return '';
+  var k = c.kainaLt;
+  var det = 'Skelbimo kaina ' + formatEUR(k.kaina)
+    + ' + transportas ' + formatEUR(k.kastai.transportas)
+    + ' + registracija ' + formatEUR(k.kastai.registracija)
+    + ' + paruošimas ' + formatEUR(k.kastai.paruosimas)
+    + '. Neįskaičiuota: ' + (k.neiskaiciuota || []).join(', ') + '.';
+  return '<div class="ct-market-row" title="' + esc(det) + '">'
+    + '<span class="ct-market-k">≈ LIETUVOJE</span>'
+    + '<span class="ct-market-v">' + formatEUR(k.viso) + '</span></div>';
+}
 function formatEUR(n) {
   if (n === null || n === undefined) return '?';
   return n.toLocaleString('lt-LT').replace(/,/g, ' ') + ' €';
@@ -6329,10 +6349,11 @@ function ctNavTab(tab) {
         +         '</div>'
         +         '<div class="ct-market">'
         +           ((c.marketMedian && !rinkaSilpna)
-                      ? '<div class="ct-market-row"><span class="ct-market-k">RINKOS VIDURKIS</span><span class="ct-market-v">' + formatEUR(c.marketMedian) + '</span></div>'
+                      ? '<div class="ct-market-row"><span class="ct-market-k">' + rinkosEtikete(c) + '</span><span class="ct-market-v">' + formatEUR(c.marketMedian) + '</span></div>'
                         + (skirtSuma != null ? '<div class="ct-market-row ' + diffTonas + '"><span class="ct-market-k">' + skirtEtik + '</span><span class="ct-market-v">' + formatEUR(skirtSuma) + '</span></div>' : '')
                       : '<div class="ct-market-row"><span class="ct-market-k">RINKOS VIDURKIS</span><span class="ct-market-v is-unrated-val">–</span></div>'
                         + '<div class="ct-market-row"><span class="ct-market-k">PANAŠIŲ SKELBIMŲ</span><span class="ct-market-v is-unrated-val">' + (c.marketCount ? c.marketCount + ' – per mažai' : 'per mažai') + '</span></div>')
+        +           kainaLtEilute(c)
         +         '</div>'
         +       '</div>'
         +     '</div>'

@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.17.0', data: '2026-10-16', pavadinimas: 'Kaina lyginama su savo rinka, ne su visų šalių mišiniu',
+    pakeitimai: [
+      'Skelbimo kaina dabar lyginama su TOS PAČIOS šalies rinka: vokiškas – su Vokietijos, lenkiškas – su Lenkijos, lietuviškas – su Lietuvos. Anksčiau visų penkių portalų kainos buvo suplaktos į vieną vidurkį, todėl užsienio skelbimai atrodė pigesni vien dėl rinkos skirtumo, o geri lietuviški pasiūlymai skendo.',
+      'Kortelėje rašoma, su kuria rinka palyginta – „Vokietijos rinka“, „Lietuvos rinka“ ir panašiai. Jei tos šalies skelbimų imtis per maža, sąžiningai rašoma „rinkos (visos šalys kartu)“.',
+      'Prie užsienio skelbimų atsirado eilutė „≈ Lietuvoje“: skelbimo kaina plius apytiksliai parsivežimo kaštai (transportas, registracija, paruošimas). Užvedus matosi, iš ko ta suma sudėta.',
+      'Svarbu: parsivežimo kaštai kol kas yra PRADINIAI orientyrai, ne sąmata. Į juos neįskaičiuotas taršos mokestis, PVM ir remontas – todėl visur rašoma „≈“.',
+    ],
+  },
+  {
     versija: '2.16.3', data: '2026-09-24', pavadinimas: 'Pataisa: tikra paieškos kaina administravime',
     pakeitimai: [
       'Administravimo žurnale prie kiekvienos paieškos dabar rodomi tikri ScraperAPI kreditai – anksčiau buvo rodomas užklausų skaičius, todėl lietuviškų portalų paieškos atrodė apie dešimt kartų pigesnės, nei yra.',

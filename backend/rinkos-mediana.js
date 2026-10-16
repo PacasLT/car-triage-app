@@ -18,6 +18,8 @@
 // peržengia 2,5 karto. Rėmai taikomi tik kai imtyje ≥ 5 kainos: mažoje imtyje
 // pirminė mediana pati nepatikima, ir ji atkirstų teisingas kainas.
 
+const { rinkaPagalPortala } = require('./rinkos');
+
 const MIN_KAINA = 500;
 const MAX_KAINA = 1500000;
 const APACIA = 0.4;
@@ -49,6 +51,10 @@ function computeMarketMedians(parsedListings) {
   const byModel = {};
   const ridaByModel = {};
   const byGrupe = {};
+  // v2.17.0 (A punktas): ta pati kaina papildomai renkama ir pagal rinką (LT/DE/EU/PL),
+  // kad skelbimas būtų lyginamas su SAVO rinka, o ne su visų penkių portalų mišiniu.
+  const byRinka = {};
+  const byRinkaGrupe = {};
   (parsedListings || []).forEach((l) => {
     // Lizingo įmokos ir klaidingai įvestos sumos, kurias jau pažymėjo kainosPatikra
     if (l.kaina && !l.kainosIspejimas) {
@@ -57,6 +63,16 @@ function computeMarketMedians(parsedListings) {
       if (gr.length) {
         const g = (byGrupe[l.modelis] = byGrupe[l.modelis] || {});
         gr.forEach((x) => (g[x] = g[x] || []).push(l.kaina));
+      }
+      const rinka = l.rinka || rinkaPagalPortala(l.source || l.portalas);
+      if (rinka) {
+        const r = (byRinka[l.modelis] = byRinka[l.modelis] || {});
+        (r[rinka] = r[rinka] || []).push(l.kaina);
+        if (gr.length) {
+          const rg = (byRinkaGrupe[l.modelis] = byRinkaGrupe[l.modelis] || {});
+          const rgr = (rg[rinka] = rg[rinka] || {});
+          gr.forEach((x) => (rgr[x] = rgr[x] || []).push(l.kaina));
+        }
       }
     }
     if (l.rida) (ridaByModel[l.modelis] = ridaByModel[l.modelis] || []).push(l.rida);
@@ -70,6 +86,16 @@ function computeMarketMedians(parsedListings) {
       const gm = atspariMediana(kainos);
       grupes[gr] = { median: gm.median, count: gm.count };
     }
+    const rinkos = {};
+    for (const [rk, kainos] of Object.entries(byRinka[model] || {})) {
+      const rm = atspariMediana(kainos);
+      const rgrupes = {};
+      for (const [gr, gk] of Object.entries((byRinkaGrupe[model] || {})[rk] || {})) {
+        const gm = atspariMediana(gk);
+        rgrupes[gr] = { median: gm.median, count: gm.count };
+      }
+      rinkos[rk] = { median: rm.median, count: rm.count, grupes: rgrupes };
+    }
     medians[model] = {
       median: k.median,
       count: k.count,
@@ -77,6 +103,7 @@ function computeMarketMedians(parsedListings) {
       ridaMedian: r.length ? med(r) : null,
       ridaCount: r.length,
       grupes,
+      rinkos,
     };
   }
   return medians;
@@ -92,14 +119,36 @@ const MIN_GRUPEI = 5;
 const MIN_NAUJU_GRUPEI = 3;
 function grupesRiba(gr) { return gr === 'naujas' ? MIN_NAUJU_GRUPEI : MIN_GRUPEI; }
 
-function lyginimoMediana(marketData, grupes) {
+// v2.17.0 (A punktas): pirmenybė SAVO rinkai. Eiliškumas – nuo tiksliausio prie
+// bendriausio, kiekvieną kartą reikalaujant pakankamos imties:
+//   1) ta pati rinka + ta pati kartos fazė  (tiksliausia: „G05 LCI Vokietijoje")
+//   2) ta pati rinka                        („X5 Vokietijoje")
+//   3) kartos fazė, visos rinkos            (kaip iki šiol)
+//   4) visas modelis, visos rinkos          (kaip iki šiol)
+// Jei savos rinkos imtis per maža, krentam žemyn, bet grąžiname `rinka: null`,
+// kad rodinys galėtų sąžiningai parašyti, su kuo lyginta.
+const MIN_RINKAI = 5;
+
+function lyginimoMediana(marketData, grupes, rinka) {
   if (!marketData) return null;
   const sar = Array.isArray(grupes) ? grupes : (grupes ? [grupes] : []);
+  const r = rinka && marketData.rinkos ? marketData.rinkos[rinka] : null;
+  if (r) {
+    for (const gr of sar) {
+      const g = r.grupes ? r.grupes[gr] : null;
+      if (g && g.count >= grupesRiba(gr) && g.median) {
+        return { median: g.median, count: g.count, grupe: gr, rinka };
+      }
+    }
+    if (r.median && r.count >= MIN_RINKAI) {
+      return { median: r.median, count: r.count, grupe: null, rinka };
+    }
+  }
   for (const gr of sar) {
     const g = marketData.grupes ? marketData.grupes[gr] : null;
-    if (g && g.count >= grupesRiba(gr) && g.median) return { median: g.median, count: g.count, grupe: gr };
+    if (g && g.count >= grupesRiba(gr) && g.median) return { median: g.median, count: g.count, grupe: gr, rinka: null };
   }
-  return { median: marketData.median, count: marketData.count, grupe: null };
+  return { median: marketData.median, count: marketData.count, grupe: null, rinka: null };
 }
 
-module.exports = { atspariMediana, computeMarketMedians, lyginimoMediana, MIN_GRUPEI, MIN_NAUJU_GRUPEI, RIBOS: { MIN_KAINA, MAX_KAINA, APACIA, VIRSUS, MIN_IMTIS_REMAMS } };
+module.exports = { atspariMediana, computeMarketMedians, lyginimoMediana, MIN_GRUPEI, MIN_NAUJU_GRUPEI, MIN_RINKAI, RIBOS: { MIN_KAINA, MAX_KAINA, APACIA, VIRSUS, MIN_IMTIS_REMAMS } };
