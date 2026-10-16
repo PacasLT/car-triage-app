@@ -1927,3 +1927,33 @@ Dar grąžinama `derybos()` – „telpa · +943" arba „derėtis −557" (66 p
 - Jo argumentas dėl pirminio mygtuko irgi priimtas ir vertas užrašyti kaip taisyklę: **„kas išleidžia kreditus – ne pirminis" galioja tik tada, kai be to veiksmo puslapis turi prasmę.** Nuorodos lauke analizė yra vienintelis veiksmas, dėl kurio žmogus atėjo; „patikslinti rinką" – ne, nes ≈LT, defektai ir rizika jau matomi.
 - Tokenai 0 + 0, sargai 22 žali.
 - **Dizainerio pusė vėl tuščia.** Visas likęs darbas – markupas (66 + 68 + 69 paketai) ir `admin.html` → `.ct-dtable`.
+
+## Z-155 · 2026-10-16 · Klaudijus · v2.22.0 – lentelės rodinys (markupas) + RASTA MANO SKAIČIAVIMO KLAIDA
+
+**Atsakymas į `PERPARDAVEJO-APLINKA.md` §5 atvirą klausimą: režimas, ne atskiras puslapis.** `index.html` yra 7 600 eilučių su filtrais, paieška, sesija ir pranešimais. Atskiras puslapis reikštų visa tai dublikuoti, o du vienodi puslapiai neišvengiamai išsiskiria. Lentelė yra tos pačios paieškos kitas rodinys.
+
+- **Naujas `frontend/perpardavejas.js`** (267 eil.) – visas lentelės piešimas atskirai, kad `index.html` neaugtų. Įsijungia apgaubdamas `window.renderCandidateCards`.
+- **Spąstai, į kuriuos kone įkritau:** `index.html` turi SENESNĮ apvalkalą, kuris kortelių piešėją pasiima į `window.__ct_renderCards` ir kviečia jį **tiesiogiai** rikiuojant (`__ctApplySorting`, 6723 eil.). Perrašius tik `renderCandidateCards`, rikiavimas būtų apėjęs naują rodinį ir lentelė virtusi kortelėmis. Perrašomi abu vardai.
+- **Marža perskaičiuojama naršyklėje**, be serverio ir be kreditų: serveris atsiunčia `pardavimas`, `kastai`, `tarsa`, o formulėje skelbimo kainos nėra. Naujas sargas `perpardavejas.test.js` tikrina, kad naršyklės ir serverio skaičiai sutaptų – kitaip vartotojas matytų vieną skaičių sąraše, kitą skelbime.
+- **Likvidumo ribos – pataisytos.** Dizaineriui buvau parašęs ≥22 / 14–22 / <14 %. Tai buvo mano spėjimas. Tikros ribos jau yra `backend/regitra.js` `RIBOS`: **≥26 % judrus, ≤13 % lėtas**, ir jos nustatytos pagal imties kvartilius (P25 12,9 %, P75 26,4 %), ne pagal apvalius skaičius. Naudojam jas.
+- **`ct-priedai.css` 24 blokas** – keturi apvalkalo vardai (`.ct-dt-switch`, `.ct-dt-bar`, `.ct-dt-seg-l`, `.ct-dt-count`), tik išdėstymas, spalvos iš tokenų. Dizaineriui pasiūlyta perimti arba palikti.
+
+### KLAIDA, KURIĄ PADARIAU IR KURIĄ TAISAU VIEŠAI
+
+Rašiau Lukui ir dizaineriui, kad Octavios **MAX = 15 543 €, „telpa +1 043"**. Tai buvo suskaičiuota su **senais 750 € kaštais** (paruošimas dar 250 €), nors tame pačiame atsakyme jau skelbiau, kad paruošimas yra 350 €. Dizaineris tais skaičiais perdarė maketus ir patvirtino, kad „sutampa".
+
+Teisingi skaičiai su 850 € kaštais:
+
+| | Buvo rašyta | **Teisinga** |
+|---|---|---|
+| MAX | 15 543 € | **15 443 €** |
+| derybos | telpa +1 043 | **telpa +943** |
+| pelnas | +2 579 € | +2 579 € (nepakito) |
+| ROI | 17 % | 17 % (nepakito) |
+
+Pelnas ir ROI skaičiuojami prie tikros skelbimo kainos, todėl jų kaštų pakeitimas nepalietė – tik MAX. Dizaineriui pranešta, maketuose reikia pataisyti du skaičius.
+
+**Pamoka sau:** skelbiant skaičių po to, kai tame pačiame darbe pasikeitė įvestis, perskaičiuoti, o ne kopijuoti ankstesnį. Sargas `perpardavejas.test.js` dabar tą patį pavyzdį tikrina automatiškai.
+
+- Sargai: **23 žali** (naujas `perpardavejas`). Tokenai 0 + 0.
+- **Kas lieka:** trijų rinkų rodinys, nuorodos laukas ir `admin.html` → `.ct-dtable`.

@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.22.0', data: '2026-10-16', pavadinimas: 'Lentelės rodinys perpardavėjui',
+    pakeitimai: [
+      'Virš rezultatų atsirado jungiklis „Kortelės / Lentelė“. Lentelėje telpa dvidešimt variantų vienu metu, su pinigų stulpeliais: didžiausia pirkimo kaina, ≈ kaina Lietuvoje, pelnas, grąža, likvidumas ir kiek dienų skelbimas kabo.',
+      'Maržos jungiklis (10 / 15 / 20 %) perskaičiuoja didžiausią pirkimo kainą iškart, be naujos paieškos ir be kreditų.',
+      'Būklės jungiklis: tik tvarkingi · daužti ir su defektais · visi. Daužtas automobilis žymimas dviem būdais – tvirta žyma, kai tai pažymėjo portalas, ir punktyrine, kai spėjama iš aprašymo.',
+      'Rikiavimas paspaudus stulpelio antraštę; pasirinktas rodinys ir marža įsimenami kitam kartui.',
+    ],
+  },
+  {
     versija: '2.21.1', data: '2026-10-16', pavadinimas: 'Pataisos: kaina mygtuke ir „kaina pasikeitė“',
     pakeitimai: [
       'Prie mygtuko „Analizuoti“ dabar matosi kaina kreditais – kiek kainuos, matyti prieš paspaudžiant, o ne po.',
