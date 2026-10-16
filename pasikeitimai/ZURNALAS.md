@@ -1957,3 +1957,18 @@ Pelnas ir ROI skaičiuojami prie tikros skelbimo kainos, todėl jų kaštų pake
 
 - Sargai: **23 žali** (naujas `perpardavejas`). Tokenai 0 + 0.
 - **Kas lieka:** trijų rinkų rodinys, nuorodos laukas ir `admin.html` → `.ct-dtable`.
+
+## Z-156 · 2026-10-16 · Dizaineris pataisė MANO pataisą – trečias skaičius
+
+Z-155 rašiau, kad Octavios pelnas „+2 579 € (nepakito)". **Dizaineris patikrino ir rado, kad nepakito tik reikšmė, o ne tai, ką buvau paskelbęs.** Anksčiau (v2.20.0 ataskaitoje) buvau parašęs **+2 679 €** – su senais 750 € kaštais. Tad maketuose reikėjo taisyti TRIS skaičius, ne du:
+
+| | Paskelbta anksčiau | Teisinga |
+|---|---|---|
+| MAX | 15 543 € | 15 443 € |
+| derybos | telpa +1 043 | telpa +943 |
+| **pelnas** | **+2 679 €** | **+2 579 €** |
+| ROI | 17 % | 17 % |
+
+Patikra: 17 994 − 15 415 = 2 579. Jo skaičiavimas sutampa.
+
+**Ko išmokau tiksliau nei Z-155:** klaida buvo ne tik skaičiuojant, bet ir **taisant** – paskelbiau „nepakito" apie skaičių, kurio ankstesnė mano paskelbta reikšmė buvo kita. Taisant reikia lyginti su tuo, ką PASKELBIAU, ne su tuo, ką turi kodas. `perpardavejas.test.js` dabar fiksuoja visus keturis, tad kitą kartą tai pagaus sargas.
