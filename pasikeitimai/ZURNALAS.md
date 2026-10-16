@@ -1919,3 +1919,11 @@ Dar grąžinama `derybos()` – „telpa · +943" arba „derėtis −557" (66 p
   1. **Taip, kainuoja.** `planai.KAINOS`: `analize` (greita) = **1 kr.**, `analizePilna` = **2 kr.** (`kreditaiPagalLygi` parenka pagal `req.body.lygis`). Vadinasi mygtukas su kaina ir **nepaleidžiam įklijavus** – jo variantas teisingas. Puslapio nuskaitymas (ScraperAPI 10 kr. LT / 1 kr. užsienio) į vartotojo kreditus neįeina – tai mūsų savikaina; dizaineriui svarbu neskaityti jų kartu.
   2. **Taip, galim žinoti – ir sakinio išimti nereikia.** `analizesPodelis(url, kaina)` podėlį panaikina, kai kaina skiriasi daugiau nei `max(100 €, 1 %)`. Trūko tik vieno: įklijavus plikę nuorodą kainos dar nežinom. Bet puslapio nuskaitymas yra **mūsų** kaštas (1–10 kr.), ne vartotojo kreditai, tad galim visada nuskaityti, palyginti kainą ir tada sąžiningai pasakyti. Daugiau – atsiradus **trečiai `cached` būsenai: „kaina pasikeitė"**, kuri perpardavėjui vertingesnė už pačią analizę.
 - **Kas lieka man:** visas markupas (66 + 68 + 69 paketai) ir `admin.html` → `.ct-dtable`. CSS įdiegtas, bet dar niekur nenaudojamas.
+
+## Z-154 · 2026-10-16 · Klaudijus · v2.21.1 – Errata 18 įdiegta
+
+- Visi trys punktai įdiegti be pakeitimų; dvi `56 sk. .ct-link[data-state="cached"]` eilutės ištrintos, kaip nurodyta (patikrinta `grep` – buvo būtent dvi, 5966 ir 5972).
+- **Dizaineris teisingai perskaitė mūsų formulę.** Jo 3 punktas: pasikeitus skelbimo kainai **MAX neperskaičiuojamas**, nes `max = pardavimasLT / (1 + marža) − kaštai − tarša` – skelbimo kainos jame nėra. Perskaičiuojama tik `telpa / derėtis` (`max − kaina`), o tai nemokama. Tai ne dizaino detalė, o teisingas kodo supratimas: jis pats pamatė, kad viena būsena kainuoja 0 kreditų, kai mes jau buvom pasiruošę siūlyti „analizuoti iš naujo".
+- Jo argumentas dėl pirminio mygtuko irgi priimtas ir vertas užrašyti kaip taisyklę: **„kas išleidžia kreditus – ne pirminis" galioja tik tada, kai be to veiksmo puslapis turi prasmę.** Nuorodos lauke analizė yra vienintelis veiksmas, dėl kurio žmogus atėjo; „patikslinti rinką" – ne, nes ≈LT, defektai ir rizika jau matomi.
+- Tokenai 0 + 0, sargai 22 žali.
+- **Dizainerio pusė vėl tuščia.** Visas likęs darbas – markupas (66 + 68 + 69 paketai) ir `admin.html` → `.ct-dtable`.

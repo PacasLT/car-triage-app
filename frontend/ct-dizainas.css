@@ -5963,13 +5963,11 @@ textarea.ct-field {
 .ct-link[data-state="invalid"] .ct-link-in { border-color: color-mix(in oklab, var(--danger) 60%, transparent); }
 .ct-link[data-state="foreign"] .ct-link-in { border-color: color-mix(in oklab, var(--warning) 55%, transparent); }
 .ct-link[data-state="busy"]    .ct-link-in,
-.ct-link[data-state="cached"]  .ct-link-in { border-color: var(--accent-border); }
 
 .ct-link-msg { display: flex; gap: 8px; font: var(--fw-regular) 12.5px/20px var(--font); color: var(--text-muted); text-wrap: pretty; }
 .ct-link-msg::before { content: ""; flex: none; margin-top: 6px; width: 7px; height: 7px; border-radius: 2px; background: currentColor; }
 .ct-link[data-state="invalid"] .ct-link-msg { color: var(--danger); }
 .ct-link[data-state="foreign"] .ct-link-msg { color: var(--warning); }
-.ct-link[data-state="cached"]  .ct-link-msg { color: var(--accent-light); }
 
 /* Portalai po tusciu lauku - esama `.ct3-portal-ico` 14 px */
 .ct-link-portals:not([hidden]) { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font: var(--fw-regular) 12px/1.4 var(--font); color: var(--text-muted); }
@@ -6049,3 +6047,49 @@ textarea.ct-field {
 @media (max-width: 640px) {
   .ct-money-gate > .ct-btn { width: 100%; min-height: 48px; justify-content: center; }
 }
+
+
+/* ============================================================================
+   70 · ERRATA 18 · 56 sk. - kaina mygtuke + `cached-changed`
+   Siulau v2.21.1.
+   ========================================================================== */
+
+/* 1) Mygtukas „Analizuoti · 2 kr." - kaina tame paciame `<u>` kaip visur.
+      Vienas lygis, pasirinkimo nera. Iklijavus - NEpaleidziama.
+      Mygtukas lieka PIRMINIS: cia jis yra vienintelis veiksmas, kuri zmogus
+      atejo padaryti, o kaina mygtuke - ne po juo. Isimtis is taisykles
+      „kas isleidzia kreditus - ne pirminis" galioja tik tada, kai be to
+      veiksmo puslapis neturi prasmes. Patikslinti rinka - turi (≈LT,
+      defektai, rizika jau matomi), tad ten lieka antrinis.               */
+.ct-link-row > .ct-btn-primary > u {
+  text-decoration: none;
+  margin-left: 9px; padding-left: 9px;
+  border-left: 1px solid rgba(255, 255, 255, .35);
+  font: var(--fw-semi) var(--fs-200)/1 var(--font-mono);
+}
+
+/* 2) `cached` skyla i dvi:
+      data-state="cached-same"     - akcento remelis ir tekstas (kaip buvo)
+      data-state="cached-changed"  - KRYPTIES spalva + rodykle tekste:
+           ▼ kaina krito  -> --success (pirkejui gerai)
+           ▲ kaina kilo   -> --warning (ne --danger: tai ne nuostolis, o
+                            mazesnis „telpa")
+      Rodykle - markupe (▼/▲), ne tik spalva: be jos zalias ir geltonas
+      neskaitomi daltonikui.
+
+      MAX NEPERSKAICIUOJAMAS - jis nuo skelbimo kainos nepriklauso.
+      Perskaiciuojamas tik „telpa / derėtis" (nemokamai) - ir tai pasakoma
+      tekste: „MAX tas pats — „telpa" perskaičiuota: +1 643".
+
+      „Analizuoti iš naujo · 2 kr." - ANTRINIS, po pranesimu. Jo reikia tik
+      kai pasikeite pats skelbimas (aprasymas, nuotraukos).              */
+.ct-link[data-state="cached-same"] .ct-link-in { border-color: var(--accent-border); }
+.ct-link[data-state="cached-same"] .ct-link-msg { color: var(--accent-light); }
+.ct-link[data-state="cached-changed"][data-dir="down"] .ct-link-in  { border-color: color-mix(in oklab, var(--success) 50%, transparent); }
+.ct-link[data-state="cached-changed"][data-dir="down"] .ct-link-msg { color: var(--success); }
+.ct-link[data-state="cached-changed"][data-dir="up"]   .ct-link-in  { border-color: color-mix(in oklab, var(--warning) 50%, transparent); }
+.ct-link[data-state="cached-changed"][data-dir="up"]   .ct-link-msg { color: var(--warning); }
+.ct-link-msg + .ct-btn { align-self: flex-start; }
+
+/* ISTRINTI 56 sk.: `.ct-link[data-state="cached"] …` (dvi eilutes) - pakeista
+   `cached-same`. */

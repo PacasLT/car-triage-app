@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.21.1', data: '2026-10-16', pavadinimas: 'Pataisos: kaina mygtuke ir „kaina pasikeitė“',
+    pakeitimai: [
+      'Prie mygtuko „Analizuoti“ dabar matosi kaina kreditais – kiek kainuos, matyti prieš paspaudžiant, o ne po.',
+      'Jei tą pačią nuorodą jau analizavote anksčiau, rodoma, ar skelbimo kaina nuo to laiko pasikeitė: kritimas žaliai su rodykle žemyn, kilimas geltonai su rodykle aukštyn. Tai nieko nekainuoja.',
+      'Kai kaina pasikeitė, didžiausia pirkimo kaina lieka ta pati – ji nuo skelbimo kainos nepriklauso. Perskaičiuojama tik „telpa / derėtis“ eilutė, ir tai padaroma nemokamai.',
+    ],
+  },
+  {
     versija: '2.21.0', data: '2026-10-16', pavadinimas: 'Nuorodos analizės dizainas',
     pakeitimai: [
       'Įdiegtas dizainerio 69 paketas: laukas nuorodai įklijuoti virš filtrų, su visomis būsenomis – tuščias, netinkama nuoroda, nepalaikomas portalas, dirbama, jau analizuota.',

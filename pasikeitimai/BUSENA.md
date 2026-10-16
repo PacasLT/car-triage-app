@@ -1,4 +1,4 @@
-# Būsena · 2026-10-16 · v2.21.0 (laukia push)
+# Būsena · 2026-10-16 · v2.21.1 (laukia push)
 
 Tik **atviri** punktai. Uždaryti — `ZURNALAS.md` / `archyvas/`. Kas laukia Luko — `LUKUI.md`.
 Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
@@ -33,7 +33,7 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 
 | Nr. | Kas | Trumpai |
 |---|---|---|
-| 66 + 67 + 68 + 69 pk. | **Įdiegta v2.19.0 … v2.21.0** | 51 sk. `.ct-dtable`, 52 sk. `.ct-bukle`/`.ct-seg`, `--shadow-1`. |
+| 66 … 70 pk. (su Erratomis 17, 18) | **Įdiegta v2.19.0 … v2.21.1** | 51 sk. `.ct-dtable`, 52 sk. `.ct-bukle`/`.ct-seg`, `--shadow-1`. |
 | ~~K-66a~~ | `--dt-h` | **Uždaryta** (Errata 17): `:root`, atsarginė nuimta. |
 | ~~K-66b~~ | `--neutral` | **Uždaryta** (Errata 17): `--neutral-dim`/`-border` perrašyti per jį 10 %/26 % – 0/255 skirtumas. Tokenų skola **0 + 0**. |
 | K-66c | `.adm-users` → `.ct-dtable` | Atidėta į B dalį: `.ct-dtable` neperima 4 admino taisyklių. |
