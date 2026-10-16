@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.19.0', data: '2026-10-16', pavadinimas: 'Perpardavėjo lentelės ir būklės dizainas',
+    pakeitimai: [
+      'Įdiegtas dizainerio 66 paketas: tanki lentelė su lipnia antrašte ir rikiavimu paspaudus stulpelį, bei būklės jungiklis su dviem žymomis.',
+      'Svarbiausias skaičius – didžiausia pirkimo kaina – lentelėje išskirtas fono juosta per visą stulpelį ir didesniu šriftu, ne spalva: spalva lentelėje jau rodo pelną ir derybas.',
+      'Daužtas automobilis nebėra raudonas įspėjimas. Dvi žymos skiriasi tuo, kiek jomis galima pasitikėti: „Daužtas“ su pilnu fonu reiškia, kad tai pažymėjo portalas, o punktyrinis „~ daužtas?“ – kad spėjama iš aprašymo.',
+      'Pataisyta sena dizaino skola: vienas šešėlio nustatymas buvo naudojamas, bet neaprašytas, kitas – aprašytas, bet nenaudojamas.',
+    ],
+  },
+  {
     versija: '2.18.1', data: '2026-10-16', pavadinimas: 'Pataisa: rinkos duomenys nepasiekdavo ekrano',
     pakeitimai: [
       'Naujos eilutės „Vokietijos rinka“ ir „≈ Lietuvoje“ buvo suskaičiuojamos serveryje, bet nepasiekdavo ekrano – sąsajai siunčiamų laukų sąrašas yra baltasis, o nauji laukai į jį nebuvo įrašyti. Dabar matosi.',

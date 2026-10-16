@@ -125,7 +125,6 @@
   --k-signal:           var(--warning);          /* 🟡 galimas signalas */
   --k-signal-dim:       var(--warning-dim);
   --k-signal-border:    var(--warning-border);
-  --k-unknown:          var(--neutral);          /* ⚪ neįvertinta */
   --k-unknown-dim:      var(--neutral-dim);
   --k-unknown-border:   var(--neutral-border);
 
@@ -172,7 +171,7 @@
 
   /* ── 8. ŠEŠĖLIAI · tik pakylėjimui, ne dekoracijai ────────────────────────*/
   --shadow-2:    0 4px 16px rgba(0, 0, 0, .40);
-  --shadow-3:    0 16px 48px rgba(0, 0, 0, .55);
+  --shadow-1:    0 5px 12px -6px rgba(0, 0, 0, .9);   /* 66 pk.: buvo naudojamas (.pg-acct .ct3-portal-ico), bet neapibreztas */
   --shadow-card: var(--shadow-2);   /* suderinamumui su index.html */
   --shadow-glow:  0 10px 28px -12px rgba(37, 99, 235, .85); /* TIK pirminis CTA · 56a mėlyna */
   --shadow-panel: 0 18px 40px -24px rgba(0, 0, 0, .8);  /* 58 pk. K-57c: iš ct-bendras.css (iškrentantys meniu) */
@@ -5365,3 +5364,270 @@ textarea.ct-field {
 /* 58 pk. K-57b: išdėstymas klausia [hidden] (display perkeltas iš bazinių taisyklių) */
 .acct-row:not([hidden]) { display: flex; }
 .acct-set-f:not([hidden]) { display: flex; }
+
+
+/* ============================================================================
+   51 sk. · TANKI LENTELE · `.ct-dtable`
+   ----------------------------------------------------------------------------
+   Kilme - 48 sk. `.adm-users`. Ta pati forma: tinklelis, ne <table>; eilute
+   `display: contents`; FONAS ant celiu (K-55a). Stulpeliai - per `--cols`
+   kiekvienai lentelei, nes perpardavejo ir admino stulpeliai skirtingi.
+
+   `.adm-users` PERRASOMAS i `.ct-dtable` (admin.html markupe: prideti klase
+   `ct-dtable`, palikti `adm-users` tik `--cols` reiksmei). 48 sk. taisykles
+   `.adm-users-h`, `.adm-u` trinamos - zr. PASTABOS 3 d.
+
+     <div class="ct-dtable-wrap">                          <- slinkties deze
+       <div class="ct-dtable" style="--cols: 44px minmax(260px,1fr) 136px 158px 92px 58px 112px 70px 112px">
+         <div class="ct-dtable-h">
+           <button class="ct-dt-sel" aria-label="Zymeti visus">…</button>
+           <span>Automobilis<small>rizika · rida · vieta</small></span>
+           <button class="is-key is-num" aria-sort="none">Max pirkimo<small>marza 15 %</small></button>
+           <button class="is-num" aria-sort="descending">Pelnas<small>po kastu</small></button>
+           …
+         </div>
+         <div class="ct-dtable-r" aria-selected="false">…celes…</div>
+       </div>
+     </div>
+
+   RIKIAVIMAS - `aria-sort` ant antrastes mygtuko (none | ascending |
+   descending). Rodykle piesia CSS is atributo - JS keicia tik atributa.
+   ========================================================================== */
+
+.ct-dtable-wrap { overflow: auto; max-height: var(--dt-h, 70vh); }
+.ct-dtable { display: grid; grid-template-columns: var(--cols); }
+.ct-dtable-h,
+.ct-dtable-r { display: contents; }
+
+/* ── Antraste · lipni ── */
+.ct-dtable-h > * {
+  position: sticky; top: 0; z-index: 2;
+  display: flex; flex-direction: column; justify-content: center; gap: 3px;
+  min-height: 52px;
+  padding: 8px 12px;
+  background: var(--bg-sunken);
+  border: 0;
+  border-bottom: 1px solid var(--border-light);
+  font: var(--fw-semi) 9.5px/1.2 var(--font-mono);
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: left;
+  white-space: nowrap;
+}
+.ct-dtable-h > * > small {
+  font: var(--fw-regular) 10.5px/1 var(--font-mono);
+  letter-spacing: 0; text-transform: none;
+  color: var(--text-dim);
+}
+.ct-dtable-h > button { cursor: pointer; }
+.ct-dtable-h > button:hover { color: var(--text-primary); }
+.ct-dtable-h > button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.ct-dtable-h > [aria-sort="ascending"],
+.ct-dtable-h > [aria-sort="descending"] { color: var(--text-primary); }
+.ct-dtable-h > [aria-sort="descending"]::after { content: "↓"; color: var(--accent-light); }
+.ct-dtable-h > [aria-sort="ascending"]::after  { content: "↑"; color: var(--accent-light); }
+/* rodykle - antrastes eiluteje, ne po ja */
+.ct-dtable-h > [aria-sort]::after { position: absolute; top: 14px; right: 6px; }
+.ct-dtable-h > .is-num { align-items: flex-end; text-align: right; padding-right: 18px; }
+
+/* ── Celes ── */
+.ct-dtable-r > * {
+  display: flex; flex-direction: column; justify-content: center; gap: 5px;
+  min-width: 0;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  font-variant-numeric: tabular-nums;
+}
+.ct-dtable-r > .is-num { align-items: flex-end; text-align: right; }
+.ct-dtable-r > * > b {
+  font: var(--fw-semi) 13px/1 var(--font-mono);
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+.ct-dtable-r > * > small {
+  font: var(--fw-regular) 10.5px/1 var(--font-mono);
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.ct-dtable-r:hover > * { background: var(--bg-elevated); }
+.ct-dtable-r[aria-selected="true"] > * { background: var(--accent-dim); }
+.ct-dtable-r[aria-selected="true"] > :first-child { box-shadow: inset 2px 0 0 var(--accent); }
+/* Praleista eilute - lieka matoma (galima grazinti), bet nebekonkuruoja */
+.ct-dtable-r.is-dim > * { opacity: .5; }
+
+/* ── VIENAS SVARBIAUSIAS SKAICIUS · `.is-key` ─────────────────────────────
+   Atsakymas i jusu klausima: NE spalva, NE atskiras pirmas stulpelis.
+   FONO JUOSTA per visa stulpeli + didesnis ir storesnis skaicius.
+
+   Kodel ne spalva: lenteleje spalva jau dirba (pelnas zalias/raudonas,
+   „derėtis" geltona). Penkta spalva butu dar vienas signalas, ne virsus.
+   Kodel ne pirmas stulpelis: akis skaito is kaires - pirma turi buti, KAS
+   tai per automobilis; be to MAX be konteksto nieko nereiskia.
+   Juosta veikia ir rikiuojant, ir slenkant: stulpelis matosi kaip viena
+   vertikali zona, o skaicius joje - didziausias lenteleje.
+
+   Po skaiciumi - `telpa · +750` (skelbimo kaina zemiau max) arba
+   `derėtis −650` (auksciau): tai, ka zmogus sakys pardavejui.            */
+.ct-dtable-h > .is-key {
+  background: color-mix(in oklab, var(--accent) 12%, var(--bg-sunken));
+  color: var(--accent-light);
+}
+.ct-dtable-h > .is-key,
+.ct-dtable-r > .is-key {
+  box-shadow: inset 1px 0 0 var(--accent-border), inset -1px 0 0 var(--accent-border);
+}
+.ct-dtable-r > .is-key { background: color-mix(in oklab, var(--accent) 7%, transparent); }
+.ct-dtable-r[aria-selected="true"] > .is-key { background: color-mix(in oklab, var(--accent) 20%, transparent); }
+.ct-dtable-r > .is-key > b { font: var(--fw-bold) 15.5px/1 var(--font-mono); color: #F4F7FD; }
+.ct-dtable-r > .is-key > small.is-ok   { color: var(--success); }
+.ct-dtable-r > .is-key > small.is-deal { color: var(--warning); }
+
+/* ── Smulkus elementai lenteleje ── */
+.ct-dt-car { flex-direction: row !important; align-items: center; gap: 12px !important; color: inherit; text-decoration: none; }
+.ct-dt-car > img,
+.ct-dt-car > .ct-dt-ph { flex: none; width: 52px; height: 38px; border-radius: 7px; object-fit: cover; background: var(--bg-raised); }
+.ct-dt-car-t { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.ct-dt-car-t > span:first-child { font: var(--fw-medium) var(--fs-300)/1.25 var(--font); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ct-dt-meta { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.ct-dt-meta > span:last-child { min-width: 0; font: var(--fw-regular) 11px/1 var(--font-mono); color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Likvidumas - trys bruksniai, NE sviesoforas: tai greitis, ne gerai/blogai */
+.ct-dt-liq { display: flex; gap: 3px; }
+.ct-dt-liq > i { width: 14px; height: 4px; border-radius: 2px; background: var(--border-light); }
+.ct-dt-liq[data-l="1"] > i:nth-child(-n+1),
+.ct-dt-liq[data-l="2"] > i:nth-child(-n+2),
+.ct-dt-liq[data-l="3"] > i { background: var(--accent-light); }
+
+/* Kabo dienu ≥ 45 - derybu svertas: akcento spalva + zodis po skaiciumi */
+.ct-dtable-r > .is-lever > b { color: var(--accent-light); }
+
+/* Tarsa „nezinoma" - ne nulis: punktyrinis pabraukimas ir „?" */
+.ct-dt-unk { color: var(--warning); text-decoration: underline dotted; text-underline-offset: 2px; }
+
+/* Zymejimo langelis */
+.ct-dt-sel { display: grid !important; place-items: center; padding: 0 !important; cursor: pointer; }
+.ct-dt-sel > input { width: 16px; height: 16px; accent-color: var(--accent-strong); cursor: pointer; }
+
+/* ── Telefonas ≤640 · lentele tampa sarasu ────────────────────────────────
+   Prie automobilio telefonas turi atsakyti i viena klausima: „ar moku
+   per daug?". Tad lieka TRYS skaiciai (max, ≈LT, pelnas), MAX - dezeje,
+   ir viena eilute zymu. ROI, likvidumo bruksniai, busena - dingsta (jie
+   lentelei, ne aiksteleje). Zymejimas telefone - ilgai paspaudus (JS).   */
+@media (max-width: 640px) {
+  .ct-dtable { grid-template-columns: 1fr; }
+  .ct-dtable-h { display: none; }
+  .ct-dtable-r:not([hidden]) {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr 1fr;
+    gap: 10px 8px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ct-dtable-r > * { padding: 0; border: 0; background: none !important; }
+  .ct-dtable-r > .ct-dt-car,
+  .ct-dtable-r > .ct-dt-tags { grid-column: 1 / -1; }
+  .ct-dtable-r > .ct-dt-sel,
+  .ct-dtable-r > [data-m="hide"] { display: none; }
+  .ct-dtable-r > .is-key {
+    padding: 9px 10px;
+    border-radius: 9px;
+    border: 1px solid var(--accent-border);
+    background: var(--accent-dim) !important;
+    box-shadow: none;
+    align-items: flex-start;
+  }
+  .ct-dtable-r > .is-num { align-items: flex-start; text-align: left; }
+  .ct-dtable-r > [data-k]::before {
+    content: attr(data-k);
+    font: var(--fw-semi) 8.5px/1 var(--font-mono);
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .ct-dtable-r > .is-key[data-k]::before { color: var(--accent-light); }
+  .ct-dtable-r > .is-key > b { font-size: 17px; }
+}
+
+/* MARKUPUI telefonui:
+     data-k="max pirkimo" / "≈ lietuvoje" / "pelnas" - trims skaiciu celems;
+     data-m="hide" - ROI, likvidumui, kabo, busenai (jie telefone keliauja i
+     `.ct-dt-tags` eilute tekstu: „greitas ~22 d. · kabo 9 d.").
+   `!important` sitame bloke - tik ten, kur telefonas perraso tos pacios
+   celes desktopo `display`/`background`; jokio specifiskumo karo.       */
+
+
+/* ============================================================================
+   52 sk. · BUKLE · jungiklis ir dvi zymos
+   ----------------------------------------------------------------------------
+   Jungiklis - pagrindineje juostoje, trys reiksmes, radiogroup. Tai ta pati
+   forma kaip marzos jungiklis greta - vienas `.ct-seg` abiem.
+
+     <div class="ct-seg" role="radiogroup" aria-label="Bukle">
+       <button role="radio" aria-checked="false">Tik tvarkingi</button>
+       <button role="radio" aria-checked="false">Dauzti / su defektais</button>
+       <button role="radio" aria-checked="true">Visi</button>
+     </div>
+
+   DVI ZYMOS - skiriasi SVORIU, ne spalva:
+     `.ct-bukle.is-portal` - pilnas fonas, tvirtas remelis, sviesus tekstas:
+                             „Dauztas". Portalas tai pazymejo strukturiniu lauku.
+     `.ct-bukle.is-guess`  - punktyrinis remelis, be fono, blankesnis tekstas,
+                             „~" priekyje ir „?" gale: „~ dauztas?". Speta
+                             is aprasymo - gali buti klaida.
+   Spalva NE raudona ir NE geltona: perpardavejui dauztas = preke, ne
+   ispejimas. Raudona lieka tik pinigu nuostoliui (neigiamas pelnas).
+
+   Legenda - pacioje juostoje, salia jungiklio: dvi zymos su paaiskinimu.
+   Be jos punktyras atrodo kaip „isjungta".                                */
+
+.ct-seg {
+  display: inline-flex;
+  padding: 3px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+}
+.ct-seg > button {
+  height: 30px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: var(--fw-medium) var(--fs-200) var(--font);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ct-seg > button:hover { color: var(--text-primary); }
+.ct-seg > button[aria-checked="true"] {
+  background: var(--accent-strong);
+  color: #fff;
+  font-weight: var(--fw-semi);
+}
+.ct-seg > button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+@media (max-width: 640px) {
+  .ct-seg:not([hidden]) { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; width: 100%; }
+  .ct-seg > button { min-height: var(--tap-min); }
+}
+
+.ct-bukle {
+  flex: none;
+  display: inline-flex; align-items: center;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 5px;
+  font: var(--fw-semi) 10px/1 var(--font);
+  white-space: nowrap;
+}
+.ct-bukle.is-portal {
+  background: var(--bg-raised);
+  border: 1px solid color-mix(in oklab, var(--text-muted) 45%, transparent);
+  color: var(--text-primary);
+}
+.ct-bukle.is-guess {
+  background: transparent;
+  border: 1px dashed color-mix(in oklab, var(--text-muted) 45%, transparent);
+  color: var(--text-muted);
+  font-weight: var(--fw-medium);
+}
+.ct-bukle-legend { display: flex; align-items: center; gap: 12px; font: var(--fw-regular) 11.5px/1 var(--font); color: var(--text-muted); }
+@media (max-width: 640px) { .ct-bukle-legend { display: none; } }

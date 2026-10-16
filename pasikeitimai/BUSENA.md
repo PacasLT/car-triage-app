@@ -1,4 +1,4 @@
-# Būsena · 2026-10-16 · v2.18.0 (laukia push)
+# Būsena · 2026-10-16 · v2.19.0 (laukia push)
 
 Tik **atviri** punktai. Uždaryti — `ZURNALAS.md` / `archyvas/`. Kas laukia Luko — `LUKUI.md`.
 Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
@@ -22,7 +22,7 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 | KL-R1 / KL-R2 | Kainos kritimo žyma; atsuktos ridos įspėjimas | Luko „taip“. 0 kreditų. |
 | KL-F3PLUS | ScraperAPI paros žurnalas + <20 % įspėjimas | Luko „taip“; jungti su stabdžio admin rodiniu. |
 | KL-MODELIS | Sonnet 5 bandymas 3–5 apžvalgomis | Mokama – su Luko žinia. |
-| DZ-TINDER | „Tinder“ perdarymas | Dizainas + kodas. |
+| ~~DZ-TINDER~~ | Atšaukta 10-16 (Luko sprendimas „tik perpardavėjams“) | Dizaineris nepradėjo. |
 | A punktas | Mediana atskirai pagal rinką | **Padaryta v2.17.0:** `backend/rinkos.js` + `rinkos-mediana.js` rinkos (LT/DE/EU/PL), kortelėje „VOKIETIJOS RINKA“ ir „≈ LIETUVOJE“. Liko: tikri Luko kaštų skaičiai ir taršos mokestis. |
 | C punktas | Taršos (registracijos) mokestis | **Padaryta v2.18.0:** `backend/tarsos-mokestis.js` – rėžis pagal kurą ir variklio tūrį, nes CO₂ skelbimuose nėra. EV/PHEV 0 €. |
 | KL-1016-KASTAI | Parsivežimo kaštai | **Primesta v2.18.0** iš viešų šaltinių: DE 450, PL 300, EU 700 €; Regitra 20 €; TA 30 €; paruošimas 250 €. Luko patikslinimas – kai turės tikrus vežėjų skaičius. |
@@ -33,6 +33,11 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 
 | Nr. | Kas | Trumpai |
 |---|---|---|
+| 66 paketas | **Įdiegta v2.19.0** | 51 sk. `.ct-dtable`, 52 sk. `.ct-bukle`/`.ct-seg`, `--shadow-1`. |
+| K-66a | `--dt-h` | Naudojamas su atsargine (`var(--dt-h, 70vh)`), bet neapibrėžtas – ar dedam į `:root`? |
+| K-66b | `--neutral` | Tapo negyvas, kai ištrynėm `--k-unknown` (vienintelį jo naudotoją) – ar trinam? |
+| K-66c | `.adm-users` → `.ct-dtable` | Atidėta į B dalį: `.ct-dtable` neperima 4 admino taisyklių. |
+| dz-perpardavejas B | Laukiam | 2 + 3 + 5 darbai (trys rinkos, kortelė, būsenos). |
 | Prieiga | `Downloads\cartriige-dizaineriui` | Tikros kopijos (junction'ai neveikė). Patikra: `ct-priedai.css` eil. sk. + ši pirma eilutė. |
 | `#search-btn` | 5-as ID mygtukas | Gradientas / švytėjimas / `:disabled` sistemoje ar vientisas CTA? Z-93. |
 | Kiti vardai | `.ct-btn-accent` (priedų 5), `.ct-regitra` (15), `.mg-atn-busena` (12), `.ct3-portal-ico` | Dizaineris pažadėjo kitame pakete. |

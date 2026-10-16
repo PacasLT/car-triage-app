@@ -1807,3 +1807,43 @@ laikinas sprendimas „kol Lukas nuspręs" negali tapti antra tiesa.
 - **Pamoka:** naujas laukas skelbime reikalauja DVIEJŲ vietų – `enriched` ir `allListingsBase`. Sargai to nepagauna, nes jie tikrina modulius, ne atsakymo formą. Vertėtų atskiras sargas, tikrinantis, kad `kainaLt` ir `rinka` yra atsakyme.
 - **Pataisa:** keturi laukai įrašyti į baltąjį sąrašą su komentaru, kad tai baltasis sąrašas.
 - Sargai: 21 žali.
+
+---
+
+## D-60 · 2026-10-16 · Dizaineris → Klaudijui · 51–52 sk. · 66 PAKETAS
+
+Produktas pakeitė klausimą — „ar geras?" → „kiek uždirbsiu?" — ir pirmas
+dalykas, kurį tai pakeitė dizaine, yra **hierarchija be spalvos**. Lentelėje
+spalva jau turi darbą (pelnas, derybos), tad svarbiausias skaičius iškeliamas
+**vieta ir dydžiu**: fono juosta per stulpelį. Spalvą, kuri reikštų „svarbu",
+pridėti būtų lengva, ir būtent todėl neteisinga.
+
+Antras: daužtas automobilis nebėra įspėjimas. Žymos skiriasi **šaltinio
+patikimumu** (tvirta / punktyras), ne pavojumi. Tai pirmas kartas, kai
+būklės žyma produkte neturi spalvos — nes ji nebeturi vertinimo.
+
+`.adm-users` tapo `.ct-dtable` — antras komponentas, kuris gimė admino zonoje
+ir išėjo į produktą (po `.ct-portals`). Admin zona pasirodė esanti geriausia
+dirbtuvė: ten duomenys tikri, o vartotojas — mes patys.
+
+**Failai:** `pasikeitimai/is-dizainerio/66-perpardavejas-a/`
+
+
+## Z-150 · 2026-10-16 · Klaudijus · v2.19.0 – 66 paketas įdiegtas (51 + 52 sk.), pervadinimas atidėtas
+
+**Įdiegta:**
+- `51 sk. .ct-dtable` ir `52 sk. .ct-bukle` / `.ct-seg` – visas paketo CSS, nekeistas nė vienas simbolis.
+- Tokenų skola: `--shadow-1` apibrėžtas (jis realiai naudojamas `ct-dizainas.css:4581` `.pg-acct .ct3-portal-ico`, bet apibrėžimo nebuvo); `--shadow-3` ištrintas.
+
+**NEĮDIEGTA ir kodėl:**
+1. **`--k-unknown` ištrintas, bet tik jis vienas.** Dizaineris prašė grep visiems failams – padariau: `--k-unknown` (bare) nenaudojamas niekur, bet **`--k-unknown-dim` ir `--k-unknown-border` naudojami 6 vietose** (`ct-dizainas.css` 365, 388–389, 551–552, 805). Juos ištrynus lūžtų neįvertintų skelbimų žymės ir `.ct-reject`. Tai tiksliai ta „59 pk. pamoka", dėl kurios jis ir prašė grep.
+2. **`.adm-users` → `.ct-dtable` pervadinimas ATIDĖTAS į B dalį.** `.ct-dtable` neperima keturių admino taisyklių: `.adm-u > :nth-child(n+4)` dešininimo (naujoji lentelė tam naudoja `.is-num` klasę), `.adm-u > :first-child` ellipsis, `.adm-u > .is-low` / `.is-zero` spalvų ir telefono taisyklių (3 ir 7 stulpelių slėpimas). Juos ištrynus šiandien sulūžtų admino vartotojų lentelė, o perpardavėjo lentelės markupo dar nėra, tad nauda nulinė. Pervadinimas daromas kartu su B dalimi, kai bus kam juo naudotis – tada `admin.html` markupas gaus `ct-dtable` klases ir `.is-num` ant skaičių celių.
+
+**Matavimai (tokenų patikra prieš/po):**
+- Buvo: 1 sulūžęs ryšys (`--shadow-1`), 2 negyvi (`--k-unknown`, `--shadow-3`).
+- Tapo: 1 sulūžęs (`--dt-h`), 1 negyvas (`--neutral`).
+- `--dt-h` turi atsarginę reikšmę (`var(--dt-h, 70vh)`), tad realiai nelūžta – patikra atsarginių nemato. **K-66a dizaineriui:** ar apibrėžiam `--dt-h: 70vh` `:root`, ar paliekam tik atsarginę?
+- `--neutral` tapo negyvas **dėl mūsų pačių trynimo**: `--k-unknown: var(--neutral)` buvo vienintelis jo naudotojas. **K-66b:** ar `--neutral` irgi trinamas?
+- Sargai: 21 žali, `dizainas.test` 26/26 (ribos nepakito), `migracija` krenta aplinkoje (`better-sqlite3` ABI).
+
+**Atsakyta dizaineriui (PASTABOS 7 d.):** formulė patvirtinta su patikslinimais, `likvidumas.etikete` – trys reikšmės plius `null`. Detaliai – atsakyme Lukui.
