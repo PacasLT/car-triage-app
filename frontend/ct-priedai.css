@@ -160,36 +160,6 @@
    pačiame 48 sk.; telefono `1fr` taisyklė tame pačiame faile vėliau. */
 
 
-/* 24 BLOKAS · v2.22.0 · lentelės rodinio APVALKALAS (Klaudijus)
-   ----------------------------------------------------------------------------
-   Keturi vardai, kurių 66/68 paketuose nebuvo, nes jie yra ne komponentas, o
-   jo aplinka: rodinio jungiklis, filtrų juosta, jungiklio etiketė ir skaitiklis.
-   Visi stiliai – tik išdėstymas; spalvos ir dydžiai imami iš tokenų.
-   DIZAINERIUI: jei šie keturi turi tapti sistemos vardais, perimkit – blokas
-   tada trinamas, kaip 20–23.                                                 */
-
-.ct-dt-switch { display: flex; justify-content: flex-end; margin: 0 0 12px; }
-
-.ct-dt-bar {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px;
-  margin: 0 0 14px;
-}
-.ct-dt-seg-l {
-  font: var(--fw-semi) 9.5px/1 var(--font-mono);
-  letter-spacing: .12em; text-transform: uppercase;
-  color: var(--text-dim);
-}
-.ct-dt-count {
-  margin-left: auto;
-  font: var(--fw-regular) 11.5px/1 var(--font-mono);
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-@media (max-width: 640px) {
-  .ct-dt-bar { gap: 8px; }
-  .ct-dt-bar > .ct-seg { width: 100%; }
-  .ct-dt-count { margin-left: 0; }
-  .ct-dt-switch { justify-content: stretch; }
-  .ct-dt-switch > .ct-seg { width: 100%; }
-}
+/* 24 BLOKAS · IŠTRINTAS v2.22.1 (71 pk.): dizaineris perėmė visus keturis vardus
+   į 51b sk. – `.ct-dtable-bar`, `.ct-dtable-count`, `.ct-dtable-view`, `.ct-seg-l`.
+   `.ct-dt-switch` nebeegzistuoja: juosta nuolatinė, jungiklis gyvena jos gale. */

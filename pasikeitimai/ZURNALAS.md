@@ -1972,3 +1972,37 @@ Z-155 rašiau, kad Octavios pelnas „+2 579 € (nepakito)". **Dizaineris patik
 Patikra: 17 994 − 15 415 = 2 579. Jo skaičiavimas sutampa.
 
 **Ko išmokau tiksliau nei Z-155:** klaida buvo ne tik skaičiuojant, bet ir **taisant** – paskelbiau „nepakito" apie skaičių, kurio ankstesnė mano paskelbta reikšmė buvo kita. Taisant reikia lyginti su tuo, ką PASKELBIAU, ne su tuo, ką turi kodas. `perpardavejas.test.js` dabar fiksuoja visus keturis, tad kitą kartą tai pagaus sargas.
+
+## Z-157 · 2026-10-16 · Klaudijus · v2.22.1 – 71 paketas: juosta nuolatinė, abiem rodiniais
+
+Dizaineris perėmė visus keturis `ct-priedai.css` 24 bloko vardus į **51b sk.** ir pasirinko ne tą variantą, kurį siūliau. Siūliau du: a) palikti `.ct-dt-switch` atskirai, b) juosta tampa nuolatinė. Jis pasirinko **b, bet griežtesnį**: nuolatinė turi būti ne tik jungiklio juosta, o **pilna** – su būklės ir maržos filtrais.
+
+**Jo argumentas, ir jis teisingas:** būklė ir marža nėra lentelės filtrai. Daužtus atsijoti reikia abiem rodiniais, o kortelė pagal 54 sk. irgi rodys MAX pagal maržą. Mano variantas būtų palikęs būklės filtrą pasiekiamą tik lentelėje – t. y. paslėpęs jį nuo to, kas dirba kortelėmis.
+
+### Kas pasikeitė kode
+
+- **`frontend/perpardavejas.js` perdarytas** (267 → 299 eil.). Juosta nebe piešiama kartu su lentele: ji sukuriama **vieną kartą** virš rezultatų konteinerio ir ten lieka, kai konteinerio vidus perrašomas. Klausymas – delegavimu ant pačios juostos, tad `innerHTML` atnaujinimas mygtukų neatjungia.
+- **Būklės filtras dabar veikia abiem rodiniais:** kortelių piešėjui perduodamas jau atfiltruotas sąrašas.
+- **`window.CT_PERP`** – marža ir ta pati MAX formulė atiduotos kortelių piešėjui, kad 54 sk. kortelė rodytų tą patį skaičių kaip lentelė, o ne savo.
+- **Juosta be rezultatų slepiama** (`[hidden]`) – todėl 51b sk. ir rašo `display` per `:not([hidden])`.
+- **Vardai:** `.ct-dt-switch` → nebėra, `.ct-dt-bar` → `.ct-dtable-bar`, `.ct-dt-count` → `.ct-dtable-count`, `.ct-dt-seg-l` → `.ct-seg-l`, naujas `.ct-seg.ct-dtable-view`.
+- **`ct-priedai.css` 24 blokas ištrintas** (163–195). Priedų failas 195 → 166 eil.
+
+### K-71a · dizaineriui · legenda telefone
+
+52 sk. turėjo `@media (max-width: 640px) { .ct-bukle-legend { display: none; } }` – specifiškumas 0,1,0. Naujas 51b sk. `.ct-bukle-legend:not([hidden])` yra 0,2,0 **ir stovi failo gale**, tad telefono slėpimas būtų nustojęs veikti ir legenda atsirastų po filtrais. Perkėliau tą vieną eilutę į 51b `@media` bloką ta pačia `:not([hidden])` forma. Pamatuota: 390 px abiem rodiniais `display: none`.
+
+### Pamatuota (`transition: none`, tikras `ct-dizainas.css`)
+
+| | 1280 px | 390 px |
+|---|---|---|
+| Juosta | viena eilutė, 38 px | 207 px, keturios eilutės |
+| Skaitiklis | x 1033, dešinėje | x 20, **viršutinėje eilutėje** |
+| Rodinio jungiklis | x 1108–1260 (juostos gale) | x 216–370, viršuje dešinėje |
+| Filtrų jungikliai | 291 ir 176 px | po 350 px (per visą plotį), 52 px aukščio |
+| Legenda lentelėje | `flex` | `none` |
+| Legenda kortelėse | `[hidden]`, `none` | `[hidden]`, `none` |
+
+Būklės filtras kortelių režime: 8 skelb. → **6 skelb.**, kortelių DOM'e irgi 6. Juosta abiem atvejais liko virš rezultatų (`bar.nextElementSibling === #results`).
+
+- Sargai: **23 žali**; `perpardavejas.test.js` 5 → **17 patikrų** (prisidėjo juostos vieta, vardai, legendos `[hidden]`, skaitiklis ir būklės filtras kortelių režime). Tokenai **0 + 0**.

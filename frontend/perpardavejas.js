@@ -1,10 +1,17 @@
-/* perpardavejas.js — tankios lentelės rodinys (66 + 68 paketai).
+/* perpardavejas.js — rezultatų juosta ir tankios lentelės rodinys
+ * (66 + 68 paketai, 71 pk. · 51b sk.).
  *
  * KODĖL REŽIMAS, O NE ATSKIRAS PUSLAPIS (atsakymas į PERPARDAVEJO-APLINKA §5):
  * `index.html` yra 7 600 eilučių su filtrais, paieška, sesija ir pranešimais.
  * Atskiras puslapis reikštų visa tai dublikuoti, o du vienodi puslapiai
  * neišvengiamai išsiskiria. Todėl lentelė yra tos pačios paieškos KITAS
  * RODINYS: tie patys duomenys, kitas piešimas.
+ *
+ * KODĖL JUOSTA NUOLATINĖ (71 pk.): būklė ir marža nėra lentelės filtrai.
+ * Daužtus reikia atfiltruoti abiem rodiniais, o kortelė irgi rodys MAX pagal
+ * maržą (54 sk.). Todėl juosta – ne lentelės dalis: ji gyvena VIRŠ rezultatų
+ * konteinerio ir išlieka, kai konteinerio vidus perrašomas. Rodinio jungiklis
+ * stovi jos gale.
  *
  * Įsijungia per `window.renderCandidateCards` – tą patį kabliuką, kurį jau
  * naudoja kitos rodinio pataisos.
@@ -20,6 +27,13 @@
     var r = localStorage.getItem(LS); if (r) busena.rodinys = r;
     var m = parseFloat(localStorage.getItem(LS_MARZA)); if (m > 0) busena.marza = m;
   } catch (e) { /* privatus langas – lieka numatytosios */ }
+
+  function irasyti(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+
+  // Kontekstas – paskutinis piešimo kvietimas. Juosta perpiešia iš jo, tad
+  // filtro paspaudimas nereikalauja nei naujos paieškos, nei kreditų.
+  var ctx = { sarasas: [], results: null, korteles: null };
+  var juostaEl = null;
 
   // ── Pagalbinės ────────────────────────────────────────────────────────────
   function esc(s) {
@@ -76,24 +90,63 @@
     return busena.bukle === 'dauzti' ? !!b : !b;
   }
 
+  // Kortelių piešėjui (54 sk.): ta pati marža ir ta pati formulė, kad abu
+  // rodiniai rodytų tą patį skaičių.
+  window.CT_PERP = {
+    marza: function () { return busena.marza; },
+    maxPirkimo: function (c) { return maxPrieMarzos(c, busena.marza); },
+    bukle: bukle,
+  };
+
   // ── Juosta ────────────────────────────────────────────────────────────────
-  function seg(etikete, reiksmes, dabar, atgal) {
-    var h = '<span class="ct-dt-seg-l">' + esc(etikete) + '</span><div class="ct-seg" role="radiogroup" aria-label="' + esc(etikete) + '">';
-    reiksmes.forEach(function (r) {
-      h += '<button type="button" role="radio" aria-checked="' + (r.v === dabar ? 'true' : 'false')
-        + '" data-v="' + esc(r.v) + '">' + esc(r.t) + '</button>';
+  function segVidus(etikete, reiksmes, dabar, klase) {
+    var h = '<div class="ct-seg' + (klase ? ' ' + klase : '') + '" role="radiogroup" aria-label="' + esc(etikete) + '">';
+    reiksmes.forEach(function (x) {
+      h += '<button type="button" role="radio" aria-checked="' + (x.v === dabar ? 'true' : 'false')
+        + '" data-v="' + esc(x.v) + '">' + esc(x.t) + '</button>';
     });
     return h + '</div>';
   }
+  function segSuEtikete(etikete, reiksmes, dabar) {
+    return '<span class="ct-seg-l">' + esc(etikete) + '</span>' + segVidus(etikete, reiksmes, dabar);
+  }
 
-  function juosta(kiek) {
-    return '<div class="ct-dt-bar">'
-      + seg('Būklė', [{ v: 'tvarkingi', t: 'Tik tvarkingi' }, { v: 'dauzti', t: 'Daužti / su defektais' }, { v: 'visi', t: 'Visi' }], busena.bukle)
-      + seg('Marža', [{ v: '0.1', t: '10 %' }, { v: '0.15', t: '15 %' }, { v: '0.2', t: '20 %' }], String(busena.marza))
-      + '<span class="ct-bukle-legend"><span class="ct-bukle is-portal">Daužtas</span> pažymėta portale'
-      + '<span class="ct-bukle is-guess">~ daužtas?</span> spėjama iš aprašymo</span>'
-      + '<span class="ct-dt-count">' + kiek + ' skelb.</span>'
-      + '</div>';
+  function juostaVidus(kiek) {
+    var lentele = busena.rodinys === 'lentele';
+    return segSuEtikete('Būklė', [{ v: 'tvarkingi', t: 'Tik tvarkingi' }, { v: 'dauzti', t: 'Daužti / su defektais' }, { v: 'visi', t: 'Visi' }], busena.bukle)
+      + segSuEtikete('Marža', [{ v: '0.1', t: '10 %' }, { v: '0.15', t: '15 %' }, { v: '0.2', t: '20 %' }], String(busena.marza))
+      // Legenda – tik lentelės režime: kortelėje žyma stovi su žodžiu.
+      + '<div class="ct-bukle-legend"' + (lentele ? '' : ' hidden') + '>'
+      + '<span class="ct-bukle is-portal">Daužtas</span> pažymėta portale'
+      + '<span class="ct-bukle is-guess">~ daužtas?</span> spėjama iš aprašymo</div>'
+      + '<span class="ct-dtable-count">' + kiek + ' skelb.</span>'
+      + segVidus('Rodinys', [{ v: 'korteles', t: 'Kortelės' }, { v: 'lentele', t: 'Lentelė' }], busena.rodinys, 'ct-dtable-view');
+  }
+
+  // Juosta kuriama VIENĄ kartą ir gyvena virš rezultatų konteinerio. Klausymas
+  // – delegavimu ant pačios juostos, tad `innerHTML` atnaujinimas mygtukų
+  // neatjungia.
+  function uztikrintiJuosta(results) {
+    if (!results || !results.parentNode) return false;
+    if (juostaEl) {
+      if (juostaEl.nextSibling !== results) results.parentNode.insertBefore(juostaEl, results);
+      return true;
+    }
+    juostaEl = document.createElement('div');
+    juostaEl.className = 'ct-dtable-bar';
+    results.parentNode.insertBefore(juostaEl, results);
+    juostaEl.addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('button[data-v]') : null;
+      if (!b || !juostaEl.contains(b)) return;
+      var grupe = b.parentNode.getAttribute('aria-label');
+      var v = b.getAttribute('data-v');
+      if (grupe === 'Marža') { busena.marza = parseFloat(v); irasyti(LS_MARZA, v); }
+      else if (grupe === 'Būklė') { busena.bukle = v; }
+      else if (grupe === 'Rodinys') { busena.rodinys = v; irasyti(LS, v); }
+      else return;
+      perpiesti();
+    });
+    return true;
   }
 
   // ── Eilutė ────────────────────────────────────────────────────────────────
@@ -117,7 +170,7 @@
       + '</div>';
   }
 
-  function eilute(c, i) {
+  function eilute(c) {
     var max = maxPrieMarzos(c, busena.marza);
     var mp = c.maxPirkimo || {};
     var riba = !!mp.riba;
@@ -189,40 +242,15 @@
   }
 
   // ── Piešimas ──────────────────────────────────────────────────────────────
-  function piesti(sarasas, kur) {
-    var matomi = rikiuoti(sarasas.filter(telpaBuklei));
-    var h = juosta(matomi.length);
-    if (!matomi.length) {
-      h += '<div class="ct-state"><div class="ct-state-ic">∅</div><h3>Pagal šiuos filtrus progų nėra</h3>'
-        + '<p>Iš ' + sarasas.length + ' rastų skelbimų nė vienas neatitinka būklės filtro.</p></div>';
-      kur.innerHTML = h;
-      prijungti(kur, sarasas);
-      return;
-    }
-    h += '<div class="ct-dtable-wrap"><div class="ct-dtable" style="--cols: ' + STULPELIAI + '">'
+  function lentele(matomi, kur) {
+    kur.innerHTML = '<div class="ct-dtable-wrap"><div class="ct-dtable" style="--cols: ' + STULPELIAI + '">'
       + antraste() + matomi.map(eilute).join('') + '</div></div>';
-    kur.innerHTML = h;
-    prijungti(kur, sarasas);
-  }
-
-  function prijungti(kur, sarasas) {
-    kur.querySelectorAll('.ct-seg').forEach(function (s) {
-      s.addEventListener('click', function (e) {
-        var b = e.target.closest('button[data-v]'); if (!b) return;
-        var v = b.getAttribute('data-v');
-        if (s.getAttribute('aria-label') === 'Marža') {
-          busena.marza = parseFloat(v);
-          try { localStorage.setItem(LS_MARZA, v); } catch (err) {}
-        } else { busena.bukle = v; }
-        piesti(sarasas, kur);
-      });
-    });
     kur.querySelectorAll('.ct-dtable-h [data-sort]').forEach(function (b) {
       b.addEventListener('click', function () {
         var k = b.getAttribute('data-sort');
         if (busena.rikiavimas === k) busena.kryptis = busena.kryptis === 'desc' ? 'asc' : 'desc';
         else { busena.rikiavimas = k; busena.kryptis = 'desc'; }
-        piesti(sarasas, kur);
+        perpiesti();
       });
     });
     kur.querySelectorAll('.ct-dtable-r input[type=checkbox]').forEach(function (i) {
@@ -234,21 +262,25 @@
     });
   }
 
-  // ── Rodinio jungiklis ─────────────────────────────────────────────────────
-  function jungiklis(kur, sarasas, korteles) {
-    var d = document.createElement('div');
-    d.className = 'ct-dt-switch';
-    d.innerHTML = seg('Rodinys', [{ v: 'korteles', t: 'Kortelės' }, { v: 'lentele', t: 'Lentelė' }], busena.rodinys);
-    kur.parentNode.insertBefore(d, kur);
-    d.querySelector('.ct-seg').addEventListener('click', function (e) {
-      var b = e.target.closest('button[data-v]'); if (!b) return;
-      busena.rodinys = b.getAttribute('data-v');
-      try { localStorage.setItem(LS, busena.rodinys); } catch (err) {}
-      d.querySelectorAll('button[data-v]').forEach(function (x) {
-        x.setAttribute('aria-checked', x === b ? 'true' : 'false');
-      });
-      if (busena.rodinys === 'lentele') piesti(sarasas, kur); else korteles();
-    });
+  function tuscia(kur, isViso) {
+    kur.innerHTML = '<div class="ct-state"><div class="ct-state-ic">∅</div>'
+      + '<h3>Pagal šiuos filtrus progų nėra</h3>'
+      + '<p>Iš ' + isViso + ' rastų skelbimų nė vienas neatitinka būklės filtro.</p></div>';
+  }
+
+  function perpiesti() {
+    var kur = ctx.results;
+    if (!kur) { if (ctx.korteles) ctx.korteles(ctx.sarasas); return; }
+    var turiJuosta = uztikrintiJuosta(kur);
+    var matomi = ctx.sarasas.filter(telpaBuklei);
+    if (turiJuosta) {
+      // Juosta be rezultatų – tuščias triukšmas; `[hidden]` ją išima (51b sk.).
+      juostaEl.hidden = !ctx.sarasas.length;
+      if (ctx.sarasas.length) juostaEl.innerHTML = juostaVidus(matomi.length);
+    }
+    if (ctx.sarasas.length && !matomi.length) { tuscia(kur, ctx.sarasas.length); return; }
+    if (busena.rodinys === 'lentele') lentele(rikiuoti(matomi), kur);
+    else ctx.korteles(matomi);
   }
 
   // ── Įsijungimas ───────────────────────────────────────────────────────────
@@ -258,15 +290,10 @@
   // lentelė virstų kortelėmis. Todėl perrašom abu vardus.
   var senas = window.__ct_renderCards || window.renderCandidateCards;
   window.renderCandidateCards = function (candidates, results) {
-    var sarasas = candidates || [];
-    function korteles() { if (senas) senas.call(window, sarasas, results); }
-    // jungiklis dedamas vieną kartą, virš rezultatų konteinerio
-    if (results && !results.__ctPerpJungiklis) {
-      results.__ctPerpJungiklis = true;
-      try { jungiklis(results, sarasas, korteles); } catch (e) { /* jungiklis nebūtinas */ }
-    }
-    if (busena.rodinys === 'lentele' && results) { piesti(sarasas, results); return; }
-    korteles();
+    ctx.sarasas = candidates || [];
+    ctx.results = results || null;
+    ctx.korteles = function (sar) { if (senas) senas.call(window, sar, results); };
+    perpiesti();
   };
   if (window.__ct_renderCards) window.__ct_renderCards = window.renderCandidateCards;
 })();

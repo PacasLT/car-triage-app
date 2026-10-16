@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.22.1', data: '2026-10-16', pavadinimas: 'Filtrai veikia ir kortelėse',
+    pakeitimai: [
+      'Būklės ir maržos jungikliai persikėlė į nuolatinę juostą virš rezultatų: anksčiau jie matėsi tik lentelėje, nors daužtus atsijoti reikia ir kortelių rodinyje.',
+      'Juostos gale – rodinio jungiklis „Kortelės / Lentelė“, šalia jo skelbimų skaitiklis, kuris persiskaičiuoja paspaudus filtrą.',
+      'Telefone viršuje – skaitiklis ir rodinio jungiklis, po jais filtrai per visą plotį.',
+    ],
+  },
+  {
     versija: '2.22.0', data: '2026-10-16', pavadinimas: 'Lentelės rodinys perpardavėjui',
     pakeitimai: [
       'Virš rezultatų atsirado jungiklis „Kortelės / Lentelė“. Lentelėje telpa dvidešimt variantų vienu metu, su pinigų stulpeliais: didžiausia pirkimo kaina, ≈ kaina Lietuvoje, pelnas, grąža, likvidumas ir kiek dienų skelbimas kabo.',

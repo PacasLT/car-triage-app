@@ -5629,8 +5629,8 @@ textarea.ct-field {
   color: var(--text-muted);
   font-weight: var(--fw-medium);
 }
-.ct-bukle-legend { display: flex; align-items: center; gap: 12px; font: var(--fw-regular) 11.5px/1 var(--font); color: var(--text-muted); }
-@media (max-width: 640px) { .ct-bukle-legend { display: none; } }
+/* `display` – 51b sk. per `:not([hidden])` (71 pk.): legenda korteliu rezime slepiama JS. */
+.ct-bukle-legend { align-items: center; gap: 12px; font: var(--fw-regular) 11.5px/1 var(--font); color: var(--text-muted); }
 
 
 /* ============================================================================
@@ -6093,3 +6093,68 @@ textarea.ct-field {
 
 /* ISTRINTI 56 sk.: `.ct-link[data-state="cached"] …` (dvi eilutes) - pakeista
    `cached-same`. */
+
+
+/* ============================================================================
+   71 · 51b sk. · `.ct-dtable-bar` · REZULTATU JUOSTA (perimta is priedu 24)
+   ----------------------------------------------------------------------------
+   Juosta NUOLATINE, abiem rezimais, PILNA. Ne „tik jungiklis" korteliu
+   rezime: bukle ir marza nera lenteles filtrai - kortele irgi rodo MAX pagal
+   marza (54 sk.), o dauztus filtruoti reikia abiem rodiniais. Jungiklis -
+   juostos gale, desineje.
+
+     <div class="ct-dtable-bar">
+       <span class="ct-seg-l">Būklė</span>  <div class="ct-seg">…</div>
+       <span class="ct-seg-l">Marža</span>  <div class="ct-seg">…</div>
+       <div class="ct-bukle-legend">…</div>              <- tik lenteles rezime
+       <span class="ct-dtable-count">22 skelb.</span>
+       <div class="ct-seg ct-dtable-view" role="radiogroup" aria-label="Rodinys">
+         <button role="radio" aria-checked="false">Kortelės</button>
+         <button role="radio" aria-checked="true">Lentelė</button>
+       </div>
+     </div>
+
+   Legenda korteliu rezime nereikalinga (kortelėje zyma su zodziu), tad JS
+   ja slepia per [hidden]; 52 sk. bazine `display` isimta, cia - per
+   `:not([hidden])` (59 pk. taisykle).
+   ========================================================================== */
+
+.ct-dtable-bar:not([hidden]) {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: 10px 16px;
+  margin: 0 0 14px;
+}
+/* Etikete + jos jungiklis - viena pora; tarpas tarp poru didesnis */
+.ct-seg-l {
+  font: var(--fw-semi) 9.5px/1 var(--font-mono);
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text-dim);
+  margin-right: -6px;
+}
+.ct-dtable-count {
+  margin-left: auto;
+  font: var(--fw-regular) 11.5px/1 var(--font-mono);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+/* Rodinio jungiklis - ne filtras, tad vizualiai atskirtas nuo ju */
+.ct-dtable-view { margin-left: 4px; }
+
+/* 52 sk. PATAISA - legenda slepiama JS: */
+.ct-bukle-legend:not([hidden]) { display: flex; }
+
+@media (max-width: 640px) {
+  .ct-dtable-bar:not([hidden]) { gap: 8px; }
+  .ct-dtable-bar > .ct-seg { width: 100%; }
+  .ct-seg-l { margin-right: 0; flex-basis: 100%; }
+  .ct-dtable-count { margin-left: 0; order: -1; }
+  .ct-dtable-view { order: -1; margin-left: auto; width: auto !important; }
+  /* K-71a: telefono legendos slepimas atkeltas is 52 sk. – ten jis buvo
+     `.ct-bukle-legend` (0,1,0) ir po sio bloko `:not([hidden])` (0,2,0)
+     nebeveiktu. Ta pati specifiskumo pora, tik teisinga tvarka. */
+  .ct-bukle-legend:not([hidden]) { display: none; }
+}
+/* Telefone: virsuje viena eilute - skaitiklis kaireje, rodinio jungiklis
+   desineje; po ja - filtrai per visa ploti. `!important` - tik ten, kur
+   jungiklis perraso ta pacia `.ct-dtable-bar > .ct-seg { width: 100% }`. */
