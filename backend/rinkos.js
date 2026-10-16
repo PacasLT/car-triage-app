@@ -12,6 +12,8 @@
 // Nyderlandai. Tai mišri Vakarų Europos imtis, todėl ji turi savo rinką (EU),
 // o ne dedama kartu su mobile.de.
 
+const tarsosMokestis = require('./tarsos-mokestis');
+
 const PORTALO_RINKA = {
   autoplius: 'LT',
   autogidas: 'LT',
@@ -28,25 +30,39 @@ const RINKU_VARDAI = {
 };
 
 // ---------------------------------------------------------------------------
-// APYTIKSLIAI PARSIVEŽIMO KAŠTAI
+// PARSIVEŽIMO KAŠTAI
 //
-// ŠIE SKAIČIAI YRA PRADINIAI ORIENTYRAI, NE SĄMATA. Lukas juos patikslins
-// (KL-1016-KASTAI). Iki tol rodom su žyma „apytiksliai" ir niekur neteigiam,
-// kad tai tiksli kaina.
+// v2.18.0: skaičiai nebėra iš lubų – surinkti iš viešų LT rinkos šaltinių
+// (2026-10-16). Vis tiek tai ORIENTYRAI: konkretus vežėjas, atstumas ir auto
+// dydis keičia sumą, todėl visur rodom „≈".
 //
-// Į sumą NEĮSKAIČIUOTA ir sąmoningai neskaičiuojama, kol nėra duomenų:
-//   • taršos (registracijos) mokestis — priklauso nuo CO₂, bus atskirai;
-//   • PVM — priklauso nuo to, ar pirkimas per įmonę ir ar sąskaita su PVM;
-//   • remontas — priklauso nuo konkretaus auto būklės.
+//   transportas  atviru autovežiu, DE → LT 350–500 € (wheelstreet, 2026),
+//                kitas vežėjas door-to-door „nuo 600 €" (veza.lt). Imam 450 €.
+//                PL arčiau – įvertinta 300 €; Vakarų Europa toliau – 700 €.
+//   registracija Regitra: pirmoji registracija (naudotas/įvežtas) 12,45 €
+//                + valstybiniai numeriai 7,20 € ≈ 20 €. Lietuvoje pirktam
+//                auto – tik valdytojo keitimas 11,30 €.
+//   ta           LTSA maksimalūs 2026: benzinas 27,00 €, dyzelinas 31,10 €,
+//                dujos 33,80 €. Imam 30 €. LT auto TA dažniausiai galioja.
+//   paruosimas   plovimas, poliravimas, smulkūs trūkumai, nuotraukos.
+//                Viešo šaltinio nėra – tai Luko skaičius, kol kas 250 €.
+//
+// NEĮSKAIČIUOTA sąmoningai: PVM (priklauso nuo pirkimo per įmonę ir sąskaitos
+// tipo), remontas (priklauso nuo konkretaus auto) ir kelionė apžiūrėti
+// (200–400 €, jei važiuojama patikrinti prieš perkant).
+//
+// Taršos (registracijos) mokestis NEBĖRA šiame sąraše – jis skaičiuojamas
+// atskirai pagal kurą ir variklį (`tarsos-mokestis.js`), nes tarp dviejų
+// vienodos kainos auto jis skiriasi šimtais eurų.
 // ---------------------------------------------------------------------------
 const KASTAI = {
-  LT: { transportas: 0,   registracija: 0,   paruosimas: 150 },
-  DE: { transportas: 650, registracija: 150, paruosimas: 250 },
-  EU: { transportas: 900, registracija: 150, paruosimas: 250 },
-  PL: { transportas: 400, registracija: 150, paruosimas: 250 },
+  LT: { transportas: 0,   registracija: 11, ta: 0,  paruosimas: 250 },
+  DE: { transportas: 450, registracija: 20, ta: 30, paruosimas: 250 },
+  EU: { transportas: 700, registracija: 20, ta: 30, paruosimas: 250 },
+  PL: { transportas: 300, registracija: 20, ta: 30, paruosimas: 250 },
 };
 
-const NEISKAICIUOTA = ['taršos mokestis', 'PVM', 'remontas'];
+const NEISKAICIUOTA = ['PVM', 'remontas', 'kelionė apžiūrėti'];
 
 function rinkaPagalPortala(portalas) {
   return PORTALO_RINKA[portalas] || null;
@@ -56,25 +72,30 @@ function rinkosVardas(rinka) {
   return RINKU_VARDAI[rinka] || rinka || null;
 }
 
-// kastai('DE') -> { transportas: 650, registracija: 150, paruosimas: 250, viso: 1050 }
+// kastai('DE') -> { transportas: 450, registracija: 20, ta: 30, paruosimas: 250, viso: 750 }
 function kastai(rinka) {
   const k = KASTAI[rinka];
   if (!k) return null;
-  return { ...k, viso: k.transportas + k.registracija + k.paruosimas };
+  return { ...k, viso: k.transportas + k.registracija + k.ta + k.paruosimas };
 }
 
-// Apytikslė kaina Lietuvoje: skelbimo kaina + parsivežimo kaštai.
-// Grąžina null, jei kainos ar rinkos nežinom — geriau nerodyti nieko,
-// nei rodyti išgalvotą skaičių.
-function kainaLietuvoje(kaina, rinka) {
+// Apytikslė kaina Lietuvoje: skelbimo kaina + parsivežimas + taršos mokestis.
+// `auto` – { kuras, variklioTuris, co2 } iš skelbimo; jei jų nėra, taršos
+// eilutė lieka su `tikslumas: 'nezinoma'` ir į sumą neįeina.
+// Grąžina null, jei kainos ar rinkos nežinom – geriau nerodyti nieko, nei
+// rodyti išgalvotą skaičių.
+function kainaLietuvoje(kaina, rinka, auto) {
   const k = kastai(rinka);
   if (!Number.isFinite(kaina) || kaina <= 0 || !k) return null;
+  const tarsa = tarsosMokestis.ivertinti(auto || {});
+  const tarsosSuma = Number.isFinite(tarsa.vidurkis) ? tarsa.vidurkis : 0;
   return {
     kaina,
     rinka,
     rinkosVardas: rinkosVardas(rinka),
     kastai: k,
-    viso: kaina + k.viso,
+    tarsa,
+    viso: kaina + k.viso + tarsosSuma,
     apytiksle: true,
     neiskaiciuota: NEISKAICIUOTA,
   };

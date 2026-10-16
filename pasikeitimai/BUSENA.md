@@ -1,4 +1,4 @@
-# Būsena · 2026-10-16 · v2.17.0 (laukia push)
+# Būsena · 2026-10-16 · v2.18.0 (laukia push)
 
 Tik **atviri** punktai. Uždaryti — `ZURNALAS.md` / `archyvas/`. Kas laukia Luko — `LUKUI.md`.
 Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
@@ -24,9 +24,10 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 | KL-MODELIS | Sonnet 5 bandymas 3–5 apžvalgomis | Mokama – su Luko žinia. |
 | DZ-TINDER | „Tinder“ perdarymas | Dizainas + kodas. |
 | A punktas | Mediana atskirai pagal rinką | **Padaryta v2.17.0:** `backend/rinkos.js` + `rinkos-mediana.js` rinkos (LT/DE/EU/PL), kortelėje „VOKIETIJOS RINKA“ ir „≈ LIETUVOJE“. Liko: tikri Luko kaštų skaičiai ir taršos mokestis. |
-| C punktas | Taršos (registracijos) mokestis | Atskiras `backend/tarsos-mokestis.js` iš viešos LR tvarkos. Reikia Luko „taip“. |
-| KL-1016-KASTAI | Parsivežimo kaštai | Laukia Luko skaičių: transportas DE/PL, registracija, TA, paruošimas. Iki tol `rinkos.js` – pradiniai orientyrai. |
-| Užsakymas klientui | Trijų rinkų paieška su sekimu | Planas `claude/UZSAKYMAS-KLIENTUI.md`. 1 žingsnis (A) padarytas; 2 žingsnis – rodinys (reikia dizainerio); 3 – sekimas kartu su Radaru. |
+| C punktas | Taršos (registracijos) mokestis | **Padaryta v2.18.0:** `backend/tarsos-mokestis.js` – rėžis pagal kurą ir variklio tūrį, nes CO₂ skelbimuose nėra. EV/PHEV 0 €. |
+| KL-1016-KASTAI | Parsivežimo kaštai | **Primesta v2.18.0** iš viešų šaltinių: DE 450, PL 300, EU 700 €; Regitra 20 €; TA 30 €; paruošimas 250 €. Luko patikslinimas – kai turės tikrus vežėjų skaičius. |
+| Užsakymas klientui | Trijų rinkų paieška su sekimu | Planas `claude/UZSAKYMAS-KLIENTUI.md`. 1 žingsnis (A+kaštai) padarytas v2.17–2.18; **2 žingsnis – rodinys, Luko „taip darom“, reikia dizainerio**; 3 – sekimas kartu su Radaru. |
+| Tik perpardavėjams | Produkto peržiūra | Luko sprendimas 10-16: platforma tik perpardavėjams ir tiems, kas ieško auto kitiems. Reikia peržiūrėti, ką išmesti (asmeninio pirkėjo režimas, Tinder) ir pertvarkyti kliento kortelę. |
 
 ## Dizaineris
 

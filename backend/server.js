@@ -3485,7 +3485,7 @@ async function runSearchJob(jobId, filters, arAdminas) {
         rinkosVardas: rinkos.rinkosVardas(rinka),
         // apytikslė kaina Lietuvoje: skelbimo kaina + parsivežimas. Pradiniai
         // orientyrai (rinkos.js), be taršos mokesčio, PVM ir remonto.
-        kainaLt: rinkos.kainaLietuvoje(l.kaina, rinka),
+        kainaLt: rinkos.kainaLietuvoje(l.kaina, rinka, { kuras: l.kuras, variklioTuris: l.variklioTuris, co2: l.co2 }),
         ridaMedian: marketData ? marketData.ridaMedian : null,
       };
     });

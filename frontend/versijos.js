@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.18.0', data: '2026-10-16', pavadinimas: 'Tikri parsivežimo kaštai ir taršos mokestis',
+    pakeitimai: [
+      'Eilutė „≈ Lietuvoje“ dabar skaičiuojama iš tikrų rinkos kainų, ne iš spėjimų: transportas iš Vokietijos 450 €, iš Lenkijos 300 €, iš kitos Vakarų Europos 700 €; registracija Regitroje 20 €; techninė apžiūra 30 €; paruošimas pardavimui 250 €.',
+      'Pridėtas taršos (registracijos) mokestis – vienintelis kaštas, kuris tarp dviejų vienodos kainos automobilių skiriasi šimtais eurų. Elektriniai, vandeniliniai ir įkraunami hibridai – 0 €; 3 litrų dyzelinis visureigis – apie 200 €, o didelės taršos auto – ir daugiau.',
+      'CO₂ skelbimuose nenurodytas, todėl mokestis įvertinamas pagal kurą ir variklio tūrį ir rodomas rėžiu („nuo–iki“), o ne vienu tiksliu skaičiumi. Užvedus matosi, iš ko įvertinta. Kai duomenų nepakanka, mokestis tiesiog neskaičiuojamas – geriau nerodyti, nei rodyti neteisingai.',
+      'Užvedus ant „≈ Lietuvoje“ dabar matosi visa eilutė: kaina + transportas + registracija + TA + paruošimas + taršos mokestis, ir kas į sumą NEįeina (PVM, remontas, kelionė apžiūrėti).',
+    ],
+  },
+  {
     versija: '2.17.0', data: '2026-10-16', pavadinimas: 'Kaina lyginama su savo rinka, ne su visų šalių mišiniu',
     pakeitimai: [
       'Skelbimo kaina dabar lyginama su TOS PAČIOS šalies rinka: vokiškas – su Vokietijos, lenkiškas – su Lenkijos, lietuviškas – su Lietuvos. Anksčiau visų penkių portalų kainos buvo suplaktos į vieną vidurkį, todėl užsienio skelbimai atrodė pigesni vien dėl rinkos skirtumo, o geri lietuviški pasiūlymai skendo.',

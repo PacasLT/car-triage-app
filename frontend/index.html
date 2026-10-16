@@ -4406,12 +4406,20 @@ function rinkosEtikete(c) {
 }
 function kainaLtEilute(c) {
   if (!c || !c.kainaLt || c.rinka === 'LT') return '';
-  var k = c.kainaLt;
+  var k = c.kainaLt, t = k.tarsa || {};
+  var tarsosEil = t.tikslumas === 'nezinoma'
+    ? ' + taršos mokestis (neskaičiuotas – trūksta duomenų)'
+    : (t.vidurkis > 0
+        ? ' + taršos mokestis ≈ ' + formatEUR(t.vidurkis) + ' (' + formatEUR(t.nuo) + '–' + formatEUR(t.iki) + ')'
+        : ' + taršos mokestis 0 €');
   var det = 'Skelbimo kaina ' + formatEUR(k.kaina)
     + ' + transportas ' + formatEUR(k.kastai.transportas)
     + ' + registracija ' + formatEUR(k.kastai.registracija)
+    + ' + TA ' + formatEUR(k.kastai.ta)
     + ' + paruošimas ' + formatEUR(k.kastai.paruosimas)
-    + '. Neįskaičiuota: ' + (k.neiskaiciuota || []).join(', ') + '.';
+    + tarsosEil
+    + '. Neįskaičiuota: ' + (k.neiskaiciuota || []).join(', ') + '.'
+    + (t.paaiskinimas ? ' ' + t.paaiskinimas : '');
   return '<div class="ct-market-row" title="' + esc(det) + '">'
     + '<span class="ct-market-k">≈ LIETUVOJE</span>'
     + '<span class="ct-market-v">' + formatEUR(k.viso) + '</span></div>';
