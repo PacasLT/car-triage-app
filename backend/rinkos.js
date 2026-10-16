@@ -45,7 +45,7 @@ const RINKU_VARDAI = {
 //   ta           LTSA maksimalūs 2026: benzinas 27,00 €, dyzelinas 31,10 €,
 //                dujos 33,80 €. Imam 30 €. LT auto TA dažniausiai galioja.
 //   paruosimas   plovimas, poliravimas, smulkūs trūkumai, nuotraukos.
-//                Viešo šaltinio nėra – tai Luko skaičius, kol kas 250 €.
+//                Viešo šaltinio nėra – tai LUKO skaičius: 350 € (2026-10-16).
 //
 // NEĮSKAIČIUOTA sąmoningai: PVM (priklauso nuo pirkimo per įmonę ir sąskaitos
 // tipo), remontas (priklauso nuo konkretaus auto) ir kelionė apžiūrėti
@@ -56,13 +56,28 @@ const RINKU_VARDAI = {
 // vienodos kainos auto jis skiriasi šimtais eurų.
 // ---------------------------------------------------------------------------
 const KASTAI = {
-  LT: { transportas: 0,   registracija: 11, ta: 0,  paruosimas: 250 },
-  DE: { transportas: 450, registracija: 20, ta: 30, paruosimas: 250 },
-  EU: { transportas: 700, registracija: 20, ta: 30, paruosimas: 250 },
-  PL: { transportas: 300, registracija: 20, ta: 30, paruosimas: 250 },
+  LT: { transportas: 0,   registracija: 11, ta: 0,  paruosimas: 350 },
+  DE: { transportas: 450, registracija: 20, ta: 30, paruosimas: 350 },
+  EU: { transportas: 700, registracija: 20, ta: 30, paruosimas: 350 },
+  PL: { transportas: 300, registracija: 20, ta: 30, paruosimas: 350 },
 };
 
 const NEISKAICIUOTA = ['PVM', 'remontas', 'kelionė apžiūrėti'];
+
+// Pristatymo trukmė dienomis – verdiktui „pigiau DE, bet +5–7 d." (68 pk.).
+// Tokio lauko skelbimuose nėra; tai konstanta pagal vežėjų skelbiamus terminus
+// (wheelstreet 2026: DE → LT 5–7 d., tranzitas per Lenkiją 3–4 d.).
+// Rodom RĖŽIU, ne tašku – tiksliai niekas nežino.
+const PRISTATYMAS = {
+  LT: { nuo: 0, iki: 0 },
+  DE: { nuo: 5, iki: 7 },
+  EU: { nuo: 7, iki: 10 },
+  PL: { nuo: 3, iki: 5 },
+};
+
+function pristatymas(rinka) {
+  return PRISTATYMAS[rinka] || null;
+}
 
 function rinkaPagalPortala(portalas) {
   return PORTALO_RINKA[portalas] || null;
@@ -72,7 +87,7 @@ function rinkosVardas(rinka) {
   return RINKU_VARDAI[rinka] || rinka || null;
 }
 
-// kastai('DE') -> { transportas: 450, registracija: 20, ta: 30, paruosimas: 250, viso: 750 }
+// kastai('DE') -> { transportas: 450, registracija: 20, ta: 30, paruosimas: 350, viso: 850 }
 function kastai(rinka) {
   const k = KASTAI[rinka];
   if (!k) return null;
@@ -95,6 +110,7 @@ function kainaLietuvoje(kaina, rinka, auto) {
     rinkosVardas: rinkosVardas(rinka),
     kastai: k,
     tarsa,
+    pristatymas: pristatymas(rinka),
     viso: kaina + k.viso + tarsosSuma,
     apytiksle: true,
     neiskaiciuota: NEISKAICIUOTA,
@@ -102,6 +118,6 @@ function kainaLietuvoje(kaina, rinka, auto) {
 }
 
 module.exports = {
-  PORTALO_RINKA, RINKU_VARDAI, KASTAI, NEISKAICIUOTA,
-  rinkaPagalPortala, rinkosVardas, kastai, kainaLietuvoje,
+  PORTALO_RINKA, RINKU_VARDAI, KASTAI, NEISKAICIUOTA, PRISTATYMAS,
+  rinkaPagalPortala, rinkosVardas, kastai, kainaLietuvoje, pristatymas,
 };

@@ -5691,3 +5691,198 @@ textarea.ct-field {
    Tada --neutral gyvas, ir negyvu tokenu - 0.
    Jei vizualiai pasikeistu daugiau nei 2/255 - palikit kaip yra ir
    pasakykit, tada --neutral trinam. */
+
+
+/* ============================================================================
+   68 paketas · dz-perpardavejas B dalis (2 + 3 + 5 darbai)
+   53 sk. `.ct-mkts`   - trys rinkos + verdiktas
+   54 sk. `.ct-card` perpardavejui - pinigai virsuje (`.ct-money`)
+   55 sk. `.ct-pipe` busenos + tusti ekranai (`.ct-state` 43 sk. - esamas)
+   +  `.adm-users` -> `.ct-dtable` (atideta is A dalies)
+   Siulau v2.20.0. Visi `display`, kuriuos JS slepia, - `:not([hidden])`.
+   ========================================================================== */
+
+
+/* ============================================================================
+   53 sk. · TRYS RINKOS
+   ----------------------------------------------------------------------------
+   ≥1100: trys skiltys greta. <1100: SKIRTUKAI (radiogroup), ta pati data.
+   Skirtuke - kodas ir geriausia ≈LT suma po juo: telefone ir nepaspaudes
+   matai, kur pigiau.
+
+   VERDIKTAS - VIRSUJE, ne po sarasais. Jis yra atsakymas, sarasai -
+   irodymai. Perpardavejas pirma nori zinoti „kur pirkti", tik tada „ka".
+
+   TUSCIA RINKA - skiltis LIEKA (kitaip trys virsta dviem ir palyginimas
+   meluoja). Viduje - punktyrinis `.ct-state`: kiek rasta, kodel 0, ir vienas
+   veiksmas, kuris tikrai duos rezultatu (be ridos ribos - 7). Verdikte tos
+   rinkos zyma punktyru: „PL — nerasta pagal filtrus".
+
+     <section class="ct-mkts">
+       <div class="ct-mkts-v">…verdiktas…</div>
+       <div class="ct-seg ct-mkts-tabs" role="tablist">…LT · DE · PL…</div>
+       <div class="ct-mkts-g">
+         <div class="ct-mkt is-best" data-rinka="DE">…</div>
+       </div>
+     </section>                                                             */
+
+.ct-mkts { display: flex; flex-direction: column; gap: var(--s-4); }
+.ct-mkts-v {
+  display: flex; align-items: center; gap: 22px; flex-wrap: wrap;
+  padding: 16px 18px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(90deg, var(--accent-dim), color-mix(in oklab, var(--accent) 4%, transparent));
+  border: 1px solid var(--accent-border);
+}
+.ct-mkts-v > p { flex: 1 1 420px; font: var(--fw-medium) 15px/1.45 var(--font); text-wrap: pretty; }
+.ct-mkts-v b { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.ct-mkts-v b.is-gain { color: var(--success); }
+
+.ct-mkts-g:not([hidden]) { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.ct-mkts-tabs { display: none; }
+
+.ct-mkt { display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+.ct-mkt.is-best { border-color: var(--accent-border); }
+.ct-mkt-h { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.ct-mkt-code {
+  flex: none; width: 30px; height: 22px; border-radius: 5px;
+  display: grid; place-items: center;
+  background: var(--bg-raised); border: 1px solid var(--border-light);
+  font: var(--fw-bold) 10.5px/1 var(--font-mono);
+}
+.ct-mkt-h > small { margin-left: auto; font: var(--fw-regular) 11px/1 var(--font-mono); color: var(--text-dim); white-space: nowrap; }
+
+/* Eilute: pavadinimas | ≈LT | MAX (su ta pacia juosta kaip .ct-dtable .is-key) */
+.ct-mkt-r { display: grid; grid-template-columns: minmax(0, 1fr) 88px 104px; align-items: center; gap: 12px; padding: 11px 16px; border-bottom: 1px solid var(--border); color: inherit; text-decoration: none; }
+.ct-mkt-r:hover { background: var(--bg-elevated); }
+.ct-mkt-r > .is-key { padding: 6px 8px; border-radius: 7px; background: color-mix(in oklab, var(--accent) 8%, transparent); text-align: right; }
+.ct-mkt-r > .is-key.is-cap > b { text-decoration: underline dotted color-mix(in oklab, var(--warning) 70%, transparent); text-underline-offset: 4px; }
+
+.ct-mkt > .ct-state { margin: 16px; border: 1px dashed var(--border-light); border-radius: var(--radius-md); align-items: flex-start; text-align: left; }
+
+@media (max-width: 1100px) {
+  .ct-mkts-tabs:not([hidden]) { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .ct-mkts-tabs > button { min-height: var(--tap-min); display: flex; flex-direction: column; gap: 3px; }
+  .ct-mkts-tabs > button > small { font: var(--fw-regular) 10px/1 var(--font-mono); opacity: .85; }
+  .ct-mkts-g:not([hidden]) { grid-template-columns: 1fr; }
+  .ct-mkt:not(.is-on) { display: none; }
+  .ct-mkt { border: 0; background: none; }
+  .ct-mkt-h { display: none; }
+}
+
+
+/* ============================================================================
+   54 sk. · KORTELE · PINIGAI VIRSUJE · `.ct-money`
+   ----------------------------------------------------------------------------
+   Kortele prasideda TRIMIS skaiciais per visa ploti: MAX (juostoje) | ≈LT su
+   sudetimi | pelnas ir ROI. Po jais - automobilis.
+
+   Rizikos juosta - NUIMTA is virsaus, tampa viena `.ct-chip` tarp kitu
+   pozymiu (rizika, likvidumas, kabo, rida, iranga, bukle).
+
+   Nuotrauka - VIENA miniatiura 96×72 (ne galerija). Perpardavejas vis tiek
+   atidarys skelbima; nuotrauka cia atpazinimui, ne vertinimui. `.ct-thumbs`
+   perpardavejo kortelėje nerodomas.
+
+   `.ct-market` - JUSU eilutes tinka, CSS nereikia. Vienas pakeitimas:
+   kai `lygintaRinka: null`, raktas „RINKOS VIDURKIS", o reiksme prasideda
+   „visos šalys kartu · …" - ne raktas skliausteliuose (raktas lūžo i 2
+   eilutes ir skaitesi kaip dvi skirtingos eilutės).                        */
+
+.ct-money { display: grid; grid-template-columns: 1.15fr 1fr 1fr; border-bottom: 1px solid var(--border); }
+.ct-money > div { display: flex; flex-direction: column; gap: 7px; padding: 16px 18px; min-width: 0; }
+.ct-money > div + div { border-left: 1px solid var(--border); }
+.ct-money > div > span:first-child {
+  font: var(--fw-semi) 9.5px/1 var(--font-mono);
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text-dim); white-space: nowrap;
+}
+.ct-money > div > b { font: var(--fw-semi) 19px/1 var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ct-money > div > small { font: var(--fw-regular) 11px/1.4 var(--font-mono); color: var(--text-dim); }
+.ct-money > .is-key { background: color-mix(in oklab, var(--accent) 9%, transparent); border-right: 1px solid var(--accent-border); }
+.ct-money > .is-key + div { border-left: 0; }
+.ct-money > .is-key > span:first-child { color: var(--accent-light); }
+.ct-money > .is-key > b { font: var(--fw-bold) 26px/1 var(--font-mono); color: #F4F7FD; }
+.ct-money > .is-key.is-cap > b { text-decoration: underline dotted color-mix(in oklab, var(--warning) 70%, transparent); text-underline-offset: 5px; text-decoration-thickness: 1.5px; }
+.ct-money > .is-key.is-cap > b > i { font: var(--fw-medium) 12px var(--font); font-style: normal; color: var(--text-muted); margin-right: 4px; }
+.ct-money > .is-key > small.is-ok   { color: var(--success); font-weight: var(--fw-medium); }
+.ct-money > .is-key > small.is-deal { color: var(--warning); font-weight: var(--fw-medium); }
+.ct-money .is-gain { color: var(--success); }
+.ct-money .is-loss { color: var(--danger); }
+
+.ct-card.is-resale .ct-media { flex: none; width: 96px; }
+.ct-card.is-resale .ct-photo { height: 72px; border-radius: 9px; }
+.ct-card.is-resale .ct-thumbs { display: none; }
+
+@media (max-width: 640px) {
+  .ct-money { grid-template-columns: 1fr 1fr; }
+  .ct-money > .is-key { grid-column: 1 / -1; border-right: 0; border-bottom: 1px solid var(--accent-border); }
+  .ct-money > .is-key + div { border-left: 0; }
+  .ct-money > .is-key > b { font-size: 28px; }
+}
+
+
+/* ============================================================================
+   55 sk. · PIRKIMO SARASAS · `.ct-pipe` + tusti ekranai
+   ----------------------------------------------------------------------------
+   Penkios busenos - viena eilute mygtuku kortelės apacioje (ne isskleidziamas
+   meniu): pakeisti busena turi buti vienas paspaudimas, nes perpardavejas
+   tai daro telefonu po skambucio.
+
+     stebiu · skambinau · derybos   - akcento (darbas vyksta)
+     nupirkta                       - zalia (vienintele „gera" busena)
+     praleista                      - perbraukta, blanki; eilute lenteleje .is-dim
+
+   Lenteleje (51 sk.) ta pati busena - viena piliule; tuscia - punktyrine
+   „+ į sąrašą".
+
+     <div class="ct-pipe" role="radiogroup" aria-label="Pirkimo sąrašas">
+       <button role="radio" aria-checked="true">stebiu</button> …
+     </div>                                                                 */
+
+.ct-pipe:not([hidden]) { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ct-pipe > button {
+  height: 28px; padding: 0 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-light);
+  background: transparent;
+  color: var(--text-muted);
+  font: var(--fw-medium) 11.5px var(--font);
+  white-space: nowrap; cursor: pointer;
+}
+.ct-pipe > button[aria-checked="true"] { background: color-mix(in oklab, var(--accent) 18%, transparent); border-color: color-mix(in oklab, var(--accent) 50%, transparent); color: var(--text-primary); font-weight: var(--fw-semi); }
+.ct-pipe > button[data-v="nupirkta"][aria-checked="true"] { background: color-mix(in oklab, var(--success) 16%, transparent); border-color: color-mix(in oklab, var(--success) 45%, transparent); color: var(--success); }
+.ct-pipe > button[data-v="praleista"][aria-checked="true"] { background: transparent; color: var(--text-dim); text-decoration: line-through; }
+.ct-pipe > button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+@media (max-width: 640px) { .ct-pipe > button { min-height: var(--tap-min); padding: 0 12px; } }
+
+/* Lenteles piliule (51 sk. BUSENA stulpelis) */
+.ct-pipe-pill { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: var(--radius-pill); border: 1px solid var(--border-light); font: var(--fw-medium) 11.5px/1 var(--font); color: var(--text-secondary); white-space: nowrap; }
+.ct-pipe-pill[data-v="skambinau"] { background: var(--accent-dim); border-color: var(--accent-border); color: var(--accent-light); }
+.ct-pipe-pill[data-v="derybos"]   { background: color-mix(in oklab, var(--accent) 22%, transparent); border-color: color-mix(in oklab, var(--accent) 55%, transparent); color: var(--text-primary); }
+.ct-pipe-pill[data-v="nupirkta"]  { background: color-mix(in oklab, var(--success) 14%, transparent); border-color: color-mix(in oklab, var(--success) 40%, transparent); color: var(--success); }
+.ct-pipe-pill[data-v="praleista"] { color: var(--text-dim); text-decoration: line-through; }
+.ct-pipe-pill:not([data-v]) { border-style: dashed; color: var(--text-muted); }
+
+/* TUSTI EKRANAI - esamas `.ct-state` (43 sk.), nauju vardu nereikia.
+   Kiekvienas atsako i tris dalykus: KIEK rasta, KODEL tuscia, KA daryti -
+   ir veiksmas visada toks, kuris TIKRAI duos rezultatu:
+     nera progu        -> „Rodyti su 10 % marža" (pirminis) + „Rodyti visus 64"
+                          + arciausias kandidatas tekste („derėtis −420 €")
+     sarasas tuscias   -> „Grįžti į paiešką"
+     rinkoje nerasta   -> „Rodyti be ridos ribos" su skaiciumi, kiek tada bus */
+.ct-state.is-left { align-items: flex-start; text-align: left; }
+
+
+/* ============================================================================
+   `.adm-users` -> `.ct-dtable` · uzbaigimas (atideta is 66 pk.)
+   ----------------------------------------------------------------------------
+   Keturios admino taisykles, kuriu .ct-dtable neperemė, - dabar bendros:   */
+.ct-dtable-r > :first-child.is-ell,
+.ct-dtable-r > .is-ell { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.ct-dtable-r > .is-low  > b, .ct-dtable-r > .is-low  { color: var(--warning); }
+.ct-dtable-r > .is-zero > b, .ct-dtable-r > .is-zero { color: var(--danger); }
+/* Desininimas - per `.is-num` (51 sk.), ne `:nth-child(n+4)`.
+   Telefone stulpeliu slepimas - per `data-m="hide"` (51 sk.), ne `:nth-child(3/7)`.
+   admin.html: `.is-num` ant 4-7 celiu, `.is-ell` ant el. pasto, `data-m="hide"`
+   ant „galioja iki" ir „sukurta". Tada 48 sk. `.adm-users-h`, `.adm-u` - TRINTI. */

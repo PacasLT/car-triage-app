@@ -1875,3 +1875,38 @@ Dizainerio Errata 17 (67) – trys punktai priimti, ketvirtas **padarytas kitaip
 
 - **Rezultatas: tokenų patikra 0 sulūžusių ir 0 negyvų** – pirmą kartą projekte. Buvo 1 + 2 prieš 66 paketą.
 - Sargai: 21 žali, `dizainas.test` 26/26.
+
+| `53 sk.` `.ct-mkts` | Dizaineris | **Klaudijus** | ≥1100 skiltys, <1100 skirtukai; verdiktas viršuje; tuščia rinka lieka |
+| `54 sk.` `.ct-money` | Dizaineris | **Klaudijus** | Kortelė: pinigai viršuje, rizika — žyma, viena miniatiūra |
+| `55 sk.` `.ct-pipe` | Dizaineris | **Klaudijus** | 5 būsenos; tušti ekranai per `.ct-state` |
+| `.adm-users` → `.ct-dtable` | Dizaineris | **Klaudijus** | Bendros taisyklės paruoštos; 48 sk. trinti po markupo |
+| Verdikto „+9 d." | Dizaineris | **Klaudijus** | Iš kur dienos? |
+| Tuščios rinkos skaičius | Dizaineris | **Klaudijus** | Ar serveris žino „kiek be filtro"? |
+| dz-perpardavejas | — | — | A + B atiduoti |
+
+
+## Z-152 · 2026-10-16 · Klaudijus · v2.20.0 – didžiausia pirkimo kaina + 68 paketas
+
+**Luko skaičiai (2026-10-16):** siekiama marža **iki 10 %**, paruošimas pardavimui **350 €** (buvo 250). Abu įrašyti į vieną vietą (`max-pirkimo.js`, `rinkos.js`), DE parsivežimas tapo **850 €**.
+
+**Naujas `backend/max-pirkimo.js`.** Formulė – dizainerio pasiūlyta, mūsų patikrinta:
+`max = pardavimasLT / (1 + marža) − kaštai − tarša`. Ji duoda tiksliai ROI = marža nuo investuotų pinigų (išvedimas modulio komentare, tikrinama testu visoms trims maržoms).
+
+**Trys taisyklės, be kurių skaičius meluotų:**
+1. `pardavimasLT` – **tos pačios kartos Lietuvos** mediana (`lyginimoMediana(..., 'LT')`). Jei grąžinta `rinka !== 'LT'`, vadinasi patikimos LT imties nėra – **max neskaičiuojamas**, grąžinam `null` ir priežastį. Kitaip „kiek galiu mokėti" remtųsi į vokišką kainą.
+2. Niekas neparduoda už medianą – įvesta 3 % atsargos nuolaida (`PARDAVIMO_NUOLAIDA`).
+3. Kai `tarsa.tikslumas === 'nezinoma'`, max yra **viršutinė riba** – `riba: true`, rodinys rašo „iki …" (Errata 17 `.is-key.is-cap`).
+
+Dar grąžinama `derybos()` – „telpa · +943" arba „derėtis −557" (66 pk.).
+
+**Pamatuota, DE Octavia 2,0 TDI už 14 500 €:** LT mediana 18 550 → pardavimas 17 994, kaštai 850, tarša ~65 → **max 15 543 €**, derybos „telpa · +1 043", pelnas 2 679 €, ROI 17 %.
+
+**68 paketas įdiegtas** – 53 sk. `.ct-mkts`, 54 sk. `.ct-money`, 55 sk. `.ct-pipe`. Visi tokenai buvo; selektorių dublikatų nėra; tokenų patikra **0 + 0** nepakito.
+
+**`.ct-market` pataisa pagal dizainerio pastabą:** kai `lygintaRinka: null`, raktas lieka „RINKOS VIDURKIS", o „visos šalys kartu ·" perkelta į **reikšmės pradžią** – skliaustuose raktas lūždavo į dvi eilutes.
+
+**Atsakymai į du 68 pk. klausimus** – žr. atsakymą dizaineriui; trumpai: (1) „+N dienos" lauko nebuvo, **pridėtas `rinkos.PRISTATYMAS`** – rėžis pagal šalį (DE 5–7, PL 3–5, EU 7–10, LT 0), konstanta iš vežėjų terminų, rodoma rėžiu; (2) „kiek būtų be vieno filtro" serveris **gali** pasakyti nemokamai iš `hardRejectReasons`, bet tik tarp jau nuskaitytų skelbimų.
+
+**`.adm-users` → `.ct-dtable` vis dar neužbaigta**, bet priežastis pasikeitė: bendros klasės (`.is-ell`, `.is-low`/`.is-zero`, `.is-num`, `data-m`) jau yra, liko tik `admin.html` markupas. Daroma kartu su perpardavėjo rodinio markupu, vienu kartu.
+
+**Naujas sargas** `backend/testai/max-pirkimo.test.js` – 23/23. Sargai: **22 žali**. `tarsos-mokestis.test` buvo nukritęs ir tai teisinga – jis pagavo paruošimo kaštų pakeitimą 250 → 350; ribos pataisytos į `kl.kastai.viso`, kad nebekartotųsi.

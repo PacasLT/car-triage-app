@@ -4404,6 +4404,12 @@ function rinkosEtikete(c) {
   var v = { LT: 'LIETUVOS RINKA', DE: 'VOKIETIJOS RINKA', EU: 'VAK. EUROPOS RINKA', PL: 'LENKIJOS RINKA' };
   return v[c.lygintaRinka] || 'RINKOS VIDURKIS';
 }
+// 68 pk.: kai palyginta su visų šalių mišiniu, tai sakoma REIKŠMĖS pradžioje –
+// skliaustuose raktas lūždavo į dvi eilutes (dizainerio pastaba).
+function rinkosReiksme(c) {
+  var suma = formatEUR(c.marketMedian);
+  return (c && c.lygintaRinka) ? suma : '<span style="color:var(--text-dim)">visos šalys kartu · </span>' + suma;
+}
 function kainaLtEilute(c) {
   if (!c || !c.kainaLt || c.rinka === 'LT') return '';
   var k = c.kainaLt, t = k.tarsa || {};
@@ -6357,7 +6363,7 @@ function ctNavTab(tab) {
         +         '</div>'
         +         '<div class="ct-market">'
         +           ((c.marketMedian && !rinkaSilpna)
-                      ? '<div class="ct-market-row"><span class="ct-market-k">' + rinkosEtikete(c) + '</span><span class="ct-market-v">' + formatEUR(c.marketMedian) + '</span></div>'
+                      ? '<div class="ct-market-row"><span class="ct-market-k">' + rinkosEtikete(c) + '</span><span class="ct-market-v">' + rinkosReiksme(c) + '</span></div>'
                         + (skirtSuma != null ? '<div class="ct-market-row ' + diffTonas + '"><span class="ct-market-k">' + skirtEtik + '</span><span class="ct-market-v">' + formatEUR(skirtSuma) + '</span></div>' : '')
                       : '<div class="ct-market-row"><span class="ct-market-k">RINKOS VIDURKIS</span><span class="ct-market-v is-unrated-val">–</span></div>'
                         + '<div class="ct-market-row"><span class="ct-market-k">PANAŠIŲ SKELBIMŲ</span><span class="ct-market-v is-unrated-val">' + (c.marketCount ? c.marketCount + ' – per mažai' : 'per mažai') + '</span></div>')

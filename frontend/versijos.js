@@ -8,6 +8,17 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.20.0', data: '2026-10-16', pavadinimas: 'Didžiausia pirkimo kaina',
+    pakeitimai: [
+      'Atsirado svarbiausias perpardavėjo skaičius – didžiausia pirkimo kaina: daugiausia, kiek galima mokėti už automobilį, kad po visų kaštų liktų norima marža. Tai skaičius, su kuriuo einama derėtis.',
+      'Siekiama marža – 10 % (galima rinktis 10, 15 arba 20 %). Pelnas ir grąža rodomi prie tikros skelbimo kainos, o didžiausia pirkimo kaina – prie pasirinktos maržos.',
+      'Pardavimo kaina imama iš tos pačios kartos Lietuvos rinkos medianos ir sumažinama 3 %, nes realiai niekas neparduoda tiksliai už medianą. Jei patikimos Lietuvos medianos nėra, skaičius nerodomas visai – geriau nerodyti, nei remtis vokiška kaina.',
+      'Kai taršos mokesčio tiksliai nežinome, didžiausia pirkimo kaina rodoma kaip viršutinė riba su žodžiu „iki“.',
+      'Paruošimas pardavimui kaštuose pakeltas iki 350 €, pagal tikrą kainą.',
+      'Įdiegtas dizainerio 68 paketas: trijų rinkų rodinys, perpardavėjo kortelė ir pirkimo sąrašo būsenos.',
+    ],
+  },
+  {
     versija: '2.19.1', data: '2026-10-16', pavadinimas: 'Pataisos: „iki“ prie neaiškaus mokesčio ir dizaino skolos pabaiga',
     pakeitimai: [
       'Kai taršos mokesčio tiksliai apskaičiuoti neįmanoma (skelbime nėra CO₂), didžiausia pirkimo kaina rodoma su žodžiu „iki“ ir punktyru – tai viršutinė riba, ne tikslus skaičius. Anksčiau tokiu atveju skaičius atrodė tikslesnis, nei yra.',

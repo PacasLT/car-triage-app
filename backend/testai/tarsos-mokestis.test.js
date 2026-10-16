@@ -56,10 +56,10 @@ t(d20.vidurkis < d30.vidurkis, '2,0 l (' + d20.vidurkis + ' €) pigiau nei 3,0 
 
 console.log('\n── 7. Kaina Lietuvoje – mokestis įeina į sumą ────────────');
 const kl = R.kainaLietuvoje(14500, 'DE', { kuras: 'Dyzelinas', variklioTuris: 1968 });
-t(kl.kastai.viso === 750, 'DE parsivežimas 750 € (450+20+30+250)');
-t(kl.viso === 14500 + 750 + kl.tarsa.vidurkis, 'suma = kaina + kaštai + taršos vidurkis = ' + kl.viso + ' €');
+t(kl.kastai.viso === 850, 'DE parsivežimas 850 € (450+20+30+350, paruošimas – Luko skaičius)');
+t(kl.viso === 14500 + kl.kastai.viso + kl.tarsa.vidurkis, 'suma = kaina + kaštai + taršos vidurkis = ' + kl.viso + ' €');
 const klEv = R.kainaLietuvoje(14500, 'DE', { kuras: 'Elektra' });
-t(klEv.viso === 14500 + 750, 'elektrinis – be taršos mokesčio (' + klEv.viso + ' €)');
+t(klEv.viso === 14500 + 850, 'elektrinis – be taršos mokesčio (' + klEv.viso + ' €)');
 t(klEv.viso < kl.viso, 'elektrinis pigiau parsivežti nei dyzelinis – būtent dėl mokesčio');
 const klLt = R.kainaLietuvoje(14500, 'LT', { kuras: 'Dyzelinas', variklioTuris: 1968 });
 t(klLt.kastai.transportas === 0 && klLt.kastai.ta === 0, 'LT: be transporto ir be TA');

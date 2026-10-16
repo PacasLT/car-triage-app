@@ -2014,6 +2014,7 @@ function mergeDuplicatesAcrossPortals(listings) {
 // testuojama be serverio. Kvietejai nepasikeite.
 const { computeMarketMedians, lyginimoMediana } = require('./rinkos-mediana');
 const rinkos = require('./rinkos');
+const maxPirkimo = require('./max-pirkimo');
 // v2.10.6: tekstas kartos atnaujinimui atpažinti (LCI / facelift skelbimo pavadinime).
 function rinkosTekstas(l) { return [l.modelis, l.title, l.variantas].filter(Boolean).join(' '); }
 
@@ -3467,6 +3468,11 @@ async function runSearchJob(jobId, filters, arAdminas) {
       const marketData = l.modelis ? medians[l.modelis] : null;
       const rinka = l.rinka || rinkos.rinkaPagalPortala(l.source);
       const lyg = lyginimoMediana(marketData, l.rinkosGrupes, rinka);
+      // v2.20.0: didžiausia pirkimo kaina remiasi TIK Lietuvos medianą. Jei
+      // patikimos LT medianos tai kartai nėra, `lyg2.rinka` nebus 'LT' ir
+      // skaičius neskaičiuojamas – geriau nerodyti, nei remtis vokiška kaina.
+      const lyg2 = lyginimoMediana(marketData, l.rinkosGrupes, 'LT');
+      const ltMediana = (lyg2 && lyg2.rinka === 'LT') ? lyg2.median : null;
       const hasReliableMarket = lyg && lyg.count >= 3;
       let diffPct = null, ridaDiffPct = null;
       if (l.kaina && hasReliableMarket) {
@@ -3475,8 +3481,14 @@ async function runSearchJob(jobId, filters, arAdminas) {
       if (l.rida && marketData && marketData.ridaMedian && marketData.ridaCount >= 3) {
         ridaDiffPct = Math.round(((l.rida - marketData.ridaMedian) / marketData.ridaMedian) * 100);
       }
+      const klt = rinkos.kainaLietuvoje(l.kaina, rinka, { kuras: l.kuras, variklioTuris: l.variklioTuris, co2: l.co2 });
+      const kastaiViso = klt ? klt.kastai.viso : 0;
+      const tarsosSuma = (klt && Number.isFinite(klt.tarsa.vidurkis)) ? klt.tarsa.vidurkis : 0;
+      const mp = maxPirkimo.skaiciuoti({ ltMediana, kastai: kastaiViso, tarsa: tarsosSuma,
+        tarsosTikslumas: klt ? klt.tarsa.tikslumas : 'nezinoma' });
+      const pl = maxPirkimo.pelnas({ kaina: l.kaina, ltMediana, kastai: kastaiViso, tarsa: tarsosSuma });
       return {
-        ...l, diffPct, ridaDiffPct, rinka,
+        ...l, diffPct, ridaDiffPct, rinka, ltMediana,
         marketCount: lyg ? lyg.count : 0,
         marketMedian: lyg ? lyg.median : null,
         rinkosGrupe: lyg ? lyg.grupe : null,
@@ -3485,7 +3497,10 @@ async function runSearchJob(jobId, filters, arAdminas) {
         rinkosVardas: rinkos.rinkosVardas(rinka),
         // apytikslė kaina Lietuvoje: skelbimo kaina + parsivežimas. Pradiniai
         // orientyrai (rinkos.js), be taršos mokesčio, PVM ir remonto.
-        kainaLt: rinkos.kainaLietuvoje(l.kaina, rinka, { kuras: l.kuras, variklioTuris: l.variklioTuris, co2: l.co2 }),
+        kainaLt: klt,
+        maxPirkimo: mp,
+        pelnoMath: pl,
+        derybos: (mp && mp.max) ? maxPirkimo.derybos(l.kaina, mp.max) : null,
         ridaMedian: marketData ? marketData.ridaMedian : null,
       };
     });
@@ -3767,6 +3782,9 @@ async function runSearchJob(jobId, filters, arAdminas) {
       // kurio čia nėra, iki sąsajos nenukeliauja, net jei `enriched` jį turi.
       rinka: l.rinka || null, lygintaRinka: l.lygintaRinka || null,
       rinkosVardas: l.rinkosVardas || null, kainaLt: l.kainaLt || null,
+      // v2.20.0 – perpardavėjo skaičiai
+      ltMediana: l.ltMediana || null, maxPirkimo: l.maxPirkimo || null,
+      pelnoMath: l.pelnoMath || null, derybos: l.derybos || null,
       // v1.25.0: PVM skaidymas - rodom, kad kaina yra galutine (su PVM)
       pvmPastaba: l.pvmPastaba || null, kainaBaze: l.kainaBaze || null, kainaBePvm: l.kainaBePvm || null,
       varantieji: l.varantieji || null, itariamaZala: l.itariamaZala || null,
