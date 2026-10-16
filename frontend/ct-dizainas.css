@@ -5886,3 +5886,166 @@ textarea.ct-field {
    Telefone stulpeliu slepimas - per `data-m="hide"` (51 sk.), ne `:nth-child(3/7)`.
    admin.html: `.is-num` ant 4-7 celiu, `.is-ell` ant el. pasto, `data-m="hide"`
    ant „galioja iki" ir „sukurta". Tada 48 sk. `.adm-users-h`, `.adm-u` - TRINTI. */
+
+
+/* ============================================================================
+   69 paketas · dz-nuoroda
+   56 sk. `.ct-link`   - nuorodos laukas paieskos puslapio virsuje (a variantas)
+   57 sk. `.ct-money.is-pending` - „rinka nepatikslinta"
+   Siulau v2.21.0. Visi slepiami `display` - `:not([hidden])`.
+   ========================================================================== */
+
+
+/* ============================================================================
+   56 sk. · NUORODOS LAUKAS
+   ----------------------------------------------------------------------------
+   VIETA - a) paieskos puslapio virsuje, virs filtru. Sutinku su jusu
+   linkimu ir pridedu viena priezasti: c) (antraste) per siaura busenoms -
+   klaida, svetimas portalas ir laukimo zingsniai turi stoveti PO lauku, o
+   antrasteje ju nera kur deti. b) - atskiro puslapio niekas neranda.
+
+   PENKIOS BUSENOS - ant `.ct-link` per `data-state`, ne klases:
+     empty    - pavyzdys placeholder'yje + 5 portalai su spalvomis po lauku
+     invalid  - raudonas remelis, „Tai ne nuoroda…"
+     foreign  - geltonas remelis, portalo vardas + kuriuos skaitom
+     busy     - zingsniai su sekundemis, mygtukas „Analizuojama…" neaktyvus
+     cached   - akcento remelis, „analizavote prieš 2 val. — 0 kreditų",
+                mygtukas „Rodyti"
+
+   LAUKIMAS - ZINGSNIAI, ne procentu juosta. Procentus reiktu sugalvoti,
+   zingsniai sako tiesa: kas jau padaryta, kas vyksta, kas liko. Prie
+   padaryto - kiek uztruko. Po jais: „Paprastai 10–20 s. Galite uždaryti —
+   rezultatas liks paskyroje." Paskutinis sakinys svarbiausias: jis atsako,
+   kodel nereikia sedeti ir ziureti.
+
+     <form class="ct-link" data-state="busy">
+       <div class="ct-link-row">
+         <label class="ct-link-in"><input type="url" inputmode="url" …></label>
+         <button class="ct-btn ct-btn-primary ct-btn-lg">Analizuoti</button>
+       </div>
+       <p class="ct-link-msg">…</p>                     <- invalid/foreign/cached
+       <ol class="ct-steps">                           <- busy
+         <li data-s="ok">Skaitom skelbimą<small>3 s</small></li>
+         <li data-s="now" aria-current="step">Lyginam su Lietuvos rinka</li>
+         <li data-s="wait">Vertinam būklę ir riziką</li>
+       </ol>
+     </form>
+
+   Klaviatura: `type="url"` + `inputmode="url"` - telefone iskart URL
+   klaviatura; `Enter` paleidzia. Įklijavus GALIOJANCIA nuoroda - mygtukas
+   tampa aktyvus, bet analize NEPRASIDEDA pati (zr. PASTABOS 3 d. - kaina).  */
+
+.ct-link {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 14px 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.ct-link-row:not([hidden]) { display: flex; gap: 10px; }
+.ct-link-in {
+  flex: 1; min-width: 0;
+  display: flex; align-items: center; gap: 10px;
+  height: 46px; padding: 0 14px;
+  background: var(--bg-base);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+}
+.ct-link-in > input {
+  flex: 1; min-width: 0;
+  border: 0; outline: 0; background: none;
+  font: var(--fw-regular) 13.5px/1 var(--font-mono);
+  color: var(--text-primary);
+}
+.ct-link-in > input::placeholder { color: var(--text-dim); }
+.ct-link-in:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+
+.ct-link[data-state="invalid"] .ct-link-in { border-color: color-mix(in oklab, var(--danger) 60%, transparent); }
+.ct-link[data-state="foreign"] .ct-link-in { border-color: color-mix(in oklab, var(--warning) 55%, transparent); }
+.ct-link[data-state="busy"]    .ct-link-in,
+.ct-link[data-state="cached"]  .ct-link-in { border-color: var(--accent-border); }
+
+.ct-link-msg { display: flex; gap: 8px; font: var(--fw-regular) 12.5px/20px var(--font); color: var(--text-muted); text-wrap: pretty; }
+.ct-link-msg::before { content: ""; flex: none; margin-top: 6px; width: 7px; height: 7px; border-radius: 2px; background: currentColor; }
+.ct-link[data-state="invalid"] .ct-link-msg { color: var(--danger); }
+.ct-link[data-state="foreign"] .ct-link-msg { color: var(--warning); }
+.ct-link[data-state="cached"]  .ct-link-msg { color: var(--accent-light); }
+
+/* Portalai po tusciu lauku - esama `.ct3-portal-ico` 14 px */
+.ct-link-portals:not([hidden]) { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font: var(--fw-regular) 12px/1.4 var(--font); color: var(--text-muted); }
+.ct-link-portals .ct3-portal-ico { width: 14px; height: 14px; border-radius: 4px; }
+
+/* ── Zingsniai · bendri (tinka ir 57 sk. tikslinimui) ── */
+.ct-steps { list-style: none; display: flex; flex-direction: column; gap: 9px; margin: 0; padding: 4px 2px 2px; }
+.ct-steps > li { display: flex; align-items: center; gap: 10px; font: var(--fw-medium) 13px/1.3 var(--font); }
+.ct-steps > li::before {
+  content: ""; flex: none;
+  width: 18px; height: 18px; border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border-light);
+  display: grid; place-items: center;
+  font: var(--fw-bold) 10px/18px var(--font); color: #fff; text-align: center;
+}
+.ct-steps > li[data-s="ok"]::before  { content: "✓"; border-color: var(--success); background: var(--success); }
+.ct-steps > li[data-s="now"]::before { border-color: var(--accent); background: var(--accent-dim); animation: ct-pulse 1.4s ease-in-out infinite; }
+.ct-steps > li[data-s="now"]  { font-weight: var(--fw-semi); }
+.ct-steps > li[data-s="wait"] { color: var(--text-dim); }
+.ct-steps > li > small { margin-left: auto; font: var(--fw-regular) 11.5px/1 var(--font-mono); color: var(--text-dim); }
+@media (prefers-reduced-motion: reduce) { .ct-steps > li[data-s="now"]::before { animation: none; } }
+
+@media (max-width: 640px) {
+  .ct-link-row:not([hidden]) { flex-direction: column; }
+  .ct-link-in { height: 50px; }
+  .ct-link-row > .ct-btn { min-height: 50px; width: 100%; }
+}
+
+
+/* ============================================================================
+   57 sk. · RINKA NEPATIKSLINTA · `.ct-money.is-pending`
+   ----------------------------------------------------------------------------
+   Pinigu blokas MATOMAS, bet MAX ir pelnas - bruksniai „— — —" ir
+   „laukia rinkos". ≈LT LIEKA tikras: jis nuo LT medianos nepriklauso
+   (kaina + kastai + tarsa), tad ji slėpti butu prarasti tikra skaiciu.
+
+   Po bloku - juosta (`.ct-money-gate`): KODEL („Lietuvoje tokių radom tik 2")
+   + KODEL TAI SVARBU (vienas sakinys) + mygtukas su kaina VIDUJE.
+
+   Mygtukas - NE pirminis, akcento remelis (taisykle: kas isleidzia kreditus,
+   nera pirminis - ta pati kaip 45 sk. trecias mygtukas). Kaina - `<u>` su
+   skirtuku, kaip `.is-short` ir `.ct-hdr-plan`.
+
+   Paspaudus - juosta virsta `.ct-steps` su antraste „Tiksliname rinką ·
+   25 kr. nurašyta" (kreditai nurasyti - pasakom IŠKART, ne po). Baigus -
+   zalia eilute „Rinka patikslinta · Lietuvoje 14 · mediana 18 550 €", ir
+   skaiciai uzsipildo.
+
+     <div class="ct-money is-pending">…</div>
+     <div class="ct-money-gate" data-state="idle | run | done">…</div>    */
+
+.ct-money.is-pending > .is-key > b,
+.ct-money.is-pending > [data-needs="lt"] > b { color: var(--text-dim); letter-spacing: .1em; }
+.ct-money.is-pending > .is-key > small,
+.ct-money.is-pending > [data-needs="lt"] > small { color: var(--text-dim); }
+
+.ct-money-gate:not([hidden]) {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  padding: 14px 18px;
+  background: var(--bg-sunken);
+  border-bottom: 1px solid var(--border);
+}
+.ct-money-gate > div { flex: 1 1 260px; display: flex; flex-direction: column; gap: 4px; }
+.ct-money-gate > div > strong { font: var(--fw-semi) 13.5px/1.35 var(--font); }
+.ct-money-gate > div > span { font: var(--fw-regular) var(--fs-200)/1.5 var(--font); color: var(--text-muted); text-wrap: pretty; }
+.ct-money-gate > .ct-btn { flex: none; border-color: color-mix(in oklab, var(--accent) 55%, transparent); background: color-mix(in oklab, var(--accent) 12%, transparent); }
+.ct-money-gate > .ct-btn > u {
+  text-decoration: none;
+  margin-left: 10px; padding-left: 10px;
+  border-left: 1px solid var(--border-light);
+  font: var(--fw-semi) var(--fs-200)/1 var(--font-mono);
+  color: var(--accent-light);
+}
+.ct-money-gate[data-state="run"] { flex-direction: column; align-items: stretch; }
+.ct-money-gate[data-state="done"] { background: color-mix(in oklab, var(--success) 8%, transparent); color: var(--success); font: var(--fw-medium) var(--fs-200) var(--font); }
+
+@media (max-width: 640px) {
+  .ct-money-gate > .ct-btn { width: 100%; min-height: 48px; justify-content: center; }
+}

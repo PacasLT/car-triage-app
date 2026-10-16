@@ -1910,3 +1910,12 @@ Dar grąžinama `derybos()` – „telpa · +943" arba „derėtis −557" (66 p
 **`.adm-users` → `.ct-dtable` vis dar neužbaigta**, bet priežastis pasikeitė: bendros klasės (`.is-ell`, `.is-low`/`.is-zero`, `.is-num`, `data-m`) jau yra, liko tik `admin.html` markupas. Daroma kartu su perpardavėjo rodinio markupu, vienu kartu.
 
 **Naujas sargas** `backend/testai/max-pirkimo.test.js` – 23/23. Sargai: **22 žali**. `tarsos-mokestis.test` buvo nukritęs ir tai teisinga – jis pagavo paruošimo kaštų pakeitimą 250 → 350; ribos pataisytos į `kl.kastai.viso`, kad nebekartotųsi.
+
+## Z-153 · 2026-10-16 · Klaudijus · v2.21.0 – 69 paketas (nuorodos analizė) įdiegtas
+
+- **Įdiegta be pakeitimų:** 56 sk. `.ct-link` (+ bendras `.ct-steps`), 57 sk. `.ct-money.is-pending` ir `.ct-money-gate`. Visi tokenai buvo, selektorių dublikatų nėra, tokenų patikra **0 + 0** nepakito. Sargai 22 žali.
+- Vieta – **a) virš filtrų**, kaip ir siūlėme; dizaineris pridėjo priežastį, kurios neturėjome: antraštėje nėra kur dėti būsenų, o jos privalo stovėti po lauku.
+- **Atsakyta į du jo klausimus** (abu reikalavo pažiūrėti į kodą, ne į atmintį):
+  1. **Taip, kainuoja.** `planai.KAINOS`: `analize` (greita) = **1 kr.**, `analizePilna` = **2 kr.** (`kreditaiPagalLygi` parenka pagal `req.body.lygis`). Vadinasi mygtukas su kaina ir **nepaleidžiam įklijavus** – jo variantas teisingas. Puslapio nuskaitymas (ScraperAPI 10 kr. LT / 1 kr. užsienio) į vartotojo kreditus neįeina – tai mūsų savikaina; dizaineriui svarbu neskaityti jų kartu.
+  2. **Taip, galim žinoti – ir sakinio išimti nereikia.** `analizesPodelis(url, kaina)` podėlį panaikina, kai kaina skiriasi daugiau nei `max(100 €, 1 %)`. Trūko tik vieno: įklijavus plikę nuorodą kainos dar nežinom. Bet puslapio nuskaitymas yra **mūsų** kaštas (1–10 kr.), ne vartotojo kreditai, tad galim visada nuskaityti, palyginti kainą ir tada sąžiningai pasakyti. Daugiau – atsiradus **trečiai `cached` būsenai: „kaina pasikeitė"**, kuri perpardavėjui vertingesnė už pačią analizę.
+- **Kas lieka man:** visas markupas (66 + 68 + 69 paketai) ir `admin.html` → `.ct-dtable`. CSS įdiegtas, bet dar niekur nenaudojamas.

@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.21.0', data: '2026-10-16', pavadinimas: 'Nuorodos analizės dizainas',
+    pakeitimai: [
+      'Įdiegtas dizainerio 69 paketas: laukas nuorodai įklijuoti virš filtrų, su visomis būsenomis – tuščias, netinkama nuoroda, nepalaikomas portalas, dirbama, jau analizuota.',
+      'Laukimo metu rodomi žingsniai su sekundėmis, o ne procentai, ir sakinys „galite uždaryti – rezultatas liks paskyroje“.',
+      'Kai Lietuvos rinkos duomenų per mažai, kaina Lietuvoje vis tiek rodoma tikra (ji nuo medianos nepriklauso), o didžiausia pirkimo kaina ir pelnas – brūkšniai su paaiškinimu, kodėl ir ką galima padaryti.',
+    ],
+  },
+  {
     versija: '2.20.0', data: '2026-10-16', pavadinimas: 'Didžiausia pirkimo kaina',
     pakeitimai: [
       'Atsirado svarbiausias perpardavėjo skaičius – didžiausia pirkimo kaina: daugiausia, kiek galima mokėti už automobilį, kad po visų kaštų liktų norima marža. Tai skaičius, su kuriuo einama derėtis.',
