@@ -1,4 +1,4 @@
-# Būsena · 2026-10-19 · v2.27.0 (laukia push; v2.26.0 gyva nuo 01:11)
+# Būsena · 2026-10-19 · v2.27.1 (laukia push; v2.27.0 išsiųsta)
 
 Tik **atviri** punktai. Uždaryti — `ZURNALAS.md` / `archyvas/`. Kas laukia Luko — `LUKUI.md`.
 Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
@@ -22,6 +22,7 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 | ~~Nuorodos analizė~~ | **Padaryta v2.26.0:** įklijuok nuorodą → pilna apžvalga | Laukas paieškos viršuje (56 sk.), rinkos mediana iš archyvo (0 kr.), pagal rinką, imtis ≥8. Liko: „patikslinti rinką (25 kr.)“ mygtukas, kai archyvo per mažai – sąmoningai atidėtas, kol Lukas pamatys, kaip dažnai archyvo pakanka. |
 | K-76 | 56 sk. `.ct-link-msg` be `:not([hidden])` + kablelis `busy` selektoriuje | Priedų 27 blokas. Dizaineriui. |
 | ~~Archyvas~~ | **Padaryta v2.27.0:** paieška pildo `rinka.db` | Iki šiol archyvą pildė tik admino skenavimas – paieškų duomenys dingdavo, nors puslapiai apmokėti. 0 papildomų kreditų. Nauji laukai `nuotrauku_sk`, `teksto_ilgis`; nuasmenintas CSV eksportas Analitikui. Atsakymai – `claude/ATSAKYMAI-DUOMENU-BAZE.md`. |
+| Kryptingi skenavimai | Analitiko 15 modelių planas | Modelio skenavimas padarytas (v2.27.1). Liko: pamatuoti skelbimų kiekius (300 kr.) ir Luko leidimas savaitiniam grafikui. |
 | Archyvo terminas | Kiek laikom eilutes (TEISE.md R-02) | Siūlau: su `dingo` senesnės nei 24 mėn. – trinti, palikti mėnesio agregatą. **Luko sprendimas.** |
 | K-73a | 59 sk. `small` netelpa į 136 px | Pamatuota: `guess` 120 px, `own` 153 px prieš 112 px vidų. Dizaineriui. |
 | K-75 | `.ct-bukle` dabar neša dvi prasmes | Pigumo žyma įdėta į esamą 52 sk. komponentą (tvirta/punktyras prasmė sutampa). Eilutėje gali stovėti dvi žymos – telpa, bet dizaineris sprendžia, ar pigumui duoti savo vardą. |

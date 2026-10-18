@@ -875,7 +875,17 @@ app.get('/admin/rinka/eilutes', klaiduPrieiga, (req, res) => {
 app.get('/admin/rinka/eksportas', klaiduPrieiga, (req, res) => {
   try {
     const ka = req.query.ka === 'stebejimai' ? 'stebejimai' : 'skelbimai';
-    const csv = rinka.eksportas({ ka, riba: req.query.riba });
+    const csv = rinka.eksportas({
+      ka, riba: req.query.riba,
+      // Analitiko prasymas: `raktas` atskiru stulpeliu (K-33 raktai) ir kartos
+      // ribos su `atn` - kad nereiketu jungti per kartos.json.
+      raktas: (marke, modelis) => regitra.baziniModelis(marke, modelis),
+      kartos: (marke, modelis, metai) => {
+        if (!marke || !modelis || !metai) return null;
+        const g = regitra.kartosIntervalui(marke, modelis, metai, metai);
+        return g && g.length ? g[0] : null;
+      },
+    });
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', 'attachment; filename="cartriige-' + ka + '-'
       + new Date().toISOString().slice(0, 10) + '.csv"');
@@ -892,6 +902,9 @@ app.post('/admin/rinka/skenuoti', klaiduPrieiga, async (req, res) => {
     const portalas = String(b.portalas || '');
     if (!RINKOS_PORTALAI[portalas]) return res.status(400).json({ error: 'portalas: ' + Object.keys(RINKOS_PORTALAI).join(' | ') });
     const marke = String(b.marke || 'BMW').slice(0, 40);
+    // v2.27.1: skenuoti galima ir VIENA MODELI - Analitiko kryptingi skenavimai.
+    // Tai pigiau uz markes skenavima tiek kartu, kiek modeliu marke turi.
+    const modelis = b.modelis ? String(b.modelis).slice(0, 40) : null;
     const metaiNuo = parseInt(b.metaiNuo, 10) || null;
     if (metaiNuo && (metaiNuo < 1990 || metaiNuo > new Date().getFullYear())) return res.status(400).json({ error: 'metaiNuo' });
     // Riba privaloma: be jos klaida analizatoriuje (kas puslapį „nauji" skelbimai)
@@ -909,12 +922,13 @@ app.post('/admin/rinka/skenuoti', klaiduPrieiga, async (req, res) => {
       return res.status(409).json({ error: 'Kreditu sargas: po skenavimo liktu maziau nei atsarga',
         likutis, samata, atsarga: KREDITU_ATSARGA, daugiausiaPuslapiu: Math.max(0, Math.floor((likutis - KREDITU_ATSARGA) / kPsl)) });
     }
-    const url = RINKOS_PORTALAI[portalas]({ marke, metaiNuo, rikiavimas: 'naujausi' });
+    const url = RINKOS_PORTALAI[portalas]({ marke, modelis, metaiNuo, rikiavimas: 'naujausi' });
     if (!url) return res.status(400).json({ error: 'marke nezinoma portalui ' + portalas });
-    const skId = rinka.pradeti({ portalas, marke, metaiNuo, url });
-    console.log('[RINKA] skenavimas #' + skId + ' pradetas: ' + portalas + ' ' + marke + ' nuo ' + (metaiNuo || '-') + ' · riba ' + maxPuslapiu + ' psl.');
+    const skId = rinka.pradeti({ portalas, marke, modelis, metaiNuo, url });
+    console.log('[RINKA] skenavimas #' + skId + ' pradetas: ' + portalas + ' ' + marke
+      + (modelis ? ' ' + modelis : '') + ' nuo ' + (metaiNuo || '-') + ' · riba ' + maxPuslapiu + ' psl.');
     vykdytiSkenavima(skId, portalas, url, maxPuslapiu, marke, metaiNuo);
-    res.status(202).json({ skenavimas: skId, portalas, marke, metaiNuo, maxPuslapiu, url });
+    res.status(202).json({ skenavimas: skId, portalas, marke, modelis, metaiNuo, maxPuslapiu, url });
   } catch (e) {
     console.error('[RINKA]', e.message);
     res.status(500).json({ error: e.message });

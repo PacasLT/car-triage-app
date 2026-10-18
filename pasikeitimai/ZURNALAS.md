@@ -2416,3 +2416,32 @@ Tai reiškė, kad už tuos puslapius jau sumokėta ScraperAPI kreditais, o istor
 
 - Sargai: **27 žali** (naujas `archyvo-eksportas` 51). Tokenai 0 + 0.
 - `nuoroda` sargo pataisa: portalų patikra buvo rašyta regexp'u prieš v2.26.0 pataisą, dabar tikrina domenų sąrašą.
+
+## Z-170 · 2026-10-19 · Vieno modelio skenavimas ir eksporto papildymai (v2.27.1)
+
+Analitiko atsakymas į Z-169 atnešė du darbus ir vieną svarbią pataisą mano §4 teiginiui („visiems matavimams reikia 6 mėn.“). Jis teisus: **pusė matavimų yra PJŪVIS, ne laikas** – facelift priedas, kartos premija, kaina pagal ridą ir amžių, nuotraukų skaičiaus įtaka. Jiems užtenka vieno gilaus skenavimo, ir rezultatas gali būti po kelių dienų. Laiko reikia tik pardavimo greičiui, kainų mažinimams, sezoniškumui ir kartos keitimo dinamikai.
+
+### Vieno modelio skenavimas
+
+`/admin/rinka/skenuoti` iki šiol mokėjo tik markę. Analitiko 15 modelių planas su markės skenavimais reikštų, kad norint Tiguano nuskaitom visą VW. `buildAutopliusUrl` modelį priima nuo seno – trūko tik lauko maršrute.
+
+**Spąstai, kuriuos reikėjo užkirsti:** dingimo aprėptis `baigti()` buvo `portalas + marke + metai_nuo`. Paleidus modelio skenavimą su tokia aprėptimi, „Tiguan“ skenavimas po dviejų kartų **paskelbtų dingusiais visus kitus VW** – ir visa pardavimo greičio statistika taptų šiukšlėmis. Todėl `skenavimai` gavo `modelis` stulpelį (idempotentiškas `ALTER`), o aprėptis – ketvirtą matmenį. Sargas tikrina abi puses: modelio skenavimas X3 nepaliečia, markės – paliečia.
+
+### Eksporto papildymai (Analitiko §3)
+
+`raktas` (K-33 bazinis modelis), `kartos_nuo`, `kartos_iki`, `atn_metai` – kad nereikėtų jungti per `kartos.json`. Jie ateina **iš išorės**: `rinka.eksportas()` priima `raktas` ir `kartos` funkcijas, o `server.js` paduoda `regitra.baziniModelis` ir `regitra.kartosIntervalui`. Archyvas lieka nepriklausomas nuo registro modulio, o sargas gali paduoti stubą.
+
+### Kiek kainuoja vienas skenavimas (atsakymas Analitikui)
+
+LT portalai – **10 kr. už puslapį**, 20 skelbimų puslapyje, tad **0,5 kr. už skelbimą**:
+
+```
+skenavimo kaina (kr.) ≈ gyvų skelbimų skaičius / 2        (vienam LT portalui)
+eurais (Hobby, 0,000425 €/kr.) ≈ skelbimų / 4700
+```
+
+1 000 skelbimų modelis = 500 kr. = 0,21 € už vieną portalą. Tikslaus skelbimų kiekio nė vienam iš 15 modelių nežinau ir **nespėlioju** – jį duoda `/api/quick-count`, bet jis pats kainuoja 10 kr. už LT portalą. Visų 15 modelių × 2 portalai pamatavimas = **300 kr. (0,13 €)** vienkartinai. Luko eilėje.
+
+Svarbi nuanso pataisa planui: palaikomasis skenavimas **negali** būti tik pirmi puslapiai. Naujus skelbimus rikiavimas „naujausi“ atneštų, bet **kainos sumažinimas nėra naujas skelbimas** – jį pamatom tik pamatę tą patį skelbimą iš naujo. Taigi savaitinis skenavimas turi būti pilnas, o jo kaina kas savaitę ta pati.
+
+- Sargai: **27 žali**; `archyvo-eksportas` 51 → **62**. Tokenai 0 + 0.

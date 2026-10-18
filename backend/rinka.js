@@ -102,6 +102,10 @@ function ikelti(katalogas, failas) {
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
       portalas    TEXT NOT NULL,
       marke       TEXT,
+      -- v2.27.1: skenavimas gali buti ir VIENO MODELIO. Tada aprieptis siauresne,
+      -- ir dingima galima zymeti TIK tarp to paties modelio skelbimu - kitaip
+      -- „Tiguan" skenavimas paskelbtu dingusiais visus kitus VW.
+      modelis     TEXT,
       metai_nuo   INTEGER,
       url         TEXT,
       pradzia     INTEGER NOT NULL,
@@ -123,6 +127,7 @@ function ikelti(katalogas, failas) {
   for (const st of ['nuotrauku_sk INTEGER', 'teksto_ilgis INTEGER']) {
     try { db.exec('ALTER TABLE skelbimai ADD COLUMN ' + st); } catch (e) { /* jau yra */ }
   }
+  try { db.exec('ALTER TABLE skenavimai ADD COLUMN modelis TEXT'); } catch (e) { /* jau yra */ }
   taisytiSenusIrasus();
   // Skenavimas, kurį nutraukė perkrovimas, liktų „vyksta" amžinai.
   const pakibe = db.prepare(`UPDATE skenavimai SET busena='nutraukta', priezastis='serveris perkrautas', pabaiga=?
@@ -211,9 +216,10 @@ function kitiLaukai(l) {
 }
 
 // ── Skenavimas ───────────────────────────────────────────────────────────────
-function pradeti({ portalas, marke, metaiNuo, url }) {
-  const r = db.prepare(`INSERT INTO skenavimai (portalas, marke, metai_nuo, url, pradzia, busena)
-                        VALUES (?, ?, ?, ?, ?, 'vyksta')`).run(portalas, marke || null, metaiNuo || null, url || null, Date.now());
+function pradeti({ portalas, marke, modelis, metaiNuo, url }) {
+  const r = db.prepare(`INSERT INTO skenavimai (portalas, marke, modelis, metai_nuo, url, pradzia, busena)
+                        VALUES (?, ?, ?, ?, ?, ?, 'vyksta')`)
+    .run(portalas, marke || null, modelis || null, metaiNuo || null, url || null, Date.now());
   return Number(r.lastInsertRowid);
 }
 
@@ -291,9 +297,12 @@ function baigti(skenavimoId, { pilnas, priezastis, kreditu, busena }) {
     // Aprėptis - tai, ką šis skenavimas TURĖJO matyti: tas pats portalas,
     // markė, metai nuo. Kas aprėptyje, bet nematytas šiame skenavime -
     // praleista+1; antras kartas iš eilės - dingo.
+    // v2.27.1: `modelis` - ketvirtas apriepties matmuo. Modelio skenavimas mato
+    // tik savo modelio skelbimus, tad ir dingusiais gali skelbti tik juos.
     const apr = `portalas=? AND dingo IS NULL AND paskut_matytas < ?
-                 AND (? IS NULL OR marke=?) AND (? IS NULL OR metai >= ?)`;
-    const arg = [s.portalas, s.pradzia, s.marke, s.marke, s.metai_nuo, s.metai_nuo];
+                 AND (? IS NULL OR marke=?) AND (? IS NULL OR modelis=?) AND (? IS NULL OR metai >= ?)`;
+    const arg = [s.portalas, s.pradzia, s.marke, s.marke, s.modelis || null, s.modelis || null,
+      s.metai_nuo, s.metai_nuo];
     db.transaction(() => {
       db.prepare(`UPDATE skelbimai SET praleista=praleista+1 WHERE ${apr}`).run(...arg);
       dingo = db.prepare(`UPDATE skelbimai SET dingo=? WHERE praleista>=2 AND ${apr}`).run(Date.now(), ...arg).changes;
@@ -371,7 +380,10 @@ const CSV = (v) => {
   return /[",\n;]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t;
 };
 
-function eksportas({ ka, riba } = {}) {
+// `raktas` ir kartos metai ateina IS ISORES (server.js paduoda `regitra`), kad
+// archyvas neprikluausytu nuo registro modulio - ir kad sarge butu galima
+// paduoti paprasta stuba.
+function eksportas({ ka, riba, raktas, kartos } = {}) {
   if (!db) return '';
   const r = Math.min(Math.max(parseInt(riba, 10) || 50000, 1), 200000);
   if (ka === 'stebejimai') {
@@ -385,7 +397,8 @@ function eksportas({ ka, riba } = {}) {
       (SELECT kaina FROM stebejimai t WHERE t.skelbimo_id = s.id ORDER BY t.laikas ASC LIMIT 1) AS pirma_kaina,
       (SELECT kaina FROM stebejimai t WHERE t.skelbimo_id = s.id ORDER BY t.laikas DESC LIMIT 1) AS paskut_kaina
     FROM skelbimai s ORDER BY s.pirma_matytas LIMIT ?`).all(r);
-  const antr = ['id_maisa', 'portalas', 'marke', 'modelis', 'kartos_kodas', 'kartos_faze', 'rinkos_grupe',
+  const antr = ['id_maisa', 'portalas', 'marke', 'modelis', 'raktas', 'kartos_kodas', 'kartos_faze',
+    'kartos_nuo', 'kartos_iki', 'atn_metai', 'rinkos_grupe',
     'metai', 'menuo', 'kuras', 'deze', 'kebulas', 'galia', 'variklio_turis', 'rida', 'kaina',
     'kainos_ispejimas', 'pardavejo_tipas', 'turi_vin', 'garantija', 'miestas', 'nuotrauku_sk', 'teksto_ilgis',
     'ikelta', 'pirmas_matymas', 'paskutinis_matymas', 'dingo_data', 'kartu_matytas', 'dienu_rinkoje',
@@ -394,7 +407,11 @@ function eksportas({ ka, riba } = {}) {
     const k = kartosLaukai(s.kita);
     const pab = s.dingo || s.paskut_matytas;
     const dienos = (s.pirma_matytas && pab) ? Math.round((pab - s.pirma_matytas) / 86400000) : '';
-    return [maisa(s.id), s.portalas, s.marke || '', s.modelis || '', k.kodas, k.faze, k.grupe,
+    const g = (typeof kartos === 'function' ? kartos(s.marke, s.modelis, s.metai) : null) || {};
+    return [maisa(s.id), s.portalas, s.marke || '', s.modelis || '',
+      (typeof raktas === 'function' ? raktas(s.marke, s.modelis) : null) || '',
+      k.kodas || g.kodas || '', k.faze,
+      g.nuo == null ? '' : g.nuo, g.iki == null ? '' : g.iki, g.atn == null ? '' : g.atn, k.grupe,
       s.metai == null ? '' : s.metai, s.menuo == null ? '' : s.menuo, s.kuras || '', s.pavarai || '',
       s.kebulas || '', s.galia == null ? '' : s.galia, s.variklio_turis == null ? '' : s.variklio_turis,
       s.rida == null ? '' : s.rida, s.kaina == null ? '' : s.kaina,

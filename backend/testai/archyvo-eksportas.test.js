@@ -95,6 +95,52 @@ T(/"Vilnius, Fabijoni/.test(csv2), 'kablelis lauke – reikšmė kabutėse');
 T(csv2.trim().split('\n').every((x) => (x.match(/,/g) || []).length >= antr.length - 1),
   'nė viena eilutė neprarado stulpelių');
 
+// ── Naujos eksporto skiltys (Analitiko prašymas): raktas ir kartos ribos ────
+const csv3 = rinka.eksportas({
+  raktas: (marke, modelis) => (marke && modelis ? marke.toUpperCase() + ' ' + modelis.toUpperCase() : null),
+  kartos: (marke, modelis, metai) => (metai === 2019 ? { kodas: 'G05', nuo: 2018, iki: null, atn: 2023 } : null),
+});
+const a3 = csv3.trim().split('\n')[0].split(',');
+const r3 = csv3.trim().split('\n')[1].split(',');
+const v3 = (k) => r3[a3.indexOf(k)];
+['raktas', 'kartos_nuo', 'kartos_iki', 'atn_metai'].forEach((k) => T(a3.indexOf(k) !== -1, 'stulpelis `' + k + '`'));
+T(v3('raktas') === 'BMW X5', '`raktas` ateina iš išorės (regitra.baziniModelis)');
+T(v3('kartos_nuo') === '2018' && v3('atn_metai') === '2023', 'kartos ribos ir facelift metai');
+T(v3('kartos_iki') === '', 'neuždaryta karta – tuščias langelis, ne „null“');
+T(rinka.eksportas({}).trim().split('\n')[0].split(',').length === a3.length,
+  'be išorinių funkcijų stulpelių skaičius tas pats – tik tušti langeliai');
+
+// ── Modelio skenavimas: dingimas neperžengia savo aprėpties (v2.27.1) ───────
+const kitas = (nr, modelis) => skelbimas({ nr: 100 + nr, modelis,
+  url: 'https://autoplius.lt/skelbimai/m-' + modelis + '-' + nr + '.html' });
+rinka.irasytiPaieskos([kitas(1, 'X5'), kitas(2, 'X3')], 'BMW');
+const gyvas = () => {
+  const d = rinka._db();
+  const q = (m) => d.prepare('SELECT dingo FROM skelbimai WHERE modelis=? AND url LIKE ?').all(m, '%/m-%');
+  return { X5: q('X5').map((x) => x.dingo), X3: q('X3').map((x) => x.dingo) };
+};
+// Trumpa pauzė: aprėptis remiasi `paskut_matytas < skenavimo pradžia`, o testas
+// rašo ir skenuoja per tą pačią milisekundę (tikrame gyvenime tarp jų – sekundės).
+const pauze = (ms) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+pauze(5);
+// Du PILNI X5 skenavimai, kuriuose X5 skelbimo nebėra
+for (let i = 0; i < 2; i++) {
+  const id = rinka.pradeti({ portalas: 'autoplius', marke: 'BMW', modelis: 'X5', metaiNuo: null, url: 'x' });
+  rinka.baigti(id, { pilnas: true, priezastis: 'testas', busena: 'baigta' });
+}
+let g = gyvas();
+T(g.X5.every((x) => x != null), 'X5 skelbimas pažymėtas dingusiu po dviejų pilnų X5 skenavimų');
+T(g.X3.every((x) => x == null), 'X3 skelbimo tas skenavimas NEPALIETĖ – aprėptis yra modelis');
+
+// Markės skenavimas (be modelio) mato visus – X3 dingsta tik po jo
+pauze(5);
+for (let i = 0; i < 2; i++) {
+  const id = rinka.pradeti({ portalas: 'autoplius', marke: 'BMW', metaiNuo: null, url: 'x' });
+  rinka.baigti(id, { pilnas: true, priezastis: 'testas', busena: 'baigta' });
+}
+g = gyvas();
+T(g.X3.every((x) => x != null), 'markės skenavimas pažymi ir X3 – jo aprėptis platesnė');
+
 try { fs.rmSync(kat, { recursive: true, force: true }); } catch (e) { /* aplinka gali neleisti trinti */ }
 
 console.log('\n' + (klaidu ? klaidu + ' KRENTA' : 'visi ' + n + ' prajo'));

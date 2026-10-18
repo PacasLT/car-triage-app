@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.27.1', data: '2026-10-19', pavadinimas: 'Kryptingi vieno modelio skenavimai',
+    pakeitimai: [
+      'Archyvo skenavimą dabar galima paleisti vienam modeliui, ne visai markei – tiek kartų pigiau, kiek modelių markė turi.',
+      'Tokio skenavimo aprėptis siauresnė: jis nebegali paskelbti „dingusiais“ kitų tos markės modelių skelbimų.',
+    ],
+  },
+  {
     versija: '2.27.0', data: '2026-10-19', pavadinimas: 'Kiekviena paieška papildo mūsų kainų istoriją',
     pakeitimai: [
       'Nuo šiol kiekviena paieška įrašo matytus skelbimus į mūsų archyvą – iki šiol jį pildė tik rankiniai skenavimai, o paieškų duomenys dingdavo.',
