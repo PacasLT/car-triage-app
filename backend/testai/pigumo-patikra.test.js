@@ -103,7 +103,18 @@ const srv = fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
 T(/const antrai = pigus\.filter\(\(c\) => !c\.pigumas && c\.photo\)/.test(srv),
   '2 pakopa kviečiama TIK tiems, kurių 1 pakopa neatsakė (brangesnė eina paskui)');
 T(/\.slice\(0, PIGUMO_MAX\)/.test(srv), '2 pakopa turi ribą vienai paieškai');
-T(/PIGUMO_PILNA \|\| '0'/.test(srv), '3 pakopa (0,062 €) pagal nutylėjimą IŠJUNGTA');
+T(/PIGUMO_PILNA \|\| '1'/.test(srv), '3 pakopa ĮJUNGTA (Luko sprendimas KL-1019-0100)');
+T(/PIGUMO_PILNA_MAX \|\| '3'/.test(srv), '…bet ne daugiau 3 per paiešką – kitaip 0,062 € × 34');
+T(/const pilnosVerti = PIGUMO_PILNA[\s\S]{0,200}reikiaPilnos\)\.slice\(0, PIGUMO_PILNA_MAX\)/.test(srv),
+  '3 pakopa tik tiems, kuriems 2 pakopa neatsakė');
+// Kešo tarifai: be jų sąskaita būtų nuvertinta ten, kur tokenų daugiausia
+T(p.kainaEur('claude-sonnet-4-5', { input_tokens: 0, output_tokens: 0, cache_read_input_tokens: 1000000 })
+  < p.kainaEur('claude-sonnet-4-5', { input_tokens: 1000000, output_tokens: 0 }), 'kešo skaitymas pigesnis už įprastą įėjimą');
+T(p.kainaEur('claude-sonnet-4-5', { cache_creation_input_tokens: 1000000 })
+  > p.kainaEur('claude-sonnet-4-5', { input_tokens: 1000000 }), 'kešo įrašymas brangesnis');
+T(/async function aiKvietimas/.test(srv), 'visi AI kvietimai eina per vieną vietą (ATSARGA.ai)');
+T(!/[^_]anthropic\.messages\.create\(/.test(srv.replace('const r = await anthropic.messages.create(opts);', '')),
+  'nė vieno AI kvietimo pro apskaitą');
 T(/pigumas: l\.pigumas \|\| null,/.test(srv), 'verdiktas yra baltajame `allListingsBase` sąraše');
 T(/ai: \{ kvietimai: 0, in: 0, out: 0, eur: 0 \}/.test(srv), 'AI sąnaudos skaičiuojamos (ATSARGA.ai)');
 T(/delete v\.usage;/.test(srv), 'tokenai į sąsają nekeliauja');

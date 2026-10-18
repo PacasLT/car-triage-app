@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.27.2', data: '2026-10-19', pavadinimas: 'Įtartinai pigiems – ir pilna apžvalga',
+    pakeitimai: [
+      'Jei skelbimas per pigus, o nei tekste, nei nuotraukoje priežasties nesimato, dabar automatiškai paruošiama pilna apžvalga – daugiausia trims tokiems skelbimams per paiešką.',
+      'Pilna apžvalga prisega nemokamai: už ją moka ne jūsų kreditai.',
+      'Admin zonoje dabar matosi tikra AI sąskaita – visi kvietimai, ne tik dalis jų.',
+    ],
+  },
+  {
     versija: '2.27.1', data: '2026-10-19', pavadinimas: 'Kryptingi vieno modelio skenavimai',
     pakeitimai: [
       'Archyvo skenavimą dabar galima paleisti vienam modeliui, ne visai markei – tiek kartų pigiau, kiek modelių markė turi.',

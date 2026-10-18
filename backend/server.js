@@ -982,9 +982,11 @@ const PIGUMO_PATIKRA = (process.env.PIGUMO_PATIKRA || '1') !== '0';
 const PIGUMO_RIBA = parseInt(process.env.PIGUMO_RIBA_PCT || '25', 10);
 const PIGUMO_IMTIS = parseInt(process.env.PIGUMO_IMTIS || '5', 10);
 const PIGUMO_MAX = parseInt(process.env.PIGUMO_MAX || '12', 10);
-// 3 pakopa (pilna analize su 6 nuotraukomis, 0,062 EUR) automatiskai NEVYKSTA,
-// kol Lukas nepamate tikros 2 pakopos kainos. Ijungus - ne daugiau PILNA_MAX.
-const PIGUMO_PILNA = (process.env.PIGUMO_PILNA || '0') !== '0';
+// 3 pakopa (pilna analize su 6 nuotraukomis, ~0,062 EUR UZ SKELBIMA). Luko
+// sprendimas KL-1019-0100 (10-19): „per pigiems + ijungti pilna analize 3
+// itartiniems". Ne daugiau PILNA_MAX vienai paieskai - blogiausiu atveju
+// 3 x 0,062 = 0,19 EUR, ir tik tiems, kuriems 2 pakopa neatsake „kodel pigu".
+const PIGUMO_PILNA = (process.env.PIGUMO_PILNA || '1') !== '0';
 const PIGUMO_PILNA_MAX = parseInt(process.env.PIGUMO_PILNA_MAX || '3', 10);
 // Kiek nuotrauku siusti vizualinei analizei. Kiekviena ~1500 tokenu.
 const DEEP_FOTO_KIEKIS = parseInt(process.env.DEEP_FOTO_KIEKIS || '6', 10);
@@ -2084,6 +2086,22 @@ const { kuroSarasas, kuroKodai } = require('./kuras');   // v2.23.0: daugiareiks
 // v2.10.6: tekstas kartos atnaujinimui atpažinti (LCI / facelift skelbimo pavadinime).
 function rinkosTekstas(l) { return [l.modelis, l.title, l.variantas].filter(Boolean).join(' '); }
 
+// v2.27.2: VISI AI kvietimai eina per šią vietą. Iki šiol `ATSARGA.ai` rodė
+// tik pigumo patikrą, t. y. pigiausią sąskaitos dalį, o gili analizė – 30 kartų
+// brangesnė – nesimatė niekur. Kaina skaičiuojama iš tikro `usage`, su kešo
+// tarifais (`pigumo-patikra.KAINOS`).
+async function aiKvietimas(opts) {
+  const r = await anthropic.messages.create(opts);
+  try {
+    ATSARGA.ai.kvietimai++;
+    ATSARGA.ai.in += (r.usage && (r.usage.input_tokens || 0) + (r.usage.cache_read_input_tokens || 0)
+      + (r.usage.cache_creation_input_tokens || 0)) || 0;
+    ATSARGA.ai.out += (r.usage && r.usage.output_tokens) || 0;
+    ATSARGA.ai.eur += pigumas.kainaEur(opts && opts.model, r.usage);
+  } catch (e) { /* apskaita niekada nelauzo atsakymo */ }
+  return r;
+}
+
 async function generateShortComment(listing, diffPct) {
   const turiDefektu = listing.galimiDefektai.length > 0;
   const kontekstas = turiDefektu
@@ -2135,7 +2153,7 @@ iskaitant rida. Grazink TIK ta sakini.`;
     // 28 zodziu sakiniui. Su iranki kontekstas persiunciamas is naujo kiekvienam
     // raundui, todel vienas komentaras kainuodavo ~$0.10, o 60 komentaru ~$6.
     // Modelio gedimu zinios yra bendros - paieskos tam nereikia.
-    const response = await anthropic.messages.create({
+    const response = await aiKvietimas({
       model: KOMENTARU_MODEL, max_tokens: 160,
       messages: [{ role: 'user', content: prompt }],
     });
@@ -4345,7 +4363,7 @@ Grazink TIK JSON (be markdown):
   "ispejimai": "jei rasta neigiamu atsiliepimu/skundu/gincu - trumpai, arba null",
   "nuoroda": "URL i registro/atsiliepimu puslapi jei radai, arba null"
 }`;
-  const response = await anthropic.messages.create({
+  const response = await aiKvietimas({
     model: MODEL,
     max_tokens: 1500,
     tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 4 }],
@@ -4387,7 +4405,7 @@ Grazink TIK JSON (be markdown):
   "isvada": "1-2 sakiniai lietuviskai, ka tai reiskia pirkejui (net jei nieko nerasta)"
 }`;
   async function kviesti(suIrankiais) {
-    const response = await anthropic.messages.create({
+    const response = await aiKvietimas({
       model: MODEL,
       max_tokens: 1500,
       ...(suIrankiais ? { tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 5 }] } : {}),
@@ -4496,7 +4514,7 @@ kainu lenteles, zemelapiai, kito automobilio ar salono reklamines nuotraukos, tu
 Automobilio interjero, variklio, ratu, dokumentu, VIN lipduku, prietaisu skydelio nuotraukos YRA tinkamos.
 Jei kuri nors nuotrauka yra PARDAVEJO (autosalono, imones) LOGOTIPAS - nurodyk jos numeri.
 Atsakyk TIK JSON: {"netinkamos":[numeriai],"logotipas":numeris arba null}`});
-    const response = await anthropic.messages.create({
+    const response = await aiKvietimas({
       model: KOMENTARU_MODEL, max_tokens: 120,
       messages: [{ role: 'user', content }],
     });
@@ -4666,7 +4684,7 @@ ${turinys}`;
     ...imageBlocks,
   ];
 
-  const response = await anthropic.messages.create({
+  const response = await aiKvietimas({
     model: MODEL,
     max_tokens: imageBlocks.length > 0 ? 4500 : 3800,
     // PATAISYTA: web_search verte persiusti VISAS nuotraukas is naujo kiekvienam
@@ -4684,7 +4702,7 @@ ${turinys}`;
     // nes siame bandyme nuotraukos NEsiuciamos), trumpesnis atsakymas, mazesne tikimybe nutrukti
     try {
       const retryTurinys = turinys.replace(photoInstructions, '');
-      const retryResponse = await anthropic.messages.create({
+      const retryResponse = await aiKvietimas({
         model: MODEL,
         max_tokens: 2600,
         messages: [{ role: 'user', content: [
@@ -5179,7 +5197,7 @@ Grazink TIK JSON (be markdown, be paaiskinimu aplink), tokios strukturos:
   "issaugojimai": "<ka verta zinoti pries apsisprendziant - rizikos, kurios gali pakeisti sprendima>"
 }`;
 
-  const response = await anthropic.messages.create({
+  const response = await aiKvietimas({
     model: MODEL,
     max_tokens: 2500,
     messages: [{ role: 'user', content: prompt }],
@@ -5508,7 +5526,7 @@ app.post('/api/modelio-apzvalga', requireAuth, (req, res, next) => {
       } : null,
     }, { regitra, cache });
 
-    const atsakymas = await anthropic.messages.create({
+    const atsakymas = await aiKvietimas({
       model: MODEL,
       max_tokens: 3500,
       tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 5 }],
@@ -5572,7 +5590,7 @@ Jei reikia išvardyti, rašyk sakiniais arba kiekvieną punktą iš naujos eilut
 Prisimink, kas buvo sakyta anksčiau pokalbyje – žmogus gali klausti trumpai, nekartodamas konteksto.` },
     { role: 'assistant', content: 'Supratau. Klauskite.' },
   ];
-  const atsakymas = await anthropic.messages.create({
+  const atsakymas = await aiKvietimas({
     model: MODEL,
     max_tokens: 900,
     tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 2 }],

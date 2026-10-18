@@ -2445,3 +2445,23 @@ eurais (Hobby, 0,000425 €/kr.) ≈ skelbimų / 4700
 Svarbi nuanso pataisa planui: palaikomasis skenavimas **negali** būti tik pirmi puslapiai. Naujus skelbimus rikiavimas „naujausi“ atneštų, bet **kainos sumažinimas nėra naujas skelbimas** – jį pamatom tik pamatę tą patį skelbimą iš naujo. Taigi savaitinis skenavimas turi būti pilnas, o jo kaina kas savaitę ta pati.
 
 - Sargai: **27 žali**; `archyvo-eksportas` 51 → **62**. Tokenai 0 + 0.
+
+## Z-171 · 2026-10-19 · 3 pakopa įjungta; visi AI kvietimai per vieną vietą (v2.27.2)
+
+Luko atsakymai eilėje (naktį): **KL-1019-0100 – „per pigiems + įjungti pilną analizę 3 įtartiniems“**; KL-1019-0315 – 24 mėn. + mėnesio agregatas; KL-1019-0320 – „marža ir laikas“ nemokama kortelės dalis; KL-1019-0310 – push.
+
+### 3 pakopa
+
+`PIGUMO_PILNA` numatytoji reikšmė `0` → `1`. Apimtis nesikeičia (tik „per pigūs“), riba lieka 3 vienai paieškai: blogiausiu atveju 3 × 0,062 = **0,19 €**. Pilna apžvalga prisegama nemokamai – vartotojo kreditai už ją nenurašomi, nes jos neprašė jis, o mes.
+
+### Apskaitos skylė, kurią pamačiau tik dabar
+
+`ATSARGA.ai` (v2.25.0) skaičiavo **tik pigumo patikrą** – pigiausią sąskaitos dalį. Gili analizė, 30 kartų brangesnė, nesimatė niekur. Dabar visi devyni `anthropic.messages.create` kvietimai eina per `aiKvietimas()`, kuris įrašo tikrą `usage`. Sargas tikrina, kad nė vienas kvietimas nebūtų apėjęs apskaitos – tai lengva padaryti netyčia rašant naują kodą.
+
+Kartu pataisyti **kešo tarifai** `kainaEur`: skaitymas iš kešo 0,1×, įrašymas 1,25× įprastos įeinančio tokeno kainos. Be jų suma buvo nuvertinta būtent ten, kur tokenų daugiausia – vizualiniame sluoksnyje ir gilioje analizėje, kurie naudoja `cache_control`.
+
+### Ko NEdariau: 24 mėn. valymas
+
+Luko sprendimas priimtas ir užrašytas, bet kodo dar nėra. Priežastis paprasta: archyvas pradėjo kauptis vakar, tad pirma eilutė sueis 24 mėn. 2028-ais. Mechanizmas (mėnesio agregatas `modelis × karta × metai × rinka → mediana, imtis, mediana dienų iki dingimo`, tada eilučių trynimas) užrašytas BUSENA – darysiu kartu su agregatų lentele, kurios pirmam `marža ir laikas` skaičiavimui vis tiek reikės.
+
+- Sargai: **27 žali**; `pigumo-patikra` 56 → **62**. Tokenai 0 + 0.

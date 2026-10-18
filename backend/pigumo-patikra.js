@@ -30,11 +30,22 @@ const KAINOS = {
 };
 const USD_EUR = 0.92;
 
+// Kesuoti tokenai kainuoja kitaip: skaitymas is kešo - 0,1x, kešo irasymas -
+// 1,25x iprastos ieinancio tokeno kainos. Be siu dvieju eiluciu suma butu
+// nuvertinta visur, kur naudojam `cache_control` (vizualinis sluoksnis, gili
+// analize) - o butent ten tokenu daugiausia.
+const KESO_SKAITYMAS = 0.1;
+const KESO_IRASYMAS = 1.25;
+
 function kainaEur(model, usage) {
   const k = KAINOS[model] || KAINOS['claude-haiku-4-5'];
-  const i = (usage && usage.input_tokens) || 0;
-  const o = (usage && usage.output_tokens) || 0;
-  return ((i / 1e6) * k.in + (o / 1e6) * k.out) * USD_EUR;
+  const u = usage || {};
+  const i = u.input_tokens || 0;
+  const o = u.output_tokens || 0;
+  const kr = u.cache_read_input_tokens || 0;
+  const ki = u.cache_creation_input_tokens || 0;
+  return ((i / 1e6) * k.in + (kr / 1e6) * k.in * KESO_SKAITYMAS + (ki / 1e6) * k.in * KESO_IRASYMAS
+    + (o / 1e6) * k.out) * USD_EUR;
 }
 
 // ── 1 PAKOPA · tekstas (0 €) ───────────────────────────────────────────────
@@ -264,7 +275,7 @@ function santrauka(v) {
 }
 
 module.exports = {
-  KAINOS, USD_EUR, kainaEur,
+  KAINOS, USD_EUR, KESO_SKAITYMAS, KESO_IRASYMAS, kainaEur,
   TEKSTO_PRIEZASTYS, tekstoPriezastys, tekstoVerdiktas,
   arPigus, INSTRUKCIJA, PRIEZASTYS_2, nuplautiTeiginius, apdoroti, patikra,
   PAV, santrauka,
