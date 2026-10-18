@@ -69,5 +69,49 @@ T(/scraperKr: ATSARGA\.paieska\.kreditai - priesKr/.test(src), 'paieškų žurna
 T(/const kreditu = ATSARGA\.paieska\.kreditai - pries;/.test(src), 'rinkos skenavime – taip pat kreditai');
 T(/ATSARGA\.paieska\.scraperapi === priesUzkl/.test(src), '„is talpyklos“ vis dar sprendžiama pagal užklausas, ne kreditus');
 
+// ── K-74: `esc(` be `esc` toje srityje (v2.24.1) ────────────────────────────
+// `kainaLtEilute` kviete `esc(det)`, nors `esc` apibreztas tik triju KITU
+// funkciju viduje. JS to nepasako, kol eilute nepasiekiama - o ji nebuvo
+// pasiekiama, nes `kainaLt` produkcijoje visada buvo null (K-72). Pataisius
+// K-72 ji pasiekta pirma karta ir visas korteliu rodinys nukrito.
+//
+// Sargas: kiekvienas bare `esc(` index.html privalo buti funkcijos, kuri
+// `esc` apibrezia, VIDUJE. Sritis randam skaiciuodami rietuves nuo apibrezimo.
+{
+  const idx = fs.readFileSync(path.join(__dirname, '..', '..', 'frontend', 'index.html'), 'utf8');
+  const sritys = [];
+  const apibr = /(?:var|const|let)\s+esc\s*=|function\s+esc\s*\(/g;
+  let m;
+  while ((m = apibr.exec(idx))) {
+    // Atgal iki APGAUBIANCIO bloko skliausto: skaiciuojam gyli, kol jis tampa
+    // neigiamas - tada radom `{`, kuris dar neuzdarytas (ne vidinis).
+    let g = 0, i = -1;
+    for (let k = m.index - 1; k >= 0; k--) {
+      if (idx[k] === '}') g++;
+      else if (idx[k] === '{') { if (!g) { i = k; break; } g--; }
+    }
+    if (i < 0) { sritys.push([0, idx.length]); continue; }
+    g = 0;
+    for (let k = i; k < idx.length; k++) {
+      if (idx[k] === '{') g++;
+      else if (idx[k] === '}') { g--; if (!g) { sritys.push([i, k]); break; } }
+    }
+  }
+  const kviet = /[^A-Za-z0-9_.$]esc\(/g;
+  const blogos = [];
+  while ((m = kviet.exec(idx))) {
+    const poz = m.index + 1;
+    // praleidziam komentaru eilutes
+    const eilPr = idx.lastIndexOf('\n', poz) + 1;
+    const eil = idx.slice(eilPr, idx.indexOf('\n', poz));
+    if (/^\s*(\/\/|\*|\/\*)/.test(eil)) continue;
+    if (!sritys.some(([a, b]) => poz > a && poz < b)) {
+      blogos.push(idx.slice(0, poz).split('\n').length + ': ' + eil.trim().slice(0, 70));
+    }
+  }
+  T(blogos.length === 0, 'index.html: visi `esc(` yra srityje, kurioje `esc` apibreztas'
+    + (blogos.length ? ' → ' + JSON.stringify(blogos.slice(0, 3)) : ''));
+}
+
 console.log('\n' + (klaidu ? '✗ ' + klaidu + ' klaidos iš ' + n : '✓ ' + n + '/' + n + ' patikrų praėjo'));
 process.exit(klaidu ? 1 : 0);

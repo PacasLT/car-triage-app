@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.24.1', data: '2026-10-19', pavadinimas: 'Pataisyta: „Rodymo klaida“ kortelėse',
+    pakeitimai: [
+      'Rezultatai nebeparodydavo nieko, tik raudoną „Rodymo klaida“. Priežastis – eilutėje „≈ Lietuvoje“ buvo naudojama funkcija, kurios toje vietoje nėra.',
+      'Klaida gyveno kode seniai, bet iki šiol nebuvo pasiekiama: kaina Lietuvoje visada likdavo tuščia (pataisyta vakar), tad ta eilutė niekada nebuvo piešiama.',
+      'Pridėtas sargas, kuris tokį atvejį suranda prieš išleidžiant – jis patikrintas sąmoningai grąžinus klaidą.',
+    ],
+  },
+  {
     versija: '2.24.0', data: '2026-10-19', pavadinimas: 'Filtrų sąrašas telefone – apatinis lapelis',
     pakeitimai: [
       'Telefone kuro sąrašas atsidaro kaip lapelis ekrano apačioje. Dešiniajame stulpelyje jis anksčiau iššokdavo už ekrano krašto.',

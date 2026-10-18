@@ -4518,7 +4518,12 @@ function kainaLtEilute(c) {
     + tarsosEil
     + '. Neįskaičiuota: ' + (k.neiskaiciuota || []).join(', ') + '.'
     + (t.paaiskinimas ? ' ' + t.paaiskinimas : '');
-  return '<div class="ct-market-row" title="' + esc(det) + '">'
+  // v2.24.1: buvo `esc(det)`, bet `esc` šioje srityje NEEGZISTUOJA – jis
+  // apibrėžtas tik viduje trijų kitų funkcijų. Iki v2.23.1 to nesimatė, nes
+  // `kainaLt` produkcijoje visada buvo `null` (K-72), ir ši eilutė nė karto
+  // nebuvo pasiekta. Pataisius K-72 ji pasiekta pirmą kartą – ir visas kortelių
+  // rodinys nukrito su „Rodymo klaida: esc is not defined".
+  return '<div class="ct-market-row" title="' + ctEsc(det) + '">'
     + '<span class="ct-market-k">≈ LIETUVOJE</span>'
     + '<span class="ct-market-v">' + formatEUR(k.viso) + '</span></div>';
 }

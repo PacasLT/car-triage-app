@@ -2259,3 +2259,27 @@ Stulpelis 136 px, paraštės 12/12 → **vidus 112 px** (dizaineris spėjo 108 �
 Pats laukas su ✓ telpa tiksliai, kaip ir numatyta. Bet **abi `small` eilutės netelpa**, o stulpelis lygiuojamas dešinėn, tad tekstas lenda į kairę, ant „Automobilis“ stulpelio. Tai ne mano markupo klaida – eilutės duotos pakete. Klausimas dizaineriui: trumpinti tekstą (pvz. „~2 100 · C“ ir „1 500 · keisti“), leisti dvi eilutes, ar `own` būsenoje „keisti“ perkelti į patį skaičių.
 
 - Sargai: **24 žali**; `perpardavejas` 42 → **47**. Tokenai 0 + 0.
+
+## Z-166 · 2026-10-19 · K-74 – `esc is not defined`: klaida, kurią atidengė kita pataisa (v2.24.1)
+
+Lukas atsiuntė ekranvaizdį: paieška pavyko (634 rasta, 34 atitiko, 32 rekomenduojami), bet vietoj rezultatų – raudona eilutė **„Rodymo klaida: esc is not defined"**.
+
+### Kas buvo
+
+`kainaLtEilute()` (`index.html` ~4505) kviečia `esc(det)`. Bet `esc` tame faile apibrėžtas **tik trijų kitų funkcijų viduje** – globalaus `esc` nėra (globali versija vadinasi `ctEsc`). Tai buvo tikra klaida nuo tada, kai eilutė parašyta.
+
+**Kodėl nesimatė iki šiandien:** iki v2.23.1 `kainaLt` produkcijoje **visada buvo `null`** (K-72 – `source` yra domenas, ne trumpasis vardas). `kainaLtEilute` grįždavo anksčiau ir to sakinio nepasiekdavo. Vakar pataisius K-72 eilutė pasiekta **pirmą kartą per visą projekto laiką** – ir nuvertė visą kortelių rodinį.
+
+Tai pamoka apie pataisų eiliškumą: **pataisius vieną klaidą, pirmą kartą pradeda veikti kodas, kurio niekas niekada nevykdė.** Po K-72 reikėjo ne tik patikrinti, ar atsirado skaičiai, bet ir pereiti visus kelius, kurie anksčiau buvo negyvi.
+
+### Pataisyta
+
+`esc(det)` → `ctEsc(det)` (globali funkcija, 5951 eil.).
+
+### Sargas, kuris tai gaudo (K-74)
+
+`puslapiai.test.js`: kiekvienas bare `esc(` `index.html` privalo būti funkcijos, kuri `esc` apibrėžia, **viduje**. Sritys randamos skaičiuojant riestinius skliaustus atgal iki apgaubiančio bloko.
+
+**Sargas patikrintas atbuline eiga:** grąžinau `esc(det)` atgal – sargas nukrito (1 klaida); grąžinus `ctEsc` – vėl žalias. Sargas, kurio nepatikrinai sulaužytu kodu, yra tik viltis.
+
+- Sargai: **24 žali**; `puslapiai` 43 → **44**. Tokenai 0 + 0.
