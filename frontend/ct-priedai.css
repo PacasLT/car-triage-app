@@ -179,7 +179,12 @@
    rėmelis, šešėlis ir radiusas – iš tokenų.                                  */
 
 .ct-fld { position: relative; }
-.ct-fld-pop {
+/* K-73: `display` SU `:not([hidden])` (59 pk.). Be jo `display: flex` bazinėje
+   taisyklėje (0,1,0) nugali bendrą `:where([hidden]) { display: none }`
+   (0,0,0), ir skydelis lieka matomas net su `hidden` atributu – būtent tai
+   Lukas matė kaip „pakibusį" sąrašą, kurio neuždaro nei „Gerai", nei Esc.
+   Mano sargas to nepagavo, nes tikrino ATRIBUTĄ, ne apskaičiuotą `display`. */
+.ct-fld-pop:not([hidden]) {
   position: absolute; top: calc(100% + 5px); left: 0; z-index: 30;
   min-width: 100%; width: max-content; max-width: min(280px, 92vw);
   max-height: 300px; overflow: auto;

@@ -2177,3 +2177,60 @@ Bendra būsena, abi kryptys:
 
 - Sargai: **24 žali**; `perpardavejas` 21 → **32** (nauji tikrina, kad perkėlimo vietos ir `#ct-juostos-dalys` neišnyktų iš markupo). Tokenai **0 + 0**.
 - **Tinder mygtukas** liko juostoje, nors DZ-TINDER atšauktas 10-16 („tik perpardavėjams“). Nieko netryniau savo iniciatyva – punktas Lukui.
+
+## Z-163 · 2026-10-18 · K-73 – `hidden` be `:not([hidden])` nieko neslepia (v2.23.4)
+
+Lukas: „šitas kuro filtro tabas vis tiek nedingsta ir negalime paspausti Gerai mygtuko.“
+
+### Klaida
+
+`ct-priedai.css` 25 bloke parašiau:
+
+```css
+.ct-fld-pop { position: absolute; … display: flex; … }
+```
+
+Bendra sistemos taisyklė yra `:where([hidden]:not([hidden="until-found"])) { display: none; }` – **specifiškumas 0,0,0**. Mano bazinė `.ct-fld-pop` yra 0,1,0, tad `hidden` atributas nieko neslėpė. JS teisingai uždarinėjo skydelį, bet jis likdavo matomas – ir „Gerai“ atrodė neveikiantis, nors veikė.
+
+Tai TA PATI taisyklė, kurią dizaineris pats užrašė 59 pakete ir priminė Erratoje 19: „jei bazinėje `display` su `:not([hidden])`, tai ir kiekvienas `@media` perrašymas rašomas su `:not([hidden])`.“ Rašiau naują bloką ir jos nepritaikiau.
+
+### Kodėl mano sargas to nepagavo – svarbiau už pačią klaidą
+
+Matavime tikrinau **atributą**: `pop.hasAttribute('hidden')`. Atributas buvo teisingas visą laiką. Reikėjo tikrinti **apskaičiuotą `display`** ir elemento aukštį. Dabar matuoju būtent tai:
+
+| | atributas | `display` | matosi |
+|---|---|---|---|
+| pradžia | `hidden` | `none` | ne |
+| atidarius | – | `flex` | taip |
+| pažymėjus | – | `flex` | taip |
+| „Gerai“ | `hidden` | `none` | **ne** |
+| Esc | `hidden` | `none` | **ne** |
+| kitas laukas | `hidden` | `none` | **ne** |
+
+Sargas `perpardavejas.test.js` dabar tikrina patį CSS: `.ct-fld-pop` `display` privalo būti su `:not([hidden])`, o bazinės formos be jo – neturi likti.
+
+**Pamoka:** tikrinti ne tai, ką programa MANO, o tai, ką žmogus MATO. `hasAttribute` yra pirmas; `getComputedStyle` – tikrasis.
+
+## Z-164 · 2026-10-18 · Be nuotraukos – į apačią (Luko prašymas, v2.23.4)
+
+„Jeigu skelbime neįdėta nuotrauka, patikriname ar tikrai nėra ir be nuotraukų skelbimus dedame į apačią, nes be nuotraukos labai sunku ką spręsti apie automobilį.“
+
+**Neišmetam, nustumiam.** Be nuotraukos skelbimas gali būti geriausias sandoris, bet negali stovėti viršuje prieš tą, kurį galima pamatyti.
+
+### „Ar tikrai nėra“ – du nemokami patikrinimai
+
+1. **`photos[0]`** – kortelės skaitytuvas kai kuriuose portaluose užpildo masyvą, bet ne `photo`. Patikrinam prieš nurašant.
+2. **Kryžminis skelbimas** – tas pats automobilis kitame portale. Grupė sudaryta pagal modelį, metus, ridą (±300 km), kurą ir dėžę, tad tai ne spėjimas. Pasiskolintą nuotrauką pažymim `photoIsKito`, ir lentelėje ji turi paaiškinimą užvedus pelę.
+
+Trečias būdas – atidaryti patį skelbimo puslapį – **kainuoja kreditų**, tad savo iniciatyva jo nedarau. Punktas Lukui: KL-1018-2230.
+
+### Kur veikia
+
+- **Serveryje**: `enriched` gauna `beNuotraukos`, o `candidates` rikiuojami `(a.beNuotraukos - b.beNuotraukos) || (b.qualityScore - a.qualityScore)`. Laukas įrašytas ir į baltąjį sąrašą – be to iki sąsajos nenukeliautų (ta pati v2.18.1 ir K-72 pamoka).
+- **Lentelėje**: `beNuotr()` stovi prieš visus kitus palyginimus, tad galioja ir rikiuojant pagal bet kurį stulpelį, abiem kryptim.
+- **Kortelėse**: tas pats, stabiliai perstumiant – kitų tvarka nekinta.
+- Tuščias kvadratas lentelėje pakeistas brūkšniu su paaiškinimu „Skelbime nuotraukos nėra“.
+
+Sargas tikrina esminį dalyką: skelbimas su **didžiausiu pelnu, bet be nuotraukos**, atsiduria trečias iš trijų, o kiti du nesusikeičia vietomis.
+
+- Sargai: **24 žali**; `perpardavejas` 32 → **42**. Tokenai 0 + 0.

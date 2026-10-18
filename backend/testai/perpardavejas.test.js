@@ -126,5 +126,43 @@ T(/1 skelb\./.test(juosta.innerHTML),'skaitiklis persiskaiciavo i 1');
   T(!/\.ct-fld-pop > \.ct-check \{ min-height/.test(pr), 'ir is priedu 25 bloko ta eilute isimta');
 }
 
+// ── K-73: skydelio `display` su :not([hidden]) ──────────────────────────────
+// Kodel sargas: `hidden` atributas BE `:not([hidden])` nieko nepaslepia, nes
+// bazine `display: flex` (0,1,0) nugali bendra `:where([hidden])` (0,0,0).
+// Mano ankstesnis sargas tikrino ATRIBUTA, ne apskaiciuota `display` - ir
+// praleido. Dabar tikrinam pati CSS.
+{
+  const pr = fs.readFileSync('frontend/ct-priedai.css', 'utf8');
+  T(/\.ct-fld-pop:not\(\[hidden\]\)\s*\{/.test(pr), '`.ct-fld-pop` display rasytas su :not([hidden])');
+  T(!/^\.ct-fld-pop\s*\{/m.test(pr), 'bazines `.ct-fld-pop {` be :not([hidden]) nebera');
+}
+
+// ── Be nuotraukos – i apacia (Luko prasymas) ────────────────────────────────
+{
+  const su1 = { ...c, url: 'p1', photo: 'a.jpg', pelnoMath: { pelnas: 100, investicija: 1, roi: 1 } };
+  const be  = { ...c, url: 'p2', photo: null,    pelnoMath: { pelnas: 9999, investicija: 1, roi: 9 } };
+  const su2 = { ...c, url: 'p3', photo: 'b.jpg', pelnoMath: { pelnas: 50, investicija: 1, roi: 1 } };
+  let gauta = null;
+  const dom2 = naujasDom();
+  const ctx3 = { window: {}, localStorage: { getItem: () => null, setItem() {} },
+    document: { createElement: dom2.mk, getElementById: () => null, body: dom2.mk() } };
+  ctx3.window.localStorage = ctx3.localStorage; ctx3.window.document = ctx3.document;
+  ctx3.window.renderCandidateCards = function (sar) { gauta = sar; };
+  vm.createContext(ctx3); vm.runInContext(kodas, ctx3);
+  ctx3.window.renderCandidateCards([su1, be, su2], dom2.res);
+  T(gauta && gauta.length === 3, 'visi trys lieka – skelbimas neismetamas');
+  T(gauta && gauta[2].url === 'p2', 'be nuotraukos nukeliavo i APACIA, nors jo pelnas didziausias');
+  T(gauta && gauta[0].url === 'p1' && gauta[1].url === 'p3', 'kitu tvarka nepakito');
+
+  const kodas3 = fs.readFileSync('frontend/perpardavejas.js', 'utf8');
+  T(/function beNuotr/.test(kodas3), 'lenteles rikiavimas turi ta pati sargyba');
+  const srv = fs.readFileSync('backend/server.js', 'utf8');
+  T(/\(a\.beNuotraukos - b\.beNuotraukos\)/.test(srv), 'serveris rikiuoja kandidatus taip pat');
+  T(/if \(!l\.photo && Array\.isArray\(l\.photos\) && l\.photos\.length\) l\.photo = l\.photos\[0\]/.test(srv),
+    'pries tai patikrinam `photos[0]` – ar tikrai nera');
+  T(/primary\.photoIsKito/.test(srv), 'ir pasiskolinam is kryzminio skelbimo');
+  T(/beNuotraukos: !!l\.beNuotraukos/.test(srv), 'laukas patenka i baltaji sarasa (be jo iki sasajos nenukeliautu)');
+}
+
 console.log('\n'+(klaidu?klaidu+' KRENTA':'visi '+n+' prajo'));
 process.exit(klaidu?1:0);

@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.23.4', data: '2026-10-18', pavadinimas: 'Kuro sąrašas užsidaro; skelbimai be nuotraukų – apačioje',
+    pakeitimai: [
+      'Kuro sąrašas tikrai užsidaro – paspaudus „Gerai“, Esc, kitą filtrą ar šalia. Iki šiol jis likdavo matomas, nors programa jį jau buvo „uždariusi“.',
+      'Skelbimai be nuotraukos nukeliauja į sąrašo apačią – abiejuose rodiniuose ir rikiuojant bet kuria tvarka. Skelbimas neišmetamas: be nuotraukos jis gali būti geras sandoris, bet negali stovėti viršuje prieš tą, kurį matai.',
+      'Prieš tai patikrinama, ar nuotraukos tikrai nėra: jei tą patį automobilį randame kitame portale su nuotrauka, ją parodome ir pasakome, iš kur.',
+    ],
+  },
+  {
     versija: '2.23.3', data: '2026-10-18', pavadinimas: 'Viena juosta virš rezultatų',
     pakeitimai: [
       'Dvi juostos viena po kita suliejamos į vieną: rūšiavimas, būklė, marža, skelbimų skaičius, „Analizuoti modelį“ ir rodinio jungiklis dabar vienoje eilutėje.',

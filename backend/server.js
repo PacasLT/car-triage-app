@@ -2001,6 +2001,18 @@ function mergeDuplicatesAcrossPortals(listings) {
       group.sort((x, y) => (x.kaina || Infinity) - (y.kaina || Infinity));
       const primary = { ...group[0] };
       primary.kryzminiaiSkelbimai = group.slice(1).map((g) => ({ source: g.source, url: g.url, kaina: g.kaina }));
+      // v2.23.4: jei pigiausias skelbimas be nuotraukos, o tas PATS automobilis
+      // kitame portale ją turi – pasiskolinam. Tai ne spėjimas: grupė sudaryta
+      // pagal modelį, metus, ridą (±300 km), kurą ir dėžę. Pažymim, kad
+      // nuotrauka iš kito skelbimo – kad kortelėje galėtume tai pasakyti.
+      if (!primary.photo) {
+        const su = group.find((g) => g.photo);
+        if (su) {
+          primary.photo = su.photo;
+          primary.photos = (su.photos && su.photos.length) ? su.photos : [su.photo];
+          primary.photoIsKito = su.source || true;
+        }
+      }
       merged.push(primary);
     } else {
       merged.push(a);
@@ -3609,7 +3621,24 @@ async function runSearchJob(jobId, filters, arAdminas) {
       l.kartos = regitra.kartos(regMarke, l.modelis, l.metai, rinkosTekstas(l), l.menuo);
     });
 
-    let candidates = enriched.slice().sort((a, b) => b.qualityScore - a.qualityScore);
+    // v2.23.4 (Luko prašymas): BE NUOTRAUKOS – Į APAČIĄ.
+    // „Be nuotraukos labai sunku ką spręsti apie automobilį." Skelbimo
+    // neišmetam – jis gali būti geriausias sandoris – bet jis nebegali stovėti
+    // viršuje prieš tą, kurį galima pamatyti.
+    //
+    // PRIEŠ tai patikrinam, ar nuotraukos TIKRAI nėra, dviem nemokamais būdais:
+    //   1) `photos[0]` – kortelės skaitytuvas kartais užpildo masyvą, bet ne
+    //      `photo` (skirtingi portalų šablonai);
+    //   2) kryžminis skelbimas – tas pats automobilis kitame portale
+    //      (`sulietiKryzminius` aukščiau) – iš jo pasiskolinta nuotrauka.
+    // Trečias būdas – atidaryti patį skelbimo puslapį – KAINUOJA kreditų, tad
+    // jo čia nedarom; tai Luko sprendimas (KL-1018-2230).
+    enriched.forEach((l) => {
+      if (!l.photo && Array.isArray(l.photos) && l.photos.length) l.photo = l.photos[0];
+      l.beNuotraukos = !l.photo;
+    });
+    let candidates = enriched.slice().sort((a, b) =>
+      (a.beNuotraukos - b.beNuotraukos) || (b.qualityScore - a.qualityScore));
     // v2.7.2 (Z-97): rezultatu filtrai - be kreditu, po triazo. Neatitike nedingsta:
     // jie lieka „Kiti skelbimai" su priezastimi (explainRejection skaito `papAtmesta`).
     const zemiauRinkos = parseInt(filters.zemiauRinkos, 10) || 0;
@@ -3791,6 +3820,7 @@ async function runSearchJob(jobId, filters, arAdminas) {
       diffPct: l.diffPct, marketMedian: l.marketMedian, marketCount: l.marketCount,
       // v2.18.1: rinka ir kaina Lietuvoje. Šis sąrašas yra BALTASIS SĄRAŠAS - laukas,
       // kurio čia nėra, iki sąsajos nenukeliauja, net jei `enriched` jį turi.
+      beNuotraukos: !!l.beNuotraukos, photoIsKito: l.photoIsKito || null,
       rinka: l.rinka || null, lygintaRinka: l.lygintaRinka || null,
       rinkosVardas: l.rinkosVardas || null, kainaLt: l.kainaLt || null,
       // v2.20.0 – perpardavėjo skaičiai

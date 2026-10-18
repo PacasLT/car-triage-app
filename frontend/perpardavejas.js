@@ -274,7 +274,9 @@
     return '<div class="ct-dtable-r" data-url="' + esc(c.url) + '" aria-selected="' + (pazymeta ? 'true' : 'false') + '">'
       + '<span class="ct-dt-sel"><input type="checkbox" aria-label="Žymėti"' + (pazymeta ? ' checked' : '') + '></span>'
       + '<a class="ct-dt-car" href="' + esc(c.url) + '" target="_blank" rel="noopener">'
-      + (c.photo ? '<img src="' + esc(c.photo) + '" alt="" loading="lazy">' : '<span class="ct-dt-ph"></span>')
+      + (c.photo
+        ? '<img src="' + esc(c.photo) + '" alt=""' + (c.photoIsKito ? ' title="Nuotrauka iš to paties automobilio skelbimo kitame portale"' : '') + ' loading="lazy">'
+        : '<span class="ct-dt-ph" title="Skelbime nuotraukos nėra">—</span>')
       + '<span class="ct-dt-car-t"><span>' + pav + '</span>'
       + '<span class="ct-dt-meta">'
       + (bk ? '<span class="ct-bukle ' + (bk.saltinis === 'portalas' ? 'is-portal' : 'is-guess') + '">' + esc(bk.tekstas) + '</span>' : '')
@@ -302,9 +304,15 @@
       default: return null;
     }
   }
+  // v2.23.4 (Luko prašymas): be nuotraukos – visada apačioje, nesvarbu, pagal
+  // ką rikiuojam ir kuria kryptim. Be nuotraukos apie automobilį spręsti
+  // sunku, tad toks skelbimas negali stovėti viršuje prieš tą, kurį matai.
+  function beNuotr(c) { return c.beNuotraukos || !c.photo ? 1 : 0; }
   function rikiuoti(sar) {
     var k = busena.rikiavimas, zb = busena.kryptis === 'desc' ? -1 : 1;
     return sar.slice().sort(function (a, b) {
+      var n = beNuotr(a) - beNuotr(b);
+      if (n) return n;
       var x = reiksme(a, k), y = reiksme(b, k);
       if (x == null && y == null) return 0;
       if (x == null) return 1;          // tušti visada apačioje, abiem kryptim
@@ -358,7 +366,14 @@
     }
     if (ctx.sarasas.length && !matomi.length) { tuscia(kur, ctx.sarasas.length); return; }
     if (busena.rodinys === 'lentele') lentele(rikiuoti(matomi), kur);
-    else ctx.korteles(matomi);
+    else {
+      // Kortelėse rikiuoja senasis apvalkalas, bet „be nuotraukos – apačioje"
+      // galioja abiem rodiniams, tad perstumiam čia (stabiliai, kitos tvarkos
+      // nekeičiant).
+      var su = [], be = [];
+      matomi.forEach(function (c) { (beNuotr(c) ? be : su).push(c); });
+      ctx.korteles(su.concat(be));
+    }
   }
 
   // ── Įsijungimas ───────────────────────────────────────────────────────────
