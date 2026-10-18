@@ -867,6 +867,22 @@ app.get('/admin/rinka/eilutes', klaiduPrieiga, (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// Nuasmenintas eksportas Analitikui (v2.27.0). GET, nemokamas - tik DB.
+// Be `url`, be `photo`, be portalo ID, be laisvo teksto: pardavėjo čia nėra nė
+// vienoje skiltyje, tik TIPAS (privatus / įmonė). Dvi lentelės atskirai:
+//   /admin/rinka/eksportas            - skelbimai (po vieną eilutę)
+//   /admin/rinka/eksportas?ka=stebejimai - kainų ir ridos pokyčiai laike
+app.get('/admin/rinka/eksportas', klaiduPrieiga, (req, res) => {
+  try {
+    const ka = req.query.ka === 'stebejimai' ? 'stebejimai' : 'skelbimai';
+    const csv = rinka.eksportas({ ka, riba: req.query.riba });
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="cartriige-' + ka + '-'
+      + new Date().toISOString().slice(0, 10) + '.csv"');
+    res.send(csv);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // Paleisti skenavimą. POST, nes KAINUOJA kreditus: ~1 kreditas puslapiui
 // (render=false), 20 skelbimų puslapyje. Atsako iš karto (202), dirba fone;
 // eigą rodo GET /admin/rinka. Vienu metu - tik vienas skenavimas.
@@ -3443,6 +3459,17 @@ async function runSearchJob(jobId, filters, arAdminas) {
     // Kaupiam VISUS nuskaitytus skelbimus - kuo daugiau istorijos, tuo tikslesnes
     // busimos medianos ir balai jau matytiems modeliams.
     cache.addToHistory([...parsed, ...hardRejected]);
+    // v2.27.0 (Analitiko užduotis §2.1): tie patys skelbimai - ir į `rinka.db`.
+    // Puslapiai jau nuskaityti ir apmokėti, tad tai nekainuoja nė vieno kredito,
+    // o archyvas pagaliau auga nuo KIEKVIENOS paieškos, ne tik nuo admino
+    // skenavimo. Dingimo nežymim - paieška nėra aprėptis (žr. `irasytiPaieskos`).
+    try {
+      const ar = rinka.irasytiPaieskos([...parsed, ...hardRejected], filters.marke || null);
+      if (ar && ar.irasyta) {
+        console.log(`[RINKA] paieška → archyvas: ${ar.irasyta} skelb. (${ar.nauju} nauji, `
+          + `${ar.pasikeite} pasikeitę) iš ${ar.portalu} portalų`);
+      }
+    } catch (e) { console.error('[RINKA] paieskos irasymas:', e.message); }
 
     // Kiekvienam matytam skelbimui fiksuojam kainos/ridos momentini vaizda ir
     // gyvavimo cikla. Is to veliau gaunam "kaina mazinta", "kabo 3 savaites",

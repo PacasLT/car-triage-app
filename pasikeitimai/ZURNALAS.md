@@ -2391,3 +2391,28 @@ Kaina ir metai traukiami iš paties puslapio teksto. Pavojus žinomas ir senas �
 Variantas C turi antrą pusę – mygtuką „patikslinti rinką (25 kr.)“, kai archyvo imtis per maža. Jo nedariau: tai mokamas skenavimas, o Lukas dar nematė, kaip dažnai archyvo pakanka. Pirma pamatuojam, tada leidžiam pinigus.
 
 - Sargai: **26 žali** (naujas `nuoroda` 57, patikrintas sulaužytu kodu: sumaišius rinkas ir nuėmus `kainos_ispejimas IS NULL` krenta 10 patikrų). Tokenai 0 + 0.
+
+## Z-169 · 2026-10-19 · Paieška pagaliau pildo archyvą; nuasmenintas eksportas (v2.27.0)
+
+Analitikas atsiuntė `claude/UZDUOTIS-DUOMENU-BAZE.md` su penkiais klausimais apie `rinka.db`. Atsakymai – `claude/ATSAKYMAI-DUOMENU-BAZE.md` (projekte). Čia – kas pasikeitė kode.
+
+### Radinys, dėl kurio ir rašoma ši eilutė
+
+Analitikas klausė, ar `rinka.db` rašo kainų pokyčius ir dingimo datą. **Rašo nuo v2.4.0** – `stebejimai` lentelė, `pirma_matytas`, `dingo`. Tikroji spraga buvo kita: `rinka.irasytiPuslapi` kviečiamas **tik iš `vykdytiSkenavima`**, t. y. tik iš `/admin/rinka/skenuoti`. Kiekviena vartotojo paieška savo skelbimus įrašydavo tik į `cache` JSON (`addToHistory` – 1 modelis, ribotas kiekis) ir **išmesdavo** viską, ką buvo galima laikyti.
+
+Tai reiškė, kad už tuos puslapius jau sumokėta ScraperAPI kreditais, o istorijos iš jų – nulis. `rinka.irasytiPaieskos()`: tie patys skelbimai, tas pats rašymas, **0 papildomų kreditų**.
+
+**Riba, kurios nepažeidžiau:** paieška nėra aprėptis. Dingimas (`dingo`) žymimas tik po skenavimo, pasiekusio sąrašo galą (`pilnas = 1`); paieškos skenavimas rašomas su `pilnas = 0`. Be šito kas antras skelbimas „dingtų“ vien todėl, kad jo nebuvo šioje paieškoje – ir visa pardavimo greičio statistika būtų šiukšlės. Sargas tai tikrina.
+
+### Du nauji laukai ir eksportas
+
+`nuotrauku_sk`, `teksto_ilgis` – abu jau buvo atmintyje, tik niekur nenukeliaudavo. Teksto ILGIS, ne tekstas: `rawText` į archyvą nerašomas (BDAR, `NESAUGOMA`). Senoms bazėms – idempotentiškas `ALTER TABLE ADD COLUMN` try/catch, kaip ir `taisytiSenusIrasus`.
+
+`GET /admin/rinka/eksportas` – CSV Analitikui. Be `url`, be nuotraukų adresų, be portalo ID, be `kita` laisvo teksto, be skelbimo teksto. Pardavėjas – tik tipas. Skelbimo tapatybė – stabili 16 simbolių SHA-256 maiša su pastovia druska: `stebejimai` sujungiami su `skelbimai`, du eksportai sutampa, o atgal į skelbimą kelio nėra. Datos – `YYYY-MM-DD` be laiko.
+
+### Sargas (51 patikra), patikrintas sulaužytu kodu
+
+`archyvo-eksportas.test.js` tikrina ne tik tai, kas eksporte YRA, bet ir tai, ko jame NĖRA – nes šis kelias išeina iš mūsų, ir klaida čia nėra „neveikia“, ji yra „atidavėm, ko neturėjom“. Patikrinta grąžinus `url` į eksportą ir pakeitus `pilnas` į `true`: krenta 4 patikros.
+
+- Sargai: **27 žali** (naujas `archyvo-eksportas` 51). Tokenai 0 + 0.
+- `nuoroda` sargo pataisa: portalų patikra buvo rašyta regexp'u prieš v2.26.0 pataisą, dabar tikrina domenų sąrašą.

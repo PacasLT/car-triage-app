@@ -27,6 +27,9 @@
 const fs = require('fs');
 const path = require('path');
 const Database = require('better-sqlite3');
+// v2.27.0: `l.source` yra DOMENAS („mobile.de"), o archyve portalas laikomas
+// trumpuoju vardu. Vertimas gyvena VIENOJE vietoje - `rinkos.js` (K-72).
+const { portaloRaktas } = require('./rinkos');
 
 // Laukai, kurie į archyvą NEPATENKA, ir kodėl.
 const NESAUGOMA = {
@@ -73,7 +76,13 @@ function ikelti(katalogas, failas) {
       paskut_matytas  INTEGER NOT NULL,
       kartu_matytas   INTEGER NOT NULL DEFAULT 1,
       praleista       INTEGER NOT NULL DEFAULT 0,
-      dingo           INTEGER
+      dingo           INTEGER,
+      -- v2.27.0 (Analitiko prasymas): du laukai, kurie nieko nekainuoja - juos
+      -- jau turim atmintyje nuskaitymo metu. teksto_ilgis - NE pats tekstas:
+      -- aprasymo ilgis yra pozymis (trumpas skelbimas = maziau informacijos),
+      -- o pats tekstas i archyva nerasomas (BDAR, NESAUGOMA.rawText).
+      nuotrauku_sk    INTEGER,
+      teksto_ilgis    INTEGER
     );
     CREATE INDEX IF NOT EXISTS sk_modelis ON skelbimai(marke, modelis, metai);
     CREATE INDEX IF NOT EXISTS sk_portalas ON skelbimai(portalas, dingo);
@@ -108,6 +117,12 @@ function ikelti(katalogas, failas) {
       kreditu     INTEGER
     );
   `);
+  // Senoms bazems (Railway diske jau yra) - stulpeliai pridedami atskirai.
+  // `CREATE TABLE IF NOT EXISTS` ju neprideda, o migraciju versiju cia nera:
+  // uzklausa idempotentiska, klaida reiskia „jau yra".
+  for (const st of ['nuotrauku_sk INTEGER', 'teksto_ilgis INTEGER']) {
+    try { db.exec('ALTER TABLE skelbimai ADD COLUMN ' + st); } catch (e) { /* jau yra */ }
+  }
   taisytiSenusIrasus();
   // Skenavimas, kurį nutraukė perkrovimas, liktų „vyksta" amžinai.
   const pakibe = db.prepare(`UPDATE skenavimai SET busena='nutraukta', priezastis='serveris perkrautas', pabaiga=?
@@ -214,10 +229,10 @@ function irasytiPuslapi(skenavimoId, portalas, marke, listings) {
   const naujas = db.prepare(`INSERT INTO skelbimai
     (id, portalas, url, marke, modelis, metai, menuo, kuras, pavarai, kebulas, galia, variklio_turis, miestas,
      verslas, turi_vin, garantija, kaina, rida, kainos_ispejimas, ikelta_laikas, photo, kita,
-     pirma_matytas, paskut_matytas)
+     nuotrauku_sk, teksto_ilgis, pirma_matytas, paskut_matytas)
     VALUES (@id, @portalas, @url, @marke, @modelis, @metai, @menuo, @kuras, @pavarai, @kebulas, @galia, @variklio_turis, @miestas,
      @verslas, @turi_vin, @garantija, @kaina, @rida, @kainos_ispejimas, @ikelta_laikas, @photo, @kita,
-     @laikas, @laikas)`);
+     @nuotrauku_sk, @teksto_ilgis, @laikas, @laikas)`);
   const atnaujinti = db.prepare(`UPDATE skelbimai SET
       url=@url, modelis=COALESCE(@modelis, modelis), metai=COALESCE(@metai, metai), menuo=COALESCE(@menuo, menuo),
       kuras=COALESCE(@kuras, kuras), pavarai=COALESCE(@pavarai, pavarai), kebulas=COALESCE(@kebulas, kebulas),
@@ -226,6 +241,7 @@ function irasytiPuslapi(skenavimoId, portalas, marke, listings) {
       garantija=COALESCE(@garantija, garantija), kaina=COALESCE(@kaina, kaina), rida=COALESCE(@rida, rida),
       kainos_ispejimas=@kainos_ispejimas, ikelta_laikas=COALESCE(@ikelta_laikas, ikelta_laikas),
       photo=COALESCE(@photo, photo), kita=COALESCE(@kita, kita),
+      nuotrauku_sk=COALESCE(@nuotrauku_sk, nuotrauku_sk), teksto_ilgis=COALESCE(@teksto_ilgis, teksto_ilgis),
       paskut_matytas=@laikas, kartu_matytas=kartu_matytas+1, praleista=0, dingo=NULL
     WHERE id=@id`);
   const stebejimas = db.prepare('INSERT INTO stebejimai (skelbimo_id, laikas, kaina, rida, skenavimas) VALUES (?, ?, ?, ?, ?)');
@@ -243,6 +259,8 @@ function irasytiPuslapi(skenavimoId, portalas, marke, listings) {
         kaina: sv(l.kaina), rida: sv(l.rida),
         kainos_ispejimas: l.kainosIspejimas ? JSON.stringify(l.kainosIspejimas) : null,
         ikelta_laikas: sv(l.ikeltaLaikas), photo: tx(l.photo), kita: kitiLaukai(l), laikas: dabar,
+        nuotrauku_sk: sv(Array.isArray(l.photos) ? l.photos.length : (l.photo ? 1 : null)),
+        teksto_ilgis: sv(l.rawText ? String(l.rawText).length : null),
       };
       const buvo = gauti.get(id);
       if (!buvo) {
@@ -285,6 +303,111 @@ function baigti(skenavimoId, { pilnas, priezastis, kreditu, busena }) {
     .run(Date.now(), busena || (pilnas ? 'baigta' : 'nutraukta'), pilnas ? 1 : 0, priezastis || null,
       kreditu == null ? null : kreditu, dingo, skenavimoId);
   return db.prepare('SELECT * FROM skenavimai WHERE id=?').get(skenavimoId);
+}
+
+// ── Vartotojo paieška į archyvą (v2.27.0) ───────────────────────────────────
+// Iki šiol archyvą pildė TIK admino skenavimas (`/admin/rinka/skenuoti`), o
+// kiekviena vartotojo paieška savo duomenis išmesdavo: puslapiai jau nuskaityti
+// ir APMOKĖTI, bet į istoriją nepatekdavo. Dėl to Analitikas ir neturėjo kainų
+// istorijos, nors pinigai už tuos puslapius jau išleisti.
+//
+// Riba, kurios nepažeidžiam: paieška NĖRA aprėptis. Ji nuskaito tik tai, ko
+// prašė vartotojas, todėl `pilnas = 0` ir dingimo NEŽYMIM - kitaip kas antras
+// skelbimas „dingtų" vien dėl to, kad jo nebuvo šioje paieškoje.
+function irasytiPaieskos(listings, marke) {
+  if (!db) return null;
+  const pagal = {};
+  (listings || []).forEach((l) => {
+    if (!l || !l.url) return;
+    const p = portaloRaktas(l.source);
+    if (!p) return;
+    (pagal[p] = pagal[p] || []).push(l);
+  });
+  const rez = { portalu: 0, irasyta: 0, nauju: 0, pasikeite: 0 };
+  Object.keys(pagal).forEach((p) => {
+    let id = null;
+    try {
+      id = pradeti({ portalas: p, marke: marke || null, metaiNuo: null, url: 'vartotojo paieska' });
+      const r = irasytiPuslapi(id, p, marke || null, pagal[p]);
+      rez.portalu++; rez.irasyta += r.irasyta; rez.nauju += r.nauju; rez.pasikeite += r.pasikeite;
+      baigti(id, { pilnas: false, priezastis: 'vartotojo paieska', kreditu: null, busena: 'baigta' });
+    } catch (e) {
+      if (id) { try { baigti(id, { pilnas: false, priezastis: 'klaida: ' + e.message, busena: 'klaida' }); } catch (e2) {} }
+      console.error('[RINKA] paieskos irasymas (' + p + '):', e.message);
+    }
+  });
+  return rez;
+}
+
+// ── Nuasmenintas eksportas analizei (v2.27.0) ───────────────────────────────
+// Analitikas dirba su duomenimis, ne su skelbimais, todėl jam atiduodam
+// MAŽIAU, nei turim: be `url`, be `photo`, be `kita` laisvo teksto ir be
+// portalo ID. Skelbimo tapatybė - stabili maiša, kad `stebejimai` būtų galima
+// sujungti su `skelbimai`, bet atgal į skelbimą nebūtų kelio.
+//
+// Druska yra PASTOVI (ne slaptas raktas): jos tikslas - ne apsauga nuo mūsų
+// pačių, o kad dviejų eksportų eilutės sutaptų ir analizė būtų kartotina.
+const EKSPORTO_DRUSKA = 'cartriige-eksportas-v1';
+function maisa(id) {
+  return require('crypto').createHash('sha256').update(EKSPORTO_DRUSKA + '|' + String(id)).digest('hex').slice(0, 16);
+}
+const D = (ms) => (ms ? new Date(ms).toISOString().slice(0, 10) : '');
+
+// `kita` JSON - tik trys laukai, kurių prašė Analitikas (kartos). Visa kita
+// lieka pas mus: laisvas tekstas eksporte yra rizika be naudos.
+function kartosLaukai(kita) {
+  let j = null;
+  try { j = kita ? JSON.parse(kita) : null; } catch (e) { return { kodas: '', faze: '', grupe: '' }; }
+  const k = (j && Array.isArray(j.kartos) && j.kartos[0]) || null;
+  return {
+    kodas: k && k.kodas ? String(k.kodas) : '',
+    faze: k && k.lci === true ? 'atnaujinta' : (k && k.lci === false ? 'pradine' : ''),
+    grupe: (j && j.rinkosGrupe) ? String(j.rinkosGrupe) : (k && k.grupe ? String(k.grupe) : ''),
+  };
+}
+
+const CSV = (v) => {
+  const t = v == null ? '' : String(v);
+  return /[",\n;]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t;
+};
+
+function eksportas({ ka, riba } = {}) {
+  if (!db) return '';
+  const r = Math.min(Math.max(parseInt(riba, 10) || 50000, 1), 200000);
+  if (ka === 'stebejimai') {
+    const eil = db.prepare(`SELECT skelbimo_id, laikas, kaina, rida FROM stebejimai ORDER BY skelbimo_id, laikas LIMIT ?`).all(r);
+    const antr = ['id_maisa', 'data', 'kaina', 'rida'];
+    return [antr.join(',')].concat(eil.map((e) => [maisa(e.skelbimo_id), D(e.laikas), e.kaina == null ? '' : e.kaina,
+      e.rida == null ? '' : e.rida].map(CSV).join(','))).join('\n') + '\n';
+  }
+  const eil = db.prepare(`SELECT s.*,
+      (SELECT COUNT(*) FROM stebejimai t WHERE t.skelbimo_id = s.id) AS stebejimu,
+      (SELECT kaina FROM stebejimai t WHERE t.skelbimo_id = s.id ORDER BY t.laikas ASC LIMIT 1) AS pirma_kaina,
+      (SELECT kaina FROM stebejimai t WHERE t.skelbimo_id = s.id ORDER BY t.laikas DESC LIMIT 1) AS paskut_kaina
+    FROM skelbimai s ORDER BY s.pirma_matytas LIMIT ?`).all(r);
+  const antr = ['id_maisa', 'portalas', 'marke', 'modelis', 'kartos_kodas', 'kartos_faze', 'rinkos_grupe',
+    'metai', 'menuo', 'kuras', 'deze', 'kebulas', 'galia', 'variklio_turis', 'rida', 'kaina',
+    'kainos_ispejimas', 'pardavejo_tipas', 'turi_vin', 'garantija', 'miestas', 'nuotrauku_sk', 'teksto_ilgis',
+    'ikelta', 'pirmas_matymas', 'paskutinis_matymas', 'dingo_data', 'kartu_matytas', 'dienu_rinkoje',
+    'stebejimu', 'pirma_kaina', 'paskut_kaina'];
+  const eilutes_ = eil.map((s) => {
+    const k = kartosLaukai(s.kita);
+    const pab = s.dingo || s.paskut_matytas;
+    const dienos = (s.pirma_matytas && pab) ? Math.round((pab - s.pirma_matytas) / 86400000) : '';
+    return [maisa(s.id), s.portalas, s.marke || '', s.modelis || '', k.kodas, k.faze, k.grupe,
+      s.metai == null ? '' : s.metai, s.menuo == null ? '' : s.menuo, s.kuras || '', s.pavarai || '',
+      s.kebulas || '', s.galia == null ? '' : s.galia, s.variklio_turis == null ? '' : s.variklio_turis,
+      s.rida == null ? '' : s.rida, s.kaina == null ? '' : s.kaina,
+      s.kainos_ispejimas ? 1 : 0,
+      // Pardavejo TIPAS, ne pardavejas: vardo, telefono ir nuorodos archyve nera.
+      s.verslas == null ? '' : (s.verslas ? 'imone' : 'privatus'),
+      s.turi_vin == null ? '' : s.turi_vin, s.garantija == null ? '' : s.garantija,
+      s.miestas || '', s.nuotrauku_sk == null ? '' : s.nuotrauku_sk, s.teksto_ilgis == null ? '' : s.teksto_ilgis,
+      D(s.ikelta_laikas), D(s.pirma_matytas), D(s.paskut_matytas), D(s.dingo),
+      s.kartu_matytas, dienos, s.stebejimu, s.pirma_kaina == null ? '' : s.pirma_kaina,
+      s.paskut_kaina == null ? '' : s.paskut_kaina].map(CSV).join(',');
+  });
+  return [antr.join(',')].concat(eilutes_).join('\n') + '\n';
 }
 
 // ── Suvestinė ────────────────────────────────────────────────────────────────
@@ -348,6 +471,6 @@ function kainosModeliui({ marke, modelis, metaiNuo, metaiIki, riba } = {}) {
 module.exports = {
   kuroNorm, taisytiSenusIrasus,
   ikelti, skelbimoId, pradeti, vykstantis, irasytiPuslapi, baigti, suvestine, eilutes,
-  kainosModeliui, NESAUGOMA,
+  kainosModeliui, irasytiPaieskos, eksportas, kartosLaukai, NESAUGOMA,
   _db: () => db,
 };

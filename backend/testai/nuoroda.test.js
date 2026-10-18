@@ -106,7 +106,8 @@ T(/type="url" inputmode="url"/.test(idx), 'telefone – URL klaviatūra');
 T(/id="ct-link-btn" disabled/.test(idx), 'mygtukas iš pradžių neaktyvus – analizė kainuoja kreditų');
 T(/Analizuoti · 2 kr/.test(idx), 'kaina užrašyta ant mygtuko');
 T(/function ctNuorodosPortalas/.test(idx), 'portalo atpazinimas yra');
-T(/mobile\\.de/.test(idx) && /otomoto\\.pl/.test(idx), 'atpazistami visi penki portalai');
+T(['autoplius.lt', 'autogidas.lt', 'autoscout24.com', 'otomoto.pl', 'mobile.de']
+  .every((d) => idx.includes("'" + d + "'")), 'atpažįstami visi penki portalai');
 T(/ctNuorodosBusena\('foreign'/.test(idx), 'svetimas portalas gauna savo būseną, ne klaidą');
 T(/localStorage\.setItem\('ct_detail'/.test(idx), 'rezultatas perduodamas skelbimo puslapiui');
 // Inline stilių tikrinam TIK naujame bloke: senų `index.html` nuodėmių šis

@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.27.0', data: '2026-10-19', pavadinimas: 'Kiekviena paieška papildo mūsų kainų istoriją',
+    pakeitimai: [
+      'Nuo šiol kiekviena paieška įrašo matytus skelbimus į mūsų archyvą – iki šiol jį pildė tik rankiniai skenavimai, o paieškų duomenys dingdavo.',
+      'Tai nekainuoja nė vieno papildomo kredito: puslapiai jau nuskaityti, tiesiog nebeišmetami.',
+      'Archyvas – tai, kas leis ateityje pasakyti, per kiek dienų toks automobilis parduodamas ir kiek paprastai nuleidžiama kaina.',
+      'Archyve saugome tik duomenis apie automobilį ir kainą: jokių pardavėjo vardų ar kontaktų, tik „privatus“ arba „įmonė“.',
+    ],
+  },
+  {
     versija: '2.26.0', data: '2026-10-19', pavadinimas: 'Įklijuok nuorodą – gauk pilną apžvalgą',
     pakeitimai: [
       'Paieškos puslapio viršuje atsirado laukas nuorodai: įklijuoji skelbimo adresą ir gauni tą pačią pilną apžvalgą, kaip paspaudus kortelėje – nereikia paleisti visos paieškos.',
