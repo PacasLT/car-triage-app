@@ -21,6 +21,9 @@ const cache = require('./cache');
 const autopliusIds = require('./autoplius-ids');
 const vinTikrinimas = require('./vin-tikrinimas');
 const nuotrAnalize = require('./nuotrauku-analize');
+// v2.25.0: kodel skelbimas per pigus - trys pakopos (tekstas / viena
+// nuotrauka Haiku / pilna analize). Luko sprendimas 10-19, KL-1019-0030.
+const pigumas = require('./pigumo-patikra');
 // Regitros parko suvestine (docs/regitra-panaudojimas.md). Ikeliama KARTA
 // paleidziant - 237 KB atmintyje, be SQLite: tai ketvirtinis statinis duomuo,
 // keliaujantis su deploy'umi, ne kintanti busena.
@@ -913,6 +916,9 @@ app.get('/admin/atsarga', klaiduPrieiga, (req, res) => {
     regitra: regitra.meta(),
     paieskosPuslapiai: ATSARGA.paieska,
     skelbimuPuslapiai: ATSARGA.skelbimas,
+    // v2.25.0: AI sanaudos nuo paleidimo. `eur` - tikra suma pagal modelio
+    // `usage`, ne ivertis: butent del to pigumo patikra ir buvo matuojama.
+    ai: Object.assign({}, ATSARGA.ai, { eur: Math.round(ATSARGA.ai.eur * 10000) / 10000 }),
     puppeteer: p,
     isvada: p.pasiektas === 0
       ? 'Puppeteer nebuvo pasiektas ne karto - ScraperAPI ir axios uztenka.'
@@ -936,6 +942,18 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const MODEL = 'claude-sonnet-4-5';
 // Pigus modelis paprastoms uzduotims (vieno sakinio santrauka is paruosto konteksto)
 const KOMENTARU_MODEL = process.env.KOMENTARU_MODEL || 'claude-haiku-4-5';
+// ── PIGUMO PATIKRA (v2.25.0) ───────────────────────────────────────────────
+// Kada skelbimas laikomas „per pigiu" ir kiek tokiu tikrinam vienai paieskai.
+// Riba 25 % ir imtis 5 - ne atsitiktiniai: nuo plonos medianos nuolaida buna
+// netikra, o uz netikra nuolaida mes sumoketume tikrais pinigais.
+const PIGUMO_PATIKRA = (process.env.PIGUMO_PATIKRA || '1') !== '0';
+const PIGUMO_RIBA = parseInt(process.env.PIGUMO_RIBA_PCT || '25', 10);
+const PIGUMO_IMTIS = parseInt(process.env.PIGUMO_IMTIS || '5', 10);
+const PIGUMO_MAX = parseInt(process.env.PIGUMO_MAX || '12', 10);
+// 3 pakopa (pilna analize su 6 nuotraukomis, 0,062 EUR) automatiskai NEVYKSTA,
+// kol Lukas nepamate tikros 2 pakopos kainos. Ijungus - ne daugiau PILNA_MAX.
+const PIGUMO_PILNA = (process.env.PIGUMO_PILNA || '0') !== '0';
+const PIGUMO_PILNA_MAX = parseInt(process.env.PIGUMO_PILNA_MAX || '3', 10);
 // Kiek nuotrauku siusti vizualinei analizei. Kiekviena ~1500 tokenu.
 const DEEP_FOTO_KIEKIS = parseInt(process.env.DEEP_FOTO_KIEKIS || '6', 10);
 // v1.23.0 SANAUDOS: struktūriniai skelbimo laukai (lentele, iranga, pardavejas, aprasymas)
@@ -966,6 +984,9 @@ const ATSARGA = {
   paieska:   { talpykla: 0, scraperapi: 0, kreditai: 0, axios: 0, puppeteer: 0 },
   skelbimas: { talpykla: 0, scraperapi: 0, puppeteer: 0, atsarginis: 0 },
   puppeteer: { pasiektas: 0, pavyko: 0, nepavyko: 0, klaidos: {} },
+  // v2.25.0: AI tokenai ir EUR. ScraperAPI kreditus matavom nuo pradziu, o AI
+  // sanaudas skaiciuodavom rankomis audite - dabar jas rodo pats serveris.
+  ai: { kvietimai: 0, in: 0, out: 0, eur: 0 },
 };
 function atsargaKlaida(zinute) {
   const k = String(zinute || '').slice(0, 120);
@@ -3720,6 +3741,63 @@ async function runSearchJob(jobId, filters, arAdminas) {
       }
     }));
 
+    // ── PIGUMO PATIKRA · trys pakopos (v2.25.0, Luko „gerai darom" 10-19) ──
+    // Pigesne pakopa visada eina pirma ir dazniausiai atsako pati:
+    //   1 pakopa  0 EUR      skelbimo tekstas (dauztas / dalimis / lizingas / be TA...)
+    //   2 pakopa  ~0,002 EUR Haiku + PIRMA miniatiura (nuotraukos siuntimas per
+    //                        axios, tad ScraperAPI kreditu NEKAINUOJA)
+    //   3 pakopa  0,062 EUR  pilna analize - tik `PIGUMO_PILNA=1` ir ne daugiau 3
+    // Jei tekste parasyta „dauztas", 2 pakopos nekvieciam: priezastis jau zinoma.
+    if (PIGUMO_PATIKRA) {
+      const pigus = candidates.filter((c) => pigumas.arPigus(c, PIGUMO_RIBA, PIGUMO_IMTIS));
+      let is1 = 0;
+      pigus.forEach((c) => {
+        const v = pigumas.tekstoVerdiktas(pigumas.tekstoPriezastys(c));
+        if (v) { c.pigumas = v; is1++; }
+      });
+      const antrai = pigus.filter((c) => !c.pigumas && c.photo).slice(0, PIGUMO_MAX);
+      if (pigus.length) {
+        logJob(jobId, `💸 Per pigių (≥${PIGUMO_RIBA}% nuo ≥${PIGUMO_IMTIS} skelbimų medianos): ${pigus.length}. `
+          + `Priežastis tekste: ${is1}. Tikrinam nuotrauką: ${antrai.length}.`);
+      }
+      let eur = 0, patikrinta = 0;
+      await Promise.all(antrai.map(async (c) => {
+        const raktas = `${c.url}::${c.kaina}`;
+        const kesuotas = cache.getCached('pigumas', raktas, cache.PAGE_TTL_MS);
+        if (kesuotas) { c.pigumas = kesuotas; return; }
+        try {
+          const img = await downloadImageAsBase64(c.photo);
+          if (!img) return;
+          const v = await pigumas.patikra({ anthropic, model: KOMENTARU_MODEL, listing: c, img, nuotraukosUrl: c.photo });
+          if (!v) return;
+          if (v.usage) {
+            ATSARGA.ai.kvietimai++; ATSARGA.ai.in += v.usage.in;
+            ATSARGA.ai.out += v.usage.out; ATSARGA.ai.eur += v.usage.eur;
+            eur += v.usage.eur; patikrinta++;
+            delete v.usage;      // sasajai tokenu nereikia, reikia verdikto
+          }
+          c.pigumas = v;
+          cache.setCached('pigumas', raktas, v);
+        } catch (e) {
+          const aiKl = aiKlaidosZinute(e);
+          console.warn('[PIGUMAS] patikra nepavyko:', e.message);
+          if (aiKl) {
+            const zyma = jobId + ':' + aiKl.raktas;
+            if (!_aiKlaiduZymos.has(zyma)) { _aiKlaiduZymos.add(zyma); logJob(jobId, `   ⚠ ${aiKl.tekstas}`); }
+          }
+        }
+      }));
+      if (patikrinta) {
+        logJob(jobId, `   ✅ Nuotraukos patikrintos: ${patikrinta} × ${(eur / patikrinta).toFixed(4)} € = `
+          + `${eur.toFixed(3)} € (visa paieška)`);
+      }
+      const verti = candidates.filter((c) => c.pigumas && c.pigumas.reikiaPilnos);
+      if (verti.length) {
+        logJob(jobId, `   🔬 Pilnos apžvalgos verti: ${verti.length}`
+          + (PIGUMO_PILNA ? ` – darom ${Math.min(verti.length, PIGUMO_PILNA_MAX)}` : ' – rodom žymą, automatiškai nedarom'));
+      }
+    }
+
     // TOP 5 geriausius (pagal kokybes balo rikiavima) is karto isanalizuojame issamiai -
     // vartotojui nereikia paspausti mygtuko, kad matytu pilna vaizda geriausiems variantams.
     // Visi TOP 5 analizuojami LYGIAGRECIAI (ne vienas po kito) - tai ilgiausiai trunkantis
@@ -3741,7 +3819,14 @@ async function runSearchJob(jobId, filters, arAdminas) {
       }
     });
     if (isPodelio) logJob(jobId, `✅ ${isPodelio} skelbim${isPodelio === 1 ? 'ui' : 'ams'} detali apžvalga jau buvo paruošta – prisegta nemokamai`);
-    const generuoti = candidates.slice(0, TOP_N_DEEP).filter((c) => !c.deepAnalysis);
+    // v2.25.0: 3 pakopa - skelbimai, kuriems 2 pakopa neatsake „kodel pigu".
+    // Ijungiama tik `PIGUMO_PILNA=1`, nes tai 0,062 EUR uz skelbima.
+    const pilnosVerti = PIGUMO_PILNA
+      ? candidates.filter((c) => c.pigumas && c.pigumas.reikiaPilnos).slice(0, PIGUMO_PILNA_MAX)
+      : [];
+    const generuoti = candidates.slice(0, TOP_N_DEEP).concat(pilnosVerti)
+      .filter((c, i, a) => a.indexOf(c) === i)
+      .filter((c) => !c.deepAnalysis);
     if (generuoti.length) logJob(jobId, `🔬 Ruošiame detalią apžvalgą TOP ${generuoti.length} pasiūlymams (lygiagrečiai)...`);
     await Promise.all(generuoti.map(async (c, i) => {
       const label = `[${i + 1}/${generuoti.length}] ${c.modelis} ${c.kaina}€`;
@@ -3821,6 +3906,9 @@ async function runSearchJob(jobId, filters, arAdminas) {
       // v2.18.1: rinka ir kaina Lietuvoje. Šis sąrašas yra BALTASIS SĄRAŠAS - laukas,
       // kurio čia nėra, iki sąsajos nenukeliauja, net jei `enriched` jį turi.
       beNuotraukos: !!l.beNuotraukos, photoIsKito: l.photoIsKito || null,
+      // v2.25.0: pigumo patikros verdiktas (1 arba 2 pakopa). Be sios eilutes
+      // jis iki sasajos nenukeliautu - tas pats baltojo saraso spastas.
+      pigumas: l.pigumas || null,
       rinka: l.rinka || null, lygintaRinka: l.lygintaRinka || null,
       rinkosVardas: l.rinkosVardas || null, kainaLt: l.kainaLt || null,
       // v2.20.0 – perpardavėjo skaičiai

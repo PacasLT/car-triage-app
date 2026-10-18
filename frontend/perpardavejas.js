@@ -280,6 +280,13 @@
       + '<span class="ct-dt-car-t"><span>' + pav + '</span>'
       + '<span class="ct-dt-meta">'
       + (bk ? '<span class="ct-bukle ' + (bk.saltinis === 'portalas' ? 'is-portal' : 'is-guess') + '">' + esc(bk.tekstas) + '</span>' : '')
+      // v2.25.0 pigumo patikra. Ta pati 52 sk. žyma ta pačia prasme: TVIRTA –
+      // pasakė šaltinis (skelbimo tekstas), PUNKTYRAS – mūsų spėjimas iš vienos
+      // nuotraukos. Naujos klasės nekuriam.
+      + (c.pigumas && c.pigumas.zyma
+        ? '<span class="ct-bukle ' + (c.pigumas.lygis === 'tekste' || c.pigumas.lygis === 'matoma' ? 'is-portal' : 'is-guess')
+          + '" title="' + esc(c.pigumas.tekstas || '') + '">' + esc(c.pigumas.zyma) + '</span>'
+        : '')
       + '<span>' + esc(meta) + '</span></span></span></a>'
       + '<span class="is-key is-num' + (riba ? ' is-cap' : '') + '" data-k="max pirkimo">' + maxVidus + '</span>'
       + '<span class="is-num" data-k="≈ lietuvoje">' + ltVidus + '</span>'

@@ -1,4 +1,4 @@
-# Būsena · 2026-10-19 · v2.24.1 (laukia push)
+# Būsena · 2026-10-19 · v2.25.0 (laukia push)
 
 Tik **atviri** punktai. Uždaryti — `ZURNALAS.md` / `archyvas/`. Kas laukia Luko — `LUKUI.md`.
 Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
@@ -18,7 +18,9 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 | ~~K-23a~~ | `.ct-check` telefone 32 px | **Uždaryta** (Errata 19): dizaineris perėmė į 21 sk.; iš priedų 25 išimta. |
 | ~~K-71a~~ | 52 sk. legenda telefone | **Uždaryta** (Errata 19): forma patvirtinta. |
 | ~~Tinder mygtukas~~ | **Išimtas v2.24.0** (73 pk.) | Mygtukas, `startTinder()` ir CSS. `#tinder-view` markupas liko – atskiras darbas. |
+| ~~Pigumo patikra~~ | **Padaryta v2.25.0:** kodėl skelbimas per pigus | Trys pakopos (Luko „gerai darom“ 10-19): 1) tekstas 0 €, 2) Haiku + 1 nuotrauka ~0,002 €, 3) pilna analizė 0,062 € – **išjungta**, kol Lukas nepamatys 2 pakopos kainos gyvoje paieškoje (`PIGUMO_PILNA=1`). Liko: Luko sprendimas dėl apimties (ar 2 pakopa visiems, ne tik per pigiems) ir ar įjungti 3 pakopą. |
 | K-73a | 59 sk. `small` netelpa į 136 px | Pamatuota: `guess` 120 px, `own` 153 px prieš 112 px vidų. Dizaineriui. |
+| K-75 | `.ct-bukle` dabar neša dvi prasmes | Pigumo žyma įdėta į esamą 52 sk. komponentą (tvirta/punktyras prasmė sutampa). Eilutėje gali stovėti dvi žymos – telpa, bet dizaineris sprendžia, ar pigumui duoti savo vardą. |
 | 53 paketas | `card` klasė nuo apvalkalo (DZ-KORTELES: visi trys) | v2.11.0; prieš – JS `closest('.card')` / `.card` paieška. |
 | Stabdis | Kiekis portaluose + kaina + stabdis + Stop | **Dalis padaryta v2.15.0:** puslapių pasirinkimas iki „visų“ + kainos riba (`PAIESKOS_RIBA_KR`, 200 kr.) su langu „per didelė paieška“. Liko: Stop mygtukas (KL-STOP), kiekis portaluose prieš paiešką (DZ-LENTELE) ir admin kreditų rodinys pagal vartotoją (KL-F3PLUS). |
 | Modelio apžvalga | „Analizuoti modelį“ (Luko prašymas 09-24) | **Padaryta v2.16.0:** mygtukas po paieškos, Regitros/TA/mūsų kainų istorijos skaičiai + AI su web paieška, 2 kr., talpykla 30 d. Liko: gyva patikra produkcijoje ir dizainerio langas (inline stiliai). |
@@ -90,8 +92,9 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 | ~~2~~ | `.ct-l3 > .ct-istorija` | **Perimta į 39 sk.** (Errata 16, v2.13.4). |
 | ~~K-65~~ | `.ct-photo` pervadinimas | **Atšauktas** – tikrasis markupas jau atitinka sistemos 1 sk. struktūrą. Mano klaida: skaičiau `index.html` CSS, ne JS piešiamą markupą. |
 | 8 | `#more-filters` iš inline | NETRINTI (mūsų) |
+| 26 | `.ct-dt-meta` telefone lūžta (pigumo žyma, K-75) | Dizaineris – arba į 51 sk., arba pigumui savas vardas |
 
-Blokai 3–7, 9–23 jau ištrinti. Gyvų taisyklių faile – 7 (trys blokai).
+Blokai 3–7, 9–25 jau ištrinti. Gyvų taisyklių faile – **4**: `.ct3-more-panel`, `.ct3-more-row` (8 blokas) ir dvi 26 bloko telefono eilutės.
 
 
 

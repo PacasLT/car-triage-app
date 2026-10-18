@@ -362,6 +362,10 @@ function tekstasAnalizei(v) {
 
 module.exports = {
   LYGIAI, RAKURSAI, DRAUDZIAMA, EVIDENCE_INSTRUKCIJA,
+  // v2.25.0: `nuasmeninti` ir `DRAUDZIAMA` naudoja ir `pigumo-patikra.js` -
+  // uzdraustu fraziu sarasas produkte turi buti VIENAS, kitaip dvi vietos
+  // nuslys skirtingais keliais.
+  nuasmeninti,
   analizuoti, apdoroti, tekstasAnalizei,
   sutvarkytiPastebejima, skaiciuotiPasitikejima, skaiciuotiBukle,
   patvirtintiIranga, rastiPrieštaravimus,

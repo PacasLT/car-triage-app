@@ -2283,3 +2283,68 @@ Tai pamoka apie pataisų eiliškumą: **pataisius vieną klaidą, pirmą kartą 
 **Sargas patikrintas atbuline eiga:** grąžinau `esc(det)` atgal – sargas nukrito (1 klaida); grąžinus `ctEsc` – vėl žalias. Sargas, kurio nepatikrinai sulaužytu kodu, yra tik viltis.
 
 - Sargai: **24 žali**; `puslapiai` 43 → **44**. Tokenai 0 + 0.
+
+## Z-167 · 2026-10-19 · Kodėl skelbimas per pigus – trys pakopos (v2.25.0)
+
+Luko sprendimas 10-19 („gerai darom“) į KL-1019-0030. Nauja: `backend/pigumo-patikra.js`.
+
+### Kodėl trys pakopos, o ne viena analizė
+
+| Pakopa | Kaina | Ką atsako | Kam leidžiama |
+|---|---|---|---|
+| 1. tekstas | **0 €** | ar priežastis jau parašyta skelbime | visiems per pigiems |
+| 2. Haiku + 1 nuotrauka | **~0,002 €** | ar nuotrauka sutampa su aprašymu; kodėl pigu | tik tiems, kurių 1 pakopa neatsakė |
+| 3. Sonnet + 6 nuotraukos | **0,062 €** | tikra būklė | **išjungta** (`PIGUMO_PILNA=1`), riba 3 |
+
+Esmė – eiliškumas: jei skelbime parašyta „daužtas“, 2 pakopos **nekviečiam**. Priežastis jau žinoma, o patikra kainuotų pinigų už atsakymą, kurį jau turim. Iš 1 pakopos aštuoni raktai keturiomis kalbomis (LT, DE, PL, EN), nes portalai penki: žala, techninis gedimas, dalimis, be TA, aukcionas, lizingo įmoka, kaina be PVM, rida. Devintas – kryžminis skelbimas **pigiau** kitame portale: pardavėjas pats parodė, kiek prašo iš tikrųjų.
+
+### Ką 2 pakopai LEIDŽIAMA pasakyti
+
+Nieko daugiau, nei leidžia viena nuotrauka. `nuotrauku-analize.js` riba galioja ir čia (MATOME → APRAŠOME), ir **uždraustų frazių sąrašas imamas iš to paties failo**, ne kopijuojamas – kitaip dvi vietos per porą mėnesių nuslystų skirtingais keliais. Dėl to iš modulio išeksportuotas `nuasmeninti`.
+
+Praktiškai: modelis gali parašyti „automobilis daužtas“, ir sargas tą teiginį **iškerpa**, o verdiktą nuleidžia į „galimas“. Žala iš **vienos** nuotraukos niekada nėra „matoma“ – tik požymis. Du dalykai, kuriuos viena nuotrauka IŠ TIKRŲJŲ pasako ir kurie nugali modelio atsakymą: nuotraukoje **ne tas** automobilis ir nuotraukoje **ne automobilis**. Jie abu – „matoma“.
+
+„Verta pilnos apžvalgos“ sprendžiam **mes**, ne modelis: tik kai liko neatsakytas klausimas (nepaaiškinta, neatitikimas, galimi žalos požymiai, tamsi / neryški / katalogo nuotrauka). Modelio `verta_pilnos` lauko neklausom – jis pasakytų „taip“ iš smalsumo.
+
+### Kiek tai kainuoja – skaičiai, ne įspūdis
+
+Žurnale ir `/admin/atsarga` dabar yra `ATSARGA.ai` (kvietimai, tokenai, **EUR pagal tikrą `usage`**). Iki šiol AI sąnaudas skaičiuodavom rankomis audite.
+
+Įvertis prieš pirmą gyvą paiešką (instrukcija 387 tok. + skelbimas ~389 tok. + nuotrauka):
+
+| Nuotrauka | Tokenai | Vienas | 12 per paiešką |
+|---|---|---|---|
+| autoscout24 250×188 | 63 | 0,0017 € | 0,020 € |
+| autoplius 720×480 | 461 | 0,0021 € | 0,025 € |
+| mobile.de 1024×768 | 1 049 | 0,0026 € | 0,031 € |
+| 1060×1060 | 1 498 | 0,0030 € | 0,036 € |
+
+Tai **pigiau, nei pažadėjau Lukui** (0,003 € vienam). Nuotraukų parsiuntimas – `axios`, taigi **0 ScraperAPI kreditų**. Tikrą skaičių pasakys pirmos gyvos paieškos žurnalas – įvertis lieka įverčiu, kol jo nepamatuojam.
+
+### Sargas (56 patikrų), patikrintas sulaužytu kodu
+
+Z-166 pamoka pritaikyta iš karto: išėmiau frazių sargą ir išėmiau `pigumas` iš baltojo sąrašo – **4 patikros nukrito**; grąžinus – 56 žalios. Sargas tikrina ir serverio pusę: ar 2 pakopa kviečiama tik tiems, kurių 1 neatsakė; ar yra riba vienai paieškai; ar 3 pakopa pagal nutylėjimą išjungta; ar verdiktas yra baltajame sąraše (tas pats spąstas kaip v2.18.1 ir v2.23.1 – trečias kartas, tad dabar jį gaudo sargas).
+
+- Sargai: **25 žali** (naujas `pigumo-patikra` 56); `migracija` krenta tik dėl aplinkos (šiame apvalkale neleidžiama trinti failų). Tokenai 0 + 0.
+- Dizainerio failų **neliesta**: žyma lentelėje – esama 52 sk. `.ct-bukle` su ta pačia prasme (tvirta = pasakė šaltinis, punktyras = mūsų spėjimas), kortelėje – esama `.ct-risk`.
+
+### K-75 · dizaineriui: `.ct-bukle` dabar neša dvi prasmes
+
+Pigumo žymą („Pigu: žala“, „Pigu: nesimato“, „Nuotr. ≠ aprašymas“) įdėjau į **esamą** 52 sk. `.ct-bukle`, nes jos prasmė sutampa tiksliai: tvirta = pasakė šaltinis, punktyras = mūsų spėjimas. Naujos klasės nerašiau (CLAUDE.md: antrą kartą rašant tą patį į priedus – klausti dizainerio).
+
+Bet dabar eilutėje gali stovėti **dvi** to paties komponento žymos: „~ daužtas?“ ir „Pigu: nesimato“.
+
+### Pamatuota (Playwright, 1440 ir 390 px, 0 JS klaidų)
+
+| | 1440 px | 390 px |
+|---|---|---|
+| „Automobilis“ stulpelis | 730 px | 334 px |
+| Žymos | 67 + 61 px (ir 54 + 85 px) | 67 + 85 px |
+| `.ct-dt-meta` paskutinis `span` | 265 px, **nenukirptas** | **265 → 103 px, NUKIRPTAS** |
+| Kas pasimatė | viskas | tik „2023 · 60 000 km“ – rida procentais ir miestas nukrito |
+
+Telefone antra žyma suspaudė duomenų eilutę. `scrollWidth` čia nieko nebūtų pasakęs (`.ct-dt-meta` turi `overflow: visible`) – nukirpimas matomas tik VIDINIAME `span`, kuris turi `overflow: hidden`, tad matavau jį, ne tėvą.
+
+**Laikinas sprendimas – priedų 26 blokas:** telefone eilutė lūžta (`flex-wrap: wrap`, duomenys `flex: 1 0 100%`). Po to: `.ct-dt-meta` 18 → 32 px, duomenų `span` 270 px, **nenukirptas**, visi keturi faktai matosi.
+
+Dizainerio sprendimas: ar palikti vieną komponentą dviem prasmėms (tada 26 blokas pereina į 51 sk.), ar pigumo žymai duoti savo vardą (pvz. `.ct-pigu`) su kita spalva – kad „kodėl pigu“ neatrodytų kaip būklės žyma.

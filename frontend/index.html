@@ -6553,6 +6553,7 @@ function ctNavTab(tab) {
         +     '</div>'
         +     (chipsVisi.length ? '<div class="ct-l3-chips">' + chipsVisi.slice(0, 6).map(chip).join('') + '</div>' : '')
         +     (c.itariamaZala ? '<div class="ct-risk"><i>!</i><div><span class="ct-risk-t">GALIMAI DAUŽTAS</span> <span class="ct-risk-d">' + esc(c.itariamaZala.tekstas || '') + '</span></div></div>' : '')
+        +     (c.pigumas && c.pigumas.tekstas ? '<div class="ct-risk"><i>!</i><div><span class="ct-risk-t">' + esc(c.pigumas.antraste || 'KODĖL PIGU') + '</span> <span class="ct-risk-d">' + esc(c.pigumas.tekstas) + (c.pigumas.reikiaPilnos ? ' Verta pilnos apžvalgos.' : '') + '</span></div></div>' : '')
         +     (c.kainosIspejimas ? '<div class="ct-risk"><i>!</i><div><span class="ct-risk-t">PATIKRINKITE KAINĄ</span> <span class="ct-risk-d">' + esc(c.kainosIspejimas.tekstas || '') + '</span></div></div>' : '')
         +     '<div class="ct-l2">'
         +       '<div class="ct-score ' + balaTonas + '"><span class="ct-score-lbl">CARTRIIGE ĮVERTIS</span>'

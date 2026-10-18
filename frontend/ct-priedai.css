@@ -167,3 +167,24 @@
 
 /* 25 BLOKAS · IŠTRINTAS v2.24.0 (73 pk.): dizaineris perėmė `.ct-fld-pop`
    į 58 sk. – kartu su telefono apatiniu lapeliu ir `--shadow-panel`. */
+
+
+/* 26 BLOKAS · v2.25.0 · pigumo žyma lentelės eilutėje (laikinas, K-75)
+   Dizaineriui: pigumo žymą („Pigu: žala", „Pigu: nesimato", „Nuotr. ≠ aprašymas")
+   įdėjau į ESAMĄ 52 sk. `.ct-bukle`, nes prasmė sutampa tiksliai: tvirta – pasakė
+   šaltinis (skelbimo tekstas), punktyras – mūsų spėjimas iš vienos nuotraukos.
+   Naujo vardo nesugalvojau pats.
+
+   Problema, kurią pamačiau pamatavęs 390 px: eilutėje dabar gali stovėti DVI to
+   paties komponento žymos („~ daužtas?" 67 px + „Pigu: nesimato" 85 px), ir
+   `.ct-dt-meta` paskutinis `span` (51 sk. 5490 eil.) susispaudžia 265 → 103 px –
+   vietoj „2023 · 60 000 km · −12 % ridos · Vilnius" lieka „2023 · 60 000 km".
+   Metai ir rida išlieka, bet rida procentais ir miestas nukrenta.
+
+   Laikinas sprendimas: telefone leidžiu eilutei lūžti – žymos pirmoje eilutėje,
+   duomenys antroje, pilni. Tavo sprendimas: ar palikti vieną komponentą dviem
+   prasmėms (tada ši taisyklė pereina į 51 sk.), ar pigumui duoti savo vardą. */
+@media (max-width: 640px) {
+  .ct-dt-meta { flex-wrap: wrap; row-gap: 3px; }
+  .ct-dt-meta > span:last-child { flex: 1 0 100%; }
+}

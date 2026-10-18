@@ -8,6 +8,16 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.25.0', data: '2026-10-19', pavadinimas: 'Kodėl šis skelbimas per pigus',
+    pakeitimai: [
+      'Per pigiems skelbimams dabar rašoma, KODĖL jie pigūs: ar priežastis nurodyta pačiame skelbime (žala, parduodamas dalimis, be TA, lizingo įmoka, kaina be PVM, aukcionas), ar ji matoma pirmoje nuotraukoje.',
+      'Jei priežastis nurodyta skelbime – nuotraukos netikriname: atsakymas jau yra, o patikra kainuotų pinigų.',
+      'Jei nuotraukoje nesimato, kodėl pigu, skelbimas pažymimas „verta pilnos apžvalgos“ – automatiškai jos nedarome.',
+      'Žyma rodoma ir lentelėje, ir kortelėse: tvirta – pasakė skelbimas, punktyrinė – požymis nuotraukoje. Viena nuotrauka niekada nerašo „daužtas“.',
+      'Per pigiu skelbimas laikomas tik tada, kai mediana surinkta bent iš 5 panašių skelbimų – kitaip nuolaida netikra.',
+    ],
+  },
+  {
     versija: '2.24.1', data: '2026-10-19', pavadinimas: 'Pataisyta: „Rodymo klaida“ kortelėse',
     pakeitimai: [
       'Rezultatai nebeparodydavo nieko, tik raudoną „Rodymo klaida“. Priežastis – eilutėje „≈ Lietuvoje“ buvo naudojama funkcija, kurios toje vietoje nėra.',
