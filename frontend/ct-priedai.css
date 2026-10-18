@@ -190,6 +190,14 @@
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-1);
 }
+/* „Gerai" – aiškus būdas užverti, ypač telefone, kur paspaudimas šalia
+   dažnai pataiko į kitą valdiklį. Atskirtas linija, nes tai ne pasirinkimas. */
+.ct-fld-pop > .ct-btn {
+  align-self: stretch; margin-top: 6px; padding-top: 8px;
+  border-top: 1px solid var(--border);
+  border-radius: 0; background: transparent;
+}
+
 /* Atidarytas laukas atrodo kaip fokusuotas – kitaip nesimato, kuris atsidarė */
 .ct-fld.is-open > .ct-fld-v { border-color: var(--accent-border); }
 .ct-fld.is-open > .ct-fld-v > .ct-i { transform: rotate(180deg); }

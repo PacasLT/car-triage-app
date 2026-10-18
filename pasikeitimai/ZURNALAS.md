@@ -2111,3 +2111,34 @@ Tai trečia tos pačios rūšies pamoka po Z-155 (skaičiavau su senais kaštais
 
 - Sargai: **24 žali**; `rinkos` 23 → 32, `perpardavejas` 17 → 21. Tokenai 0 + 0.
 - **Lieka atvira:** MAX gali ir toliau rodyti „laukia rinkos", jei paieška be modelio – jam reikia bent 5 to paties modelio LT skelbimų. Tai ne klaida, bet reikia Luko patikros su konkrečiu modeliu.
+
+## Z-161 · 2026-10-18 · v2.23.2 – metai iš sąrašo, kuro skydelis nebekabo
+
+Luko pranešimas su ekranvaizdžiu: „kuro filtras pakibęs ir rodo pastoviai“ + „metų skaičių irgi reikia rinktis iš sąrašo, o ne įrašyti pačiam“.
+
+### 1. Metai → `<select>`
+
+Buvo du `type="number"` laukai. Metų yra baigtinis skaičius ir juos visi žino – rašyti ranka reiškia tik daugiau būdų suklysti (2O18, 218, 20188), o telefone dar ir skaičių klaviatūrą. Dabar du sąrašai, 2027 → 1990, pirma eilutė „nuo“ / „iki“ (tuščia reikšmė). Laukų `id` ir reikšmės nepakito, tad URL, išsaugotos paieškos ir portalų filtrai veikia kaip veikę; `ctFldBusenos` `<select>` šaką jau turėjo.
+
+### 2. Kuro skydelis – trys atskiros klaidos, visos rastos matuojant
+
+**a) Nesiuždarydavo.** Uždarymas kabojo ant `click` ties `document`, o dalis filtrų valdiklių įvykį sustabdo anksčiau (`stopPropagation`). Perkelta į `pointerdown` **gaudymo fazėje** – ten mus pasiekia kiekvienas paspaudimas. Pamatuota: paspaudus kitą filtro lauką, „Gerai“ arba Esc – užsidaro.
+
+**b) Varnelė neįsijungdavo paspaudus eilutės tekstą.** `.ct-check` langelis yra `position:absolute; opacity:0; pointer-events:none` (21 sk.), tad paspaudimas nusėsdavo ant `<i>`, o `<label>` perjungimas nesuveikdavo. Dabar perjungiam patys su `preventDefault` – vienas kelias, be naršyklės spėlionių ir be dvigubo perjungimo.
+
+**c) Mano paties ką tik įvesta klaida.** Buvau pridėjęs `window.addEventListener('scroll', … , true)`, kad skydelis užsivertų slenkant. Matavimas parodė, kad jis vis tiek neužsiverčia (skydelis juda kartu su lauku, nes yra `position:absolute` jo viduje) – **o būtų buvę blogiau**: skydelis turi savo slinktį (`max-height: 300px`), ir vidinė slinktis gaudymo fazėje būtų pasiekusi langą ir užvėrusi sąrašą renkantis. Klausytojas išimtas, vietoje jo – komentaras, kodėl jo ten nėra.
+
+Pridėtas mygtukas **„Gerai“** skydelio apačioje: telefone paspaudimas „šalia“ dažnai pataiko į kitą valdiklį.
+
+### Pamatuota (1440 px)
+
+| Veiksmas | Rezultatas |
+|---|---|
+| Paspaudus lauką | atsidaro |
+| Paspaudus varnelę | lieka atidarytas, `#fuel` = `dyzelinas,benzinas` |
+| Paspaudus kitą filtro lauką | užsidaro |
+| „Gerai“ | užsidaro |
+| Esc | užsidaro |
+| Metai | du `<select>`, 39 eilutės (2027 → 1990), pirma „nuo“ / „iki“ |
+
+- Sargai: **24 žali**. Tokenai 0 + 0.

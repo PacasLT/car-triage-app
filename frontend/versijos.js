@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.23.2', data: '2026-10-18', pavadinimas: 'Metai iš sąrašo; kuro sąrašas nebekabo',
+    pakeitimai: [
+      'Metai renkami iš sąrašo, ne rašomi ranka – nuo 2027 iki 1990, abiem laukams.',
+      'Kuro sąrašas nebelikdavo atviras: dabar užsidaro paspaudus bet kur šalia, kitą filtrą, mygtuką „Gerai“ arba Esc.',
+      'Pataisyta ir pati varnelė: paspaudus eilutės tekstą kuras kartais neįsijungdavo.',
+    ],
+  },
+  {
     versija: '2.23.1', data: '2026-10-18', pavadinimas: 'Pataisyta: kaina Lietuvoje ir daužto žyma',
     pakeitimai: [
       'Stulpelis „≈ Lietuvoje“ rodė gryną skelbimo kainą be parsivežimo kaštų, o didžiausia pirkimo kaina – „laukia rinkos“. Priežastis: skelbimo portalas buvo įrašomas kaip adresas („autoscout24.com“), o kaštų lentelė jo ieškojo trumpu vardu, todėl rinka visada likdavo nežinoma. Veikia nuo spalio 16-osios.',

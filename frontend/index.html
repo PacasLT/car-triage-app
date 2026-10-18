@@ -2468,9 +2468,95 @@
         <div class="ct-fld is-empty is-range" data-lauk="i-f-metai">
           <span class="ct-fld-k"><svg class="ct-i"><use href="#i-f-metai"></use></svg>METAI</span>
           <div class="ct-fld-v">
-            <input class="ct-fld-t" id="metaiNuo" type="number" placeholder="2018" min="1990" max="2025">
+            <!-- v2.23.2: metai renkami iš sąrašo, ne rašomi ranka (Luko prašymas).
+                 Metų yra baigtinis skaičius ir juos visi žino – rašyti ranka
+                 reiškia tik daugiau būdų suklysti (2O18, 218, 20188). Telefone
+                 `<select>` atidaro sisteminį ratuką, tad pasirinkimas vienu
+                 judesiu. Laukų vardai ir reikšmės nepakito, tad URL,
+                 išsaugotos paieškos ir portalų filtrai veikia kaip veikę. -->
+            <select class="ct-fld-t" id="metaiNuo">
+              <option value="">nuo</option>
+              <option value="2027">2027</option>
+              <option value="2026">2026</option>
+              <option value="2025">2025</option>
+              <option value="2024">2024</option>
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+              <option value="2021">2021</option>
+              <option value="2020">2020</option>
+              <option value="2019">2019</option>
+              <option value="2018">2018</option>
+              <option value="2017">2017</option>
+              <option value="2016">2016</option>
+              <option value="2015">2015</option>
+              <option value="2014">2014</option>
+              <option value="2013">2013</option>
+              <option value="2012">2012</option>
+              <option value="2011">2011</option>
+              <option value="2010">2010</option>
+              <option value="2009">2009</option>
+              <option value="2008">2008</option>
+              <option value="2007">2007</option>
+              <option value="2006">2006</option>
+              <option value="2005">2005</option>
+              <option value="2004">2004</option>
+              <option value="2003">2003</option>
+              <option value="2002">2002</option>
+              <option value="2001">2001</option>
+              <option value="2000">2000</option>
+              <option value="1999">1999</option>
+              <option value="1998">1998</option>
+              <option value="1997">1997</option>
+              <option value="1996">1996</option>
+              <option value="1995">1995</option>
+              <option value="1994">1994</option>
+              <option value="1993">1993</option>
+              <option value="1992">1992</option>
+              <option value="1991">1991</option>
+              <option value="1990">1990</option>
+            </select>
             <span>–</span>
-            <input class="ct-fld-t" id="metaiIki" type="number" placeholder="2024" min="1990" max="2025">
+            <select class="ct-fld-t" id="metaiIki">
+              <option value="">iki</option>
+              <option value="2027">2027</option>
+              <option value="2026">2026</option>
+              <option value="2025">2025</option>
+              <option value="2024">2024</option>
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+              <option value="2021">2021</option>
+              <option value="2020">2020</option>
+              <option value="2019">2019</option>
+              <option value="2018">2018</option>
+              <option value="2017">2017</option>
+              <option value="2016">2016</option>
+              <option value="2015">2015</option>
+              <option value="2014">2014</option>
+              <option value="2013">2013</option>
+              <option value="2012">2012</option>
+              <option value="2011">2011</option>
+              <option value="2010">2010</option>
+              <option value="2009">2009</option>
+              <option value="2008">2008</option>
+              <option value="2007">2007</option>
+              <option value="2006">2006</option>
+              <option value="2005">2005</option>
+              <option value="2004">2004</option>
+              <option value="2003">2003</option>
+              <option value="2002">2002</option>
+              <option value="2001">2001</option>
+              <option value="2000">2000</option>
+              <option value="1999">1999</option>
+              <option value="1998">1998</option>
+              <option value="1997">1997</option>
+              <option value="1996">1996</option>
+              <option value="1995">1995</option>
+              <option value="1994">1994</option>
+              <option value="1993">1993</option>
+              <option value="1992">1992</option>
+              <option value="1991">1991</option>
+              <option value="1990">1990</option>
+            </select>
             <svg class="ct-i" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
             <button type="button" class="ct-fld-x" tabindex="-1" aria-label="Išvalyti">✕</button>
           </div>
@@ -2526,6 +2612,7 @@
                 <label class="ct-check"><input type="checkbox" value="benzinas_elektra"><i>✓</i><span>Benzinas / elektra</span></label>
                 <label class="ct-check"><input type="checkbox" value="elektra"><i>✓</i><span>Elektra</span></label>
                 <label class="ct-check"><input type="checkbox" value="dyzelinas_elektra"><i>✓</i><span>Dyzelinas / elektra</span></label>
+            <button type="button" class="ct-btn ct-btn-sm" id="fuel-ok">Gerai</button>
           </div>
         </div>
 
@@ -4527,20 +4614,39 @@ window.ctKuroSkydelis = function (rodyti) {
   if (atidarytas) pop.removeAttribute('hidden'); else pop.setAttribute('hidden', '');
   fld.classList.toggle('is-open', atidarytas);
 };
-document.addEventListener('click', function (e) {
-  if (!e.target.closest) return;
-  // ✕ tvarko bendras `.ct-fld-x` klausytojas – čia jo neliečiam
-  if (e.target.closest('.ct-fld-x')) return;
-  var laukas = e.target.closest('.ct-fld[data-lauk="i-f-kuras"] .ct-fld-v');
-  if (laukas) { window.ctKuroSkydelis(); return; }
-  if (!e.target.closest('#fuel-pop')) window.ctKuroSkydelis(false);   // paspaudus šalia – užsidaro
-});
+// v2.23.2: uždarymas per `pointerdown` GAUDYMO fazėje. Su `click` ant
+// `document` skydelis likdavo atviras, nes dalis filtrų valdiklių sustabdo
+// įvykį anksčiau (`stopPropagation`) – žmogui tai atrodo kaip „pakibęs"
+// sąrašas. Gaudymo fazėje mus pasiekia kiekvienas paspaudimas.
+document.addEventListener('pointerdown', function (e) {
+  var t = e.target; if (!t || !t.closest) return;
+  if (t.closest('#fuel-pop')) return;                       // renkamės – neliečiam
+  if (t.closest('.ct-fld[data-lauk="i-f-kuras"] .ct-fld-x')) return;   // ✕ turi savo klausytoją
+  var laukas = t.closest('.ct-fld[data-lauk="i-f-kuras"] .ct-fld-v');
+  if (laukas) { window.ctKuroSkydelis(); return; }           // paspaudus lauką – perjungiam
+  window.ctKuroSkydelis(false);                              // bet kur kitur – užsidaro
+}, true);
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') window.ctKuroSkydelis(false);
 });
-document.addEventListener('change', function (e) {
-  var c = e.target.closest && e.target.closest('#fuel-pop input[type=checkbox]');
-  if (!c) return;
+document.addEventListener('click', function (e) {
+  if (e.target.closest && e.target.closest('#fuel-ok')) window.ctKuroSkydelis(false);
+});
+// Slinkties klausytojo čia SĄMONINGAI nėra. Skydelis yra `position: absolute`
+// lauko viduje, tad slenkant jis juda kartu – uždaryti nereikia. O su juo
+// būtų blogiau: skydelis turi savo slinktį (`max-height: 300px`), ir vidinė
+// slinktis gaudymo fazėje pasiektų langą bei užvertų sąrašą renkantis.
+// v2.23.2: eilutė perjungiama MŪSŲ kodo, ne naršyklės `<label>` elgesio.
+// Pamatuota: tikras paspaudimas ant eilutės varnelės neperjungdavo, nes
+// langelis yra `position:absolute; opacity:0; pointer-events:none` (21 sk.),
+// ir paspaudimas nusėsdavo ant `<i>`. Todėl `preventDefault` ir perjungiam
+// patys – vienas kelias, be naršyklės spėlionių ir be dvigubo perjungimo.
+document.addEventListener('click', function (e) {
+  var lab = e.target.closest && e.target.closest('#fuel-pop .ct-check');
+  if (!lab) return;
+  e.preventDefault();
+  var c = lab.querySelector('input[type=checkbox]'); if (!c) return;
+  c.checked = !c.checked;
   var inp = document.getElementById('fuel'); if (!inp) return;
   var sar = ctKuroSar(), i = sar.indexOf(c.value);
   if (c.checked && i === -1) sar.push(c.value);
