@@ -123,12 +123,76 @@
     var lentele = busena.rodinys === 'lentele';
     return segSuEtikete('Būklė', [{ v: 'tvarkingi', t: 'Tik tvarkingi' }, { v: 'dauzti', t: 'Daužti / su defektais' }, { v: 'visi', t: 'Visi' }], busena.bukle)
       + segSuEtikete('Marža', [{ v: '0.1', t: '10 %' }, { v: '0.15', t: '15 %' }, { v: '0.2', t: '20 %' }], String(busena.marza))
+      // Rūšiavimas – tik kortelių režime: lentelėje rikiuoja stulpelių antraštės.
+      + '<span class="ct-seg-l" data-mode="cards"' + (lentele ? ' hidden' : '') + '>Rūšiuoti</span>'
+      + '<span data-vieta="sort"></span>'
       // Legenda – tik lentelės režime: kortelėje žyma stovi su žodžiu.
       + '<div class="ct-bukle-legend"' + (lentele ? '' : ' hidden') + '>'
       + '<span class="ct-bukle is-portal">Daužtas</span> pažymėta portale'
       + '<span class="ct-bukle is-guess">~ daužtas?</span> spėjama iš aprašymo</div>'
       + '<span class="ct-dtable-count">' + kiek + ' skelb.</span>'
+      + '<span data-vieta="modelis"></span><span data-vieta="tinder"></span>'
       + segVidus('Rodinys', [{ v: 'korteles', t: 'Kortelės' }, { v: 'lentele', t: 'Lentelė' }], busena.rodinys, 'ct-dtable-view');
+  }
+
+  // ── Perkeliami elementai (Errata 19) ──────────────────────────────────────
+  // `#ct-sort`, `#ct-modelio-btn` ir `#tinder-launch-btn` yra TIKRI mazgai su
+  // savo `id`, meniu turiniu ir `onclick` kabliukais, kuriuos sudėlioja senas
+  // kodas. Juostą perpiešiam `innerHTML`, tad prieš tai juos padedam į sandėlį
+  // (`#ct-juostos-dalys`, `hidden`), o po to įstatom į vietas.
+  var PERKELIAMI = [['sort', 'ct-sort'], ['modelis', 'ct-modelio-btn'], ['tinder', 'tinder-launch-btn']];
+  function sandelis() {
+    var s = document.getElementById('ct-juostos-dalys');
+    if (s) return s;
+    var tevas = document.body || document.documentElement;   // jei `body` dar nėra – nekrentam
+    if (!tevas || !tevas.appendChild) return null;
+    s = document.createElement('div'); s.id = 'ct-juostos-dalys'; s.hidden = true;
+    tevas.appendChild(s);
+    return s;
+  }
+  function isimtiPerkeliamus() {
+    var s = sandelis(); if (!s) return;
+    PERKELIAMI.forEach(function (x) { var el = document.getElementById(x[1]); if (el) s.appendChild(el); });
+  }
+  function idetiPerkeliamus() {
+    PERKELIAMI.forEach(function (x) {
+      var vieta = juostaEl.querySelector('[data-vieta="' + x[0] + '"]');
+      var el = document.getElementById(x[1]);
+      if (!vieta) return;
+      if (!el) { vieta.remove(); return; }
+      vieta.replaceWith(el);
+    });
+    var sort = document.getElementById('ct-sort');
+    if (sort) sort.hidden = busena.rodinys === 'lentele';   // lentelėje rikiuoja antraštės
+  }
+
+  // ── Viena rūšiavimo būsena abiem rodiniams (Errata 19) ────────────────────
+  // Kortelių meniu reikšmės ir lentelės stulpeliai yra skirtingi dalykai, tad
+  // juos reikia susieti. Nesutampa viskas, ir tai pasakyta garsiai: kortelėse
+  // nėra „ROI" ar „Kabo", o lentelėje nėra „kaina/kokybė".
+  var SORT_I_LENTELE = {
+    cheapest: ['kainaLt', 'asc'],
+    priciest: ['kainaLt', 'desc'],
+    'biggest-discount': ['pelnas', 'desc'],
+    quality: ['pelnas', 'desc'],
+  };
+  var LENTELE_I_SORT = { kainaLt: { asc: 'cheapest', desc: 'priciest' }, pelnas: { desc: 'biggest-discount' } };
+  var paskKorteliu = null;
+  function sortLaukas() { return document.getElementById('sort-select'); }
+  function imtiIsKorteliu() {
+    var el = sortLaukas(); if (!el) return;
+    if (el.value === paskKorteliu) return;      // nepasikeitė – nieko neliečiam
+    paskKorteliu = el.value;
+    var m = SORT_I_LENTELE[el.value];
+    if (m) { busena.rikiavimas = m[0]; busena.kryptis = m[1]; }
+  }
+  function atiduotiKortelems() {
+    var el = sortLaukas(); if (!el) return;
+    var k = LENTELE_I_SORT[busena.rikiavimas];
+    var v = k && k[busena.kryptis];
+    if (!v || el.value === v) return;
+    el.value = v; paskKorteliu = v;
+    if (typeof window.ctSortSetLabel === 'function') window.ctSortSetLabel(v);
   }
 
   // Juosta kuriama VIENĄ kartą ir gyvena virš rezultatų konteinerio. Klausymas
@@ -258,6 +322,7 @@
         var k = b.getAttribute('data-sort');
         if (busena.rikiavimas === k) busena.kryptis = busena.kryptis === 'desc' ? 'asc' : 'desc';
         else { busena.rikiavimas = k; busena.kryptis = 'desc'; }
+        atiduotiKortelems();   // kad persijungus į korteles rikiavimas liktų tas pats
         perpiesti();
       });
     });
@@ -280,11 +345,16 @@
     var kur = ctx.results;
     if (!kur) { if (ctx.korteles) ctx.korteles(ctx.sarasas); return; }
     var turiJuosta = uztikrintiJuosta(kur);
+    imtiIsKorteliu();                         // kortelių meniu -> lentelės stulpelis
     var matomi = ctx.sarasas.filter(telpaBuklei);
     if (turiJuosta) {
       // Juosta be rezultatų – tuščias triukšmas; `[hidden]` ją išima (51b sk.).
       juostaEl.hidden = !ctx.sarasas.length;
-      if (ctx.sarasas.length) juostaEl.innerHTML = juostaVidus(matomi.length);
+      if (ctx.sarasas.length) {
+        isimtiPerkeliamus();
+        juostaEl.innerHTML = juostaVidus(matomi.length);
+        idetiPerkeliamus();
+      }
     }
     if (ctx.sarasas.length && !matomi.length) { tuscia(kur, ctx.sarasas.length); return; }
     if (busena.rodinys === 'lentele') lentele(rikiuoti(matomi), kur);

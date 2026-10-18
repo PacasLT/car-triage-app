@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.23.3', data: '2026-10-18', pavadinimas: 'Viena juosta virš rezultatų',
+    pakeitimai: [
+      'Dvi juostos viena po kita suliejamos į vieną: rūšiavimas, būklė, marža, skelbimų skaičius, „Analizuoti modelį“ ir rodinio jungiklis dabar vienoje eilutėje.',
+      'Rūšiavimo meniu rodomas tik kortelių režime – lentelėje rikiuoja stulpelių antraštės. Būsena bendra: pasirinkus „Pigiausi pirmiausia“ ir perjungus į lentelę, rikiavimas stovi ant „≈ Lietuvoje“ stulpelio, ir atvirkščiai.',
+      'Telefone žymimųjų langelių eilutės tapo 44 px – tiek pat, kiek kiti pasirinkimai.',
+    ],
+  },
+  {
     versija: '2.23.2', data: '2026-10-18', pavadinimas: 'Metai iš sąrašo; kuro sąrašas nebekabo',
     pakeitimai: [
       'Metai renkami iš sąrašo, ne rašomi ranka – nuo 2027 iki 1990, abiem laukams.',

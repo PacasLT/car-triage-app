@@ -12,7 +12,8 @@ let klaidu=0,n=0; const T=(c,s)=>{n++;console.log((c?'  ok   ':'  BLOGAI ')+s); 
 // minimalus DOM, kad IIFE prasisuktu
 const el=()=>({innerHTML:'',appendChild(){},insertBefore(){},querySelectorAll:()=>[],
   querySelector:()=>null,addEventListener(){},setAttribute(){},getAttribute:()=>null,closest:()=>null,parentNode:{insertBefore(){}}});
-const ctx={window:{},localStorage:{getItem:()=>null,setItem(){}},document:{createElement:el,getElementById:()=>null}};
+const ctx={window:{},localStorage:{getItem:()=>null,setItem(){}},
+  document:{createElement:el,getElementById:()=>null,body:el()}};
 ctx.window.localStorage=ctx.localStorage; ctx.window.document=ctx.document;
 ctx.window.renderCandidateCards=function(){ctx.window.__korteles=true;};
 vm.createContext(ctx);
@@ -61,6 +62,7 @@ const dom=naujasDom();
 const ctx2={window:{},localStorage:{getItem:()=>null,setItem(){}},
   document:{createElement:dom.mk,getElementById:()=>null}};
 ctx2.window.localStorage=ctx2.localStorage; ctx2.window.document=ctx2.document;
+ctx2.document.body = dom.mk();
 let gautaKortelese=null;
 ctx2.window.renderCandidateCards=function(sar){gautaKortelese=sar;};
 vm.createContext(ctx2); vm.runInContext(kodas,ctx2);
@@ -96,6 +98,32 @@ T(/1 skelb\./.test(juosta.innerHTML),'skaitiklis persiskaiciavo i 1');
   T(b(trump) && b(trump).saltinis === 'portalas', '„mobilede" (trumpas) irgi veikia');
   T(b(ap) && b(ap).saltinis === 'aprasymas', '„autoplius.lt" -> punktyrine „~ dauztas?" (struktūrinio lauko nera)');
   T(b({ ...c, url: 'z4' }) === null, 'tvarkingas -> jokios zymos');
+}
+
+// ── Errata 19: viena juosta, rusiavimo busena bendra ────────────────────────
+// Kodel sargas: `#sort-bar` istrintas, o `.ct-sort` meniu ir „Analizuoti
+// modeli" PERKELIAMI i juosta. Jei perkelimo vietos dings is markupo, juostoje
+// nebeliks rusiavimo - ir to nesimatys niekur, isskyrus gyva puslapi.
+{
+  const kodas2 = fs.readFileSync('frontend/perpardavejas.js', 'utf8');
+  T(/data-vieta="sort"/.test(kodas2), 'juostoje yra vieta rusiavimo meniu');
+  T(/data-vieta="modelis"/.test(kodas2), 'juostoje yra vieta „Analizuoti modeli"');
+  T(/data-mode="cards"/.test(kodas2), '„Rusiuoti" etikete pazymeta data-mode="cards"');
+  T(/sort\.hidden = busena\.rodinys === 'lentele'/.test(kodas2), 'lenteles rezime meniu slepiamas');
+
+  const idx = fs.readFileSync('frontend/index.html', 'utf8');
+  T(!/id="sort-bar"/.test(idx), '`#sort-bar` markupo nebera');
+  T(/id="ct-juostos-dalys"/.test(idx), 'perkeliamieji laikomi sandelyje');
+  T(/id="ct-sort"/.test(idx) && /id="ct-modelio-btn"/.test(idx) && /id="sort-select"/.test(idx),
+    'visi trys elementai issaugoti (meniu, modelio mygtukas, busenos laukas)');
+
+  const css = fs.readFileSync('frontend/ct-dizainas.css', 'utf8');
+  T(!/^\.ct-sortbar/m.test(css), '`.ct-sortbar*` taisykliu nebera');
+  T(/\.ct-dtable-bar > \.ct-sort:not\(\[hidden\]\)/.test(css), '51b papildymas idiegtas');
+  T(/@media \(max-width: 640px\) \{ \.ct-check \{ min-height: var\(--tap-min\); \} \}/.test(css),
+    'K-23a: `.ct-check` telefone 44 px (21 sk.)');
+  const pr = fs.readFileSync('frontend/ct-priedai.css', 'utf8');
+  T(!/\.ct-fld-pop > \.ct-check \{ min-height/.test(pr), 'ir is priedu 25 bloko ta eilute isimta');
 }
 
 console.log('\n'+(klaidu?klaidu+' KRENTA':'visi '+n+' prajo'));

@@ -2142,3 +2142,38 @@ Pridėtas mygtukas **„Gerai“** skydelio apačioje: telefone paspaudimas „�
 | Metai | du `<select>`, 39 eilutės (2027 → 1990), pirma „nuo“ / „iki“ |
 
 - Sargai: **24 žali**. Tokenai 0 + 0.
+
+## Z-162 · 2026-10-18 · 72 pk. Errata 19 – viena juosta virš rezultatų (v2.23.3)
+
+Luko pastaba iš ekranvaizdžio („pabėgęs dizainas“) pasirodė esanti dizaino klausimas, ne klaida: virš rezultatų buvo DVI juostos viena po kita – senasis `#sort-bar` ir naujoji 51b `.ct-dtable-bar`. Dizaineris: „du atsakymai į tą patį klausimą – kaip man rodyti rezultatus“.
+
+### Kas padaryta
+
+- **`#sort-bar` ištrintas** – markupas, `.ct-sortbar*` taisyklės ir dešimt `#sort-bar` / `#sort-select` eilučių `index.html` inline stiliuose. `.ct-sort` meniu lieka.
+- **Trys elementai PERKELIAMI, ne perpiešiami**: `#ct-sort`, `#ct-modelio-btn`, `#tinder-launch-btn`. Jų `id`, meniu turinį ir `onclick` kabliukus sudėlioja senas kodas; perpiešus juos reikėtų kurti iš naujo. Juosta perpiešiama `innerHTML`, tad prieš tai jie padedami į sandėlį (`#ct-juostos-dalys`, `hidden`), o po to įstatomi į `data-vieta` vietas.
+- **Rūšiavimas pagal režimą**: kortelėse – `.ct-sort` meniu juostoje; lentelėje – stulpelių antraštės (`aria-sort`), meniu `[hidden]`.
+- **Viena būsena abiem**. `SORT_I_LENTELE` / `LENTELE_I_SORT` susieja kortelių meniu reikšmes su lentelės stulpeliais. Sutampa ne viskas, ir tai pasakyta kode garsiai: kortelėse nėra „ROI“ ar „Kabo“, lentelėje – „kaina/kokybė“.
+- **K-23a uždaryta**: `.ct-check { min-height: var(--tap-min) }` ≤640 perkelta į 21 sk., iš priedų 25 bloko išimta.
+- **K-71a patvirtinta** dizainerio – forma ta pati. 52 sk. senos ≤640 eilutės nebebuvo (išimta v2.22.1).
+
+### Pamatuota (1440 ir 390 px)
+
+Juostos vaikai iš eilės: `ct-seg-l` · Būklė · `ct-seg-l` · Marža · `ct-seg-l` (Rūšiuoti) · `ct-sort` · legenda · skaitiklis · „Analizuoti modelį“ · Tinder · rodinio jungiklis. Juosta 1440 px – **38 px, viena eilutė**; 390 px – 357 px (viskas per visą plotį, kaip 51b `@media` ir numato).
+
+Kortelių režime: meniu matomas, legenda `none`. Lentelės režime: meniu ir „Rūšiuoti“ etiketė `none`, legenda `flex`.
+
+Bendra būsena, abi kryptys:
+
+| Veiksmas | Lentelė | Kortelių meniu |
+|---|---|---|
+| pradžia | `pelnas: descending` | „Kaina/kokybės santykis“ |
+| ≈LT antraštė ×1 | `kainaLt: descending` | **„Brangiausi pirmiausia“** |
+| ≈LT antraštė ×2 | `kainaLt: ascending` | **„Pigiausi pirmiausia“** |
+| meniu „Didžiausia nuolaida“ | **`pelnas: descending`** | „Didžiausia nuolaida“ |
+
+### Viena smulkmena, kurią pagavo sargas
+
+`sandelis()` kreipėsi į `document.body` be patikros. Sargo DOM'e `body` nebuvo, ir visas rodinys nukrito. Realioje naršyklėje tai nebūtų pasimatę (skriptas įkeliamas kūno gale), bet patikra vis tiek teisinga – dabar `document.body || document.documentElement`, o be jų tiesiog nieko nedaro.
+
+- Sargai: **24 žali**; `perpardavejas` 21 → **32** (nauji tikrina, kad perkėlimo vietos ir `#ct-juostos-dalys` neišnyktų iš markupo). Tokenai **0 + 0**.
+- **Tinder mygtukas** liko juostoje, nors DZ-TINDER atšauktas 10-16 („tik perpardavėjams“). Nieko netryniau savo iniciatyva – punktas Lukui.

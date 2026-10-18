@@ -345,8 +345,6 @@
     .card-actions .card-link { padding: 10px; text-align: center; background: var(--bg-elevated); border-radius: var(--radius-sm); }
     .detail-btn { padding: 11px 12px; font-size: 13px; width: 100%; }
     #log-header { font-size: 12px; padding: 12px; }
-    #sort-bar select { width: 100%; margin-top: 6px; }
-    #sort-bar label { display: block; margin-bottom: 2px; }
     .risk-banner { font-size: 11px; }
     #all-listings-wrap button { font-size: 13px; padding: 12px; }
   }
@@ -453,8 +451,6 @@
   #tinder-hint { color: var(--text-muted); font-size: 11px; padding: 0 16px 6px; text-align: center; flex-shrink: 0; }
 
   /* ===== SORT BAR ===== */
-  #sort-bar { display: none; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; align-items: center; }
-  #sort-select { padding: 7px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-surface); color: var(--text-primary); font-size: 13px; }
 
   /* ===== ALL LISTINGS ===== */
   #all-listings-wrap { margin-top: 30px; }
@@ -943,9 +939,6 @@
    ============================================================ */
 
 /* ===== SORT BAR ===== */
-#sort-bar { margin: 6px 0 14px; align-items: center; gap: 12px; }
-#sort-bar label { font: 500 9px/1 var(--font-mono) !important; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim) !important; }
-#sort-select { height: 28px; padding: 0 26px 0 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-surface); color: var(--text-primary); font-size: 12px; font-weight: 500; appearance: none; }
 #tinder-launch-btn { background: transparent !important; color: var(--text-primary) !important; border: 1px solid var(--border-light) !important; border-radius: var(--radius-md) !important; box-shadow: none !important; height: 32px; padding: 0 14px !important; font-size: 12.5px !important; }
 #tinder-launch-btn:hover { background: var(--bg-elevated) !important; }
 
@@ -1424,9 +1417,6 @@
   .ct-auth-body { padding: 22px 20px 20px !important; }
 
   /* Sort baras */
-  #sort-bar { flex-wrap: wrap; gap: 8px; }
-  #sort-select { width: 100%; }
-  #sort-bar label { display: block; margin-bottom: 2px; }
 
   /* Log */
   #log-header { font-size: 12px; padding: 12px; }
@@ -2893,16 +2883,20 @@
     </div>
     <div id="log-box"></div>
   </div>
-  <div id="sort-bar" class="ct-sortbar" style="display:none;">
-    <div class="ct-sortbar-l">
-      <span class="ct-sortbar-k">RŪŠIUOTI</span>
-      <input type="hidden" id="sort-select" value="quality">
-      <div id="ct-sort" class="ct-sort">
-        <button type="button" id="ct-sort-btn" class="ct-btn ct-btn-sm ct-btn-toggle" aria-expanded="false" onclick="ctSortToggle(event)">
-          <span id="ct-sort-label">Kaina/kokybės santykis</span>
-        </button>
-        <div id="ct-sort-menu" class="ct-sort-menu"></div>
-      </div>
+  <!-- v2.23.3 (Errata 19): ATSKIROS rūšiavimo juostos (`#sort-bar`) nebėra.
+       Dvi juostos viena po kita buvo du atsakymai į tą patį klausimą „kaip man
+       rodyti rezultatus". Šie trys elementai dabar gyvena 51b sk. juostoje
+       (`.ct-dtable-bar`), o `perpardavejas.js` juos ten PERKELIA – ne perpiešia.
+       Perkelia todėl, kad meniu turinį, būseną ir `onclick` kabliukus jau
+       sudėlioja senas kodas pagal `id`; perpiešus juos reikėtų kurti iš naujo.
+       Kol juosta perpiešiama, jie laikomi čia. -->
+  <div id="ct-juostos-dalys" hidden>
+    <input type="hidden" id="sort-select" value="quality">
+    <div id="ct-sort" class="ct-sort" data-mode="cards">
+      <button type="button" id="ct-sort-btn" class="ct-btn ct-btn-sm ct-btn-toggle" aria-expanded="false" onclick="ctSortToggle(event)">
+        <span id="ct-sort-label">Kaina/kokybės santykis</span>
+      </button>
+      <div id="ct-sort-menu" class="ct-sort-menu"></div>
     </div>
     <!-- v2.16.0: apzvalga apie PATI modeli (ne apie viena skelbima). Rodomas
          tik tada, kai paieskoje buvo pasirinktas modelis. -->
@@ -5039,7 +5033,6 @@ function renderResults(data, status, results) {
     // Browse mode: rodom VISUS skelbimus, be jokios balo ribos – taip, kaip žada režimo aprašymas.
     const browseCands = data.candidates.slice();
     status.innerHTML = ctRezultatuSantrauka({ ivertinta: browseCands.length, verti: null, rasta: data.rawFoundCount || null, atitiko: data.totalScanned || null, tuscia: !browseCands.length });
-    document.getElementById('sort-bar').style.display = browseCands.length > 0 ? 'flex' : 'none';
     window.ctSortSetLabel('quality');
     // Vienas dizainas visur: narsymo rezultatai piesiami tuo paciu korteliu
     // rendereriu kaip ir analizes rezimas - skiriasi tik tai, kad cia nera AI apzvalgu.
@@ -5062,7 +5055,6 @@ function renderResults(data, status, results) {
   });
   // v1.31.0: tie patys trys skaiciai keliauja ir i zurnalo antraste
   if (window.ctLogSkaiciai) window.ctLogSkaiciai(data.rawFoundCount || 0, data.totalScanned || 0, data.candidates.length);
-  document.getElementById('sort-bar').style.display = data.candidates.length > 0 ? 'flex' : 'none';
   window.ctSortSetLabel('quality');
   ctModelioMygtukas();
   results.innerHTML = '';

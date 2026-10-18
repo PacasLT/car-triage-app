@@ -204,9 +204,6 @@
 
 @media (max-width: 640px) {
   .ct-fld-pop { max-width: 92vw; }
-  /* K-23a (dizaineriui): `.ct-check` (21 sk.) telefone lieka 32 px, nors
-     `.ct-flag` toje pačioje vietoje turi `min-height: var(--tap-min)`.
-     Pamatuota 390 px: eilutė 32 px. Čia pataisyta tik skydelyje – sistemoje
-     tai turėtų būti pačiame `.ct-check`. */
-  .ct-fld-pop > .ct-check { min-height: var(--tap-min); }
+  /* K-23a – UŽDARYTA (Errata 19): dizaineris perėmė į 21 sk. `.ct-check`,
+     tad čia eilutės nebereikia. */
 }

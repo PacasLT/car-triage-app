@@ -531,11 +531,12 @@ textarea:focus-visible,
    ir .ct-btn-over (38 px ant nuotraukos), t. y. abi vietas, kur 44 px yra
    klaida, ne prieinamumas.                                                  */
 @media (max-width: 640px) {
-  .ct3-nav-link,
-  #sort-select {
+  .ct3-nav-link {
     min-height: var(--tap-min);
   }
 }
+/* `#sort-select` isimtas v2.23.3 (Errata 19): `#sort-bar` istrintas, rusiavimas
+   persikele i 51b juosta kaip `.ct-sort`. */
 
 /* ── 4. NEIVERTINTA ⚪ ──────────────────────────────────────────────────────
    Balo dedamoji, kurios reiksme null, rodoma tuscia juosta — o tuscia juosta
@@ -1570,6 +1571,9 @@ button.dp-check.is-active { border-color: var(--accent-border); background: var(
 /* Etikete prie langelio yra TEKSTAS, ne mono etikete — ja reikia perskaityti,
    ne nuskenuoti. Mono didziosiomis prie pazymejimo atrodo kaip antrastė. */
 .ct-check > span { font-size: var(--fs-300); line-height: var(--lh-snug); color: var(--text-secondary); }
+/* K-23a (Errata 19): telefone ta pati 44 px zona kaip `.ct-flag`. Buvo
+   sistemos skyle - `.ct-flag` ja turejo, `.ct-check` ne. */
+@media (max-width: 640px) { .ct-check { min-height: var(--tap-min); } }
 
 
 /* ============================================================================
@@ -3751,6 +3755,13 @@ textarea.ct-field {
 /* ============================================================================
    38. RUSIAVIMO JUOSTA IR MENIU   ·   .ct-sort
    ----------------------------------------------------------------------------
+   v2.23.3 (Errata 19): PACIOS JUOSTOS (`#sort-bar`, `.ct-sortbar*`) NEBERA -
+   dvi juostos viena po kita buvo du atsakymai i ta pati klausima. `.ct-sort`
+   meniu persikele i 51b sk. `.ct-dtable-bar` ir rodomas TIK korteliu rezime;
+   lenteleje rikiuoja stulpeliu antrastes (`aria-sort`). Zemiau aprasytas
+   markupas su `#sort-bar` yra ISTORINIS - paliktas, kad butu aisku, is kur
+   `.ct-sort` atejo.
+   ----------------------------------------------------------------------------
    Vienas principas: meniu yra IŠKRENTANTIS SLUOKSNIS, ne juostos turinys.
    Viskas, kas juosta apkerpa - overflow, mask, transform - meniu nepasiekia,
    nes meniu juostoje negyvena.
@@ -3810,22 +3821,9 @@ textarea.ct-field {
    Sesėlis - `--shadow-panel`, `:root` aprasytas „iškrentantys meniu,
    modalai" ir iki siol turejes nulį naudojimu.                            */
 
-.ct-sortbar {
-  display: flex;
-  align-items: center;
-  gap: var(--s-3);
-  flex-wrap: wrap;
-}
-.ct-sortbar-l { display: flex; align-items: center; gap: 10px; min-width: 0; }
-
-/* 11 px, ne 10: mano paties 6 sk. sako, kad mono etiketes zemiau 11 px yra
-   per mazos. 46 pakete buvau parases 10 - taisykle bučiau sulauzes savo. */
-.ct-sortbar-k {
-  flex: none;
-  font: var(--fw-semi) 11px/1 var(--font-mono);
-  letter-spacing: .1em;
-  color: var(--text-dim);
-}
+/* `.ct-sortbar`, `.ct-sortbar-l`, `.ct-sortbar-k` - ISTRINTA v2.23.3
+   (Errata 19): atskiros rusiavimo juostos nebera, viskas persikele i 51b sk.
+   `.ct-dtable-bar`. Etikete dabar `.ct-seg-l`. `.ct-sort` (meniu) lieka. */
 
 .ct-sort { position: relative; display: inline-flex; }
 
@@ -6158,3 +6156,27 @@ textarea.ct-field {
 /* Telefone: virsuje viena eilute - skaitiklis kaireje, rodinio jungiklis
    desineje; po ja - filtrai per visa ploti. `!important` - tik ten, kur
    jungiklis perraso ta pacia `.ct-dtable-bar > .ct-seg { width: 100% }`. */
+
+
+/* ============================================================================
+   72 · ERRATA 19 · viena juosta virs rezultatu (51b sk. papildymas)
+   ----------------------------------------------------------------------------
+   `#sort-bar` istrintas. Rusiavimas:
+     LENTELE  – rikiuoja stulpeliu antrastes (`aria-sort`), juostoje jo NERA
+     KORTELES – juostoje `.ct-sort` (38 sk. meniu), `data-mode="cards"`
+   Viena busena abiem: pasirinkus „Pigiausi pirmiausia" korteliu rezime ir
+   perjungus i lentele, `aria-sort` stovi ant ≈LT stulpelio. Ir atvirksciai.
+
+   „Analizuoti modelį" – VEIKSMAS, ne filtras: juostos gale, pries rodinio
+   jungikli, `.ct-btn .ct-btn-sm` (ne pirminis).
+   ========================================================================== */
+
+.ct-dtable-bar > .ct-sort:not([hidden]) { display: inline-block; }
+.ct-dtable-bar > [data-mode][hidden] { display: none; }
+.ct-dtable-bar > .ct-btn { flex: none; }
+
+@media (max-width: 640px) {
+  .ct-dtable-bar > .ct-sort { width: 100%; }
+  .ct-dtable-bar > .ct-sort > .ct-btn-toggle { width: 100%; justify-content: space-between; }
+  .ct-dtable-bar > .ct-btn { order: 10; width: 100%; min-height: var(--tap-min); }
+}
