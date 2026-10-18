@@ -2386,6 +2386,25 @@
 
 </section>
 
+<!-- NUORODOS LAUKAS (69 pk., 56 sk. `.ct-link`; v2.26.0) ─────────────────────
+     Vieta - dizainerio pasirinktas a variantas: paieskos puslapio virsuje, VIRS
+     filtru. Busenos - `data-state` ant `.ct-link`: empty / invalid / foreign /
+     busy / cached. Enter paleidzia; iklijavus galiojancia nuoroda analize
+     NEPRASIDEDA pati - ji kainuoja kreditu. -->
+<form class="ct-link" id="ct-link" data-state="empty" onsubmit="ctNuorodaSiusti(event); return false;">
+  <div class="ct-link-row">
+    <label class="ct-link-in">
+      <input type="url" inputmode="url" id="ct-link-url" autocomplete="off" spellcheck="false"
+        placeholder="Įklijuok skelbimo nuorodą" aria-label="Skelbimo nuoroda"
+        oninput="ctNuorodaTikrinti()" onpaste="setTimeout(ctNuorodaTikrinti, 0)">
+    </label>
+    <button type="submit" class="ct-btn ct-btn-primary ct-btn-lg" id="ct-link-btn" disabled>Analizuoti · 2 kr</button>
+  </div>
+  <p class="ct-link-msg" id="ct-link-msg" hidden></p>
+  <ol class="ct-steps" id="ct-link-steps" hidden></ol>
+  <div class="ct-link-portals" id="ct-link-portals"></div>
+</form>
+
 <!-- SEARCH PANEL -->
 <!-- v1.75.0: 25 sk. .ct-shell - filtrai i sona nuo 1180 px -->
 <div class="ct-shell">
@@ -7644,6 +7663,161 @@ function ctPortaloZenklas(k) {
     + '<rect width="32" height="32" rx="7" fill="' + p[0] + '"/>'
     + '<text x="16" y="22" font-family="system-ui,sans-serif" font-weight="900" font-size="' + p[2] + '" fill="#fff" text-anchor="middle">' + p[1] + '</text></svg>';
 }
+// ── NUORODOS ANALIZĖ (v2.26.0, 69 pk. 56 sk.) ──────────────────────────────
+// Perpardavėjo rytas: kažkas atsiuntė nuorodą, ir atsakymo reikia per minutę.
+// Iki šiol tam reikėjo paleisti visą paiešką – per lėta ir per brangu vienam
+// skelbimui. Serveris rinkos skaičius dabar surenka pats iš mūsų archyvo
+// (0 kreditų) – `backend/nuorodos-rinka.js`.
+// Tikrinam HOSTNAME, ne tekstą. Pirmas variantas buvo `/(^|\.)autoplius\.lt\//`
+// ir atmesdavo TEISINGĄ nuorodą: „https://autoplius.lt/..." prieš domeną turi
+// `/`, ne tašką ir ne eilutės pradžią. Pamatuota – ne atspėta.
+var CT_NUORODU_PORTALAI = {
+  autoplius: ['autoplius.lt'], autogidas: ['autogidas.lt'],
+  autoscout24: ['autoscout24.com', 'autoscout24.de', 'autoscout24.lt', 'autoscout24.nl', 'autoscout24.it', 'autoscout24.fr', 'autoscout24.be', 'autoscout24.at'],
+  otomoto: ['otomoto.pl'], mobilede: ['mobile.de'],
+};
+var CT_NUORODOS_ZINGSNIAI = ['Skaitom skelbimą', 'Lyginam su rinka', 'Vertinam būklę ir riziką'];
+var _ctNuorodaVyksta = false, _ctNuorodaLaikm = null, _ctNuorodaPradzia = 0;
+
+function ctNuorodosHostas(u) {
+  try { return new URL(String(u || '').trim()).hostname.toLowerCase().replace(/^www\./, ''); }
+  catch (e) { return null; }
+}
+function ctNuorodosPortalas(u) {
+  var h = ctNuorodosHostas(u);
+  if (!h) return null;
+  var k = Object.keys(CT_NUORODU_PORTALAI).find(function (x) {
+    return CT_NUORODU_PORTALAI[x].some(function (d) { return h === d || h.endsWith('.' + d); });
+  });
+  return k || null;
+}
+
+function ctNuorodosBusena(busena, zinute) {
+  var f = document.getElementById('ct-link');
+  if (!f) return;
+  f.dataset.state = busena;
+  var m = document.getElementById('ct-link-msg');
+  if (m) { m.textContent = zinute || ''; m.hidden = !zinute; }
+  var prt = document.getElementById('ct-link-portals');
+  // Portalus rodom tik tuščiam laukui: po to jų vieta reikalinga būsenai.
+  if (prt) prt.hidden = busena !== 'empty';
+}
+
+function ctNuorodaTikrinti() {
+  var inp = document.getElementById('ct-link-url'), btn = document.getElementById('ct-link-btn');
+  if (!inp || !btn || _ctNuorodaVyksta) return;
+  var v = inp.value.trim();
+  if (!v) { btn.disabled = true; ctNuorodosBusena('empty', ''); return; }
+  if (!/^https?:\/\/[^\s]+\.[a-z]{2,}/i.test(v)) {
+    btn.disabled = true;
+    ctNuorodosBusena('invalid', 'Tai ne nuoroda – įklijuok visą skelbimo adresą, pradedant https://');
+    return;
+  }
+  var p = ctNuorodosPortalas(v);
+  if (!p) {
+    btn.disabled = true;
+    var host = ctNuorodosHostas(v) || v.replace(/^https?:\/\/(www\.)?/i, '').split('/')[0];
+    ctNuorodosBusena('foreign', host + ' neskaitome. Skaitome autoplius.lt, autogidas.lt, autoscout24.com, otomoto.pl ir mobile.de.');
+    return;
+  }
+  btn.disabled = false;
+  ctNuorodosBusena('empty', '');
+}
+
+// Žingsniai yra LAIKINIAI, ne tikri serverio įvykiai: `/api/analyze-single`
+// atsako vienu kartu, be srauto. Todėl rodom, KAS vyksta, o ne kiek procentų –
+// procentus reiktų sugalvoti. Prie padaryto žingsnio – kiek realiai užtruko.
+function ctNuorodosZingsniai(dabar) {
+  var ol = document.getElementById('ct-link-steps');
+  if (!ol) return;
+  var s = Math.round((Date.now() - _ctNuorodaPradzia) / 1000);
+  ol.hidden = false;
+  ol.innerHTML = CT_NUORODOS_ZINGSNIAI.map(function (t, i) {
+    var b = i < dabar ? 'ok' : (i === dabar ? 'now' : 'wait');
+    return '<li data-s="' + b + '"' + (b === 'now' ? ' aria-current="step"' : '') + '>' + ctEsc(t)
+      + (b === 'now' ? '<small>' + s + ' s</small>' : '') + '</li>';
+  }).join('');
+}
+
+async function ctNuorodaSiusti(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  if (_ctNuorodaVyksta) return;
+  var inp = document.getElementById('ct-link-url'), btn = document.getElementById('ct-link-btn');
+  var url = inp ? inp.value.trim() : '';
+  if (!ctNuorodosPortalas(url)) { ctNuorodaTikrinti(); return; }
+  _ctNuorodaVyksta = true;
+  _ctNuorodaPradzia = Date.now();
+  btn.disabled = true;
+  var senasTekstas = btn.textContent;
+  btn.textContent = 'Analizuojama…';
+  // Paskutinis sakinys cia svarbiausias: jis atsako, kodel nereikia sedeti ir
+  // ziureti. Jo vieta - `.ct-link-msg` (dizainerio nuoroda), ne dar vienas
+  // zingsnis: zingsniai yra darbai, ne pastabos. Jokiu inline stiliu.
+  ctNuorodosBusena('busy', 'Paprastai 10–20 s. Galite uždaryti – rezultatas liks paskyroje.');
+  var zing = 0;
+  ctNuorodosZingsniai(0);
+  _ctNuorodaLaikm = setInterval(function () {
+    var s = (Date.now() - _ctNuorodaPradzia) / 1000;
+    var naujas = s > 14 ? 2 : (s > 6 ? 1 : 0);
+    if (naujas !== zing) { zing = naujas; }
+    ctNuorodosZingsniai(zing);
+  }, 1000);
+  try {
+    var resp = await ctApi('/api/analyze-single', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: url, lygis: 'pilna' }),
+    });
+    var r = await resp.json();
+    if (!resp.ok) throw new Error(r && r.error ? r.error : 'Nepavyko');
+    var rk = r.rinkosKontekstas || {};
+    var portalas = ctNuorodosPortalas(url);
+    var c = {
+      url: url, pavadinimas: r.title || null,
+      modelis: [rk.marke, rk.modelis].filter(Boolean).join(' ') || r.title || null,
+      kaina: r.kaina || rk.kaina || null, metai: rk.metai || null, rida: null,
+      source: (CT_PORTALU_SPALVOS[portalas] || [])[3] || portalas,
+      photo: r.photo || null, pardavejas: r.pardavejas || null, vin: r.vin || null,
+      marketMedian: rk.median || null, marketCount: rk.count || 0,
+      diffPct: (rk.diffPct != null ? rk.diffPct : null),
+      rinka: rk.rinka || null, rinkosVardas: rk.rinkosVardas || null,
+      kainaLt: rk.kainaLt || null, ltMediana: rk.ltMediana || null,
+      maxPirkimo: rk.maxPirkimo || null, pelnoMath: rk.pelnoMath || null,
+      // Kai archyvo imtis per maža, sąsajai reikia PRIEŽASTIES, ne brūkšnio.
+      rinkosZinute: rk.zinute || null,
+      isNuorodos: true,
+    };
+    try {
+      localStorage.setItem('ct_detail', JSON.stringify({
+        c: c, analysis: r.analysis || null, photos: r.photos || [],
+        vizualus: r.vizualus || null, vinPaslėptas: !!r.vinPaslėptas,
+        vinPrefiksas: r.vinPrefiksas || null, istorijosNuoroda: r.istorijosNuoroda || null,
+      }));
+    } catch (err) { /* privatus režimas - detail.html pasakys pats */ }
+    if (r.cached) {
+      var val = Math.round((r.cacheAgeMinutes || 0) / 60);
+      ctNuorodosBusena('cached', 'Šį skelbimą jau analizavome' + (val > 0 ? ' prieš ' + val + ' val.' : ' ką tik') + ' – 0 kreditų.');
+    }
+    location.href = 'detail.html';
+  } catch (err) {
+    ctNuorodosBusena('invalid', String((err && err.message) || err).slice(0, 180));
+    var ol = document.getElementById('ct-link-steps'); if (ol) ol.hidden = true;
+  } finally {
+    if (_ctNuorodaLaikm) { clearInterval(_ctNuorodaLaikm); _ctNuorodaLaikm = null; }
+    _ctNuorodaVyksta = false;
+    if (btn) { btn.textContent = senasTekstas; btn.disabled = false; }
+  }
+}
+
+// Portalų eilutė po tuščiu lauku – kad iš karto matytųsi, ką skaitome.
+function ctNuorodosPortalusPiesti() {
+  var prt = document.getElementById('ct-link-portals');
+  if (!prt) return;
+  prt.innerHTML = '<span>Skaitome:</span>' + Object.keys(CT_PORTALU_SPALVOS).map(function (k) {
+    return ctPortaloZenklas(k) + '<span>' + ctEsc((CT_PORTALU_SPALVOS[k] || [])[3] || k) + '</span>';
+  }).join('');
+}
+document.addEventListener('DOMContentLoaded', ctNuorodosPortalusPiesti);
+
 function ctPerbranguLangas(r) {
   var galima = r.siulomaPuslapiu || 1;
   var scrim = document.createElement('div');

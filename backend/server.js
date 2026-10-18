@@ -24,6 +24,8 @@ const nuotrAnalize = require('./nuotrauku-analize');
 // v2.25.0: kodel skelbimas per pigus - trys pakopos (tekstas / viena
 // nuotrauka Haiku / pilna analize). Luko sprendimas 10-19, KL-1019-0030.
 const pigumas = require('./pigumo-patikra');
+// v2.26.0: iklijuota nuoroda - rinkos mediana is MUSU archyvo (0 kreditu).
+const nuorodosRinka = require('./nuorodos-rinka');
 // Regitros parko suvestine (docs/regitra-panaudojimas.md). Ikeliama KARTA
 // paleidziant - 237 KB atmintyje, be SQLite: tai ketvirtinis statinis duomuo,
 // keliaujantis su deploy'umi, ne kintanti busena.
@@ -4929,7 +4931,50 @@ app.post('/api/analyze-single', requireAuth, kreditaiPagalLygi, async (req, res)
 
     const { title, fullText, photo: photo0, photos: photos0, vin, vinPrefiksas, pardavejas,
       pardavejoInfo, vinPaslėptas, istorijosNuoroda, skelbimoParametrai, iranga, aprasymas, vieta } = await scrapeSingleListing(url);
-    const marketContext = marketMedian ? { kaina, marketMedian, marketCount, diffPct, modelis, galia, variklioTuris, rinkosGrupe, kartos: kartosSar } : null;
+    // ── v2.26.0 · IKLIJUOTA NUORODA ────────────────────────────────────────
+    // Jei rinkos skaiciu uzklausoje nera (vartotojas atejo ne iš kortelės, o
+    // iklijaves nuoroda), surenkam juos PATYS iš archyvo - 0 kreditu.
+    // `claude/NUORODOS-ANALIZE.md` §3, variantas C: archyvas pirma.
+    let rinkosKontekstas = null;
+    let kainaSkelbimo = Number.isFinite(+kaina) && +kaina > 0 ? +kaina : null;
+    if (!marketMedian) {
+      const tekstas = [title, aprasymas, fullText].filter(Boolean).join(' \n ').slice(0, 4000);
+      const ident = nuorodosRinka.atpazinti([title, modelis].filter(Boolean).join(' '), autopliusIds.katalogas());
+      const metaiNr = parseInt(req.body.metai, 10) || nuorodosRinka.metaiIsTeksto(tekstas);
+      if (!kainaSkelbimo) kainaSkelbimo = nuorodosRinka.kainaIsTeksto(tekstas);
+      const rinkaKodas = rinkos.rinkaPagalPortala(paieskosPortalas(url));
+      const eil = ident.modelis
+        ? rinka.kainosModeliui({ marke: ident.marke, modelis: ident.modelis,
+            metaiNuo: metaiNr ? metaiNr - nuorodosRinka.METU_LANGAS : null,
+            metaiIki: metaiNr ? metaiNr + nuorodosRinka.METU_LANGAS : null })
+        : [];
+      const k = nuorodosRinka.kontekstas(eil, { rinka: rinkaKodas, metai: metaiNr, kaina: kainaSkelbimo });
+      // Kaina Lietuvoje, MAX pirkimo ir pelnas - TIE PATYS moduliai kaip paieskoje,
+      // kad nuorodos analize ir lentele rodytu ta pati skaiciu.
+      const klt = rinkos.kainaLietuvoje(kainaSkelbimo, rinkaKodas,
+        { kuras: req.body.kuras || null, variklioTuris: req.body.variklioTuris || null });
+      const kastaiViso = klt ? klt.kastai.viso : 0;
+      const tarsosSuma = (klt && Number.isFinite(klt.tarsa.vidurkis)) ? klt.tarsa.vidurkis : 0;
+      rinkosKontekstas = Object.assign({}, k, {
+        marke: ident.marke, modelis: ident.modelis, metai: metaiNr || null,
+        kaina: kainaSkelbimo, portalas: paieskosPortalas(url),
+        rinkosVardas: rinkos.rinkosVardas(rinkaKodas), kainaLt: klt,
+        maxPirkimo: maxPirkimo.skaiciuoti({ ltMediana: k.ltMediana, kastai: kastaiViso, tarsa: tarsosSuma,
+          tarsosTikslumas: klt ? klt.tarsa.tikslumas : 'nezinoma' }),
+        pelnoMath: maxPirkimo.pelnas({ kaina: kainaSkelbimo, ltMediana: k.ltMediana, kastai: kastaiViso, tarsa: tarsosSuma }),
+        zinute: nuorodosRinka.zinute(k),
+      });
+      console.log(`[NUORODA] ${paieskosPortalas(url)} ${ident.marke || '?'} ${ident.modelis || '?'} ${metaiNr || '?'} `
+        + `${kainaSkelbimo || '?'} EUR -> archyve ${k.count} (${k.rinka || 'rinka ?'}), mediana ${k.median || '-'}`);
+    }
+    const marketContext = marketMedian
+      ? { kaina, marketMedian, marketCount, diffPct, modelis, galia, variklioTuris, rinkosGrupe, kartos: kartosSar }
+      : (rinkosKontekstas && rinkosKontekstas.patikima
+        ? { kaina: rinkosKontekstas.kaina, marketMedian: rinkosKontekstas.median,
+            marketCount: rinkosKontekstas.count, diffPct: rinkosKontekstas.diffPct,
+            modelis: [rinkosKontekstas.marke, rinkosKontekstas.modelis].filter(Boolean).join(' ') || modelis || null,
+            galia, variklioTuris, rinkosGrupe: null, kartos: [] }
+        : null);
     // Ne automobilio nuotraukos (reklamos, logotipai) - salin; pardavejo logotipas - prie pardavejo
     // Greitam lygiui nuotrauku AI nekvieciam - todel jis ir pigesnis
     const foto = pilna
@@ -4972,7 +5017,9 @@ app.post('/api/analyze-single', requireAuth, kreditaiPagalLygi, async (req, res)
       pardavejoInfo: pardavejoInfo || null, vinPaslėptas: !!vinPaslėptas,
       istorijosNuoroda: istorijosNuoroda || null, skelbimoParametrai: skelbimoParametrai || null,
       iranga: iranga || null, aprasymas: aprasymas || null, vieta: vieta || null,
-      kaina: kaina || null, // v1.23.0: pagal ja tikrinam, ar podelio analize dar aktuali
+      kaina: kaina || kainaSkelbimo || null, // v1.23.0: pagal ja tikrinam, ar podelio analize dar aktuali
+      // v2.26.0: rinkos skaiciai, surinkti be paieskos (iklijuota nuoroda).
+      rinkosKontekstas: rinkosKontekstas || null,
       vizualus: vizualus || null, // v1.24.0: irodymu sluoksnis (bukle, pasitikejimas, pastebejimai)
       lygis: pilna ? 'pilna' : 'greita',
     };

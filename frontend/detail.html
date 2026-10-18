@@ -1655,6 +1655,9 @@ window.ctApi = function (kelias, params) {
     } else {
       eil.push('<div class="ct-market-row"><span class="ct-market-k">RINKOS VIDURKIS</span><span class="ct-market-v is-unrated-val">\u2013</span></div>');
       eil.push('<div class="ct-market-row"><span class="ct-market-k">PANA\u0160I\u0172 SKELBIM\u0172</span><span class="ct-market-v is-unrated-val">' + (c.marketCount ? c.marketCount + ' \u2013 per ma\u017Eai duomen\u0173' : '\u2013 per ma\u017Eai duomen\u0173') + '</span></div>');
+      // v2.26.0: iklijuotai nuorodai bruksnio neuztenka - zmogus turi zinoti,
+      // KODEL skaiciaus nera ir ar tai pataisoma (mini skenavimas).
+      if (c.rinkosZinute) eil.push('<div class="ct-market-row"><span class="ct-market-k">KOD\u0116L</span><span class="ct-market-v">' + ctEsc(c.rinkosZinute) + '</span></div>');
     }
     document.getElementById('dp-market').innerHTML = eil.join('');
 

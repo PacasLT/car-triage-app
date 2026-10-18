@@ -188,3 +188,19 @@
   .ct-dt-meta { flex-wrap: wrap; row-gap: 3px; }
   .ct-dt-meta > span:last-child { flex: 1 0 100%; }
 }
+
+
+/* 27 BLOKAS · v2.26.0 · `.ct-link-msg` paslėpimas (laikinas, K-76)
+   Dizaineriui: 56 sk. (69 pk.) `.ct-link-msg` turi `display: flex` BE
+   `:not([hidden])`, todėl globalus `:where([hidden])` (specifiškumas 0,0,0)
+   jo nenugali – `hidden` žinutės nepaslepia. Pamatuota: tuščiame lauke
+   žinutės eilutė su tašku matoma, forma 167 px vietoj 147 px.
+   Tai ta pati taisyklė, kurią patvirtinai po K-71a ir K-73: „jei bazinėje
+   `display` su `:not([hidden])`, tai ir kiekvienas perrašymas – su juo“.
+
+   Antra, tame pačiame 56 sk. bloke: `.ct-link[data-state="busy"] .ct-link-in,`
+   baigiasi kableliu ir prilimpa prie kitos taisyklės, todėl `busy` būsenos
+   laukas gauna `.ct-link-msg` šriftą ir spalvą, o pati `busy` taisyklė
+   (greičiausiai `opacity`) prarasta. Jos neatstatinėju – nežinau, kokia ji
+   turėjo būti. */
+.ct-link-msg[hidden] { display: none; }

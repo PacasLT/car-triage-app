@@ -8,6 +8,16 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.26.0', data: '2026-10-19', pavadinimas: 'Įklijuok nuorodą – gauk pilną apžvalgą',
+    pakeitimai: [
+      'Paieškos puslapio viršuje atsirado laukas nuorodai: įklijuoji skelbimo adresą ir gauni tą pačią pilną apžvalgą, kaip paspaudus kortelėje – nereikia paleisti visos paieškos.',
+      'Skaitome penkis portalus: autoplius.lt, autogidas.lt, autoscout24.com, otomoto.pl ir mobile.de. Svetimą nuorodą pasakom iš karto, dar nepaspaudus mygtuko.',
+      'Rinkos kainą tokiam skelbimui surenkam iš savo archyvo – papildomų skenavimo kreditų tai nekainuoja.',
+      'Lyginam su TOS PAČIOS rinkos kainomis: vokiškas automobilis prieš Lietuvos vidurkį atrodytų pigus vien dėl rinkos skirtumo.',
+      'Jei archyve panašių skelbimų per mažai, skaičiaus nerodom ir parašom, kodėl – geriau nieko, nei netikra nuolaida.',
+    ],
+  },
+  {
     versija: '2.25.0', data: '2026-10-19', pavadinimas: 'Kodėl šis skelbimas per pigus',
     pakeitimai: [
       'Per pigiems skelbimams dabar rašoma, KODĖL jie pigūs: ar priežastis nurodyta pačiame skelbime (žala, parduodamas dalimis, be TA, lizingo įmoka, kaina be PVM, aukcionas), ar ji matoma pirmoje nuotraukoje.',

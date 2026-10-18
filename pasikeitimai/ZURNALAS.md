@@ -2348,3 +2348,46 @@ Telefone antra žyma suspaudė duomenų eilutę. `scrollWidth` čia nieko nebūt
 **Laikinas sprendimas – priedų 26 blokas:** telefone eilutė lūžta (`flex-wrap: wrap`, duomenys `flex: 1 0 100%`). Po to: `.ct-dt-meta` 18 → 32 px, duomenų `span` 270 px, **nenukirptas**, visi keturi faktai matosi.
 
 Dizainerio sprendimas: ar palikti vieną komponentą dviem prasmėms (tada 26 blokas pereina į 51 sk.), ar pigumo žymai duoti savo vardą (pvz. `.ct-pigu`) su kita spalva – kad „kodėl pigu“ neatrodytų kaip būklės žyma.
+
+## Z-168 · 2026-10-19 · Įklijuota nuoroda → pilna apžvalga (v2.26.0)
+
+Luko klausimas naktį: *„dar nematau kur galime linką įdėti skelbimo ir patikrinti giluminiai analizei pilnai"*. Teisingai nematė – lauko nebuvo. Buvo viskas aplink jį: `/api/analyze-single` (pilna analizė pagal URL su nuotraukomis, VIN, podėliu), `portalasLeidziamas`, vizualinis sluoksnis, ir net dizainerio CSS (69 pk., 56 sk. `.ct-link`, penkios būsenos) – įdiegta dar v2.21.0. Trūko įvesties lauko ir vieno sprendimo: **iš kur rinkos mediana, kai paieškos nebuvo** (`claude/NUORODOS-ANALIZE.md` §3).
+
+### Iš kur mediana: archyvas (variantas C, pirmoji pusė)
+
+`rinka.db` jau turi `portalas`, `marke`, `modelis`, `metai`, `kaina` – tad medianą galima surinkti **už 0 kreditų**. Naujas `backend/nuorodos-rinka.js`:
+
+- **markė ir modelis iš antraštės** pagal autoplius katalogą (`autoplius-ids.katalogas()`, 31 markė su SEED, ~3 900 modelių produkcijoje). Renkam ILGIAUSIĄ atitikmenį („A4 Allroad“ prieš „A4“, „Land Rover“ prieš „Land“), plius trumpas aliasų sąrašas (VW → Volkswagen). **Neatpažinto nespėliojam** – geriau nepalyginti, nei palyginti su kito modelio kainomis.
+- **mediana PAGAL RINKĄ**, ne pagal viską (K-72 pamoka): vokiškas automobilis prieš Lietuvos medianą atrodo pigus vien dėl rinkos skirtumo. Lietuvos mediana laikoma atskirai – ji reikalinga MAX pirkimo kainai (v2.20.0).
+- **imtis < 8 – skaičiaus nerodom.** 8, o ne 5, nes tiek pat reikalauja ir `detail.html` (`CT_RINKOS_MIN`, Luko AN-0923-RIBA-B). Su 5 mediana būtų suskaičiuota, o puslapis vis tiek rašytų „per mažai duomenų“ – dvi skirtingos tiesos viename ekrane.
+- vietoj brūkšnio – **sakinys**: „Archyve radom 4 panašius skelbimus šioje rinkoje, o patikimai medianai reikia 8.“
+
+Kaina ir metai traukiami iš paties puslapio teksto. Pavojus žinomas ir senas – lizingo įmoka atrodo kaip kaina – todėl: atmetam viską, kas stovi šalia „įmoka / mėn. / lizingas / nuo“; atmetam ne automobilio sumas; o iš likusių imam **dažniausią** skaičių, ne pirmą (tikra kaina skelbime kartojasi, triukšmas – vienkartinis).
+
+### Du dalykai, kuriuos rado MATAVIMAS, o ne skaitymas
+
+1. **Teisinga autoplius nuoroda buvo atmesta kaip svetima.** Portalą tikrinau tekstu: `/(^|\.)autoplius\.lt\//`. Bet „https://autoplius.lt/…“ prieš domeną turi `/`, ne tašką ir ne eilutės pradžią. Dabar tikrinam `new URL().hostname` – ir domenas, ir jo subdomenai.
+2. **`.ct-link-msg` su `hidden` nebuvo paslėpta** (56 sk. `display: flex` be `:not([hidden])`) – tuščiame lauke kabojo tuščia eilutė su tašku, forma 167 px vietoj 147 px. Priedų 27 blokas; dizaineriui – K-76.
+
+### Pamatuota (1440 ir 390 px, 0 JS klaidų)
+
+| Būsena | web forma | telefonas | mygtukas |
+|---|---|---|---|
+| empty | 119 px, portalai matomi | 178 px, portalai dviem eilutėm | neaktyvus |
+| invalid | 147 px, „Tai ne nuoroda…“ | 201 px | neaktyvus |
+| foreign | 147 px, „ebay.de neskaitome…“ | 221 px | neaktyvus |
+| galiojanti nuoroda | 119 px | 178 px | **aktyvus** |
+| busy | trys žingsniai, 78 px | tas pats | „Analizuojama…“ |
+
+Žingsniai yra **laikiniai, ne serverio įvykiai**: `/api/analyze-single` atsako vienu kartu, be srauto. Rodom, KAS vyksta, o ne procentus – procentus reiktų sugalvoti. Po jais – dizainerio sakinys „Galite uždaryti – rezultatas liks paskyroje“, nes būtent jis atsako, kodėl nereikia sėdėti ir žiūrėti.
+
+### K-76 · dizaineriui: dvi klaidos 56 sk. (69 pk.)
+
+1. `.ct-link-msg { display: flex }` be `:not([hidden])` – ta pati taisyklė, kurią patvirtinai po K-71a ir K-73.
+2. `.ct-link[data-state="busy"] .ct-link-in,` baigiasi **kableliu** ir prilimpa prie `.ct-link-msg`: `busy` būsenos laukas gauna žinutės šriftą ir spalvą, o pati `busy` taisyklė (greičiausiai `opacity`) prarasta. Neatstatinėju – nežinau, kokia ji turėjo būti.
+
+### Kas NEPADARYTA (sąmoningai)
+
+Variantas C turi antrą pusę – mygtuką „patikslinti rinką (25 kr.)“, kai archyvo imtis per maža. Jo nedariau: tai mokamas skenavimas, o Lukas dar nematė, kaip dažnai archyvo pakanka. Pirma pamatuojam, tada leidžiam pinigus.
+
+- Sargai: **26 žali** (naujas `nuoroda` 57, patikrintas sulaužytu kodu: sumaišius rinkas ir nuėmus `kainos_ispejimas IS NULL` krenta 10 patikrų). Tokenai 0 + 0.

@@ -327,8 +327,27 @@ function eilutes({ portalas, gyvi, riba } = {}) {
     ORDER BY id LIMIT ?`).all(portalas || null, portalas || null, gyvi ? 1 : 0, r);
 }
 
+// v2.26.0: kainos vienam modeliui - iklijuotos nuorodos rinkos medianai
+// (`nuorodos-rinka.js`). Tik GYVI skelbimai ir tik be kainos ispejimo: lizingo
+// imoka ar "parduota" kaina medianoje yra ta pati bėda, kuri Nr. 43 nukreipe
+// visa rinka. `portalas` grazinamas, nes mediana skaiciuojama PAGAL RINKA.
+function kainosModeliui({ marke, modelis, metaiNuo, metaiIki, riba } = {}) {
+  if (!db || !marke) return [];
+  const r = Math.min(Math.max(parseInt(riba, 10) || 400, 1), 2000);
+  const n = (x) => String(x || '').trim().toLowerCase();
+  return db.prepare(`SELECT portalas, kaina, metai, rida FROM skelbimai
+    WHERE dingo IS NULL AND kaina IS NOT NULL AND kainos_ispejimas IS NULL
+      AND LOWER(TRIM(marke)) = ?
+      AND (? IS NULL OR LOWER(TRIM(modelis)) = ?)
+      AND (? IS NULL OR metai >= ?) AND (? IS NULL OR metai <= ?)
+    ORDER BY paskut_matytas DESC LIMIT ?`)
+    .all(n(marke), modelis ? n(modelis) : null, modelis ? n(modelis) : null,
+      metaiNuo || null, metaiNuo || null, metaiIki || null, metaiIki || null, r);
+}
+
 module.exports = {
   kuroNorm, taisytiSenusIrasus,
-  ikelti, skelbimoId, pradeti, vykstantis, irasytiPuslapi, baigti, suvestine, eilutes, NESAUGOMA,
+  ikelti, skelbimoId, pradeti, vykstantis, irasytiPuslapi, baigti, suvestine, eilutes,
+  kainosModeliui, NESAUGOMA,
   _db: () => db,
 };

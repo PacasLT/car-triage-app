@@ -189,6 +189,23 @@ function urlDalis(marke, modelis) {
   return `make_id%5B${mk}%5D=${ids.length ? ids.join('_') : 0}&make_id_list=${mk}`;
 }
 
+// v2.26.0: visu zinomu markiu vardai (pilna lentele, jei ikelta, kitaip SEED).
+// Reikia `nuorodos-rinka.atpazinti` - markei ir modeliui is skelbimo antrastes.
+function markes() {
+  return _pilna ? Object.keys(_pilna.makes).map((id) => _pilna.makes[id]) : Object.keys(SEED.makes);
+}
+
+// { 'BMW': ['X5','X6',...] } - katalogas atpazinimui. Be '-kita-' irasu.
+function katalogas() {
+  const k = {};
+  markes().forEach((m) => {
+    // Marke irasom VISADA, net be modeliu saraso: tada atpazinsim bent marke,
+    // o kvietejas pats nuspres, ar be modelio mediana turi prasme (neturi).
+    k[m] = modeliai(m).map((x) => x.pavadinimas).filter((x) => x && x !== '-kita-');
+  });
+  return k;
+}
+
 function busena() {
   return { pilna: !!_pilna, atnaujinta: _pilna ? _pilna.atnaujinta : null,
     markiu: _pilna ? Object.keys(_pilna.makes).length : Object.keys(SEED.makes).length,
@@ -203,4 +220,4 @@ function modeliai(marke) {
   return Object.keys(s).map((k) => ({ id: [].concat(s[k])[0], pavadinimas: k }));
 }
 
-module.exports = { SEED, PARAMETRAI, MAKE_COMBO_URL, prijungti, atnaujinti, isparsinti, markesId, modeliuIds, urlDalis, busena, modeliai };
+module.exports = { SEED, PARAMETRAI, MAKE_COMBO_URL, prijungti, atnaujinti, isparsinti, markesId, modeliuIds, urlDalis, busena, modeliai, markes, katalogas };

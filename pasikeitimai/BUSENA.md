@@ -1,4 +1,4 @@
-# Būsena · 2026-10-19 · v2.25.0 (laukia push)
+# Būsena · 2026-10-19 · v2.26.0 (laukia push; v2.25.0 gyva nuo 00:57)
 
 Tik **atviri** punktai. Uždaryti — `ZURNALAS.md` / `archyvas/`. Kas laukia Luko — `LUKUI.md`.
 Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
@@ -19,6 +19,8 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 | ~~K-71a~~ | 52 sk. legenda telefone | **Uždaryta** (Errata 19): forma patvirtinta. |
 | ~~Tinder mygtukas~~ | **Išimtas v2.24.0** (73 pk.) | Mygtukas, `startTinder()` ir CSS. `#tinder-view` markupas liko – atskiras darbas. |
 | ~~Pigumo patikra~~ | **Padaryta v2.25.0:** kodėl skelbimas per pigus | Trys pakopos (Luko „gerai darom“ 10-19): 1) tekstas 0 €, 2) Haiku + 1 nuotrauka ~0,002 €, 3) pilna analizė 0,062 € – **išjungta**, kol Lukas nepamatys 2 pakopos kainos gyvoje paieškoje (`PIGUMO_PILNA=1`). Liko: Luko sprendimas dėl apimties (ar 2 pakopa visiems, ne tik per pigiems) ir ar įjungti 3 pakopą. |
+| ~~Nuorodos analizė~~ | **Padaryta v2.26.0:** įklijuok nuorodą → pilna apžvalga | Laukas paieškos viršuje (56 sk.), rinkos mediana iš archyvo (0 kr.), pagal rinką, imtis ≥8. Liko: „patikslinti rinką (25 kr.)“ mygtukas, kai archyvo per mažai – sąmoningai atidėtas, kol Lukas pamatys, kaip dažnai archyvo pakanka. |
+| K-76 | 56 sk. `.ct-link-msg` be `:not([hidden])` + kablelis `busy` selektoriuje | Priedų 27 blokas. Dizaineriui. |
 | K-73a | 59 sk. `small` netelpa į 136 px | Pamatuota: `guess` 120 px, `own` 153 px prieš 112 px vidų. Dizaineriui. |
 | K-75 | `.ct-bukle` dabar neša dvi prasmes | Pigumo žyma įdėta į esamą 52 sk. komponentą (tvirta/punktyras prasmė sutampa). Eilutėje gali stovėti dvi žymos – telpa, bet dizaineris sprendžia, ar pigumui duoti savo vardą. |
 | 53 paketas | `card` klasė nuo apvalkalo (DZ-KORTELES: visi trys) | v2.11.0; prieš – JS `closest('.card')` / `.card` paieška. |
@@ -93,8 +95,9 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 | ~~K-65~~ | `.ct-photo` pervadinimas | **Atšauktas** – tikrasis markupas jau atitinka sistemos 1 sk. struktūrą. Mano klaida: skaičiau `index.html` CSS, ne JS piešiamą markupą. |
 | 8 | `#more-filters` iš inline | NETRINTI (mūsų) |
 | 26 | `.ct-dt-meta` telefone lūžta (pigumo žyma, K-75) | Dizaineris – arba į 51 sk., arba pigumui savas vardas |
+| 27 | `.ct-link-msg[hidden]` (K-76) | Dizaineris – `:not([hidden])` į 56 sk. |
 
-Blokai 3–7, 9–25 jau ištrinti. Gyvų taisyklių faile – **4**: `.ct3-more-panel`, `.ct3-more-row` (8 blokas) ir dvi 26 bloko telefono eilutės.
+Blokai 3–7, 9–25 jau ištrinti. Gyvų taisyklių faile – **5**: `.ct3-more-panel`, `.ct3-more-row` (8 blokas), dvi 26 bloko telefono eilutės ir `.ct-link-msg[hidden]` (27).
 
 
 
