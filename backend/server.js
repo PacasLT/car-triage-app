@@ -2015,6 +2015,7 @@ function mergeDuplicatesAcrossPortals(listings) {
 const { computeMarketMedians, lyginimoMediana } = require('./rinkos-mediana');
 const rinkos = require('./rinkos');
 const maxPirkimo = require('./max-pirkimo');
+const { kuroSarasas, kuroKodai } = require('./kuras');   // v2.23.0: daugiareiksmis kuro filtras
 // v2.10.6: tekstas kartos atnaujinimui atpažinti (LCI / facelift skelbimo pavadinime).
 function rinkosTekstas(l) { return [l.modelis, l.title, l.variantas].filter(Boolean).join(' '); }
 
@@ -2107,13 +2108,15 @@ const KURO_SENI = {
   dyzelis: ['dyzelinas', 'dyzelinas_elektra'],
   hibridas: ['benzinas_elektra', 'dyzelinas_elektra'],
 };
+// v2.23.0: `filtras` gali buti KELI kurai, atskirti kableliu
+// („benzinas,benzinas_elektra"). Tinka, jei skelbimas atitinka bent viena.
 function kurasAtitinka(kuras, filtras) {
-  if (!filtras) return true;
+  const pasirinkti = kuroSarasas(filtras);
+  if (!pasirinkti.length) return true;
   if (!kuras) return true; // nezinomas kuras - nefiltruojam, kad neismestume gero skelbimo
   const kat = kuroKategorija(kuras);
   if (!kat) return true;
-  if (KURO_SENI[filtras]) return KURO_SENI[filtras].includes(kat);
-  return kat === filtras;
+  return pasirinkti.some((f) => (KURO_SENI[f] ? KURO_SENI[f].includes(kat) : kat === f));
 }
 
 // ============ URL SUDARYMAS PAGAL FILTRUS ============
@@ -2218,8 +2221,7 @@ function buildAutopliusUrl(filters) {
   if (filters.ridaIki) url += `&kilometrage_to=${filters.ridaIki}`;
   if (filters.pavaru_deze === 'Automatinė') url += `&gearbox_id=38`;
   if (filters.pavaru_deze === 'Mechaninė') url += `&gearbox_id=37`;
-  const fuelIds = AUTOPLIUS_FUEL_IDS[filters.kuras];
-  if (fuelIds) fuelIds.forEach((id) => { url += `&fuel_id%5B${id}%5D=${id}`; });
+  kuroKodai(filters.kuras, AUTOPLIUS_FUEL_IDS).forEach((id) => { url += `&fuel_id%5B${id}%5D=${id}`; });
   // PRIDETA: papildomi autoplius filtrai - juos pritaiko PATS portalas, tad nuskaitom maziau siuksliu
   const P = autopliusIds.PARAMETRAI.zymimieji;
   if (filters.varantieji && autopliusIds.PARAMETRAI.varantieji[filters.varantieji]) {
@@ -2278,7 +2280,7 @@ function buildAutogidasUrl(filters) {
   // v2.4.3: buvo `AUTOGIDAS_PARAM.kuras[filters.kuras]` - raktai „Dyzelinas", o
   // sasaja siuncia „dyzelis", tad kuro filtras NIEKADA nepateko i adresa.
   // Ir net pataikius formatas `f_2[1]=1` grazina 0 rezultatu - reikia teksto.
-  (KURO_FILTRAS.autogidas[filters.kuras] || []).forEach(([i, t]) => params.push(`f_2[${i}]=${encodeURIComponent(t)}`));
+  kuroKodai(filters.kuras, KURO_FILTRAS.autogidas).forEach(([i, t]) => params.push(`f_2[${i}]=${encodeURIComponent(t)}`));
   if (filters.beDefektu) params.push(`f_46=${encodeURIComponent('Be defektų')}`);
   if (filters.tikSuVin) params.push('ac_3=1');
   if (filters.tikLietuvoje) params.push('ac_4=1');
@@ -2306,7 +2308,10 @@ function buildAutoscout24Url(filters) {
   if (filters.kainaNuo) params.push(`pricefrom=${filters.kainaNuo}`);
   if (filters.kainaIki) params.push(`priceto=${filters.kainaIki}`);
   // v2.4.3: kuras, deze ir rida - iki siol autoscout24 ju negaudavo is viso.
-  if (KURO_FILTRAS.autoscout24[filters.kuras]) params.push(`fuel=${KURO_FILTRAS.autoscout24[filters.kuras]}`);
+  { // as24 kuro kodai eina viename `fuel=` kableliais, tad dar isskaidom ir sudedam
+    const as24 = [...new Set(kuroKodai(filters.kuras, KURO_FILTRAS.autoscout24)
+      .flatMap((v) => String(v).split(',')))];
+    if (as24.length) params.push(`fuel=${as24.join(',')}`); }
   if (filters.pavaru_deze === 'Automatinė') params.push('gear=A,S');   // S = pusiau automatinė
   if (filters.pavaru_deze === 'Mechaninė') params.push('gear=M');
   if (filters.ridaIki) params.push(`kmto=${filters.ridaIki}`);
@@ -2368,7 +2373,7 @@ function buildOtomotoUrl(filters) {
     if (g) params.push(`search[filter_enum_gearbox][0]=${g}`);
   }
   // v2.4.3: kuras - iki siol otomoto jo negaudavo.
-  (KURO_FILTRAS.otomoto[filters.kuras] || []).forEach((v, i) => params.push(`search[filter_enum_fuel_type][${i}]=${v}`));
+  kuroKodai(filters.kuras, KURO_FILTRAS.otomoto).forEach((v, i) => params.push(`search[filter_enum_fuel_type][${i}]=${v}`));
   { const pf = papFiltras(filters);
     if (pf.kb) params.push(`search[filter_enum_body_type][0]=${pf.kb.oto}`);
     if (pf.pr) params.push(`search[private_business]=${pf.pr.oto}`); }

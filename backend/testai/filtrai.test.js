@@ -35,7 +35,10 @@ const kodas = [
   'return { kurasAtitinka, buildAutopliusUrl, buildAutogidasUrl, buildAutoscout24Url, buildOtomotoUrl };',
 ].join('\n');
 const autopliusIds = require(path.join(__dirname, '..', 'autoplius-ids.js'));
-const F = new Function('autopliusIds', kodas)(autopliusIds);
+// v2.23.0: kuro saraso pagalbininkai gyvena atskirame modulyje - paduodam tikrus,
+// kad sargas tikrintu ta pati koda, kuri vykdo serveris.
+const KURAS_MOD = require(path.join(__dirname, '..', 'kuras.js'));
+const F = new Function('autopliusIds', 'kuroSarasas', 'kuroKodai', kodas)(autopliusIds, KURAS_MOD.kuroSarasas, KURAS_MOD.kuroKodai);
 
 let ok = 0, bl = 0;
 const t = (pav, c, info) => (c ? (ok++, console.log('  ✓ ' + pav)) : (bl++, console.log('  ✗ ' + pav + ' → ' + JSON.stringify(info))));
@@ -59,6 +62,46 @@ for (const [portalas, kurai] of Object.entries(lauk)) {
 }
 t('hibridas autogide NEįtraukia gryno benzino', !d(F.buildAutogidasUrl({ marke: 'BMW', kuras: 'hibridas' })).includes('=Benzinas&'));
 t('elektra autoplius NEįtraukia hibridų', !d(F.buildAutopliusUrl({ marke: 'BMW', kuras: 'elektra' })).includes('[36]'));
+
+console.log('\n1b. KELI KURAI VIENU METU (v2.23.0) ────────────────────────');
+// Kodėl: vartotojas pažymi „Benzinas" ir „Benzinas / elektra". Jei kuris nors
+// portalas liks vienareikšmis, jis grąžins tik vieną kurą – ir to nesimatys
+// niekur, išskyrus trūkstamus skelbimus.
+const DU = { marke: 'BMW', metaiNuo: 2019, kuras: 'benzinas,benzinas_elektra' };
+{
+  const ap = d(F.buildAutopliusUrl(DU));
+  t('autoplius · du kurai: [30] IR [36]', ap.includes('[30]=30') && ap.includes('[36]=36'), ap);
+  t('autoplius · du kurai: be dyzelino [32]', !ap.includes('[32]=32'));
+  const ag = d(F.buildAutogidasUrl(DU));
+  t('autogidas · du kurai: Benzinas IR Benzinas/Elektra',
+    ag.includes('f_2[2]=Benzinas') && ag.includes('f_2[4]=Benzinas/Elektra'), ag);
+  const as = d(F.buildAutoscout24Url(DU));
+  t('autoscout24 · du kurai viename fuel=B,2', /fuel=B,2(&|$)/.test(as), as);
+  const ot = d(F.buildOtomotoUrl(DU));
+  t('otomoto · du kurai: petrol[0] + hybrid[1] + plugin[2]',
+    ot.includes('fuel_type][0]=petrol') && ot.includes('fuel_type][1]=hybrid') && ot.includes('fuel_type][2]=plugin-hybrid'), ot);
+}
+{ // trys kurai, kur du dalijasi ta paciu kodu - kodas neturi dubliuotis
+  const TRYS = { marke: 'BMW', kuras: 'benzinas_elektra,dyzelinas_elektra,benzinas' };
+  const ot = d(F.buildOtomotoUrl(TRYS));
+  const hyb = (ot.match(/=hybrid(&|$)/g) || []).length;
+  t('otomoto · bendras kodas `hybrid` tik viena karta', hyb === 1, ot);
+  const as = d(F.buildAutoscout24Url({ marke: 'BMW', kuras: 'benzinas,benzinas_dujos' }));
+  t('autoscout24 · `L,C` issiskaido i bendra sarasa', /fuel=B,L,C(&|$)/.test(as), as);
+}
+{ // skelbimu atranka serveryje
+  const F2 = 'benzinas,benzinas_elektra';
+  t('kurasAtitinka · Benzinas telpa', F.kurasAtitinka('Benzinas', F2));
+  t('kurasAtitinka · Benzinas / elektra telpa', F.kurasAtitinka('Benzinas / elektra', F2));
+  t('kurasAtitinka · Dyzelinas netelpa', !F.kurasAtitinka('Dyzelinas', F2));
+  t('kurasAtitinka · Benzinas / dujos netelpa', !F.kurasAtitinka('Benzinas / dujos', F2));
+}
+{ // mobile.de - penktas portalas, tas pats modulis
+  const MDm = require(path.join(__dirname, '..', 'mobilede.js'));
+  const md = d(MDm.buildMobileDeUrl(DU));
+  t('mobile.de · du kurai: ft=PETROL IR ft=HYBRID', md.includes('ft=PETROL') && md.includes('ft=HYBRID'), md);
+  t('mobile.de · du kurai: be DIESEL', !/ft=DIESEL(&|$)/.test(md));
+}
 
 console.log('\n2. PAVARŲ DĖŽĖ ir RIDA ─────────────────────────────────────');
 const auto = { marke: 'BMW', pavaru_deze: 'Automatinė', ridaIki: 100000 };

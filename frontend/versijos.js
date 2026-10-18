@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.23.0', data: '2026-10-18', pavadinimas: 'Kuras – keli vienu metu',
+    pakeitimai: [
+      'Kuro filtre dabar galima pažymėti kelis kurus iš karto, su varnelėmis: pavyzdžiui benziną ir benziną/elektrą kartu. Iki šiol tilpo tik vienas.',
+      'Lauke rodoma „Benzinas +1“, o pasirinkimas atsidaro sąrašu po juo; telefone eilutės 44 px.',
+      'Papildomų kreditų tai nekainuoja: visi penki portalai kuro sąrašą priima viename užklausime, tad daugiau pažymėtų kurų – tas pats vienas nuskaitymas, tik platesnis.',
+    ],
+  },
+  {
     versija: '2.22.1', data: '2026-10-16', pavadinimas: 'Filtrai veikia ir kortelėse',
     pakeitimai: [
       'Būklės ir maržos jungikliai persikėlė į nuolatinę juostą virš rezultatų: anksčiau jie matėsi tik lentelėje, nors daužtus atsijoti reikia ir kortelių rodinyje.',

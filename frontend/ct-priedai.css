@@ -163,3 +163,42 @@
 /* 24 BLOKAS · IŠTRINTAS v2.22.1 (71 pk.): dizaineris perėmė visus keturis vardus
    į 51b sk. – `.ct-dtable-bar`, `.ct-dtable-count`, `.ct-dtable-view`, `.ct-seg-l`.
    `.ct-dt-switch` nebeegzistuoja: juosta nuolatinė, jungiklis gyvena jos gale. */
+
+
+/* 25 BLOKAS · v2.23.0 · kuro skydelis `.ct-fld-pop` (Klaudijus)
+   ----------------------------------------------------------------------------
+   Kuro filtras tapo daugiareikšmis (benzinas IR benzinas/elektra). Eilutės
+   viduje – dizainerio `.ct-check` (21 sk.); naujas tik pats skydelis.
+
+   KODĖL NE ŽENKLIUKAI VIETOJE LAUKO: pamatuota – filtrų stulpelis 213 px
+   (telefone 151 px), septyni `.ct-flag` išsidėsto į ŠEŠIAS eilutes, o
+   `.ct-fld-v` aukštis fiksuotas 36 px (34 sk.), tad jie dar ir nukerpami.
+
+   DIZAINERIUI: jei išskleidžiamas skydelis turi tapti sistemos vardu –
+   perimkit, blokas tada trinamas, kaip 20–24. Tik išdėstymas; spalvos,
+   rėmelis, šešėlis ir radiusas – iš tokenų.                                  */
+
+.ct-fld { position: relative; }
+.ct-fld-pop {
+  position: absolute; top: calc(100% + 5px); left: 0; z-index: 30;
+  min-width: 100%; width: max-content; max-width: min(280px, 92vw);
+  max-height: 300px; overflow: auto;
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 8px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-1);
+}
+/* Atidarytas laukas atrodo kaip fokusuotas – kitaip nesimato, kuris atsidarė */
+.ct-fld.is-open > .ct-fld-v { border-color: var(--accent-border); }
+.ct-fld.is-open > .ct-fld-v > .ct-i { transform: rotate(180deg); }
+
+@media (max-width: 640px) {
+  .ct-fld-pop { max-width: 92vw; }
+  /* K-23a (dizaineriui): `.ct-check` (21 sk.) telefone lieka 32 px, nors
+     `.ct-flag` toje pačioje vietoje turi `min-height: var(--tap-min)`.
+     Pamatuota 390 px: eilutė 32 px. Čia pataisyta tik skydelyje – sistemoje
+     tai turėtų būti pačiame `.ct-check`. */
+  .ct-fld-pop > .ct-check { min-height: var(--tap-min); }
+}

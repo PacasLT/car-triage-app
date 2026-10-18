@@ -2034,3 +2034,42 @@ Siūlymas: `tools/gyvas.js` – kas N min. paima `/versijos.js`, lygina su `main
 ### Antra, dar neuždaryta: `ANTHROPIC_API_KEY`
 
 Prieš išsijungimą žurnale kas antra eilutė buvo `generateShortComment KLAIDA: 401 invalid x-api-key`. Skelbimai nuskaitomi, AI komentarai – ne. Sargai to nepagauna, nes nekviečia tikro API. Punktas Lukui – KL-1016-1840. Po rakto pakeitimo reikia **vienos tikros analizės** patikrai, žurnale 401 turi dingti.
+
+## Z-159 · 2026-10-18 · Klaudijus · v2.23.0 – kuro filtras daugiareikšmis (Luko prašymas)
+
+Luko prašymas: „dar reikia sąraše kad galėtum apsirinkti kelis variantus su varnelėmis kuro pvz benzinas ir dar benzinas/elektra“. Perpardavėjui tai kasdienis atvejis – benzininis ir benzinas/elektra jam yra ta pati lentyna, o dyzelinas jau kita.
+
+### Svarbiausias faktas: tai NEKAINUOJA papildomų kreditų
+
+Pirmas klausimas buvo, ar du pažymėti kurai reiškia dvi užklausas portalui. **Ne.** Visi penki portalai kuro filtrą priima kaip SĄRAŠĄ viename URL: autoplius `fuel_id[]`, autogidas `f_2[]`, autoscout24 `fuel=B,2`, otomoto `filter_enum_fuel_type[]`, mobile.de pakartotinis `ft=`. Daugiau pažymėtų kurų = tas pats vienas nuskaitymas, tik platesnis.
+
+### Kodas
+
+- **Naujas `backend/kuras.js`** – `kuroSarasas` (eilutė „benzinas,benzinas_elektra“ → masyvas) ir `kuroKodai` (surenka portalo kodus visiems pažymėtiems, be pasikartojimų). Atskiras modulis, nes tą pačią eilutę skaito ir `server.js`, ir `mobilede.js`.
+- `kurasAtitinka` – vietoj `kat === filtras` dabar `pasirinkti.some(...)`. Seni vardai (`dyzelis`, `hibridas`) išsaugotose paieškose tebeveikia.
+- Penki URL kūrėjai – visi per `kuroKodai`. autoscout24 atskiras atvejis: jo kodai patys būna su kableliais (`L,C`), tad dar išskaidomi ir sudedami į vieną `fuel=B,L,C`.
+
+### Sąsaja – pirmas bandymas buvo klaidingas
+
+Pirma padariau ženkliukus (`.ct-flag` su varnele, 11 sk.) tiesiai lauke. **Pamatuota – netinka:** filtrų stulpelis yra **213 px** (telefone 151 px), septyni ženkliukai išsidėsto į **šešias eilutes**, o `.ct-fld-v` aukštis fiksuotas **36 px** (34 sk.), tad jie dar ir nukerpami – matėsi tik pirma eilutė. Ekranvaizdis tai parodė iš karto; be matavimo būčiau atidavęs sulaužytą lauką.
+
+Antras variantas ir liko: laukas vienos eilutės su santrauka („Benzinas +1“), o pasirinkimas – skydelyje po juo. Eilutės – dizainerio `.ct-check` (21 sk.), naujas tik pats skydelis (`ct-priedai.css` **25 BLOKAS**).
+
+**Tiesa gyvena `#fuel` laukelyje** (kableliais), varnelės ir santrauka yra tik jo vaizdas. Todėl išsaugotos paieškos, URL, „Išvalyti“ ir kiekio skaičiavimas veikia nieko nežinodami apie skydelį.
+
+### Pamatuota (1440 ir 390 px)
+
+| | Uždarytas | Atidarytas |
+|---|---|---|
+| Laukas | 36×213 px (telefone 36×151) | tas pats, rodyklė pasukta |
+| Skydelis | – | 220×174 px, 5 px po lauku, kairieji kraštai sulygiuoti, telpa ekrane |
+| Santrauka | „Dyzelinas“ → „Benzinas +1“ → „Visi“ | |
+
+Pažymėjus benziną ir benziną/elektrą: `#fuel` = `benzinas,benzinas_elektra`, laukas `is-set`. Paspaudus šalia – užsidaro; ✕ išvalo (reikšmė tuščia, santrauka „Visi“, varnelių 0). Esc uždaro.
+
+### K-23a · dizaineriui
+
+`.ct-check` (21 sk.) telefone lieka **32 px**, nors `.ct-flag` toje pačioje vietoje turi `min-height: var(--tap-min)`. Pamatuota 390 px. Priedų 25 bloke pataisyta tik skydelyje – sistemoje tai turėtų būti pačiame `.ct-check`.
+
+- Sargai: **24 žali** (naujas `kuras` – 23 patikros; `filtrai` 97 → 110 su skyriumi „1b. KELI KURAI VIENU METU“). Tokenai **0 + 0**.
+- Du sargai turėjo būti pataisyti, nes jie ima funkcijas iš `server.js` teksto ir nematė naujo modulio: `filtrai.test.js` ir `autogidas.test.js` dabar gauna tikrą `kuras.js`.

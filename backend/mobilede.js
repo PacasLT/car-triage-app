@@ -90,6 +90,7 @@ MOBILEDE_MODELIAI.Mercedes = MOBILEDE_MODELIAI['Mercedes-Benz'];
 // Mūsų kuro semantika (ta pati kaip KURO_FILTRAS server.js):
 // dyzelis = dyzelinas + dyzelino hibridai; benzinas = benzinas + benzino hibridai
 // + dujos; hibridas = visi hibridai; elektra = tik elektra.
+const { kuroKodai } = require('./kuras');   // v2.23.0: daugiareiksmis kuro filtras
 const MOBILEDE_KURAS = {
   dyzelis: ['DIESEL', 'HYBRID_DIESEL'],
   benzinas: ['PETROL'],   // v2.10.5 griežtai (buvo + HYBRID, LPG, CNG)
@@ -137,7 +138,7 @@ function buildMobileDeUrl(filters, puslapis, opts) {
   if (filters.metaiNuo || filters.metaiIki) params.push(`fr=${nuoIki(filters.metaiNuo, filters.metaiIki)}`);
   if (filters.kainaNuo || filters.kainaIki) params.push(`p=${nuoIki(filters.kainaNuo, filters.kainaIki)}`);
   if (filters.ridaIki) params.push(`ml=${nuoIki('', filters.ridaIki)}`);
-  (MOBILEDE_KURAS[filters.kuras] || []).forEach((k) => params.push(`ft=${k}`));
+  kuroKodai(filters.kuras, MOBILEDE_KURAS).forEach((k) => params.push(`ft=${k}`));   // v2.23.0: keli kurai
   if (filters.pavaru_deze === 'Automatinė') params.push('tr=AUTOMATIC_GEAR', 'tr=SEMIAUTOMATIC_GEAR');
   if (filters.pavaru_deze === 'Mechaninė') params.push('tr=MANUAL_GEAR');
   // v2.7.2 (Z-97): patikrinta portale - st FSBO/DEALER, doc=N d., c=kebulas.

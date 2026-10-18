@@ -1,4 +1,4 @@
-# Būsena · 2026-10-16 · v2.22.1 (GYVA)
+# Būsena · 2026-10-18 · v2.23.0 (laukia push)
 
 Tik **atviri** punktai. Uždaryti — `ZURNALAS.md` / `archyvas/`. Kas laukia Luko — `LUKUI.md`.
 Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
@@ -12,7 +12,8 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 | Nr.45 | Otomoto pilna apžvalga be analizės ir nuotraukų | Luko „Neveikia“. Testuoti tik su įrašytu HTML (iki 10-16). |
 | Nr.30 | Antraštė index ≠ mėgstamiausi | Luko „Neveikia“. |
 | Nr.47 | Neatitinkantys filtrų (autogidas iškelti) rodomi „Kiti skelbimai“ | Nerodyti visai, rinkos kainai lieka. |
-| Kuras | Griežtas kuro filtras (KL-PUSH-0922E) | Tik pasirinktas kuras; variantai: Dyzelinas, Benzinas, Benzinas/dujos, Benzinas/elektra, Elektra, Dyzelinas/elektra. Push v2.10.1–2 – po šito, su nauju leidimu. |
+| ~~Kuras~~ | **Padaryta v2.23.0:** kuro filtras daugiareikšmis | Keli kurai vienu metu su varnelėmis (Luko prašymas 10-18). Griežta prasmė iš v2.10.5 nepakito. Papildomų kreditų nekainuoja – portalai kuro sąrašą priima viename URL. |
+| K-23a | `.ct-check` telefone 32 px | Dizaineriui: `.ct-flag` turi `--tap-min`, `.ct-check` ne. Priedų 25 bloke pataisyta tik kuro skydelyje. |
 | 53 paketas | `card` klasė nuo apvalkalo (DZ-KORTELES: visi trys) | v2.11.0; prieš – JS `closest('.card')` / `.card` paieška. |
 | Stabdis | Kiekis portaluose + kaina + stabdis + Stop | **Dalis padaryta v2.15.0:** puslapių pasirinkimas iki „visų“ + kainos riba (`PAIESKOS_RIBA_KR`, 200 kr.) su langu „per didelė paieška“. Liko: Stop mygtukas (KL-STOP), kiekis portaluose prieš paiešką (DZ-LENTELE) ir admin kreditų rodinys pagal vartotoją (KL-F3PLUS). |
 | Modelio apžvalga | „Analizuoti modelį“ (Luko prašymas 09-24) | **Padaryta v2.16.0:** mygtukas po paieškos, Regitros/TA/mūsų kainų istorijos skaičiai + AI su web paieška, 2 kr., talpykla 30 d. Liko: gyva patikra produkcijoje ir dizainerio langas (inline stiliai). |

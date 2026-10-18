@@ -2500,17 +2500,32 @@
         <div class="ct-fld is-empty" data-lauk="i-f-kuras">
           <span class="ct-fld-k"><svg class="ct-i"><use href="#i-f-kuras"></use></svg>KURAS</span>
           <div class="ct-fld-v">
-            <select class="ct-fld-t" id="fuel">
-              <option value="">Visi</option>
-              <option value="dyzelinas" selected>Dyzelinas</option>
-              <option value="benzinas">Benzinas</option>
-              <option value="benzinas_dujos">Benzinas / dujos</option>
-              <option value="benzinas_elektra">Benzinas / elektra</option>
-              <option value="elektra">Elektra</option>
-              <option value="dyzelinas_elektra">Dyzelinas / elektra</option>
-            </select>
+            <!-- v2.23.0: kuras tapo DAUGIAREIKŠMIS. Perpardavėjui benzininis ir
+                 benzinas/elektra dažnai yra ta pati lentyna, o dyzelinas – kita;
+                 su vienu <select> tokios paieškos nepadarysi.
+
+                 KODĖL IŠSKLEIDŽIAMAS SĄRAŠAS, O NE ŽENKLIUKAI VIETOJE:
+                 pamatuota – filtrų stulpelis yra 213 px (telefone 151 px), tad
+                 septyni `.ct-flag` ženkliukai išsidėsto į ŠEŠIAS eilutes, o
+                 `.ct-fld-v` aukštis yra fiksuotas 36 px, tad jie dar ir nukerpami.
+                 Todėl laukas lieka vienos eilutės, o pasirinkimas gyvena
+                 skydelyje po juo. Eilutės – dizainerio `.ct-check` (21 sk.).
+
+                 Reikšmė lieka `#fuel` laukelyje kableliais, tad visas senas kodas
+                 (`document.getElementById('fuel').value`, URL, išsaugotos
+                 paieškos, kiekio skaičiavimas) veikia be pakeitimų. -->
+            <span class="ct-fld-t" id="fuel-sum">Dyzelinas</span>
+            <input type="hidden" class="ct-fld-t" id="fuel" value="dyzelinas">
             <svg class="ct-i" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
             <button type="button" class="ct-fld-x" tabindex="-1" aria-label="Išvalyti">✕</button>
+          </div>
+          <div class="ct-fld-pop" id="fuel-pop" role="group" aria-label="Kuras" hidden>
+                <label class="ct-check"><input type="checkbox" value="dyzelinas"><i>✓</i><span>Dyzelinas</span></label>
+                <label class="ct-check"><input type="checkbox" value="benzinas"><i>✓</i><span>Benzinas</span></label>
+                <label class="ct-check"><input type="checkbox" value="benzinas_dujos"><i>✓</i><span>Benzinas / dujos</span></label>
+                <label class="ct-check"><input type="checkbox" value="benzinas_elektra"><i>✓</i><span>Benzinas / elektra</span></label>
+                <label class="ct-check"><input type="checkbox" value="elektra"><i>✓</i><span>Elektra</span></label>
+                <label class="ct-check"><input type="checkbox" value="dyzelinas_elektra"><i>✓</i><span>Dyzelinas / elektra</span></label>
           </div>
         </div>
 
@@ -3927,7 +3942,12 @@ async function runSearch() {
 // Paspaudus "Ieskoti", filtrai iraso i adresa. Taip nuoroda tampa dalinama,
 // veikia narsykles "atgal", o perkrovus puslapi filtrai lieka vietoje.
 // v2.10.5: senos kuro reikšmės (išsaugotos paieškos, nuorodos) → naujos griežtos.
-function ctKuroSenas(v) { return ({ dyzelis: 'dyzelinas', hibridas: 'benzinas_elektra' })[v] || v; }
+// v2.23.0: reikšmė gali būti kelios, kableliais – seni vardai verčiami kiekvienas.
+function ctKuroSenas(v) {
+  var SENI = { dyzelis: 'dyzelinas', hibridas: 'benzinas_elektra' };
+  return String(v || '').split(',').map(function (x) { x = x.trim(); return SENI[x] || x; })
+    .filter(Boolean).join(',');
+}
 const CT_URL_LAUKAI = [
   ['marke', 'marke'], ['modelis', 'modelis'], ['pavaru_deze', 'deze'],
   ['fuel', 'kuras'], ['metaiNuo', 'metai_nuo'], ['metaiIki', 'metai_iki'],
@@ -4475,6 +4495,63 @@ let currentData = null;
 //
 // Kas laikoma NUSTATYTA: bet kuris vidinis <select>/<input> su nenuline
 // reiksme. <select> pirma <option value=""> yra „visi", t.y. NE pasirinkimas.
+// ── Kuro pasirinkimas · keli kurai (v2.23.0) ───────────────────────────────
+// Tiesa gyvena `#fuel` laukelyje (kableliais); varnelės ir santrauka yra tik
+// jo vaizdas. Todėl viskas, kas keičia `#fuel` – išsaugota paieška, URL,
+// „Išvalyti“ – veikia nieko nežinodama apie skydelį, o `ctKuroSinc` pasiveja.
+var CT_KURO_VARDAI = {
+  dyzelinas: 'Dyzelinas', benzinas: 'Benzinas', benzinas_dujos: 'Benzinas / dujos',
+  benzinas_elektra: 'Benzinas / elektra', elektra: 'Elektra', dyzelinas_elektra: 'Dyzelinas / elektra',
+};
+function ctKuroSar() {
+  var inp = document.getElementById('fuel');
+  return String(inp ? inp.value : '').split(',').map(function (x) { return x.trim(); }).filter(Boolean);
+}
+window.ctKuroSinc = function () {
+  var pop = document.getElementById('fuel-pop'), sum = document.getElementById('fuel-sum');
+  if (!pop || !sum) return;
+  var sar = ctKuroSar();
+  pop.querySelectorAll('input[type=checkbox]').forEach(function (c) {
+    c.checked = sar.indexOf(c.value) !== -1;
+  });
+  // Santrauka: pirmas vardas + „+N“. Visų vardų nerašom – 213 px jie netelpa,
+  // o nukirstas tekstas meluoja labiau nei skaičius.
+  sum.textContent = !sar.length ? 'Visi'
+    : (CT_KURO_VARDAI[sar[0]] || sar[0]) + (sar.length > 1 ? ' +' + (sar.length - 1) : '');
+};
+window.ctKuroSkydelis = function (rodyti) {
+  var pop = document.getElementById('fuel-pop');
+  var fld = pop && pop.closest('.ct-fld');
+  if (!pop || !fld) return;
+  var atidarytas = rodyti == null ? pop.hasAttribute('hidden') : rodyti;
+  if (atidarytas) pop.removeAttribute('hidden'); else pop.setAttribute('hidden', '');
+  fld.classList.toggle('is-open', atidarytas);
+};
+document.addEventListener('click', function (e) {
+  if (!e.target.closest) return;
+  // ✕ tvarko bendras `.ct-fld-x` klausytojas – čia jo neliečiam
+  if (e.target.closest('.ct-fld-x')) return;
+  var laukas = e.target.closest('.ct-fld[data-lauk="i-f-kuras"] .ct-fld-v');
+  if (laukas) { window.ctKuroSkydelis(); return; }
+  if (!e.target.closest('#fuel-pop')) window.ctKuroSkydelis(false);   // paspaudus šalia – užsidaro
+});
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') window.ctKuroSkydelis(false);
+});
+document.addEventListener('change', function (e) {
+  var c = e.target.closest && e.target.closest('#fuel-pop input[type=checkbox]');
+  if (!c) return;
+  var inp = document.getElementById('fuel'); if (!inp) return;
+  var sar = ctKuroSar(), i = sar.indexOf(c.value);
+  if (c.checked && i === -1) sar.push(c.value);
+  if (!c.checked && i !== -1) sar.splice(i, 1);
+  inp.value = sar.join(',');
+  window.ctKuroSinc();
+  inp.dispatchEvent(new Event('change', { bubbles: true }));   // kiekio skaičiavimas
+  if (typeof window.ctFldBusenos === 'function') window.ctFldBusenos();
+  if (typeof ctUpdateMoreBadge === 'function') ctUpdateMoreBadge();
+});
+
 window.ctFldBusenos = function () {
   var n = 0;
   document.querySelectorAll('.ct-fld').forEach(function (f) {
@@ -4493,6 +4570,7 @@ window.ctFldBusenos = function () {
       ? '<b>NUSTATYTA ' + n + '</b><button type="button" onclick="ctFldValyti()">I\u0161valyti</button>'
       : '';
   }
+  if (typeof window.ctKuroSinc === 'function') window.ctKuroSinc();
 };
 window.ctFldValyti = function (f) {
   var sar = f ? [f] : [].slice.call(document.querySelectorAll('.ct-fld'));

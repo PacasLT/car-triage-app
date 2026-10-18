@@ -22,7 +22,9 @@ const konst = (src.match(/const KURO_FILTRAS = \{[\s\S]*?\n\};/) || [''])[0]
 const ribos = 'const MIN_REALI_KAINA = 4000; const SENAS_METAI = new Date().getFullYear() - 10; const SENAS_RIDA = 200000;';
 const kodas = ribos + konst + ['extractField', 'kainosPatikra', 'papFiltras', 'extractAutogidasListings', 'buildAutogidasUrl'].map(imk).join('\n')
   + '\nreturn { extractAutogidasListings, buildAutogidasUrl };';
-const { extractAutogidasListings, buildAutogidasUrl } = new Function('cheerio', 'URL', kodas)(cheerio, URL);
+// v2.23.0: buildAutogidasUrl naudoja kuroKodai is backend/kuras.js - paduodam tikra.
+const KURAS_MOD = require(path.join(__dirname, '..', 'kuras.js'));
+const { extractAutogidasListings, buildAutogidasUrl } = new Function('cheerio', 'URL', 'kuroKodai', kodas)(cheerio, URL, KURAS_MOD.kuroKodai);
 
 let ok = 0, blogai = 0;
 const t = (pav, salyga, info) => salyga
