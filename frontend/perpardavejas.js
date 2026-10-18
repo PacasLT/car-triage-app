@@ -73,12 +73,20 @@
   // Būklė. mobile.de / otomoto / autoscout24 turi struktūrinį žalos lauką;
   // autoplius ir autogidas – tik tekstą, todėl ten tai SPĖJIMAS, ir rodinys
   // tai pasako atskira žyma (dizainerio 52 sk.: tvirta vs punktyras).
-  var STRUKTURINIAI = { mobilede: 1, otomoto: 1, autoscout24: 1 };
+  // K-72 (v2.23.1): `c.source` yra DOMENAS („mobile.de"), ne trumpasis vardas –
+  // serveris rašo `l.source = site`. Dėl to `STRUKTURINIAI[c.source]` niekada
+  // nesutapdavo ir KIEKVIENAS daužtas automobilis gaudavo punktyrinę žymą
+  // „~ daužtas?", net kai portalas pats tai pažymėjo. Tikrinam pagal vardą.
+  var STRUKTURINIAI = ['mobile.de', 'mobilede', 'otomoto', 'autoscout24'];
+  function strukturinis(source) {
+    var s = String(source || '').toLowerCase();
+    return STRUKTURINIAI.some(function (x) { return s.indexOf(x) !== -1; });
+  }
   function bukle(c) {
     var def = (c.galimiDefektai || []).length > 0;
     var zala = !!c.itariamaZala;
     if (!def && !zala) return null;
-    var strukt = !!STRUKTURINIAI[c.source] && def;
+    var strukt = strukturinis(c.source) && def;
     return strukt
       ? { reiksme: 'dauztas', saltinis: 'portalas', tekstas: 'Daužtas' }
       : { reiksme: 'dauztas', saltinis: 'aprasymas', tekstas: '~ daužtas?' };

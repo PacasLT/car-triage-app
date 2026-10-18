@@ -83,5 +83,20 @@ juosta.__klik({target:{closest:()=>({parentNode:{getAttribute:()=>'Būklė'},get
 T(gautaKortelese && gautaKortelese.length===1 && gautaKortelese[0].url==='u','bukles filtras veikia IR korteliu rezime (2 -> 1)');
 T(/1 skelb\./.test(juosta.innerHTML),'skaitiklis persiskaiciavo i 1');
 
+// ── K-72: bukles zyma pagal DOMENA, ne trumpaji varda ───────────────────────
+// `c.source` is serverio ateina kaip „mobile.de" / „autoscout24.com", todel
+// senasis STRUKTURINIAI[c.source] niekada nesutapdavo ir KIEKVIENAS dauztas
+// auto gaudavo punktyrine „~ dauztas?" zyma, net kai portalas pats pazymejo.
+{
+  const dom = { ...c, url: 'z', source: 'mobile.de', galimiDefektai: ['Priekis'] };
+  const trump = { ...c, url: 'z2', source: 'mobilede', galimiDefektai: ['Priekis'] };
+  const ap = { ...c, url: 'z3', source: 'autoplius.lt', galimiDefektai: ['Priekis'] };
+  const b = ctx.window.CT_PERP.bukle;
+  T(b(dom) && b(dom).saltinis === 'portalas', '„mobile.de" (domenas) -> tvirta zyma „Dauztas"');
+  T(b(trump) && b(trump).saltinis === 'portalas', '„mobilede" (trumpas) irgi veikia');
+  T(b(ap) && b(ap).saltinis === 'aprasymas', '„autoplius.lt" -> punktyrine „~ dauztas?" (struktūrinio lauko nera)');
+  T(b({ ...c, url: 'z4' }) === null, 'tvarkingas -> jokios zymos');
+}
+
 console.log('\n'+(klaidu?klaidu+' KRENTA':'visi '+n+' prajo'));
 process.exit(klaidu?1:0);

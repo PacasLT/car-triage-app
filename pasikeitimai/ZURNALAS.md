@@ -2073,3 +2073,41 @@ Pažymėjus benziną ir benziną/elektrą: `#fuel` = `benzinas,benzinas_elektra`
 
 - Sargai: **24 žali** (naujas `kuras` – 23 patikros; `filtrai` 97 → 110 su skyriumi „1b. KELI KURAI VIENU METU“). Tokenai **0 + 0**.
 - Du sargai turėjo būti pataisyti, nes jie ima funkcijas iš `server.js` teksto ir nematė naujo modulio: `filtrai.test.js` ir `autogidas.test.js` dabar gauna tikrą `kuras.js`.
+
+## Z-160 · 2026-10-18 · K-72 · `source` yra DOMENAS – rinkos dalis produkcijoje neveikė nuo v2.17.0
+
+Lukas atsiuntė lentelės ekranvaizdį: „≈ Lietuvoje" rodo gryną skelbimo kainą, MAX – „laukia rinkos", „Kabo" – brūkšnys. Iš pradžių atrodė, kad kalta reta imtis (BMW be modelio – 550, 225, 118, 530 vienoje paieškoje). **Nebuvo.**
+
+### Viena klaida, trys simptomai
+
+`server.js` kiekvienam skelbimui rašo `l.source = site`, o `site` yra **domenas**: `autoplius.lt`, `autogidas.lt`, `autoscout24.com`, `otomoto.pl`, `mobile.de`. `rinkos.js` `PORTALO_RINKA` raktai buvo **trumpieji vardai**: `autoplius`, `autoscout24`, `mobilede`. Jie niekada nesutapo.
+
+```
+rinkaPagalPortala('autoscout24.com') → null
+  → kastai(null) → null
+  → kainaLietuvoje(...) → null
+  → „≈ Lietuvoje" rodo gryną kainą, kaštai 0, tarša 0
+```
+
+Tas pats antroje vietoje: `perpardavejas.js` `STRUKTURINIAI[c.source]` – irgi niekada nesutapo, tad **kiekvienas daužtas automobilis gaudavo punktyrinę „~ daužtas?"**, net kai portalas pats tai pažymėjo. Luko ekranvaizdyje abu BMW (550 ir 530) yra iš autoscout24/mobile.de ir abu su punktyru – antras tos pačios klaidos pėdsakas, matomas be jokio derinimo.
+
+Trečias, atskiras: **`dienosRinkoje`** buvo dedamas TIK į `allListingsBase` ir `filtruAtmesti`, o `candidates` jo neturėjo – todėl stulpelis „Kabo" visada brūkšnys. Tas pats baltojo sąrašo spąstas kaip v2.18.1, tik iš kitos pusės.
+
+### Kodėl sargai rodė žalią
+
+Mano pavyzdžiuose `source` buvo `'mobilede'` – **forma, kurios portalai niekada neduoda.** Testavau tai, ką pats sugalvojau, o ne tai, ką gamina serveris. Nuo v2.17.0 (spalio 16) visa rinkos dalis produkcijoje neveikė nė dienos, o 23 sargai buvo žali.
+
+Tai trečia tos pačios rūšies pamoka po Z-155 (skaičiavau su senais kaštais) ir Z-156 (taisiau lygindamas su kodu, ne su tuo, ką paskelbiau). Bendras vardiklis: **tikrinau savo prielaidą, ne tikrą duomenį.**
+
+### Pataisyta
+
+- `rinkaPagalPortala` priima abi formas per `portaloRaktas` (veikia ir `autoscout24.de`, ir `www.autoplius.lt`). `source` LIEKA domenas – jį sąsaja rodo žmogui (`<span class="source-tag">`).
+- `perpardavejas.js` būklės žyma – pagal vardą tekste, ne pagal tikslų raktą.
+- `dienosRinkoje` pridėtas į `enriched`, tad pasiekia ir `candidates`.
+
+### Sargas, kuris to nebeleis
+
+`rinkos.test.js` 5 skyrius **ima tikras `site` eilutes tiesiai iš `server.js`** (`allUrls` bloko regexp), ne mano rankomis surašytas, ir reikalauja, kad kiekviena jų grąžintų rinką. Papildomai tikrina, kad `server.js` tebededa `l.source = site` – jei kas nors tai pakeis, sargas pasakys, kad jo prielaida pasenusi.
+
+- Sargai: **24 žali**; `rinkos` 23 → 32, `perpardavejas` 17 → 21. Tokenai 0 + 0.
+- **Lieka atvira:** MAX gali ir toliau rodyti „laukia rinkos", jei paieška be modelio – jam reikia bent 5 to paties modelio LT skelbimų. Tai ne klaida, bet reikia Luko patikros su konkrečiu modeliu.

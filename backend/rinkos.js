@@ -79,8 +79,36 @@ function pristatymas(rinka) {
   return PRISTATYMAS[rinka] || null;
 }
 
+// K-72 (v2.23.1): skelbime `l.source` yra DOMENAS – serveris rašo
+// `l.source = site`, o `site` yra „autoplius.lt", „autoscout24.com",
+// „mobile.de", „otomoto.pl", „autogidas.lt". `PORTALO_RINKA` raktai yra
+// trumpieji vardai, tad nuo v2.17.0 ši funkcija PRODUKCIJOJE visada grąžino
+// `null`: rinka nežinoma -> `kainaLietuvoje` -> null -> stulpelis „≈ Lietuvoje"
+// rodė gryną skelbimo kainą, o MAX – „laukia rinkos". Sargai to nepagavo, nes
+// mano pavyzdžiuose `source` buvo trumpasis vardas, kurio portalai neduoda.
+// Priimam abi formas; `source` lieka domenas, nes jį sąsaja rodo žmogui.
+const DOMENO_RAKTAS = {
+  'autoplius.lt': 'autoplius',
+  'autogidas.lt': 'autogidas',
+  'mobile.de': 'mobilede',
+  'autoscout24.com': 'autoscout24',
+  'otomoto.pl': 'otomoto',
+};
+function portaloRaktas(portalas) {
+  if (!portalas) return null;
+  const s = String(portalas).toLowerCase().trim().replace(/^www\./, '');
+  if (PORTALO_RINKA[s]) return s;
+  if (DOMENO_RAKTAS[s]) return DOMENO_RAKTAS[s];
+  // atsarga, jei domenas ateitų su keliu ar kitu TLD („autoscout24.de")
+  for (const [dom, raktas] of Object.entries(DOMENO_RAKTAS)) {
+    const vardas = dom.split('.')[0];
+    if (s.startsWith(vardas)) return raktas;
+  }
+  return null;
+}
 function rinkaPagalPortala(portalas) {
-  return PORTALO_RINKA[portalas] || null;
+  const k = portaloRaktas(portalas);
+  return k ? PORTALO_RINKA[k] : null;
 }
 
 function rinkosVardas(rinka) {
@@ -119,5 +147,5 @@ function kainaLietuvoje(kaina, rinka, auto) {
 
 module.exports = {
   PORTALO_RINKA, RINKU_VARDAI, KASTAI, NEISKAICIUOTA, PRISTATYMAS,
-  rinkaPagalPortala, rinkosVardas, kastai, kainaLietuvoje, pristatymas,
+  portaloRaktas, rinkaPagalPortala, rinkosVardas, kastai, kainaLietuvoje, pristatymas,
 };

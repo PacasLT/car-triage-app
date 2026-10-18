@@ -66,6 +66,29 @@ const lygPl = M.lyginimoMediana(med2.X5, ['G05'], 'PL');
 T(lygPl.rinka === null, 'PL imtis per maža (2) – grąžinam rinka:null, kad rodinys to neteigtų');
 T(lygPl.count >= 5, 'bet mediana vis tiek yra – iš platesnės imties (' + lygPl.count + ')');
 
+console.log('\n── 5. K-72: `source` yra DOMENAS, ne trumpasis vardas ────');
+// Kodėl sargas: v2.17.0–v2.23.0 produkcijoje VISA rinkos dalis buvo negyva,
+// nes `server.js` rašo `l.source = site`, kur `site` yra „autoplius.lt",
+// o `PORTALO_RINKA` raktai buvo trumpieji vardai. Mano pavyzdžiuose `source`
+// buvo trumpasis vardas, tad sargai rodė žalią, o žmogus matė tuščius
+// stulpelius. Todėl šis sargas ima TIKRAS eilutes iš `server.js`, ne mano
+// rankomis surašytas – kitaip ta pati klaida grįš nepastebėta.
+{
+  const fs = require('fs'), path = require('path');
+  const src = fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
+  const blokas = (src.match(/const allUrls = \[[\s\S]*?\n    \];/) || [''])[0];
+  const site = [...blokas.matchAll(/site:\s*'([^']+)'/g)].map((m) => m[1]);
+  T(site.length === 5, 'server.js allUrls turi 5 portalus (rasta ' + site.length + ')');
+  for (const sv of site) {
+    T(R.rinkaPagalPortala(sv) !== null, '`' + sv + '` → ' + R.rinkaPagalPortala(sv));
+  }
+  T(/l\.source = site;/.test(src), 'server.js tebededa `l.source = site` (domeną) – sargas tikrina tą pačią formą');
+  // Kaina Lietuvoje privalo susiskaičiuoti su TOMIS PAČIOMIS eilutėmis
+  const klt = R.kainaLietuvoje(28450, R.rinkaPagalPortala('autoscout24.com'), { kuras: 'Benzinas', variklioTuris: 1.5 });
+  T(klt !== null, 'kainaLietuvoje su domenu „autoscout24.com" nebegrąžina null');
+  T(klt && klt.kastai.viso > 0, 'ir kaštai > 0 (' + (klt ? klt.kastai.viso : '-') + ' €)');
+}
+
 console.log('\n── Rezultatas ────────────────────────────────────────────');
 console.log(klaidu === 0 ? `Visi ${n} patikrinimai praėjo.` : `${klaidu} iš ${n} KRENTA.`);
 process.exit(klaidu === 0 ? 0 : 1);

@@ -3507,6 +3507,12 @@ async function runSearchJob(jobId, filters, arAdminas) {
         pelnoMath: pl,
         derybos: (mp && mp.max) ? maxPirkimo.derybos(l.kaina, mp.max) : null,
         ridaMedian: marketData ? marketData.ridaMedian : null,
+        // v2.23.1: KIEK DIENŲ KABO. Iki šiol šis laukas buvo dedamas TIK į
+        // `allListingsBase` ir `filtruAtmesti`, o `candidates` jo neturėjo –
+        // todėl lentelės stulpelis „Kabo" visada rodė brūkšnį. Tas pats
+        // baltojo sąrašo spąstas kaip v2.18.1, tik iš kitos pusės: ten laukas
+        // nepateko į `allListings`, čia – į `candidates`.
+        dienosRinkoje: dienosNuo(l.ikeltaLaikas),
       };
     });
 

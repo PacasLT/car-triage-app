@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.23.1', data: '2026-10-18', pavadinimas: 'Pataisyta: kaina Lietuvoje ir daužto žyma',
+    pakeitimai: [
+      'Stulpelis „≈ Lietuvoje“ rodė gryną skelbimo kainą be parsivežimo kaštų, o didžiausia pirkimo kaina – „laukia rinkos“. Priežastis: skelbimo portalas buvo įrašomas kaip adresas („autoscout24.com“), o kaštų lentelė jo ieškojo trumpu vardu, todėl rinka visada likdavo nežinoma. Veikia nuo spalio 16-osios.',
+      'Daužtas automobilis visada gaudavo punktyrinę žymą „~ daužtas?“, net kai portalas pats tai pažymėjo. Ta pati priežastis – dabar tvirta žyma rodoma teisingai.',
+      'Stulpelis „Kabo“ lentelėje visada rodė brūkšnį – dienų skaičius nepasiekdavo sąrašo. Pataisyta (autoplius, mobile.de ir otomoto skelbimams; autogidas ir autoscout24 to lauko neduoda).',
+    ],
+  },
+  {
     versija: '2.23.0', data: '2026-10-18', pavadinimas: 'Kuras – keli vienu metu',
     pakeitimai: [
       'Kuro filtre dabar galima pažymėti kelis kurus iš karto, su varnelėmis: pavyzdžiui benziną ir benziną/elektrą kartu. Iki šiol tilpo tik vienas.',
