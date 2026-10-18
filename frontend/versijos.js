@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.24.0', data: '2026-10-19', pavadinimas: 'Filtrų sąrašas telefone – apatinis lapelis',
+    pakeitimai: [
+      'Telefone kuro sąrašas atsidaro kaip lapelis ekrano apačioje. Dešiniajame stulpelyje jis anksčiau iššokdavo už ekrano krašto.',
+      'Metų laukas telefone užima visą plotį – „2018“ ir „2024“ dabar telpa be nukirtimo.',
+      'Esc užveria sąrašą ir grąžina žymeklį į lauką.',
+      'Išimtas „Tinder naršymas“ – režimas atšauktas, o jo violetinis mygtukas buvo paskutinė tokia spalva už logotipo ribų.',
+    ],
+  },
+  {
     versija: '2.23.4', data: '2026-10-18', pavadinimas: 'Kuro sąrašas užsidaro; skelbimai be nuotraukų – apačioje',
     pakeitimai: [
       'Kuro sąrašas tikrai užsidaro – paspaudus „Gerai“, Esc, kitą filtrą ar šalia. Iki šiol jis likdavo matomas, nors programa jį jau buvo „uždariusi“.',

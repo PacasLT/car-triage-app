@@ -6180,3 +6180,167 @@ textarea.ct-field {
   .ct-dtable-bar > .ct-sort > .ct-btn-toggle { width: 100%; justify-content: space-between; }
   .ct-dtable-bar > .ct-btn { order: 10; width: 100%; min-height: var(--tap-min); }
 }
+
+
+/* ============================================================================
+   73 paketas · 58 sk. `.ct-fld-pop` (perimta is priedu 25) · 59 sk. savo
+   samata MAX langelyje · metu laukas · Tinder
+   Siulau v2.24.0. Po diegimo: ct-priedai.css 25 blokas (168-209) trinamas.
+   ========================================================================== */
+
+
+/* ============================================================================
+   58 sk. · ISSKLEIDZIAMAS FILTRO SKYDELIS · `.ct-fld-pop`
+   ----------------------------------------------------------------------------
+   Jusu blokas perimamas beveik kaip yra. Visi trys elgsenos sprendimai
+   (pointerdown gaudymo fazeje, be slinkties klausytojo, „Gerai") - teisingi,
+   lieka. Pridedu du dalykus:
+
+   1) TELEFONE - APATINIS LAPELIS, ne absolute po lauku. Desiniame stulpelyje
+      (x ≈ 200) 280 px skydelis is lauko kairio krasto iseina uz ekrano. Lapelis
+      problema isprendzia ir antra jusu pastaba: „paspaudimas salia" telefone
+      pataikydavo i kita valdikli - lapelis uzdengia filtrus, tad salia nebera
+      ko pataikyti. „Gerai" lieka - lapelyje jis yra natūralus uzdarymas.
+   2) `Esc` uzveria ir grazina fokusa laukui (JS, viena eilute).
+
+   Santrauka lauke - jusu „Benzinas +1" / „Visi" - teisinga: nukirstas tekstas
+   meluoja labiau nei skaicius.                                              */
+
+.ct-fld { position: relative; }
+.ct-fld-pop:not([hidden]) {
+  position: absolute; top: calc(100% + 5px); left: 0; z-index: 30;
+  min-width: 100%; width: max-content; max-width: min(280px, 92vw);
+  max-height: 300px; overflow: auto;
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 8px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-panel);
+}
+.ct-fld-pop > .ct-btn {
+  align-self: stretch; margin-top: 6px; padding-top: 8px;
+  border-top: 1px solid var(--border);
+  border-radius: 0; background: transparent;
+}
+.ct-fld.is-open > .ct-fld-v { border-color: var(--accent-border); }
+.ct-fld > .ct-fld-v > .ct-i { transition: transform .15s; }
+.ct-fld.is-open > .ct-fld-v > .ct-i { transform: rotate(180deg); }
+@media (prefers-reduced-motion: reduce) { .ct-fld > .ct-fld-v > .ct-i { transition: none; } }
+
+@media (max-width: 640px) {
+  .ct-fld-pop:not([hidden]) {
+    position: fixed; inset: auto 0 0 0; top: auto;
+    z-index: 3000;
+    width: auto; max-width: none; min-width: 0;
+    max-height: 60vh;
+    padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    border-bottom: 0;
+  }
+  .ct-fld-pop > .ct-btn { min-height: var(--tap-min); border-radius: var(--radius-md); background: var(--accent-strong); color: #fff; border-top: 0; margin-top: 10px; }
+}
+/* `box-shadow`: --shadow-1 -> --shadow-panel. Skydelis kyla virs filtru
+   kaip meniu, o meniu seselis sistemoje - --shadow-panel (58 pk.). */
+
+
+/* ============================================================================
+   METU LAUKAS · du <select> telefone
+   ----------------------------------------------------------------------------
+   Jusu skaicius pasako pakankamai: 30 px sarasui telefone - „2018" mono
+   ~29 px, ir dar rodykle. Netelpa, net jei atrodo, kad telpa.
+
+   Sprendimas - ne mazinti srifta, o duoti vietos: telefone diapazono laukas
+   su <select> uzima ABU tinklelio stulpelius. Tik su select'ais - kiti penki
+   diapazonai (input) lieka per viena, Errata 4 matavimai nesikeicia.        */
+@media (max-width: 640px) {
+  .ct3-fields .ct-fld.is-range:has(select) { grid-column: 1 / -1; }
+}
+.ct-fld.is-range > .ct-fld-v > select { min-width: 0; flex: 1; }
+
+
+/* ============================================================================
+   59 sk. · SAVO SAMATA MAX LANGELYJE · `.is-key` busenos
+   ----------------------------------------------------------------------------
+   Trys busenos tame paciame langelyje (lentele, kortele, nuoroda):
+
+     guess   <b><i>iki</i> 13 343 €</b>                  punktyras (Errata 17)
+             <small>remontas ~2 100 · C</small>
+             <button class="ct-key-edit">Įrašyti savo</button>
+
+     edit    <label class="ct-key-in"><input inputmode="numeric" value="2100">€</label>
+             <small>jūsų remonto sąmata</small>
+             Enter / ✓ - issaugo; Esc - atsaukia. Fokusas - i lauka iskart.
+
+     own     <b>13 943 €</b>                              be punktyro
+             <small>jūsų sąmata 1 500 · <button class="ct-key-edit">keisti</button></small>
+
+   Remontas ir tarsa kartu nezinomi - VIENAS „iki", o `small` sako, kuris
+   (remontas ~2 100 · tarša ?). Isirasius sava remonto sumą punktyras dingsta
+   TIK jei tarsa zinoma - kitaip lieka, nes MAX vis dar riba.
+
+   136 px stulpelyje lauko vieta: 136 − 2×14 padding = 108 px. Laukas 84 px
+   (iki „12 500" mono 13 + €) + ✓ 22 px. Tikrinta makete pagal plocius.
+
+   TELEFONE - ne lauke: „Įrašyti savo" atidaro apatini lapeli (58 sk. forma)
+   su vienu lauku 50 px, `inputmode="numeric"`, ir keturiais greitais
+   pasirinkimais - klasiu vidurkiais (A 275 · B 800 · C 2 100 · D 4 250).
+   Prie automobilio zmogus dazniau zino klase nei suma.                      */
+
+.ct-key-edit {
+  align-self: flex-end;
+  padding: 0; border: 0; background: none;
+  font: var(--fw-medium) 10.5px/1 var(--font);
+  color: var(--accent-light);
+  text-decoration: underline; text-underline-offset: 2px;
+  cursor: pointer; white-space: nowrap;
+}
+.ct-key-edit:hover { color: var(--text-primary); }
+small > .ct-key-edit { font-size: inherit; }
+
+.ct-key-in {
+  display: flex; align-items: center; gap: 4px;
+  width: 100%; height: 30px;
+  padding: 0 4px 0 8px;
+  background: var(--bg-base);
+  border: 1px solid var(--accent);
+  border-radius: 7px;
+  box-shadow: 0 0 0 3px var(--accent-dim);
+  font: var(--fw-semi) 13px/1 var(--font-mono);
+  color: var(--text-muted);
+}
+.ct-key-in > input {
+  flex: 1; min-width: 0;
+  border: 0; outline: 0; background: none;
+  font: inherit; color: var(--text-primary);
+  text-align: right; font-variant-numeric: tabular-nums;
+}
+.ct-key-in > button {
+  flex: none; width: 22px; height: 22px;
+  border: 0; border-radius: 5px;
+  background: var(--accent-strong); color: #fff;
+  font: var(--fw-bold) 12px/1 var(--font); cursor: pointer;
+}
+/* Busena `own` - punktyras nuimamas, jei MAX nebera riba */
+.is-key.is-own > b { text-decoration: none; }
+.is-key.is-own > small { color: var(--accent-light); }
+
+/* Greiti pasirinkimai lapelyje */
+.ct-key-presets:not([hidden]) { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.ct-key-presets > button {
+  min-height: var(--tap-min);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  border: 1px solid var(--border-light); border-radius: var(--radius-md);
+  background: transparent; color: var(--text-primary);
+  font: var(--fw-semi) 13px/1 var(--font-mono); cursor: pointer;
+}
+.ct-key-presets > button > small { font: var(--fw-regular) 10px/1 var(--font); color: var(--text-dim); }
+.ct-key-presets > button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-dim); }
+
+
+/* ============================================================================
+   TINDER · ISIMTI
+   ----------------------------------------------------------------------------
+   DZ-TINDER atsauktas 10-16. Mygtukas juostoje - is markupo, `startTinder()`
+   ir `#tinder-launch-btn` gradientas (vienintele violetine vieta po 58 pk.) -
+   trinami kartu. Po to violetine produkte lieka TIK logotipe.               */

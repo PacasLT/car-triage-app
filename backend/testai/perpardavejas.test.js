@@ -131,10 +131,20 @@ T(/1 skelb\./.test(juosta.innerHTML),'skaitiklis persiskaiciavo i 1');
 // bazine `display: flex` (0,1,0) nugali bendra `:where([hidden])` (0,0,0).
 // Mano ankstesnis sargas tikrino ATRIBUTA, ne apskaiciuota `display` - ir
 // praleido. Dabar tikrinam pati CSS.
+// v2.24.0: `.ct-fld-pop` persikele is priedu 25 bloko i 58 sk. (73 pk.),
+// tad tikrinam dizainerio faile - ne priedu.
 {
+  const dz = fs.readFileSync('frontend/ct-dizainas.css', 'utf8');
+  T(/\.ct-fld-pop:not\(\[hidden\]\)\s*\{/.test(dz), '`.ct-fld-pop` display rasytas su :not([hidden])');
+  T(!/^\.ct-fld-pop\s*\{/m.test(dz), 'bazines `.ct-fld-pop {` be :not([hidden]) nebera');
+  T(/position: fixed; inset: auto 0 0 0/.test(dz), 'telefone - apatinis lapelis (58 sk.)');
+  const popBlokas = (dz.match(/\.ct-fld-pop:not\(\[hidden\]\)\s*\{[^}]*\}/) || [''])[0];
+  T(/box-shadow: var\(--shadow-panel\)/.test(popBlokas), 'seselis --shadow-panel (ne --shadow-1)');
   const pr = fs.readFileSync('frontend/ct-priedai.css', 'utf8');
-  T(/\.ct-fld-pop:not\(\[hidden\]\)\s*\{/.test(pr), '`.ct-fld-pop` display rasytas su :not([hidden])');
-  T(!/^\.ct-fld-pop\s*\{/m.test(pr), 'bazines `.ct-fld-pop {` be :not([hidden]) nebera');
+  T(/25 BLOKAS · IŠTRINTAS/.test(pr) && !/\.ct-fld-pop:not/.test(pr), 'priedu 25 blokas istrintas');
+  const idx = fs.readFileSync('frontend/index.html', 'utf8');
+  T(!/startTinder\(\)\s*\{/.test(idx) && !/tinder-launch-btn/.test(idx), 'Tinder mygtukas ir startTinder() isimti');
+  T(/v\.setAttribute\('tabindex', '-1'\); v\.focus\(\)/.test(idx), 'Esc grazina fokusa laukui');
 }
 
 // ── Be nuotraukos – i apacia (Luko prasymas) ────────────────────────────────

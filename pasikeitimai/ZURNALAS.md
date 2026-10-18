@@ -2234,3 +2234,28 @@ Trečias būdas – atidaryti patį skelbimo puslapį – **kainuoja kreditų**,
 Sargas tikrina esminį dalyką: skelbimas su **didžiausiu pelnu, bet be nuotraukos**, atsiduria trečias iš trijų, o kiti du nesusikeičia vietomis.
 
 - Sargai: **24 žali**; `perpardavejas` 32 → **42**. Tokenai 0 + 0.
+
+## Z-165 · 2026-10-19 · 73 paketas – `.ct-fld-pop` perimtas, savo sąmatos CSS, Tinder išimtas (v2.24.0)
+
+Dizaineris perėmė kuro skydelį į **58 sk.** ir pridėjo du dalykus, kurių neturėjau: telefone – apatinis lapelis (`position: fixed`, ekrano apačioje), ir `Esc` grąžina fokusą laukui. Abu teisingi: dešiniajame filtrų stulpelyje (x ≈ 200) 280 px skydelis iš kairio krašto iššokdavo už ekrano, o lapelis uždengia filtrus, tad „paspaudimas šalia“ nebeturi į ką pataikyti. `--shadow-1` → `--shadow-panel`.
+
+Mano trys elgsenos sprendimai – `pointerdown` gaudymo fazėje, be slinkties klausytojo, „Gerai“ – priimti be pakeitimų.
+
+- **Priedų 25 blokas ištrintas.** Priedai 214 → 170 eil.
+- **Metų laukas telefone** užima abu tinklelio stulpelius (`:has(select)`), kiti penki diapazonai nepakitę.
+- **59 sk. savo sąmatos CSS įdiegtas**, markupo dar nėra – jis ateis kartu su remonto kaštų backend'u (laukia KL-1018-1935).
+- **Tinder išimtas**: mygtukas, `startTinder()` ir penkios `#tinder-launch-btn` CSS eilutės. `#tinder-view` markupas paliktas – jo niekas nebepasiekia, bet trynimas yra atskiras darbas, ne šio paketo dalis.
+
+### Pamatuota: 136 px MAX stulpelis (dizainerio prašymas)
+
+Stulpelis 136 px, paraštės 12/12 → **vidus 112 px** (dizaineris spėjo 108 – paraštė yra 12, ne 14).
+
+| Būsena | Plotis | Telpa? |
+|---|---|---|
+| `edit` laukelis | **112×30**, skaičiaus laukas 60 px, ✓ **22×22** | **taip**, be lūžimo |
+| `guess` `small` „remontas ~2 100 · C“ | 120 px | **ne – 8 px per plati** |
+| `own` `small` „jūsų sąmata 1 500 · keisti“ | 153 px | **ne – 41 px per plati** |
+
+Pats laukas su ✓ telpa tiksliai, kaip ir numatyta. Bet **abi `small` eilutės netelpa**, o stulpelis lygiuojamas dešinėn, tad tekstas lenda į kairę, ant „Automobilis“ stulpelio. Tai ne mano markupo klaida – eilutės duotos pakete. Klausimas dizaineriui: trumpinti tekstą (pvz. „~2 100 · C“ ir „1 500 · keisti“), leisti dvi eilutes, ar `own` būsenoje „keisti“ perkelti į patį skaičių.
+
+- Sargai: **24 žali**; `perpardavejas` 42 → **47**. Tokenai 0 + 0.

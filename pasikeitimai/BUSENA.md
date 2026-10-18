@@ -1,4 +1,4 @@
-# Būsena · 2026-10-18 · v2.23.4 (laukia push)
+# Būsena · 2026-10-19 · v2.24.0 (laukia push)
 
 Tik **atviri** punktai. Uždaryti — `ZURNALAS.md` / `archyvas/`. Kas laukia Luko — `LUKUI.md`.
 Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
@@ -17,7 +17,8 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 | K-72b | MAX „laukia rinkos" be modelio | Ne klaida: MAX reikia ≥5 to paties modelio LT skelbimų. Luko patikra su konkrečiu modeliu. |
 | ~~K-23a~~ | `.ct-check` telefone 32 px | **Uždaryta** (Errata 19): dizaineris perėmė į 21 sk.; iš priedų 25 išimta. |
 | ~~K-71a~~ | 52 sk. legenda telefone | **Uždaryta** (Errata 19): forma patvirtinta. |
-| Tinder mygtukas | Liko juostoje | DZ-TINDER atšauktas 10-16, bet mygtukas tebėra. Luko sprendimas: trinti ar palikti. |
+| ~~Tinder mygtukas~~ | **Išimtas v2.24.0** (73 pk.) | Mygtukas, `startTinder()` ir CSS. `#tinder-view` markupas liko – atskiras darbas. |
+| K-73a | 59 sk. `small` netelpa į 136 px | Pamatuota: `guess` 120 px, `own` 153 px prieš 112 px vidų. Dizaineriui. |
 | 53 paketas | `card` klasė nuo apvalkalo (DZ-KORTELES: visi trys) | v2.11.0; prieš – JS `closest('.card')` / `.card` paieška. |
 | Stabdis | Kiekis portaluose + kaina + stabdis + Stop | **Dalis padaryta v2.15.0:** puslapių pasirinkimas iki „visų“ + kainos riba (`PAIESKOS_RIBA_KR`, 200 kr.) su langu „per didelė paieška“. Liko: Stop mygtukas (KL-STOP), kiekis portaluose prieš paiešką (DZ-LENTELE) ir admin kreditų rodinys pagal vartotoją (KL-F3PLUS). |
 | Modelio apžvalga | „Analizuoti modelį“ (Luko prašymas 09-24) | **Padaryta v2.16.0:** mygtukas po paieškos, Regitros/TA/mūsų kainų istorijos skaičiai + AI su web paieška, 2 kr., talpykla 30 d. Liko: gyva patikra produkcijoje ir dizainerio langas (inline stiliai). |

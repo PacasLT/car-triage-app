@@ -173,8 +173,6 @@
   .ct-kaina-past { display: block; margin-top: 4px; font: 400 11px/1.4 var(--font); color: var(--text-dim); }
   .ct-rs:has(.ct-rs-bad) { background: var(--warning-dim); border-color: var(--warning-border); }
   .ct-rs:has(.ct-rs-bad) .ct-rs-ic { background: var(--warning); }
-  #tinder-launch-btn { display: none !important; }
-  @media (max-width: 640px) { #tinder-launch-btn { display: inline-block !important; } }
   .ct-kiti-hdr { display: flex; align-items: center; gap: 12px; margin: 24px 0 14px; cursor: pointer; user-select: none; border: none; background: none; width: 100%; padding: 0; text-align: left; }
   .ct-kiti-hdr:hover .ct-kiti-t { color: var(--text-primary); }
   .ct-kiti-t { display: flex; align-items: center; gap: 8px; flex: none; font: 600 13px/1 var(--font); color: var(--text-secondary); }
@@ -350,7 +348,6 @@
   }
 
   /* ============ TINDER NARSYMAS (visi ekranai) ============ */
-  #tinder-launch-btn { display: inline-flex; align-items: center; gap: 6px; }
   #tinder-view {
     display: none;
     position: fixed; inset: 0;
@@ -939,8 +936,6 @@
    ============================================================ */
 
 /* ===== SORT BAR ===== */
-#tinder-launch-btn { background: transparent !important; color: var(--text-primary) !important; border: 1px solid var(--border-light) !important; border-radius: var(--radius-md) !important; box-shadow: none !important; height: 32px; padding: 0 14px !important; font-size: 12.5px !important; }
-#tinder-launch-btn:hover { background: var(--bg-elevated) !important; }
 
 /* ===== LOG ===== */
 #log-header { background: var(--bg-surface); border-color: var(--border); border-radius: var(--radius-lg); font-size: 12.5px; }
@@ -2901,8 +2896,11 @@
     <!-- v2.16.0: apzvalga apie PATI modeli (ne apie viena skelbima). Rodomas
          tik tada, kai paieskoje buvo pasirinktas modelis. -->
     <button type="button" id="ct-modelio-btn" class="ct-btn ct-btn-sm" hidden onclick="ctModelioApzvalga()">📘 Analizuoti modelį</button>
-    <!-- PASALINTA: "Pagrindinis" rezimo zenklelis. Tinder narsymas - tik telefone (CSS) -->
-    <button id="tinder-launch-btn" onclick="startTinder()" style="padding:9px 18px; background:linear-gradient(135deg,var(--accent),var(--accent-light)); color:#fff; border:none; border-radius:20px; font-size:13px; font-weight:600; cursor:pointer; box-shadow:0 4px 14px rgba(124,111,247,0.4);">🔥 Tinder naršymas</button>
+    <!-- v2.24.0 (73 pk.): „Tinder naršymas" mygtukas IŠIMTAS. DZ-TINDER atšauktas
+         10-16 (Luko „tik perpardavėjams"), o jo gradientas buvo paskutinė
+         violetinė vieta produkte po 58 paketo. Dabar violetinė lieka tik
+         logotipe. `#tinder-view` markupas kol kas paliktas – jo niekas
+         nebepasiekia, bet jo trynimas yra atskiras darbas. -->
   </div>
   <div id="results"></div>
   </div>
@@ -4177,17 +4175,9 @@ let tinderLiked = [];
 let tinderSkipped = [];
 let tinderIndex = 0;
 
-function startTinder() {
-  if (!currentData || !currentData.candidates || currentData.candidates.length === 0) return;
-  tinderPhase = 'top';
-  tinderQueue = [...currentData.candidates];
-  tinderLiked = [];
-  tinderSkipped = [];
-  tinderIndex = 0;
-  document.getElementById('tinder-view').classList.add('active');
-  document.body.style.overflow = 'hidden';
-  renderTinderCard();
-}
+// v2.24.0 (73 pk.): `startTinder()` IŠIMTA – Tinder režimas atšauktas 10-16.
+// Likęs `#tinder-view` kodas be jos nepaleidžiamas; trinsim atskirai, kad
+// šitas paketas liktų apie dizainą, ne apie didelį funkcijos išėmimą.
 
 function exitTinder() {
   document.getElementById('tinder-view').classList.remove('active');
@@ -4436,7 +4426,8 @@ function tinderSwipe(direction) {
 }
 
 document.addEventListener('keydown', (e) => {
-  if (!document.getElementById('tinder-view').classList.contains('active')) return;
+  var tv = document.getElementById('tinder-view');
+  if (!tv || !tv.classList.contains('active')) return;
   if (e.key === 'ArrowLeft') tinderSwipe('left');
   if (e.key === 'ArrowRight') tinderSwipe('right');
   if (e.key === 'Escape') exitTinder();
@@ -4621,7 +4612,15 @@ document.addEventListener('pointerdown', function (e) {
   window.ctKuroSkydelis(false);                              // bet kur kitur – užsidaro
 }, true);
 document.addEventListener('keydown', function (e) {
-  if (e.key === 'Escape') window.ctKuroSkydelis(false);
+  if (e.key !== 'Escape') return;
+  var buvo = !document.getElementById('fuel-pop').hasAttribute('hidden');
+  window.ctKuroSkydelis(false);
+  // v2.24.0 (73 pk.): Esc grąžina fokusą laukui – kitaip klaviatūra
+  // naudojantis žmogus po uždarymo nebežino, kur stovi.
+  if (buvo) {
+    var v = document.querySelector('.ct-fld[data-lauk="i-f-kuras"] .ct-fld-v');
+    if (v) { v.setAttribute('tabindex', '-1'); v.focus(); }
+  }
 });
 document.addEventListener('click', function (e) {
   if (e.target.closest && e.target.closest('#fuel-ok')) window.ctKuroSkydelis(false);

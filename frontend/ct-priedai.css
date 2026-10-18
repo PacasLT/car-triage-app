@@ -165,50 +165,5 @@
    `.ct-dt-switch` nebeegzistuoja: juosta nuolatinė, jungiklis gyvena jos gale. */
 
 
-/* 25 BLOKAS · v2.23.0 · kuro skydelis `.ct-fld-pop` (Klaudijus)
-   ----------------------------------------------------------------------------
-   Kuro filtras tapo daugiareikšmis (benzinas IR benzinas/elektra). Eilutės
-   viduje – dizainerio `.ct-check` (21 sk.); naujas tik pats skydelis.
-
-   KODĖL NE ŽENKLIUKAI VIETOJE LAUKO: pamatuota – filtrų stulpelis 213 px
-   (telefone 151 px), septyni `.ct-flag` išsidėsto į ŠEŠIAS eilutes, o
-   `.ct-fld-v` aukštis fiksuotas 36 px (34 sk.), tad jie dar ir nukerpami.
-
-   DIZAINERIUI: jei išskleidžiamas skydelis turi tapti sistemos vardu –
-   perimkit, blokas tada trinamas, kaip 20–24. Tik išdėstymas; spalvos,
-   rėmelis, šešėlis ir radiusas – iš tokenų.                                  */
-
-.ct-fld { position: relative; }
-/* K-73: `display` SU `:not([hidden])` (59 pk.). Be jo `display: flex` bazinėje
-   taisyklėje (0,1,0) nugali bendrą `:where([hidden]) { display: none }`
-   (0,0,0), ir skydelis lieka matomas net su `hidden` atributu – būtent tai
-   Lukas matė kaip „pakibusį" sąrašą, kurio neuždaro nei „Gerai", nei Esc.
-   Mano sargas to nepagavo, nes tikrino ATRIBUTĄ, ne apskaičiuotą `display`. */
-.ct-fld-pop:not([hidden]) {
-  position: absolute; top: calc(100% + 5px); left: 0; z-index: 30;
-  min-width: 100%; width: max-content; max-width: min(280px, 92vw);
-  max-height: 300px; overflow: auto;
-  display: flex; flex-direction: column; gap: 2px;
-  padding: 8px 10px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-1);
-}
-/* „Gerai" – aiškus būdas užverti, ypač telefone, kur paspaudimas šalia
-   dažnai pataiko į kitą valdiklį. Atskirtas linija, nes tai ne pasirinkimas. */
-.ct-fld-pop > .ct-btn {
-  align-self: stretch; margin-top: 6px; padding-top: 8px;
-  border-top: 1px solid var(--border);
-  border-radius: 0; background: transparent;
-}
-
-/* Atidarytas laukas atrodo kaip fokusuotas – kitaip nesimato, kuris atsidarė */
-.ct-fld.is-open > .ct-fld-v { border-color: var(--accent-border); }
-.ct-fld.is-open > .ct-fld-v > .ct-i { transform: rotate(180deg); }
-
-@media (max-width: 640px) {
-  .ct-fld-pop { max-width: 92vw; }
-  /* K-23a – UŽDARYTA (Errata 19): dizaineris perėmė į 21 sk. `.ct-check`,
-     tad čia eilutės nebereikia. */
-}
+/* 25 BLOKAS · IŠTRINTAS v2.24.0 (73 pk.): dizaineris perėmė `.ct-fld-pop`
+   į 58 sk. – kartu su telefono apatiniu lapeliu ir `--shadow-panel`. */
