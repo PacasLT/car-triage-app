@@ -867,6 +867,57 @@ app.get('/admin/rinka/eilutes', klaiduPrieiga, (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// Skenavimu eile. POST - sarasas, ne vienas skenavimas. KAINUOJA kreditus,
+// todel samata grazinama IS KARTO, dar pries pradedant, ir ji remiasi tuo paciu
+// `paieskos-kaina.js`, kuriuo matuojam vartotojo paieskas.
+app.post('/admin/rinka/eile', klaiduPrieiga, (req, res) => {
+  try {
+    const b = req.body || {};
+    const portalai = (Array.isArray(b.portalai) ? b.portalai : ['autoplius', 'autogidas'])
+      .filter((p) => RINKOS_PORTALAI[p]);
+    if (!portalai.length) return res.status(400).json({ error: 'portalai: ' + Object.keys(RINKOS_PORTALAI).join(' | ') });
+    const modeliai = (Array.isArray(b.modeliai) ? b.modeliai : []).slice(0, 60)
+      .map((m) => ({ marke: String(m.marke || '').slice(0, 40), modelis: m.modelis ? String(m.modelis).slice(0, 40) : null }))
+      .filter((m) => m.marke);
+    if (!modeliai.length) return res.status(400).json({ error: 'modeliai: [{marke, modelis}]' });
+    const metaiNuo = parseInt(b.metaiNuo, 10) || null;
+    const maxPuslapiu = Math.min(Math.max(parseInt(b.maxPuslapiu, 10) || 60, 1), 400);
+    if (_skenEile.vykdoma || _skenEile.laukia.length) {
+      return res.status(409).json({ error: 'Eile jau veikia', busena: eilesBusena() });
+    }
+    const darbai = [];
+    portalai.forEach((portalas) => modeliai.forEach((m) => darbai.push({
+      portalas, marke: m.marke, modelis: m.modelis, metaiNuo, maxPuslapiu,
+    })));
+    _skenEile.laukia = darbai;
+    _skenEile.baigti = [];
+    _skenEile.stabdyti = false;
+    _skenEile.klaida = null;
+    _skenEile.pradeta = Date.now();
+    // Blogiausio atvejo samata: visi skenavimai iki puslapiu ribos. Realiai
+    // buna maziau - saraso galas ateina anksciau ir skenavimas sustoja pats.
+    const kr = darbai.reduce((sum, d) => sum + d.maxPuslapiu * (KREDITAI_PORTALUI[d.portalas] || KREDITAI_PUSLAPIUI), 0);
+    _eilesVykdytojas();
+    res.status(202).json({ darbu: darbai.length, blogiausiuAtvejuKr: kr, blogiausiuAtvejuEur: kaina.eurais(kr),
+      pastaba: 'Samata blogiausiam atvejui: kiekvienas skenavimas iki ' + maxPuslapiu + ' psl. Realiai sustoja saraso gale.',
+      busena: eilesBusena() });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+function eilesBusena() {
+  return {
+    vykdoma: _skenEile.vykdoma, laukia: _skenEile.laukia.length, baigta: _skenEile.baigti.length,
+    stabdyti: _skenEile.stabdyti, pradeta: _skenEile.pradeta, klaida: _skenEile.klaida,
+    sunaudotaKr: _skenEile.baigti.length ? null : undefined,
+  };
+}
+app.get('/admin/rinka/eile', klaiduPrieiga, (req, res) => res.json(eilesBusena()));
+app.post('/admin/rinka/eile/stop', klaiduPrieiga, (req, res) => {
+  _skenEile.stabdyti = true;
+  // Vykstancio skenavimo nenutraukiam - jis baigsis pats; tiesiog nebeimam kito.
+  res.json({ ok: true, pastaba: 'Vykstantis skenavimas baigsis, kiti nebepaleidziami', busena: eilesBusena() });
+});
+
 // Nuasmenintas eksportas Analitikui (v2.27.0). GET, nemokamas - tik DB.
 // Be `url`, be `photo`, be portalo ID, be laisvo teksto: pardavėjo čia nėra nė
 // vienoje skiltyje, tik TIPAS (privatus / įmonė). Dvi lentelės atskirai:
@@ -874,7 +925,7 @@ app.get('/admin/rinka/eilutes', klaiduPrieiga, (req, res) => {
 //   /admin/rinka/eksportas?ka=stebejimai - kainų ir ridos pokyčiai laike
 app.get('/admin/rinka/eksportas', klaiduPrieiga, (req, res) => {
   try {
-    const ka = req.query.ka === 'stebejimai' ? 'stebejimai' : 'skelbimai';
+    const ka = ['stebejimai', 'skenavimai'].indexOf(req.query.ka) !== -1 ? req.query.ka : 'skelbimai';
     const csv = rinka.eksportas({
       ka, riba: req.query.riba,
       // Analitiko prasymas: `raktas` atskiru stulpeliu (K-33 raktai) ir kartos
@@ -893,6 +944,60 @@ app.get('/admin/rinka/eksportas', klaiduPrieiga, (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// ── Vieno skenavimo paleidimas (v2.27.3) ────────────────────────────────────
+// Istraukta is marsruto, nes dabar ja kviecia DU: rankinis POST ir eile.
+// Visi sargai lieka cia - kitaip eile juos apeitu.
+async function pradetiSkenavima({ portalas, marke, modelis, metaiNuo, maxPuslapiu }) {
+  const v = rinka.vykstantis();
+  if (v) return { kodas: 409, klaida: { error: 'Jau vyksta skenavimas #' + v.id, vykstantis: v } };
+  // Kreditu sargas pries pradedant. Jei paskyros patikrinti nepavyksta -
+  // NEPRADEDAM: nezinomas likutis nera leidimas.
+  const likutis = await kredituLikutis();
+  const kPsl = KREDITAI_PORTALUI[portalas] || KREDITAI_PUSLAPIUI;
+  const samata = maxPuslapiu * kPsl;
+  if (likutis == null) return { kodas: 503, klaida: { error: 'Nepavyko patikrinti ScraperAPI likucio - skenavimas nepradetas' } };
+  if (likutis - samata < KREDITU_ATSARGA) {
+    return { kodas: 409, klaida: { error: 'Kreditu sargas: po skenavimo liktu maziau nei atsarga',
+      likutis, samata, atsarga: KREDITU_ATSARGA, daugiausiaPuslapiu: Math.max(0, Math.floor((likutis - KREDITU_ATSARGA) / kPsl)) } };
+  }
+  const url = RINKOS_PORTALAI[portalas]({ marke, modelis, metaiNuo, rikiavimas: 'naujausi' });
+  if (!url) return { kodas: 400, klaida: { error: 'marke nezinoma portalui ' + portalas } };
+  const skId = rinka.pradeti({ portalas, marke, modelis, metaiNuo, url });
+  console.log('[RINKA] skenavimas #' + skId + ' pradetas: ' + portalas + ' ' + marke
+    + (modelis ? ' ' + modelis : '') + ' nuo ' + (metaiNuo || '-') + ' · riba ' + maxPuslapiu + ' psl.');
+  const darbas = vykdytiSkenavima(skId, portalas, url, maxPuslapiu, marke, metaiNuo);
+  return { skId, darbas, atsakymas: { skenavimas: skId, portalas, marke, modelis, metaiNuo, maxPuslapiu, url } };
+}
+
+// ── Skenavimu EILE (v2.27.3) ────────────────────────────────────────────────
+// Analitiko kryptingi skenavimai - tai 15 modeliu x 2 portalai = 30 skenavimu,
+// o vienu metu gali vykti TIK VIENAS (`rinka.vykstantis()`). Be eiles Lukui
+// reiktu 30 kartu rankomis laukti, kol baigsis ankstesnis.
+//
+// Eile nieko neprideda prie kainos ir nieko neapeina: kiekvienas jos elementas
+// eina per ta pacia `pradetiSkenavima` su tuo paciu kreditu sargu. Sargui
+// sustabdzius, eile SUSTOJA - ji niekada nebando „prastumti" kito.
+const _skenEile = { laukia: [], vykdoma: null, baigti: [], stabdyti: false, pradeta: null, klaida: null };
+async function _eilesVykdytojas() {
+  while (_skenEile.laukia.length && !_skenEile.stabdyti) {
+    const d = _skenEile.laukia.shift();
+    _skenEile.vykdoma = d;
+    const r = await pradetiSkenavima(d);
+    if (r.klaida) {
+      // Sargas arba portalo klaida: eile sustoja, likusieji LIEKA saraše -
+      // Lukas pamatys, kiek neivykdyta, ir kodel.
+      _skenEile.klaida = r.klaida;
+      _skenEile.laukia.unshift(d);
+      _skenEile.vykdoma = null;
+      console.error('[RINKA] eile sustojo:', JSON.stringify(r.klaida).slice(0, 200));
+      return;
+    }
+    try { await r.darbas; } catch (e) { /* vykdytiSkenavima klaidas rasо pats */ }
+    _skenEile.baigti.push(Object.assign({ skId: r.skId }, d));
+    _skenEile.vykdoma = null;
+  }
+}
+
 // Paleisti skenavimą. POST, nes KAINUOJA kreditus: ~1 kreditas puslapiui
 // (render=false), 20 skelbimų puslapyje. Atsako iš karto (202), dirba fone;
 // eigą rodo GET /admin/rinka. Vienu metu - tik vienas skenavimas.
@@ -910,25 +1015,9 @@ app.post('/admin/rinka/skenuoti', klaiduPrieiga, async (req, res) => {
     // Riba privaloma: be jos klaida analizatoriuje (kas puslapį „nauji" skelbimai)
     // suvalgytų kreditus iki paskyros galo.
     const maxPuslapiu = Math.min(Math.max(parseInt(b.maxPuslapiu, 10) || 150, 1), 400);
-    const v = rinka.vykstantis();
-    if (v) return res.status(409).json({ error: 'Jau vyksta skenavimas #' + v.id, vykstantis: v });
-    // Kreditu sargas pries pradedant. Jei paskyros patikrinti nepavyksta -
-    // NEPRADEDAM: nezinomas likutis nera leidimas.
-    const likutis = await kredituLikutis();
-    const kPsl = KREDITAI_PORTALUI[portalas] || KREDITAI_PUSLAPIUI;
-    const samata = maxPuslapiu * kPsl;
-    if (likutis == null) return res.status(503).json({ error: 'Nepavyko patikrinti ScraperAPI likucio - skenavimas nepradetas' });
-    if (likutis - samata < KREDITU_ATSARGA) {
-      return res.status(409).json({ error: 'Kreditu sargas: po skenavimo liktu maziau nei atsarga',
-        likutis, samata, atsarga: KREDITU_ATSARGA, daugiausiaPuslapiu: Math.max(0, Math.floor((likutis - KREDITU_ATSARGA) / kPsl)) });
-    }
-    const url = RINKOS_PORTALAI[portalas]({ marke, modelis, metaiNuo, rikiavimas: 'naujausi' });
-    if (!url) return res.status(400).json({ error: 'marke nezinoma portalui ' + portalas });
-    const skId = rinka.pradeti({ portalas, marke, modelis, metaiNuo, url });
-    console.log('[RINKA] skenavimas #' + skId + ' pradetas: ' + portalas + ' ' + marke
-      + (modelis ? ' ' + modelis : '') + ' nuo ' + (metaiNuo || '-') + ' · riba ' + maxPuslapiu + ' psl.');
-    vykdytiSkenavima(skId, portalas, url, maxPuslapiu, marke, metaiNuo);
-    res.status(202).json({ skenavimas: skId, portalas, marke, modelis, metaiNuo, maxPuslapiu, url });
+    const r = await pradetiSkenavima({ portalas, marke, modelis, metaiNuo, maxPuslapiu });
+    if (r.klaida) return res.status(r.kodas || 400).json(r.klaida);
+    res.status(202).json(r.atsakymas);
   } catch (e) {
     console.error('[RINKA]', e.message);
     res.status(500).json({ error: e.message });

@@ -386,6 +386,21 @@ const CSV = (v) => {
 function eksportas({ ka, riba, raktas, kartos } = {}) {
   if (!db) return '';
   const r = Math.min(Math.max(parseInt(riba, 10) || 50000, 1), 200000);
+  // v2.27.3: Analitikui uztenka `kreditu` stulpelio, kad patikrintu tikra
+  // skenavimo kaina pries formule (skelbimai/2). Skenavimu lenteleje asmens
+  // duomenu nera iš viso, todel ji atiduodama kaip yra, tik be `url`.
+  if (ka === 'skenavimai') {
+    const eil = db.prepare(`SELECT id, portalas, marke, modelis, metai_nuo, pradzia, pabaiga, busena,
+        pilnas, priezastis, puslapiu, skelbimu, nauju, pasikeite, dingo, kreditu
+      FROM skenavimai ORDER BY id DESC LIMIT ?`).all(r);
+    const antr = ['id', 'portalas', 'marke', 'modelis', 'metai_nuo', 'pradzia', 'pabaiga', 'trukme_s',
+      'busena', 'pilnas', 'priezastis', 'puslapiu', 'skelbimu', 'nauju', 'pasikeite', 'dingo', 'kreditu'];
+    return [antr.join(',')].concat(eil.map((e) => [e.id, e.portalas, e.marke || '', e.modelis || '',
+      e.metai_nuo == null ? '' : e.metai_nuo, D(e.pradzia), D(e.pabaiga),
+      (e.pradzia && e.pabaiga) ? Math.round((e.pabaiga - e.pradzia) / 1000) : '',
+      e.busena, e.pilnas, e.priezastis || '', e.puslapiu, e.skelbimu, e.nauju, e.pasikeite, e.dingo,
+      e.kreditu == null ? '' : e.kreditu].map(CSV).join(','))).join('\n') + '\n';
+  }
   if (ka === 'stebejimai') {
     const eil = db.prepare(`SELECT skelbimo_id, laikas, kaina, rida FROM stebejimai ORDER BY skelbimo_id, laikas LIMIT ?`).all(r);
     const antr = ['id_maisa', 'data', 'kaina', 'rida'];

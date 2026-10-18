@@ -141,6 +141,27 @@ for (let i = 0; i < 2; i++) {
 g = gyvas();
 T(g.X3.every((x) => x != null), 'markės skenavimas pažymi ir X3 – jo aprėptis platesnė');
 
+// ── Skenavimų eksportas (v2.27.3, Analitiko §E) ────────────────────────────
+const sk = rinka.eksportas({ ka: 'skenavimai' });
+const skA = sk.trim().split('\n')[0].split(',');
+T(skA.indexOf('kreditu') !== -1, 'skenavimų eksporte yra `kreditu` – pagal jį tikrinama kainos formulė');
+['id', 'portalas', 'marke', 'modelis', 'skelbimu', 'puslapiu', 'pilnas', 'trukme_s'].forEach((k) => {
+  T(skA.indexOf(k) !== -1, 'skenavimų stulpelis `' + k + '`');
+});
+T(skA.indexOf('url') === -1, 'skenavimo `url` neatiduodam – jame filtrai ir portalo vidinė struktūra');
+T(sk.trim().split('\n').length > 1, 'bent vienas skenavimo įrašas');
+
+// ── Serverio pusė: eilė nieko neapeina ─────────────────────────────────────
+const srv = fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
+T(/async function pradetiSkenavima/.test(srv), 'vieno skenavimo paleidimas – viena funkcija');
+T(/const r = await pradetiSkenavima\(/.test(srv), 'rankinis maršrutas naudoja ją');
+T(/const r = await pradetiSkenavima\(d\)/.test(srv), 'eilė naudoja TĄ PAČIĄ funkciją – sargai neapeinami');
+T(/Kreditu sargas: po skenavimo liktu maziau nei atsarga/.test(srv), 'kreditų sargas gyvena joje');
+T(/_skenEile\.laukia\.unshift\(d\)/.test(srv), 'sargui sustabdžius, neįvykdytas darbas lieka eilėje');
+T(/_skenEile\.stabdyti/.test(srv) && /eile\/stop/.test(srv), 'eilę galima sustabdyti');
+T(/if \(_skenEile\.vykdoma \|\| _skenEile\.laukia\.length\)/.test(srv), 'dvi eilės vienu metu neprasideda');
+T(/blogiausiuAtvejuKr/.test(srv), 'sąmata grąžinama IŠ KARTO, prieš pradedant');
+
 try { fs.rmSync(kat, { recursive: true, force: true }); } catch (e) { /* aplinka gali neleisti trinti */ }
 
 console.log('\n' + (klaidu ? klaidu + ' KRENTA' : 'visi ' + n + ' prajo'));

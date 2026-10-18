@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.27.3', data: '2026-10-19', pavadinimas: 'Skenavimų eilė (vidinis įrankis)',
+    pakeitimai: [
+      'Admin zonoje galima paleisti kelių modelių skenavimų eilę – ji dirba po vieną, kaip ir anksčiau, tik nebereikia laukti ir paleisti kiekvieno ranka.',
+      'Prieš pradedant parodoma blogiausio atvejo sąmata kreditais ir eurais.',
+      'Kreditų sargas galioja kiekvienam eilės žingsniui atskirai: jam sustabdžius, eilė sustoja, o neįvykdyti darbai lieka sąraše.',
+    ],
+  },
+  {
     versija: '2.27.2', data: '2026-10-19', pavadinimas: 'Įtartinai pigiems – ir pilna apžvalga',
     pakeitimai: [
       'Jei skelbimas per pigus, o nei tekste, nei nuotraukoje priežasties nesimato, dabar automatiškai paruošiama pilna apžvalga – daugiausia trims tokiems skelbimams per paiešką.',

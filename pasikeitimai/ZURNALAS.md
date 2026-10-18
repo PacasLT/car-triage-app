@@ -2465,3 +2465,22 @@ Kartu pataisyti **kešo tarifai** `kainaEur`: skaitymas iš kešo 0,1×, įrašy
 Luko sprendimas priimtas ir užrašytas, bet kodo dar nėra. Priežastis paprasta: archyvas pradėjo kauptis vakar, tad pirma eilutė sueis 24 mėn. 2028-ais. Mechanizmas (mėnesio agregatas `modelis × karta × metai × rinka → mediana, imtis, mediana dienų iki dingimo`, tada eilučių trynimas) užrašytas BUSENA – darysiu kartu su agregatų lentele, kurios pirmam `marža ir laikas` skaičiavimui vis tiek reikės.
 
 - Sargai: **27 žali**; `pigumo-patikra` 56 → **62**. Tokenai 0 + 0.
+
+## Z-172 · 2026-10-19 · Skenavimų eilė ir skenavimų eksportas (v2.27.3)
+
+Analitikas atsiuntė skenavimų planą pagal mano kainos formulę. Jo aritmetika teisinga (patikrinau: 900 skelbimų modeliui → 450 kr., 15 modelių → 6 750 kr. ≈ 2,87 €; savaitinė 5 modelių eilutė 2 250 kr./sav. ≈ 9 750 kr./mėn. ≈ 4,14 €, t. y. ~10 % Hobby fondo). Bet planas turėjo praktinę skylę, kurios nei jis, nei aš iki šiol nematėm.
+
+### Skylė: 30 skenavimų, o vienu metu gali vykti vienas
+
+`rinka.vykstantis()` neleidžia dviejų skenavimų vienu metu – ir teisingai, nes lygiagretūs skenavimai ScraperAPI eilėje tik muštųsi tarpusavyje. Bet tai reiškia, kad 15 modelių × 2 portalai = **30 kartų Lukui reiktų rankomis paleisti ir laukti**, kol baigsis ankstesnis. Tokio plano niekas nedarytų du kartus.
+
+`POST /admin/rinka/eile` priima sąrašą ir vykdo po vieną. Svarbiausia, ko eilė NEDARO: ji neturi savo kelio į skenavimą. Kiekvienas jos žingsnis eina per tą pačią `pradetiSkenavima()`, kurią naudoja ir rankinis maršrutas, su tuo pačiu kreditų sargu. Sargui sustabdžius, **eilė sustoja**, o neįvykdytas darbas lieka sąraše – ji niekada nebando „prastumti“ kito. Sargas tikrina būtent tai: sulaužius (eilei duodant tiesioginį kelią) krenta dvi patikros.
+
+Sąmata grąžinama iš karto, dar nepradėjus: `blogiausiuAtvejuKr` ir `blogiausiuAtvejuEur` iš to paties `paieskos-kaina.js`, kuriuo matuojam vartotojo paieškas. Blogiausias atvejis – kiekvienas skenavimas iki puslapių ribos; realiai sąrašo galas ateina anksčiau.
+
+### Skenavimų eksportas (Analitiko §E)
+
+`?ka=skenavimai`: `id, portalas, marke, modelis, metai_nuo, pradzia, pabaiga, trukme_s, busena, pilnas, priezastis, puslapiu, skelbimu, nauju, pasikeite, dingo, kreditu`. `kreditu` jau buvo rašomas nuo v2.4.0 – jo tiesiog niekas neatiduodavo. Pagal jį Analitikas patikrins tikrą kainą prieš mano formulę. `url` neatiduodu: jame filtrai ir portalo vidinė struktūra, o analizei jis nieko neduoda.
+
+- Sargai: **27 žali**; `archyvo-eksportas` 62 → **81**. Tokenai 0 + 0.
+- Nieko nepaleidau: eilė tuščia, kol Lukas neatsakė KL-1019-0400.

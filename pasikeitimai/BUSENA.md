@@ -1,4 +1,4 @@
-# Būsena · 2026-10-19 · v2.27.2 (laukia push; v2.27.1 išsiųsta)
+# Būsena · 2026-10-19 · v2.27.3 (laukia push; v2.27.2 gyva)
 
 Tik **atviri** punktai. Uždaryti — `ZURNALAS.md` / `archyvas/`. Kas laukia Luko — `LUKUI.md`.
 Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
@@ -22,6 +22,7 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 | ~~Nuorodos analizė~~ | **Padaryta v2.26.0:** įklijuok nuorodą → pilna apžvalga | Laukas paieškos viršuje (56 sk.), rinkos mediana iš archyvo (0 kr.), pagal rinką, imtis ≥8. Liko: „patikslinti rinką (25 kr.)“ mygtukas, kai archyvo per mažai – sąmoningai atidėtas, kol Lukas pamatys, kaip dažnai archyvo pakanka. |
 | K-76 | 56 sk. `.ct-link-msg` be `:not([hidden])` + kablelis `busy` selektoriuje | Priedų 27 blokas. Dizaineriui. |
 | ~~Archyvas~~ | **Padaryta v2.27.0:** paieška pildo `rinka.db` | Iki šiol archyvą pildė tik admino skenavimas – paieškų duomenys dingdavo, nors puslapiai apmokėti. 0 papildomų kreditų. Nauji laukai `nuotrauku_sk`, `teksto_ilgis`; nuasmenintas CSV eksportas Analitikui. Atsakymai – `claude/ATSAKYMAI-DUOMENU-BAZE.md`. |
+| Skenavimų eilė | **Padaryta v2.27.3** | `POST /admin/rinka/eile` – 30 skenavimų po vieną, su sąmata ir kreditų sargu kiekvienam žingsniui. Nieko nepaleista: laukia KL-1019-0400. |
 | Kryptingi skenavimai | Analitiko 15 modelių planas | Modelio skenavimas padarytas (v2.27.1). Liko: pamatuoti skelbimų kiekius (300 kr.) ir Luko leidimas savaitiniam grafikui. |
 | Archyvo valymas | 24 mėn. + mėnesio agregatas (Luko KL-1019-0315) | **Sprendimas yra, kodo dar nėra.** Pirma eilutė sueis 24 mėn. 2028-ais. Darysiu kartu su agregatų lentele (`modelis × karta × metai × rinka → mediana, imtis, mediana dienų iki dingimo`), kurios reikės „maržai ir laikui“. |
 | „Marža ir laikas“ | Nemokama kortelės dalis (Luko KL-1019-0320) | Laukia archyvo istorijos: 3–6 mėn. nuo 10-19. |
