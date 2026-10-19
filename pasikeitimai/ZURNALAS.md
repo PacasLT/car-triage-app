@@ -2518,3 +2518,19 @@ Skenavimas visada eina `rikiavimas: 'naujausi'`:
 Tai **skelbimo paskelbimo data**, ne kaina. Vadinasi, nupjautas sąrašas praranda ne pigiausius, o **seniausiai kabančius** skelbimus. Praktinė pasekmė: medianai poveikis mažesnis, nei jis bijojo, bet ilgai kabantys skelbimai yra būtent tie, kuriuose daugiausia derybų erdvės – tad nupjovimas kenkia labiausiai tam matavimui, kurio dar net nedarom (kainos mažinimai). Todėl jo sąlyga teisinga abiem atvejais.
 
 - Sargai: **27 žali**; `archyvo-eksportas` 86 → **92**. Tokenai 0 + 0.
+
+## Z-175 · 2026-10-19 · Pjūvio skenavimas įvykdytas; eilės skaitiklis melavo (v2.27.6)
+
+Pirmas tikras kryptingų skenavimų pjūvis: **29 skenavimai, 11 051 skelbimas, 5 960 kr. ≈ 2,53 €**, visi iki vieno baigėsi žyma `galas` (`pilnas = 1`). Quick-count įvertis buvo 5 570 kr. – skirtumas iš to, kad puslapiai neskaidomi ir kad autogidas į puslapį talpina kiek kitaip.
+
+Analitiko patikros išlaikytos: autoplius `skelbimu` sutampa su quick-count beveik tiksliai (BMW 5: 1 377 prieš 1 378; Audi A6: 723 prieš 723), autogidas duoda 2–3 % daugiau, nes jo quick-count rodo „bent tiek“. `kreditu` visur lygiai `puslapiai × 10`.
+
+### Skaitiklis, kuris melavo
+
+Paleidus eilę, atsakymas rodė `darbu: 27`, nors paleisti 28 darbai; vienam modeliui – `darbu: 0` vietoj 1. Priežastis: `_skenEile.laukia = darbai` yra **tas pats masyvas**, o `_eilesVykdytojas()` paleidžiamas prieš `res.json(...)` ir iškart nusiima pirmą darbą (`shift`). Taigi `darbai.length` atsakyme jau buvo sumažėjęs.
+
+Skenavimai vyko teisingai – melavo tik skaičius. Bet būtent juo remiantis sprendžiama, ar viskas pateko į eilę: dėl jo pusvalandį laikiau, kad vieno modelio trūksta, ir žadėjau Lukui paleisti jį atskirai. Kiekis dabar paimamas prieš paleidžiant vykdytoją; sargas tikrina abi eilutes.
+
+**Pamoka:** jei atsakymas aprašo būseną, kurią tuo pat metu keičia fonas, jis turi remtis momentine kopija, ne gyva nuoroda.
+
+- Sargai: **27 žali**; `archyvo-eksportas` 92 → **94**. Tokenai 0 + 0.

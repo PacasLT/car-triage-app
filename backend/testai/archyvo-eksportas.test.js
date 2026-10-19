@@ -179,6 +179,10 @@ T(/_skenEile\.laukia\.unshift\(d\)/.test(srv), 'sargui sustabdžius, neįvykdyta
 T(/_skenEile\.stabdyti/.test(srv) && /eile\/stop/.test(srv), 'eilę galima sustabdyti');
 T(/if \(_skenEile\.vykdoma \|\| _skenEile\.laukia\.length\)/.test(srv), 'dvi eilės vienu metu neprasideda');
 T(/blogiausiuAtvejuKr/.test(srv), 'sąmata grąžinama IŠ KARTO, prieš pradedant');
+// v2.27.6: darbų kiekis skaičiuojamas PRIEŠ paleidžiant vykdytoją
+T(/const kiek = darbai\.length;\n    _eilesVykdytojas\(\);/.test(srv),
+  'darbų kiekis paimamas prieš `_eilesVykdytojas()` – jis iškart nusiima pirmą darbą');
+T(/res\.status\(202\)\.json\(\{ darbu: kiek,/.test(srv), '…ir atsakyme rodomas tas skaičius, ne gyvas masyvo ilgis');
 // v2.27.4: portalas be modelio filtro – praleidžiam, neapeinam per tekstą
 T(/portalas === 'autoplius' && !autopliusIds\.urlDalis\(marke, modelis\)/.test(srv),
   'autoplius be modelio ID – skenavimas nepradedamas');

@@ -908,8 +908,14 @@ app.post('/admin/rinka/eile', klaiduPrieiga, (req, res) => {
     // Blogiausio atvejo samata: visi skenavimai iki puslapiu ribos. Realiai
     // buna maziau - saraso galas ateina anksciau ir skenavimas sustoja pats.
     const kr = darbai.reduce((sum, d) => sum + d.maxPuslapiu * (KREDITAI_PORTALUI[d.portalas] || KREDITAI_PUSLAPIUI), 0);
+    // v2.27.6: kieki skaiciuojam PRIES paleidziant. `_skenEile.laukia` yra TAS PATS
+    // masyvas, tad vykdytojas iskart nusiima pirma darba (`shift`), ir `darbai.length`
+    // atsakyme rodydavo vienu maziau: 28 darbai -> „darbu: 27", 1 darbas -> „darbu: 0".
+    // Skenavimai vyko teisingai, melavo tik skaicius atsakyme - bet butent juo
+    // remiantis sprendziama, ar viskas pateko i eile.
+    const kiek = darbai.length;
     _eilesVykdytojas();
-    res.status(202).json({ darbu: darbai.length, blogiausiuAtvejuKr: kr, blogiausiuAtvejuEur: kaina.eurais(kr),
+    res.status(202).json({ darbu: kiek, blogiausiuAtvejuKr: kr, blogiausiuAtvejuEur: kaina.eurais(kr),
       pastaba: 'Samata blogiausiam atvejui: kiekvienas skenavimas iki ' + maxPuslapiu + ' psl. Realiai sustoja saraso gale.',
       busena: eilesBusena() });
   } catch (e) { res.status(500).json({ error: e.message }); }

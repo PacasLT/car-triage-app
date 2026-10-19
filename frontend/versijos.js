@@ -8,6 +8,12 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.27.6', data: '2026-10-19', pavadinimas: 'Pataisyta: skenavimų eilė rodė vienu darbu mažiau',
+    pakeitimai: [
+      'Paleidus skenavimų eilę, atsakyme buvo rodomas vienu darbu mažesnis skaičius, nei iš tikrųjų paleista. Patys skenavimai vyko teisingai.',
+    ],
+  },
+  {
     versija: '2.27.5', data: '2026-10-19', pavadinimas: 'Skenavimas pagal metų rėžį',
     pakeitimai: [
       'Archyvo skenavimą galima riboti ir iš viršaus (pvz. 2010–2016), kad didelis modelis būtų nuskaitytas dalimis iki galo.',
