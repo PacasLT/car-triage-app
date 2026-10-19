@@ -1,4 +1,4 @@
-# Būsena · 2026-10-19 · v2.27.5 (laukia push; v2.27.4 išsiųsta)
+# Būsena · 2026-10-19 · v2.28.0 (laukia push)
 
 Tik **atviri** punktai. Uždaryti — `ZURNALAS.md` / `archyvas/`. Kas laukia Luko — `LUKUI.md`.
 Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
@@ -24,6 +24,9 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 | ~~Archyvas~~ | **Padaryta v2.27.0:** paieška pildo `rinka.db` | Iki šiol archyvą pildė tik admino skenavimas – paieškų duomenys dingdavo, nors puslapiai apmokėti. 0 papildomų kreditų. Nauji laukai `nuotrauku_sk`, `teksto_ilgis`; nuasmenintas CSV eksportas Analitikui. Atsakymai – `claude/ATSAKYMAI-DUOMENU-BAZE.md`. |
 | Skenavimų eilė | **Padaryta v2.27.3** | `POST /admin/rinka/eile` – 30 skenavimų po vieną, su sąmata ir kreditų sargu kiekvienam žingsniui. Nieko nepaleista: laukia KL-1019-0400. |
 | Kryptingi skenavimai | Analitiko 15 modelių planas | Modelio skenavimas padarytas (v2.27.1). Liko: pamatuoti skelbimų kiekius (300 kr.) ir Luko leidimas savaitiniam grafikui. |
+| ~~Kainos kreivė~~ | **Padaryta v2.28.0:** kaina lyginama su tokio pat amžiaus ir ridos auto | Luko „Darom“ 10-19. Analitiko koeficientai (14 modelių), paklaida 16,6 % vs 54,5 % vienai medianai; perskaičiuota savo eksporte, sutampa ≤1,6 proc. p. Rodoma skelbimo puslapyje. **Nekeičia** balo, 12/15 % slenksčių, filtro „žemiau rinkos“, `itariamaZala` ir MAX – jie toliau ant medianos. Liko: Luko sprendimas, ar kreivę kelti į balą ir į maržą; įklijuotos nuorodos kelias kreivės nerodo (nėra ridos). |
+| Faceliflo priedas | Analitiko +5–7 % – **neįdėta** | Perskaičiavau: su laiko trendu 0 ± 3 proc. p., be trendo auga su langu (+6,2 → +18,7 %), placebo toje pačioje specifikacijoje irgi +9,6 %. Luko sprendimas: „tegul analitikas užbaigia“. Patikra – `claude/FACELIFTO-PATIKRA-2026-10-19.md`. |
+| Pardavėjo tipas į maržą | +7,7 % (ne +9,0 %) | Luko „Gerai darom“ 10-19. Kodo dar nėra – eina kartu su `maxPirkimo` pataisa. |
 | Archyvo valymas | 24 mėn. + mėnesio agregatas (Luko KL-1019-0315) | **Sprendimas yra, kodo dar nėra.** Pirma eilutė sueis 24 mėn. 2028-ais. Darysiu kartu su agregatų lentele (`modelis × karta × metai × rinka → mediana, imtis, mediana dienų iki dingimo`), kurios reikės „maržai ir laikui“. |
 | „Marža ir laikas“ | Nemokama kortelės dalis (Luko KL-1019-0320) | Laukia archyvo istorijos: 3–6 mėn. nuo 10-19. |
 | Archyvo terminas | Kiek laikom eilutes (TEISE.md R-02) | Siūlau: su `dingo` senesnės nei 24 mėn. – trinti, palikti mėnesio agregatą. **Luko sprendimas.** |
@@ -87,6 +90,9 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 |---|---|---|
 | K-29 | Nurašymų riba 40 vs 50 | Su amžiaus vartais 40 nebėra triukšmingas. Z-52. |
 | K-30 | Ar `rida_kv` naudotinas skelbimui | Normalus 2–4 m. X5 gautų klaidingą 🟡. Z-52. |
+| K-79 | `likutis_q` skalė | Dokumente `skirtumas = kaina/prognozė − 1`, bet kvantiliai log skalėje. Įdiegta per `log(kaina/prognozė)`. Patikslinti dokumentą. |
+| K-80 | P75–P90 juostos nėra | Specifikacijoje keturios juostos iš penkių. Įdėjau „brangesnis nei 75 %“. |
+| K-81 | `elektra` ir `benzinas/dujos` be koeficiento | Nė viename modelyje (archyve 330 ir 91 skelbimas) – vertinami kaip bazinis kuras. |
 
 ## Lukas
 

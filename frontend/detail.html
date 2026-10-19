@@ -1659,6 +1659,25 @@ window.ctApi = function (kelias, params) {
       // KODEL skaiciaus nera ir ar tai pataisoma (mini skenavimas).
       if (c.rinkosZinute) eil.push('<div class="ct-market-row"><span class="ct-market-k">KOD\u0116L</span><span class="ct-market-v">' + ctEsc(c.rinkosZinute) + '</span></div>');
     }
+    // v2.28.0: KAINOS KREIVE. Mediana (virs) nezino nei amziaus, nei ridos -
+    // sios eilutes lygina skelbima su to paties amziaus, ridos, galios ir kuro
+    // prognoze. Paklaida 16,6 % vs 54,5 % vienai medianai (analitikas, 14 modeliu).
+    // Rodoma TIK kai backend'as grazino ok: uz imties ribu kreive ekstrapoliuoja,
+    // o modeliu faile tik 14 - kitiems lieka vien mediana.
+    var kk = c.kainuKreive;
+    if (kk && kk.ok && kk.prognoze) {
+      var kkTonas = kk.tonas === 'good' ? 'is-good' : kk.tonas === 'warn' ? 'is-warn' : '';
+      var kkRez = kk.rezis ? fmt(kk.rezis[0]) + '\u2013' + fmt(kk.rezis[1]) + ' \u20AC' : '';
+      eil.push('<div class="ct-market-row"><span class="ct-market-k">PROGNOZ\u0116</span>'
+        + '<span class="ct-market-v"'
+        + (kkRez ? ' title="Tik\u0117tinas r\u0117\u017Eis: ' + kkRez + '"' : '') + '>'
+        + fmt(kk.prognoze) + ' \u20AC</span></div>');
+      eil.push('<div class="ct-market-row ' + kkTonas + '"><span class="ct-market-k">PAD\u0116TIS</span>'
+        + '<span class="ct-market-v" title="' + ctEsc(kk.tekstas || '') + '">' + ctEsc(kk.zyma) + '</span></div>');
+      eil.push('<div class="ct-market-row"><span class="ct-market-k">PAGR\u012ASTA</span>'
+        + '<span class="ct-market-v">' + kk.n + ' skelbimais'
+        + (kk.maePct ? ' \u00B7 \u00B1' + kk.maePct + ' %' : '') + '</span></div>');
+    }
     document.getElementById('dp-market').innerHTML = eil.join('');
 
     // ── Rizikos juosta: VIRS viso turinio, ne skirtuke ──

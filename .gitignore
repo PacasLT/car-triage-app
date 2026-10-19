@@ -23,6 +23,9 @@ pasikeitimai/klaidos-*.txt
 
 # Testų laikinos DB (migracija.test)
 backend/testai/*.db
+# migracijos sargas aplinkoje negali istrinti savo failu (unlink neleidziamas),
+# tad po jo lieka zurnalas - jis niekada neturi patekti i git.
+backend/testai/*.db-journal
 
 # Python
 __pycache__/

@@ -2574,3 +2574,54 @@ Eksporte tai vienas stulpelis `atn_tekste`: `1`, `0` arba tuščia („antrašt�
 Su juo ribinių metų skelbimai, kuriuose pardavėjas pats pasakė, tampa naudojami, o fazių palyginimas nustoja būti ratu.
 
 - Sargai: **27 žali**; `archyvo-eksportas` 98 → **102**. Tokenai 0 + 0.
+
+## Z-178 · 2026-10-19 · Kainos kreivė vietoj vienos medianos (v2.28.0)
+
+Luko sprendimas: „Darom“. Analitiko matavimas (`claude/KAINU-KREIVES.md`): vidutinė absoliuti paklaida nuo prašomos kainos, 14 modelių – viena modelio mediana **54,5 %**, mediana pagal modelį ir metus 17,7 %, kainos kreivė **16,6 %** (kryžminė patikra).
+
+### Pirma – patikrinau koeficientus savo eksporte
+
+Failas `kainu-kreives.json` (md5 `e8a331fe579a233ffd08a3bd93881c58`, 5 279 B) atkeltas į `backend/duomenys/`. Md5 sutampa. Paleidau jo formulę ant savo 2026-10-19 eksporto:
+
+| | paklaida faile | mano perskaičiavimas | prieš vieną medianą |
+|---|---|---|---|
+| BMW X5 | 16,0 % | 16,0 % | 65,4 % |
+| VW Touran | 19,6 % | 18,6 % | **81,0 %** |
+| Skoda Kodiaq | 11,0 % | 10,6 % | 23,5 % |
+| … visi 14 | | skirtumas ≤ 1,6 proc. p. | kreivė laimi visur |
+
+### Du nuokrypiai nuo specifikacijos, abu sąmoningi
+
+1. **Skalė.** Dokumentas rašo `skirtumas = kaina/prognozė − 1` ir lygina su `likutis_q`. Bet `likutis_q` yra likučių kvantiliai **log** skalėje (P50 = +0,0159 ≈ +1,6 %; sigma 0,2235 ≈ P10/−1,28). Prie ±0,29 log ir procentai skiriasi ~4 proc. p., tad riba suveiktų ne ten, kur turi, ir „pigesnis nei 90 %“ atsirastų skelbimams, kurie tokie nėra. Lyginam `log(kaina/prognozė)`. Sargas tai fiksuoja atskiru atveju (kaina −23 %: log skalėje P10, procentų skalėje – ne).
+2. **Trūkstanti juosta.** Specifikacijoje nėra P75–P90 atvejo (yra ≤P10, ≤P25, P25–P75, ≥P90). Įdėjau „brangesnis nei 75 %“ – kitaip tas intervalas būtų rodęs „kaina atitinka lygį“, nors ji virš trijų ketvirčių panašių.
+
+### Ko šis darbas NEKEIČIA
+
+Triažo balo, 12/15 % slenksčių, filtro „žemiau rinkos“, `itariamaZala` ir `maxPirkimo`. Visi jie toliau remiasi mediana. Kreivė yra atskiras, geriau pagrįstas rodiklis skelbimo puslapyje; jos perkėlimas į balą ir į maržą būtų atskiras Luko sprendimas.
+
+### Failai
+
+- `backend/kainu-kreive.js` – naujas. `ivertinti`, `prognoze`, `padetis`, `normKuras`, `kreive`, `versija`.
+- `backend/duomenys/kainu-kreives.json` – analitiko koeficientai.
+- `backend/server.js` – 3 vietos: `require`; skaičiavimas ten, kur jau žinoma `regMarke` (po `l.kartos`); **baltasis sąrašas** `allListingsBase` (be jos laukas iki sąsajos nenukeliautų – tas pats spąstas kaip v2.18.1, v2.23.1, v2.25.0).
+- `frontend/detail.html` – trys eilutės rinkos bloke: PROGNOZĖ, PADĖTIS, PAGRĮSTA. Naujo CSS nėra – naudojamos esamos `.ct-market-row` ir `.is-good/.is-warn`.
+- `backend/testai/kainu-kreive.test.js` – naujas sargas, **62 patikros**.
+
+### Kada nerodoma (analitiko 5 sk.)
+
+Modelio nėra faile (yra 14) · amžius, rida arba galia už imties ribų (ten kreivė ekstrapoliuoja) · rida tuščia arba < 1 000 km · galios nėra · lizingo įmoka (`kainosIspejimas`). Visais atvejais lieka senoji mediana.
+
+### Dvi žinomos spragos
+
+- **Įklijuotos nuorodos kelias kreivės nerodo**: tame kelyje `rida: null` (mėnesio ir ridos iš archyvo konteksto negaunam), o be ridos kreivė neskaičiuojama. Tai sąžininga – ne klaida, bet ir ne tai, ko norėtume.
+- **`elektra` ir `benzinas/dujos` kuro koeficiento neturi** nė viename modelyje (archyve 330 ir 91 skelbimas). Jie vertinami kaip bazinis kuras. Perduota Analitikui.
+
+### Sargai
+
+**28 žali** (buvo 27; naujas `kainu-kreive` 62/62). `migracija` krenta dėl aplinkos – `unlink` prijungtame kataloge neleidžiamas, ne dėl kodo. Tokenai 0 + 0.
+
+Sargas patikrintas tyčia sulaužant kodą tris kartus: procentai vietoj log → 1 BLOGAI; be brūkšnio normalizacijos kure → 4 BLOGAI; be galiojimo ribų → 4 BLOGAI.
+
+### Pamoka K-78
+
+`Number(null) === 0`, ir nulis yra „baigtinis skaičius“. Pirma versija skelbimui be metų skaičiavo amžių 2026 ir rodė prognozę, pagrįstą niekuo – niekas nenukrito. Tuščias laukas pirma turi tapti `NaN`, tik tada tikrinamas. Sargas tai pagavo.

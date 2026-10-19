@@ -2228,6 +2228,9 @@ function mergeDuplicatesAcrossPortals(listings) {
 // v2.4.0: perkelta i rinkos-mediana.js (atspari mediana, Nr. 43) - kad butu
 // testuojama be serverio. Kvietejai nepasikeite.
 const { computeMarketMedians, lyginimoMediana } = require('./rinkos-mediana');
+// v2.28.0: kainos prognoze pagal amziu, rida, galia ir kura. Medianos NEKEICIA -
+// atskiras, geriau pagristas rodiklis (paklaida 16,6 % vs 54,5 % vienai medianai).
+const kainuKreive = require('./kainu-kreive');
 const rinkos = require('./rinkos');
 const maxPirkimo = require('./max-pirkimo');
 const { kuroSarasas, kuroKodai } = require('./kuras');   // v2.23.0: daugiareiksmis kuro filtras
@@ -3849,6 +3852,13 @@ async function runSearchJob(jobId, filters, arAdminas) {
       l.regitra = regitra.kontekstas(regMarke, l.modelis) || null;
       l.regitraPunktai = regitra.punktai(Object.assign({}, l, { marke: regMarke }));
       l.kartos = regitra.kartos(regMarke, l.modelis, l.metai, rinkosTekstas(l), l.menuo);
+      // v2.28.0: kainos kreive. Balo NEKEICIA (`computeTriageScore` jau ivykdytas
+      // ir apie si lauka nezino) - tas pats principas kaip `l.regitra`.
+      l.kainuKreive = kainuKreive.ivertinti({
+        raktas: regitra.baziniModelis(regMarke, l.modelis),
+        metai: l.metai, rida: l.rida, galia: l.galia, kuras: l.kuras,
+        kaina: l.kaina, kainosIspejimas: l.kainosIspejimas,
+      });
     });
 
     // v2.23.4 (Luko prašymas): BE NUOTRAUKOS – Į APAČIĄ.
@@ -4118,6 +4128,9 @@ async function runSearchJob(jobId, filters, arAdminas) {
       // v2.25.0: pigumo patikros verdiktas (1 arba 2 pakopa). Be sios eilutes
       // jis iki sasajos nenukeliautu - tas pats baltojo saraso spastas.
       pigumas: l.pigumas || null,
+      // v2.28.0: kainos kreive. BALTASIS SARASAS - be sios eilutes iki sasajos
+      // nenukeliautu, nors `enriched` ji turi (v2.18.1, v2.23.1, v2.25.0 spastas).
+      kainuKreive: l.kainuKreive || null,
       rinka: l.rinka || null, lygintaRinka: l.lygintaRinka || null,
       rinkosVardas: l.rinkosVardas || null, kainaLt: l.kainaLt || null,
       // v2.20.0 – perpardavėjo skaičiai

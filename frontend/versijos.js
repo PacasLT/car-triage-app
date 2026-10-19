@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.28.0', data: '2026-10-19', pavadinimas: 'Kaina lyginama su tokio pat amžiaus ir ridos automobiliu',
+    pakeitimai: [
+      'Skelbimo puslapyje atsirado prognozė: kiek turėtų kainuoti toks pat automobilis pagal amžių, ridą, galią ir kurą.',
+      'Prie prognozės rodoma padėtis tarp panašių – pavyzdžiui „pigesnis nei 90 %“ – ir kiek skelbimų ja pagrįsta.',
+      'Iki šiol kaina buvo lyginama tik su viso modelio vidurkiu, kuris nežino nei metų, nei ridos.',
+      'Kol kas veikia 14 populiariausių modelių; kitiems rodomas ankstesnis vidurkis.',
+    ],
+  },
+  {
     versija: '2.27.8', data: '2026-10-19', pavadinimas: 'Archyve matyti, ką apie atnaujinimą rašo pats pardavėjas',
     pakeitimai: [
       'Archyvo eksporte atsirado požymis, ar pardavėjas skelbimo antraštėje pats parašė „LCI“, „facelift“ ar „restyling“.',
