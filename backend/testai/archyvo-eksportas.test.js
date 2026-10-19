@@ -161,6 +161,14 @@ T(/_skenEile\.laukia\.unshift\(d\)/.test(srv), 'sargui sustabdžius, neįvykdyta
 T(/_skenEile\.stabdyti/.test(srv) && /eile\/stop/.test(srv), 'eilę galima sustabdyti');
 T(/if \(_skenEile\.vykdoma \|\| _skenEile\.laukia\.length\)/.test(srv), 'dvi eilės vienu metu neprasideda');
 T(/blogiausiuAtvejuKr/.test(srv), 'sąmata grąžinama IŠ KARTO, prieš pradedant');
+// v2.27.4: portalas be modelio filtro – praleidžiam, neapeinam per tekstą
+T(/portalas === 'autoplius' && !autopliusIds\.urlDalis\(marke, modelis\)/.test(srv),
+  'autoplius be modelio ID – skenavimas nepradedamas');
+T(/praleista: true/.test(srv), '…grąžinama kaip PRALEIDIMAS, ne klaida');
+T(/if \(r\.praleista\)[\s\S]{0,260}continue;/.test(srv), 'praleidimas eilės nestabdo – kiti modeliai nesusiję');
+T(/_skenEile\.praleisti\.push/.test(srv), 'praleisti įrašomi – Analitikas turi žinoti, ko nėra pjūvyje');
+T(/parseInt\(b\.maxPuslapiu, 10\) \|\| 150/.test(srv),
+  'eilės numatytoji puslapių riba 150 – pjūviui svarbu pasiekti sąrašo galą');
 
 try { fs.rmSync(kat, { recursive: true, force: true }); } catch (e) { /* aplinka gali neleisti trinti */ }
 

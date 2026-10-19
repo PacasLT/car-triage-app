@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.27.4', data: '2026-10-19', pavadinimas: 'Skenavimas neapeina portalo filtro',
+    pakeitimai: [
+      'Jei portalas neturi tokio modelio filtro, skenavimas praleidžiamas ir pažymimas – anksčiau būtų ėjęs per teksto paiešką ir būtume mokėję už nesusijusių skelbimų puslapius.',
+      'Praleidimas eilės nestabdo: kiti modeliai su tuo nesusiję.',
+    ],
+  },
+  {
     versija: '2.27.3', data: '2026-10-19', pavadinimas: 'Skenavimų eilė (vidinis įrankis)',
     pakeitimai: [
       'Admin zonoje galima paleisti kelių modelių skenavimų eilę – ji dirba po vieną, kaip ir anksčiau, tik nebereikia laukti ir paleisti kiekvieno ranka.',

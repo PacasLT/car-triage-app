@@ -881,7 +881,10 @@ app.post('/admin/rinka/eile', klaiduPrieiga, (req, res) => {
       .filter((m) => m.marke);
     if (!modeliai.length) return res.status(400).json({ error: 'modeliai: [{marke, modelis}]' });
     const metaiNuo = parseInt(b.metaiNuo, 10) || null;
-    const maxPuslapiu = Math.min(Math.max(parseInt(b.maxPuslapiu, 10) || 60, 1), 400);
+    // Numatytoji 150, kaip ir rankiniame marsrute: Analitikui svarbu, kad
+    // skenavimas pasiektu saraso GALA (`pilnas = 1`) - kitaip pjuvis nupjautas
+    // nuo pigiojo galo. Tikslu skaiciu duos quick-count.
+    const maxPuslapiu = Math.min(Math.max(parseInt(b.maxPuslapiu, 10) || 150, 1), 400);
     if (_skenEile.vykdoma || _skenEile.laukia.length) {
       return res.status(409).json({ error: 'Eile jau veikia', busena: eilesBusena() });
     }
@@ -891,6 +894,7 @@ app.post('/admin/rinka/eile', klaiduPrieiga, (req, res) => {
     })));
     _skenEile.laukia = darbai;
     _skenEile.baigti = [];
+    _skenEile.praleisti = [];
     _skenEile.stabdyti = false;
     _skenEile.klaida = null;
     _skenEile.pradeta = Date.now();
@@ -907,6 +911,7 @@ app.post('/admin/rinka/eile', klaiduPrieiga, (req, res) => {
 function eilesBusena() {
   return {
     vykdoma: _skenEile.vykdoma, laukia: _skenEile.laukia.length, baigta: _skenEile.baigti.length,
+    praleista: _skenEile.praleisti,
     stabdyti: _skenEile.stabdyti, pradeta: _skenEile.pradeta, klaida: _skenEile.klaida,
     sunaudotaKr: _skenEile.baigti.length ? null : undefined,
   };
@@ -960,6 +965,15 @@ async function pradetiSkenavima({ portalas, marke, modelis, metaiNuo, maxPuslapi
     return { kodas: 409, klaida: { error: 'Kreditu sargas: po skenavimo liktu maziau nei atsarga',
       likutis, samata, atsarga: KREDITU_ATSARGA, daugiausiaPuslapiu: Math.max(0, Math.floor((likutis - KREDITU_ATSARGA) / kPsl)) } };
   }
+  // v2.27.4 (Analitiko salyga): „jei portalas neturi tokio modelio filtro,
+  // praleisk ir pazymek - nebandyk apeiti per teksta". autoplius be modelio ID
+  // grizta i `qt=` teksto paieska, o ji grazina ir nesusijusiu skelbimu - uz
+  // kuriu puslapius sumoketume ta pacia kaina. Tyliai to nedarom.
+  if (modelis && portalas === 'autoplius' && !autopliusIds.urlDalis(marke, modelis)) {
+    return { kodas: 422, praleista: true, klaida: { error: 'autoplius neturi sio modelio ID - praleidziam',
+      marke, modelis, pastaba: 'Teksto paieska (qt=) kainuotu tiek pat, bet grazintu ir nesusijusius skelbimus. '
+        + 'Modeliu lentele atnaujinama POST /admin/autoplius-id/atnaujinti (apie 10 kr., galioja 30 d.).' } };
+  }
   const url = RINKOS_PORTALAI[portalas]({ marke, modelis, metaiNuo, rikiavimas: 'naujausi' });
   if (!url) return { kodas: 400, klaida: { error: 'marke nezinoma portalui ' + portalas } };
   const skId = rinka.pradeti({ portalas, marke, modelis, metaiNuo, url });
@@ -977,12 +991,20 @@ async function pradetiSkenavima({ portalas, marke, modelis, metaiNuo, maxPuslapi
 // Eile nieko neprideda prie kainos ir nieko neapeina: kiekvienas jos elementas
 // eina per ta pacia `pradetiSkenavima` su tuo paciu kreditu sargu. Sargui
 // sustabdzius, eile SUSTOJA - ji niekada nebando „prastumti" kito.
-const _skenEile = { laukia: [], vykdoma: null, baigti: [], stabdyti: false, pradeta: null, klaida: null };
+const _skenEile = { laukia: [], vykdoma: null, baigti: [], praleisti: [], stabdyti: false, pradeta: null, klaida: null };
 async function _eilesVykdytojas() {
   while (_skenEile.laukia.length && !_skenEile.stabdyti) {
     const d = _skenEile.laukia.shift();
     _skenEile.vykdoma = d;
     const r = await pradetiSkenavima(d);
+    // Praleidimas NERA sustojimas: portalas tiesiog neturi tokio filtro, o
+    // likusieji modeliai su tuo niekaip nesusije.
+    if (r.praleista) {
+      _skenEile.praleisti.push(Object.assign({ priezastis: r.klaida && r.klaida.error }, d));
+      _skenEile.vykdoma = null;
+      console.warn('[RINKA] eile praleido:', d.portalas, d.marke, d.modelis || '');
+      continue;
+    }
     if (r.klaida) {
       // Sargas arba portalo klaida: eile sustoja, likusieji LIEKA saraše -
       // Lukas pamatys, kiek neivykdyta, ir kodel.

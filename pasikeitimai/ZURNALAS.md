@@ -2484,3 +2484,19 @@ Sąmata grąžinama iš karto, dar nepradėjus: `blogiausiuAtvejuKr` ir `blogiau
 
 - Sargai: **27 žali**; `archyvo-eksportas` 62 → **81**. Tokenai 0 + 0.
 - Nieko nepaleidau: eilė tuščia, kol Lukas neatsakė KL-1019-0400.
+
+## Z-173 · 2026-10-19 · Skenavimas neapeina portalo filtro + mano klaidingas radinys (v2.27.4)
+
+Analitiko sąlyga pjūvio skenavimams: *„jei portalas neturi tokio modelio filtro, praleisk ir pažymėk – nebandyk apeiti per tekstą"*. Tai tikras pavojus: `buildAutopliusUrl` be modelio ID grįžta į `qt=` teksto paiešką, kuri grąžina ir nesusijusių skelbimų, o mes už tuos puslapius mokam tą pačią kainą. Dabar toks skenavimas **nepradedamas**: grąžinamas `praleista: true`, eilė jį įsirašo į `praleisti` ir eina toliau (praleidimas nėra sustojimas – kiti modeliai su tuo nesusiję).
+
+### Mano klaidingas radinys ir kaip jį pagavau
+
+Praėjusiame perdavime parašiau Analitikui ir į Luko eilę: „iš 15 modelių 14 turi autoplius ID, o **Dacia Duster – ne**“, ir pasiūliau 10 kr. lentelės atnaujinimą. **Tai buvo netiesa.**
+
+Tikrinau `autopliusIds.katalogas()` savo pusėje, o čia, kūrimo aplinkoje, `autoplius-ids.json` nėra – veikia tik SEED (31 markė, 134 modeliai). Produkcijoje lentelė pilna: Railway žurnale `[AUTOPLIUS-ID] įkelta iš disko: 210 markių, 3 819 modelių`, atnaujinta 10-18 16:43, galioja 30 d. Taigi Duster beveik neabejotinai turi ID, o siūlytas 10 kr. atnaujinimas nereikalingas.
+
+**Pamoka, kurią užrašau:** aplinkos skirtumas yra duomenų skirtumas. Tikrindamas, ką produkcija *turi*, negaliu remtis tuo, ką turi mano kopija – reikia arba produkcijos žurnalo, arba endpointo. Tas pats spąstas kaip K-72 fikstūros (tada naudojau formą, kurios portalai niekada negrąžina), tik iš kitos pusės: čia naudojau katalogą, kurio produkcija niekada neturi tokio skurdaus.
+
+Kodas vis tiek lieka: sargas prasminga ir tada, kai lentelė pilna – ji sensta po 30 d., o nauja markė gali atsirasti bet kada.
+
+- Sargai: **27 žali**; `archyvo-eksportas` 81 → **86**. Tokenai 0 + 0.
