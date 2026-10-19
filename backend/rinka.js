@@ -428,10 +428,10 @@ function eksportas({ ka, riba, raktas, kartos } = {}) {
     const k = kartosLaukai(s.kita);
     const pab = s.dingo || s.paskut_matytas;
     const dienos = (s.pirma_matytas && pab) ? Math.round((pab - s.pirma_matytas) / 86400000) : '';
-    const g = (typeof kartos === 'function' ? kartos(s.marke, s.modelis, s.metai) : null) || {};
+    const g = (typeof kartos === 'function' ? kartos(s.marke, s.modelis, s.metai, s.menuo) : null) || {};
     return [maisa(s.id), s.portalas, s.marke || '', s.modelis || '',
       (typeof raktas === 'function' ? raktas(s.marke, s.modelis) : null) || '',
-      k.kodas || g.kodas || '', k.faze,
+      k.kodas || g.kodas || '', k.faze || g.faze || '',
       g.nuo == null ? '' : g.nuo, g.iki == null ? '' : g.iki, g.atn == null ? '' : g.atn, k.grupe,
       s.metai == null ? '' : s.metai, s.menuo == null ? '' : s.menuo, s.kuras || '', s.pavarai || '',
       s.kebulas || '', s.galia == null ? '' : s.galia, s.variklio_turis == null ? '' : s.variklio_turis,

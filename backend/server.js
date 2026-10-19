@@ -949,10 +949,22 @@ app.get('/admin/rinka/eksportas', klaiduPrieiga, (req, res) => {
       // Analitiko prasymas: `raktas` atskiru stulpeliu (K-33 raktai) ir kartos
       // ribos su `atn` - kad nereiketu jungti per kartos.json.
       raktas: (marke, modelis) => regitra.baziniModelis(marke, modelis),
-      kartos: (marke, modelis, metai) => {
+      // v2.27.7: kartu su kartos ribomis grazinam ir FAZE. Iki siol ji buvo imama
+      // tik is `kita` JSON, o ten jos nera: `l.kartos` priskiriama paieskos
+      // praturtinime, o archyva pildo skenavimas - tad eksporte `kartos_faze`
+      // buvo tuscia VISOSE 14 109 eilutese. Faze skaiciuojam is to, ka turim:
+      // metai + menuo pries kartos atnaujinimo data (`kartosFazes` logika, be
+      // skelbimo teksto - jo archyve nesaugom).
+      kartos: (marke, modelis, metai, menuo) => {
         if (!marke || !modelis || !metai) return null;
         const g = regitra.kartosIntervalui(marke, modelis, metai, metai);
-        return g && g.length ? g[0] : null;
+        const pagr = (g && g.length) ? g[0] : null;
+        const f = regitra.kartosFazes(marke, modelis, metai, null, menuo);
+        // Dvi fazes = atnaujinimo metai be menesio: nezinom, kuri. „riba" yra
+        // sazininga reiksme - Analitikas tokias eilutes gali atmesti pats.
+        const faze = !f.length ? '' : (f.length > 1 ? 'riba'
+          : (f[0].lci === true ? 'atnaujinta' : f[0].lci === false ? 'pradine' : 'vientisa'));
+        return Object.assign({ faze }, pagr || {});
       },
     });
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');

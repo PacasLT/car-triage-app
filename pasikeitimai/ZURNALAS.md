@@ -2534,3 +2534,21 @@ Skenavimai vyko teisingai – melavo tik skaičius. Bet būtent juo remiantis sp
 **Pamoka:** jei atsakymas aprašo būseną, kurią tuo pat metu keičia fonas, jis turi remtis momentine kopija, ne gyva nuoroda.
 
 - Sargai: **27 žali**; `archyvo-eksportas` 92 → **94**. Tokenai 0 + 0.
+
+## Z-176 · 2026-10-19 · `kartos_faze` buvo tuščia VISOSE 14 109 eilutėse (v2.27.7)
+
+Pirmas eksportas Analitikui – ir pirma Analitiko patikra iškart jį sustabdė. Jo sąlyga buvo: `kartos_faze` užpildyta bent 60 % A ir B grupių skelbimų. Pamatuota mano paties:
+
+| Grupė | Eilutės | `kartos_kodas` | `kartos_faze` | `atn_metai` |
+|---|---|---|---|---|
+| A (kartos keitimas) | 2 891 | 99,8 % | **0,0 %** | 93,1 % |
+| B (facelift) | 3 785 | 99,8 % | **0,0 %** | 81,9 % |
+| C ir kiti | 7 433 | 85,5 % | **0,0 %** | 60,7 % |
+
+Nulis visur. Priežastis: fazę ėmiau tik iš `kita` JSON (`j.kartos[0].lci`), o ten jos **niekada nebūna**. `l.kartos` priskiriama paieškos praturtinime (`server.js` 3644), o archyvą pildo skenavimas, kuris to kelio neina. `kartos_kodas` ir `atn_metai` buvo užpildyti tik todėl, kad juos skaičiuoju iš išorės (`regitra.kartosIntervalui`) – fazei tokio kelio nebuvau padaręs.
+
+**Pataisa:** fazė skaičiuojama tuo pačiu `regitra.kartosFazes`, kurį naudoja produktas, tik be skelbimo teksto (archyve jo nėra – `NESAUGOMA.rawText`): sprendžia metai ir mėnuo prieš kartos atnaujinimo datą (`atn`, `atnMen`). Reikšmės: `pradine`, `atnaujinta`, `vientisa` (karta be atnaujinimo) ir **`riba`**, kai iš metų su mėnesiu nuspręsti neįmanoma. „Riba“ čia svarbi: ji sąžininga, ir Analitikas tokias eilutes gali atmesti pats, o spėjimas jam tyliai iškreiptų būtent facelift priedą – pirmą skaičių, kurio produktas neturi.
+
+Pamoka ta pati kaip v2.18.1 ir v2.23.1, tik trečia forma: **laukas, kurį užpildo vienas kelias, neatsiranda kitame kelyje.** Paieška praturtina, skenavimas – ne.
+
+- Sargai: **27 žali**; `archyvo-eksportas` 94 → **98**. Tokenai 0 + 0.

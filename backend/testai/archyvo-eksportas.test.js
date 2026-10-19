@@ -98,7 +98,8 @@ T(csv2.trim().split('\n').every((x) => (x.match(/,/g) || []).length >= antr.leng
 // ── Naujos eksporto skiltys (Analitiko prašymas): raktas ir kartos ribos ────
 const csv3 = rinka.eksportas({
   raktas: (marke, modelis) => (marke && modelis ? marke.toUpperCase() + ' ' + modelis.toUpperCase() : null),
-  kartos: (marke, modelis, metai) => (metai === 2019 ? { kodas: 'G05', nuo: 2018, iki: null, atn: 2023 } : null),
+  kartos: (marke, modelis, metai, menuo) => (metai === 2019
+    ? { kodas: 'G05', nuo: 2018, iki: null, atn: 2023, faze: menuo ? 'pradine' : '' } : null),
 });
 const a3 = csv3.trim().split('\n')[0].split(',');
 const r3 = csv3.trim().split('\n')[1].split(',');
@@ -106,6 +107,8 @@ const v3 = (k) => r3[a3.indexOf(k)];
 ['raktas', 'kartos_nuo', 'kartos_iki', 'atn_metai'].forEach((k) => T(a3.indexOf(k) !== -1, 'stulpelis `' + k + '`'));
 T(v3('raktas') === 'BMW X5', '`raktas` ateina iš išorės (regitra.baziniModelis)');
 T(v3('kartos_nuo') === '2018' && v3('atn_metai') === '2023', 'kartos ribos ir facelift metai');
+// v2.27.7: faze ateina iš skaičiavimo, kai `kita` jos neturi (archyve jos nėra niekada)
+T(v3('kartos_faze') === 'pradine', 'kartos_faze suskaičiuojama iš metų ir mėnesio');
 T(v3('kartos_iki') === '', 'neuždaryta karta – tuščias langelis, ne „null“');
 T(rinka.eksportas({}).trim().split('\n')[0].split(',').length === a3.length,
   'be išorinių funkcijų stulpelių skaičius tas pats – tik tušti langeliai');
@@ -171,6 +174,10 @@ T(sk.trim().split('\n').length > 1, 'bent vienas skenavimo įrašas');
 
 // ── Serverio pusė: eilė nieko neapeina ─────────────────────────────────────
 const srv = fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
+T(/kartos: \(marke, modelis, metai, menuo\) =>/.test(srv), 'serveris paduoda ir mėnesį');
+T(/regitra\.kartosFazes\(marke, modelis, metai, null, menuo\)/.test(srv),
+  'fazė imama iš `kartosFazes` (be skelbimo teksto – archyve jo nėra)');
+T(/f\.length > 1 \? 'riba'/.test(srv), 'dvi galimos fazės = „riba“, ne spėjimas');
 T(/async function pradetiSkenavima/.test(srv), 'vieno skenavimo paleidimas – viena funkcija');
 T(/const r = await pradetiSkenavima\(/.test(srv), 'rankinis maršrutas naudoja ją');
 T(/const r = await pradetiSkenavima\(d\)/.test(srv), 'eilė naudoja TĄ PAČIĄ funkciją – sargai neapeinami');

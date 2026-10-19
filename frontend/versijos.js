@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.27.7', data: '2026-10-19', pavadinimas: 'Kartos fazė archyvo eksporte',
+    pakeitimai: [
+      'Archyvo eksporte atsirado kartos fazė (prieš atnaujinimą / po jo) – iki šiol ji buvo tuščia visose eilutėse.',
+      'Fazė skaičiuojama iš automobilio metų ir mėnesio; kai iš jų nuspręsti neįmanoma, rašoma „riba“, o ne spėjimas.',
+    ],
+  },
+  {
     versija: '2.27.6', data: '2026-10-19', pavadinimas: 'Pataisyta: skenavimų eilė rodė vienu darbu mažiau',
     pakeitimai: [
       'Paleidus skenavimų eilę, atsakyme buvo rodomas vienu darbu mažesnis skaičius, nei iš tikrųjų paleista. Patys skenavimai vyko teisingai.',
