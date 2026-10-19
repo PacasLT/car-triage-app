@@ -141,6 +141,24 @@ for (let i = 0; i < 2; i++) {
 g = gyvas();
 T(g.X3.every((x) => x != null), 'markės skenavimas pažymi ir X3 – jo aprėptis platesnė');
 
+// ── Metų rėžis: aprėptis neperžengia ir iš viršaus (v2.27.5) ───────────────
+// Analitiko b variantas: didelį modelį skaidom į du skenavimus pagal metus.
+// Be `metai_iki` aprėptyje 2010–2016 skenavimas paskelbtų dingusiais 2017+.
+const su2017 = skelbimas({ nr: 300, metai: 2021, modelis: 'Golf',
+  url: 'https://autoplius.lt/skelbimai/y-golf-2021.html' });
+const su2013 = skelbimas({ nr: 301, metai: 2013, modelis: 'Golf',
+  url: 'https://autoplius.lt/skelbimai/y-golf-2013.html' });
+rinka.irasytiPaieskos([su2017, su2013], 'Volkswagen');
+const golf = (metai) => rinka._db().prepare('SELECT dingo FROM skelbimai WHERE modelis=? AND metai=?').get('Golf', metai);
+pauze(5);
+for (let i = 0; i < 2; i++) {
+  const id = rinka.pradeti({ portalas: 'autoplius', marke: 'Volkswagen', modelis: 'Golf',
+    metaiNuo: 2010, metaiIki: 2016, url: 'x' });
+  rinka.baigti(id, { pilnas: true, priezastis: 'testas', busena: 'baigta' });
+}
+T(golf(2013).dingo != null, '2010–2016 skenavimas pažymėjo 2013 m. skelbimą');
+T(golf(2021).dingo == null, '…ir NEPALIETĖ 2021 m. skelbimo – aprėptis uždaryta ir iš viršaus');
+
 // ── Skenavimų eksportas (v2.27.3, Analitiko §E) ────────────────────────────
 const sk = rinka.eksportas({ ka: 'skenavimai' });
 const skA = sk.trim().split('\n')[0].split(',');
@@ -169,6 +187,13 @@ T(/if \(r\.praleista\)[\s\S]{0,260}continue;/.test(srv), 'praleidimas eilės nes
 T(/_skenEile\.praleisti\.push/.test(srv), 'praleisti įrašomi – Analitikas turi žinoti, ko nėra pjūvyje');
 T(/parseInt\(b\.maxPuslapiu, 10\) \|\| 150/.test(srv),
   'eilės numatytoji puslapių riba 150 – pjūviui svarbu pasiekti sąrašo galą');
+// v2.27.5: kiekvienas eilės elementas gali turėti savo metų rėžį ir ribą
+T(/metaiNuo: m\.metaiNuo \|\| metaiNuo, metaiIki: m\.metaiIki \|\| null/.test(srv),
+  'eilės elementas gali turėti savo metų rėžį');
+T(/maxPuslapiu: Math\.min\(m\.maxPuslapiu \|\| maxPuslapiu, 400\)/.test(srv),
+  '…ir savo puslapių ribą, neperžengiant 400');
+T(/rikiavimas: 'naujausi'/.test(srv), 'skenavimo rikiavimas – naujausi (pagal skelbimo datą, ne kainą)');
+T(skA.indexOf('metai_iki') !== -1, 'skenavimų eksporte matosi metų rėžio viršus');
 
 try { fs.rmSync(kat, { recursive: true, force: true }); } catch (e) { /* aplinka gali neleisti trinti */ }
 

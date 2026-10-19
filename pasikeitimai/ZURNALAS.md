@@ -2500,3 +2500,21 @@ Tikrinau `autopliusIds.katalogas()` savo pusėje, o čia, kūrimo aplinkoje, `au
 Kodas vis tiek lieka: sargas prasminga ir tada, kai lentelė pilna – ji sensta po 30 d., o nauja markė gali atsirasti bet kada.
 
 - Sargai: **27 žali**; `archyvo-eksportas` 81 → **86**. Tokenai 0 + 0.
+
+## Z-174 · 2026-10-19 · Metų rėžis skenavimui ir aprėptis iš viršaus (v2.27.5)
+
+Analitiko sąlyga prieš pjūvį: modelį, kurio portale > 1 100 skelbimų, arba skenuojam su didesne puslapių riba, arba **skaidom į du skenavimus pagal metus**, kad kiekvienas pasiektų `pilnas = 1`.
+
+Antras variantas be pataisos būtų sugadinęs duomenis tiksliai taip pat, kaip būtų sugadinęs modelio skenavimas prieš v2.27.1: aprėptis `baigti()` turėjo tik `metai >= metai_nuo`. Skenavimas „2010–2016“ po dviejų kartų būtų paskelbęs **dingusiais visus 2017+ skelbimus**, kurių jis net nematė. Dabar `skenavimai` turi `metai_iki`, aprėptis uždaryta iš abiejų pusių, o sargas tikrina būtent tai (sulaužius krenta).
+
+Eilėje kiekvienas elementas gali turėti savo `metaiNuo`, `metaiIki` ir `maxPuslapiu` – kitaip vienas didelis modelis arba nupjautų savo sąrašą, arba verstų kelti ribą visiems 30 skenavimų.
+
+### Atsakymas į Analitiko klausimą apie rikiavimą
+
+Skenavimas visada eina `rikiavimas: 'naujausi'`:
+- autoplius `order_by=3&order_direction=DESC`
+- autogidas `f_50=naujausi_asc`
+
+Tai **skelbimo paskelbimo data**, ne kaina. Vadinasi, nupjautas sąrašas praranda ne pigiausius, o **seniausiai kabančius** skelbimus. Praktinė pasekmė: medianai poveikis mažesnis, nei jis bijojo, bet ilgai kabantys skelbimai yra būtent tie, kuriuose daugiausia derybų erdvės – tad nupjovimas kenkia labiausiai tam matavimui, kurio dar net nedarom (kainos mažinimai). Todėl jo sąlyga teisinga abiem atvejais.
+
+- Sargai: **27 žali**; `archyvo-eksportas` 86 → **92**. Tokenai 0 + 0.

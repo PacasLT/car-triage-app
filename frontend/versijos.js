@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.27.5', data: '2026-10-19', pavadinimas: 'Skenavimas pagal metų rėžį',
+    pakeitimai: [
+      'Archyvo skenavimą galima riboti ir iš viršaus (pvz. 2010–2016), kad didelis modelis būtų nuskaitytas dalimis iki galo.',
+      'Tokio skenavimo aprėptis uždaryta ir iš viršaus: jis nebegali paskelbti „dingusiais“ naujesnių metų skelbimų.',
+      'Eilėje kiekvienas modelis gali turėti savo metų rėžį ir puslapių ribą.',
+    ],
+  },
+  {
     versija: '2.27.4', data: '2026-10-19', pavadinimas: 'Skenavimas neapeina portalo filtro',
     pakeitimai: [
       'Jei portalas neturi tokio modelio filtro, skenavimas praleidžiamas ir pažymimas – anksčiau būtų ėjęs per teksto paiešką ir būtume mokėję už nesusijusių skelbimų puslapius.',

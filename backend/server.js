@@ -876,8 +876,13 @@ app.post('/admin/rinka/eile', klaiduPrieiga, (req, res) => {
     const portalai = (Array.isArray(b.portalai) ? b.portalai : ['autoplius', 'autogidas'])
       .filter((p) => RINKOS_PORTALAI[p]);
     if (!portalai.length) return res.status(400).json({ error: 'portalai: ' + Object.keys(RINKOS_PORTALAI).join(' | ') });
+    // v2.27.5 (Analitiko salyga): kiekvienas elementas gali tureti SAVO metu
+    // rezi ir puslapiu riba - kitaip vienas didelis modelis arba nupjautu savo
+    // sarasa, arba verstu kelti riba visiems 30 skenavimu.
     const modeliai = (Array.isArray(b.modeliai) ? b.modeliai : []).slice(0, 60)
-      .map((m) => ({ marke: String(m.marke || '').slice(0, 40), modelis: m.modelis ? String(m.modelis).slice(0, 40) : null }))
+      .map((m) => ({ marke: String(m.marke || '').slice(0, 40), modelis: m.modelis ? String(m.modelis).slice(0, 40) : null,
+        metaiNuo: parseInt(m.metaiNuo, 10) || null, metaiIki: parseInt(m.metaiIki, 10) || null,
+        maxPuslapiu: parseInt(m.maxPuslapiu, 10) || null }))
       .filter((m) => m.marke);
     if (!modeliai.length) return res.status(400).json({ error: 'modeliai: [{marke, modelis}]' });
     const metaiNuo = parseInt(b.metaiNuo, 10) || null;
@@ -890,7 +895,9 @@ app.post('/admin/rinka/eile', klaiduPrieiga, (req, res) => {
     }
     const darbai = [];
     portalai.forEach((portalas) => modeliai.forEach((m) => darbai.push({
-      portalas, marke: m.marke, modelis: m.modelis, metaiNuo, maxPuslapiu,
+      portalas, marke: m.marke, modelis: m.modelis,
+      metaiNuo: m.metaiNuo || metaiNuo, metaiIki: m.metaiIki || null,
+      maxPuslapiu: Math.min(m.maxPuslapiu || maxPuslapiu, 400),
     })));
     _skenEile.laukia = darbai;
     _skenEile.baigti = [];
@@ -952,7 +959,7 @@ app.get('/admin/rinka/eksportas', klaiduPrieiga, (req, res) => {
 // ── Vieno skenavimo paleidimas (v2.27.3) ────────────────────────────────────
 // Istraukta is marsruto, nes dabar ja kviecia DU: rankinis POST ir eile.
 // Visi sargai lieka cia - kitaip eile juos apeitu.
-async function pradetiSkenavima({ portalas, marke, modelis, metaiNuo, maxPuslapiu }) {
+async function pradetiSkenavima({ portalas, marke, modelis, metaiNuo, metaiIki, maxPuslapiu }) {
   const v = rinka.vykstantis();
   if (v) return { kodas: 409, klaida: { error: 'Jau vyksta skenavimas #' + v.id, vykstantis: v } };
   // Kreditu sargas pries pradedant. Jei paskyros patikrinti nepavyksta -
@@ -974,13 +981,18 @@ async function pradetiSkenavima({ portalas, marke, modelis, metaiNuo, maxPuslapi
       marke, modelis, pastaba: 'Teksto paieska (qt=) kainuotu tiek pat, bet grazintu ir nesusijusius skelbimus. '
         + 'Modeliu lentele atnaujinama POST /admin/autoplius-id/atnaujinti (apie 10 kr., galioja 30 d.).' } };
   }
-  const url = RINKOS_PORTALAI[portalas]({ marke, modelis, metaiNuo, rikiavimas: 'naujausi' });
+  // Rikiavimas visada „naujausi" (autoplius order_by=3 DESC, autogidas
+  // f_50=naujausi_asc) - t. y. pagal SKELBIMO paskelbimo data, ne pagal kaina.
+  // Analitikui tai svarbu: jei sarasas nupjaunamas, dingsta seniausiai kabantys
+  // skelbimai, o ne pigiausi.
+  const url = RINKOS_PORTALAI[portalas]({ marke, modelis, metaiNuo, metaiIki, rikiavimas: 'naujausi' });
   if (!url) return { kodas: 400, klaida: { error: 'marke nezinoma portalui ' + portalas } };
-  const skId = rinka.pradeti({ portalas, marke, modelis, metaiNuo, url });
+  const skId = rinka.pradeti({ portalas, marke, modelis, metaiNuo, metaiIki, url });
   console.log('[RINKA] skenavimas #' + skId + ' pradetas: ' + portalas + ' ' + marke
-    + (modelis ? ' ' + modelis : '') + ' nuo ' + (metaiNuo || '-') + ' · riba ' + maxPuslapiu + ' psl.');
+    + (modelis ? ' ' + modelis : '') + ' ' + (metaiNuo || '-') + '-' + (metaiIki || '-')
+    + ' · riba ' + maxPuslapiu + ' psl.');
   const darbas = vykdytiSkenavima(skId, portalas, url, maxPuslapiu, marke, metaiNuo);
-  return { skId, darbas, atsakymas: { skenavimas: skId, portalas, marke, modelis, metaiNuo, maxPuslapiu, url } };
+  return { skId, darbas, atsakymas: { skenavimas: skId, portalas, marke, modelis, metaiNuo, metaiIki, maxPuslapiu, url } };
 }
 
 // ── Skenavimu EILE (v2.27.3) ────────────────────────────────────────────────
@@ -1033,11 +1045,13 @@ app.post('/admin/rinka/skenuoti', klaiduPrieiga, async (req, res) => {
     // Tai pigiau uz markes skenavima tiek kartu, kiek modeliu marke turi.
     const modelis = b.modelis ? String(b.modelis).slice(0, 40) : null;
     const metaiNuo = parseInt(b.metaiNuo, 10) || null;
+    const metaiIki = parseInt(b.metaiIki, 10) || null;
     if (metaiNuo && (metaiNuo < 1990 || metaiNuo > new Date().getFullYear())) return res.status(400).json({ error: 'metaiNuo' });
+    if (metaiIki && (metaiIki < 1990 || (metaiNuo && metaiIki < metaiNuo))) return res.status(400).json({ error: 'metaiIki' });
     // Riba privaloma: be jos klaida analizatoriuje (kas puslapį „nauji" skelbimai)
     // suvalgytų kreditus iki paskyros galo.
     const maxPuslapiu = Math.min(Math.max(parseInt(b.maxPuslapiu, 10) || 150, 1), 400);
-    const r = await pradetiSkenavima({ portalas, marke, modelis, metaiNuo, maxPuslapiu });
+    const r = await pradetiSkenavima({ portalas, marke, modelis, metaiNuo, metaiIki, maxPuslapiu });
     if (r.klaida) return res.status(r.kodas || 400).json(r.klaida);
     res.status(202).json(r.atsakymas);
   } catch (e) {

@@ -106,6 +106,9 @@ function ikelti(katalogas, failas) {
       -- ir dingima galima zymeti TIK tarp to paties modelio skelbimu - kitaip
       -- „Tiguan" skenavimas paskelbtu dingusiais visus kitus VW.
       modelis     TEXT,
+      -- v2.27.5: tas pats is virsaus. Skenavimas 2010-2016 nemato 2017+ skelbimu,
+      -- tad ir dingusiais ju skelbti negali (Analitiko b varianto salyga).
+      metai_iki   INTEGER,
       metai_nuo   INTEGER,
       url         TEXT,
       pradzia     INTEGER NOT NULL,
@@ -127,7 +130,9 @@ function ikelti(katalogas, failas) {
   for (const st of ['nuotrauku_sk INTEGER', 'teksto_ilgis INTEGER']) {
     try { db.exec('ALTER TABLE skelbimai ADD COLUMN ' + st); } catch (e) { /* jau yra */ }
   }
-  try { db.exec('ALTER TABLE skenavimai ADD COLUMN modelis TEXT'); } catch (e) { /* jau yra */ }
+  for (const st of ['modelis TEXT', 'metai_iki INTEGER']) {
+    try { db.exec('ALTER TABLE skenavimai ADD COLUMN ' + st); } catch (e) { /* jau yra */ }
+  }
   taisytiSenusIrasus();
   // Skenavimas, kurį nutraukė perkrovimas, liktų „vyksta" amžinai.
   const pakibe = db.prepare(`UPDATE skenavimai SET busena='nutraukta', priezastis='serveris perkrautas', pabaiga=?
@@ -216,10 +221,10 @@ function kitiLaukai(l) {
 }
 
 // ── Skenavimas ───────────────────────────────────────────────────────────────
-function pradeti({ portalas, marke, modelis, metaiNuo, url }) {
-  const r = db.prepare(`INSERT INTO skenavimai (portalas, marke, modelis, metai_nuo, url, pradzia, busena)
-                        VALUES (?, ?, ?, ?, ?, ?, 'vyksta')`)
-    .run(portalas, marke || null, modelis || null, metaiNuo || null, url || null, Date.now());
+function pradeti({ portalas, marke, modelis, metaiNuo, metaiIki, url }) {
+  const r = db.prepare(`INSERT INTO skenavimai (portalas, marke, modelis, metai_nuo, metai_iki, url, pradzia, busena)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, 'vyksta')`)
+    .run(portalas, marke || null, modelis || null, metaiNuo || null, metaiIki || null, url || null, Date.now());
   return Number(r.lastInsertRowid);
 }
 
@@ -300,9 +305,10 @@ function baigti(skenavimoId, { pilnas, priezastis, kreditu, busena }) {
     // v2.27.1: `modelis` - ketvirtas apriepties matmuo. Modelio skenavimas mato
     // tik savo modelio skelbimus, tad ir dingusiais gali skelbti tik juos.
     const apr = `portalas=? AND dingo IS NULL AND paskut_matytas < ?
-                 AND (? IS NULL OR marke=?) AND (? IS NULL OR modelis=?) AND (? IS NULL OR metai >= ?)`;
+                 AND (? IS NULL OR marke=?) AND (? IS NULL OR modelis=?)
+                 AND (? IS NULL OR metai >= ?) AND (? IS NULL OR metai <= ?)`;
     const arg = [s.portalas, s.pradzia, s.marke, s.marke, s.modelis || null, s.modelis || null,
-      s.metai_nuo, s.metai_nuo];
+      s.metai_nuo, s.metai_nuo, s.metai_iki || null, s.metai_iki || null];
     db.transaction(() => {
       db.prepare(`UPDATE skelbimai SET praleista=praleista+1 WHERE ${apr}`).run(...arg);
       dingo = db.prepare(`UPDATE skelbimai SET dingo=? WHERE praleista>=2 AND ${apr}`).run(Date.now(), ...arg).changes;
@@ -390,13 +396,13 @@ function eksportas({ ka, riba, raktas, kartos } = {}) {
   // skenavimo kaina pries formule (skelbimai/2). Skenavimu lenteleje asmens
   // duomenu nera iš viso, todel ji atiduodama kaip yra, tik be `url`.
   if (ka === 'skenavimai') {
-    const eil = db.prepare(`SELECT id, portalas, marke, modelis, metai_nuo, pradzia, pabaiga, busena,
+    const eil = db.prepare(`SELECT id, portalas, marke, modelis, metai_nuo, metai_iki, pradzia, pabaiga, busena,
         pilnas, priezastis, puslapiu, skelbimu, nauju, pasikeite, dingo, kreditu
       FROM skenavimai ORDER BY id DESC LIMIT ?`).all(r);
-    const antr = ['id', 'portalas', 'marke', 'modelis', 'metai_nuo', 'pradzia', 'pabaiga', 'trukme_s',
+    const antr = ['id', 'portalas', 'marke', 'modelis', 'metai_nuo', 'metai_iki', 'pradzia', 'pabaiga', 'trukme_s',
       'busena', 'pilnas', 'priezastis', 'puslapiu', 'skelbimu', 'nauju', 'pasikeite', 'dingo', 'kreditu'];
     return [antr.join(',')].concat(eil.map((e) => [e.id, e.portalas, e.marke || '', e.modelis || '',
-      e.metai_nuo == null ? '' : e.metai_nuo, D(e.pradzia), D(e.pabaiga),
+      e.metai_nuo == null ? '' : e.metai_nuo, e.metai_iki == null ? '' : e.metai_iki, D(e.pradzia), D(e.pabaiga),
       (e.pradzia && e.pabaiga) ? Math.round((e.pabaiga - e.pradzia) / 1000) : '',
       e.busena, e.pilnas, e.priezastis || '', e.puslapiu, e.skelbimu, e.nauju, e.pasikeite, e.dingo,
       e.kreditu == null ? '' : e.kreditu].map(CSV).join(','))).join('\n') + '\n';
