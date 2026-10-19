@@ -1,4 +1,4 @@
-# Būsena · 2026-10-19 · v2.28.1 (laukia push)
+# Būsena · 2026-10-19 · v2.28.2 (laukia push; v2.28.1 gyva)
 
 Tik **atviri** punktai. Uždaryti — `ZURNALAS.md` / `archyvas/`. Kas laukia Luko — `LUKUI.md`.
 Klaidos gyvena `/admin.html`: **9 atviros**. Nr.51, 52, 55 ištaisytos v2.28.1 (laukia deploy → `laukia-patikros`); Nr.53 – ne klaida, mūsų įspėjimas eigos sąraše; Nr.54 ir Nr.45 lieka.
@@ -25,7 +25,7 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 | Skenavimų eilė | **Padaryta v2.27.3** | `POST /admin/rinka/eile` – 30 skenavimų po vieną, su sąmata ir kreditų sargu kiekvienam žingsniui. Nieko nepaleista: laukia KL-1019-0400. |
 | Kryptingi skenavimai | Analitiko 15 modelių planas | Modelio skenavimas padarytas (v2.27.1). Liko: pamatuoti skelbimų kiekius (300 kr.) ir Luko leidimas savaitiniam grafikui. |
 | ~~Nr.55~~ | **Ištaisyta v2.28.1:** BMW 5 paieška grąžindavo X1/X3/X5 | Modelio filtras buvo poeilė: „X1 **1.5**“ ir kaina „37 900“ turi „5“, o `rawText` – visada. Dabar raktas per `baziniModelis`. Naujas `modelio-atitikimas.js`, sargas 61. |
-| ~~Nr.52~~ | **Ištaisyta v2.28.1:** mobile.de nuoroda metė 500 | Žinoma portalo apsauga grąžindavo serverio klaidą su techniniu tekstu. Dabar 503 + žmogiškas paaiškinimas; kreditas grąžinamas. Naujas `klaidu-atsakai.js`, sargas 27. |
+| ~~Nr.52~~ | **Ištaisyta v2.28.1 + v2.28.2:** mobile.de nuoroda metė 500 | Žinoma portalo apsauga grąžindavo serverio klaidą su techniniu tekstu. Dabar 503 + žmogiškas paaiškinimas; kreditas grąžinamas. Naujas `klaidu-atsakai.js`, sargas 27. |
 | ~~Nr.53~~ | **Ne klaida:** įspėjimas atrodė kaip klaida | Eigos sąraše mūsų pačių eilutė „modelio filtras portale nesuveikė“ su įspėjimo ženklu. Priežastis ta pati kaip Nr.55 – po v2.28.1 atsiras daug rečiau. |
 | ~~Nr.51~~ | **Ištaisyta v2.28.1:** „G05 (2018–dabar, LCI nuo 2023)“ | Skaitėsi taip, lyg pradinis variantas vis dar gaminamas. Dabar „G05 (2018–2023, LCI 2023–dabar)“. `regitra.kartosEtikete`, sargas 16. |
 | Nr.54 | Pereinamųjų metų kėbulas iškreipia kainą | **Dalinai:** v2.28.0 kreivė fazės nenaudoja, tad prognozė tvarkinga; mediana vis dar maišo. Pilnas sprendimas – Analitiko kartų pradžios mėnesiai. |

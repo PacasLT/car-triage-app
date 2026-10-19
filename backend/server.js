@@ -1353,13 +1353,20 @@ async function fetchMobileDeSkelbima(url) {
   // Jei neseniai NEPAVYKO nė vienu būdu - nebandom 6 val.: kitaip kiekviena
   // paieška su mobile.de TOP-8 sudegintų iki ~170 kreditų už nieką.
   if (MOBILEDE_BUDO_ATMINTIS.nepavykoIki > Date.now()) {
-    const e = new Error('mobile.de skelbimo puslapis neprieinamas (patikrinta neseniai)'); e.kodas = 'MOBILEDE_NEPRIEINAMA'; throw e;
+    const e = new Error('mobile.de skelbimo puslapis neprieinamas (patikrinta neseniai)');
+    e.kodas = 'MOBILEDE_PAUZE'; throw e;
   }
   const KEY = process.env.SCRAPER_API_KEY;
   if (!KEY) { const e = new Error('nera SCRAPER_API_KEY'); e.kodas = 'MOBILEDE_NEPRIEINAMA'; throw e; }
   const zinomas = MOBILEDE_BUDO_ATMINTIS.iki > Date.now() ? MOBILEDE_BUDO_ATMINTIS.budas : null;
   const eile = zinomas ? [MOBILEDE_BUDAI.find((b) => b.vardas === zinomas), ...MOBILEDE_BUDAI.filter((b) => b.vardas !== zinomas)] : MOBILEDE_BUDAI;
   MOBILEDE_GILUS_STAT.bandyta++;
+  // v2.28.2 (Nr.52 testas): ar nors vienas budas gavo 200. Tai skiria DU skirtingus
+  // dalykus, kuriuos iki siol vadinom vienu vardu:
+  //   200, bet skelbimo nerandam  -> issukio puslapis, t.y. portalas tikrai blokuoja
+  //   ne 200 (500 / 404)          -> TAS SKELBIMAS neprieinamas (istrintas, arba
+  //                                  ScraperAPI klaida), portalas cia niekuo detas
+  const bandymai = [];
   for (const b of eile) {
     try {
       const r = await axios.get(`https://api.scraperapi.com?api_key=${KEY}&url=${encodeURIComponent(url)}${b.q}`,
@@ -1368,21 +1375,36 @@ async function fetchMobileDeSkelbima(url) {
       MOBILEDE_GILUS_STAT.kreditu += kaina;
       const html = typeof r.data === 'string' ? r.data : '';
       const ok = r.status === 200 && mobilede.mobileDeSkelbimoPuslapis(html).rasta;
+      bandymai.push({ status: r.status, rasta: ok });
       console.log(`  [MOBILEDE-SKELBIMAS] ${b.vardas} -> ${r.status} ${html.length} simb. kaina=${kaina} ${ok ? 'RASTA' : 'ne'}`);
       if (ok) {
         MOBILEDE_GILUS_STAT.pavyko++;
         MOBILEDE_GILUS_STAT.pagalBuda[b.vardas] = (MOBILEDE_GILUS_STAT.pagalBuda[b.vardas] || 0) + 1;
         MOBILEDE_BUDO_ATMINTIS.budas = b.vardas; MOBILEDE_BUDO_ATMINTIS.iki = Date.now() + 6 * 3600 * 1000;
+        // Pavyko - vadinasi portalas neblokuoja. Jei stabdis buvo uzdetas, nuimam.
+        MOBILEDE_BUDO_ATMINTIS.nepavykoIki = 0;
         ATSARGA.skelbimas.scraperapi++;
         cache.setCached('pages', 'full:' + url, html);
         return html;
       }
     } catch (err) {
+      bandymai.push({ status: 0, rasta: false });
       console.log(`  [MOBILEDE-SKELBIMAS] ${b.vardas} klaida: ${String(err.message).replace(KEY, '***')}`);
     }
   }
-  MOBILEDE_BUDO_ATMINTIS.nepavykoIki = Date.now() + 6 * 3600 * 1000;
-  const e = new Error('mobile.de skelbimo puslapis neprieinamas (apsauga)'); e.kodas = 'MOBILEDE_NEPRIEINAMA'; throw e;
+  // v2.28.2. Iki siol cia VISADA buvo uzdedamas 6 val. stabdis visam portalui.
+  // Pamatuota produkcijoje 2026-10-19 18:09-18:12: du mobile.de skelbimai
+  // perskaityti sekmingai (po 1 kredita), trecias grazino ScraperAPI 500 visais
+  // trimis budais - ir po to VISAS mobile.de buvo isjungtas 6 valandoms, nors
+  // portalas veike puikiai. Butent tai ir pamate Lukas (Nr.52): pirma „(apsauga)",
+  // po penkiu minuciu „(patikrinta neseniai)".
+  //
+  // Vienas negyvas skelbimas negali isjungti portalo. Stabdi dedam tik tada, kai
+  // matem 200 be skelbimo - tai issukio puslapis, t.y. tikras blokavimas.
+  const v = mobiledeStabdis.verdiktas(bandymai);
+  if (v.stabdyti) MOBILEDE_BUDO_ATMINTIS.nepavykoIki = Date.now() + 6 * 3600 * 1000;
+  console.log(`  [MOBILEDE-SKELBIMAS] verdiktas: ${v.priezastis}${v.stabdyti ? ' - stabdom 6 val.' : ' - portalo nestabdom'}`);
+  const e = new Error('mobile.de skelbimo puslapis neprieinamas (' + v.priezastis + ')'); e.kodas = v.kodas; throw e;
 }
 
 // Specialiai skelbimo puslapiui - naudoja render=true, kad gautume JS-renderinta HTML
@@ -2235,6 +2257,8 @@ const kainuKreive = require('./kainu-kreive');
 const modelioAtitikimas = require('./modelio-atitikimas');
 // Nr.52: zinomos portalu busenos - ne 500.
 const klaiduAtsakai = require('./klaidu-atsakai');
+// Nr.52: vienas negyvas skelbimas negali isjungti viso mobile.de.
+const mobiledeStabdis = require('./mobilede-stabdis');
 const rinkos = require('./rinkos');
 const maxPirkimo = require('./max-pirkimo');
 const { kuroSarasas, kuroKodai } = require('./kuras');   // v2.23.0: daugiareiksmis kuro filtras

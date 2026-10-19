@@ -34,12 +34,29 @@ const a = (kodas, message) => K.atsakas(Object.assign(new Error(message || 'x'),
   T(/nenurašėme/.test(r.kunas.error), 'ir čia pasakyta apie kreditus');
 }
 
+// ── Pauzė po nesėkmės: NE „portalas blokuoja" ──────────────────────────────
+// v2.28.2. Pamatuota produkcijoje 2026-10-19: du mobile.de skelbimai perskaityti
+// sėkmingai, trečias grąžino 500 – ir visas portalas buvo išjungtas 6 valandoms.
+// Tuo metu vartotojui sakydavom „portalo apsauga", nors portalas veikė. Pauzė
+// yra MŪSŲ sprendimas, ir tekstas turi tai pasakyti.
+{
+  const r = a('MOBILEDE_PAUZE');
+  T(r.status === 503, 'MOBILEDE_PAUZE → 503');
+  T(r.kunas.laikina === true, 'laikina');
+  T(/pauz/i.test(r.kunas.error), 'pasakyta, kad tai PAUZĖ');
+  T(!/apsauga/i.test(r.kunas.error), 'NEsakom „portalo apsauga" – portalas gali veikti');
+  T(/nenurašėme/.test(r.kunas.error), 'pasakyta apie kreditus');
+  T(r.kunas.error !== K.ZINOMI.MOBILEDE_NEPRIEINAMA.error, 'tekstas skiriasi nuo tikro blokavimo');
+}
+
 // ── Ištrintas skelbimas: 410, ne laikina ───────────────────────────────────
 {
   const r = a('SKELBIMAS_NERASTAS');
   T(r.status === 410, 'SKELBIMAS_NERASTAS → 410');
   T(r.kunas.laikina === undefined, 'ne laikina – skelbimo tikrai nebėra');
   T(/parduotas|ištrintas/.test(r.kunas.error), 'pasakyta, kodėl');
+  T(/Kiti to paties portalo skelbimai veikia/.test(r.kunas.error),
+    'pasakyta, kad tai VIENAS skelbimas, o ne visas portalas');
   T(r.status === 410, 'planai.js grąžina kreditą ir esant 410');
 }
 

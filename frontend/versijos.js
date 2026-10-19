@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.28.2', data: '2026-10-19', pavadinimas: 'Vienas negyvas skelbimas nebeišjungia viso mobile.de',
+    pakeitimai: [
+      'Jei nepavyksta perskaityti vieno mobile.de skelbimo, likusieji toliau skaitomi – anksčiau po vienos nesėkmės portalas buvo išjungiamas šešioms valandoms.',
+      'Pranešimai atskirti: „šio skelbimo perskaityti nepavyko“ nėra tas pats, kas „portalas neleidžia“.',
+    ],
+  },
+  {
     versija: '2.28.1', data: '2026-10-19', pavadinimas: 'Paieška nebegrąžina ne to modelio',
     pakeitimai: [
       'Ieškant „BMW 5“ nebepatenka X1, X3 ar X5 – modelis dabar atpažįstamas pagal raktą, o ne pagal skaitmenį pavadinime.',

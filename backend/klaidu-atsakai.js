@@ -17,7 +17,7 @@ const ZINOMI = {
   SKELBIMAS_NERASTAS: {
     status: 410,
     laikina: false,
-    error: 'Šio skelbimo portale nebėra – greičiausiai automobilis parduotas arba skelbimas ištrintas.',
+    error: 'Šio skelbimo perskaityti nepavyko – greičiausiai automobilis parduotas, skelbimas ištrintas arba portalas jo neatiduoda. Kreditų nenurašėme. Kiti to paties portalo skelbimai veikia.',
   },
   MOBILEDE_NEPRIEINAMA: {
     status: 503,
@@ -26,6 +26,18 @@ const ZINOMI = {
     error: 'mobile.de šiuo metu neleidžia perskaityti skelbimo puslapio (portalo apsauga). '
       + 'Kreditų nenurašėme. Tą patį automobilį galime išanalizuoti iš autoplius, autogidas, '
       + 'autoscout24 ar otomoto nuorodos, o paprastoje paieškoje mobile.de sąrašus skaitom normaliai.',
+  },
+  // v2.28.2: atskira busena nuo MOBILEDE_NEPRIEINAMA. Ja grazinam, kai esam
+  // PATYS sustoje po ankstesnio nesekmingo bandymo - tada sakyti „portalas
+  // blokuoja" butu melas: pamatuota, kad portalas gali veikti puikiai, o
+  // stabdis uzdetas del vieno negyvo skelbimo.
+  MOBILEDE_PAUZE: {
+    status: 503,
+    laikina: true,
+    portalas: 'mobile.de',
+    error: 'mobile.de skelbimų puslapių laikinai neskaitom – po ankstesnio nepavykusio bandymo padarėme pauzę, '
+      + 'kad nedegintume kreditų. Kreditų nenurašėme. Paieškoje mobile.de sąrašai skaitomi normaliai, '
+      + 'o šį automobilį galime išanalizuoti iš autoplius, autogidas, autoscout24 ar otomoto nuorodos.',
   },
   MOBILEDE_ISJUNGTA: {
     status: 503,

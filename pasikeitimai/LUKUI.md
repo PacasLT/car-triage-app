@@ -1,4 +1,4 @@
-# Lukui · 2026-10-19 · v2.28.1 (laukia push)
+# Lukui · 2026-10-19 · v2.28.1 gyva · **v2.28.2 laukia push**
 
 Viskas, ko laukia tavęs. Kiekvienas punktas ≤ 1 min.
 
@@ -6,14 +6,15 @@ Viskas, ko laukia tavęs. Kiekvienas punktas ≤ 1 min.
 
 | Kas | Ko reikia |
 |---|---|
-| **v2.28.1 push** | Atsakyk „push“. Sargai 31 žalias, tokenai 0 + 0. Jame ir kainos kreivė (v2.28.0), ir keturios tavo klaidos. |
+| **v2.28.2 push** | Atsakyk „push“. Sargai 32 žali. Taiso tai, ką radau tikrindamas v2.28.1: vienas negyvas mobile.de skelbimas išjungdavo visą portalą 6 valandoms. **Toks stabdis dabar uždėtas produkcijoje** – po deploy jis dingsta. |
+| ~~v2.28.1 push~~ | **Padaryta.** Deploy SUCCESS, 0 JS klaidų. Nr.51 patikrinta produkcijoje; Nr.52 ir Nr.55 laukia tavo patikros (reikia mokamo veiksmo, pats netikrinau). |
 
 ## Tavo klaidos: keturios ištaisytos
 
 | Nr. | Ką pranešei | Kas buvo | Dabar |
 |---|---|---|---|
-| **55** | „BMW 5 paieška grąžino ir X1/X3/X5“ | Modelio filtras ieškojo skaitmens tekste. „BMW X1 **1.5**“ ir kaina „37 900“ turi „5“ – praeidavo. Blogiau: tas X1 įėjo ir į BMW 5 rinkos vidurkį. | Modelis atpažįstamas pagal raktą, kaip ir medianoje. |
-| **52** | „Išmetė klaidą įklijavus savo skelbimą“ | mobile.de apsauga neleido perskaityti puslapio, o mes tai parodėme kaip serverio klaidą su techniniu tekstu. | Aiškus paaiškinimas, pasiūlymas naudoti kitą portalą. Kreditai nenurašomi. |
+| **55** ✅ | **Patikrinta gyvai:** autoscout24 grąžino tik 540 ir 550, mobile.de – 520/530/540/550. Nė vieno X. | Modelio filtras ieškojo skaitmens tekste. „BMW X1 **1.5**“ ir kaina „37 900“ turi „5“ – praeidavo. Blogiau: tas X1 įėjo ir į BMW 5 rinkos vidurkį. | Modelis atpažįstamas pagal raktą, kaip ir medianoje. |
+| **52** ✅ | **Patikrinta gyvai:** vietoj klaidos – paaiškinimas, kreditai nenurašyti. Bet radau gilesnę priežastį, žr. v2.28.2. | mobile.de apsauga neleido perskaityti puslapio, o mes tai parodėme kaip serverio klaidą su techniniu tekstu. | Aiškus paaiškinimas, pasiūlymas naudoti kitą portalą. Kreditai nenurašomi. |
 | **53** | „Išmetė klaidą beieškant auto“ | **Ne klaida.** Eigos sąraše mūsų pačių įspėjimas su raudonu ženklu – ta pati Nr.55 priežastis. | Po šio leidimo atsiras daug rečiau ir sakys tiesą. |
 | **51** | „LCI iki dabar, o ne pre-facelift. Jo jau nebegamina“ | Rodė „G05 (2018–dabar, LCI nuo 2023)“ – skaitėsi, lyg pradinis variantas vis dar gaminamas. | „G05 (2018–2023, LCI 2023–dabar)“. |
 
@@ -53,6 +54,8 @@ Tada lieka senasis vidurkis, kaip iki šiol.
 
 | Nr. | Kas | Ko reikia |
 |---|---|---|
+| **KL-1019-0530** | Ar BMW 5 paieška turi rodyti **i5**? | Pataisius filtrą, „BMW 5“ nebeįtraukia nei M5, nei i5. M5 išskyrimas aiškiai geras – jis kėlė medianą. i5 yra elektrinis 5 serijos; archyve jų 83 iš 485 autoscout24 skelbimų. Jei perpardavinėji ir elektrinius, galiu sujungti. |
+| **KL-1019-0520** | Kur taikyti pardavėjo tipo +7,7 %? | Sutarėm dėl SKAIČIAUS, bet ne dėl vietos. Analitikas siūlo: parduodant kaip įmonei tikėtis +7,7 % virš medianos. Bet mūsų pardavimo kaina dabar yra `mediana × 0,97`, o tie −3 % **tavo dar nepatikrinti** (KL-1016-NUOLAIDA, kabo nuo 10-16). Dėti +7,7 % ant nepatikrintų −3 % reikštų statyti ant smėlio. Siūlau: pirma patikrink −3 % su vienu tikrai parduotu auto, tada dedam abu kartu. |
 | **KL-1019-0510** | Ar daryti sargą „ta pati paieška jau vykdoma“? | Žurnale 10-19 dvi identiškos BMW 5 paieškos sukosi vienu metu ir abi skaitė tuos pačius 50 autoscout24 + 23 mobile.de puslapius. Gali būti, kad turėjai du langus. Jei taip nutinka ir netyčia – sargas sutaupytų pusę tos paieškos kainos. |
 | **KL-1019-0500** | Ar kainos kreivę kelti į **balą ir į maržą**? | Dabar ji tik rodoma. Balas, 12/15 % slenksčiai, filtras „žemiau rinkos“, „galimai daužtas“ ir MAX pirkimo kaina toliau remiasi senuoju vidurkiu. Perkėlimas patikslintų visus juos, bet pajudintų skaičius, kuriuos jau pažįsti. Mano siūlymas: pirma pasižiūrėk savaitę, kaip prognozė atitinka tavo nuojautą, tada keliam. |
 | KL-1019-0215 | Nuorodos laukas gyvai + pigumo kainos log eilutė | Laukia nuo 10-19. |

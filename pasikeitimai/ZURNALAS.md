@@ -2694,3 +2694,62 @@ Sąsaja rodė `G05 (2018–dabar, LCI nuo 2023)`. Abu skaičiai teisingi atskira
 ### Pamoka K-79
 
 Poeilė modelio atitikimui yra klaida, kuri nekrenta ir kurios dydis priklauso nuo modelio vardo ilgio. „Octavia“ veikė puikiai, „5“ – visiškai ne. Vardo ilgis neturi lemti filtro teisingumo: lyginti reikia raktą, ne tekstą.
+
+## Z-180 · 2026-10-19 · Nr.52 antras sluoksnis: vienas skelbimas išjungdavo portalą (v2.28.2)
+
+Lukas leido mokamas patikras, tad patikrinau v2.28.1 produkcijoje. Nr.55 ir Nr.52 pasitvirtino, bet tikrindamas radau, kas iš tikrųjų sukėlė Nr.52 — ir to v2.28.1 netaisė.
+
+### Ką parodė matavimas
+
+Paleidau mobile.de paiešką (1 psl., 20 skelbimų). Žurnalas per tris minutes:
+
+```
+[MOBILEDE-SKELBIMAS] standartinis -> 200 824418 simb. kaina=1 RASTA
+[MOBILEDE-SKELBIMAS] standartinis -> 200 584680 simb. kaina=1 RASTA
+[MOBILEDE-SKELBIMAS] standartinis -> 500 208 simb. kaina=0 ne
+[MOBILEDE-SKELBIMAS] render       -> 500 208 simb. kaina=0 ne
+[MOBILEDE-SKELBIMAS] premium      -> 500 208 simb. kaina=0 ne
+```
+
+Du skelbimai perskaityti puikiai, po vieną kreditą. Trečias – ScraperAPI 500 visais trimis būdais. Ir po to `MOBILEDE_BUDO_ATMINTIS.nepavykoIki` išjungė **visą mobile.de 6 valandoms**, nors portalas veikė.
+
+Tą pačią sekundę patikrinau iš vartotojo pusės: įklijavus kitą mobile.de nuorodą gavau
+
+```
+503 MOBILEDE_NEPRIEINAMA
+„mobile.de šiuo metu neleidžia perskaityti skelbimo puslapio (portalo apsauga)."
+```
+
+**Mano paties v2.28.1 tekstas melavo.** Portalas neblokavo – mes patys buvom sustoję dėl vieno negyvo skelbimo. Tai ir paaiškina Luko Nr.52 seką: 14:24 „(apsauga)“, 14:29 „(patikrinta neseniai)“ – antrasis pranešimas buvo pirmojo pasekmė, ne nauja problema.
+
+### Taisymas
+
+Naujas `backend/mobilede-stabdis.js` skiria du dalykus, kuriuos iki šiol vadinom vienu vardu:
+
+| Ką matom | Ką reiškia | Ką darom |
+|---|---|---|
+| 200, bet skelbimo puslapyje nėra | iššūkio puslapis – portalas tikrai blokuoja | stabdom 6 val. |
+| ne 200 (500 / 404 / timeout) | tas skelbimas neprieinamas | **portalo nestabdom**, grąžinam 410 |
+
+Taip pat: sėkmė dabar **nuima** stabdį (`nepavykoIki = 0`) – anksčiau sėkmingas skaitymas stabdžio nenuimdavo.
+
+Trečia būsena `MOBILEDE_PAUZE` (503): kai esam patys sustoję, tekstas sako „padarėme pauzę po nepavykusio bandymo“, o ne „portalas blokuoja“. Sargas tikrina, kad šiame tekste **nebūtų** žodžio „apsauga“ – kitaip vėl meluotume.
+
+### Patikros, kurios pasitvirtino produkcijoje
+
+- **Nr.55.** autoscout24, BMW 5, 2023+: grąžinta BMW 540 (2) ir BMW 550 (1), nė vieno X. Žurnalas: „is 40 skelbimų tik 3 yra 5“. mobile.de, 20 skelbimų: 520, 530, 540, 550 – nė vieno X5, M5 ar i5.
+- Ar nefiltruojam per daug: paleidau naują filtrą ant **tikrų 485 autoscout24 archyvo eilučių** (2026-10-18 BMW paieška). Senoji poeilė praleisdavo **271 (55,9 %)** – tarp jų X5 70, i5 83, M5 43, 225 11, 750 7. Naujoji praleidžia **57 (11,8 %)** – 530, 550, 528, 520, visi tikri. 3 iš 40 produkcijoje atitinka šį santykį.
+- **Nr.52.** 503, `laikina: true`, `portalas: mobile.de`, žmogiškas tekstas, be analizės, per 0 s ir be ScraperAPI kreditų. Kreditas grąžinamas.
+- **Nr.51.** `/api/kartos`: `G05 (2018–2023, LCI 2023–dabar)`, `Mk8 (2019–2024, Mk8.5 2024–dabar)`. 0 JS klaidų.
+
+### Šalutinis poveikis, kurį verta žinoti
+
+BMW 5 paieška nebeįtraukia **M5** ir **i5**. M5 išskyrimas teisingas – jis smarkiai kelia medianą. **i5** (elektrinis 5 serijos) yra diskutuotinas: archyve jų 83 iš 485. Luko sprendimas, KL-1019-0530.
+
+### Sargai
+
+**32 žali** (buvo 31). Naujas `mobilede-stabdis` 17; `klaidu-atsakai` 27 → 34. Abu patikrinti tyčia sulaužant (9 ir 6 patikros krenta). Tokenai 0 + 0.
+
+### Pamoka K-80
+
+Pataisiau pranešimą, bet ne taisyklę, ir pranešimas ėmė meluoti tiksliau. „mobile.de neprieinamas“ buvo vienas vardas dviem skirtingiems dalykams; kol jie nebuvo atskirti, joks tekstas negalėjo būti teisingas. Gyva patikra tai parodė per penkias minutes – sargas vienas nebūtų.
