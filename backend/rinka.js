@@ -372,12 +372,15 @@ const D = (ms) => (ms ? new Date(ms).toISOString().slice(0, 10) : '');
 // lieka pas mus: laisvas tekstas eksporte yra rizika be naudos.
 function kartosLaukai(kita) {
   let j = null;
-  try { j = kita ? JSON.parse(kita) : null; } catch (e) { return { kodas: '', faze: '', grupe: '' }; }
+  try { j = kita ? JSON.parse(kita) : null; } catch (e) { return { kodas: '', faze: '', grupe: '', pavadinimas: '' }; }
   const k = (j && Array.isArray(j.kartos) && j.kartos[0]) || null;
   return {
     kodas: k && k.kodas ? String(k.kodas) : '',
     faze: k && k.lci === true ? 'atnaujinta' : (k && k.lci === false ? 'pradine' : ''),
     grupe: (j && j.rinkosGrupe) ? String(j.rinkosGrupe) : (k && k.grupe ? String(k.grupe) : ''),
+    // Pats pavadinimas i eksporta NEEINA (laisvas tekstas, kartais reklama) -
+    // is jo skaiciuojam tik viena pozymi, `atn_tekste`.
+    pavadinimas: (j && j.pavadinimas) ? String(j.pavadinimas) : '',
   };
 }
 
@@ -389,7 +392,7 @@ const CSV = (v) => {
 // `raktas` ir kartos metai ateina IS ISORES (server.js paduoda `regitra`), kad
 // archyvas neprikluausytu nuo registro modulio - ir kad sarge butu galima
 // paduoti paprasta stuba.
-function eksportas({ ka, riba, raktas, kartos } = {}) {
+function eksportas({ ka, riba, raktas, kartos, atnTekste } = {}) {
   if (!db) return '';
   const r = Math.min(Math.max(parseInt(riba, 10) || 50000, 1), 200000);
   // v2.27.3: Analitikui uztenka `kreditu` stulpelio, kad patikrintu tikra
@@ -419,7 +422,7 @@ function eksportas({ ka, riba, raktas, kartos } = {}) {
       (SELECT kaina FROM stebejimai t WHERE t.skelbimo_id = s.id ORDER BY t.laikas DESC LIMIT 1) AS paskut_kaina
     FROM skelbimai s ORDER BY s.pirma_matytas LIMIT ?`).all(r);
   const antr = ['id_maisa', 'portalas', 'marke', 'modelis', 'raktas', 'kartos_kodas', 'kartos_faze',
-    'kartos_nuo', 'kartos_iki', 'atn_metai', 'rinkos_grupe',
+    'kartos_nuo', 'kartos_iki', 'atn_metai', 'atn_tekste', 'rinkos_grupe',
     'metai', 'menuo', 'kuras', 'deze', 'kebulas', 'galia', 'variklio_turis', 'rida', 'kaina',
     'kainos_ispejimas', 'pardavejo_tipas', 'turi_vin', 'garantija', 'miestas', 'nuotrauku_sk', 'teksto_ilgis',
     'ikelta', 'pirmas_matymas', 'paskutinis_matymas', 'dingo_data', 'kartu_matytas', 'dienu_rinkoje',
@@ -432,7 +435,10 @@ function eksportas({ ka, riba, raktas, kartos } = {}) {
     return [maisa(s.id), s.portalas, s.marke || '', s.modelis || '',
       (typeof raktas === 'function' ? raktas(s.marke, s.modelis) : null) || '',
       k.kodas || g.kodas || '', k.faze || g.faze || '',
-      g.nuo == null ? '' : g.nuo, g.iki == null ? '' : g.iki, g.atn == null ? '' : g.atn, k.grupe,
+      g.nuo == null ? '' : g.nuo, g.iki == null ? '' : g.iki, g.atn == null ? '' : g.atn,
+      // 1 / 0 / tuscia: tuscia reiskia „antrastes neturim", ne „nerasta".
+      (!k.pavadinimas || typeof atnTekste !== 'function') ? '' : (atnTekste(k.pavadinimas) ? 1 : 0),
+      k.grupe,
       s.metai == null ? '' : s.metai, s.menuo == null ? '' : s.menuo, s.kuras || '', s.pavarai || '',
       s.kebulas || '', s.galia == null ? '' : s.galia, s.variklio_turis == null ? '' : s.variklio_turis,
       s.rida == null ? '' : s.rida, s.kaina == null ? '' : s.kaina,

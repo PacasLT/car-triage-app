@@ -109,6 +109,14 @@ T(v3('raktas') === 'BMW X5', '`raktas` ateina iš išorės (regitra.baziniModeli
 T(v3('kartos_nuo') === '2018' && v3('atn_metai') === '2023', 'kartos ribos ir facelift metai');
 // v2.27.7: faze ateina iš skaičiavimo, kai `kita` jos neturi (archyve jos nėra niekada)
 T(v3('kartos_faze') === 'pradine', 'kartos_faze suskaičiuojama iš metų ir mėnesio');
+
+// v2.27.8: `atn_tekste` – nepriklausomas signalas iš pardavėjo antraštės
+const csv4 = rinka.eksportas({ atnTekste: (t) => /LCI|facelift/i.test(t) });
+const a4 = csv4.trim().split('\n')[0].split(',');
+T(a4.indexOf('atn_tekste') !== -1, 'stulpelis `atn_tekste`');
+T(!/Labai geras automobilis|pirmas savininkas/.test(csv4), 'pats pavadinimas į eksportą NEEINA – tik požymis');
+const beZymos = rinka.eksportas({}).trim().split('\n')[1].split(',');
+T(beZymos[a4.indexOf('atn_tekste')] === '', 'be funkcijos – tuščia, ne 0 („neturim", ne „nerasta")');
 T(v3('kartos_iki') === '', 'neuždaryta karta – tuščias langelis, ne „null“');
 T(rinka.eksportas({}).trim().split('\n')[0].split(',').length === a3.length,
   'be išorinių funkcijų stulpelių skaičius tas pats – tik tušti langeliai');
@@ -178,6 +186,7 @@ T(/kartos: \(marke, modelis, metai, menuo\) =>/.test(srv), 'serveris paduoda ir 
 T(/regitra\.kartosFazes\(marke, modelis, metai, null, menuo\)/.test(srv),
   'fazė imama iš `kartosFazes` (be skelbimo teksto – archyve jo nėra)');
 T(/f\.length > 1 \? 'riba'/.test(srv), 'dvi galimos fazės = „riba“, ne spėjimas');
+T(/atnTekste: \(t\) => regitra\.atnTekste\(t\)/.test(srv), 'serveris paduoda ir teksto požymį');
 T(/async function pradetiSkenavima/.test(srv), 'vieno skenavimo paleidimas – viena funkcija');
 T(/const r = await pradetiSkenavima\(/.test(srv), 'rankinis maršrutas naudoja ją');
 T(/const r = await pradetiSkenavima\(d\)/.test(srv), 'eilė naudoja TĄ PAČIĄ funkciją – sargai neapeinami');

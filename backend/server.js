@@ -966,6 +966,11 @@ app.get('/admin/rinka/eksportas', klaiduPrieiga, (req, res) => {
           : (f[0].lci === true ? 'atnaujinta' : f[0].lci === false ? 'pradine' : 'vientisa'));
         return Object.assign({ faze }, pagr || {});
       },
+      // v2.27.8: nepriklausomas fazes signalas - ar pats pardavejas antrasteje
+      // parase „LCI / facelift / restyling". Be jo facelift priedo isvis
+      // neimanoma pamatuoti: `kartos_faze` nustatoma pagal metus, tad lyginti
+      // fazes tais paciais metais butu ratas (Analitiko 1 matavimas).
+      atnTekste: (t) => regitra.atnTekste(t),
     });
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', 'attachment; filename="cartriige-' + ka + '-'

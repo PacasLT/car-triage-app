@@ -590,4 +590,8 @@ module.exports = {
   meta: () => META,
   taMeta: () => TA_META, taKontekstas,
   kartos, kartosFazes, rinkosGrupe, rinkosGrupes, kartosIntervalui,
+  // v2.27.8: ar PATS pardavejas antrasteje parase „LCI / facelift / restyling".
+  // Tai vienintelis NEPRIKLAUSOMAS fazes signalas: `kartosFazes` faze nustato
+  // pagal metus, tad lyginti fazes tais paciais metais butu ratas.
+  atnTekste: (t) => (t ? ATN_TEKSTE.test(String(t)) : false),
 };

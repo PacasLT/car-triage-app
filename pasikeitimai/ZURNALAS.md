@@ -2552,3 +2552,25 @@ Nulis visur. Priežastis: fazę ėmiau tik iš `kita` JSON (`j.kartos[0].lci`), 
 Pamoka ta pati kaip v2.18.1 ir v2.23.1, tik trečia forma: **laukas, kurį užpildo vienas kelias, neatsiranda kitame kelyje.** Paieška praturtina, skenavimas – ne.
 
 - Sargai: **27 žali**; `archyvo-eksportas` 94 → **98**. Tokenai 0 + 0.
+
+## Z-177 · 2026-10-19 · Fazė pagal metus yra ratas; `atn_tekste` (v2.27.8)
+
+Antras eksportas praėjo Analitiko patikrą: `kartos_faze` užpildyta **99,8 %** A ir B grupėse (reikalauta ≥60 %), `kreditu` **5 960 kr.** prieš formulės 5 760 (puslapiai × 10) – skirtumas 3,5 %, tai pakartoti puslapių bandymai.
+
+Bet pasitikrinęs, ar duomenys tinka pirmam Analitiko matavimui (facelift priedas – „tų pačių metų to paties modelio mediana fazė prieš vs po“), radau, kad **netinka, ir tai struktūrinė problema, ne duomenų kiekio**:
+
+| Modelis | Metai su abiem fazėmis (≥10 kiekvienos) |
+|---|---|
+| Audi A6, BMW X5, Octavia, Corolla, Golf | **nė vienų** |
+
+Priežastis paprasta, kai ją pamatai: **fazę mes nustatom pagal metus** (ir mėnesį). Vadinasi, tų pačių metų skelbimai beveik visada gauna tą pačią fazę, o atnaujinimo metai virsta „riba“. Lyginti fazes tais pačiais metais reikštų lyginti metus su pačiais savimi – ratas. Tas pats ir su kartos premija: `kartosIntervalui` vieneriems metams parenka vieną kartą, todėl nė viename modelyje nėra metų su dviem kartomis.
+
+### Ką pridėjau: `atn_tekste`
+
+Vienintelis nepriklausomas fazės signalas yra tas, kurį parašė **pats pardavėjas**: „LCI“, „facelift“, „restyling“ antraštėje. Tą tekstą archyvas jau turi – `pavadinimas` guli `kita` JSON (jis nėra atskiras stulpelis, tad pateko ten automatiškai). Taigi požymį galima suskaičiuoti **eksporto metu, be jokio naujo skenavimo**.
+
+Eksporte tai vienas stulpelis `atn_tekste`: `1`, `0` arba tuščia („antraštės neturim“, ne „nerasta“). Pats pavadinimas į eksportą neeina – tai laisvas tekstas, kuriame pasitaiko ir reklamos.
+
+Su juo ribinių metų skelbimai, kuriuose pardavėjas pats pasakė, tampa naudojami, o fazių palyginimas nustoja būti ratu.
+
+- Sargai: **27 žali**; `archyvo-eksportas` 98 → **102**. Tokenai 0 + 0.

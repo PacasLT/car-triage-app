@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.27.8', data: '2026-10-19', pavadinimas: 'Archyve matyti, ką apie atnaujinimą rašo pats pardavėjas',
+    pakeitimai: [
+      'Archyvo eksporte atsirado požymis, ar pardavėjas skelbimo antraštėje pats parašė „LCI“, „facelift“ ar „restyling“.',
+      'Pats pavadinimas į eksportą nekeliauja – tik vienas požymis (taip / ne).',
+    ],
+  },
+  {
     versija: '2.27.7', data: '2026-10-19', pavadinimas: 'Kartos fazė archyvo eksporte',
     pakeitimai: [
       'Archyvo eksporte atsirado kartos fazė (prieš atnaujinimą / po jo) – iki šiol ji buvo tuščia visose eilutėse.',
