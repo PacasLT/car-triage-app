@@ -3010,8 +3010,13 @@ function ctKartos() {
       // Reikšmės iš /api/kartos praleidžiamos per ctEsc – innerHTML be jo nerašomas.
       var esc = window.ctEsc || function (x) { return String(x == null ? '' : x).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); };
       el.innerHTML = '<span>Kėbulai:</span> ' + k.map(function (g) {
-        return '<b>' + esc(g.kodas) + '</b> (' + esc(g.nuo) + '–' + (g.iki == null ? 'dabar' : esc(g.iki))
-          + (g.atn ? ', ' + esc(g.atnPav) + ' nuo ' + esc(g.atn) : '') + ')';
+        // Nr.51 (v2.28.1): etiketę skaičiuoja serveris (`regitra.kartosEtikete`).
+        // Anksčiau čia buvo „G05 (2018–dabar, LCI nuo 2023)" – abu skaičiai teisingi,
+        // bet kartu sakė netiesą: atrodė, kad PRADINIS variantas gaminamas iki šiol.
+        // Senesniam serveriui (be `etikete`) lieka ankstesnė forma.
+        var et = g.etikete || (String(g.nuo) + '–' + (g.iki == null ? 'dabar' : String(g.iki))
+          + (g.atn ? ', ' + String(g.atnPav) + ' nuo ' + String(g.atn) : ''));
+        return '<b>' + esc(g.kodas) + '</b> (' + esc(et) + ')';
       }).join(', ');
       el.hidden = false;
     }).catch(function () { el.hidden = true; });

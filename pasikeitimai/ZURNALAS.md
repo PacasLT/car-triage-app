@@ -2625,3 +2625,72 @@ Sargas patikrintas tyčia sulaužant kodą tris kartus: procentai vietoj log →
 ### Pamoka K-78
 
 `Number(null) === 0`, ir nulis yra „baigtinis skaičius“. Pirma versija skelbimui be metų skaičiavo amžių 2026 ir rodė prognozę, pagrįstą niekuo – niekas nenukrito. Tuščias laukas pirma turi tapti `NaN`, tik tada tikrinamas. Sargas tai pagavo.
+
+## Z-179 · 2026-10-19 · Keturios Luko klaidos: Nr.51, Nr.52, Nr.53, Nr.55 (v2.28.1)
+
+Peržiūrėjau `/admin/klaidos`: 9 atviros, iš jų 6 mano ėjimas. Keturias ištaisiau, viena pasirodė esanti ne klaida, viena lieka.
+
+### Nr.55 – „Paleidus BMW 5 paiešką gavome ir X1/X3 ir X5“
+
+**Atkartota iš produkcijos žurnalo ir nuotraukos.** Lukas matė kortelę „BMW X1 1.5 xDrive25e M-Sport“ (autoscout24) BMW 5 paieškoje, palygintą su BMW 5 mediana („−18 % žemiau Vakarų Europos rinkos“).
+
+Priežastis – filtras buvo **poeilė**:
+
+```js
+(l.modelis || '').toLowerCase().includes(modelQuery)
+|| (l.rawText || '').toLowerCase().includes(modelQuery)
+```
+
+Su `modelQuery = "5"` tai beveik nieko neatfiltruoja. X1 praėjo ne per `modelis`, o per `rawText`: antraštėje „X1 **1.5**“, kainoje „37 900“. `rawText` turi „5“ praktiškai visada – 2015 metai, 150 kW, 15 500 €.
+
+Produkcijos žurnalas tą pačią akimirką:
+
+```
+autoscout24.com: modelio filtras portale nesuveikė – is 961 skelbimų tik 446 yra „5". Atfiltravom patys.
+```
+
+Tai dvigubai blogai: sumokėjom už 961 puslapį, panaudojom 446, ir tie 446 atrinkti ta pačia poeile.
+
+**Taisymas:** naujas `backend/modelio-atitikimas.js` lygina **raktą** per `regitra.baziniModelis` („520d“ → „BMW 5“, „X5 xDrive30d“ → „BMW X5“). Ta pati funkcija, kuria lyginam medianą ir kainos kreivę. Kai `modelis` lauko nėra – raktas iš antraštės; kai ir jos nėra – **skelbimo neišmetam** (už jį sumokėta, o spėjimu išmesti teisingą brangiau nei parodyti vieną netinkamą).
+
+Sargas `modelio-atitikimas.test.js` – **61 patikra**, tarp jų tikras Nr.55 skelbimas su visais trimis laukais.
+
+### Nr.52 – „Išmetė klaidą įklijavus savo skelbimą“
+
+Žurnale 14:24:06, 30 s prieš pranešimą: `Error: mobile.de skelbimo puslapis neprieinamas (apsauga)`.
+
+`fetchMobileDeSkelbima` meta klaidą su `kodas = 'MOBILEDE_NEPRIEINAMA'`, bet **niekas jos negaudė** – maršrutas grąžindavo `500` su tuo pačiu techniniu tekstu. Vartotojui tai atrodo kaip mūsų avarija, nors nesulūžo niekas: mobile.de anti-botų apsauga neleidžia perskaityti skelbimo puslapio, ir kodas tai specialiai aptinka.
+
+**Taisymas:** naujas `backend/klaidu-atsakai.js` – žinomų kodų žemėlapis. `MOBILEDE_NEPRIEINAMA` → **503**, žmogiškas tekstas, `laikina: true`, pasiūlymas naudoti kitą portalą. 503 ≥ 500, tad `planai.js` kreditą grąžina – todėl tekstas „kreditų nenurašėme“ yra tiesa. Sargas tai tikrina atskirai: jei kas nors statusą nuleis žemiau 500, tekstas taptų melu ir patikra kris.
+
+Sargas `klaidu-atsakai.test.js` – **27 patikros**.
+
+### Nr.53 – „Išmetė klaidą beieškant auto“ → NE klaida
+
+Nuotraukoje matyti paieška „BMW 5, 2023+, galia 184, visi puslapiai“, o eigos sąraše – **mūsų pačių** eilutė su įspėjimo ženklu:
+
+```
+autoscout24.com: modelio filtras portale nesuveikė – is 961 skelbimų tik 446 yra „5". Atfiltravom patys.
+```
+
+Paieška nenukrito – tai buvo mūsų įspėjimas, kuris eigos sąraše atrodo kaip žingsnis, kuris sulūžo. Pati priežastis – ta pati Nr.55 poeilė, tad po šio leidimo eilutė atsiras daug rečiau ir, kai atsiras, sakys tiesą.
+
+**Pastaba, kurios neišsprendžiau:** tuo metu žurnale sukosi **dvi identiškos paieškos lygiagrečiai** (`mvfclgumjydlcx` ir `mvfck11t287d7y`), abi iki autoscout24 50 psl. ir mobile.de 23 psl. Gali būti du naršyklės langai, gali būti dvigubas siuntimas. Nesu tikras, tad nespėlioju – siūlau sargą „ta pati paieška jau vykdoma“, bet tai atskiras sprendimas (KL-1019-0510).
+
+### Nr.51 – „LCI iki dabar, o ne pre-facelift modelis. Jo jau nebegamina“
+
+Sąsaja rodė `G05 (2018–dabar, LCI nuo 2023)`. Abu skaičiai teisingi atskirai, bet kartu sako netiesą: atrodo, kad **pradinis** variantas gaminamas iki šiol, nors nuo 2023 gaminamas tik LCI.
+
+**Taisymas:** `regitra.kartosEtikete` – ribos rašomos aiškiai: `G05 (2018–2023, LCI 2023–dabar)`. Etiketę skaičiuoja serveris, sąsaja ją tik spausdina (senesniam serveriui lieka atsarginė forma). Sargas `kartos-etikete.test.js` – **16 patikrų**, tarp jų taisyklė „pradinė dalis negali baigtis žodžiu „dabar“, kai LCI turi savo rėžį“.
+
+### Nr.54 – lieka atvira
+
+„Rodo senesnį kėbulą, dėl to kaina iškreipiama“ – pereinamųjų metų automobiliai. Dalinai sušvelnėjo su v2.28.0: kainos kreivė fazės **nenaudoja** (prognozuoja pagal amžių, ridą, galią, kurą), tad pereinamųjų metų auto gauna tvarkingą prognozę. Bet mediana vis dar maišo. Pilnas sprendimas laukia Analitiko kartų pradžios mėnesių.
+
+### Sargai
+
+**31 žalias** (buvo 28): nauji `modelio-atitikimas` 61, `klaidu-atsakai` 27, `kartos-etikete` 16. Visi trys patikrinti tyčia sulaužant kodą – gaudo 7, 6 ir 7 patikras atitinkamai. Tokenai 0 + 0. `migracija` krenta dėl aplinkos (`unlink` neleidžiamas).
+
+### Pamoka K-79
+
+Poeilė modelio atitikimui yra klaida, kuri nekrenta ir kurios dydis priklauso nuo modelio vardo ilgio. „Octavia“ veikė puikiai, „5“ – visiškai ne. Vardo ilgis neturi lemti filtro teisingumo: lyginti reikia raktą, ne tekstą.

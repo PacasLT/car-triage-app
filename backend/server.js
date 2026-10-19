@@ -2231,6 +2231,10 @@ const { computeMarketMedians, lyginimoMediana } = require('./rinkos-mediana');
 // v2.28.0: kainos prognoze pagal amziu, rida, galia ir kura. Medianos NEKEICIA -
 // atskiras, geriau pagristas rodiklis (paklaida 16,6 % vs 54,5 % vienai medianai).
 const kainuKreive = require('./kainu-kreive');
+// Nr.55: ar portalo grazintas skelbimas tikrai to modelio, kurio prasyta.
+const modelioAtitikimas = require('./modelio-atitikimas');
+// Nr.52: zinomos portalu busenos - ne 500.
+const klaiduAtsakai = require('./klaidu-atsakai');
 const rinkos = require('./rinkos');
 const maxPirkimo = require('./max-pirkimo');
 const { kuroSarasas, kuroKodai } = require('./kuras');   // v2.23.0: daugiareiksmis kuro filtras
@@ -3416,6 +3420,9 @@ async function runSearchJob(jobId, filters, arAdminas) {
     }
 
     const modelQuery = (filters.modelis || '').toLowerCase().trim();
+    // Nr.55 (v2.28.1): modelio atitikimas – raktu (`baziniModelis`), ne poeile.
+    // Kodėl ir ką pamatavom – `backend/modelio-atitikimas.js` komentaruose.
+    const tinkaModelis = modelioAtitikimas.tikrintuvas(filters.marke, filters.modelis);
     const selectedPortals = Array.isArray(filters.portals) && filters.portals.length > 0
       ? filters.portals
       : ['autoplius', 'autogidas']; // atsarginis variantas - jei nenurodyta, tikrinam abu
@@ -3492,9 +3499,7 @@ async function runSearchJob(jobId, filters, arAdminas) {
       // ("Mercedes-Benz C 220" nesutampa su uzklausa "c klase").
       const tekstinePaieska = format !== 'parsed' || (site === 'autoplius.lt' && !autopliusIds.urlDalis(filters.marke, filters.modelis));
       if (tekstinePaieska && modelQuery) {
-        siteParsed = siteParsed.filter((l) =>
-          (l.modelis || '').toLowerCase().includes(modelQuery) || (l.rawText || '').toLowerCase().includes(modelQuery)
-        );
+        siteParsed = siteParsed.filter(tinkaModelis);
       } else if (modelQuery && siteParsed.length >= 5) {
         // v1.39.0 SAUGIKLIS. Kai nuskaitom struktūriškai, pasitikim, kad portalo URL
         // jau atfiltravo modelį – ir tekstinio filtro nebetaikom. Bet jei URL modelio
@@ -3505,9 +3510,7 @@ async function runSearchJob(jobId, filters, arAdminas) {
         // Tikrinam rezultatą, ne prielaidą: jei daugiau nei trečdalis grąžintų skelbimų
         // nėra prašyto modelio, portalo filtras nesuveikė – įjungiam tekstinį ir sakom,
         // kuris portalas sulūžo.
-        const sutampa = siteParsed.filter((l) =>
-          (l.modelis || '').toLowerCase().includes(modelQuery) || (l.rawText || '').toLowerCase().includes(modelQuery)
-        );
+        const sutampa = siteParsed.filter(tinkaModelis);
         const netinkamuDalis = 1 - (sutampa.length / siteParsed.length);
         if (netinkamuDalis > 0.33) {
           const pries = siteParsed.length;
@@ -5249,11 +5252,12 @@ app.post('/api/analyze-single', requireAuth, kreditaiPagalLygi, async (req, res)
   } catch (err) {
     // v2.5.4: ištrintas skelbimas - ne serverio klaida. 410 + aiškus tekstas;
     // kreditas grąžinamas (planai.js: grąžinimas ir esant 410, ne tik ≥500).
-    if (err && err.kodas === 'SKELBIMAS_NERASTAS') {
-      return res.status(410).json({ error: 'Šio skelbimo portale nebėra – greičiausiai automobilis parduotas arba skelbimas ištrintas.', kodas: err.kodas });
-    }
-    console.error(err);
-    res.status(500).json({ error: err.message, kodas: (err && err.kodas) || null });
+    // Nr.52 / Nr.53 (v2.28.1): zinomos busenos nebegrazinamos kaip 500 su
+    // techniniu tekstu. Kodu zemelapis ir kodel - `backend/klaidu-atsakai.js`.
+    const at = klaiduAtsakai.atsakas(err);
+    if (at.status >= 500) console.error(err);
+    else console.warn('[ATSAKAS] ' + (err && err.kodas) + ': ' + at.kunas.error.slice(0, 80));
+    return res.status(at.status).json(at.kunas);
   }
 });
 

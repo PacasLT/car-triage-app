@@ -1,7 +1,7 @@
-# Būsena · 2026-10-19 · v2.28.0 (laukia push)
+# Būsena · 2026-10-19 · v2.28.1 (laukia push)
 
 Tik **atviri** punktai. Uždaryti — `ZURNALAS.md` / `archyvas/`. Kas laukia Luko — `LUKUI.md`.
-Klaidos gyvena `/admin.html` (šiuo metu 6 atviros, visos — Luko ėjimas).
+Klaidos gyvena `/admin.html`: **9 atviros**. Nr.51, 52, 55 ištaisytos v2.28.1 (laukia deploy → `laukia-patikros`); Nr.53 – ne klaida, mūsų įspėjimas eigos sąraše; Nr.54 ir Nr.45 lieka.
 
 ## Klaudijus
 
@@ -24,6 +24,12 @@ Eilė pagal Luko KL-PRIORITETAS (klaidos pirma), tada Luko 09-22 sprendimai.
 | ~~Archyvas~~ | **Padaryta v2.27.0:** paieška pildo `rinka.db` | Iki šiol archyvą pildė tik admino skenavimas – paieškų duomenys dingdavo, nors puslapiai apmokėti. 0 papildomų kreditų. Nauji laukai `nuotrauku_sk`, `teksto_ilgis`; nuasmenintas CSV eksportas Analitikui. Atsakymai – `claude/ATSAKYMAI-DUOMENU-BAZE.md`. |
 | Skenavimų eilė | **Padaryta v2.27.3** | `POST /admin/rinka/eile` – 30 skenavimų po vieną, su sąmata ir kreditų sargu kiekvienam žingsniui. Nieko nepaleista: laukia KL-1019-0400. |
 | Kryptingi skenavimai | Analitiko 15 modelių planas | Modelio skenavimas padarytas (v2.27.1). Liko: pamatuoti skelbimų kiekius (300 kr.) ir Luko leidimas savaitiniam grafikui. |
+| ~~Nr.55~~ | **Ištaisyta v2.28.1:** BMW 5 paieška grąžindavo X1/X3/X5 | Modelio filtras buvo poeilė: „X1 **1.5**“ ir kaina „37 900“ turi „5“, o `rawText` – visada. Dabar raktas per `baziniModelis`. Naujas `modelio-atitikimas.js`, sargas 61. |
+| ~~Nr.52~~ | **Ištaisyta v2.28.1:** mobile.de nuoroda metė 500 | Žinoma portalo apsauga grąžindavo serverio klaidą su techniniu tekstu. Dabar 503 + žmogiškas paaiškinimas; kreditas grąžinamas. Naujas `klaidu-atsakai.js`, sargas 27. |
+| ~~Nr.53~~ | **Ne klaida:** įspėjimas atrodė kaip klaida | Eigos sąraše mūsų pačių eilutė „modelio filtras portale nesuveikė“ su įspėjimo ženklu. Priežastis ta pati kaip Nr.55 – po v2.28.1 atsiras daug rečiau. |
+| ~~Nr.51~~ | **Ištaisyta v2.28.1:** „G05 (2018–dabar, LCI nuo 2023)“ | Skaitėsi taip, lyg pradinis variantas vis dar gaminamas. Dabar „G05 (2018–2023, LCI 2023–dabar)“. `regitra.kartosEtikete`, sargas 16. |
+| Nr.54 | Pereinamųjų metų kėbulas iškreipia kainą | **Dalinai:** v2.28.0 kreivė fazės nenaudoja, tad prognozė tvarkinga; mediana vis dar maišo. Pilnas sprendimas – Analitiko kartų pradžios mėnesiai. |
+| KL-1019-0510 | Dvi identiškos paieškos lygiagrečiai | Žurnale 10-19 du darbai tuo pačiu metu skaitė tuos pačius 50 autoscout24 ir 23 mobile.de puslapius. Gali būti du langai, gali būti dvigubas siuntimas – nespėlioju. Siūlau sargą „ta pati paieška jau vykdoma“. **Luko sprendimas.** |
 | ~~Kainos kreivė~~ | **Padaryta v2.28.0:** kaina lyginama su tokio pat amžiaus ir ridos auto | Luko „Darom“ 10-19. Analitiko koeficientai (14 modelių), paklaida 16,6 % vs 54,5 % vienai medianai; perskaičiuota savo eksporte, sutampa ≤1,6 proc. p. Rodoma skelbimo puslapyje. **Nekeičia** balo, 12/15 % slenksčių, filtro „žemiau rinkos“, `itariamaZala` ir MAX – jie toliau ant medianos. Liko: Luko sprendimas, ar kreivę kelti į balą ir į maržą; įklijuotos nuorodos kelias kreivės nerodo (nėra ridos). |
 | Faceliflo priedas | Analitiko +5–7 % – **neįdėta** | Perskaičiavau: su laiko trendu 0 ± 3 proc. p., be trendo auga su langu (+6,2 → +18,7 %), placebo toje pačioje specifikacijoje irgi +9,6 %. Luko sprendimas: „tegul analitikas užbaigia“. Patikra – `claude/FACELIFTO-PATIKRA-2026-10-19.md`. |
 | Pardavėjo tipas į maržą | +7,7 % (ne +9,0 %) | Luko „Gerai darom“ 10-19. Kodo dar nėra – eina kartu su `maxPirkimo` pataisa. |

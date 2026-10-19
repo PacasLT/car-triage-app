@@ -8,6 +8,15 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.28.1', data: '2026-10-19', pavadinimas: 'Paieška nebegrąžina ne to modelio',
+    pakeitimai: [
+      'Ieškant „BMW 5“ nebepatenka X1, X3 ar X5 – modelis dabar atpažįstamas pagal raktą, o ne pagal skaitmenį pavadinime.',
+      'Tai taisė ir kainą: svetimo modelio skelbimas anksčiau įeidavo į to modelio rinkos vidurkį.',
+      'Įklijavus mobile.de nuorodą, kai portalas neleidžia perskaityti puslapio, rodomas aiškus paaiškinimas, o ne klaida. Kreditai negrąžinami – jie ir nebuvo nurašyti.',
+      'Kėbulo kartos eilutė nebemeluoja: vietoj „G05 (2018–dabar, LCI nuo 2023)“ rodoma „G05 (2018–2023, LCI 2023–dabar)“.',
+    ],
+  },
+  {
     versija: '2.28.0', data: '2026-10-19', pavadinimas: 'Kaina lyginama su tokio pat amžiaus ir ridos automobiliu',
     pakeitimai: [
       'Skelbimo puslapyje atsirado prognozė: kiek turėtų kainuoti toks pat automobilis pagal amžių, ridą, galią ir kurą.',

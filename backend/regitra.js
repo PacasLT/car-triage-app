@@ -198,7 +198,27 @@ function kartosIntervalui(marke, modelis, nuo, iki) {
   const a = parseInt(nuo, 10) || 0, b = parseInt(iki, 10) || 9999;
   const pav = atnPav(k);
   return KARTOS[k].filter((g) => g.nuo <= b && (g.iki == null || g.iki >= a))
-    .map((g) => ({ kodas: g.kodas, nuo: g.nuo, iki: g.iki, atn: g.atn || null, atnPav: g.atn ? (g.atnVardas || pav) : null }));
+    .map((g) => {
+      const atnPavad = g.atn ? (g.atnVardas || pav) : null;
+      return { kodas: g.kodas, nuo: g.nuo, iki: g.iki, atn: g.atn || null, atnPav: atnPavad,
+        etikete: kartosEtikete(g.nuo, g.iki, g.atn || null, atnPavad) };
+    });
+}
+
+// v2.28.1 (Luko klaida Nr.51: „LCI iki dabar o ne pre facelift modelis. Jo jau
+// nebegamina"). Sasaja rode „G05 (2018-dabar, LCI nuo 2023)". Abu skaiciai
+// teisingi, bet kartu jie sako netiesa: atrodo, kad PRADINIS variantas
+// gaminamas iki siol, nors nuo 2023 gaminamas tik LCI. Karta tesiasi iki dabar
+// - pradinis variantas ne.
+//
+// Dabar ribos rasomos aiskiai: „G05 (2018-2023, LCI 2023-dabar)".
+function kartosEtikete(nuo, iki, atn, atnPav) {
+  const pb = (x) => (x == null ? 'dabar' : String(x));
+  if (!atn || !nuo || atn <= nuo) {
+    // Nera atnaujinimo arba jis tais paciais metais kaip pradzia - viena eilute.
+    return String(nuo) + '\u2013' + pb(iki) + (atn && atnPav ? ', ' + atnPav + ' nuo ' + atn : '');
+  }
+  return String(nuo) + '\u2013' + String(atn) + (atnPav ? ', ' + atnPav + ' ' + atn + '\u2013' + pb(iki) : '');
 }
 
 function ikelti() {
@@ -589,7 +609,7 @@ module.exports = {
   RIBOS, LYGIS, DRAUDZIAMA, KURO_KILMININKAS,
   meta: () => META,
   taMeta: () => TA_META, taKontekstas,
-  kartos, kartosFazes, rinkosGrupe, rinkosGrupes, kartosIntervalui,
+  kartos, kartosFazes, rinkosGrupe, rinkosGrupes, kartosIntervalui, kartosEtikete,
   // v2.27.8: ar PATS pardavejas antrasteje parase „LCI / facelift / restyling".
   // Tai vienintelis NEPRIKLAUSOMAS fazes signalas: `kartosFazes` faze nustato
   // pagal metus, tad lyginti fazes tais paciais metais butu ratas.
