@@ -133,6 +133,19 @@ function ivertinti(o) {
   if (g.galia && (galia < g.galia[0] || galia > g.galia[1])) uzRibu.push('galia');
   if (uzRibu.length) return { ok: false, priezastis: 'uz-ribu', uzRibu };
 
+  // v2.28.3. Pamatuota gyvai 2026-10-19: mobile.de skelbimas „BMW 520, 2026 m.,
+  // 277 700 km, 5 900 EUR" gavo prognoze 35 385 EUR ir zyma „pigesnis nei 90 %".
+  // Atskirai kiekvienas laukas yra ribose, bet KARTU jie negalimi: 555 400 km
+  // per metus. Toks skelbimas jau zymimas „galimai dauztas" (88 %) ir patenka i
+  // ATMESTI, bet prognoze vis tiek butu rodoma - o ji pagrista neimanomu ivestimi.
+  // Riba 100 000 km/metus yra sazininga: taksi ar tolimuju reisu auto jos
+  // nepasiekia, o absurdas pasiekia is karto.
+  const KM_PER_METUS_RIBA = 100000;
+  if (rida / Math.max(amzius, 1) > KM_PER_METUS_RIBA) {
+    return { ok: false, priezastis: 'neimanoma-rida',
+      kmPerMetus: Math.round(rida / Math.max(amzius, 1)) };
+  }
+
   const kuras = normKuras(o.kuras);
   const p = prognoze(m, amzius, rida, galia, kuras);
   if (!Number.isFinite(p) || p <= 0) return { ok: false, priezastis: 'skaiciavimo-klaida' };

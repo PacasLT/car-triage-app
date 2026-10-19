@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.28.3', data: '2026-10-19', pavadinimas: 'Prognozė nerodoma, kai skelbimo duomenys negalimi',
+    pakeitimai: [
+      'Jei skelbime nurodyta rida automobilio metams yra neįmanoma (pvz. 2026 m. ir 277 700 km), kainos prognozė nerodoma.',
+      'Iki šiol toks skelbimas gaudavo prognozę ir žymą „pigesnis nei 90 %“, nors skaičiai rėmėsi klaidingais duomenimis.',
+    ],
+  },
+  {
     versija: '2.28.2', data: '2026-10-19', pavadinimas: 'Vienas negyvas skelbimas nebeišjungia viso mobile.de',
     pakeitimai: [
       'Jei nepavyksta perskaityti vieno mobile.de skelbimo, likusieji toliau skaitomi – anksčiau po vienos nesėkmės portalas buvo išjungiamas šešioms valandoms.',

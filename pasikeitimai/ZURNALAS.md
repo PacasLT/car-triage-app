@@ -2753,3 +2753,21 @@ BMW 5 paieška nebeįtraukia **M5** ir **i5**. M5 išskyrimas teisingas – jis 
 ### Pamoka K-80
 
 Pataisiau pranešimą, bet ne taisyklę, ir pranešimas ėmė meluoti tiksliau. „mobile.de neprieinamas“ buvo vienas vardas dviem skirtingiems dalykams; kol jie nebuvo atskirti, joks tekstas negalėjo būti teisingas. Gyva patikra tai parodė per penkias minutes – sargas vienas nebūtų.
+
+## Z-181 · 2026-10-19 · Neįmanoma rida amžiui (v2.28.3)
+
+Tikrindamas v2.28.2 gyvai (mobile.de, BMW 5, 1 psl.) pamačiau kortelėje:
+
+> BMW 520, **2026 m.**, **277 700 km**, 5 900 € → prognozė **35 385 €**, „pigesnis nei 90 %"
+
+Kiekvienas laukas atskirai yra `galioja` ribose: amžius 0 (riba 0–16), rida 277 700 (riba ~29 000–355 000), galia 135. Bet **kartu** jie negalimi: 555 400 km per metus.
+
+Skelbimas jau buvo pažymėtas „galimai daužtas" (88 %) ir pateko į ATMESTI, tad rimto pavojaus nebuvo. Bet prognozė vis tiek būtų rodoma, o ji pagrįsta įvestimi, kurios negali būti. Analitiko 5 skyriaus logika („už ribų – nerodom") čia neveikė, nes ribos tikrinamos **po vieną**, ne kartu.
+
+Pridėta jungtinė riba: `rida / max(amžius, 1) > 100 000 km/metus` → `neimanoma-rida`, prognozės nerodom, grąžinam ir patį skaičių (žurnalui ir sąsajai). Riba sąmoningai atlaidi – taksi ar tolimųjų reisų auto jos nepasiekia (patikrinta sargu: metų senumo su 90 000 km ir 10 metų su 300 000 km toliau rodomi).
+
+Sargas `kainu-kreive` 62 → **68**; išjungus ribą krenta 3 patikros.
+
+### Pamoka K-81
+
+Ribos po vieną nėra riba. `galioja` tikrino amžių, ridą ir galią atskirai, ir kiekvienas iš jų praėjo – negalimas buvo tik jų derinys. Kur yra keli laukai, verta klausti ne tik „ar kiekvienas tikėtinas", bet ir „ar jie gali būti kartu".

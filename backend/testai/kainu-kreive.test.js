@@ -86,6 +86,25 @@ T(K.ivertinti(Object.assign({}, bazė, { rida: gl.rida[1] + 50000 })).priezastis
 T(K.ivertinti(Object.assign({}, bazė, { galia: gl.galia[1] + 100 })).priezastis === 'uz-ribu', 'per didelė galia → už ribų');
 T((K.ivertinti(Object.assign({}, bazė, { rida: gl.rida[1] + 50000 })).uzRibu || []).includes('rida'), 'pasakoma, KURI reikšmė už ribų');
 
+// ── Neįmanoma rida amžiui (v2.28.3, rasta gyvai) ───────────────────────────
+// mobile.de skelbimas „BMW 520, 2026 m., 277 700 km, 5 900 EUR" gavo prognozę
+// 35 385 € ir žymą „pigesnis nei 90 %". Kiekvienas laukas atskirai ribose, bet
+// kartu – 555 400 km per metus. Prognozė, pagrįsta neįmanoma įvestimi, yra
+// blogiau nei jokia prognozė.
+{
+  const r = K.ivertinti(Object.assign({}, bazė, { metai: 2026, rida: 277700, kaina: 5900 }));
+  T(r.ok !== true, 'tikras skelbimas: 2026 m. su 277 700 km – prognozės nerodom');
+  T(r.priezastis === 'neimanoma-rida', 'priežastis įvardinta (gauta: ' + r.priezastis + ')');
+  T(r.kmPerMetus > 100000, 'pasakoma, kiek km/metus gavosi: ' + r.kmPerMetus);
+  // Riba neturi gaudyti normalių automobilių
+  T(K.ivertinti(Object.assign({}, bazė, { metai: 2025, rida: 90000 })).ok === true,
+    'metų senumo auto su 90 000 km – normalu, rodom');
+  T(K.ivertinti(Object.assign({}, bazė, { metai: 2016, rida: 300000 })).ok === true,
+    '10 metų auto su 300 000 km – normalu, rodom');
+  T(K.ivertinti(Object.assign({}, bazė, { metai: 2021, rida: 150000 })).ok === true,
+    'bazinis atvejis nepaliestas');
+}
+
 // ── Kada nerodom (analitiko 5 skyrius) ──────────────────────────────────────
 T(K.ivertinti(Object.assign({}, bazė, { raktas: 'OPEL ASTRA' })).priezastis === 'modelio-nera', 'modelio nėra faile');
 T(K.ivertinti(Object.assign({}, bazė, { raktas: null })).priezastis === 'nera-rakto', 'be rakto');

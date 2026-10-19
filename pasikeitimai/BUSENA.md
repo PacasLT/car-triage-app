@@ -1,4 +1,4 @@
-# Būsena · 2026-10-19 · v2.28.2 (laukia push; v2.28.1 gyva)
+# Būsena · 2026-10-19 · v2.28.3 (laukia push; v2.28.2 gyva)
 
 Tik **atviri** punktai. Uždaryti — `ZURNALAS.md` / `archyvas/`. Kas laukia Luko — `LUKUI.md`.
 Klaidos gyvena `/admin.html`: **9 atviros**. Nr.51, 52, 55 ištaisytos v2.28.1 (laukia deploy → `laukia-patikros`); Nr.53 – ne klaida, mūsų įspėjimas eigos sąraše; Nr.54 ir Nr.45 lieka.

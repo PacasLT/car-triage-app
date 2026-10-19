@@ -1,4 +1,4 @@
-# Lukui · 2026-10-19 · v2.28.1 gyva · **v2.28.2 laukia push**
+# Lukui · 2026-10-19 · v2.28.2 gyva · **v2.28.3 laukia push**
 
 Viskas, ko laukia tavęs. Kiekvienas punktas ≤ 1 min.
 
@@ -6,7 +6,8 @@ Viskas, ko laukia tavęs. Kiekvienas punktas ≤ 1 min.
 
 | Kas | Ko reikia |
 |---|---|
-| **v2.28.2 push** | Atsakyk „push“. Sargai 32 žali. Taiso tai, ką radau tikrindamas v2.28.1: vienas negyvas mobile.de skelbimas išjungdavo visą portalą 6 valandoms. **Toks stabdis dabar uždėtas produkcijoje** – po deploy jis dingsta. |
+| **v2.28.3 push** | Atsakyk „push“. Sargai 32 žali. Radau tikrindamas v2.28.2 gyvai: skelbimas „2026 m., 277 700 km, 5 900 €“ gaudavo prognozę ir žymą „pigesnis nei 90 %“. Dabar tokiu atveju prognozės nerodom. |
+| ~~v2.28.2 push~~ | **Padaryta.** Deploy SUCCESS. Patikrinta gyvai: visi 3 mobile.de skelbimai perskaityti (3/3, anksčiau 2/3), stabdis neuždėtas. |
 | ~~v2.28.1 push~~ | **Padaryta.** Deploy SUCCESS, 0 JS klaidų. Nr.51 patikrinta produkcijoje; Nr.52 ir Nr.55 laukia tavo patikros (reikia mokamo veiksmo, pats netikrinau). |
 
 ## Tavo klaidos: keturios ištaisytos
