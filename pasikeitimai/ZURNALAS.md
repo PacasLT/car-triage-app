@@ -2771,3 +2771,44 @@ Sargas `kainu-kreive` 62 → **68**; išjungus ribą krenta 3 patikros.
 ### Pamoka K-81
 
 Ribos po vieną nėra riba. `galioja` tikrino amžių, ridą ir galią atskirai, ir kiekvienas iš jų praėjo – negalimas buvo tik jų derinys. Kur yra keli laukai, verta klausti ne tik „ar kiekvienas tikėtinas", bet ir „ar jie gali būti kartu".
+
+## Z-182 · 2026-10-21 · Įklijuotos nuorodos kaina buvo spėjama (v2.28.4)
+
+Luko pranešimas su dviem ekrano nuotraukomis: įklijavus mobile.de nuorodą CarTriige rodė **57 200 €**, o pačiame skelbime – **28 000 €**. Automobilis BMW 530e Touring, 2024 m., 43 000 km, privatus pardavėjas Vokietijoje.
+
+### Kodėl
+
+`mobileDeSkelbimoPuslapis` iš RSC JSON ima **tikslią** prašomą kainą (`price.grs.amount`). Bet `scrapeSingleListing` mobile.de šakoje jos **negrąžindavo** – grąžindavo `title`, `fullText`, nuotraukas, parametrus, bet ne kainą. Todėl `/api/analyze-single` kainos neturėdavo ir kviesdavo `nuorodosRinka.kainaIsTeksto(tekstas)` – spėjimą iš teksto.
+
+O tekste, kurį patys sudedam AI analizei, yra dvi sumos eurais, kurios **nėra** prašoma kaina:
+
+```
+[TECHNINIAI DUOMENYS …]: Neupreis: 57.200 €; …
+[MOBILE.DE KAINŲ RIBOS ŠIAM AUTOMOBILIUI]: 26.500 / 28.900 / 57.200 € (vertinimas: GOOD)
+```
+
+`kainaIsTeksto` renka dažniausiai pasikartojančią sumą, o lygiosiose ima **didžiausią**. 57 200 pasikartoja du kartus → laimi.
+
+Tai ta pati spąstų šeima kaip baltasis sąrašas: laukas **yra** ankstesniame žingsnyje, bet neperduodamas toliau, ir kitas žingsnis pradeda spėlioti.
+
+### Taisymas
+
+1. `scrapeSingleListing` mobile.de šaka grąžina `kaina: p.kaina`.
+2. Naujas `nuorodosRinka.kainaSkelbimui({ isUzklausos, isPortalo, tekstas })` – aiškus eiliškumas: **užklausa** (iš kortelės) → **portalo struktūrinis laukas** → **spėjimas iš teksto**. Tekstas paskutinis, nes jame būna ir kainų ribų, ir naujo auto kainos, ir lizingo įmokų.
+3. `kainaIsTeksto` praplėsta: suma, prieš kurią per 90 simbolių stovi „ribos", „Neupreis", „Listenpreis", „UVP" ar panašiai, į kandidates nebeeina.
+
+### Kodėl kainos klaida yra blogiausia iš galimų
+
+Ant skelbimo kainos stovi viskas, ką rodome: nuolaidos procentas, „galimai daužtas", marža, MAX pirkimo kaina ir nuo v2.28.0 – kainos kreivės padėtis. 57 200 vietoj 28 000 reiškia, kad automobilis atrodytų **du kartus brangesnis nei yra**, o visi skaičiai aplink jį – melas.
+
+### Sargai
+
+`nuoroda` 57 → **70**. Du tyčiniai sulaužymai: nuėmus „ne kaina" filtrą krenta 4 patikros, apsukus eiliškumą (tekstas pirma) – 2. Visi sargai **32 žali**.
+
+### Dar matyti toje pačioje nuotraukoje
+
+Kortelėje nėra ridos – rodo tik „2024". Priežastis ta pati: įklijuotos nuorodos kelias iš mobile.de neperima nei ridos, nei galios, nei kuro (jie guli `parametrai` vokiškais pavadinimais: `Kilometerstand`, `Leistung`, `Kraftstoff`). Dėl to tokiam skelbimui neskaičiuojama ir kainos kreivė. Atskiras darbas – KL-1021-0100.
+
+### Pamoka K-82
+
+Spėjimas iš teksto turi būti **paskutinė** eilutė, o ne pirma laisva. Kai struktūrinis laukas yra, bet neperduotas, kodas nesulūžta – jis tyliai pereina prie spėjimo, ir spėjimas atrodo lygiai taip pat įtikinamai kaip faktas.

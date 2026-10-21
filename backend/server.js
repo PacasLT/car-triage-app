@@ -4344,6 +4344,11 @@ async function scrapeSingleListing(url) {
       title: p.title, fullText: mobilede.mobileDeAnalizesTekstas(p), photo: p.photo, photos: p.photos,
       vin: null, vinPrefiksas: null, pardavejas: p.pardavejoInfo ? p.pardavejoInfo.vardas : null,
       pardavejoInfo: p.pardavejoInfo, vinPaslėptas: false, istorijosNuoroda: null,
+      // v2.28.4 (Luko klaida): mobile.de RSC JSON turi TIKSLIA prasoma kaina
+      // (`price.grs.amount`), bet ji cia nebuvo grazinama - ir iklijuotos
+      // nuorodos kelias kaina speliodavo is teksto. BMW 530e Touring: skelbime
+      // 28 000 EUR, parodem 57 200 EUR (is mobile.de kainu ribu eilutes).
+      kaina: p.kaina != null ? p.kaina : null,
       skelbimoParametrai: p.parametrai, iranga: p.iranga, aprasymas: p.aprasymas, vieta: p.vieta,
       mobilede: { ikelta: p.ikelta, kainosRibos: p.kainosRibos, kainosVertinimas: p.kainosVertinimas, busena: p.busena, tu: p.tu, carfax: p.carfax },
     };
@@ -5177,13 +5182,17 @@ app.post('/api/analyze-single', requireAuth, kreditaiPagalLygi, async (req, res)
     }
 
     const { title, fullText, photo: photo0, photos: photos0, vin, vinPrefiksas, pardavejas,
-      pardavejoInfo, vinPaslėptas, istorijosNuoroda, skelbimoParametrai, iranga, aprasymas, vieta } = await scrapeSingleListing(url);
+      pardavejoInfo, vinPaslėptas, istorijosNuoroda, skelbimoParametrai, iranga, aprasymas, vieta,
+      kaina: kainaIsPortalo } = await scrapeSingleListing(url);
     // ── v2.26.0 · IKLIJUOTA NUORODA ────────────────────────────────────────
     // Jei rinkos skaiciu uzklausoje nera (vartotojas atejo ne iš kortelės, o
     // iklijaves nuoroda), surenkam juos PATYS iš archyvo - 0 kreditu.
     // `claude/NUORODOS-ANALIZE.md` §3, variantas C: archyvas pirma.
     let rinkosKontekstas = null;
-    let kainaSkelbimo = Number.isFinite(+kaina) && +kaina > 0 ? +kaina : null;
+    // v2.28.4: eiliskumas - uzklausa (is korteles) -> portalo struktūrinis laukas
+    // -> spejimas is teksto. Tekstas PASKUTINIS: jame buna ir kainu ribu, ir
+    // naujo auto kainos, ir lizingo imoku.
+    let kainaSkelbimo = nuorodosRinka.kainaSkelbimui({ isUzklausos: kaina, isPortalo: kainaIsPortalo });
     if (!marketMedian) {
       const tekstas = [title, aprasymas, fullText].filter(Boolean).join(' \n ').slice(0, 4000);
       const ident = nuorodosRinka.atpazinti([title, modelis].filter(Boolean).join(' '), autopliusIds.katalogas());

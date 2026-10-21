@@ -138,6 +138,14 @@ function zinute(k) {
 //      triuksmas buna vienkartinis. Lygiosios - didesne suma.
 const IMOKOS = /(m[eė]n|imok|įmok|lizing|rata|monatl|miesi|\/\s*mo\b|per\s+m[eė]n|nuo)/i;
 
+// v2.28.4 (Luko rasta klaida): sumos, kurios TIKRAI nėra prašoma kaina, nors
+// stovi su „€". Pamatuota su mobile.de BMW 530e Touring: skelbime 28 000 €, o
+// mes parodėm 57 200 €. Analizės tekste yra eilutė
+// „[MOBILE.DE KAINŲ RIBOS ŠIAM AUTOMOBILIUI]: … €" (portalo kainų vertinimo
+// slenksčiai) ir vokiškas „Neupreis" – naujo automobilio kaina. Abu yra eurai,
+// abu didesni už prašomą sumą, ir lygiosiose laimėdavo didžiausias.
+const NE_KAINA = /(rib[oų]s|neupreis|neuprei|listenpreis|uvp|nauja\s+kaina|naujo\s+kaina|bruttolistenpreis)/i;
+
 function kainaIsTeksto(tekstas) {
   const t = String(tekstas || '');
   // Skaicius: arba tukstanciai su tarpu/tasku („43 500", „43.500"), arba 3-6
@@ -154,6 +162,9 @@ function kainaIsTeksto(tekstas) {
     // prilipe („/men.", „per men."). Platus „po" langas atmesdavo ir tikrą kainą,
     // kai tolimesnis sakinys buvo apie lizingą: „18 900 EUR, įmoka nuo 199 EUR".
     if (IMOKOS.test(pries) || /^\s*(\/|per\s|\s)*\s*(m[eė]n|mo\b|monatl|miesi)/i.test(po)) continue;
+    // Platesnis langas atgal: antraštė „[... KAINŲ RIBOS ...]" gali būti toliau
+    // nei 30 simbolių prieš pačią sumą, kai ribų yra kelios.
+    if (NE_KAINA.test(t.slice(Math.max(0, m.index - 90), m.index))) continue;
     const v = parseInt(String(m[1]).replace(/[\s.]/g, ''), 10);
     if (!Number.isFinite(v) || v < 300 || v > 500000) continue;
     sk[v] = (sk[v] || 0) + 1;
@@ -182,4 +193,12 @@ function metaiIsTeksto(tekstas, siandienMetai) {
   return r[0];
 }
 
-module.exports = { MIN_IMTIS, METU_LANGAS, ALIASAI, atpazinti, kontekstas, zinute, kainaIsTeksto, metaiIsTeksto };
+// Kuri kaina laikom skelbimo kaina. Eiliškumas svarbus: užklausos (iš kortelės)
+// → portalo struktūrinis laukas → spėjimas iš teksto. Tekstas yra PASKUTINIS,
+// nes jame būna ir kainų ribų, ir naujo auto kainos, ir lizingo įmokų.
+function kainaSkelbimui({ isUzklausos, isPortalo, tekstas } = {}) {
+  const sk = (x) => (Number.isFinite(+x) && +x > 0 ? +x : null);
+  return sk(isUzklausos) || sk(isPortalo) || kainaIsTeksto(tekstas) || null;
+}
+
+module.exports = { MIN_IMTIS, METU_LANGAS, ALIASAI, atpazinti, kontekstas, zinute, kainaIsTeksto, metaiIsTeksto, kainaSkelbimui, NE_KAINA };

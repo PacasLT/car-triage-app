@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.28.4', data: '2026-10-21', pavadinimas: 'Įklijuotos nuorodos kaina imama iš skelbimo, ne spėjama',
+    pakeitimai: [
+      'Įklijavus mobile.de nuorodą kaina imama tiesiai iš skelbimo duomenų – anksčiau ji buvo spėjama iš teksto ir galėjo pataikyti į naujo automobilio kainą.',
+      'Pavyzdys: BMW 530e Touring už 28 000 € buvo rodomas kaip 57 200 €.',
+      'Kainų ribos ir „Neupreis“ nebelaikomos skelbimo kaina.',
+    ],
+  },
+  {
     versija: '2.28.3', data: '2026-10-19', pavadinimas: 'Prognozė nerodoma, kai skelbimo duomenys negalimi',
     pakeitimai: [
       'Jei skelbime nurodyta rida automobilio metams yra neįmanoma (pvz. 2026 m. ir 277 700 km), kainos prognozė nerodoma.',

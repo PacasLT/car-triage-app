@@ -38,6 +38,39 @@ T(k('Mėnesinė įmoka nuo 149 EUR/mėn.') === null, 'vien įmoka – kainos nė
 T(k('Preis 24.900 EUR, Finanzierung ab 299 EUR monatlich') === 24900, 'DE: taškas kaip tūkstančių skyriklis');
 T(k('Rida 120 000 km, kaina 15 900 €') === 15900, 'rida nepalaikoma kaina');
 T(k('Kaina 250 € (dalys)') === null, 'per maža suma – ne automobilio kaina');
+
+// ── v2.28.4: TIKRA Luko klaida – mobile.de BMW 530e Touring ────────────────
+// Skelbime 28 000 €, o mes parodėme 57 200 €. Analizės tekste yra dvi sumos,
+// kurios NĖRA prašoma kaina: vokiškas „Neupreis" (naujo auto kaina) ir eilutė
+// „[MOBILE.DE KAINŲ RIBOS ŠIAM AUTOMOBILIUI]". Abi didesnės, o lygiosiose
+// laimėdavo didžiausia. Kainos klaida yra brangiausia iš visų: ant jos stovi
+// ir nuolaida, ir marža, ir MAX pirkimo kaina.
+{
+  const tekstas = '[TECHNINIAI DUOMENYS IŠ SKELBIMO LENTELĖS (mobile.de, vokiškai)]: '
+    + 'Neupreis: 57.200 €; Kilometerstand: 43.000 km; Leistung: 220 kW (299 PS)\n\n'
+    + '[MOBILE.DE KAINŲ RIBOS ŠIAM AUTOMOBILIUI]: 26.500 / 28.900 / 57.200 € (vertinimas: GOOD)';
+  T(k(tekstas) !== 57200, 'kainų ribos ir „Neupreis" nebelaikomos kaina (gauta: ' + k(tekstas) + ')');
+  // Portalo struktūrinis laukas turi nugalėti bet kokį spėjimą iš teksto
+  T(nr.kainaSkelbimui({ isPortalo: 28000, tekstas }) === 28000, 'portalo kaina nugali tekstą');
+  // Eiliškumas turi galioti ir tada, kai tekste yra visiškai tikėtina suma:
+  // portalo struktūrinis laukas yra faktas, tekstas – spėjimas.
+  T(nr.kainaSkelbimui({ isPortalo: 28000, tekstas: 'Kaina: 31 000 €' }) === 28000,
+    'portalo laukas nugali ir tikėtiną sumą tekste');
+  T(nr.kainaSkelbimui({ isUzklausos: 27000, isPortalo: 28000, tekstas: 'Kaina: 31 000 €' }) === 27000,
+    'užklausa nugali abu');
+  T(nr.kainaSkelbimui({ isUzklausos: 28000, isPortalo: 99999, tekstas }) === 28000,
+    'užklausos kaina (iš kortelės) nugali portalo lauką');
+  T(nr.kainaSkelbimui({ tekstas: 'Kaina: 28 000 €' }) === 28000, 'be portalo lauko – imam iš teksto');
+  T(nr.kainaSkelbimui({ tekstas: 'be jokios sumos' }) === null, 'kai nieko nėra – null, o ne spėjimas');
+  T(nr.kainaSkelbimui({ isPortalo: 0, tekstas: 'Kaina: 28 000 €' }) === 28000, 'nulinė portalo kaina nenugali');
+  T(nr.kainaSkelbimui({ isPortalo: null, isUzklausos: null, tekstas: null }) === null, 'tušti įėjimai nenukrenta');
+  T(nr.kainaSkelbimui() === null, 'be argumentų nenukrenta');
+  // Vokiškas naujo auto kainos vardas kitais pavidalais
+  T(k('Listenpreis 61.000 €') !== 61000, '„Listenpreis" – ne prašoma kaina');
+  T(k('UVP: 59.900 €') !== 59900, '„UVP" – ne prašoma kaina');
+  // Bet tikra kaina tame pačiame tekste vis tiek randama
+  T(k('Preis: 28.000 € · Neupreis: 57.200 €') === 28000, 'tikra kaina randama šalia „Neupreis"');
+}
 T(k('Kaina 1 200 000 €') === null, 'per didelė suma atmetama');
 T(k('') === null && k(null) === null, 'tuščias tekstas');
 // Dažniausias skaičius, ne pirmas

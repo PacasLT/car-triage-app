@@ -1,4 +1,4 @@
-# Lukui · 2026-10-19 · v2.28.2 gyva · **v2.28.3 laukia push**
+# Lukui · 2026-10-21 · v2.28.3 gyva · **v2.28.4 laukia push**
 
 Viskas, ko laukia tavęs. Kiekvienas punktas ≤ 1 min.
 
@@ -6,7 +6,8 @@ Viskas, ko laukia tavęs. Kiekvienas punktas ≤ 1 min.
 
 | Kas | Ko reikia |
 |---|---|
-| **v2.28.3 push** | Atsakyk „push“. Sargai 32 žali. Radau tikrindamas v2.28.2 gyvai: skelbimas „2026 m., 277 700 km, 5 900 €“ gaudavo prognozę ir žymą „pigesnis nei 90 %“. Dabar tokiu atveju prognozės nerodom. |
+| **v2.28.4 push** | Atsakyk „push“. Taiso tavo rastą kainos klaidą: BMW 530e Touring už **28 000 €** buvo rodomas kaip **57 200 €**. Sargai 32 žali. |
+| ~~v2.28.3 push~~ | Atsakyk „push“. Sargai 32 žali. Radau tikrindamas v2.28.2 gyvai: skelbimas „2026 m., 277 700 km, 5 900 €“ gaudavo prognozę ir žymą „pigesnis nei 90 %“. Dabar tokiu atveju prognozės nerodom. |
 | ~~v2.28.2 push~~ | **Padaryta.** Deploy SUCCESS. Patikrinta gyvai: visi 3 mobile.de skelbimai perskaityti (3/3, anksčiau 2/3), stabdis neuždėtas. |
 | ~~v2.28.1 push~~ | **Padaryta.** Deploy SUCCESS, 0 JS klaidų. Nr.51 patikrinta produkcijoje; Nr.52 ir Nr.55 laukia tavo patikros (reikia mokamo veiksmo, pats netikrinau). |
 
@@ -55,6 +56,7 @@ Tada lieka senasis vidurkis, kaip iki šiol.
 
 | Nr. | Kas | Ko reikia |
 |---|---|---|
+| **KL-1021-0100** | Ar perimti mobile.de ridą, galią ir kurą įklijuotai nuorodai? | Toje pačioje tavo nuotraukoje matyti, kad kortelėje nėra ridos – tik „2024“. mobile.de duomenys yra, bet vokiškais pavadinimais (`Kilometerstand`, `Leistung`, `Kraftstoff`), ir jų neperimam. Dėl to tokiam skelbimui neskaičiuojama ir kainos kreivė. Darbas nedidelis, bet reikia atskiro sargo vokiškiems pavadinimams. |
 | **KL-1019-0530** | Ar BMW 5 paieška turi rodyti **i5**? | Pataisius filtrą, „BMW 5“ nebeįtraukia nei M5, nei i5. M5 išskyrimas aiškiai geras – jis kėlė medianą. i5 yra elektrinis 5 serijos; archyve jų 83 iš 485 autoscout24 skelbimų. Jei perpardavinėji ir elektrinius, galiu sujungti. |
 | **KL-1019-0520** | Kur taikyti pardavėjo tipo +7,7 %? | Sutarėm dėl SKAIČIAUS, bet ne dėl vietos. Analitikas siūlo: parduodant kaip įmonei tikėtis +7,7 % virš medianos. Bet mūsų pardavimo kaina dabar yra `mediana × 0,97`, o tie −3 % **tavo dar nepatikrinti** (KL-1016-NUOLAIDA, kabo nuo 10-16). Dėti +7,7 % ant nepatikrintų −3 % reikštų statyti ant smėlio. Siūlau: pirma patikrink −3 % su vienu tikrai parduotu auto, tada dedam abu kartu. |
 | **KL-1019-0510** | Ar daryti sargą „ta pati paieška jau vykdoma“? | Žurnale 10-19 dvi identiškos BMW 5 paieškos sukosi vienu metu ir abi skaitė tuos pačius 50 autoscout24 + 23 mobile.de puslapius. Gali būti, kad turėjai du langus. Jei taip nutinka ir netyčia – sargas sutaupytų pusę tos paieškos kainos. |
