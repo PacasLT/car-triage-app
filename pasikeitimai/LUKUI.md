@@ -1,4 +1,4 @@
-# Lukui · 2026-10-21 · v2.28.3 gyva · **v2.28.4 laukia push**
+# Lukui · 2026-10-21 · v2.28.3 gyva · **v2.28.4 + v2.28.5 laukia push**
 
 Viskas, ko laukia tavęs. Kiekvienas punktas ≤ 1 min.
 
@@ -6,7 +6,8 @@ Viskas, ko laukia tavęs. Kiekvienas punktas ≤ 1 min.
 
 | Kas | Ko reikia |
 |---|---|
-| **v2.28.4 push** | Atsakyk „push“. Taiso tavo rastą kainos klaidą: BMW 530e Touring už **28 000 €** buvo rodomas kaip **57 200 €**. Sargai 32 žali. |
+| **v2.28.4 + v2.28.5 push** | Atsakyk „push“. v2.28.4 – tavo rasta kainos klaida (28 000 € rodėme kaip 57 200 €). v2.28.5 – patikrinau kitus portalus: **autoscout24 angliškų ir otomoto zlotinių kainų neatpažindavo išvis**. Sargai 32 žali. |
+| ~~senas v2.28.4 push~~ | Atsakyk „push“. Taiso tavo rastą kainos klaidą: BMW 530e Touring už **28 000 €** buvo rodomas kaip **57 200 €**. Sargai 32 žali. |
 | ~~v2.28.3 push~~ | Atsakyk „push“. Sargai 32 žali. Radau tikrindamas v2.28.2 gyvai: skelbimas „2026 m., 277 700 km, 5 900 €“ gaudavo prognozę ir žymą „pigesnis nei 90 %“. Dabar tokiu atveju prognozės nerodom. |
 | ~~v2.28.2 push~~ | **Padaryta.** Deploy SUCCESS. Patikrinta gyvai: visi 3 mobile.de skelbimai perskaityti (3/3, anksčiau 2/3), stabdis neuždėtas. |
 | ~~v2.28.1 push~~ | **Padaryta.** Deploy SUCCESS, 0 JS klaidų. Nr.51 patikrinta produkcijoje; Nr.52 ir Nr.55 laukia tavo patikros (reikia mokamo veiksmo, pats netikrinau). |

@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.28.5', data: '2026-10-21', pavadinimas: 'Kainos teisingai nuskaitomos visuose penkiuose portaluose',
+    pakeitimai: [
+      'autoscout24 angliškos kainos („EUR 28,000“) anksčiau nebuvo atpažįstamos išvis – įklijavus nuorodą kaina likdavo tuščia.',
+      'otomoto kainos zlotais dabar atpažįstamos ir perskaičiuojamos į eurus pagal ECB kursą.',
+      'Kai portalas kainą pateikia savo duomenyse, ji imama iš ten, o ne spėjama iš teksto.',
+    ],
+  },
+  {
     versija: '2.28.4', data: '2026-10-21', pavadinimas: 'Įklijuotos nuorodos kaina imama iš skelbimo, ne spėjama',
     pakeitimai: [
       'Įklijavus mobile.de nuorodą kaina imama tiesiai iš skelbimo duomenų – anksčiau ji buvo spėjama iš teksto ir galėjo pataikyti į naujo automobilio kainą.',

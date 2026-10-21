@@ -2812,3 +2812,51 @@ Kortelėje nėra ridos – rodo tik „2024". Priežastis ta pati: įklijuotos n
 ### Pamoka K-82
 
 Spėjimas iš teksto turi būti **paskutinė** eilutė, o ne pirma laisva. Kai struktūrinis laukas yra, bet neperduotas, kodas nesulūžta – jis tyliai pereina prie spėjimo, ir spėjimas atrodo lygiai taip pat įtikinamai kaip faktas.
+
+## Z-183 · 2026-10-21 · Kitų portalų kainos: dvi iš penkių neveikė visai (v2.28.5)
+
+Luko klausimas po Z-182: „patikrink, ar kitų puslapių gražiai nuskaito kainas ir kitą svarbią info".
+
+### Pirma – struktūrinis radinys, be jokių kreditų
+
+`scrapeSingleListing` **nė vienam portalui, išskyrus mobile.de, negrąžino kainos**. Vadinasi įklijuotos nuorodos kelias ją visada spėdavo iš teksto – mobile.de klaida (Z-182) buvo ne išimtis, o vienintelis atvejis, kur struktūrinis laukas apskritai egzistavo.
+
+O `otomoto.otomotoSkelbimoLaukai` kainą turi (`{ suma, valiuta }`) nuo seno – tik niekas jos neperdavė toliau. Tas pats trūkis, tik kitame portale.
+
+### Antra – paleidau skaitytuvą ant visų penkių formatų
+
+| Portalas | Kaip rašo | Buvo | Dabar |
+|---|---|---|---|
+| autoplius | `25 900 EUR` | 25 900 | 25 900 |
+| autogidas | `21 500 EUR` | 21 500 | 21 500 |
+| autoscout24 (DE) | `28.000 EUR` | 28 000 | 28 000 |
+| **autoscout24 (EN)** | `EUR 28,000` | **null** | **28 000** |
+| **autoscout24 (EN)** | `28,000 EUR` | **null** | **28 000** |
+| **otomoto** | `119 900 PLN` | **null** | **27 884** |
+| mobile.de | `28.000 EUR` | 28 000 (bet nugalėdavo `Neupreis`) | 28 000 |
+
+Dvi priežastys:
+
+1. **Kablelis kaip tūkstančių skyriklis.** Regex priėmė tik tarpą ir tašką. „28,000" nesutapo nė su viena šaka, tad kainos nebūdavo **išvis** – ne klaidinga, o jokia.
+2. **Valiuta prieš sumą.** autoscout24 angliškai rašo „EUR 28,000"; regex reikalavo valiutos **po** skaičiaus.
+3. **Zlotai.** otomoto kainos PLN; skaitytuvas mokėjo tik eurus.
+
+### Taisymas
+
+- Kablelis imamas kaip tūkstančių skyriklis **tik kai po jo lygiai trys skaitmenys** – kitaip „1,5 l" taptų kaina (sargas tai tikrina).
+- Valiuta gaudoma ir prieš, ir po sumos.
+- PLN ir `zł` verčiami į eurus; kursą perduoda serveris (ECB, `PLN_KURSAS`), be jo – atsarginis 4,25.
+- `scrapeSingleListing` grąžina `kaina` **visiems** portalams, kai portalas ją turi; naujas `kainaIEur` suveda skaičių arba `{ suma, valiuta }` į eurus vienoje vietoje.
+- Eiliškumas nepakito: užklausa → portalo laukas → tekstas.
+
+### Kas dar netvarkoma (sąmoningai)
+
+Įklijuotai nuorodai vis dar neperimama **rida, galia ir kuras** – jie guli `parametrai` portalo kalba (`Kilometerstand`, `Przebieg`, `Rida`). Dėl to tokiam skelbimui neskaičiuojama kainos kreivė. KL-1021-0100, laukia Luko.
+
+### Sargai
+
+`nuoroda` 70 → **90**. Du tyčiniai sulaužymai: grąžinus kablelį atgal krenta 2 patikros, nuėmus PLN vertimą – 3. Visi sargai **32 žali**.
+
+### Pamoka K-83
+
+Klausimas „ar gražiai nuskaito" buvo atsakytas be vieno kredito: pakako perskaityti, ką funkcija **grąžina**. Dviejų portalų kainos nebuvo klaidingos – jų nebuvo. Tuščias laukas atrodo nekaltai, nes niekas nekrenta, o sąsajoje tiesiog nieko nerodo.

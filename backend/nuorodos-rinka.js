@@ -144,18 +144,28 @@ const IMOKOS = /(m[eė]n|imok|įmok|lizing|rata|monatl|miesi|\/\s*mo\b|per\s+m[e
 // „[MOBILE.DE KAINŲ RIBOS ŠIAM AUTOMOBILIUI]: … €" (portalo kainų vertinimo
 // slenksčiai) ir vokiškas „Neupreis" – naujo automobilio kaina. Abu yra eurai,
 // abu didesni už prašomą sumą, ir lygiosiose laimėdavo didžiausias.
+const PLN_ATSARGINIS = 4.25;   // tik kai kvietejas kurso neperdave
 const NE_KAINA = /(rib[oų]s|neupreis|neuprei|listenpreis|uvp|nauja\s+kaina|naujo\s+kaina|bruttolistenpreis)/i;
 
-function kainaIsTeksto(tekstas) {
+function kainaIsTeksto(tekstas, kursasPLN) {
   const t = String(tekstas || '');
   // Skaicius: arba tukstanciai su tarpu/tasku („43 500", „43.500"), arba 3-6
   // skaitmenu seka. Lookbehind neleidzia prisijungti prie priekyje stovincio
   // skaiciaus: be jo „Octavia 2021, 18 900 EUR" susirinkdavo i „202118900",
   // tas butu atmestas kaip per didelis, o TIKRA kaina likdavo nepamatyta.
-  const re = /(?<![\d.,])(\d{1,3}(?:[\s.]\d{3})+|\d{3,6})\s*(€|EUR\b|eur\b)/g;
+  // v2.28.5. Tris formas reikia gaudyti, nes portalai raso skirtingai:
+  //   „25 900 EUR" (LT)   „28.000 EUR" (DE)   „EUR 28,000" / „28,000 EUR" (EN)
+  // Kablelis kaip tukstanciu skyriklis imamas TIK kai po jo lygiai trys
+  // skaitmenys - kitaip „1,5 l" taptu kaina. Valiuta gali stoveti ir PRIES
+  // suma (autoscout24 angliskai: „EUR 28,000"), ir po jos.
+  const VAL = '€|EUR\\b|eur\\b|PLN\\b|pln\\b|zł|zl\\b';
+  const SK = '\\d{1,3}(?:[\\s.,]\\d{3})+|\\d{3,6}';
+  const re = new RegExp('(?<![\\d.,])(?:(' + VAL + ')\\s*(' + SK + ')|(' + SK + ')\\s*(' + VAL + '))', 'g');
   const sk = {};
   let m;
   while ((m = re.exec(t)) !== null) {
+    const valiuta = (m[1] || m[4] || '').toLowerCase();
+    const skaicius = m[2] || m[3];
     const pries = t.slice(Math.max(0, m.index - 30), m.index);
     const po = t.slice(m.index + m[0].length, m.index + m[0].length + 10);
     // Pries sumą tikrinam placiau („įmoka nuo 149 EUR"), PO jos - tik tai, kas
@@ -165,8 +175,13 @@ function kainaIsTeksto(tekstas) {
     // Platesnis langas atgal: antraštė „[... KAINŲ RIBOS ...]" gali būti toliau
     // nei 30 simbolių prieš pačią sumą, kai ribų yra kelios.
     if (NE_KAINA.test(t.slice(Math.max(0, m.index - 90), m.index))) continue;
-    const v = parseInt(String(m[1]).replace(/[\s.]/g, ''), 10);
-    if (!Number.isFinite(v) || v < 300 || v > 500000) continue;
+    let v = parseInt(String(skaicius).replace(/[\s.,]/g, ''), 10);
+    if (!Number.isFinite(v)) continue;
+    // Zloto suma verciama i eurus: be to otomoto „119 900 PLN" arba liktu
+    // nepastebeta, arba butu parodyta kaip 119 900 EUR.
+    const zlotai = /pln|zł|zl/.test(valiuta);
+    if (zlotai) v = Math.round(v / (Number.isFinite(+kursasPLN) && +kursasPLN > 0 ? +kursasPLN : PLN_ATSARGINIS));
+    if (v < 300 || v > 500000) continue;
     sk[v] = (sk[v] || 0) + 1;
   }
   const raktai = Object.keys(sk).map(Number);
@@ -196,9 +211,24 @@ function metaiIsTeksto(tekstas, siandienMetai) {
 // Kuri kaina laikom skelbimo kaina. Eiliškumas svarbus: užklausos (iš kortelės)
 // → portalo struktūrinis laukas → spėjimas iš teksto. Tekstas yra PASKUTINIS,
 // nes jame būna ir kainų ribų, ir naujo auto kainos, ir lizingo įmokų.
-function kainaSkelbimui({ isUzklausos, isPortalo, tekstas } = {}) {
+function kainaSkelbimui({ isUzklausos, isPortalo, tekstas, kursasPLN } = {}) {
   const sk = (x) => (Number.isFinite(+x) && +x > 0 ? +x : null);
-  return sk(isUzklausos) || sk(isPortalo) || kainaIsTeksto(tekstas) || null;
+  return sk(isUzklausos) || kainaIEur(isPortalo, kursasPLN) || kainaIsTeksto(tekstas, kursasPLN) || null;
 }
 
-module.exports = { MIN_IMTIS, METU_LANGAS, ALIASAI, atpazinti, kontekstas, zinute, kainaIsTeksto, metaiIsTeksto, kainaSkelbimui, NE_KAINA };
+// Portalo struktūrinis laukas būna arba skaičius (mobile.de, eurai), arba
+// { suma, valiuta } (otomoto, zlotai). Suvedam į eurus vienoje vietoje.
+function kainaIEur(x, kursasPLN) {
+  if (x == null) return null;
+  const kursas = Number.isFinite(+kursasPLN) && +kursasPLN > 0 ? +kursasPLN : PLN_ATSARGINIS;
+  if (typeof x === 'object') {
+    const suma = +x.suma;
+    if (!Number.isFinite(suma) || suma <= 0) return null;
+    const val = String(x.valiuta || 'EUR').toUpperCase();
+    if (val === 'PLN' || val === 'ZL') return Math.round(suma / kursas);
+    return Math.round(suma);
+  }
+  return Number.isFinite(+x) && +x > 0 ? Math.round(+x) : null;
+}
+
+module.exports = { MIN_IMTIS, METU_LANGAS, ALIASAI, atpazinti, kontekstas, zinute, kainaIsTeksto, metaiIsTeksto, kainaSkelbimui, kainaIEur, NE_KAINA, PLN_ATSARGINIS };

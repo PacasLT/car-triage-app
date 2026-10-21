@@ -4508,7 +4508,11 @@ async function scrapeSingleListing(url) {
     ? (struk.pardavejoInfo.vardas || null)
     : (sellerMatch ? sellerMatch[1].trim() : null);
 
-  return { title, fullText, photo, photos, vin: struk.vinPilnas || vin, vinPrefiksas, pardavejas,
+  // v2.28.5: portalo struktūrinė kaina, kai portalas ją turi (otomoto:
+  // { suma, valiuta } zlotais). Be šios eilutės iklijuotos nuorodos kelias
+  // kaina SPELIODAVO is teksto - ta pati Nr. su mobile.de 57 200 EUR.
+  return { kaina: struk.kaina != null ? struk.kaina : null,
+    title, fullText, photo, photos, vin: struk.vinPilnas || vin, vinPrefiksas, pardavejas,
     pardavejoInfo: struk.pardavejoInfo, vinPaslėptas: struk.vinPaslėptas,
     istorijosNuoroda: struk.istNuoroda, skelbimoParametrai: struk.parametrai,
     iranga: struk.iranga, aprasymas: struk.aprasymas, vieta: struk.vieta };
@@ -5192,12 +5196,13 @@ app.post('/api/analyze-single', requireAuth, kreditaiPagalLygi, async (req, res)
     // v2.28.4: eiliskumas - uzklausa (is korteles) -> portalo struktūrinis laukas
     // -> spejimas is teksto. Tekstas PASKUTINIS: jame buna ir kainu ribu, ir
     // naujo auto kainos, ir lizingo imoku.
-    let kainaSkelbimo = nuorodosRinka.kainaSkelbimui({ isUzklausos: kaina, isPortalo: kainaIsPortalo });
+    let kainaSkelbimo = nuorodosRinka.kainaSkelbimui({
+      isUzklausos: kaina, isPortalo: kainaIsPortalo, kursasPLN: PLN_KURSAS.verte });
     if (!marketMedian) {
       const tekstas = [title, aprasymas, fullText].filter(Boolean).join(' \n ').slice(0, 4000);
       const ident = nuorodosRinka.atpazinti([title, modelis].filter(Boolean).join(' '), autopliusIds.katalogas());
       const metaiNr = parseInt(req.body.metai, 10) || nuorodosRinka.metaiIsTeksto(tekstas);
-      if (!kainaSkelbimo) kainaSkelbimo = nuorodosRinka.kainaIsTeksto(tekstas);
+      if (!kainaSkelbimo) kainaSkelbimo = nuorodosRinka.kainaIsTeksto(tekstas, PLN_KURSAS.verte);
       const rinkaKodas = rinkos.rinkaPagalPortala(paieskosPortalas(url));
       const eil = ident.modelis
         ? rinka.kainosModeliui({ marke: ident.marke, modelis: ident.modelis,

@@ -71,6 +71,47 @@ T(k('Kaina 250 € (dalys)') === null, 'per maža suma – ne automobilio kaina'
   // Bet tikra kaina tame pačiame tekste vis tiek randama
   T(k('Preis: 28.000 € · Neupreis: 57.200 €') === 28000, 'tikra kaina randama šalia „Neupreis"');
 }
+
+// --- v2.28.5: visi penki portalai raso kaina skirtingai ---
+// Patikrinta po Luko klausimo „ar kitu puslapiu kainas nuskaito graziai":
+// autoscout24 angliskai raso „EUR 28,000" (valiuta PRIES suma, kablelis kaip
+// tukstanciu skyriklis), otomoto - zlotais. Abiem atvejais senasis skaitytuvas
+// grazindavo NULL, t. y. kainos nebuvo isvis.
+{
+  const kurs = 4.3;
+  const p = (t) => nr.kainaIsTeksto(t, kurs);
+  T(p('Kaina: 25 900 EUR Lizingas nuo 299 EUR/men.') === 25900, 'autoplius: tarpas kaip skyriklis');
+  T(p('Audi A6 - 21 500 EUR - Rida 180 000 km') === 21500, 'autogidas: tas pats formatas');
+  T(p('BMW 530e  EUR 28,000  Negotiable  from EUR 297 mth.') === 28000,
+    'autoscout24 EN: valiuta PRIES suma, kablelis kaip tukstanciai');
+  T(p('BMW 530e  28,000 EUR  from 297 EUR mth.') === 28000, 'autoscout24: kablelis ir valiuta po sumos');
+  T(p('28.000 EUR VB ab 297 EUR mtl.') === 28000, 'autoscout24 DE: taskas kaip skyriklis');
+  T(p('BMW seria 5  119 900 PLN  Przebieg 150 000 km') === Math.round(119900 / kurs),
+    'otomoto: zlotai verciami i eurus (' + p('BMW seria 5  119 900 PLN') + ' EUR)');
+  T(p('119 900 zl') === Math.round(119900 / kurs), 'otomoto: zenklas zl veikia kaip PLN');
+  T(p('Preis: 28.000 EUR') === 28000, 'mobile.de formatas nepakito');
+  T(p('Variklis 1,5 l benzinas, kaina 15 900 EUR') === 15900,
+    'variklio turis 1,5 l nelaikomas tukstanciais');
+  T(p('Rida 180 000 km') === null, 'rida be valiutos - ne kaina');
+  T(p('Lizingas nuo 299 EUR/men.') === null, 'vien imoka - kainos nera');
+  T(p('') === null && p(null) === null, 'tuscias tekstas nenukrenta');
+  const beKurso = nr.kainaIsTeksto('119 900 PLN');
+  T(beKurso > 20000 && beKurso < 35000, 'be perduoto kurso naudojamas atsarginis (' + beKurso + ' EUR)');
+}
+
+// --- Portalo strukturine kaina: skaicius arba { suma, valiuta } ---
+{
+  T(nr.kainaIEur(28000) === 28000, 'mobile.de: paprastas skaicius eurais');
+  T(nr.kainaIEur({ suma: 119900, valiuta: 'PLN' }, 4.3) === Math.round(119900 / 4.3),
+    'otomoto: { suma, valiuta } zlotais -> eurai');
+  T(nr.kainaIEur({ suma: 28000, valiuta: 'EUR' }) === 28000, 'objektas eurais nekeiciamas');
+  T(nr.kainaIEur({ suma: 28000 }) === 28000, 'be valiutos laikom eurais');
+  T(nr.kainaIEur(null) === null && nr.kainaIEur({ suma: 0 }) === null, 'tuscia - null');
+  T(nr.kainaIEur({ suma: 'x' }) === null, 'siuksle - null, o ne NaN');
+  T(nr.kainaSkelbimui({ isPortalo: { suma: 119900, valiuta: 'PLN' }, tekstas: 'Kaina 99 999 EUR', kursasPLN: 4.3 })
+    === Math.round(119900 / 4.3), 'otomoto strukturine kaina nugali teksta');
+}
+
 T(k('Kaina 1 200 000 €') === null, 'per didelė suma atmetama');
 T(k('') === null && k(null) === null, 'tuščias tekstas');
 // Dažniausias skaičius, ne pirmas
