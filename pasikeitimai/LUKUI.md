@@ -1,4 +1,4 @@
-# Lukui · 2026-10-28 · **v2.29.0 gyva** (deploy atsistatė po Railway 10-21 incidento)
+# Lukui · 2026-10-28 · v2.29.0 gyva · **v2.29.1 laukia push**
 
 Viskas, ko laukia tavęs. Kiekvienas punktas ≤ 1 min.
 
@@ -6,6 +6,7 @@ Viskas, ko laukia tavęs. Kiekvienas punktas ≤ 1 min.
 
 | Kas | Ko reikia |
 |---|---|
+| **v2.29.1 push** | Atsakyk „push“. Smulkmena, kurios prašė Analitikas: archyvo eksporte užsipildė `rinkos_grupe` stulpelis (buvo tuščias visose 14 109 eilutėse). Sargai 33 žali. |
 | ~~⚠ Railway deploy~~ | **Išspręsta.** Priežastis – Railway spalio 21 d. incidentas: webhook'as neatnešė nė vieno to meto push'o, todėl „Redeploy" kartojo tą patį seną commit'ą. Naujas push po jų pataisymo suveikė – produkcija peršoko 2.28.2 → **2.29.0**, visos keturios versijos iškart. |
 | ~~senas Railway punktas~~ | **Vienintelis dalykas, kuris šiuo metu blokuoja viską.** Visos trys versijos (2.28.3, 2.28.4, 2.28.5) išsiųstos į GitHub 10-21 ir ten guli, bet produkcija nuo 10-19 stovi ties **2.28.2**. Patikrinta 10-28: serveris vis dar atiduoda 2.28.2. Pažiūrėk Railway skydelyje, ar auto-deploy iš `main` įjungtas ir ar nėra nepavykusio build'o. Tavo rasta kainos klaida (28 000 € → 57 200 €) gyvai **dar neištaisyta**. |
 | ~~v2.28.4 + v2.28.5 push~~ | Atsakyk „push“. v2.28.4 – tavo rasta kainos klaida (28 000 € rodėme kaip 57 200 €). v2.28.5 – patikrinau kitus portalus: **autoscout24 angliškų ir otomoto zlotinių kainų neatpažindavo išvis**. Sargai 32 žali. |

@@ -964,7 +964,13 @@ app.get('/admin/rinka/eksportas', klaiduPrieiga, (req, res) => {
         // sazininga reiksme - Analitikas tokias eilutes gali atmesti pats.
         const faze = !f.length ? '' : (f.length > 1 ? 'riba'
           : (f[0].lci === true ? 'atnaujinta' : f[0].lci === false ? 'pradine' : 'vientisa'));
-        return Object.assign({ faze }, pagr || {});
+        // v2.29.1 (Analitiko prasymas): `rinkos_grupe` eksporte buvo tuscia VISOSE
+        // 14 109 eilutese - ta pati priezastis kaip `kartos_faze` (v2.27.7): laukas
+        // priskiriamas paieskos praturtinime, o archyva pildo skenavimas. Skaiciuojam
+        // is to, ka turim. Ties riba (dvi fazes) grupes NESPEJAM - tuscia sazininga.
+        const grupes = regitra.rinkosGrupes(marke, modelis, metai, null, menuo) || [];
+        const grupe = (f.length > 1) ? '' : (grupes[0] || '');
+        return Object.assign({ faze, grupe }, pagr || {});
       },
       // v2.27.8: nepriklausomas fazes signalas - ar pats pardavejas antrasteje
       // parase „LCI / facelift / restyling". Be jo facelift priedo isvis

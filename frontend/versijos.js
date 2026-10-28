@@ -8,6 +8,13 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.29.1', data: '2026-10-28', pavadinimas: 'Archyvo eksporte užsipildė kartos grupės stulpelis',
+    pakeitimai: [
+      'Analizei skirtame archyvo eksporte „rinkos grupė“ buvo tuščia visose eilutėse – dabar skaičiuojama iš automobilio metų ir mėnesio.',
+      'Kai metai yra ties kartos atnaujinimo riba, grupė paliekama tuščia – spėjimo nerašom.',
+    ],
+  },
+  {
     versija: '2.29.0', data: '2026-10-28', pavadinimas: 'Įklijuota nuoroda dabar parodo ridą, galią ir kainos prognozę',
     pakeitimai: [
       'Įklijavus skelbimo nuorodą kortelėje matyti rida, galia, kuras ir pavarų dėžė – iki šiol buvo tik metai.',

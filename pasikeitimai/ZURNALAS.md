@@ -2910,3 +2910,21 @@ Keturios versijos (2.28.3 … 2.29.0) buvo užstrigusios nuo spalio 21 d. Priež
 Po Railway pataisymo naujas push suveikė iš karto: produkcija peršoko **2.28.2 → 2.29.0**, 0 JS klaidų, puslapis kraunasi.
 
 Pamoka K-85: „Redeploy" nėra „paimk naujausią". Kai deploy'ai dingsta, pirmas klausimas – ar platforma apskritai mato naują commit'ą, o ne ar build'as lūžta.
+
+## Z-185 · 2026-10-28 · `rinkos_grupe` eksporte (v2.29.1)
+
+Analitiko prašymas nuo 10-19: „rinkos_grupe – NEREIKIA perleisti eksporto, pataisyk, kai bus patogu, dėl ateities". Dabar patogu.
+
+Stulpelis buvo tuščias **visose 14 109 eilutėse**. Priežastis ta pati, kas ir `kartos_faze` (Z-177, v2.27.7), ir `kaina` (Z-182), ir rida (Z-184): lauką priskiria **paieškos praturtinimas**, o archyvą pildo **skenavimas**, kuris to kelio neina. `kita` JSON jo tiesiog neturi.
+
+Taisymas toks pat kaip fazei: skaičiuojam eksporto metu iš `regitra.rinkosGrupes(marke, modelis, metai, null, menuo)`. **Ties riba (dvi galimos fazės) grupės nespėjam** – paliekam tuščią, kaip ir fazę. Eiliškumas: `kita` → skaičiavimas → tuščia.
+
+Sargas `archyvo-eksportas` 102 → **109**. Pridėta fixture eilutė **be** `rinkosGrupe` – būtent tokia guli archyve po skenavimo; be jos testas būtų žalias ir melagingas, nes visos senos fixture eilutės turėjo lauką iš `kita`. Sulaužius atgal (`k.grupe` be atsarginio) krenta 1 patikra.
+
+### Klaida darbo metu, verta užrašyti
+
+Taisydamas sargą netyčia **ištryniau visą failą**: python'e parašiau `open(p,'w').write(open(p).read()...)` – `'w'` nukerpa failą iš karto, ir vidinis skaitymas grąžina tuštumą. Atstačiau per `git show HEAD:<failas> >` (ne `git checkout`, nes šioje aplinkoje trynimas prijungtame kataloge neleidžiamas). Nuostolių nėra, bet pamoka reali.
+
+### Pamoka K-86
+
+Tą patį failą skaityti ir rašyti viename sakinyje negalima. Skaityk į kintamąjį, tik tada atidaryk rašymui. Ir antra: kai failas yra git'e, atstatymas yra viena komanda – pirmas refleksas turi būti `git show`, ne panika.

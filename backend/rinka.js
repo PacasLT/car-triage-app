@@ -438,7 +438,9 @@ function eksportas({ ka, riba, raktas, kartos, atnTekste } = {}) {
       g.nuo == null ? '' : g.nuo, g.iki == null ? '' : g.iki, g.atn == null ? '' : g.atn,
       // 1 / 0 / tuscia: tuscia reiskia „antrastes neturim", ne „nerasta".
       (!k.pavadinimas || typeof atnTekste !== 'function') ? '' : (atnTekste(k.pavadinimas) ? 1 : 0),
-      k.grupe,
+      // v2.29.1: `kita` JSON jos beveik niekada neturi (ji atsiranda tik paieskos
+      // kelyje), tad krentam i `g.grupe`, suskaiciuota is regitra.
+      k.grupe || g.grupe || '',
       s.metai == null ? '' : s.metai, s.menuo == null ? '' : s.menuo, s.kuras || '', s.pavarai || '',
       s.kebulas || '', s.galia == null ? '' : s.galia, s.variklio_turis == null ? '' : s.variklio_turis,
       s.rida == null ? '' : s.rida, s.kaina == null ? '' : s.kaina,

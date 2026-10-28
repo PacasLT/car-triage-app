@@ -110,6 +110,23 @@ T(v3('kartos_nuo') === '2018' && v3('atn_metai') === '2023', 'kartos ribos ir fa
 // v2.27.7: faze ateina iš skaičiavimo, kai `kita` jos neturi (archyve jos nėra niekada)
 T(v3('kartos_faze') === 'pradine', 'kartos_faze suskaičiuojama iš metų ir mėnesio');
 
+// v2.29.1: `rinkos_grupe` buvo tuščia VISOSE 14 109 eilutėse – ta pati priežastis
+// kaip `kartos_faze`: lauką priskiria paieškos praturtinimas, o archyvą pildo
+// skenavimas. Dabar krentam į skaičiavimą iš regitra, kaip ir su faze.
+{
+  const idx = (csv) => { const a = csv.trim().split('\n')[0].split(','); return a.indexOf('rinkos_grupe'); };
+  const eil = (csv) => csv.trim().split('\n').slice(1).map((x) => x.split(',')[idx(csv)].replace(/"/g, ''));
+  const suKita = rinka.eksportas({ kartos: () => ({ kodas: 'G05', faze: 'pradine', grupe: 'G05 iki LCI' }) });
+  T(idx(suKita) !== -1, 'stulpelis `rinkos_grupe` yra');
+  T(eil(suKita).every((v) => v.length > 0), 'visos eilutės gauna grupę (archyve buvo 0 iš 14 109)');
+  T(eil(suKita)[0] === 'G05', '`kita` grupė nugali, kai ji ten yra');
+  // Skelbimas BE `rinkosGrupe` – būtent toks guli archyve po skenavimo
+  rinka.irasytiPaieskos([skelbimas({ nr: 400, rinkosGrupe: undefined, kartos: [] })], 'BMW');
+  const beKita = rinka.eksportas({ kartos: () => ({ kodas: 'X', faze: '', grupe: 'APSKAICIUOTA' }) });
+  T(eil(beKita).includes('APSKAICIUOTA'), 'kai `kita` grupės neturi – imam apskaičiuotą');
+  T(eil(rinka.eksportas({})).includes(''), 'be išorinės funkcijos tokia eilutė lieka tuščia – nespėjam');
+}
+
 // v2.27.8: `atn_tekste` – nepriklausomas signalas iš pardavėjo antraštės
 const csv4 = rinka.eksportas({ atnTekste: (t) => /LCI|facelift/i.test(t) });
 const a4 = csv4.trim().split('\n')[0].split(',');
@@ -186,6 +203,10 @@ T(/kartos: \(marke, modelis, metai, menuo\) =>/.test(srv), 'serveris paduoda ir 
 T(/regitra\.kartosFazes\(marke, modelis, metai, null, menuo\)/.test(srv),
   'fazė imama iš `kartosFazes` (be skelbimo teksto – archyve jo nėra)');
 T(/f\.length > 1 \? 'riba'/.test(srv), 'dvi galimos fazės = „riba“, ne spėjimas');
+T(/regitra\.rinkosGrupes\(marke, modelis, metai, null, menuo\)/.test(srv),
+  'serveris skaičiuoja ir rinkos grupę (v2.29.1)');
+T(/const grupe = \(f\.length > 1\) \? ''/.test(srv),
+  'ties riba grupės NESPĖJAM – tuščia, kaip ir su faze');
 T(/atnTekste: \(t\) => regitra\.atnTekste\(t\)/.test(srv), 'serveris paduoda ir teksto požymį');
 T(/async function pradetiSkenavima/.test(srv), 'vieno skenavimo paleidimas – viena funkcija');
 T(/const r = await pradetiSkenavima\(/.test(srv), 'rankinis maršrutas naudoja ją');
