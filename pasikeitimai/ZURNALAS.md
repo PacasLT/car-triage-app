@@ -2902,3 +2902,11 @@ Visus tris sargas gaudo – patikrinta tyčia sulaužant (2, 3 ir 2 krentančios
 ### Pamoka K-84
 
 Portalo lentelė yra geriausias duomenų šaltinis, kurį jau turim rankose, ir trečią kartą paaiškėjo, kad jo nenaudojam: kaina (Z-182), kitų portalų kaina (Z-183), dabar rida ir galia. Klausimas „ką ši funkcija jau turi, bet negrąžina" rado daugiau klaidų nei bet kuris matavimas.
+
+### Z-184 priedas · deploy atsistatė
+
+Keturios versijos (2.28.3 … 2.29.0) buvo užstrigusios nuo spalio 21 d. Priežastis – **Railway spalio 21 d. incidentas**: webhook'as neatnešė nė vieno tos dienos push'o, todėl Railway toliau laikė `v2.28.2` naujausiu. Dėl to ir „Redeploy" nepadėjo – jis kartoja paskutinį ŽINOMĄ commit'ą, o ne `main` galvą.
+
+Po Railway pataisymo naujas push suveikė iš karto: produkcija peršoko **2.28.2 → 2.29.0**, 0 JS klaidų, puslapis kraunasi.
+
+Pamoka K-85: „Redeploy" nėra „paimk naujausią". Kai deploy'ai dingsta, pirmas klausimas – ar platforma apskritai mato naują commit'ą, o ne ar build'as lūžta.
