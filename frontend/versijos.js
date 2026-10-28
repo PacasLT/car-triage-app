@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.29.0', data: '2026-10-28', pavadinimas: 'Įklijuota nuoroda dabar parodo ridą, galią ir kainos prognozę',
+    pakeitimai: [
+      'Įklijavus skelbimo nuorodą kortelėje matyti rida, galia, kuras ir pavarų dėžė – iki šiol buvo tik metai.',
+      'Dėl to tokiam skelbimui dabar skaičiuojama ir kainos prognozė pagal amžių bei ridą.',
+      'Duomenys skaitomi iš paties portalo lentelės keturiomis kalbomis – lietuvių, vokiečių, lenkų ir anglų.',
+    ],
+  },
+  {
     versija: '2.28.5', data: '2026-10-21', pavadinimas: 'Kainos teisingai nuskaitomos visuose penkiuose portaluose',
     pakeitimai: [
       'autoscout24 angliškos kainos („EUR 28,000“) anksčiau nebuvo atpažįstamos išvis – įklijavus nuorodą kaina likdavo tuščia.',

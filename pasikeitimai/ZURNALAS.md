@@ -2860,3 +2860,45 @@ Dvi priežastys:
 ### Pamoka K-83
 
 Klausimas „ar gražiai nuskaito" buvo atsakytas be vieno kredito: pakako perskaityti, ką funkcija **grąžina**. Dviejų portalų kainos nebuvo klaidingos – jų nebuvo. Tuščias laukas atrodo nekaltai, nes niekas nekrenta, o sąsajoje tiesiog nieko nerodo.
+
+## Z-184 · 2026-10-28 · Įklijuota nuoroda: rida, galia ir kuras iš portalo lentelės (v2.29.0)
+
+KL-1021-0100. Luko nuotraukoje (10-21) mobile.de skelbimas rodė tik „2024" – be ridos, nors portale parašyta 43 000 km. Dėl to tam skelbimui neveikė ir kainos kreivė.
+
+Priežastis ta pati kaip Z-182, tik kitas laukas: `scrapeSingleListing` grąžina `skelbimoParametrai` – portalo lentelę jo paties kalba – bet iš jos niekas nieko neištraukdavo. Metai buvo spėjami iš teksto, ridos ir galios nebuvo išvis.
+
+### Naujas `backend/skelbimo-laukai.js`
+
+Penki portalai, keturios kalbos:
+
+| | rida | galia | kuras | data |
+|---|---|---|---|---|
+| autoplius / autogidas | Rida | Galia | Kuro tipas | Pagaminimo data |
+| mobile.de | Kilometerstand | Leistung | Kraftstoff | Erstzulassung |
+| otomoto | Przebieg | Moc | Rodzaj paliwa | Rok produkcji |
+| autoscout24 | Mileage | Power | Fuel type | First registration |
+
+Reikšmė imama **tik iš lauko, kurio pavadinimas atpažintas** – ne „rask skaičių su km". Tame pačiame mobile.de skelbime yra ir `Kilometerstand 43.000 km`, ir `Jahresfahrleistung 15.000 km`; be pavadinimo būtų 50 % tikimybė pataikyti į metinę ridą. Tikslus sutapimas nugali dalinį: „Leistung" prieš „Leistungsgewicht".
+
+### Trys vietos, kur tyli klaida kainuotų pinigus
+
+1. **„2,0 l" → 20 litrų.** Skyrikliai nuimami tik kai po jų trys skaitmenys.
+2. **„299 PS" įrašyti kaip 299 kW.** Kainos kreivės `galioja.galia` ribos yra kilovatais; 299 „kW" iškart iškristų už ribų, ir prognozė dingtų be paaiškinimo. kW turi pirmenybę, AG verčiami ×0,7355. Lenkiškas „KM" yra arklio galios, ne kilometrai.
+3. **„Hybrid (Benzin/Elektro)" → „Elektra".** Eilės tvarka sąraše svarbi: mišrios poros tikrinamos pirma, grynas elektra lieka paskutinis.
+
+Visus tris sargas gaudo – patikrinta tyčia sulaužant (2, 3 ir 2 krentančios patikros).
+
+### Taip pat
+
+- `rinkosKontekstas` dabar neša `rida`, `galia`, `menuo`, `kuras`, `variklioTuris`, `deze` ir **`kainuKreive`**.
+- Kaina Lietuvoje ir taršos mokestis skaičiuojami su **tikru** kuru ir tūriu, ne su tuščiais laukais.
+- `[NUORODA]` žurnalo eilutė dabar rodo, ką pavyko ištraukti ir ką atsakė kreivė.
+- `index.html` `ctNuorodaSiusti` perduoda naujus laukus – ir sargas tikrina, kad `rida: null` ten nebegrįžtų (tas pats baltojo sąrašo spąstas kaip v2.18.1, v2.23.1, v2.25.0, v2.28.0).
+
+### Sargai
+
+**33 žali** (buvo 32). Naujas `skelbimo-laukai` 44; `nuoroda` 90 → 96. Tokenai 0 + 0.
+
+### Pamoka K-84
+
+Portalo lentelė yra geriausias duomenų šaltinis, kurį jau turim rankose, ir trečią kartą paaiškėjo, kad jo nenaudojam: kaina (Z-182), kitų portalų kaina (Z-183), dabar rida ir galia. Klausimas „ką ši funkcija jau turi, bet negrąžina" rado daugiau klaidų nei bet kuris matavimas.

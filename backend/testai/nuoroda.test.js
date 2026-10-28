@@ -191,6 +191,23 @@ T(blokas.length > 200, 'nuorodos bloka radom');
 T(!/style="/.test(blokas), 'naujame bloke jokiu inline stiliu (dizaino taisykle 3)');
 T(!/font-weight|color:/.test(idx.slice(idx.indexOf('function ctNuorodosZingsniai'), idx.indexOf('function ctPerbranguLangas'))),
   'nuorodos JS nerašo nei šrifto, nei spalvos');
+// ── v2.29.0: laukai turi NUKELIAUTI iki kortelės (baltojo sąrašo spąstas) ──
+// Tas pats raštas kaip v2.18.1, v2.23.1, v2.25.0 ir v2.28.0: laukas suskaičiuotas
+// serveryje, bet iki sąsajos nepatenka, nes kažkur jis tiesiog neperrašomas.
+// Čia tas „kažkur" yra `ctNuorodaSiusti` objektas `c`.
+{
+  const i = idx.indexOf('async function ctNuorodaSiusti');
+  const c = idx.slice(i, idx.indexOf('location.href = \'detail.html\'', i));
+  T(c.length > 500, 'nuorodos siuntimo funkciją radom');
+  // Komentarų eilutės nesiskaito: jose „rida: null" minima kaip istorija.
+  const kodas = c.split('\n').filter((x) => !/^\s*\/\//.test(x)).join('\n');
+  T(!/rida:\s*null/.test(kodas), 'rida nebėra visada null (Luko nuotrauka: kortelėje tik „2024")');
+  [['rida', 'rida'], ['galia', 'galia'], ['kuras', 'kuras'], ['kainuKreive', 'kainos kreivė']]
+    .forEach(([laukas, vardas]) => {
+      T(new RegExp(laukas + ':\\s*rk\\.' + laukas).test(c), vardas + ' perduodama iš rinkos konteksto');
+    });
+}
+
 const det = fs.readFileSync(path.join(__dirname, '..', '..', 'frontend', 'detail.html'), 'utf8');
 T(/c\.rinkosZinute/.test(det), 'skelbimo puslapis pasako, KODĖL rinkos skaičiaus nėra');
 T(/CT_RINKOS_MIN = 8/.test(det) && nr.MIN_IMTIS === 8,

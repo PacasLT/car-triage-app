@@ -2255,6 +2255,8 @@ const { computeMarketMedians, lyginimoMediana } = require('./rinkos-mediana');
 const kainuKreive = require('./kainu-kreive');
 // Nr.55: ar portalo grazintas skelbimas tikrai to modelio, kurio prasyta.
 const modelioAtitikimas = require('./modelio-atitikimas');
+// KL-1021-0100: rida, galia, metai, kuras is portalo lenteles (keturios kalbos).
+const skelbimoLaukai = require('./skelbimo-laukai');
 // Nr.52: zinomos portalu busenos - ne 500.
 const klaiduAtsakai = require('./klaidu-atsakai');
 // Nr.52: vienas negyvas skelbimas negali isjungti viso mobile.de.
@@ -5201,7 +5203,16 @@ app.post('/api/analyze-single', requireAuth, kreditaiPagalLygi, async (req, res)
     if (!marketMedian) {
       const tekstas = [title, aprasymas, fullText].filter(Boolean).join(' \n ').slice(0, 4000);
       const ident = nuorodosRinka.atpazinti([title, modelis].filter(Boolean).join(' '), autopliusIds.katalogas());
-      const metaiNr = parseInt(req.body.metai, 10) || nuorodosRinka.metaiIsTeksto(tekstas);
+      // v2.29.0 (KL-1021-0100): rida, galia, kuras ir data is PORTALO LENTELES.
+      // Iki siol is jos nebuvo imama nieko: metai speti is teksto, o ridos ir
+      // galios nebuvo isvis - todel iklijuotai nuorodai neveike kainos kreive,
+      // o kortele rode tik metus (Luko nuotrauka 10-21).
+      const lauk = skelbimoLaukai.laukai(skelbimoParametrai);
+      const metaiNr = parseInt(req.body.metai, 10) || lauk.metai || nuorodosRinka.metaiIsTeksto(tekstas);
+      const ridaNr = Number.isFinite(+req.body.rida) && +req.body.rida > 0 ? +req.body.rida : lauk.rida;
+      const galiaNr = Number.isFinite(+req.body.galia) && +req.body.galia > 0 ? +req.body.galia : lauk.galia;
+      const kurasPav = req.body.kuras || lauk.kuras || null;
+      const turisNr = req.body.variklioTuris || lauk.variklioTuris || null;
       if (!kainaSkelbimo) kainaSkelbimo = nuorodosRinka.kainaIsTeksto(tekstas, PLN_KURSAS.verte);
       const rinkaKodas = rinkos.rinkaPagalPortala(paieskosPortalas(url));
       const eil = ident.modelis
@@ -5213,11 +5224,19 @@ app.post('/api/analyze-single', requireAuth, kreditaiPagalLygi, async (req, res)
       // Kaina Lietuvoje, MAX pirkimo ir pelnas - TIE PATYS moduliai kaip paieskoje,
       // kad nuorodos analize ir lentele rodytu ta pati skaiciu.
       const klt = rinkos.kainaLietuvoje(kainaSkelbimo, rinkaKodas,
-        { kuras: req.body.kuras || null, variklioTuris: req.body.variklioTuris || null });
+        { kuras: kurasPav, variklioTuris: turisNr });
       const kastaiViso = klt ? klt.kastai.viso : 0;
       const tarsosSuma = (klt && Number.isFinite(klt.tarsa.vidurkis)) ? klt.tarsa.vidurkis : 0;
+      // Kainos kreive iklijuotai nuorodai - dabar, kai pagaliau turim rida ir galia.
+      const kreiveNuorodai = kainuKreive.ivertinti({
+        raktas: regitra.baziniModelis(ident.marke, ident.modelis),
+        metai: metaiNr, rida: ridaNr, galia: galiaNr, kuras: kurasPav, kaina: kainaSkelbimo,
+      });
       rinkosKontekstas = Object.assign({}, k, {
         marke: ident.marke, modelis: ident.modelis, metai: metaiNr || null,
+        menuo: lauk.menuo || null, rida: ridaNr || null, galia: galiaNr || null,
+        kuras: kurasPav, variklioTuris: turisNr, deze: lauk.deze || null,
+        kainuKreive: kreiveNuorodai,
         kaina: kainaSkelbimo, portalas: paieskosPortalas(url),
         rinkosVardas: rinkos.rinkosVardas(rinkaKodas), kainaLt: klt,
         maxPirkimo: maxPirkimo.skaiciuoti({ ltMediana: k.ltMediana, kastai: kastaiViso, tarsa: tarsosSuma,
@@ -5226,7 +5245,9 @@ app.post('/api/analyze-single', requireAuth, kreditaiPagalLygi, async (req, res)
         zinute: nuorodosRinka.zinute(k),
       });
       console.log(`[NUORODA] ${paieskosPortalas(url)} ${ident.marke || '?'} ${ident.modelis || '?'} ${metaiNr || '?'} `
-        + `${kainaSkelbimo || '?'} EUR -> archyve ${k.count} (${k.rinka || 'rinka ?'}), mediana ${k.median || '-'}`);
+        + `${kainaSkelbimo || '?'} EUR -> archyve ${k.count} (${k.rinka || 'rinka ?'}), mediana ${k.median || '-'}`
+        + ` | lentele: rida ${ridaNr || '-'}, galia ${galiaNr || '-'}, kuras ${kurasPav || '-'}`
+        + ` | kreive: ${kreiveNuorodai.ok ? kreiveNuorodai.prognoze + ' EUR (' + kreiveNuorodai.zyma + ')' : kreiveNuorodai.priezastis}`);
     }
     const marketContext = marketMedian
       ? { kaina, marketMedian, marketCount, diffPct, modelis, galia, variklioTuris, rinkosGrupe, kartos: kartosSar }

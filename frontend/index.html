@@ -7779,7 +7779,13 @@ async function ctNuorodaSiusti(e) {
     var c = {
       url: url, pavadinimas: r.title || null,
       modelis: [rk.marke, rk.modelis].filter(Boolean).join(' ') || r.title || null,
-      kaina: r.kaina || rk.kaina || null, metai: rk.metai || null, rida: null,
+      // v2.29.0 (KL-1021-0100): rida, galia, kuras ir tūris ateina iš portalo
+      // lentelės per `rinkosKontekstas`. Iki šiol čia buvo `rida: null`, todėl
+      // kortelėje matėsi tik metai, o kainos kreivė neskaičiavo.
+      kaina: r.kaina || rk.kaina || null, metai: rk.metai || null, rida: rk.rida || null,
+      galia: rk.galia || null, kuras: rk.kuras || null, variklioTuris: rk.variklioTuris || null,
+      pavarai: rk.deze || null, menuo: rk.menuo || null,
+      kainuKreive: rk.kainuKreive || null,
       source: (CT_PORTALU_SPALVOS[portalas] || [])[3] || portalas,
       photo: r.photo || null, pardavejas: r.pardavejas || null, vin: r.vin || null,
       marketMedian: rk.median || null, marketCount: rk.count || 0,
