@@ -2928,3 +2928,119 @@ Taisydamas sargą netyčia **ištryniau visą failą**: python'e parašiau `open
 ### Pamoka K-86
 
 Tą patį failą skaityti ir rašyti viename sakinyje negalima. Skaityk į kintamąjį, tik tada atidaryk rašymui. Ir antra: kai failas yra git'e, atstatymas yra viena komanda – pirmas refleksas turi būti `git show`, ne panika.
+
+---
+
+## Z-186 · 2026-10-28 · Auditas: septintas baltojo sąrašo atvejis ir trys telefono klaidos (v2.30.0)
+
+Luko užduotis: *„padaryk puslapio ir funkcijų auditą. Mygtukus, linkus, ar viskas veikia…
+ar nusidubliuoti informacija… padaryk patikrinimą kodą… ar gerai veikia mobile versija…
+pasižiūrėk kaip saugoma informacija ar skelbimai kaupiami ir turime analitinės realios
+informacijos."*
+
+Pilnas auditas – projekto dokumente `claude/AUDITAS-2026-10-28.md`. Čia tik tai, ką
+iškart ištaisiau, ir tai, ko taisyti dar negalima.
+
+### 1. Svarbiausias radinys: balas rodomas dvigubai
+
+`allListingsBase` nepraleido **10 laukų, kuriuos sąsaja skaito**: `baloKomponentai`,
+`ridaDiffPct`, `ridaMedian`, `turiIstorijosAtaskaita`, `garantijosTipas`, `yraVerslas`,
+`salis`, `title`, `spalva` (ir `photos`, kuris sąmoningai nesaugomas archyve, bet buvo
+skaitomas sąsajoje).
+
+Kodėl tai matėsi ne visur: `candidates` **nepjaunami** per baltąjį sąrašą – jie gauna pilną
+`enriched` objektą. Tad TOP kortelė rodė tikrą `qualityScore`, o „Kiti skelbimai" ir lentelė
+`baloKomponentai` neturėjo, todėl `ctScore` nukrisdavo į atsarginę 2021 m. formulę. O toje
+formulėje `ridaDiffPct`, `turiIstorijosAtaskaita`, `garantijosTipas`, `yraVerslas` **irgi**
+nepraleisti, tad ji skaičiavo iš nieko:
+
+```
+istorija  = 5 + 0 + 0 + 0 + 0  →  visada 5,0
+rida      = (ridaDiffPct == null)  →  visada 6,5
+garantija →  „Nenurodyta"
+pardavėjas → „Privatus"
+```
+
+Tai **tiksliai tas** „du skirtingi CarTriige skaičiai", kurį komentarai `detail.html:908`
+ir `index.html:6200` skelbia ištaisyta. Jie abu teisūs – tik jie ištaisė kortelės pusę, o
+ne duomenų pusę.
+
+**Baltojo sąrašo spąstai per tą pačią vietą:** v2.18.1 · v2.23.1 · v2.25.0 · v2.27.7 (Z-177)
+· v2.28.4 (Z-182) · v2.29.0 (Z-184) · v2.29.1 (Z-185) · **ir dabar aštuntas**.
+
+Todėl šįkart ne tik pataisymas, bet ir sargas: `backend/testai/baltasis-sarasas.test.js`.
+Jis ištraukia baltojo sąrašo laukus iš `server.js` ir lygina su sąrašu to, ką sąsaja skaito,
+atskirai patikrindamas visus šešis `ctScore` atsarginės formulės laukus. Patikrinau, kad
+sargas tikrai gaudo: laikinai išėmiau `baloKomponentai` – sargas nukrito su tiksliu pranešimu.
+Sargas turi ir apsaugą nuo savęs: jei frontendas nebeskaito lauko, kurį sargas gina, jis
+irgi nukrinta, kad sąrašas nesenėtų tyliai.
+
+### 2. Trys telefono klaidos, visos pamatuotos gyvai (390 × 844 px)
+
+**„Palyginti" buvo nepaspaudžiamas.** Juosta x 10–380, y 767–833; `.ct-report-fab`
+x 334–378, y 789–833; persidengimas **44 px**, o `document.elementFromPoint` juostos
+dešiniajame krašte grąžino `kp-mygtukas`. Abiejų z-index 900, bet FAB įdedamas į DOM vėliau
+(`klaidu-pranesimas.js:681`), tad jis viršuje. `detail.html:315` šis atvejis jau buvo
+sutvarkytas (Nr. 21, v1.76.0) – `index.html` ne. Padariau tą patį.
+
+**Kreditų istorijos lentelė nukerpama.** `/paskyra.html`, 390 px: 15 elementų +70 px už
+ekrano, o `scrollWidth - innerWidth = 0` – „LIKUTIS PO" nei matomas, nei pasiekiamas.
+`paskyra.js:116` buvo **vienintelė** `.ct-table-w` be `is-dense`, o `ct-dizainas.css:2220`
+prie ≤640 px visoms `.ct-table-w` nustato `overflow-x: visible` – teisingai, nes `is-dense`
+lentelė tame plotyje tampa kortelėmis. Ši – netapdavo. Pridėta `is-dense`.
+
+**iOS pats priartindavo.** Visi **42 iš 42** `input`/`select`/`textarea` turi 13,33–14 px
+šriftą. iOS Safari, sufokusavus lauką po 16 px, priartina ir atgal nebeatitraukia.
+Labiausiai kenkė `#ct-link-url` – pagrindinis produkto įėjimas, pamatuota 304 × **19 px**.
+Laikinas blokas `ct-priedai.css` 29, su „Dizaineriui:" eilute.
+
+### 3. Kiti pataisymai
+
+| Kas | Buvo | Dabar |
+|---|---|---|
+| `window.__ctPlanas` | niekur nepriskiriamas globalas (pamatuota gyvai: `undefined`); tikrasis – `ctPlanas` | `detail.html:1094` kreditų įspėjimas ir `klaidu-pranesimas.js:119` plano duomenys veikia |
+| `#ct-modelio-btn`, `#ct-link-steps` | `hidden`, bet rodomi – `ct-mygtukai.css` turi **0** `:not([hidden])` visame faile | paslėpti per `ct-priedai.css` 28 blokką |
+| `index.html` logotipas | `href="#"` (visuose kituose puslapiuose `href="index.html"`) | `href="index.html"` |
+| `.gitignore` | `backend/testai/*.db`, bet ne `backend/*.db` | paleidus serverį iš repo šaknies DB failai nebepatenka į `git status` |
+
+### 4. Ko NETAISIAU, nors radau
+
+- **Perpardavėjo svoriai neįjungti.** `ctSetMode()` niekur nekviečiamas, `.ct-mode-btn` yra
+  tik CSS be mygtuko, tad `searchMode` visada `'default'` ir `TRIAGE_WEIGHTS.reseller`
+  (kaina 40 vietoj 30) bei `computeResaleMath` **niekada nevykdomi**. Spalio 16 d. sprendimas
+  „darome viską kaip perpardavinėtojams" kode neveikia. Tai sprendimas, ne pataisymas:
+  mygtukas ar `reseller` kaip numatytieji? → **KL-1028-1900**.
+- **`dingusiu = 0` iš 14 833 skelbimų.** Logika `rinka.js:297` teisinga, bet reikalauja TRIJŲ
+  pilnų to paties aprėpties skenavimų iš eilės. Rugsėjo 20 d. aprėptis buvo
+  `BMW, modelis=NULL, 2019+`; spalio 19 d. – `BMW 5, 2010+`. Skirtingos, tad spalio praėjimas
+  rugsėjo eilučių negalėjo paliesti. **Nė viena aprėptis nepakartota nė karto.** Grafiko, ne
+  kodo klaida. → **KL-1028-1910**.
+- **Dvi gyvavimo ciklo sistemos.** `cache.js` JSON (7,44 MB ant Volume) ir `rinka.js` SQLite
+  veikia paraleliai; `cache.js` funkcijos vis dar kviečiamos iš `server.js` po 1–4 kartus.
+  Dvi tiesos apie tą patį skelbimą. → **KL-1028-1920**.
+- `detectSellerPhrases` (`server.js:1842`) apibrėžta ir niekur nekviečiama – frazių bauda
+  balui neegzistuoja. `renderCandidateCards` vietinė versija `index.html:5249–5341` nebeprieinama
+  (93 mirusios eilutės). `.dp-seller-menu` (`detail.html:650`) – vienintelis mygtukas be
+  veiksmo visame produkte. Visa tai – kitas praėjimas, ne šis.
+- `senaKaina` surenkama ir niekur nerodoma. Perpardavėjui portalo „buvo X €" yra tiesiausias
+  signalas, kad pardavėjas nuleis – didžiausia nauda iš jau turimų duomenų. Reikia dizainerio
+  vietos kortelėje.
+
+### 5. Pamatuota, kad būtų kuo tikrinti vėliau
+
+| | 1400 px | 390 px |
+|---|---|---|
+| JS klaidų | 0 | 0 |
+| horizontalus slydimas | 0 px | 0 px |
+| elementų už krašto | 0 | 0 (`paskyra.html` buvo **15, +70 px**) |
+
+`hidden`, bet rodomi: **2 → 0**. Mygtukų be veiksmo 7 puslapiuose: **1**. Sulūžusių vidinių
+nuorodų: **0**. Laukų po 16 px: **42 → 0** telefone. `:not([hidden])` sargų:
+`ct-dizainas` 31 · `ct-priedai` 2+1 · `ct-mygtukai` **0** · `ct-bendras` **0**.
+
+Archyvas: 14 833 skelbimai, 15 183 stebėjimai = **1,02 stebėjimo skelbimui**; dingusių **0**;
+`/data/rinka.db` 15,01 MB, persistentinis. Kaštai: **0,413 kredito skelbimui**, pilnas 14 k
+praėjimas ≈ **6 087 kreditai**, fondas 8 727 / 100 000.
+
+Sargai **34 žali** (+1 naujas). `migracija`, `mygtukai`, `sesija` šioje aplinkoje neveikia ir
+anksčiau (`unlink` neleidžiamas, nėra `playwright`, kelias į `auth.js`).

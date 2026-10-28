@@ -318,6 +318,15 @@
   }
   @media (max-width: 640px) {
     #compare-bar { padding: 9px 10px; bottom: 12px; max-width: calc(100vw - 20px); }
+    /* v2.30.0 (auditas 2026-10-28, Nr. 1.2): klaidos mygtukas gulejo ant
+       „Palyginti". Pamatuota, 390 px su 3 automobiliais: juosta x 10-380
+       y 767-833, FAB x 334-378 y 789-833, persidengimas 44 px, o
+       `elementFromPoint` juostos desiniajame krasste grazino `kp-mygtukas` -
+       t.y. „Palyginti" telefone buvo NEPASPAUDZIAMAS. Abieju z-index 900, bet
+       FAB idedamas i DOM veliau, tad jis virsuje.
+       Tas pats sprendimas kaip detail.html:315 - keliam FAB virs juostos.
+       Specifika (0,3,0), nes `ct-mygtukai.css` prijungiamas PO siuo blokku. */
+    .ct-btn.ct-btn.ct-report-fab { bottom: calc(74px + env(safe-area-inset-bottom, 0px)); }
     .compare-bar-chip { max-width: 100px; font-size: 11px; }
     #compare-modal { padding: 10px; }
     #compare-modal-inner { padding: 14px; }
@@ -2333,7 +2342,7 @@
 <!-- ===== APP HEADER ===== -->
 <header class="ct3-header">
   <div class="ct3-header-inner">
-    <a class="ct3-logo" href="#">
+    <a class="ct3-logo" href="index.html">
       <svg class="ct3-logo-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="18" y="2" width="20" height="20" rx="3" transform="rotate(45 18 2)" fill="#7C5CFF"/>
         <rect x="18" y="9" width="11" height="11" rx="2" transform="rotate(45 18 9)" fill="#0A0C12" opacity="0.7"/>

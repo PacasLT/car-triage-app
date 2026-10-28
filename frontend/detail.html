@@ -1091,7 +1091,11 @@ window.ctApi = function (kelias, params) {
             : '')
       : '<div class="dp-check is-unknown"><i></i><span class="dp-check-b"><span class="dp-check-t">Sarasas dar nesudarytas</span><span class="dp-check-d">atsiras po apzvalgos</span></span></div>';
 
-    var kreditai = (window.__ctPlanas && window.__ctPlanas.kreditai && window.__ctPlanas.kreditai.viso);
+    // v2.30.0 (auditas 2026-10-28): buvo `window.__ctPlanas` - tokio globalo
+    // niekas niekada nepriskiria (pamatuota gyvai: undefined). Tikrasis -
+    // `window.ctPlanas` (index.html:7270). Del rasybos sis kreditu ispejimas
+    // nebuvo parodytas NE KARTO.
+    var kreditai = (window.ctPlanas && window.ctPlanas.kreditai && window.ctPlanas.kreditai.viso);
     var maza = kreditai != null && kreditai < 2;
     var cta = pilna
       ? '<button class="dp-act ct-btn ct-btn-primary ct-btn-go" onclick="window.print()">'

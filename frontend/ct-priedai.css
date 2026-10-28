@@ -204,3 +204,41 @@
    (greičiausiai `opacity`) prarasta. Jos neatstatinėju – nežinau, kokia ji
    turėjo būti. */
 .ct-link-msg[hidden] { display: none; }
+
+
+/* 28 BLOKAS · v2.30.0 · `hidden` sargas mygtukams ir zingsniams (laikinas, K-76)
+   Dizaineriui: `ct-mygtukai.css` TURI 0 `:not([hidden])` sargu visame faile, o
+   jo bazinis selektorius (32 eil.) apima 29 klases - `.ct-btn`, `.detail-btn`,
+   `.ct3-save-btn`, `.dp-act`, `.mg-btn`, `.ct-login-btn` ir t.t. - ir visoms
+   nustato `display: inline-flex`. Globalus `:where([hidden])`
+   (ct-dizainas.css:5361) yra specifiskumo 0,0,0, tad nugali kiekviena is ju.
+   Praktinis rezultatas, pamatuotas gyvai (1400 px ir 390 px): visame produkte
+   lygiai du elementai su `hidden` vis tiek rodomi -
+     #ct-modelio-btn  (`.ct-btn`,   display: inline-flex)
+     #ct-link-steps   (`.ct-steps`, display: flex, ct-dizainas.css:5975)
+   Siandien tai vienas matomas mygtukas, bet spastai padeti visam failui: bet
+   kuris naujas `hidden` mygtukas isisuks tyliai.
+
+   Tai ta pati taisykle, kuria patvirtinai po K-71a, K-73 ir K-76: „jei bazineje
+   `display` su `:not([hidden])`, tai ir kiekvienas perrasymas - su juo".
+
+   Tavo sprendimas: ar `:not([hidden])` ideti i paciu failu bazinius selektorius
+   (tada sis blokas istrinamas), ar palikti globalu sarga cia. */
+.ct-btn[hidden], .ct-steps[hidden] { display: none !important; }
+
+
+/* 29 BLOKAS · v2.30.0 · laukai telefone 16 px (laikinas)
+   Dizaineriui: VISI 42 produkto `input` / `select` / `textarea` turi `font-size`
+   13,33-14 px (pamatuota gyvai, 390 px). iOS Safari, sufokusavus lauka po 16 px,
+   PATS priartina puslapi ir atgal nebeatitraukia. `maximum-scale=5.0` nuo to
+   negelbsti; gelbetu tik `maximum-scale=1`, o tai laužo pasiekiamuma.
+   Labiausiai kenkia `#ct-link-url` - pagrindinis produkto ijimas (pamatuota:
+   304 x 19 px, 13,5 px sriftas).
+
+   Laikinas sprendimas: telefone laukams 16 px. Tavo sprendimas: ar ideti 16 px
+   i pacias lauku taisykles (`.ct-fld-t` ir kt.) prie <=640 px - tada sis blokas
+   istrinamas. */
+@media (max-width: 640px) {
+  input, select, textarea,
+  .ct-fld-t, .ct-key-in input { font-size: 16px; }
+}

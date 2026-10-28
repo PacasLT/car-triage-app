@@ -8,6 +8,19 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.30.0', data: '2026-10-28', pavadinimas: 'Auditas: balas, telefono mygtukai ir paslėpti laukai',
+    pakeitimai: [
+      'Sąraše „Kiti skelbimai" ir lentelėje rodomas balas buvo apskaičiuotas sena formule, o ne tas, kurį apskaičiavo serveris – dabar visur tas pats skaičius.',
+      'Ten pat buvo rodoma „Garantija: Nenurodyta" ir „Pardavėjo tipas: Privatus", nors duomenys buvo žinomi – dabar rodomi tikrieji.',
+      'Telefone klaidos mygtukas užstodavo „Palyginti" – pakeltas virš palyginimo juostos.',
+      'Telefone paskyros kreditų istorijos lentelė buvo nukerpama be galimybės paslysti – dabar rodoma kortelėmis.',
+      'Telefone bakstelėjus į bet kurį lauką iOS pats priartindavo puslapį ir nebeatitraukdavo – laukams nustatytas 16 px šriftas.',
+      'Kreditų įspėjimas prieš mokamą analizę nebuvo parodytas nė karto (rašybos klaida kintamojo pavadinime) – veikia.',
+      'Du elementai su „hidden" atributu vis tiek buvo rodomi – paslepiami.',
+      'Pradinio puslapio logotipas dabar veda į pradžią, kaip ir visuose kituose puslapiuose.',
+    ],
+  },
+  {
     versija: '2.29.1', data: '2026-10-28', pavadinimas: 'Archyvo eksporte užsipildė kartos grupės stulpelis',
     pakeitimai: [
       'Analizei skirtame archyvo eksporte „rinkos grupė“ buvo tuščia visose eilutėse – dabar skaičiuojama iš automobilio metų ir mėnesio.',

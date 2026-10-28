@@ -113,7 +113,7 @@
       return '<tr' + (i >= KRED_RODYTI ? ' hidden' : '') + '><td class="acct-num" style="text-align:left">' + data(r.laikas, true) + '</td><td>' + esc(t) + '</td>'
         + '<td class="acct-num' + (r.kiekis > 0 ? ' acct-plus' : '') + '">' + (r.kiekis > 0 ? '+' : r.kiekis < 0 ? '−' : '') + sk(Math.abs(r.kiekis)) + '</td><td class="acct-num">' + sk(r.likutis_po) + '</td></tr>';
     }).join('');
-    return h + '<div class="ct-table-w"><table class="ct-table"><thead><tr><th>DATA</th><th>VEIKSMAS</th><th style="text-align:right">± KIEKIS</th><th style="text-align:right">LIKUTIS PO</th></tr></thead><tbody>' + eil + '</tbody></table></div>'
+    return h + '<div class="ct-table-w"><table class="ct-table is-dense"><thead><tr><th>DATA</th><th>VEIKSMAS</th><th style="text-align:right">± KIEKIS</th><th style="text-align:right">LIKUTIS PO</th></tr></thead><tbody>' + eil + '</tbody></table></div>'
       + (kred.length > KRED_RODYTI ? '<div class="acct-more"><button type="button" class="ct-btn ct-btn-sm" data-daugiau="acct-kred">Rodyti daugiau</button></div>' : '') + '</div>';
   }
 

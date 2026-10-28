@@ -116,7 +116,9 @@
     try { v = (window.CT_VERSIJOS && window.CT_VERSIJOS[0] && window.CT_VERSIJOS[0].versija) || null; } catch (e) {}
     var planas = null;
     try {
-      var p = window.__ctPlanas;
+      // v2.30.0: buvo `__ctPlanas` - niekur nepriskiriamas globalas, tad klaidos
+      // pranesimas niekada neprideliodavo plano/kreditu.
+      var p = window.ctPlanas;
       if (p) planas = { planas: p.planas || null, kreditai: (p.kreditai && p.kreditai.viso) != null ? p.kreditai.viso : null };
     } catch (e) {}
     var raktai = [];

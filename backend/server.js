@@ -4166,6 +4166,25 @@ async function runSearchJob(jobId, filters, arAdminas) {
       // v2.28.0: kainos kreive. BALTASIS SARASAS - be sios eilutes iki sasajos
       // nenukeliautu, nors `enriched` ji turi (v2.18.1, v2.23.1, v2.25.0 spastas).
       kainuKreive: l.kainuKreive || null,
+      // v2.30.0 (auditas 2026-10-28): SEPTINTAS tu paciu spastu atvejis, ir pats
+      // skaudziausias. Siu lauku frontendas IESKO (`ctScore` abiejuose puslapiuose,
+      // korteles pardavejo ir garantijos eilutes), bet baltasis sarasas ju neleido.
+      // Pasekme buvo pamatuota: TOP korteles gauna pilna `enriched` objekta ir rodo
+      // tikra `qualityScore`, o „Kiti skelbimai" ir lentele `baloKomponentai` neturi,
+      // tad `ctScore` nukrenta i atsargine 2021 m. formule - kurioje `ridaDiffPct`,
+      // `turiIstorijosAtaskaita`, `garantijosTipas`, `yraVerslas` IRGI nepraleisti,
+      // todel istorija visada 5,0, rida visada 6,5, garantija „Nenurodyta", o
+      // pardavejas „Privatus". Tiksliai tas „du skirtingi CarTriige skaiciai",
+      // kuri komentarai detail.html:908 ir index.html:6200 skelbia istaisyta.
+      baloKomponentai: l.baloKomponentai || null,
+      ridaDiffPct: l.ridaDiffPct == null ? null : l.ridaDiffPct,
+      ridaMedian: l.ridaMedian == null ? null : l.ridaMedian,
+      turiIstorijosAtaskaita: !!l.turiIstorijosAtaskaita,
+      garantijosTipas: l.garantijosTipas || null,
+      yraVerslas: !!l.yraVerslas,
+      salis: l.salis || null,
+      title: l.title || null,
+      spalva: l.spalva || null,
       rinka: l.rinka || null, lygintaRinka: l.lygintaRinka || null,
       rinkosVardas: l.rinkosVardas || null, kainaLt: l.kainaLt || null,
       // v2.20.0 – perpardavėjo skaičiai

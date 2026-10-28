@@ -21,6 +21,13 @@ pasikeitimai/klaidos-*.txt
 *.zip
 *.csv
 
+# Auditas 2026-10-28: paleidus serveri IS REPO saknies (pvz. patikrai) SQLite
+# failai atsiranda backend/, o ne /data - ir git juos rodo kaip naujus.
+backend/*.db
+backend/*.db-journal
+backend/*.db-wal
+backend/*.db-shm
+
 # Testų laikinos DB (migracija.test)
 backend/testai/*.db
 # migracijos sargas aplinkoje negali istrinti savo failu (unlink neleidziamas),
