@@ -8,6 +8,14 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.30.1', data: '2026-10-29', pavadinimas: 'Telefono laukai ir mygtukai – pataisymo pataisymas',
+    pakeitimai: [
+      'Vakarykštis laukų pataisymas telefone pralošė kitoms taisyklėms ir 29 iš 42 laukų vis dar buvo per maži – dabar visi.',
+      'Klaidos mygtukas dar 4 px užlipdavo ant palyginimo juostos – pakeltas.',
+      'Laukų išvalymo ✕ ir „Išvalyti" telefone dabar turi pilną lietimo zoną, nors atrodo taip pat.',
+    ],
+  },
+  {
     versija: '2.30.0', data: '2026-10-28', pavadinimas: 'Auditas: balas, telefono mygtukai ir paslėpti laukai',
     pakeitimai: [
       'Sąraše „Kiti skelbimai" ir lentelėje rodomas balas buvo apskaičiuotas sena formule, o ne tas, kurį apskaičiavo serveris – dabar visur tas pats skaičius.',

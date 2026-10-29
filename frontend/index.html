@@ -326,7 +326,11 @@
        FAB idedamas i DOM veliau, tad jis virsuje.
        Tas pats sprendimas kaip detail.html:315 - keliam FAB virs juostos.
        Specifika (0,3,0), nes `ct-mygtukai.css` prijungiamas PO siuo blokku. */
-    .ct-btn.ct-btn.ct-report-fab { bottom: calc(74px + env(safe-area-inset-bottom, 0px)); }
+    .ct-btn.ct-btn.ct-report-fab { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+    /* v2.30.1: 74 px dar liko 4 px persidengimo (pamatuota po v2.30.0 deploy'o:
+       juostos virsus 766, FAB apacia 770). Juosta su trim zymomis = 66 px + 12 px
+       nuo krasto = 78; 80 duoda 2 px tarpa. `elementFromPoint` juostos desiniajame
+       krasste jau grazina `compare-clear`, ne FAB - mygtukas pasiekiamas. */
     .compare-bar-chip { max-width: 100px; font-size: 11px; }
     #compare-modal { padding: 10px; }
     #compare-modal-inner { padding: 14px; }

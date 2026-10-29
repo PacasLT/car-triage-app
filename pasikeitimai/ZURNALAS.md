@@ -3044,3 +3044,55 @@ praėjimas ≈ **6 087 kreditai**, fondas 8 727 / 100 000.
 
 Sargai **34 žali** (+1 naujas). `migracija`, `mygtukai`, `sesija` šioje aplinkoje neveikia ir
 anksčiau (`unlink` neleidžiamas, nėra `playwright`, kelias į `auth.js`).
+
+---
+
+## Z-187 · 2026-10-29 · Z-186 pataisymo patikra: trys iš keturių (v2.30.1)
+
+Po v2.30.0 deploy'o pamatavau tą patį, ką ir prieš tai. Trys pataisymai veikia, vienas –
+pralošė, ir aš jį buvau paskelbęs padarytu.
+
+| Kas | Prieš | Po v2.30.0 |
+|---|---|---|
+| `hidden`, bet rodomi | 2 | **0** ✓ |
+| `__ctPlanas` | `undefined` | `ctPlanas` yra objektas ✓ |
+| logotipas | `href="#"` | `href="index.html"` ✓ |
+| FAB vs „Palyginti" | dengė 44 px | dengia **4 px**, bet `elementFromPoint` jau grąžina `compare-clear` ✓/~ |
+| laukų po 16 px | 42 iš 42 | **29 iš 42** ✗ |
+
+### Kodėl šriftų taisyklė pralošė
+
+Parašiau `input, select, textarea { font-size: 16px }` – specifiškumas **0,0,1**. Nugalėjo
+trys taisyklės, visos su `font:` trumpiniu:
+
+```
+.ct-link-in > input                       (0,1,1)   ← #ct-link-url
+.ct-fld-v input / select / .ct3-inp       (0,1,1)   ← visi filtrų laukai
+.ct-fld-t                                 (0,1,0)
+```
+
+Mano klaida buvo ne ta, kad nemačiau specifiškumo – mačiau jį tą patį vakarą `ct-priedai.css`
+28 blokke. Klaida buvo ta, kad **paskelbiau padaryta nepamatavęs po deploy'o**. Lygiai tas,
+ko DARBO-SISTEMA reikalauja nedaryti, ir ko jau buvau pridaręs su v2.28.3.
+
+Dabar taikomasi į pačius savininkus, o klasės dvigubinamos ten, kur reikia perlipti (0,1,1):
+`.ct-fld-t.ct-fld-t`, `.ct-auth-input.ct-auth-input`, `.ct-field.ct-field`. Perrašomas tik
+`font-size`, ne visas `font:` trumpinys – šriftas, svoris ir eilutės aukštis lieka dizainerio.
+
+Penki likę „be klasės" laukai yra paslėpti `portal-*` žymimieji langeliai (0×0 px) – jiems
+šrifto dydis nieko nereiškia.
+
+### FAB · 74 → 80 px
+
+Juostos viršus 766, FAB apačia buvo 770. Juosta su trim žymomis = 66 px + 12 px nuo krašto
+= 78; 80 duoda 2 px tarpą.
+
+### Lietimo zonos be išvaizdos keitimo
+
+`.ct-fld-x` 22×22 (11 vnt.) ir „Išvalyti" 35×12. Langelio nedidinu – eilutė susilaužytų.
+Vietoj to nematoma `::after` plokštelė (`inset: -11px`) išplečia lietimo zoną iki 44 px
+nekeičiant nieko, kas matoma. Abu elementai `position: static` (patikrinta gyvai), tad
+`relative` nieko nesugadina. Dizaineriui pažymėta: jei tinka, taisyklė gali pereiti į
+mygtukų failą.
+
+Sargai 34 žali.

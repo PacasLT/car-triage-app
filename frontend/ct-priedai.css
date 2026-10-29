@@ -238,7 +238,32 @@
    Laikinas sprendimas: telefone laukams 16 px. Tavo sprendimas: ar ideti 16 px
    i pacias lauku taisykles (`.ct-fld-t` ir kt.) prie <=640 px - tada sis blokas
    istrinamas. */
+/* v2.30.1 PATIKSLINTA. Pirmas bandymas (`input, select, textarea` = 0,0,1)
+   pralosė specifiskumui - pamatuota po deploy'o: 29 is 42 lauku vis dar 13,5 px.
+   Nugalejo du dalykai, abu su `font:` trumpiniu:
+     .ct-link-in > input                      (0,1,1)
+     .ct-fld-v input / select / .ct3-inp      (0,1,1)
+     .ct-fld-t                                (0,1,0)
+   Todel dabar taikomasi i pacius savininkus, o klases dvigubinamos ten, kur
+   reikia perlipti (0,1,1). Trumpinio `font:` neperrasau visa - tik `font-size`,
+   kad sriftas, svoris ir eilutes aukstis liktu dizainerio. */
 @media (max-width: 640px) {
   input, select, textarea,
-  .ct-fld-t, .ct-key-in input { font-size: 16px; }
+  .ct-link-in > input,
+  .ct-fld-v input, .ct-fld-v select, .ct-fld-v textarea, .ct-fld-v .ct3-inp,
+  .ct-fld-t.ct-fld-t,
+  .ct-auth-input.ct-auth-input,
+  .ct-field.ct-field,
+  .ct-key-in input { font-size: 16px; }
+
+  /* Lietimo taikiniai. Pamatuota 390 px: `.ct-fld-x` 22x22 (11 vnt.),
+     „Isvalyti" 35x12. Riba - 44 px (`--tap-min`).
+     NEDIDINU pacio langelio - eilute susilaužytu. Vietoj to nematoma
+     `::after` plokstele isplecia LIETIMO zona nekeiciant isvaizdos.
+     Abu elementai yra `position: static` (patikrinta gyvai), tad `relative`
+     nieko nesugadina.
+     Dizaineriui: jei taip tinka, si taisykle gali pereiti i mygtuku faila. */
+  .ct-fld-x, .ct-fld-sum > button { position: relative; }
+  .ct-fld-x::after { content: ""; position: absolute; inset: -11px; }
+  .ct-fld-sum > button::after { content: ""; position: absolute; inset: -16px -5px; }
 }
