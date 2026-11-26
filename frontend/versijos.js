@@ -8,6 +8,16 @@
 
 window.CT_VERSIJOS = [
   {
+    versija: '2.31.0', data: '2026-11-26', pavadinimas: 'Modelio vardas pagaliau pasiekia visus portalus',
+    pakeitimai: [
+      'Ieškant BMW 5 ar Mercedes C klasės autoscout24 grąžindavo VISUS tos markės automobilius, o otomoto – nieko. Dabar modelio vardas verčiamas į kiekvieno portalo kalbą, ir rinkos vidurkis skaičiuojamas iš tikrų to modelio skelbimų.',
+      'Jei modelio vardo portale nežinome, portalas praleidžiamas ir apie tai parašoma – anksčiau jis tyliai grąžindavo visą markę.',
+      'Rinkos vidurkis iš archyvo dabar ima tik tų pačių metų ir ridos automobilius, kokius nurodėte paieškoje. Iki šiol 2024 m. automobilio vidurkis galėjo būti skaičiuojamas iš 2010 m. automobilių.',
+      'mobile.de dalį skelbimų grąžina ispaniškai – jų kuras buvo neatpažįstamas; dabar suprantami ir ispaniški bei angliški pavadinimai.',
+      'Administratoriui paieškų riba nebetaikoma – anksčiau pasibaigus planui užsidarydavo ir administravimas.',
+    ],
+  },
+  {
     versija: '2.30.1', data: '2026-10-29', pavadinimas: 'Telefono laukai ir mygtukai – pataisymo pataisymas',
     pakeitimai: [
       'Vakarykštis laukų pataisymas telefone pralošė kitoms taisyklėms ir 29 iš 42 laukų vis dar buvo per maži – dabar visi.',

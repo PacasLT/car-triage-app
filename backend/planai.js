@@ -160,6 +160,12 @@ function reikalautiPaieskos() {
   return function (req, res, next) {
     try {
       const b = busena(req.user);
+      // v2.31.0 (PATIKRA-2026-11-26.md §0): adminas ribos neapeidavo, ir Luko
+      // paskyra po plano pasibaigimo 10-31 uzsidare VISISKAI: planas nukrito i
+      // `trial`, kurio riba yra 1 paieska IS VISO, o `paieskos_viso` jau buvo 195.
+      // Tas pats nutiktu kiekvienam pilotui 31-aja diena: moketojas nebegaletu
+      // net pamatyti, ka pirko, ir tai atrodytu kaip mes ji ismetem.
+      if (arAdmin(req.user)) { req.planoBusena = b; return next(); }
       if (b.paieskos.liko !== null && b.paieskos.liko <= 0) {
         const zin = b.planas === 'trial'
           ? 'Bandomoji paieška išnaudota. Pasirinkite planą, kad ieškotumėte toliau.'

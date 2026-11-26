@@ -3096,3 +3096,139 @@ nekeičiant nieko, kas matoma. Abu elementai `position: static` (patikrinta gyva
 mygtukų failą.
 
 Sargai 34 žali.
+
+---
+
+## Z-188 · 2026-11-26 · Modelio vardas į portalo adresą keliavo neišverstas (v2.31.0)
+
+Luko užduotis buvo paprasta: *„atsinaujinę kreditai, gal išnaudokime kokio auto visų rinkų
+analizei, pasitikrink kaip kas veikia"*, Porsche 911 ir BMW 5 nuo 2024 m.
+
+Paleidus dvi tikras paieškas (278 kreditai) pasirodė, kad didžiausia klaida buvo ne tame,
+ką tikrinau, o tame, KO klausiam portalų. Pilna patikra – `claude/PATIKRA-2026-11-26.md`.
+
+### 1. Radinys: tik mobile.de turėjo modelių vertimo lentelę
+
+`buildAutoscout24Url`, `buildOtomotoUrl` ir `buildAutogidasUrl` sąsajos modelio eilutę
+kėlė į adresą **žalią**. Sąsajos reikšmės yra autoplius formato („5", „X5", „C Klasė").
+Pamatuota per `/api/quick-count`, be metų filtro:
+
+```
+AS24  „BMW 5"             = 17 558   ← tiek pat, kiek „BMW be modelio"
+AS24  „BMW 5-series"      =    645      modelio filtras IGNORUOJAMAS
+OT    „BMW 5"             =      0   ← Lenkija tyliai iškrisdavo
+OT    „BMW seria-5"       =    562
+AS24  „Mercedes C Klasė"  = 206 489  ← visi Mercedes (lietuviška raidė + tarpas)
+AS24  „c-class"           =  26 935
+OT    „c-klasa"           =    379   (o „klasa-c" = 17 658, t.y. irgi visi)
+MD    „Porsche 911"       =  7 293   ← tiek pat, kiek „Porsche be modelio"
+AG    „BMW 5"             =      0   (o AG BMW be modelio = 247)
+```
+
+Reiškia, rinkos mediana „BMW 5" buvo skaičiuojama iš **visų** BMW – X5, 1 serijos, M.
+Tai svarbiausias produkto skaičius.
+
+**Ir tai yra tikroji klaidos Nr. 55 priežastis** („paleidus BMW 5 paiešką gavome ir x1/x3 ir
+x5"). Spalio `modelio-atitikimas.js` (v2.28.1) išmeta ne tuos **rezultatus**, bet užklausa
+vis tiek prašė visų BMW. Uždengiau simptomą, ne priežastį. Beveik tikrai tai ir Nr. 45 dalis:
+archyve otomoto turėjo **2 skelbimus iš 14 833**.
+
+### 2. Naujas `backend/portalu-modeliai.js`
+
+Į lentelę rašau **tik pamatuota**. Kiekvieno slug'o patikros skaičius – komentare prie jo.
+Patikrinta 2026-11-26, iš viso ~60 kreditų:
+
+| | autoscout24 | otomoto |
+|---|---|---|
+| BMW 1–8 | `1-series` … `8-series` | `seria-1` … `seria-8` |
+| Mercedes A/B/C/E/S | `a-class` … `s-class` | `a-klasa` … `s-klasa` |
+| Mercedes CLA | `cla` | **nežinom** |
+| Mercedes ML | `m-class` (ne `ml-class`!) | **nežinom** |
+
+Ko į lentelę **neįrašiau**: otomoto CLA ir ML (`cla`, `ml-klasa` abu grąžino 17 658 = visi
+Mercedes) ir autoscout24 „M". Teisingo slug'o neradau, tad nespėjau.
+
+Patikrinta ir tai, kas **jau veikė**, kad nesulaužyčiau: Porsche 911, Peugeot 208/308/408/508,
+Mazda 2/3/6, Fiat 500, BMW X1–X7, Z4 – jų sąsajos vardas portale yra teisingas, tad eina kaip
+anksčiau. Mano spalio įvertis „25 iš 255 modelių sulaužyti" buvo per pesimistiškas: skaitiniai
+modelių vardai autoscout24 ir otomoto veikia. Tikrasis skaičius – **22**.
+
+### 3. Antras principas: tylus nukritimas į „visą markę" yra blogiau nei praleidimas
+
+Kai markė lentelėje yra, o modelio joje nėra, `slug()` grąžina `rastas: false`, ir
+`runSearchJob` tą portalą **praleidžia** su aiškia eilute žurnale. Priežastis: „visa markė"
+atrodo kaip rezultatas, kainuoja kreditus ir sugadina medianą. Portalo praleidimas bent
+matomas.
+
+Markėms, kurių lentelėje nėra, elgiamės kaip anksčiau – regresijos nėra, ir sargas tai gina
+atskirai (13 atvejų).
+
+### 4. Antras radinys: medianos neėmė paieškos metų rėžio
+
+`cache.getHistoryForModel()` archyvą davė **be jokio filtro**, nors paieška turėjo metų rėžį.
+Pamatuota, paieška „BMW 5, 2024+":
+
+```
+šioje paieškoje BMW 540 buvo VIENAS skelbimas: 2024 m., 34 300 km, 59 900 €
+o mediana sakė:  21 950 €  ·  n = 21  ·  ridos mediana 221 000 km
+```
+
+Tai 2010–2023 m. 540-ieji iš spalio skenavimų. Bet kuriam 2024 m. BMW 540 **MAX pirkimo
+kaina** būtų apie triskart neteisinga. 520/530/550 imtys didelės, todėl ten nesimatė.
+
+Naujas `backend/archyvo-rezis.js`: archyvo įrašui taikom tuos pačius rėžius kaip paieškai.
+Metų **neturintis** įrašas, kai metų rėžis nurodytas, išmetamas – negalim patikrinti, ar
+telpa, o spėjimo nerašom (ta pati taisyklė kaip v2.29.1 kartų grupėse). Ridos neturintis
+lieka: rida dažnai nenurodyta, o kainai ji turi mažesnę įtaką nei metai. Kiek archyvo
+skelbimų neįskaityta – rašom į žurnalą.
+
+### 5. Trečias radinys: mobile.de 22 % grąžina ispaniškai
+
+Iš 910 BMW skelbimų **200** turėjo „Gasolina" (101) ir „Híbrido (gasolina/eléctrico)" (99);
+jų adresai turi `euge/` – mobile.de daugiakalbį kelią. `MD_KURAS` lentelėje jų nebuvo, tad
+`kuras` likdavo ispaniškas: kuro filtras jų negalėjo patikrinti, `normKuras` kainų kreivėje
+neatpažindavo, o archyve atsirasdavo **dvi to paties kuro reikšmės**.
+
+Pridėti vokiški, angliški ir ispaniški vardai, o paieška lentelėje tapo nejautri registrui ir
+diakritikams (`mdKuras`) – kitaip „Híbrido" nepataikytų į „Hibrido", ir visa prasmė išgaruotų.
+
+### 6. Ketvirtas radinys: adminas neapeidavo paieškų ribos
+
+Luko planas pasibaigė 10-31, paskyra nukrito į `trial`, kurio riba yra **1 paieška iš viso**,
+o `paieskos_viso` jau buvo 195. Rezultatas: paskyra užsidarė **visiškai**, ir net admino tai
+neapeidavo (`planai.js:159` tikrino tik `liko <= 0`). Pridėtas `arAdmin` praleidimas.
+
+Tas pats nutiktų **kiekvienam pilotui 31-ąją dieną**: mokėtojas nebegalėtų net pamatyti, ką
+pirko. Ko turi nutikti pasibaigus mokamam planui – ne mano sprendimas; įrašiau Lukui.
+
+### 7. Kas PATVIRTINTA, kad veikia
+
+Pirmas kartas, kai spalio pataisymai patikrinti tikrais duomenimis:
+
+| | Porsche 911 | BMW 5 |
+|---|---|---|
+| balas kortelėje = balas sąraše | **60/60** | **60/60** |
+| `baloKomponentai` | 100 % | 100 % |
+| MAX „laukia rinkos" | **0 iš 596** | 0 |
+| JS klaidų | 0 | 0 |
+
+Kainų kreivė gyvai, BMW 530 už 23 500 €: prognozė 28 996 €, rėžis 24 153–33 838,
+„pigesnis nei 75 %", MAE 16,7 %, n = 1 314. Bet iš 910 ji atsakė tik **81 (9 %)** – 644
+„už ribų", nes suderinta 2010–2020 m. automobiliams; Porsche 911 – nė vieno (kreivėje
+14 modelių iš 255).
+
+Archyvas: 14 833 → **16 115** (otomoto 2 → 31). `dingusiu` vis dar 0 – vartotojo paieškos
+yra `pilnas: 0`.
+
+Kaštai: **0,185 kredito skelbimui**, ne 0,413, kaip skaičiavau spalį. Pilnas archyvo
+atnaujinimas – ne 6 087, o ~2 700 kreditų.
+
+### 8. Sargas pirmas pagavo mano klaidą
+
+`filtrai.test.js` nukrito su `ReferenceError: portaluModeliai is not defined` – jis adreso
+kūrėjus ištraukia kaip tekstą ir vykdo `new Function` su aiškiai paduotomis
+priklausomybėmis. Nauja priklausomybė jam nebuvo paduota. Būtent tam jis ir yra; priklausomybė
+paduota kaip tikras modulis.
+
+Sargai **36 žali** (+2 nauji: `portalu-modeliai` 56 patikros, `archyvo-rezis` 29, plius
+`mobilede` daugiakalbis kuras).

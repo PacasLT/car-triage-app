@@ -195,11 +195,42 @@ function mobileDePaieska(html) {
   try { return JSON.parse(txt); } catch (e) { return null; }
 }
 
+// v2.31.0 (PATIKRA-2026-11-26.md §4): mobile.de dalį skelbimų grąžina NE
+// vokiškai. Pamatuota gyvai: iš 910 BMW skelbimų 200 (22 %) turėjo „Gasolina"
+// (101) ir „Hibrido (gasolina/electrico)" (99) – jų adresai turi `euge/`,
+// mobile.de daugiakalbį kelią. Tos reikšmės nepataikydavo į šią lentelę, tad
+// `kuras` likdavo ispaniškas: kuro filtras jų negalėjo patikrinti, `normKuras`
+// kainų kreivėje neatpažindavo, o archyve atsirasdavo DVI to paties kuro
+// reikšmės, tad ir ateities analizė būtų padalinta.
+//
+// Dedam vokiškus, angliškus ir ispaniškus vardus. Paieška nejautri registrui
+// ir diakritikams (`mdKuras`), tad „Híbrido" ir „Hibrido" abu pataiko.
 const MD_KURAS = {
+  // vokiškai (pagrindinis)
   'Benzin': 'Benzinas', 'Diesel': 'Dyzelinas', 'Elektro': 'Elektra',
   'Hybrid (Benzin/Elektro)': 'Benzinas / elektra', 'Hybrid (Diesel/Elektro)': 'Dyzelinas / elektra',
   'Autogas (LPG)': 'Benzinas / dujos', 'Erdgas (CNG)': 'Benzinas / dujos',
+  // angliškai
+  'Gasoline': 'Benzinas', 'Petrol': 'Benzinas', 'Electric': 'Elektra',
+  'Hybrid (Gasoline/Electric)': 'Benzinas / elektra', 'Hybrid (Diesel/Electric)': 'Dyzelinas / elektra',
+  'LPG': 'Benzinas / dujos', 'CNG': 'Benzinas / dujos',
+  // ispaniškai (pamatuota 2026-11-26: 200 skelbimų iš 910)
+  'Gasolina': 'Benzinas', 'Diesel (ES)': 'Dyzelinas', 'Diésel': 'Dyzelinas', 'Eléctrico': 'Elektra',
+  'Hibrido (gasolina/electrico)': 'Benzinas / elektra',
+  'Hibrido (diesel/electrico)': 'Dyzelinas / elektra',
+  'Gas licuado (GLP)': 'Benzinas / dujos', 'Gas natural (GNC)': 'Benzinas / dujos',
 };
+
+// Registrui ir diakritikams nejautri paieška lentelėje. Be jos „Híbrido"
+// nepataikytų į „Hibrido", ir visa šio bloko prasmė išgaruotų.
+const _MD_KURAS_NORM = {};
+const _beDiakritiku = (s) => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+for (const [k, v] of Object.entries(MD_KURAS)) _MD_KURAS_NORM[_beDiakritiku(k)] = v;
+
+function mdKuras(reiksme) {
+  if (!reiksme) return null;
+  return _MD_KURAS_NORM[_beDiakritiku(reiksme)] || reiksme;
+}
 const MD_DEZE = { 'Automatik': 'Automatinė', 'Halbautomatik': 'Automatinė', 'Schaltgetriebe': 'Mechaninė' };
 const REKLAMA = { topOfPage: true, topInCategory: true };
 
@@ -231,7 +262,7 @@ function mobileDeSkelbimas(item) {
     // kl-pavadinimas: pilnas skelbimo pavadinimas kortelei (modelis lieka rinkos grupei)
     pavadinimas: String(item.title || `${make} ${model}`).trim().slice(0, 120) || null,
     galimiDefektai: [],
-    kuras: MD_KURAS[a.ft] || a.ft || null,
+    kuras: mdKuras(a.ft),
     pavarai: MD_DEZE[a.tr] || null,
     turiVin: false, galimasJavImportas: false, turiIstorijosAtaskaita: false,
     turiGarantija: false, garantijosTipas: null,
@@ -299,7 +330,7 @@ function extractMobileDe(html) {
 const MOBILEDE_PUSLAPIU_RIBA = 100;   // 100 x 20 = 2000 - daugiau portalas neduoda
 
 module.exports = {
-  MOBILEDE_MARKES, MOBILEDE_MODELIAI, MOBILEDE_KURAS, MOBILEDE_PUSLAPIU_RIBA,
+  MOBILEDE_MARKES, MOBILEDE_MODELIAI, MOBILEDE_KURAS, MOBILEDE_PUSLAPIU_RIBA, MD_KURAS, mdKuras,
   buildMobileDeUrl, mobileDeModelis, extractMobileDe, mobileDePaieska, mobileDeSkelbimas,
 };
 

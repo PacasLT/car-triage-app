@@ -35,6 +35,8 @@ regitra.ikelti();
 // v2.2.0: skelbimu archyvas. Jei nepavyksta - serveris vis tiek pakyla,
 // o /admin/rinka tai parodo (ikelta:false), ne tyliai.
 const rinka = require('./rinka');
+const portaluModeliai = require('./portalu-modeliai');   // v2.31.0
+const archyvoRezis = require('./archyvo-rezis');          // v2.31.0
 const mobilede = require('./mobilede');
 const kaina = require('./paieskos-kaina');
 const modelioApzvalga = require('./modelio-apzvalga');
@@ -2567,7 +2569,11 @@ function buildAutogidasUrl(filters) {
 // (__NEXT_DATA__), ne per CSS selektorius - todel patikimesnis nei kiti du portalai.
 function buildAutoscout24Url(filters) {
   const marke = (filters.marke || '').toLowerCase().trim().replace(/\s+/g, '-');
-  const modelis = (filters.modelis || '').toLowerCase().trim().replace(/\s+/g, '-');
+  // v2.31.0: modelio vardas VERCIAMAS (portalu-modeliai.js). Iki siol sasajos
+  // eilute („5", „C Klase") keliavo i adresa zalia, ir AS24 grazindavo VISUS
+  // tos markes automobilius - pamatuota: „BMW 5" = 17 558 = „BMW be modelio".
+  const v = portaluModeliai.slug('autoscout24', filters.marke, filters.modelis);
+  const modelis = (v.slug || '').toLowerCase().trim().replace(/\s+/g, '-');
   let url = `https://www.autoscout24.com/lst/${marke}`;
   if (modelis) url += `/${modelis}`;
   // v2.5.1 (Z-78): „Latest offers first" (sort=age&desc=1) - patikrinta portale.
@@ -2620,7 +2626,11 @@ setInterval(atnaujintiPlnKursa, 6 * 3600 * 1000).unref();
 
 function buildOtomotoUrl(filters) {
   const marke = (filters.marke || '').toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-  const modelis = (filters.modelis || '').toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  // v2.31.0: modelio vertimas. „BMW 5" otomoto grazindavo 0 (Lenkija tyliai
+  // iskrisdavo), o „seria-5" grazina 562. Mercedes klasems - „c-klasa", ne
+  // „klasa-c" (pamatuota: „klasa-c" = 17 658 = visi Mercedes).
+  const v = portaluModeliai.slug('otomoto', filters.marke, filters.modelis);
+  const modelis = (v.slug || '').toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
   let url = `https://www.otomoto.pl/osobowe`;
   if (marke) url += `/${marke}`;
   if (marke && modelis) url += `/${modelis}`;
@@ -3455,9 +3465,34 @@ async function runSearchJob(jobId, filters, arAdminas) {
     // Nr.55 (v2.28.1): modelio atitikimas – raktu (`baziniModelis`), ne poeile.
     // Kodėl ir ką pamatavom – `backend/modelio-atitikimas.js` komentaruose.
     const tinkaModelis = modelioAtitikimas.tikrintuvas(filters.marke, filters.modelis);
-    const selectedPortals = Array.isArray(filters.portals) && filters.portals.length > 0
+    let selectedPortals = Array.isArray(filters.portals) && filters.portals.length > 0
       ? filters.portals
       : ['autoplius', 'autogidas']; // atsarginis variantas - jei nenurodyta, tikrinam abu
+
+    // v2.31.0: portalas, kuriam MODELIO VARDO NEZINOM, praleidziamas.
+    // Tylus nukritimas i „visa marke" yra blogiau nei portalo praleidimas: jis
+    // atrodo kaip rezultatas, kainuoja kreditus ir sugadina mediana. Pamatuota
+    // pries ta pataisyma: „BMW 5" autoscout24 grazindavo 17 558 skelbimu - tiek
+    // pat, kiek „BMW be modelio" (PATIKRA-2026-11-26.md §2).
+    if (filters.modelis) {
+      const praleisti = [];
+      selectedPortals = selectedPortals.filter((p) => {
+        const v = portaluModeliai.slug(p, filters.marke, filters.modelis);
+        if (v.rastas) return true;
+        praleisti.push(p);
+        return false;
+      });
+      if (praleisti.length) {
+        logJob(jobId, '\u{1F6AB} Praleidžiame: ' + praleisti.join(', ')
+          + ' – šiam modeliui („' + filters.modelis + '") portalo vardo nežinome, '
+          + 'o be jo portalas grąžintų VISUS ' + (filters.marke || '') + ' automobilius '
+          + 'ir rinkos vidurkis būtų neteisingas.');
+      }
+      if (!selectedPortals.length) {
+        logJob(jobId, '\u26A0 Nė vienas pasirinktas portalas šio modelio neatpažįsta. '
+          + 'Pasirinkite kitą portalą arba ieškokite be modelio (tik pagal markę).');
+      }
+    }
 
     // ── Puslapiu kiekis ir kainos stabdis (v2.15.0) ───────────────────
     // Iki siol riba buvo 10 puslapiu ir "visu puslapiu" pasirinkti buvo
@@ -3648,16 +3683,27 @@ async function runSearchJob(jobId, filters, arAdminas) {
     // I rinkos imti iteina ir tie skelbimai, kuriuos atmete vartotojo biudzeto/filtru
     // rezis - jie vis tiek yra tos pacios rinkos dalis ir be ju mediana butu i sali.
     let combinedForMedians = [...parsed, ...hardRejected];
-    let historyAddedCount = 0;
+    let historyAddedCount = 0, archyvoAtmesta = 0;
     for (const model of modelsInSearch) {
       const hist = cache.getHistoryForModel(model);
       const currentUrls = new Set([...parsed, ...hardRejected].filter((l) => l.modelis === model).map((l) => l.url));
-      const fromHistory = hist.filter((h) => !currentUrls.has(h.url)).map((h) => ({ modelis: model, kaina: h.kaina, rida: h.rida, metai: h.metai, menuo: h.menuo }));
+      // v2.31.0: archyvui taikom TUOS PACIUS rezius kaip paieskai. Iki siol
+      // archyvas buvo imamas be jokio filtro, ir „BMW 5, 2024+" paieskoje BMW 540
+      // mediana buvo 21 950 EUR su ridos mediana 221 000 km, nors paieskoje tas
+      // automobilis buvo vienas - 2024 m., 34 300 km, 59 900 EUR. MAX pirkimo
+      // kaina del to buvo apie triskart neteisinga (PATIKRA-2026-11-26.md §3).
+      const istTelpa = archyvoRezis.filtruoti(
+        hist.filter((h) => !currentUrls.has(h.url)), filters);
+      archyvoAtmesta += istTelpa.atmesta;
+      const fromHistory = istTelpa.imti.map((h) => ({ modelis: model, kaina: h.kaina, rida: h.rida, metai: h.metai, menuo: h.menuo }));
       combinedForMedians = combinedForMedians.concat(fromHistory);
       historyAddedCount += fromHistory.length;
     }
     if (historyAddedCount > 0) {
       logJob(jobId, `   +${historyAddedCount} skelbimų iš archyvo (ankstesnės paieškos) – tikslesni vidurkiai`);
+    }
+    if (archyvoAtmesta > 0) {
+      logJob(jobId, `   \u{1F6AB} ${archyvoAtmesta} archyvo skelbimų NEĮSKAITYTA – neatitinka jūsų metų/ridos rėžio`);
     }
 
     logJob(jobId, '🧮 Skaičiuojame rinkos vidurkius...');

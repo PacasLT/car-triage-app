@@ -147,3 +147,40 @@ console.log('\n── 6. Archyvo tapatybė ────────────�
 
 console.log('\n' + (klaidu ? '✗ ' + klaidu + ' klaidos iš ' + patikru : '✓ ' + patikru + '/' + patikru + ' patikrų praėjo'));
 process.exit(klaidu ? 1 : 0);
+
+// ── v2.31.0: daugiakalbis kuras (PATIKRA-2026-11-26.md §4) ──────────────────
+// Pamatuota gyvai: is 910 BMW skelbimu 200 (22 %) turejo „Gasolina" ir
+// „Hibrido (gasolina/electrico)" - mobile.de `euge/` kelias. Tos reiksmes
+// nepataikydavo i lentele ir likdavo ispaniskos: kuro filtras ju negalejo
+// patikrinti, normKuras kainu kreiveje neatpazindavo, o archyve atsirasdavo
+// DVI to paties kuro reiksmes.
+{
+  const md = require('../mobilede.js');
+  const t = [
+    ['Benzin', 'Benzinas'], ['Diesel', 'Dyzelinas'], ['Elektro', 'Elektra'],
+    ['Hybrid (Benzin/Elektro)', 'Benzinas / elektra'],
+    ['Gasolina', 'Benzinas'],
+    ['Híbrido (gasolina/eléctrico)', 'Benzinas / elektra'],
+    ['Hibrido (gasolina/electrico)', 'Benzinas / elektra'],
+    ['HÍBRIDO (GASOLINA/ELÉCTRICO)', 'Benzinas / elektra'],
+    ['Diésel', 'Dyzelinas'], ['Eléctrico', 'Elektra'],
+    ['Gasoline', 'Benzinas'], ['Petrol', 'Benzinas'], ['Electric', 'Elektra'],
+    ['Hybrid (Gasoline/Electric)', 'Benzinas / elektra'],
+  ];
+  let kl = 0;
+  for (const [ivestis, laukiama] of t) {
+    const gauta = md.mdKuras(ivestis);
+    if (gauta !== laukiama) { console.error(`✗ mdKuras("${ivestis}") = "${gauta}", laukta "${laukiama}"`); kl++; }
+  }
+  // Nezinoma reiksme grazinama kaip yra - geriau zalias duomuo, nei tylus null
+  if (md.mdKuras('Wasserstoff') !== 'Wasserstoff') { console.error('✗ nezinoma reiksme turi grizti kaip yra'); kl++; }
+  if (md.mdKuras(null) !== null) { console.error('✗ null -> null'); kl++; }
+  if (md.mdKuras('') !== null) { console.error('✗ tuscia -> null'); kl++; }
+  // Nei vienos lenteles reiksmes negali likti neisverstos i LT
+  const LT = new Set(['Benzinas', 'Dyzelinas', 'Elektra', 'Benzinas / elektra', 'Dyzelinas / elektra', 'Benzinas / dujos']);
+  for (const [vardas, verte] of Object.entries(md.MD_KURAS)) {
+    if (!LT.has(verte)) { console.error(`✗ MD_KURAS["${vardas}"] = "${verte}" - ne LT reiksme`); kl++; }
+  }
+  if (kl) { console.error('\n' + kl + ' kuro klaida(os)'); process.exit(1); }
+  console.log('✓ mobilede daugiakalbis kuras: ' + (t.length + 3 + Object.keys(md.MD_KURAS).length) + ' patikros');
+}

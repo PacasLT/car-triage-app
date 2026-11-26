@@ -38,7 +38,13 @@ const autopliusIds = require(path.join(__dirname, '..', 'autoplius-ids.js'));
 // v2.23.0: kuro saraso pagalbininkai gyvena atskirame modulyje - paduodam tikrus,
 // kad sargas tikrintu ta pati koda, kuri vykdo serveris.
 const KURAS_MOD = require(path.join(__dirname, '..', 'kuras.js'));
-const F = new Function('autopliusIds', 'kuroSarasas', 'kuroKodai', kodas)(autopliusIds, KURAS_MOD.kuroSarasas, KURAS_MOD.kuroKodai);
+// v2.31.0: `buildAutoscout24Url` ir `buildOtomotoUrl` dabar verčia modelio vardą
+// per `portalu-modeliai.js`. Paduodam TIKRĄ modulį - kaip ir kuro pagalbininkus -
+// kad sargas tikrintų tą patį kodą, kurį vykdo serveris. Šis sargas pirmas ir
+// pagavo, kad naujos priklausomybės čia nebuvo (ReferenceError).
+const portaluModeliai = require(path.join(__dirname, '..', 'portalu-modeliai.js'));
+const F = new Function('autopliusIds', 'kuroSarasas', 'kuroKodai', 'portaluModeliai', kodas)(
+  autopliusIds, KURAS_MOD.kuroSarasas, KURAS_MOD.kuroKodai, portaluModeliai);
 
 let ok = 0, bl = 0;
 const t = (pav, c, info) => (c ? (ok++, console.log('  ✓ ' + pav)) : (bl++, console.log('  ✗ ' + pav + ' → ' + JSON.stringify(info))));
